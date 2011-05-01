@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.1 2011/05/01 00:05:39 drmiller Exp $
+// $Id: w600_sys.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,8 +76,6 @@ void sys_init(w600_sys_t *sys) {
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
 	//cpu_init(&sys->cpu);
-	sys->io.iofault = iofault;
-	sys->io.sys = sys;
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));
@@ -122,11 +120,7 @@ static void run_some(w600_sys_t *sys, uint16_t entry) {
 		while (!sys->run) {
 			sys_interact(sys);
 		}
-		int (*f)(w600_sys_t *sys);
-		f = sys->traps[sys->cpu.pc >> 8];
-		if (!f || f(sys) == 0) {
-			sys_exec(sys); // single-step
-		}
+		sys_exec(sys); // single-step
 	} while (sys->cpu.pc != 0x0000);
 }
 

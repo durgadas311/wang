@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.1 2011/05/01 00:05:40 drmiller Exp $
+// $Id: w600_sys.h,v 1.2 2011/05/01 00:33:02 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -16,7 +16,6 @@ typedef struct w600_sys_s {
 	w600_cpu_t cpu;
 	uint64_t ucode[2048];
 	uint8_t ram[2048]; // 4096x4
-	w600_io_t io;
 	void (*fault)(struct w600_sys_s *sys, const char *str);
 	int (*intr)(struct w600_sys_s *sys, int sig);	// return != 0 if signal not handled
 	int run;

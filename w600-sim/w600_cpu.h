@@ -1,7 +1,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-// $Id: w600_cpu.h,v 1.1 2011/05/01 00:05:39 drmiller Exp $
+// $Id: w600_cpu.h,v 1.2 2011/05/01 00:33:01 drmiller Exp $
 #include <stdio.h>
 #include <stdint.h>
 
@@ -15,6 +15,7 @@ typedef struct {
 	uint8_t dl;
 	uint8_t xh;
 	uint8_t xl;
+	uint8_t xs;
 	uint8_t xr;
 	// flags...
 	uint8_t z;

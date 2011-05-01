@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.1 2011/05/01 00:05:39 drmiller Exp $
+// $Id: w600_exec.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -14,7 +14,7 @@ inline uint64_t tsc() {
 	return tsc;
 }
 
-extern int diw600(char *buf, uint8_t *t);
+extern int diw600(char *buf, uint64_t *t);
 #endif // TRACE
 
 void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
@@ -25,12 +25,12 @@ void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	} else {
 		b &= 0x0f;
 	}
-	sys->mr = b;
+	sys->cpu.mr = b;
 }
 
 void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	uint16_t adr = (ah << 8) | (am << 4) | al;
-	uint8_t a = sys->mr;
+	uint8_t a = sys->cpu.mr;
 	uint8_t b = sys->ram[adr >> 1];
 	if (adr & 1) {
 		a <<= 4;
@@ -42,11 +42,11 @@ void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 }
 
 void rd_ram(w600_sys_t *sys) {
-	rd_ram_i(sys, sys->ah, sys->am, sys->al);
+	rd_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
 }
 
 void wr_ram(w600_sys_t *sys) {
-	wr_ram_i(sys, sys->ah, sys->am, sys->al);
+	wr_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
 }
 
 void ill_instr(w600_sys_t *sys) {

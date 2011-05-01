@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.1 2011/05/01 00:21:01 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #include "w600_sys.h"
 #include "w600_exec.h"
 
-extern int diw600(char *buf, uint8_t *t);
+extern int diw600(char *buf, uint64_t *t);
 
 static char *get_mach_str(w600_sys_t *sys) {
 	static char buf[32];
