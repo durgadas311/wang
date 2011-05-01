@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.2 2011/05/01 00:33:01 drmiller Exp $
+// $Id: w600_decode.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -65,12 +65,12 @@ int instr_exec(w600_sys_t *sys) {
 	//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
 	//
 	if (u->f == 7) {
-		sys->cpu.pc = sys->cpu.stk1;
+		sys->cpu.pc = sys->cpu.stk1 | 1;
 		if (u->j) {
 			sys->cpu.stk1 = sys->cpu.stk2;
 		} else {
 			sys->cpu.stk1 = sys->cpu.pc;	// bad?
-			rc = 1;
+			// rc = 1;
 		}
 	}
 
@@ -200,7 +200,7 @@ int instr_exec(w600_sys_t *sys) {
 	case 6:	rd_ram_i(sys, 15, 15, u->k); break;
 	case 7:	/* sys->print(); */ break;
 	case 8:	/* sys->print_feed(); */ break;
-	case 9:	rc = 1; break;
+	case 9:	rc = 2; break;
 	case 10: /* sys->tape_rd(); */ break;
 	case 11: /* sys->tape_wr(); */ break;
 	case 12: /* sys->print_stat(); */ break;
@@ -214,7 +214,7 @@ int instr_exec(w600_sys_t *sys) {
 	}
 
 	// This is done "late" to ensure we use most recent flags...
-	if (u->f == 7) {
+	if (u->f != 7) {
 		if (u->j) {
 			sys->cpu.stk2 = sys->cpu.stk1;
 			sys->cpu.stk1 = sys->cpu.pc;
@@ -228,7 +228,7 @@ int instr_exec(w600_sys_t *sys) {
 		case 4: next |= (sys->cpu.pe << 1); break;
 		case 5: next |= (sys->cpu.i << 1); break;
 		case 6: next |= (sys->cpu.kp << 1); break;
-		case 7: rc = 1; break;
+		case 7: rc = 3; break;
 		}
 		switch(u->f) {
 		case 0: next |= (0 << 0); break;
@@ -236,12 +236,14 @@ int instr_exec(w600_sys_t *sys) {
 		case 2: next |= ((sys->cpu.acc & 1) >> 0); break;
 		case 3: next |= ((sys->cpu.acc & 4) >> 2); break;
 		case 4: next |= (sys->cpu.z << 0); break;
-		case 5: rc = 1; break;
+		case 5: rc = 4; break;
 		case 6: next |= (sys->cpu.c << 0); break;
-		case 7: rc = 1; break;
+		case 7: rc = 5; break;
 		}
 		sys->cpu.pc = next;
 	}
+
+	++sys->cpu.cycles;
 
 	return rc;
 }

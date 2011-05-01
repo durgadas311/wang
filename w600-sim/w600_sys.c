@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
+// $Id: w600_sys.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +26,7 @@ extern int diw600(char *buf, uint64_t *t);
 
 static int intr(w600_sys_t *sys, int sig) {
 	if (sig == SIGINT && sys->run) {
+		fflush(sys->trc_fp);
 		sys->run = 0;
 		return 0;
 	}
@@ -48,7 +49,7 @@ static void dump(w600_sys_t *sys) {
 	fprintf(stderr, "ACC = %02x Z = %d I = %d C = %d\n",
 				sys->cpu.acc, sys->cpu.z, sys->cpu.i, sys->cpu.c);
 	fprintf(stderr, "DH = %02x DL = %02x XH = %02x XL = %02x XR = %02x\n",
-				sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl);
+			sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
 	// more...
 }
 
@@ -103,6 +104,7 @@ void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	uint32_t max = 2 * 1024;
 	adr &= 0x0fff;
 	entry &= 0x0fff;
+	int len = (max - adr) * sizeof(sys->ucode[0]);
 
 	fd = open(exe, O_RDONLY);
 	if (fd < 0) {
@@ -110,7 +112,7 @@ void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 		exit(1);
 	}
 	uint64_t *m = &sys->ucode[adr];
-	(void)read(fd, m, max - adr);
+	int rc = read(fd, m, len);
 	close(fd);
 }
 
@@ -121,7 +123,7 @@ static void run_some(w600_sys_t *sys, uint16_t entry) {
 			sys_interact(sys);
 		}
 		sys_exec(sys); // single-step
-	} while (sys->cpu.pc != 0x0000);
+	} while (1);
 }
 
 

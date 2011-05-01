@@ -41,10 +41,10 @@ int main(int argc, char **argv) {
 	ucodez = stb.st_size / sizeof(*ucode);
 
 	for (x = 0; x < ucodez; ++x) {
-		s = buf;
-		s += sprintf(s, "%03x: ", x);
-		diw600(s, ucode + x);
-		printf("%s\n", buf);
+		diw600(buf, ucode + x);
+		printf("%03x: [%011llx] %s\n", x,
+			(ucode[x] >> 2) & 0x000003ffffffffffULL,
+			buf);
 	}
 	return 0;
 }

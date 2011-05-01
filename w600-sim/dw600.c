@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.2 2011/05/01 00:05:39 drmiller Exp $
+// $Id: dw600.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -179,6 +179,7 @@ void diw600(char *buf, uint64_t *v) {
 	}
 
 	s = buf;
+	if (u->l) *s++ = '*'; else *s++ = '_';
 	s += sprintf(s, "%s%s", targ, alu);
 	if (acc[0]) {
 		s += sprintf(s, "; %s", acc);

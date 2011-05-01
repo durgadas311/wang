@@ -1,4 +1,4 @@
-// $Id: w600-sim.c,v 1.1 2011/04/30 21:36:10 drmiller Exp $
+// $Id: w600-sim.c,v 1.2 2011/05/01 03:49:35 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
@@ -31,8 +31,6 @@ int main(int argc, char **argv) {
 	int x;
 	uint16_t entry = -1, load = -1;
 	char *pgm = NULL;
-	uint16_t ccp_entry = -1, ccp_load = -1;
-	char *ccp = NULL;
 	int interact = 0;
 
 	extern char *optarg;
@@ -59,7 +57,7 @@ int main(int argc, char **argv) {
 #endif // TRACE
 		default:
 			fprintf(stderr, "Usage: "
-					"%s [-p program [-l load-addr] [-e entry]]\n",
+					"%s [-t] [-i] [-p program [-l load-addr] [-e entry]]\n",
 					argv[0]);
 			exit(1);
 			break;

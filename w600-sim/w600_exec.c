@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
+// $Id: w600_exec.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -16,6 +16,35 @@ inline uint64_t tsc() {
 
 extern int diw600(char *buf, uint64_t *t);
 #endif // TRACE
+
+char *get_mach_str(w600_sys_t *sys) {
+	static char buf[32];
+	char *s = buf;
+
+	s += sprintf(s, "mode0=%02x", sys->cpu.mode0);
+	s += sprintf(s, "|mode1=%02x", sys->cpu.mode1);
+	if (sys->cpu.pe) s += sprintf(s, "|Prog Err");
+	if (sys->cpu.me) s += sprintf(s, "|Mach Err");
+	if (sys->cpu.me) s += sprintf(s, "|Key Pressed");
+
+	*s = '\0';
+	return buf;
+}
+
+char *get_psw_str(w600_sys_t *sys) {
+	static char buf[32];
+	char *s = buf;
+
+	if (sys->cpu.z) *s++ = 'Z';
+	else *s++ = 'z';
+	if (sys->cpu.i) *s++ = 'I';
+	else *s++ = 'i';
+	if (sys->cpu.c) *s++ = 'C';
+	else *s++ = 'c';
+
+	*s = '\0';
+	return buf;
+}
 
 void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	uint16_t adr = (ah << 8) | (am << 4) | al;
@@ -54,7 +83,9 @@ void ill_instr(w600_sys_t *sys) {
 	fprintf(stderr, "Illegal instruction %03x: %011llx\n", pc,
 		(sys->ucode[pc] >> 2) & 0x000003ffffffffffULL);
 	fprintf(stderr, "Terminating at cycle %lld\n", sys->cpu.cycles);
-	exit(1);
+	// exit(1);
+	fflush(sys->trc_fp);
+	sys->run = 0;
 }
 
 void sys_exec(w600_sys_t *sys) {
@@ -73,6 +104,7 @@ void sys_exec(w600_sys_t *sys) {
 	}
 #ifdef TRACE
 	if (sys->trace) {
+		if (rc) fprintf(sys->trc_fp, "Illegal instruction break (%d)\n", rc);
 		uint64_t *m;
 		int c, x;
 #ifdef TRACE_CYCLES
@@ -81,13 +113,16 @@ void sys_exec(w600_sys_t *sys) {
 		char buf[128];
 		m = &sys->ucode[w600_pc];
 		diw600(buf, m);
-		fprintf(sys->trc_fp, "TRACE: %03x: (%s) "
 #ifdef TRACE_CYCLES
+		fprintf(sys->trc_fp, "TRACE: %03x: (%s) "
 				"%5lld native cycles\n",
 				w600_pc, buf, nat_tsc);
 #else // !TRACE_CYCLES
-				"[%03x %03x %03x] %02x %02x %02x %02x %02x %02x %02x\n",
-				w600_pc, buf,
+		fprintf(sys->trc_fp, "TRACE: %03x: "
+				"[%03x %03x %03x] %02x %02x %02x %02x "
+				"[%s] %02x %02x %02x : "
+				"%s\n",
+				w600_pc,
 				sys->cpu.pc,
 				sys->cpu.stk1,
 				sys->cpu.stk2,
@@ -95,9 +130,11 @@ void sys_exec(w600_sys_t *sys) {
 				sys->cpu.am,
 				sys->cpu.al,
 				sys->cpu.mr,
+				get_psw_str(sys),
 				sys->cpu.acc,
 				sys->cpu.dh,
-				sys->cpu.dl);
+				sys->cpu.dl,
+				buf);
 
 #endif // !TRACE_CYCLES
 	}

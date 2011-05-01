@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.2 2011/05/01 00:33:02 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,35 +11,6 @@
 #include "w600_exec.h"
 
 extern int diw600(char *buf, uint64_t *t);
-
-static char *get_mach_str(w600_sys_t *sys) {
-	static char buf[32];
-	char *s = buf;
-
-	s += sprintf(s, "mode0=%02x", sys->cpu.mode0);
-	s += sprintf(s, "|mode1=%02x", sys->cpu.mode1);
-	if (sys->cpu.pe) s += sprintf(s, "|Prog Err");
-	if (sys->cpu.me) s += sprintf(s, "|Mach Err");
-	if (sys->cpu.me) s += sprintf(s, "|Key Pressed");
-
-	*s = '\0';
-	return buf;
-}
-
-static char *get_psw_str(w600_sys_t *sys) {
-	static char buf[32];
-	char *s = buf;
-
-	if (sys->cpu.z) *s++ = 'Z';
-	else *s++ = 'z';
-	if (sys->cpu.i) *s++ = 'I';
-	else *s++ = 'i';
-	if (sys->cpu.c) *s++ = 'C';
-	else *s++ = 'c';
-
-	*s = '\0';
-	return buf;
-}
 
 static int _dump(w600_sys_t *sys, char *line) {
 	char buf[1024];
@@ -58,6 +29,68 @@ static int _dump(w600_sys_t *sys, char *line) {
 
 	fprintf(stderr, "[%s]\n", get_mach_str(sys));
 
+	return 0;
+}
+
+static int _disas(w600_sys_t *sys, char *line) {
+	char buf[1024];
+	char *s;
+	uint16_t adr = sys->cpu.pc;
+	int len = 16;
+	uint16_t max = 2 * 1024;
+
+	s = strtok(NULL, " \t");
+	if (s) {
+		if (strcmp(s, ".") != 0) {
+			adr = strtoul(s, NULL, 16);
+		}
+		s = strtok(NULL, " \t");
+		if (s) {
+			len = strtoul(s, NULL, 0);
+		}
+	}
+	adr &= 0x0fff;
+	if (max - adr < len) len = max - adr;
+
+	uint64_t *pc = &sys->ucode[adr];
+	while (len > 0) {
+		diw600(buf, pc);
+		printf("%03x: %s\n", adr, buf);
+		--len;
+		++adr;
+		++pc;
+	}
+	return 0;
+}
+
+static int _exam(w600_sys_t *sys, char *line) {
+	char *s;
+	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	int len = 16;
+	s = strtok(NULL, " \t");
+	if (s) {
+		if (strcmp(s, ".") != 0) {
+			adr = strtoul(s, NULL, 16);
+		}
+		s = strtok(NULL, " \t");
+		if (s) {
+			len = strtoul(s, NULL, 0);
+		}
+	}
+
+	adr >>= 1;
+	len = (len + 1) & ~1;
+	int x, y;
+	for (x = 0; x < len;) {
+		printf("%03x:", adr << 1);
+		for (y = 0; x + y < len && y < 16; y += 2) {
+			uint8_t b = sys->ram[adr];
+			printf(" %02u-%02u", (b >> 4), (b & 0x0f));
+			++adr;
+		}
+		printf("\n");
+		x += y;
+	}
 	return 0;
 }
 
@@ -116,6 +149,8 @@ struct {
 	{ "quit", NULL },
 	{ "trace", _trace },
 	{ "dump", _dump },
+	{ "disas", _disas },
+	{ "exam", _exam },
 	{ "go", _go },
 	{ "help", _help },
 };
@@ -137,6 +172,7 @@ void sys_command(w600_sys_t *sys) {
 	--x;
 	if (s[x] == '\n') s[x] = '\0';
 	s = strtok(buf, " \t");
+	if (!s) return;
 	for (x = 0; x < NUM_CMDS; ++x) {
 		if (strcmp(s, commands[x].cmd) == 0) {
 			break;
