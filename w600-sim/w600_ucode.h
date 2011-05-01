@@ -1,4 +1,4 @@
-// $Id: w600_ucode.h,v 1.1 2011/04/30 21:36:10 drmiller Exp $
+// $Id: w600_ucode.h,v 1.2 2011/05/01 00:05:40 drmiller Exp $
 
 #ifndef __w600_ucode_h__
 #define __w600_ucode_h__
@@ -20,7 +20,7 @@ typedef struct {
 	uint64_t c:3;
 	uint64_t g:3;
 	uint64_t h:3;
-	uint64_t _unused: 2;
+	uint64_t _unused: 20;
 } w600_ucode_t;
 
 #endif // __w600_ucode_h__

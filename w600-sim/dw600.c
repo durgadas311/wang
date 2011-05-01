@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.1 2011/04/30 21:36:09 drmiller Exp $
+// $Id: dw600.c,v 1.2 2011/05/01 00:05:39 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -60,16 +60,16 @@ void diw600(char *buf, uint64_t *v) {
 		if (u->e >= 2 || u->f >= 2) {
 			s += sprintf(s, "[");
 			switch(u->e) {
-			case 2: s += sprintf(s, "bit0(ACC)"); break;
-			case 3: s += sprintf(s, "bit2(ACC)"); break;
+			case 2: s += sprintf(s, "bit1(ACC)"); break;
+			case 3: s += sprintf(s, "bit3(ACC)"); break;
 			case 4: s += sprintf(s, "Prog Err"); break;
 			case 5: s += sprintf(s, "I"); break;
 			case 6: s += sprintf(s, "Key Down"); break;
 			}
 			s += sprintf(s, ":");
 			switch(u->f) {
-			case 2: s += sprintf(s, "bit1(ACC)"); break;
-			case 3: s += sprintf(s, "bit3(ACC)"); break;
+			case 2: s += sprintf(s, "bit0(ACC)"); break;
+			case 3: s += sprintf(s, "bit2(ACC)"); break;
 			case 4: s += sprintf(s, "Z"); break;
 			case 5: s += sprintf(s, "X?"); break;
 			case 6: s += sprintf(s, "C"); break;
