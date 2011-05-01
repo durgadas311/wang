@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.4 2011/05/01 14:35:23 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.5 2011/05/01 18:18:48 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +55,7 @@ static int _disas(w600_sys_t *sys, char *line) {
 	uint64_t *pc = &sys->ucode[adr];
 	while (len > 0) {
 		diw600(buf, pc);
-		printf("%03x: %s\n", adr, buf);
+		printf("%03x: [%011llx] %s\n", adr, (*pc >> 2), buf);
 		--len;
 		++adr;
 		++pc;

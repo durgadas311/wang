@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
+// $Id: w600_decode.c,v 1.4 2011/05/01 18:18:48 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -6,14 +6,14 @@
 static uint8_t add3_i(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
 	sys->cpu.z = ((s & 0x0f) == 0);
-	sys->cpu.i = ((s & 0xf0) != 0);
+	sys->cpu.i = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
 static uint8_t sub3_i(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a - b - c;
 	sys->cpu.z = ((s & 0x0f) == 0);
-	sys->cpu.i = ((s & 0xf0) != 0);
+	sys->cpu.i = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
@@ -64,12 +64,17 @@ int instr_exec(w600_sys_t *sys) {
 	// F!=7 && J==1:
 	//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
 	//
+	// For conditional jump/call, these bits are latched early...
+	uint8_t br_acc = sys->cpu.acc;
+	uint8_t br_c = sys->cpu.c;
+
 	if (u->f == 7) {
 		sys->cpu.pc = sys->cpu.stk1 | 1;
 		if (u->j) {
 			sys->cpu.stk1 = sys->cpu.stk2;
 		} else {
-			sys->cpu.stk1 = sys->cpu.pc;	// bad?
+			sys->cpu.stk1 = sys->cpu.stk2; // bugfix?
+			//sys->cpu.stk1 = sys->cpu.pc;	// bad?
 			// rc = 1;
 		}
 	}
@@ -99,7 +104,7 @@ int instr_exec(w600_sys_t *sys) {
 
 	uint8_t alu = 0;
 
-	if (!u->l) h = 0; // "15";?
+	if (!u->l) h = 15; // "15"? "0"? ???
 	switch (u->d) {
 	case 0:
 		if (u->dd) alu = sub3_i(sys, h, g, 0);
@@ -213,7 +218,7 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	}
 
-	// This is done "late" to ensure we use most recent flags...
+	// This is done "late" to ensure we use most recent flags for I and Z
 	if (u->f != 7) {
 		if (u->j) {
 			sys->cpu.stk2 = sys->cpu.stk1;
@@ -223,8 +228,8 @@ int instr_exec(w600_sys_t *sys) {
 		switch(u->e) {
 		case 0: next |= (0 << 1); break;
 		case 1: next |= (1 << 1); break;
-		case 2: next |= ((sys->cpu.acc & 2) >> 0); break;
-		case 3: next |= ((sys->cpu.acc & 8) >> 2); break;
+		case 2: next |= ((br_acc & 2) >> 0); break;
+		case 3: next |= ((br_acc & 8) >> 2); break;
 		case 4: next |= (sys->cpu.pe << 1); break;
 		case 5: next |= (sys->cpu.i << 1); break;
 		case 6: next |= (sys->cpu.kp << 1); break;
@@ -233,11 +238,11 @@ int instr_exec(w600_sys_t *sys) {
 		switch(u->f) {
 		case 0: next |= (0 << 0); break;
 		case 1: next |= (1 << 0); break;
-		case 2: next |= ((sys->cpu.acc & 1) >> 0); break;
-		case 3: next |= ((sys->cpu.acc & 4) >> 2); break;
+		case 2: next |= ((br_acc & 1) >> 0); break;
+		case 3: next |= ((br_acc & 4) >> 2); break;
 		case 4: next |= (sys->cpu.z << 0); break;
 		case 5: rc = 4; break;
-		case 6: next |= (sys->cpu.c << 0); break;
+		case 6: next |= (br_c << 0); break;
 		case 7: rc = 5; break;
 		}
 		sys->cpu.pc = next;

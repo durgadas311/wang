@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
+// $Id: dw600.c,v 1.4 2011/05/01 18:18:48 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -101,7 +101,7 @@ void diw600(char *buf, uint64_t *v) {
 	case 7: g = "XR"; break;
 	}
 
-	if (!u->l) h = "0"; // "15";?
+	if (!u->l) h = "15"; // "15"? "0"? ???
 	if (u->dd) ops = "-----&^$";
 	if (u->d == 7) {
 		sprintf(alu, "0");
