@@ -1,7 +1,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-// $Id: w600_cpu.h,v 1.2 2011/05/01 00:33:01 drmiller Exp $
+// $Id: w600_cpu.h,v 1.3 2011/05/01 14:35:23 drmiller Exp $
 #include <stdio.h>
 #include <stdint.h>
 
@@ -35,6 +35,7 @@ typedef struct {
 	// --------------------
 
 	uint64_t cycles;
+	uint64_t cylimit;
 } w600_cpu_t;
 
 #endif // __w600_cpu_h__

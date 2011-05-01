@@ -1,4 +1,4 @@
-// $Id: w600-sim.c,v 1.2 2011/05/01 03:49:35 drmiller Exp $
+// $Id: w600-sim.c,v 1.3 2011/05/01 14:35:23 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	extern char *optarg;
 	extern int optind, opterr, optopt;
 
-	while ((x = getopt(argc, argv, "e:il:p:t")) != EOF) {
+	while ((x = getopt(argc, argv, "e:il:p:t:")) != EOF) {
 		switch(x) {
 		case 'e':
 			entry = strtoul(optarg, NULL, 0);
@@ -52,12 +52,21 @@ int main(int argc, char **argv) {
 			break;
 #ifdef TRACE
 		case 't':
+			if (strcmp(optarg, "-") == 0) {
+				sys.trc_fp = stderr;
+			} else {
+				sys.trc_fp = fopen(optarg, "w");
+				if (!sys.trc_fp) {
+					perror(optarg);
+					exit(1);
+				}
+			}
 			sys.trace = 1;
 			break;
 #endif // TRACE
 		default:
 			fprintf(stderr, "Usage: "
-					"%s [-t] [-i] [-p program [-l load-addr] [-e entry]]\n",
+					"%s [-t file] [-i] [-p program [-l load-addr] [-e entry]]\n",
 					argv[0]);
 			exit(1);
 			break;
@@ -70,7 +79,7 @@ int main(int argc, char **argv) {
 		entry = load;
 	}
 	if (pgm == NULL) {
-		pgm = "wang600_ucode";
+		pgm = "wang600.rom";
 	}
 
 	set_intr();

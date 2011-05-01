@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.4 2011/05/01 14:35:23 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,6 +126,16 @@ static int _trace(w600_sys_t *sys, char *line) {
 }
 
 static int _go(w600_sys_t *sys, char *line) {
+	char *s;
+	s = strtok(NULL, " \t");
+	if (s) {
+		if (*s == '+') {
+			uint64_t n = strtoul(s + 1, NULL, 0);
+			sys->cpu.cylimit = sys->cpu.cycles + n;
+			printf("breakpoint at %lld cycles (now + %lld)\n",
+						sys->cpu.cylimit, n);
+		}
+	}
 	sys->run = 1;
 	printf("resuming at %03x\n", sys->cpu.pc);
 	return 0;
@@ -134,9 +144,11 @@ static int _go(w600_sys_t *sys, char *line) {
 static int _help(w600_sys_t *sys, char *line) {
 	printf(	"W600-SIM Commands:\n"
 		"\tquit\tEnd simulation\n"
-		"\ttrace\tToggle trace on/off\n"
+		"\ttrace [file]\tToggle trace on/off\n"
 		"\tdump\tDump processor state/registers\n"
-		"\tgo\tResume program at current PC\n"
+		"\texam [addr [words]]\tExamine RAM at AH,AM,AL [ or hex addr]\n"
+		"\tdisas [addr [instrs]]\tDisassemble ROM at PC [ or hex addr]\n"
+		"\tgo [+cycles]\tResume program at current PC [break after <cycles>]\n"
 		"\thelp\tDisplay this help\n"
 		);
 	return 0;

@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
+// $Id: w600_sys.c,v 1.4 2011/05/01 14:35:23 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,6 +77,7 @@ void sys_init(w600_sys_t *sys) {
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
 	//cpu_init(&sys->cpu);
+	sys->cpu.cylimit = (uint64_t)-1;
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));
@@ -123,6 +124,10 @@ static void run_some(w600_sys_t *sys, uint16_t entry) {
 			sys_interact(sys);
 		}
 		sys_exec(sys); // single-step
+		if (sys->cpu.cycles >= sys->cpu.cylimit) {
+			sys->cpu.cylimit = (uint64_t)-1;
+			sys->run = 0;
+		}
 	} while (1);
 }
 
