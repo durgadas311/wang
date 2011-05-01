@@ -1,6 +1,7 @@
 COPTS =
 
-OBJS = w600_sys.o w600_sim_cmd.o
+OBJS = w600_sys.o w600_sim_cmd.o \
+	w600_decode.o w600_exec.o
 
 XTRA = 
 
