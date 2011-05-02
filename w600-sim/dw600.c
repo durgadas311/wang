@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.7 2011/05/02 18:26:59 drmiller Exp $
+// $Id: dw600.c,v 1.8 2011/05/02 22:10:45 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -137,8 +137,8 @@ void diw600(char *buf, uint64_t *v) {
 		switch(u->b) {
 		case 0: /* sprintf(mach, "NOP"); */ break;
 		case 9: sprintf(mach, "reset 6184"); break;
-		case 10: sprintf(acc, "bit0(ACC)=Z"); break;
-		case 11: sprintf(acc, "bit1(ACC)=!Z"); break;
+		case 10: sprintf(acc, "bit0(ACC)=!Z"); break;
+		case 11: sprintf(acc, "bit1(ACC)=Z"); break;
 		case 12: sprintf(mach, "Prog Err"); break;
 		case 13: sprintf(acc, "ACC=0"); break;
 		case 14: sprintf(mach, "Mach Err"); break;

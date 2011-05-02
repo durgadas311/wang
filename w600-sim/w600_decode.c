@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.6 2011/05/02 18:26:59 drmiller Exp $
+// $Id: w600_decode.c,v 1.7 2011/05/02 22:10:45 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -67,6 +67,9 @@ int instr_exec(w600_sys_t *sys) {
 	// For conditional jump/call, these bits are latched early...
 	uint8_t br_acc = sys->cpu.acc;
 	uint8_t br_c = sys->cpu.c;
+	uint8_t m_ah = sys->cpu.ah;
+	uint8_t m_am = sys->cpu.am;
+	uint8_t m_al = sys->cpu.al;
 
 	if (u->f == 7) {
 		sys->cpu.pc = sys->cpu.stk1 | 1;
@@ -138,6 +141,16 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	}
 
+	switch(u->c) {
+	case 0:	if (u->b == 15) sys->cpu.acc = alu; break;
+	case 1:	sys->cpu.ah = alu; break;
+	case 2:	sys->cpu.am = alu; break;
+	case 3:	sys->cpu.al = alu; break;
+	case 4:	sys->cpu.dh = alu; break;
+	case 5:	sys->cpu.dl = alu; break;
+	case 6:	sys->cpu.mr = alu; break;
+	}
+
 	switch(u->b) {
 	case 0:
 		// nop
@@ -170,10 +183,10 @@ int instr_exec(w600_sys_t *sys) {
 		// T.B.D. reset 6184...
 		break;
 	case 10:
-		sys->cpu.acc = (sys->cpu.acc & 0x0e) | sys->cpu.z;
+		sys->cpu.acc = (sys->cpu.acc & 0x0e) | (sys->cpu.z ^ 1);
 		break;
 	case 11:
-		sys->cpu.acc = (sys->cpu.acc & 0x0d) | ((sys->cpu.z ^ 1) << 1);
+		sys->cpu.acc = (sys->cpu.acc & 0x0d) | (sys->cpu.z << 1);
 		break;
 	case 12:
 		sys->cpu.pe = 1;
@@ -186,22 +199,12 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	}
 
-	switch(u->c) {
-	case 0:	if (u->b == 15) sys->cpu.acc = alu; break;
-	case 1:	sys->cpu.ah = alu; break;
-	case 2:	sys->cpu.am = alu; break;
-	case 3:	sys->cpu.al = alu; break;
-	case 4:	sys->cpu.dh = alu; break;
-	case 5:	sys->cpu.dl = alu; break;
-	case 6:	sys->cpu.mr = alu; break;
-	}
-
 	switch(u->a) {
-	case 1:	wr_ram(sys); break;
-	case 2:	wr_ram_i(sys, 15, u->k, sys->cpu.al); break;
+	case 1:	wr_ram_i(sys, m_ah, m_am, m_al); break;
+	case 2:	wr_ram_i(sys, 15, u->k, m_al); break;
 	case 3:	wr_ram_i(sys, 15, 15, u->k); break;
-	case 4:	rd_ram(sys); break;
-	case 5:	rd_ram_i(sys, 15, u->k, sys->cpu.al); break;
+	case 4:	rd_ram_i(sys, m_ah, m_am, m_al); break;
+	case 5:	rd_ram_i(sys, 15, u->k, m_al); break;
 	case 6:	rd_ram_i(sys, 15, 15, u->k); break;
 	case 7:	/* sys->print(); */ break;
 	case 8:	/* sys->print_feed(); */ break;
