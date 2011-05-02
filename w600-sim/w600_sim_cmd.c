@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.6 2011/05/02 00:05:51 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.7 2011/05/02 22:25:17 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +85,7 @@ static int _exam(w600_sys_t *sys, char *line) {
 		printf("%03x:", adr << 1);
 		for (y = 0; x + y < len && y < 16; y += 2) {
 			uint8_t b = sys->ram[adr];
-			printf(" %01x-%01x", (b >> 4), (b & 0x0f));
+			printf(" %01x-%01x", (b & 0x0f), (b >> 4));
 			++adr;
 		}
 		printf("\n");
