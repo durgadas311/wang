@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.4 2011/05/01 18:18:48 drmiller Exp $
+// $Id: w600_decode.c,v 1.5 2011/05/02 18:25:37 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -104,7 +104,7 @@ int instr_exec(w600_sys_t *sys) {
 
 	uint8_t alu = 0;
 
-	if (!u->l) h = 15; // "15"? "0"? ???
+	if (!u->l) h = 0; // "15"? "0"? ???
 	switch (u->d) {
 	case 0:
 		if (u->dd) alu = sub3_i(sys, h, g, 0);

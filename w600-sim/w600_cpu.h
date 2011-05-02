@@ -1,7 +1,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-// $Id: w600_cpu.h,v 1.4 2011/05/02 00:05:51 drmiller Exp $
+// $Id: w600_cpu.h,v 1.5 2011/05/02 18:25:37 drmiller Exp $
 #include <stdio.h>
 #include <stdint.h>
 
@@ -38,12 +38,12 @@ typedef struct {
 	uint64_t cylimit;
 } w600_cpu_t;
 
-#define MODE0_FP	0x08
-#define MODE0_LST_L_P	0x04
-#define MODE0_LRN_L_P	0x02
-#define MODE0_STEP	0x01
+#define MODE0_FP	0x01
+#define MODE0_LST_L_P	0x02
+#define MODE0_LRN_L_P	0x04
+#define MODE0_STEP	0x08
 
-#define MODE1_RADIAN	0x80
-#define MODE1_PRT_OFF	0x40
+#define MODE1_RADIAN	0x10
+#define MODE1_PRT_OFF	0x20
 
 #endif // __w600_cpu_h__
