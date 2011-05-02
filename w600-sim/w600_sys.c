@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.4 2011/05/01 14:35:23 drmiller Exp $
+// $Id: w600_sys.c,v 1.5 2011/05/02 00:05:51 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,25 +44,25 @@ static void dump(w600_sys_t *sys) {
 	diw600(buf, pc);
 	fprintf(stderr, "PC = %03x [ %s ]\n", sys->cpu.pc, buf);
 	fprintf(stderr, "STK1 = %03x STK2 = %03x\n", sys->cpu.stk1, sys->cpu.stk2);
-	fprintf(stderr, "AH = %02x AM = %02x AL = %02x MR = %02x\n",
+	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
 				sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
-	fprintf(stderr, "ACC = %02x Z = %d I = %d C = %d\n",
+	fprintf(stderr, "ACC = %01x Z = %d I = %d C = %d\n",
 				sys->cpu.acc, sys->cpu.z, sys->cpu.i, sys->cpu.c);
-	fprintf(stderr, "DH = %02x DL = %02x XH = %02x XL = %02x XR = %02x\n",
+	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
 			sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
 	// more...
 }
 
 static void iofault(void *v, uint8_t port) {
 	w600_sys_t *sys = (w600_sys_t *)v;
-	fprintf(stderr, "I/O Fault at port %02x\n", port);
+	fprintf(stderr, "I/O Fault at port %01x\n", port);
 	dump(sys);
 	exit(1);
 }
 
 static void segfault(void *v, uint16_t adr) {
 	w600_sys_t *sys = (w600_sys_t *)v;
-	fprintf(stderr, "Seg Fault at address %04x\n", adr);
+	fprintf(stderr, "Seg Fault at address %03x\n", adr);
 	dump(sys);
 	exit(1);
 }
@@ -78,6 +78,10 @@ void sys_init(w600_sys_t *sys) {
 	sys->fault = sysfault;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
+
+	// need to get from "keyboard"...
+	sys->cpu.mode0 = 0;
+	sys->cpu.mode1 = 0;
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));

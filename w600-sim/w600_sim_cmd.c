@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.5 2011/05/01 18:18:48 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.6 2011/05/02 00:05:51 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,10 +21,10 @@ static int _dump(w600_sys_t *sys, char *line) {
 	fprintf(stderr, "STK1 = %03x STK2 = %03x\n",
 			sys->cpu.stk1, sys->cpu.stk2);
 
-	fprintf(stderr, "ACC  = %02x [ %s ]\n", sys->cpu.acc, get_psw_str(sys));
-	fprintf(stderr, "AH = %02x AM = %02x AL = %02x MR = %02x\n",
+	fprintf(stderr, "ACC  = %01x [ %s ]\n", sys->cpu.acc, get_psw_str(sys));
+	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
 		sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
-	fprintf(stderr, "DH = %02x DL = %02x XH = %02x XL = %02x XR = %02x\n",
+	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
 		sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
 
 	fprintf(stderr, "[%s]\n", get_mach_str(sys));
@@ -66,7 +66,7 @@ static int _disas(w600_sys_t *sys, char *line) {
 static int _exam(w600_sys_t *sys, char *line) {
 	char *s;
 	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
-	int len = 16;
+	int len = 256;
 	s = strtok(NULL, " \t");
 	if (s) {
 		if (strcmp(s, ".") != 0) {
@@ -85,13 +85,98 @@ static int _exam(w600_sys_t *sys, char *line) {
 		printf("%03x:", adr << 1);
 		for (y = 0; x + y < len && y < 16; y += 2) {
 			uint8_t b = sys->ram[adr];
-			printf(" %02u-%02u", (b >> 4), (b & 0x0f));
+			printf(" %01x-%01x", (b >> 4), (b & 0x0f));
 			++adr;
 		}
 		printf("\n");
 		x += y;
 	}
 	return 0;
+}
+
+static int _store(w600_sys_t *sys, char *line) {
+	char *s;
+	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	s = strtok(NULL, " \t");
+	if (s) {
+		adr = strtoul(s, NULL, 16);
+	}
+	// TBD...
+	return 0;
+}
+
+static int _set(w600_sys_t *sys, char *line) {
+	char *s;
+	s = strtok(NULL, " \t");
+	if (s) {
+		int z;
+		uint8_t *r;
+		uint16_t v;
+		char *t = strchr(s, '=');
+		if (!t) {
+			printf("Sytax error\n");
+			return 0;
+		}
+		*t++ = '\0';
+		z = 4;
+		if (strcasecmp(s, "pc") == 0) {
+			z = 11;
+			r = (uint8_t *)&sys->cpu.pc;	// casted back later
+		} else if (strcasecmp(s, "stk1") == 0) {
+			z = 11;
+			r = (uint8_t *)&sys->cpu.stk1;	// casted back later
+		} else if (strcasecmp(s, "stk2") == 0) {
+			z = 11;
+			r = (uint8_t *)&sys->cpu.stk2;	// casted back later
+		} else if (strcasecmp(s, "ah") == 0) {
+			r = &sys->cpu.ah;
+		} else if (strcasecmp(s, "am") == 0) {
+			r = &sys->cpu.am;
+		} else if (strcasecmp(s, "al") == 0) {
+			r = &sys->cpu.al;
+		} else if (strcasecmp(s, "acc") == 0) {
+			r = &sys->cpu.acc;
+		} else if (strcasecmp(s, "mr") == 0) {
+			r = &sys->cpu.mr;
+		} else if (strcasecmp(s, "dh") == 0) {
+			r = &sys->cpu.dh;
+		} else if (strcasecmp(s, "dl") == 0) {
+			r = &sys->cpu.dl;
+		} else if (strcasecmp(s, "xh") == 0) {
+			r = &sys->cpu.xh;
+		} else if (strcasecmp(s, "xl") == 0) {
+			r = &sys->cpu.xl;
+		} else if (strcasecmp(s, "xr") == 0) {
+			r = &sys->cpu.xr;
+		} else if (strcasecmp(s, "xs") == 0) {
+			z = 3;
+			r = &sys->cpu.xs;
+		} else if (strcasecmp(s, "mode0") == 0) {
+			r = &sys->cpu.mode0;
+		} else if (strcasecmp(s, "mode1") == 0) {
+			r = &sys->cpu.mode1;
+		} else if (strcasecmp(s, "pe") == 0) {
+			z = 1;
+			r = &sys->cpu.pe;
+		} else if (strcasecmp(s, "me") == 0) {
+			z = 1;
+			r = &sys->cpu.me;
+		} else if (strcasecmp(s, "kp") == 0) {
+			z = 1;
+			r = &sys->cpu.kp;
+		} else {
+			printf("Unknown register name\n");
+			return 0;
+		}
+		v = strtoul(t, NULL, 16);
+		v &= ((1 << z) - 1);
+		if (z > 8) {
+			*((uint16_t *)r) = v;
+		} else {
+			*r = v;
+		}
+		printf("%s = %x\n", s, v);
+	}
 }
 
 static int _trace(w600_sys_t *sys, char *line) {
@@ -141,13 +226,22 @@ static int _go(w600_sys_t *sys, char *line) {
 	return 0;
 }
 
+static int _step(w600_sys_t *sys, char *line) {
+	sys->cpu.cylimit = sys->cpu.cycles + 1;
+	sys->run = 1;
+	return 0;
+}
+
 static int _help(w600_sys_t *sys, char *line) {
 	printf(	"W600-SIM Commands:\n"
 		"\tquit\tEnd simulation\n"
 		"\ttrace [file]\tToggle trace on/off\n"
 		"\tdump\tDump processor state/registers\n"
-		"\texam [addr [words]]\tExamine RAM at AH,AM,AL [ or hex addr]\n"
-		"\tdisas [addr [instrs]]\tDisassemble ROM at PC [ or hex addr]\n"
+		"\texam [addr [words]]\tExamine RAM at AH,AM,AL [or hex addr]\n"
+		"\tdisas [addr [instrs]]\tDisassemble ROM at PC [or hex addr]\n"
+		"\tset reg=value\tSet register\n"
+		"\tstore [addr]\tStore value(s) in RAM at AH,AM,AL [or hex addr]\n"
+		"\tstep\tSingle-step one instruction\n"
 		"\tgo [+cycles]\tResume program at current PC [break after <cycles>]\n"
 		"\thelp\tDisplay this help\n"
 		);
@@ -163,6 +257,9 @@ struct {
 	{ "dump", _dump },
 	{ "disas", _disas },
 	{ "exam", _exam },
+	{ "set", _set },
+	{ "store", _store },
+	{ "step", _step },
 	{ "go", _go },
 	{ "help", _help },
 };

@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.3 2011/05/01 03:49:35 drmiller Exp $
+// $Id: w600_exec.c,v 1.4 2011/05/02 00:05:51 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -21,8 +21,8 @@ char *get_mach_str(w600_sys_t *sys) {
 	static char buf[32];
 	char *s = buf;
 
-	s += sprintf(s, "mode0=%02x", sys->cpu.mode0);
-	s += sprintf(s, "|mode1=%02x", sys->cpu.mode1);
+	s += sprintf(s, "mode0=%01x", sys->cpu.mode0);
+	s += sprintf(s, "|mode1=%01x", sys->cpu.mode1);
 	if (sys->cpu.pe) s += sprintf(s, "|Prog Err");
 	if (sys->cpu.me) s += sprintf(s, "|Mach Err");
 	if (sys->cpu.me) s += sprintf(s, "|Key Pressed");
@@ -119,8 +119,8 @@ void sys_exec(w600_sys_t *sys) {
 				w600_pc, buf, nat_tsc);
 #else // !TRACE_CYCLES
 		fprintf(sys->trc_fp, "TRACE: %03x: "
-				"[%03x %03x %03x] %02x %02x %02x %02x "
-				"[%s] %02x %02x %02x : "
+				"[%03x %03x %03x] %01x %01x %01x %01x "
+				"[%s] %01x %01x %01x : "
 				"%s\n",
 				w600_pc,
 				sys->cpu.pc,
