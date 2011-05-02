@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.6 2011/05/02 18:25:37 drmiller Exp $
+// $Id: dw600.c,v 1.7 2011/05/02 18:26:59 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -93,8 +93,8 @@ void diw600(char *buf, uint64_t *v) {
 	switch(u->g) {
 	case 0: g = "0"; break;
 	case 1: g = k; break;
-	case 2: g = "mode1"; break;
-	case 3: g = "mode0"; break;
+	case 2: g = "mode0"; break;
+	case 3: g = "mode1"; break;
 	case 4: g = "DH"; break;
 	case 5: g = "DL"; break;
 	case 6: g = "MR"; break;

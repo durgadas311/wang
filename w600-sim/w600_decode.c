@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.5 2011/05/02 18:25:37 drmiller Exp $
+// $Id: w600_decode.c,v 1.6 2011/05/02 18:26:59 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -94,8 +94,8 @@ int instr_exec(w600_sys_t *sys) {
 	switch(u->g) {
 	case 0: g = 0; break;
 	case 1: g = u->k; break;
-	case 2: g = sys->cpu.mode1; break;
-	case 3: g = sys->cpu.mode0; break;
+	case 2: g = sys->cpu.mode0; break;
+	case 3: g = sys->cpu.mode1; break;
 	case 4: g = sys->cpu.dh; break;
 	case 5: g = sys->cpu.dl; break;
 	case 6: g = sys->cpu.mr; break;
