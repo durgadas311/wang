@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.7 2011/05/02 22:10:45 drmiller Exp $
+// $Id: w600_decode.c,v 1.8 2011/05/03 22:53:17 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -181,6 +181,9 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	case 9:
 		// T.B.D. reset 6184...
+		sys->cpu.kp = 0;
+		sys->cpu.pe = 0;
+		sys->cpu.me = 0;
 		break;
 	case 10:
 		sys->cpu.acc = (sys->cpu.acc & 0x0e) | (sys->cpu.z ^ 1);
@@ -235,7 +238,11 @@ int instr_exec(w600_sys_t *sys) {
 		case 3: next |= ((br_acc & 8) >> 2); break;
 		case 4: next |= (sys->cpu.pe << 1); break;
 		case 5: next |= (sys->cpu.i << 1); break;
-		case 6: next |= (sys->cpu.kp << 1); break;
+		case 6:
+			sys->keyboard(sys);
+			next |= (sys->cpu.kp << 1);
+			sys->cpu.kp = 0;
+			break;
 		case 7: rc = 3; break;
 		}
 		switch(u->f) {
@@ -252,6 +259,17 @@ int instr_exec(w600_sys_t *sys) {
 	}
 
 	++sys->cpu.cycles;
+
+	static int disp = 0;
+	if ((sys->cpu.pc & 0xffc) == 0x51c) { // display refresh routine...
+ 		if (!disp) {
+			++disp;
+			sys->display(sys, disp);
+		}
+	} else if (disp) {
+		disp = 0;
+		sys->display(sys, disp);
+	}
 
 	return rc;
 }

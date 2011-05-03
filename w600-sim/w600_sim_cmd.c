@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.7 2011/05/02 22:25:17 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.8 2011/05/03 22:53:17 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -232,6 +232,24 @@ static int _step(w600_sys_t *sys, char *line) {
 	return 0;
 }
 
+static int _keyboard(w600_sys_t *sys, char *line) {
+	char *s;
+	sys->klen = 0;
+	sys->keyp = 0;
+	int x = 0;
+	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(sys->keyb)) {
+		int n = strtoul(s, NULL, 10);
+		int h = n / 100;
+		int l = n % 100;
+		if (h > 15 || l > 15) {
+			fprintf(stderr, "Invalid key code \"%s\"\n", s);
+			return 0;
+		}
+		sys->keyb[x++] = (h << 4) | l;
+	}
+	sys->klen = x;
+}
+
 static int _help(w600_sys_t *sys, char *line) {
 	printf(	"W600-SIM Commands:\n"
 		"\tquit\tEnd simulation\n"
@@ -260,6 +278,7 @@ struct {
 	{ "set", _set },
 	{ "store", _store },
 	{ "step", _step },
+	{ "keyboard", _keyboard },
 	{ "go", _go },
 	{ "help", _help },
 };

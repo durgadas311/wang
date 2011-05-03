@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.5 2011/05/02 00:05:51 drmiller Exp $
+// $Id: w600_sys.c,v 1.6 2011/05/03 22:53:17 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +23,41 @@ extern int diw600(char *buf, uint64_t *t);
 // Use w600_ucode_t from w600_ucode.h to decode from a uint64_t.
 // All microcode image files pad each instruction to 64 bits.
 //
+
+static void sysdisplay(w600_sys_t *sys, int on) {
+	if (!on) {
+		// fputc('\b', stdout);
+		// fputc(' ', stdout);
+		// fflush(stdout);
+		return;
+	}
+	int c = ' ';
+	if (sys->cpu.pe || sys->cpu.me) c = '!';
+	uint8_t ds = sys->cpu.al;
+	uint8_t dc = sys->cpu.mr;
+	if (ds == 0) {
+		fputc('\r', stdout);
+		fputc(c, stdout);
+	}
+	if (ds == 0 || ds == 13) {
+		c = "+-+-+-+-+-+-+-+ "[dc];
+	} else {
+		c = "0123456789.>u<L "[dc];
+	}
+	fputc(c, stdout);
+	fflush(stdout);
+}
+
+static void syskeyboard(w600_sys_t *sys) {
+	if (sys->klen && !sys->cpu.kp) {
+		--sys->klen;
+		sys->cpu.dh = sys->keyb[sys->keyp] >> 4;
+		sys->cpu.dl = sys->keyb[sys->keyp] & 0x0f;
+		++sys->keyp;
+		sys->cpu.kp = 1;
+		return;
+	}
+}
 
 static int intr(w600_sys_t *sys, int sig) {
 	if (sig == SIGINT && sys->run) {
@@ -76,6 +111,8 @@ static void sysfault(w600_sys_t *sys, const char *str) {
 void sys_init(w600_sys_t *sys) {
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
+	sys->display = sysdisplay;
+	sys->keyboard = syskeyboard;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 
