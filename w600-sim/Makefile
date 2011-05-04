@@ -1,7 +1,7 @@
 COPTS =
 
 OBJS = w600_sys.o w600_sim_cmd.o \
-	w600_decode.o w600_exec.o
+	w600_decode.o w600_exec.o w600_gui.o
 
 XTRA = 
 
@@ -14,7 +14,7 @@ CFLAGS += -g -O3 $(COPTS)
 w600-dasm: w600-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
-w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM)
+w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
 clean:

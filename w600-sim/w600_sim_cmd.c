@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.8 2011/05/03 22:53:17 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.9 2011/05/04 23:36:51 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,10 @@
 #include "w600_exec.h"
 
 extern int diw600(char *buf, uint64_t *t);
+
+extern uint8_t __keyb[32];
+extern int __klen;
+extern int __keyp;
 
 static int _dump(w600_sys_t *sys, char *line) {
 	char buf[1024];
@@ -234,10 +238,9 @@ static int _step(w600_sys_t *sys, char *line) {
 
 static int _keyboard(w600_sys_t *sys, char *line) {
 	char *s;
-	sys->klen = 0;
-	sys->keyp = 0;
+	__keyp = 0;
 	int x = 0;
-	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(sys->keyb)) {
+	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(__keyb)) {
 		int n = strtoul(s, NULL, 10);
 		int h = n / 100;
 		int l = n % 100;
@@ -245,9 +248,9 @@ static int _keyboard(w600_sys_t *sys, char *line) {
 			fprintf(stderr, "Invalid key code \"%s\"\n", s);
 			return 0;
 		}
-		sys->keyb[x++] = (h << 4) | l;
+		__keyb[x++] = (h << 4) | l;
 	}
-	sys->klen = x;
+	__klen = x;
 }
 
 static int _help(w600_sys_t *sys, char *line) {
@@ -284,7 +287,7 @@ struct {
 };
 #define NUM_CMDS	(sizeof(commands) / sizeof(commands[0]))
 
-void sys_command(w600_sys_t *sys) {
+int sys_command(w600_sys_t *sys) {
 	char buf[128];
 	int x;
 
@@ -293,10 +296,10 @@ void sys_command(w600_sys_t *sys) {
 	char *s = fgets(buf, sizeof(buf), stdin);
 	if (!s) {
 		printf("w600-sim done.\n");
-		exit(0);
+		return 1;
 	}
 	x = strlen(s);
-	if (!x) return;
+	if (!x) return 0;
 	--x;
 	if (s[x] == '\n') s[x] = '\0';
 	s = strtok(buf, " \t");
@@ -308,15 +311,15 @@ void sys_command(w600_sys_t *sys) {
 	}
 	if (!(x < NUM_CMDS)) {
 		printf("%s ?\n", s);
-		return;
+		return 0;
 	}
 	if (!commands[x].func) {
 		printf("w600-sim done.\n");
-		exit(0);
+		return 1;
 	}
 	int rc = commands[x].func(sys, buf);
 	if (rc) {
 		// what is this for?
-		exit(1);
+		return rc;
 	}
 }

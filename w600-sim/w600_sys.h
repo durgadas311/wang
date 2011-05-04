@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.3 2011/05/03 22:53:17 drmiller Exp $
+// $Id: w600_sys.h,v 1.4 2011/05/04 23:36:51 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -25,13 +25,13 @@ typedef struct w600_sys_s {
 	int trace;
 	FILE *trc_fp;
 #endif // TRACE
-	uint8_t keyb[32];
-	int klen;
-	int keyp;
 } w600_sys_t;
 
+#define SYS_START_GUI	1
+
 extern void sys_init(w600_sys_t *sys);
+extern void sys_start(w600_sys_t *sys, int ops);
 extern void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
-extern void sys_go(w600_sys_t *sys, uint16_t entry);
+extern int sys_go(w600_sys_t *sys, uint16_t entry);
 
 #endif // __w600_sys_h__

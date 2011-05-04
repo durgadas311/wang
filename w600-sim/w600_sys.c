@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.6 2011/05/03 22:53:17 drmiller Exp $
+// $Id: w600_sys.c,v 1.7 2011/05/04 23:36:51 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +11,14 @@
 
 #include "w600_sys.h"
 #include "w600_exec.h"
+#include "w600_gui.h"
 
 extern int diw600(char *buf, uint64_t *t);
+
+// allow others to access, if they know it
+uint8_t __keyb[32];
+int __klen;
+int __keyp;
 
 //
 // NOTE: microcode image is aligned in 64-bit ints as follows:
@@ -25,6 +31,43 @@ extern int diw600(char *buf, uint64_t *t);
 //
 
 static void sysdisplay(w600_sys_t *sys, int on) {
+#if 0
+	static uint8_t disp[17] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+	static int chg = 0;
+	if (!on) {
+		// fputc('\b', stdout);
+		// fputc(' ', stdout);
+		// fflush(stdout);
+		return;
+	}
+	uint8_t ds = sys->cpu.al;
+	uint8_t dc = sys->cpu.mr;
+	if (disp[ds] != dc) {
+		++chg;
+		disp[ds] = dc;
+	}
+	if (ds == 15) {
+		int c = ' ';
+		if (sys->cpu.pe || sys->cpu.me) {
+			c = '!';
+			++chg;
+		}
+		if (chg) {
+			int d;
+			fputc('\r', stdout);
+			for (d = 0; d < 16; ++d) {
+				if (d == 0 || d == 13) {
+					fputc("+-+-+-+-+-+-+-+ "[dc], stdout);
+				} else {
+					fputc("0123456789.>u<L "[dc], stdout);
+				}
+			}
+			fputc(c, stdout);
+			fflush(stdout);
+			chg = 0;
+		}
+	}
+#else
 	if (!on) {
 		// fputc('\b', stdout);
 		// fputc(' ', stdout);
@@ -46,14 +89,15 @@ static void sysdisplay(w600_sys_t *sys, int on) {
 	}
 	fputc(c, stdout);
 	fflush(stdout);
+#endif
 }
 
 static void syskeyboard(w600_sys_t *sys) {
-	if (sys->klen && !sys->cpu.kp) {
-		--sys->klen;
-		sys->cpu.dh = sys->keyb[sys->keyp] >> 4;
-		sys->cpu.dl = sys->keyb[sys->keyp] & 0x0f;
-		++sys->keyp;
+	if (__klen && !sys->cpu.kp) {
+		--__klen;
+		sys->cpu.dh = __keyb[__keyp] >> 4;
+		sys->cpu.dl = __keyb[__keyp] & 0x0f;
+		++__keyp;
 		sys->cpu.kp = 1;
 		return;
 	}
@@ -109,6 +153,7 @@ static void sysfault(w600_sys_t *sys, const char *str) {
 }
 
 void sys_init(w600_sys_t *sys) {
+	printf("Wang 600 Programmable Calculator\n");
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
 	sys->display = sysdisplay;
@@ -122,7 +167,7 @@ void sys_init(w600_sys_t *sys) {
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));
-	//memset(sys->ram, 0, sizeof(sys->ram));
+	//memset(sys->ram, 0xff, sizeof(sys->ram));
 
 	sys->intr = intr;
 	sys->trace = 0;
@@ -131,13 +176,28 @@ void sys_init(w600_sys_t *sys) {
 	// now install all devices and peripherals...
 }
 
-static void sys_interact(w600_sys_t *sys) {
-	extern void sys_command(w600_sys_t *sys);
+void sys_start(w600_sys_t *sys, int ops) {
+	if (ops & SYS_START_GUI) {
+		int rc = start_fe(sys);
+		if (rc) {
+			fprintf(stderr, "GUI startup failed, reverting to stdio\n");
+		}
+	}
+}
+
+void sys_stop(w600_sys_t *sys, int ops) {
+	stop_fe(sys);
+}
+
+static int sys_interact(w600_sys_t *sys) {
+	extern int sys_command(w600_sys_t *sys);
+	int rc;
 
 	printf("break at %03x\n", sys->cpu.pc);
 	do {
-		sys_command(sys);
-	} while (!sys->run);
+		rc = sys_command(sys);
+	} while (rc == 0 && !sys->run);
+	return rc;
 }
 
 // ! This loads a microcode image!
@@ -158,11 +218,13 @@ void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	close(fd);
 }
 
-static void run_some(w600_sys_t *sys, uint16_t entry) {
+static int run_some(w600_sys_t *sys, uint16_t entry) {
+	int rc;
 	sys->cpu.pc = entry;
 	do {
 		while (!sys->run) {
-			sys_interact(sys);
+			rc = sys_interact(sys);
+			if (rc) return rc;
 		}
 		sys_exec(sys); // single-step
 		if (sys->cpu.cycles >= sys->cpu.cylimit) {
@@ -173,13 +235,14 @@ static void run_some(w600_sys_t *sys, uint16_t entry) {
 }
 
 
-void sys_go(w600_sys_t *sys, uint16_t entry) {
+int sys_go(w600_sys_t *sys, uint16_t entry) {
 	entry &= 0x0fff;
-	run_some(sys, entry);
+	int rc = run_some(sys, entry);
 	printf("exit at cycle %lld\n", sys->cpu.cycles);
 #ifdef TRACE
 	if (sys->trace) {
 		dump(sys);
 	}
 #endif // TRACE
+	return rc;
 }

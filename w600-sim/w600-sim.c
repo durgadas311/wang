@@ -1,4 +1,4 @@
-// $Id: w600-sim.c,v 1.3 2011/05/01 14:35:23 drmiller Exp $
+// $Id: w600-sim.c,v 1.4 2011/05/04 23:36:51 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
@@ -32,14 +32,18 @@ int main(int argc, char **argv) {
 	uint16_t entry = -1, load = -1;
 	char *pgm = NULL;
 	int interact = 0;
+	int sys_ops = SYS_START_GUI;
 
 	extern char *optarg;
 	extern int optind, opterr, optopt;
 
-	while ((x = getopt(argc, argv, "e:il:p:t:")) != EOF) {
+	while ((x = getopt(argc, argv, "e:gil:p:t:")) != EOF) {
 		switch(x) {
 		case 'e':
 			entry = strtoul(optarg, NULL, 0);
+			break;
+		case 'g':
+			sys_ops &= ~SYS_START_GUI;
 			break;
 		case 'l':
 			load = strtoul(optarg, NULL, 0);
@@ -72,6 +76,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
+	sys_start(&sys, sys_ops);
 	if (load == (uint16_t)-1) {
 		load = 0x0000;
 	}
@@ -90,5 +95,6 @@ int main(int argc, char **argv) {
 
 	sys.run = (interact ? 0 : 1);
 	sys_go(&sys, entry);
+	sys_stop(&sys);
 	return 0;
 }
