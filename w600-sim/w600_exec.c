@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.4 2011/05/02 00:05:51 drmiller Exp $
+// $Id: w600_exec.c,v 1.5 2011/05/05 18:29:19 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -6,6 +6,7 @@
 #include "w600_decode.h"
 
 #undef TRACE_CYCLES
+#define TRACE_RAW_UCODE
 
 #ifdef TRACE
 inline uint64_t tsc() {
@@ -118,9 +119,15 @@ void sys_exec(w600_sys_t *sys) {
 				"%5lld native cycles\n",
 				w600_pc, buf, nat_tsc);
 #else // !TRACE_CYCLES
+#ifdef TRACE_RAW_UCODE
+		w600_ucode_t *u = (w600_ucode_t *)(m);
+#endif // TRACE_RAW_UCODE
 		fprintf(sys->trc_fp, "TRACE: %03x: "
 				"[%03x %03x %03x] %01x %01x %01x %01x "
 				"[%s] %01x %01x %01x : "
+#ifdef TRACE_RAW_UCODE
+				"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
+#endif // TRACE_RAW_UCODE
 				"%s\n",
 				w600_pc,
 				sys->cpu.pc,
@@ -134,6 +141,10 @@ void sys_exec(w600_sys_t *sys) {
 				sys->cpu.acc,
 				sys->cpu.dh,
 				sys->cpu.dl,
+#ifdef TRACE_RAW_UCODE
+				u->h, u->g, u->c, u->d, u->l, u->dd, u->a, u->k, u->b, u->j,
+				u->next << 2, u->e, u->f,
+#endif // TRACE_RAW_UCODE
 				buf);
 
 #endif // !TRACE_CYCLES

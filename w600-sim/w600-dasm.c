@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define TRACE_RAW_UCODE
+
 #include "w600_ucode.h"
 extern void diw600(char *buf, uint64_t *t);
 
@@ -41,9 +43,20 @@ int main(int argc, char **argv) {
 	ucodez = stb.st_size / sizeof(*ucode);
 
 	for (x = 0; x < ucodez; ++x) {
-		diw600(buf, ucode + x);
-		printf("%03x: [%011llx] %s\n", x,
-			(ucode[x] >> 2) & 0x000003ffffffffffULL,
+		uint64_t *m = ucode + x;
+		diw600(buf, m);
+#ifdef TRACE_RAW_UCODE
+		w600_ucode_t *u = (w600_ucode_t *)(m);
+#endif // TRACE_RAW_UCODE
+		printf("%03x: "
+#ifdef TRACE_RAW_UCODE
+			"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
+#endif // TRACE_RAW_UCODE
+			"%s\n", x,
+#ifdef TRACE_RAW_UCODE
+			u->h, u->g, u->c, u->d, u->l, u->dd, u->a, u->k, u->b, u->j,
+			u->next << 2, u->e, u->f,
+#endif // TRACE_RAW_UCODE
 			buf);
 	}
 	return 0;

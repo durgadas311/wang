@@ -1,4 +1,4 @@
-// $Id: dw600.c,v 1.8 2011/05/02 22:10:45 drmiller Exp $
+// $Id: dw600.c,v 1.9 2011/05/05 18:29:19 drmiller Exp $
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -26,7 +26,7 @@ void diw600(char *buf, uint64_t *v) {
 	targ[0] = '\0';
 	opA[0] = '\0';
 
-	sprintf(k, "%d", u->k);
+	sprintf(k, "%d.", u->k);
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
