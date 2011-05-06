@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import java.io.*;
 
 class _Key {
 
@@ -27,8 +28,7 @@ class _Key {
 		this.code = c;
 	}
 
-	static final int SHIFT = -10;
-	static final int STEP = -11;
+	static final int SHIFT = -1;
 
 	static final int PROG_CODE(int a, int b) {
 		// shift is += 01 00...
@@ -48,7 +48,7 @@ class _Key {
 		return (META | b);
 	}
 	static final int META_PRE(int b) {
-		return (METAP | b);
+		return (METAP | (b << 4));
 	}
 
 	String icon;
@@ -56,17 +56,28 @@ class _Key {
 	int code;
 }
 
-public class w600_fe {
-	public static void main(String[] args) {
-
 // (red) CLEAR button is 00 14...
 // f(x) is 10 xx
 // F(x) is 11 xx
 // XCHG is 14 xx
 // I/O, etc is 15 xx
+
+public class w600_fe {
+	public static void main(String[] args) {
+		java.io.FileOutputStream fout = null;
+
+		if (args.length > 0) {
+			String fd = "/proc/self/fd/" + args[0];
+			try {
+				fout = new FileOutputStream(fd);
+			} catch (FileNotFoundException e) {
+				System.out.println("No pipe: " + fd);
+				System.exit(1);
+			}
+		}
 		JFrame front_end = new JFrame("Wang 600 Keyboard");
 
-		Wang600_Keyboard kbd = new Wang600_Keyboard();
+		Wang600_Keyboard kbd = new Wang600_Keyboard(fout);
 		front_end.add(kbd);
 
 		front_end.getContentPane().setBackground(Color.black);
@@ -90,6 +101,8 @@ class Wang600_Keyboard extends JComponent
 	boolean _shift;
 	int _shift_kbd;
 	int _shift_btn;
+	int _meta;
+	FileOutputStream _fout;
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -100,13 +113,15 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
-	public Wang600_Keyboard() {
+	public Wang600_Keyboard(FileOutputStream fo) {
 		int x;
 		_kbds = new Wang600_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
 		_shift = false;
+		_meta = 0;
+		_fout = fo;
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JPanel pan;
@@ -187,19 +202,52 @@ class Wang600_Keyboard extends JComponent
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					if (y == _shift_kbd && x == _shift_btn) {
+					int code = _kbds[y]._keys[x].code;
+					if (code == _Key.SHIFT) {
 						setShift(!_shift);
-					} else if (_kbds[y]._keys[x].code < 0) {
-						System.out.println(_kbds[y]._keys[x].code);
-					} else {
-						int code = _kbds[y]._keys[x].code;
+						continue;
+					}
+					int type = code & ~0x0ff;
+					if (type == _Key.METAP) {
+						code &= 0x0ff;
+						if (_meta == code) {
+							_meta = 0; // simple toggle
+						} else {
+							_meta = code;
+						}
+						continue;
+					}
+					if (type == _Key.META) {
+						code |= _meta;
+						code &= 0x0ff;
+						type = 0;
+					}
+					if (type == _Key.SPCL) {
 						if (_shift) {
-							code += 0x10;
+							code += 4;
 							setShift(false);
 						}
-						int h = code >> 4;
+					}
+					if (type == 0) {
+						if (_shift) {
+							code |= 0x010;
+							setShift(false);
+						}
+					}
+
+					if (_fout == null) {
+						int t = code >> 8;
+						int h = (code >> 4) & 0x0f;
 						int l = code & 0x0f;
-						System.out.format("%02d %02d\n", h, l);
+						System.out.format("%d %02d %02d\n", t, h, l);
+					} else {
+						byte[] b = new byte[2];
+						b[0] = (byte)(code & 0x0ff);
+						b[1] = (byte)(code >> 8);
+						try {
+							_fout.write(b);
+						} catch (IOException ee) {
+						}
 					}
 					break;
 				}

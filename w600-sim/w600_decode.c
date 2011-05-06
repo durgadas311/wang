@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.9 2011/05/06 00:52:48 drmiller Exp $
+// $Id: w600_decode.c,v 1.10 2011/05/06 23:37:41 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -51,6 +51,7 @@ int instr_exec(w600_sys_t *sys) {
 	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[sys->cpu.pc];
 	uint16_t next;
 	int rc = 0;
+	static uint8_t key = 0;
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
@@ -241,9 +242,12 @@ int instr_exec(w600_sys_t *sys) {
 		case 4: next |= (sys->cpu.pe << 1); break;
 		case 5: next |= (sys->cpu.i << 1); break;
 		case 6:
-			sys->keyboard(sys);
 			next |= (sys->cpu.kp << 1);
-			sys->cpu.kp = 0;
+			if (sys->cpu.kp) {
+				sys->cpu.dh = key >> 4;
+				sys->cpu.dl = key & 0x0f;
+				sys->cpu.kp = 0;
+			}
 			break;
 		case 7: rc = 3; break;
 		}
@@ -272,6 +276,8 @@ int instr_exec(w600_sys_t *sys) {
 		disp = 0;
 		sys->display(sys, disp);
 	}
+
+	sys->keyboard(sys, &key);
 
 	return rc;
 }

@@ -26,10 +26,10 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 			sys->cpu.pc = b & 0x07;
 			break;
 		case 2:
-			sys->mode0 = b & 0x0f;
+			sys->cpu.mode0 = b & 0x0f;
 			break;
 		case 3:
-			sys->mode1 = b & 0x0f;
+			sys->cpu.mode1 = b & 0x0f;
 			break;
 		default:
 			break;
@@ -59,8 +59,13 @@ static int spawn_fe(w600_sys_t *sys) {
 		close(fd[0]);
 		setsid();
 		sprintf(fdn, "%d", fd[1]);
+#if 0
 		execlp("xterm", "xterm", "-e", "./w600_fe", fdn, (char *)NULL);
 		perror("xterm -e ./w600_fe");
+#else
+		execlp("java", "java", "w600_fe", fdn, (char *)NULL);
+		perror("java w600_fe");
+#endif
 		exit(1);
 	}
 	close(fd[1]);
