@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.8 2011/05/03 22:53:17 drmiller Exp $
+// $Id: w600_decode.c,v 1.9 2011/05/06 00:52:48 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -70,6 +70,8 @@ int instr_exec(w600_sys_t *sys) {
 	uint8_t m_ah = sys->cpu.ah;
 	uint8_t m_am = sys->cpu.am;
 	uint8_t m_al = sys->cpu.al;
+	uint8_t br_k = u->k;
+	if (sys->cpu.pc == 0x008) br_k = 15;
 
 	if (u->f == 7) {
 		sys->cpu.pc = sys->cpu.stk1 | 1;
@@ -96,7 +98,7 @@ int instr_exec(w600_sys_t *sys) {
 
 	switch(u->g) {
 	case 0: g = 0; break;
-	case 1: g = u->k; break;
+	case 1: g = br_k; break;
 	case 2: g = sys->cpu.mode0; break;
 	case 3: g = sys->cpu.mode1; break;
 	case 4: g = sys->cpu.dh; break;
@@ -204,11 +206,11 @@ int instr_exec(w600_sys_t *sys) {
 
 	switch(u->a) {
 	case 1:	wr_ram_i(sys, m_ah, m_am, m_al); break;
-	case 2:	wr_ram_i(sys, 15, u->k, m_al); break;
-	case 3:	wr_ram_i(sys, 15, 15, u->k); break;
+	case 2:	wr_ram_i(sys, 15, br_k, m_al); break;
+	case 3:	wr_ram_i(sys, 15, 15, br_k); break;
 	case 4:	rd_ram_i(sys, m_ah, m_am, m_al); break;
-	case 5:	rd_ram_i(sys, 15, u->k, m_al); break;
-	case 6:	rd_ram_i(sys, 15, 15, u->k); break;
+	case 5:	rd_ram_i(sys, 15, br_k, m_al); break;
+	case 6:	rd_ram_i(sys, 15, 15, br_k); break;
 	case 7:	/* sys->print(); */ break;
 	case 8:	/* sys->print_feed(); */ break;
 	case 9:	rc = 2; break;
@@ -220,7 +222,7 @@ int instr_exec(w600_sys_t *sys) {
 	case 15:
 		sys->cpu.xh = g;
 		sys->cpu.xl = h;
-		sys->cpu.xs = u->k & 0x07;
+		sys->cpu.xs = br_k & 0x07;
 		break;
 	}
 
