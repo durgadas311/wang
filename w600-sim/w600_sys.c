@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.7 2011/05/04 23:36:51 drmiller Exp $
+// $Id: w600_sys.c,v 1.8 2011/05/06 16:29:03 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,11 +92,10 @@ static void sysdisplay(w600_sys_t *sys, int on) {
 #endif
 }
 
-static void syskeyboard(w600_sys_t *sys) {
+static void syskeyboard(w600_sys_t *sys, uint8_t *kc) {
 	if (__klen && !sys->cpu.kp) {
 		--__klen;
-		sys->cpu.dh = __keyb[__keyp] >> 4;
-		sys->cpu.dl = __keyb[__keyp] & 0x0f;
+		*kc = __keyb[__keyp];
 		++__keyp;
 		sys->cpu.kp = 1;
 		return;

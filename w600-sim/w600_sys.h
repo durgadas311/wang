@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.4 2011/05/04 23:36:51 drmiller Exp $
+// $Id: w600_sys.h,v 1.5 2011/05/06 16:29:03 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -19,7 +19,7 @@ typedef struct w600_sys_s {
 	void (*fault)(struct w600_sys_s *sys, const char *str);
 	int (*intr)(struct w600_sys_s *sys, int sig);	// return != 0 if signal not handled
 	void (*display)(struct w600_sys_s *sys, int on);
-	void (*keyboard)(struct w600_sys_s *sys);
+	void (*keyboard)(struct w600_sys_s *sys, uint8_t *kc);
 	int run;
 #ifdef TRACE
 	int trace;

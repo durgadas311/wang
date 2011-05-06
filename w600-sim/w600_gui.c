@@ -10,14 +10,30 @@
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 
-static void guikeyboard(w600_sys_t *sys) {
-	uint8_t b;
+static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
+	uint16_t b;
 
-	int rc = read(__gui_kfd, &b, 1);
-	if (rc == 1) {
-		sys->cpu.dh = b >> 4;
-		sys->cpu.dl = b & 0x0f;
-		sys->cpu.kp = 1;
+	int rc = read(__gui_kfd, &b, sizeof(b));
+	if (rc == sizeof(b)) {
+		switch(b >> 8) {
+		case 0:
+			// can't really avoid overrun...
+			*kc = b;
+			sys->cpu.kp = 1;
+			break;
+		case 1:
+			// jam new PC...
+			sys->cpu.pc = b & 0x07;
+			break;
+		case 2:
+			sys->mode0 = b & 0x0f;
+			break;
+		case 3:
+			sys->mode1 = b & 0x0f;
+			break;
+		default:
+			break;
+		}
 	}
 }
 

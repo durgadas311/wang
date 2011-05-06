@@ -28,8 +28,8 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Invalid: \"%s\"\n", t);
 				continue;
 			}
-			uint8_t b = (h << 4) | l;
-			write(fd, &b, 1);
+			uint16_t b = (h << 4) | l;
+			write(fd, &b, sizeof(b));
 		}
 	}
 	while (1);
