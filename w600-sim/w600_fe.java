@@ -10,6 +10,7 @@ class _KeyArray {
 	static final Color green1 = new Color(230, 240, 220, 255);
 	static final Color pink1 = new Color(255, 220, 220, 255);
 	static final Color white1 = new Color(250, 250, 250, 255);
+	static final Color illum1 = new Color(255, 255, 250, 255);
 
 	public _KeyArray(String l, Color sl, int lx, int ly, int px, int py, int c) {
 		this.icon = l;
@@ -82,6 +83,18 @@ class Wang600_Keyboard extends JComponent
 	Wang600_Keyboards[] _kbds;
 	int _row;
 	int _col;
+	boolean _shift;
+	int _shift_kbd;
+	int _shift_btn;
+
+	private void setShift(boolean _new) {
+		_shift = _new;
+		if (_shift) {
+			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_KeyArray.orange1);
+		} else {
+			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_kbds[_shift_kbd]._keys[_shift_btn].color);
+		}
+	}
 
 	public Wang600_Keyboard() {
 		int x;
@@ -89,6 +102,7 @@ class Wang600_Keyboard extends JComponent
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
+		_shift = false;
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JSeparator sep;
@@ -127,6 +141,10 @@ class Wang600_Keyboard extends JComponent
 
 		kbd = new Wang600_Keyboard_main();
 		for (x = 0; x < kbd._nkeys; ++x) {
+			if (kbd._keys[x].code == _KeyArray.SHIFT) {
+				_shift_kbd = _nkbds;
+				_shift_btn = x;
+			}
 			kbd._buttons[x].addActionListener(this);
 		}
 		s.gridx = _col;
@@ -142,11 +160,18 @@ class Wang600_Keyboard extends JComponent
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					if (_kbds[y]._keys[x].code < 0) {
+					if (y == _shift_kbd && x == _shift_btn) {
+						setShift(!_shift);
+					} else if (_kbds[y]._keys[x].code < 0) {
 						System.out.println(_kbds[y]._keys[x].code);
 					} else {
-						int h = _kbds[y]._keys[x].code >> 4;
-						int l = _kbds[y]._keys[x].code & 0x0f;
+						int code = _kbds[y]._keys[x].code;
+						if (_shift) {
+							code += 0x10;
+							setShift(false);
+						}
+						int h = code >> 4;
+						int l = code & 0x0f;
 						System.out.format("%02d %02d\n", h, l);
 					}
 					break;
