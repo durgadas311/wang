@@ -75,7 +75,7 @@ class Wang600_Keyboard extends JComponent
 	implements ActionListener
 {
 	static final long serialVersionUID = 31145769203L;
-	static final int num_kbds = 1;
+	static final int num_kbds = 2;
 
 	GridBagLayout gridbag = new GridBagLayout();
 	int _nkbds;
@@ -92,6 +92,7 @@ class Wang600_Keyboard extends JComponent
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JSeparator sep;
+		Wang600_Keyboards kbd;
 
 		s.fill = GridBagConstraints.NONE;
 		s.gridx = 0;
@@ -103,40 +104,17 @@ class Wang600_Keyboard extends JComponent
 
 		setLayout(gridbag);
 
-//		addButton(s,
-//			new _KeyArray("icons/k00.gif",_KeyArray.white1, 1, 1, 0, 0, _KeyArray.META_KEY(0)));
-//		addButton(s,
-//			new _KeyArray("icons/k01.gif",_KeyArray.white1, 1, 1, 1, 0, _KeyArray.META_KEY(1)));
-//		addButton(s,
-//			new _KeyArray("icons/k02.gif",_KeyArray.white1, 1, 1, 2, 0, _KeyArray.META_KEY(2)));
-//		addButton(s,
-//			new _KeyArray("icons/k03.gif",_KeyArray.white1, 1, 1, 3, 0, _KeyArray.META_KEY(3)));
-//		addButton(s,
-//			new _KeyArray("icons/k04.gif",_KeyArray.white1, 1, 1, 4, 0, _KeyArray.META_KEY(4)));
-//		addButton(s,
-//			new _KeyArray("icons/k05.gif",_KeyArray.white1, 1, 1, 5, 0, _KeyArray.META_KEY(5)));
-//		addButton(s,
-//			new _KeyArray("icons/k06.gif",_KeyArray.white1, 1, 1, 6, 0, _KeyArray.META_KEY(6)));
-//		addButton(s,
-//			new _KeyArray("icons/k07.gif",_KeyArray.white1, 1, 1, 7, 0, _KeyArray.META_KEY(7)));
-//		addButton(s,
-//			new _KeyArray("icons/k08.gif",_KeyArray.white1, 1, 1, 8, 0, _KeyArray.META_KEY(8)));
-//		addButton(s,
-//			new _KeyArray("icons/k09.gif",_KeyArray.white1, 1, 1, 9, 0, _KeyArray.META_KEY(9)));
-//		addButton(s,
-//			new _KeyArray("icons/k10.gif",_KeyArray.white1, 1, 1, 10, 0, _KeyArray.META_KEY(10)));
-//		addButton(s,
-//			new _KeyArray("icons/k11.gif",_KeyArray.white1, 1, 1, 11, 0, _KeyArray.META_KEY(11)));
-//		addButton(s,
-//			new _KeyArray("icons/k12.gif",_KeyArray.white1, 1, 1, 12, 0, _KeyArray.META_KEY(12)));
-//		addButton(s,
-//			new _KeyArray("icons/k13.gif",_KeyArray.white1, 1, 1, 13, 0, _KeyArray.META_KEY(13)));
-//		addButton(s,
-//			new _KeyArray("icons/k14.gif",_KeyArray.white1, 1, 1, 14, 0, _KeyArray.META_KEY(14)));
-//		addButton(s,
-//			new _KeyArray("icons/k15.gif",_KeyArray.white1, 1, 1, 15, 0, _KeyArray.META_KEY(15)));
-//		_col = 0;
-//		_row += 1;
+		kbd = new Wang600_Keyboard_meta();
+		for (x = 0; x < kbd._nkeys; ++x) {
+			kbd._buttons[x].addActionListener(this);
+		}
+		s.gridx = _col;
+		s.gridy = _row;
+		gridbag.setConstraints(kbd, s);
+		add(kbd);
+		_kbds[_nkbds] = kbd;
+		++_nkbds;
+		++_row;
 
 		s.gridx = _col;
 		s.gridy = _row;
@@ -147,12 +125,12 @@ class Wang600_Keyboard extends JComponent
 		_col = 0;
 		_row += 1;
 
-		Wang600_Keyboards kbd;
-
 		kbd = new Wang600_Keyboard_main();
 		for (x = 0; x < kbd._nkeys; ++x) {
 			kbd._buttons[x].addActionListener(this);
 		}
+		s.gridx = _col;
+		s.gridy = _row;
 		gridbag.setConstraints(kbd, s);
 		add(kbd);
 		_kbds[_nkbds] = kbd;
@@ -186,18 +164,12 @@ class Wang600_Keyboards extends JComponent
 	int _nkeys;
 	_KeyArray[] _keys;
 	JButton[] _buttons;
-}
-
-class Wang600_Keyboard_main extends Wang600_Keyboards
-{
-	static final long serialVersionUID = 311457692031L;
-	static final int num_keys = 54;
-
+// private:
 	GridBagLayout gridbag = new GridBagLayout();
 	int _row;
 	int _col;
 
-	private void addButton(GridBagConstraints c, _KeyArray key) {
+	void addButton(GridBagConstraints c, _KeyArray key) {
 		final Insets inset = new Insets(2,2,2,2);
 		final Dimension dim = new Dimension(50, 50);
 		JButton butt;
@@ -224,6 +196,12 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 		_keys[_nkeys] = key;
 		++_nkeys;
 	}
+}
+
+class Wang600_Keyboard_main extends Wang600_Keyboards
+{
+	static final long serialVersionUID = 311457692031L;
+	static final int num_keys = 54;
 
 	public Wang600_Keyboard_main() {
 		_buttons = new JButton[num_keys];
@@ -411,5 +389,67 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 			new _KeyArray("icons/step.gif",	_KeyArray.green1, 1, 1, 0, 3, _KeyArray.STEP));
 		_col = 0;
 		_row += 4;
+	}
+}
+
+class Wang600_Keyboard_meta extends Wang600_Keyboards
+{
+	static final long serialVersionUID = 311457692032L;
+	static final int num_keys = 16;
+
+	public Wang600_Keyboard_meta() {
+		_buttons = new JButton[num_keys];
+		_keys = new _KeyArray[num_keys];
+		_nkeys = 0;
+		_row = 0;
+		_col = 0;
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.fill = GridBagConstraints.NONE;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0;
+		c.weighty = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.anchor = GridBagConstraints.SOUTHWEST;
+
+		setLayout(gridbag);
+
+		addButton(c,
+			new _KeyArray("icons/k00.gif",_KeyArray.white1, 1, 1, 0, 0, _KeyArray.META_KEY(0)));
+		addButton(c,
+			new _KeyArray("icons/k01.gif",_KeyArray.white1, 1, 1, 1, 0, _KeyArray.META_KEY(1)));
+		addButton(c,
+			new _KeyArray("icons/k02.gif",_KeyArray.white1, 1, 1, 2, 0, _KeyArray.META_KEY(2)));
+		addButton(c,
+			new _KeyArray("icons/k03.gif",_KeyArray.white1, 1, 1, 3, 0, _KeyArray.META_KEY(3)));
+		addButton(c,
+			new _KeyArray("icons/k04.gif",_KeyArray.white1, 1, 1, 4, 0, _KeyArray.META_KEY(4)));
+		addButton(c,
+			new _KeyArray("icons/k05.gif",_KeyArray.white1, 1, 1, 5, 0, _KeyArray.META_KEY(5)));
+		addButton(c,
+			new _KeyArray("icons/k06.gif",_KeyArray.white1, 1, 1, 6, 0, _KeyArray.META_KEY(6)));
+		addButton(c,
+			new _KeyArray("icons/k07.gif",_KeyArray.white1, 1, 1, 7, 0, _KeyArray.META_KEY(7)));
+		addButton(c,
+			new _KeyArray("icons/k08.gif",_KeyArray.white1, 1, 1, 8, 0, _KeyArray.META_KEY(8)));
+		addButton(c,
+			new _KeyArray("icons/k09.gif",_KeyArray.white1, 1, 1, 9, 0, _KeyArray.META_KEY(9)));
+		addButton(c,
+			new _KeyArray("icons/k10.gif",_KeyArray.white1, 1, 1, 10, 0, _KeyArray.META_KEY(10)));
+		addButton(c,
+			new _KeyArray("icons/k11.gif",_KeyArray.white1, 1, 1, 11, 0, _KeyArray.META_KEY(11)));
+		addButton(c,
+			new _KeyArray("icons/k12.gif",_KeyArray.white1, 1, 1, 12, 0, _KeyArray.META_KEY(12)));
+		addButton(c,
+			new _KeyArray("icons/k13.gif",_KeyArray.white1, 1, 1, 13, 0, _KeyArray.META_KEY(13)));
+		addButton(c,
+			new _KeyArray("icons/k14.gif",_KeyArray.white1, 1, 1, 14, 0, _KeyArray.META_KEY(14)));
+		addButton(c,
+			new _KeyArray("icons/k15.gif",_KeyArray.white1, 1, 1, 15, 0, _KeyArray.META_KEY(15)));
+		_col = 0;
+		_row += 1;
+
 	}
 }
