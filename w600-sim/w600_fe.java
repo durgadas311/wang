@@ -15,6 +15,7 @@ class _Key {
 	static final Color illum1 = new Color(255, 255, 230, 255);
 	static final Color red1 = new Color(255, 128, 128, 255);
 	static final Color neon = new Color(244,157,33);
+	static final Color neon2 = new Color(214,127,13);
 	static final Color empty = new Color(50,50,50);
 
 	static final int SPCL = 0x0100;
@@ -185,7 +186,7 @@ class Wang600_ProgErr extends JComponent {
 }
 
 class Wang600_Display extends JComponent
-		implements Runnable
+		implements Runnable, ActionListener
 {
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
@@ -198,14 +199,37 @@ class Wang600_Display extends JComponent
 
 	Wang600_ProgErr pe;
 	Wang600_ProgErr me;
+	boolean flashing;
+	boolean state;
+	javax.swing.Timer timer;
 
-	// TBD: mach and prog error lights...
-	// must be public so that main() can give to keyboard...
+	private void flasher() {
+		if (!flashing) {
+			state = false;
+			disp.setForeground(_Key.neon);
+			return;
+		}
+		state = !state;
+		if (state) {
+			disp.setForeground(_Key.neon2);
+		} else {
+			disp.setForeground(_Key.neon);
+		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		// verify the action is for the timer?
+		flasher();
+	}
 
 	public Wang600_Display(FileInputStream f) {
 		String blank = "--- Wang 600 ---";
 		disp_a = new byte[16];
 		disp_a = blank.getBytes();
+		flashing = false;
+		state = false;
+		timer = new Timer(100, this);
+		//timer.stop();
 
 		_fin = f;
 		setLayout(gridbag);
@@ -220,12 +244,12 @@ class Wang600_Display extends JComponent
 		s.gridwidth = 1;
 		s.gridheight = 1;
 
-		disp = new JLabel(blank, SwingConstants.LEFT);
+		disp = new JLabel(blank, SwingConstants.CENTER);
 		disp.setForeground(_Key.neon);
 		disp.setBackground(_Key.empty);
 		disp.setOpaque(true);
-		//Font font = new Font(disp.getFont().getName(), disp.getFont().getStyle(), 32);
-		Font font = new Font("Monospaced", Font.PLAIN, 32);
+		disp.setPreferredSize(new Dimension(450, 75));
+		Font font = new Font("Monospaced", Font.PLAIN, 40);
 		disp.setFont(font);
 
 		s.gridx = 0;
@@ -235,7 +259,7 @@ class Wang600_Display extends JComponent
 
 		JPanel pan;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(600, 25));
+		pan.setPreferredSize(new Dimension(400, 25));
 		pan.setOpaque(false);
 		s.gridx = 1;
 		gridbag.setConstraints(pan, s);
@@ -249,6 +273,19 @@ class Wang600_Display extends JComponent
 		if (_fin != null) {
 			Thread t = new Thread(this);
 			t.start();
+		}
+	}
+
+	private void setFlashing(boolean on) {
+		if (on) {
+			if (flashing) return;
+			flashing = true;
+			timer.start();
+		} else {
+			if (!flashing) return;
+			flashing = false;
+			timer.stop();
+			flasher();
 		}
 	}
 
@@ -271,27 +308,29 @@ class Wang600_Display extends JComponent
 				continue;
 			}
 			if (b[1] == 2) {
-				// Mach Err trumps Prog Err...
-				//s = new String("--- Mach Err ---");
 				me.setOn(true);
-			} else if (b[1] == 1) {
-				//s = new String("--- Prog Err ---");
+				setFlashing(true);
+			}
+			if (b[1] == 1) {
 				pe.setOn(true);
-			} else {
-				String s;
+				setFlashing(true);
+			}
+			if (b[1] == 0) {
 				me.setOn(false);
 				pe.setOn(false);
-				ds = (b[0] >> 4) & 0x0f;
-				dc = b[0] & 0x0f;
-				if (ds == 0 || ds == 13) {
-					c = sign_chr[dc];
-				} else {
-					c = disp_chr[dc];
-				}
-				disp_a[ds] = c;
-				s = new String(disp_a);
-				disp.setText(s);
+				setFlashing(false);
 			}
+			String s;
+			ds = (b[0] >> 4) & 0x0f;
+			dc = b[0] & 0x0f;
+			if (ds == 0 || ds == 13) {
+				c = sign_chr[dc];
+			} else {
+				c = disp_chr[dc];
+			}
+			disp_a[ds] = c;
+			s = new String(disp_a);
+			disp.setText(s);
 			repaint();
 		}
 	}

@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.9 2011/05/07 16:51:02 drmiller Exp $
+// $Id: w600_sys.c,v 1.10 2011/05/07 22:17:11 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,9 +122,9 @@ void sys_init(w600_sys_t *sys) {
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 
-	// need to get from "keyboard"...
+	// need to get initial values from "keyboard"...
 	sys->cpu.mode0 = 0;
-	sys->cpu.mode1 = 0;
+	sys->cpu.mode1 = MODE1_DEGREES;	// keyboard default... ?
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));

@@ -92,6 +92,8 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 			sys->cpu.mode0 = b & 0x0f;
 			break;
 		case 3:
+			// DEG/RAD is inverted...
+			b ^= MODE1_DEGREES;
 			sys->cpu.mode1 = b & 0x0f;
 			break;
 		default:
