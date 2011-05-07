@@ -14,6 +14,8 @@ class _Key {
 	static final Color white2 = new Color(150, 150, 150, 255);
 	static final Color illum1 = new Color(255, 255, 230, 255);
 	static final Color red1 = new Color(255, 128, 128, 255);
+	static final Color neon = new Color(244,157,33);
+	static final Color empty = new Color(50,50,50);
 
 	static final int SPCL = 0x0100;
 	static final int MODE0 = 0x0200;
@@ -122,7 +124,7 @@ public class w600_fe {
 		Wang600_Display dsp = new Wang600_Display(fin);
 		front_end.add(dsp);
 
-		Wang600_Keyboard kbd = new Wang600_Keyboard(fout);
+		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me);
 		front_end.add(kbd);
 
 		front_end.getContentPane().setBackground(Color.black);
@@ -132,10 +134,60 @@ public class w600_fe {
 	}
 }
 
+class Wang600_ProgErr extends JComponent {
+	static final long serialVersionUID = 311457692038L;
+
+	GridBagLayout gridbag = new GridBagLayout();
+	JPanel pan;
+
+	public Wang600_ProgErr(String label) {
+		GridBagConstraints s = new GridBagConstraints();
+
+		setLayout(gridbag);
+
+		s.fill = GridBagConstraints.NONE;
+		s.gridx = 0;
+		s.gridy = 0;
+		s.weightx = 0;
+		s.weighty = 0;
+		s.gridwidth = 1;
+		s.gridheight = 1;
+		s.insets.left = 0;
+		s.insets.right = 0;
+		s.anchor = GridBagConstraints.CENTER;
+
+		JLabel lab = new JLabel("<HTML><CENTER>"+label+"</CENTER></HTML>");
+		lab.setFont(new Font("Monospaced", Font.PLAIN, 8));
+		lab.setPreferredSize(new Dimension(30, 25));
+		lab.setForeground(Color.white);
+		lab.setOpaque(false);
+		s.gridx = 0;
+		s.gridy = 0;
+		gridbag.setConstraints(lab, s);
+		add(lab);
+
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setOpaque(true);
+		pan.setBackground(_Key.empty);
+		s.gridy = 1;
+		gridbag.setConstraints(pan, s);
+		add(pan);
+	}
+
+	public void setOn(boolean on) {
+		if (on) {
+			pan.setBackground(_Key.neon);
+		} else {
+			pan.setBackground(_Key.empty);
+		}
+	}
+}
+
 class Wang600_Display extends JComponent
 		implements Runnable
 {
-	static final long serialVersionUID = 311457692038L;
+	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
 
@@ -144,6 +196,9 @@ class Wang600_Display extends JComponent
 	FileInputStream _fin;
 	GridBagLayout gridbag = new GridBagLayout();
 
+	Wang600_ProgErr pe;
+	Wang600_ProgErr me;
+
 	// TBD: mach and prog error lights...
 	// must be public so that main() can give to keyboard...
 
@@ -151,7 +206,6 @@ class Wang600_Display extends JComponent
 		String blank = "--- Wang 600 ---";
 		disp_a = new byte[16];
 		disp_a = blank.getBytes();
-		Color neon = new Color(244,157,33);
 
 		_fin = f;
 		setLayout(gridbag);
@@ -167,8 +221,8 @@ class Wang600_Display extends JComponent
 		s.gridheight = 1;
 
 		disp = new JLabel(blank, SwingConstants.LEFT);
-		disp.setForeground(neon);
-		disp.setBackground(new Color(50,50,50));
+		disp.setForeground(_Key.neon);
+		disp.setBackground(_Key.empty);
 		disp.setOpaque(true);
 		//Font font = new Font(disp.getFont().getName(), disp.getFont().getStyle(), 32);
 		Font font = new Font("Monospaced", Font.PLAIN, 32);
@@ -186,6 +240,11 @@ class Wang600_Display extends JComponent
 		s.gridx = 1;
 		gridbag.setConstraints(pan, s);
 		add(pan);
+
+		pe = new Wang600_ProgErr("Prog<BR>Err");
+		pe.setOn(false);
+		me = new Wang600_ProgErr("Mach<BR>Err");
+		me.setOn(false);
 
 		if (_fin != null) {
 			Thread t = new Thread(this);
@@ -211,13 +270,17 @@ class Wang600_Display extends JComponent
 			if (n == 0) {
 				continue;
 			}
-			String s;
 			if (b[1] == 2) {
 				// Mach Err trumps Prog Err...
-				s = new String("--- Mach Err ---");
+				//s = new String("--- Mach Err ---");
+				me.setOn(true);
 			} else if (b[1] == 1) {
-				s = new String("--- Prog Err ---");
+				//s = new String("--- Prog Err ---");
+				pe.setOn(true);
 			} else {
+				String s;
+				me.setOn(false);
+				pe.setOn(false);
 				ds = (b[0] >> 4) & 0x0f;
 				dc = b[0] & 0x0f;
 				if (ds == 0 || ds == 13) {
@@ -227,8 +290,8 @@ class Wang600_Display extends JComponent
 				}
 				disp_a[ds] = c;
 				s = new String(disp_a);
+				disp.setText(s);
 			}
-			disp.setText(s);
 			repaint();
 		}
 	}
@@ -364,7 +427,7 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
-	public Wang600_Keyboard(FileOutputStream fo) {
+	public Wang600_Keyboard(FileOutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me) {
 		int x;
 		_kbds = new Wang600_Keyboards[num_kbds];
 		_nkbds = 0;
@@ -410,7 +473,7 @@ class Wang600_Keyboard extends JComponent
 		_col = 0;
 		_row += 1;
 
-		kbd = new Wang600_Keyboard_meta();
+		kbd = new Wang600_Keyboard_meta(pe, me);
 		for (x = 0; x < kbd._nkeys; ++x) {
 			kbd._buttons[x].addActionListener(this);
 		}
@@ -522,44 +585,65 @@ class Wang600_Keyboards extends JComponent
 	}
 
 	void addPushButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, String botlab, Color alt, _Key key) {
+				String toplab, String botlab, Color alt, boolean init, _Key key) {
 		final Dimension dim = new Dimension(15, 30);
 		JButton butt;
+		if (alt != null) {
+			key.altcolor = alt;
+		}
 
 		butt = new JButton();
 
 		butt.setPreferredSize(dim);
-		butt.setBackground(key.color);
-
-		if (toplab.length() > 0) {
-//			JLabel lab = new JLabel(toplab);
-//			lab.setForeground(Color.white);
-//			lab.setOpaque(false);
-//			...
+		if (init) {
+			butt.setBackground(key.altcolor);
+		} else {
+			butt.setBackground(key.color);
 		}
-		if (botlab.length() > 0) {
-//			JLabel lab = new JLabel(botlab);
-//			lab.setForeground(Color.white);
-//			lab.setOpaque(false);
-//			...
-		}
+		key.state = init;
 
 		c.insets.top = 0;
 		c.insets.bottom = 0;
 		c.insets.left = ly; // stupid warnings
-		c.insets.left = lx;
-		c.insets.right = lx;
+		c.insets.left = py; // stupid warnings
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.gridx = _col + px;
-		c.gridy = _row + py;
-		gridbag.setConstraints(butt, c);
+		c.anchor = GridBagConstraints.CENTER;
 
-		add(butt);
-		if (alt != null) {
-			key.altcolor = alt;
+		JLabel lab ;
+		if (toplab.length() > 0) {
+			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
+			lab.setFont(new Font("Monospaced", Font.PLAIN, 8));
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			c.insets.left = 0;
+			c.insets.right = 0;
+			c.gridx = _col + px;
+			c.gridy = _row + 0;
+			gridbag.setConstraints(lab, c);
+			add(lab);
 		}
+
+		c.gridx = _col + px;
+		c.gridy = _row + 1;
+		c.insets.left = lx;
+		c.insets.right = lx;
+		gridbag.setConstraints(butt, c);
+		add(butt);
+
+		if (botlab.length() > 0) {
+			lab = new JLabel("<HTML><CENTER>"+botlab+"</CENTER></HTML>");
+			lab.setFont(new Font("Monospaced", Font.PLAIN, 8));
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			c.insets.left = 0;
+			c.insets.right = 0;
+			c.gridx = _col + px;
+			c.gridy = _row + 2;
+			gridbag.setConstraints(lab, c);
+			add(lab);
+		}
+
 		_buttons[_nkeys] = butt;
 		_keys[_nkeys] = key;
 		++_nkeys;
@@ -589,7 +673,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 		c.weighty = 0;
 		c.gridwidth = 1;
 		c.gridheight = 1;
-		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.anchor = GridBagConstraints.CENTER;
 
 		s.fill = GridBagConstraints.NONE;
 		s.gridx = 0;
@@ -769,13 +853,14 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
-	public Wang600_Keyboard_meta() {
+	public Wang600_Keyboard_meta(Wang600_ProgErr pe, Wang600_ProgErr me) {
 		_buttons = new JButton[num_keys];
 		_keys = new _Key[num_keys];
 		_nkeys = 0;
 		_row = 0;
 		_col = 0;
 		GridBagConstraints c = new GridBagConstraints();
+		JPanel pan;
 
 		c.fill = GridBagConstraints.NONE;
 		c.gridx = 0;
@@ -784,7 +869,15 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 		c.weighty = 0;
 		c.gridwidth = 1;
 		c.gridheight = 1;
-		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.anchor = GridBagConstraints.CENTER;
+
+		c.gridx = _col;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(70, 50));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+		++_col;
 
 		setLayout(gridbag);
 
@@ -820,6 +913,25 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 			new _Key(_Key.white1, _Key.META_KEY(14)));
 		addButton(c,1, 1, 15, 0, "icons/k15.gif",
 			new _Key(_Key.white1, _Key.META_KEY(15)));
+		_col += 16;
+
+		c.gridx = _col;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 50));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+		++_col;
+
+		c.gridx = _col;
+		gridbag.setConstraints(pe, c);
+		add(pe);
+		++_col;
+		c.gridx = _col;
+		gridbag.setConstraints(me, c);
+		add(me);
+
+		++_col;
 		_col = 0;
 		_row += 1;
 
@@ -848,17 +960,17 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		c.weighty = 0;
 		c.gridwidth = 1;
 		c.gridheight = 1;
-		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.anchor = GridBagConstraints.CENTER;
 
 		setLayout(gridbag);
 
-		addPushButton(c, 15, 1, 0, 0,"Run","",_Key.white2,
+		addPushButton(c, 15, 1, 0, 0,"Run","",_Key.white2, true,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,0))));
-		addPushButton(c, 15, 1, 1, 0,"Learn","",_Key.white2,
+		addPushButton(c, 15, 1, 1, 0,"Learn","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,4))));
-		addPushButton(c, 15, 1, 2, 0,"Learn\nand\nPrint","",_Key.white2,
+		addPushButton(c, 15, 1, 2, 0,"Learn<BR>and<BR>Print","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,6))));
-		addPushButton(c, 15, 1, 3, 0,"List\nProgram","",_Key.white2,
+		addPushButton(c, 15, 1, 3, 0,"List<BR>Program","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,2))));
 		_col += 4;
 
@@ -870,34 +982,34 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		add(pan);
 		++_col;
 
-		addPushButton(c, 30, 1, 0, 0,"Clear","",null,
+		addPushButton(c, 30, 1, 0, 0,"Clear","",null, false,
 			new _Key(_Key.red1, _Key.PROG_CODE(0,14)));
 
-		addPushButton(c, 5, 1, 1, 0,"T","1",_Key.white2,
+		addPushButton(c, 5, 1, 1, 0,"T","1",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,1))));
-		addPushButton(c, 5, 1, 2, 0,"+","2",_Key.white2,
+		addPushButton(c, 5, 1, 2, 0,"+","2",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,2))));
-		addPushButton(c, 5, 1, 3, 0,"-","3",_Key.white2,
+		addPushButton(c, 5, 1, 3, 0,"-","3",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,3))));
-		addPushButton(c, 5, 1, 4, 0,"*","4",_Key.white2,
+		addPushButton(c, 5, 1, 4, 0,"X","4",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,4))));
-		addPushButton(c, 5, 1, 5, 0,"/","5",_Key.white2,
+		addPushButton(c, 5, 1, 5, 0,"&divide;","5",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,5))));
-		addPushButton(c, 5, 1, 6, 0,"St","6",_Key.white2,
+		addPushButton(c, 5, 1, 6, 0,"St","6",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,6))));
-		addPushButton(c, 5, 1, 7, 0,"Re","7",_Key.white2,
+		addPushButton(c, 5, 1, 7, 0,"Re","7",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(7,7))));
-		addPushButton(c, 5, 1, 8, 0,"f(x)","",_Key.white2,
+		addPushButton(c, 5, 1, 8, 0,"f(x)","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(15,10))));
-		addPushButton(c, 5, 1, 9, 0,"Sp", "8",_Key.white2,
+		addPushButton(c, 5, 1, 9, 0,"Sp<BR>\u2193<BR>On", "8",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(3,_Key.META_PRE(8,8))));
-		addPushButton(c, 5, 1, 10, 0,"Fl","",_Key.white2,
+		addPushButton(c, 5, 1, 10, 0,"Fl<BR>\u2195<BR>Sc","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(4,_Key.MODE0_CHG(1,1))));
-		addPushButton(c, 5, 1, 11, 0,"Deg","",_Key.white2,
+		addPushButton(c, 5, 1, 11, 0,"Deg<BR>\u2195<BR>Rad","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(5,_Key.MODE1_CHG(1,1))));
-		addPushButton(c, 5, 1, 12, 0,"Printer","",_Key.white2,
+		addPushButton(c, 5, 1, 12, 0,"Printer<BR>\u2193<BR>On","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(6,_Key.MODE1_CHG(2,2))));
-		addPushButton(c, 5, 1, 13, 0,"Feed","",null,
+		addPushButton(c, 5, 1, 13, 0,"Paper<BR>Feed","",null, false,
 			new _Key(_Key.white1, _Key.PROG_CODE(0,0))); // TBD
 		_col += 14;
 
