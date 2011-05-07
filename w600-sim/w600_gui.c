@@ -9,6 +9,19 @@
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
+int __gui_dfd = -1;
+
+static void guidisplay(w600_sys_t *sys, int on) {
+	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
+	if (!on) return;
+	uint8_t ds = sys->cpu.al;
+	uint8_t dc = sys->cpu.mr;
+	if (buf[ds] != dc) {
+		buf[ds] = dc;
+		uint16_t b = (ds << 4) | dc;
+		write(__gui_dfd, &b, sizeof(b));
+	}
+}
 
 static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	uint16_t b;
@@ -39,40 +52,56 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 
 static int spawn_fe(w600_sys_t *sys) {
 	int fd[2];
+	int fe[2];
 
 	int rc = pipe(fd);
 	if (rc < 0) {
 		perror("pipe()");
 		return -1;
 	}
+	rc = pipe(fe);
+	if (rc < 0) {
+		perror("pipe()");
+		close(fd[0]);
+		close(fd[1]);
+		return -1;
+	}
 	__gui_kfd = fd[0];
+	__gui_dfd = fe[1];
 	__gui_pid = fork();
 	if (__gui_pid < 0) {
 		perror("fork()");
 		close(fd[0]);
 		close(fd[1]);
+		close(fe[0]);
+		close(fe[1]);
 		return -1;
 	}
 
 	if (__gui_pid == 0) {
 		char fdn[16];
+		char fen[16];
 		close(fd[0]);
+		close(fe[1]);
 		setsid();
 		sprintf(fdn, "%d", fd[1]);
+		sprintf(fen, "%d", fe[0]);
 #if 0
 		execlp("xterm", "xterm", "-e", "./w600_fe", fdn, (char *)NULL);
 		perror("xterm -e ./w600_fe");
 #else
-		execlp("java", "java", "w600_fe", fdn, (char *)NULL);
+		execlp("java", "java", "w600_fe", fdn, fen, (char *)NULL);
 		perror("java w600_fe");
 #endif
 		exit(1);
 	}
 	close(fd[1]);
+	close(fe[0]);
 	long fl = fcntl(__gui_kfd, F_GETFL, 0);
 	fl |= O_NONBLOCK;
 	fcntl(__gui_kfd, F_SETFL, fl);
 	sys->keyboard = guikeyboard;
+	sys->display = guidisplay;
 	return 0;
 }
 

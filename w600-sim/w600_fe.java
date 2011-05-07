@@ -65,6 +65,7 @@ class _Key {
 public class w600_fe {
 	public static void main(String[] args) {
 		java.io.FileOutputStream fout = null;
+		java.io.FileInputStream fin = null;
 
 		if (args.length > 0) {
 			String fd = "/proc/self/fd/" + args[0];
@@ -74,8 +75,24 @@ public class w600_fe {
 				System.out.println("No pipe: " + fd);
 				System.exit(1);
 			}
+			if (args.length > 1) {
+				fd = "/proc/self/fd/" + args[1];
+				try {
+					fin = new FileInputStream(fd);
+				} catch (FileNotFoundException e) {
+					System.out.println("No pipe: " + fd);
+					System.exit(1);
+				}
+			}
 		}
-		JFrame front_end = new JFrame("Wang 600 Keyboard");
+		JFrame front_end = new JFrame("Wang 600");
+		FlowLayout layout = new FlowLayout();
+		front_end.setLayout(layout);
+
+//		if (fin != null) {
+			Wang600_Display dsp = new Wang600_Display(fin);
+			front_end.add(dsp);
+//		}
 
 		Wang600_Keyboard kbd = new Wang600_Keyboard(fout);
 		front_end.add(kbd);
@@ -87,8 +104,85 @@ public class w600_fe {
 	}
 }
 
+class Wang600_Display extends JComponent
+		implements Runnable
+{
+	static final long serialVersionUID = 311457692038L;
+	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
+	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
+
+	byte[] disp_a;
+	JLabel disp;
+	FileInputStream _fin;
+
+	public Wang600_Display(FileInputStream f) {
+		String blank = "   Wang 600     ";
+		disp_a = new byte[16];
+		disp_a = blank.getBytes();
+		Color neon = new Color(244,157,33);
+
+		_fin = f;
+		FlowLayout layout = new FlowLayout();
+		setLayout(layout);
+
+		disp = new JLabel(blank, SwingConstants.LEFT);
+		disp.setForeground(neon);
+		disp.setOpaque(false);
+		Font font = new Font(disp.getFont().getName(), disp.getFont().getStyle(), 32);
+		disp.setFont(font);
+		add(disp);
+		Thread t = new Thread(this);
+		t.start();
+	}
+
+	public void run() {
+		int n = 0;
+		byte[] b = new byte[2];
+		int ds;
+		int dc;
+		byte c;
+
+		while (true) {
+			if (_fin == null) {
+			try {
+				n = System.in.read(b);
+			} catch (IOException ee) {
+				System.err.println("Broken pipe for display!");
+				System.exit(1);
+			} finally {
+			}
+				
+	} else {
+			try {
+				n = _fin.read(b);
+			} catch (IOException ee) {
+				System.err.println("Broken pipe for display!");
+				System.exit(1);
+			} finally {
+			}
+			if (n == 0) {
+				continue;
+			}
+			if (b[1] == 0) {
+				ds = (b[0] >> 4) & 0x0f;
+				dc = b[0] & 0x0f;
+				if (ds == 0 || ds == 13) {
+					c = sign_chr[dc];
+				} else {
+					c = disp_chr[dc];
+				}
+				disp_a[ds] = c;
+				String s = new String(disp_a);
+				disp.setText(s);
+				repaint();
+			}
+}
+		}
+	}
+}
+
 class Wang600_Keyboard extends JComponent
-	implements ActionListener
+	implements ActionListener, KeyListener
 {
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
@@ -195,6 +289,24 @@ class Wang600_Keyboard extends JComponent
 		add(kbd);
 		_kbds[_nkbds] = kbd;
 		++_nkbds;
+		// This doesn't work... perhaps 'this' is not an "input object"?
+		// addKeyListener(this);
+		// setFocusTraversalKeysEnabled(false);
+	}
+
+	public void keyTyped(KeyEvent e) {
+	}
+
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			setShift(true);
+		}
+	}
+
+	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			setShift(false);
+		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -247,6 +359,7 @@ class Wang600_Keyboard extends JComponent
 						try {
 							_fout.write(b);
 						} catch (IOException ee) {
+							System.err.println("Broken pipe for keyboard!");
 						}
 					}
 					break;
@@ -305,6 +418,12 @@ class Wang600_Keyboards extends JComponent
 
 		butt.setPreferredSize(dim);
 		butt.setBackground(key.color);
+
+//		if (key.icon.length() > 0) {
+//			JLabel lab = new JLabel(key.icon);
+//			lab.setForeground(Color.white);
+//			lab.setOpaque(false);
+//		}
 
 		c.insets.top = 0;
 		c.insets.bottom = 0;
