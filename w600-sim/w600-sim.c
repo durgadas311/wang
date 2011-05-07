@@ -1,4 +1,4 @@
-// $Id: w600-sim.c,v 1.4 2011/05/04 23:36:51 drmiller Exp $
+// $Id: w600-sim.c,v 1.5 2011/05/07 16:51:02 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
@@ -93,6 +93,7 @@ int main(int argc, char **argv) {
 		sys_loadpgm(&sys, pgm, load, entry);
 	}
 
+	sys.cmd = (interact ? 1 : 0);
 	sys.run = (interact ? 0 : 1);
 	sys_go(&sys, entry);
 	sys_stop(&sys);

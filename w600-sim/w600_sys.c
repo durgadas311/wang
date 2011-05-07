@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.8 2011/05/06 16:29:03 drmiller Exp $
+// $Id: w600_sys.c,v 1.9 2011/05/07 16:51:02 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,43 +31,6 @@ int __keyp;
 //
 
 static void sysdisplay(w600_sys_t *sys, int on) {
-#if 0
-	static uint8_t disp[17] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-	static int chg = 0;
-	if (!on) {
-		// fputc('\b', stdout);
-		// fputc(' ', stdout);
-		// fflush(stdout);
-		return;
-	}
-	uint8_t ds = sys->cpu.al;
-	uint8_t dc = sys->cpu.mr;
-	if (disp[ds] != dc) {
-		++chg;
-		disp[ds] = dc;
-	}
-	if (ds == 15) {
-		int c = ' ';
-		if (sys->cpu.pe || sys->cpu.me) {
-			c = '!';
-			++chg;
-		}
-		if (chg) {
-			int d;
-			fputc('\r', stdout);
-			for (d = 0; d < 16; ++d) {
-				if (d == 0 || d == 13) {
-					fputc("+-+-+-+-+-+-+-+ "[dc], stdout);
-				} else {
-					fputc("0123456789.>u<L "[dc], stdout);
-				}
-			}
-			fputc(c, stdout);
-			fflush(stdout);
-			chg = 0;
-		}
-	}
-#else
 	if (!on) {
 		// fputc('\b', stdout);
 		// fputc(' ', stdout);
@@ -89,7 +52,6 @@ static void sysdisplay(w600_sys_t *sys, int on) {
 	}
 	fputc(c, stdout);
 	fflush(stdout);
-#endif
 }
 
 static void syskeyboard(w600_sys_t *sys, uint8_t *kc) {
@@ -230,7 +192,7 @@ static int run_some(w600_sys_t *sys, uint16_t entry) {
 			sys->cpu.cylimit = (uint64_t)-1;
 			sys->run = 0;
 		}
-	} while (1);
+	} while (sys->run || sys->cmd);
 }
 
 

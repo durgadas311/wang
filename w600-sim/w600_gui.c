@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <sys/wait.h>
 
 #include "w600_gui.h"
 
@@ -15,7 +17,17 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
 	static uint16_t last = 0;
 	uint16_t b = 0;
+	int rc;
+
 	if (!on) return;
+
+	rc = waitpid(__gui_pid, NULL, WNOHANG);
+	if (rc == __gui_pid) {
+		// silently quit...
+		sys->run = 0;
+		return;
+	}
+
 	// piggy-back error lights in hi order bits...
 	if (sys->cpu.pe) {
 		b |= 0x100;
@@ -29,14 +41,34 @@ static void guidisplay(w600_sys_t *sys, int on) {
 		buf[ds] = dc;
 		last = b;
 		b |= (ds << 4) | dc;
-		write(__gui_dfd, &b, sizeof(b));
+		rc = write(__gui_dfd, &b, sizeof(b));
+		if (rc < 0) {
+			perror("guidisplay");
+			// silently quit...
+			sys->run = 0;
+			return;
+		}
 	}
 }
 
 static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	uint16_t b;
 
-	int rc = read(__gui_kfd, &b, sizeof(b));
+	int rc;
+	rc = waitpid(__gui_pid, NULL, WNOHANG);
+	if (rc == __gui_pid) {
+		// silently quit...
+		sys->run = 0;
+		return;
+	}
+
+	rc = read(__gui_kfd, &b, sizeof(b));
+	if (rc < 0 && errno != EAGAIN) {
+		perror("guikeyboard");
+		// silently quit...
+		sys->run = 0;
+		return;
+	}
 	if (rc == sizeof(b)) {
 		switch(b >> 8) {
 		case 0:

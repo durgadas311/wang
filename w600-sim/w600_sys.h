@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.5 2011/05/06 16:29:03 drmiller Exp $
+// $Id: w600_sys.h,v 1.6 2011/05/07 16:51:02 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -21,6 +21,7 @@ typedef struct w600_sys_s {
 	void (*display)(struct w600_sys_s *sys, int on);
 	void (*keyboard)(struct w600_sys_s *sys, uint8_t *kc);
 	int run;
+	int cmd;	// is command mode allowed?
 #ifdef TRACE
 	int trace;
 	FILE *trc_fp;
