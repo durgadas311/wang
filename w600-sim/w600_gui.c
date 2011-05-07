@@ -13,12 +13,22 @@ int __gui_dfd = -1;
 
 static void guidisplay(w600_sys_t *sys, int on) {
 	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
+	static uint16_t last = 0;
+	uint16_t b = 0;
 	if (!on) return;
+	// piggy-back error lights in hi order bits...
+	if (sys->cpu.pe) {
+		b |= 0x100;
+	}
+	if (sys->cpu.me) {
+		b |= 0x200;
+	}
 	uint8_t ds = sys->cpu.al;
 	uint8_t dc = sys->cpu.mr;
-	if (buf[ds] != dc) {
+	if (last != b || buf[ds] != dc) {
 		buf[ds] = dc;
-		uint16_t b = (ds << 4) | dc;
+		last = b;
+		b = (ds << 4) | dc;
 		write(__gui_dfd, &b, sizeof(b));
 	}
 }
@@ -39,6 +49,7 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 			sys->cpu.pc = b & 0x07;
 			break;
 		case 2:
+			// FE gave us complete mode word... just update
 			sys->cpu.mode0 = b & 0x0f;
 			break;
 		case 3:
