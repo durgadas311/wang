@@ -28,7 +28,7 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	if (last != b || buf[ds] != dc) {
 		buf[ds] = dc;
 		last = b;
-		b = (ds << 4) | dc;
+		b |= (ds << 4) | dc;
 		write(__gui_dfd, &b, sizeof(b));
 	}
 }
@@ -46,7 +46,14 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 			break;
 		case 1:
 			// jam new PC...
-			sys->cpu.pc = b & 0x07;
+			b &= 0x07;
+			sys->cpu.pc = b;
+			if (b < 4) {
+				sys->cpu.pe = 0;
+			}
+			if (b == 0) {
+				sys->cpu.me = 0;
+			}
 			break;
 		case 2:
 			// FE gave us complete mode word... just update

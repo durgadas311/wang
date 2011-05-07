@@ -214,9 +214,9 @@ class Wang600_Display extends JComponent
 			String s;
 			if (b[1] == 2) {
 				// Mach Err trumps Prog Err...
-				s = new String("Mach Err");
+				s = new String("--- Mach Err ---");
 			} else if (b[1] == 1) {
-				s = new String("Prog Err");
+				s = new String("--- Prog Err ---");
 			} else {
 				ds = (b[0] >> 4) & 0x0f;
 				dc = b[0] & 0x0f;

@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.11 2011/05/07 03:28:01 drmiller Exp $
+// $Id: w600_decode.c,v 1.12 2011/05/07 16:32:23 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -188,8 +188,6 @@ int instr_exec(w600_sys_t *sys) {
 	case 9:
 		// T.B.D. reset 6184...
 		sys->cpu.kp = 0;
-		sys->cpu.pe = 0;
-		sys->cpu.me = 0;
 		break;
 	case 10:
 		sys->cpu.acc = (sys->cpu.acc & 0x0e) | (sys->cpu.z ^ 1);
