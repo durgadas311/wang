@@ -326,6 +326,9 @@ class Wang600_Keyboard extends JComponent
 				code |= _kbds[y]._keys[x].getMode();
 			}
 		}
+		if (type == _Key.SPCL) {
+			code |= _Key.SPCL;
+		}
 		if (type == _Key.MODE1) {
 			code = _Key.MODE1 | _mode1;
 		}
