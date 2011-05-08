@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.12 2011/05/07 16:32:23 drmiller Exp $
+// $Id: w600_decode.c,v 1.13 2011/05/08 02:01:00 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -45,6 +45,47 @@ static uint8_t sub3_c(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = sub3_i(sys, a, b, c);
 	sys->cpu.c = sys->cpu.i;
 	return s;
+}
+
+static uint8_t pr_buf[20];
+static uint8_t pr_drum = 0;
+static uint32_t pr_hammers = 0;
+static uint8_t pr_tach = 0;
+static int pr_col = 0;
+
+static void printer_status(w600_sys_t *sys) {
+	if (pr_tach) {
+		pr_col = 0;
+		pr_drum = (pr_drum + 1) & 0x0f;
+		pr_hammers = 0;
+	}
+	pr_tach ^= 0x08;
+	sys->cpu.dh = pr_drum;
+	sys->cpu.dl = pr_tach;
+}
+
+static void printer_hammers(w600_sys_t *sys) {
+	int x;
+	uint32_t h;
+
+	pr_hammers <<= 1;
+	pr_hammers &= 0x0fffff;
+	pr_hammers |= sys->cpu.dl & 1;
+	if (++pr_col >= 20) {
+		h = pr_hammers;
+		for (x = 0; h; ++x) {
+			if (h & 1) {
+				sys->printer(sys, x, pr_drum);
+			}
+			h >>= 1;
+		}
+		pr_col = 0;
+	}
+}
+
+static void printer_feed(w600_sys_t *sys) {
+	// now, actually print it...
+	sys->printer(sys, -1, 0);
 }
 
 int instr_exec(w600_sys_t *sys) {
@@ -213,12 +254,12 @@ int instr_exec(w600_sys_t *sys) {
 	case 4:	rd_ram_i(sys, m_ah, m_am, m_al); break;
 	case 5:	rd_ram_i(sys, 15, br_k, m_al); break;
 	case 6:	rd_ram_i(sys, 15, 15, br_k); break;
-	case 7:	/* sys->print(); */ break;
-	case 8:	/* sys->print_feed(); */ break;
+	case 7:	printer_hammers(sys); break;
+	case 8:	printer_feed(sys); break;
 	case 9:	rc = 2; break;
 	case 10: /* sys->tape_rd(); */ break;
 	case 11: /* sys->tape_wr(); */ break;
-	case 12: /* sys->print_stat(); */ break;
+	case 12: printer_status(sys); break;
 	case 13: /* sys->tape_on(u->g & 1); */ break;
 	case 14: /* sys->tape_off(); */ break;
 	case 15:

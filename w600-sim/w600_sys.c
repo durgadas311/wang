@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.10 2011/05/07 22:17:11 drmiller Exp $
+// $Id: w600_sys.c,v 1.11 2011/05/08 02:01:00 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +29,125 @@ int __keyp;
 // Use w600_ucode_t from w600_ucode.h to decode from a uint64_t.
 // All microcode image files pad each instruction to 64 bits.
 //
+
+static char pr_ovfl[16] = { "....OVERFLOW...." };
+static char pr_0_15[16] = { "0123456789.o!+- " };
+static char *pr_16_20[5][16] = {
+[0][0] = "E",
+[0][1] = "T",
+[0][2] = "+",
+[0][3] = "-",
+[0][4] = "x",
+[0][5] = "/",
+[0][6] = "ST",
+[0][7] = "RE",
+[0][8] = "*",
+[0][9] = "*",
+[0][10] = "f",
+[0][11] = "F",
+[0][12] = "A",
+[0][13] = "B",
+[0][14] = "C",
+[0][15] = "D",
+
+[1][0] = "0",
+[1][1] = "1",
+[1][2] = "2",
+[1][3] = "3",
+[1][4] = "4",
+[1][5] = "5",
+[1][6] = "6",
+[1][7] = "7",
+[1][8] = "8",
+[1][9] = "9",
+[1][10] = "10",
+[1][11] = "11",
+[1][12] = "12",
+[1][13] = "13",
+[1][14] = "14",
+[1][15] = "15",
+
+[2][0] = "S",
+[2][1] = "RE",
+[2][2] = "W",
+[2][3] = "Go",
+[2][4] = "Jo",
+[2][5] = "J+",
+[2][6] = "SN",
+[2][7] = "CS",
+[2][8] = "TN",
+[2][9] = "RD",
+[2][10] = "LN",
+[2][11] = "eX",
+[2][12] = "x2",
+[2][13] = "vX",
+[2][14] = "LP",
+[2][15] = "1/x",
+
+[3][0] = "M",
+[3][1] = "ST",
+[3][2] = "a",
+[3][3] = "Sp",
+[3][4] = "Jn",
+[3][5] = "Je",
+[3][6] = "S1",
+[3][7] = "C1",
+[3][8] = "T1",
+[3][9] = "DR",
+[3][10] = "LG",
+[3][11] = "10X",
+[3][12] = "I",
+[3][13] = "|x|",
+[3][14] = "EP",
+[3][15] = "RT",
+
+[4][0] = "X",
+[4][1] = "Y",
+[4][2] = "Z",
+[4][3] = "A",
+[4][4] = "B",
+[4][5] = "C",
+[4][6] = "D",
+[4][7] = "E",
+[4][8] = "F",
+[4][9] = "G",
+[4][10] = "H",
+[4][11] = "I",
+[4][12] = "J",
+[4][13] = "K",
+[4][14] = "L",
+[4][15] = "M",
+
+};
+
+static char pr_buf[128];
+
+static void sysprinter(w600_sys_t *sys, int col, int drum) {
+	static char temp[8];
+	char *s;
+	int x, c;
+
+	if (col == -1) {
+		// print what we got... then reset.
+		printf("%.*s\n", (16 + 4 * 5), pr_buf);
+		memset(pr_buf, ' ', sizeof(pr_buf));
+	} else {
+		if (col < 15) {
+			s = &pr_buf[col];
+			if (drum == 12) {
+				c = pr_ovfl[col];
+			} else {
+				c = pr_0_15[drum];
+			}
+			*s = c;
+		} else {
+			col -= 15;
+			s = &pr_buf[col * 4 + 16];
+			sprintf(temp, "%4s", pr_16_20[col][drum]);
+			memcpy(s, temp, 4);
+		}
+	}
+}
 
 static void sysdisplay(w600_sys_t *sys, int on) {
 	if (!on) {
@@ -115,10 +234,12 @@ static void sysfault(w600_sys_t *sys, const char *str) {
 
 void sys_init(w600_sys_t *sys) {
 	printf("Wang 600 Programmable Calculator\n");
+	memset(pr_buf, ' ', sizeof(pr_buf));
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
 	sys->display = sysdisplay;
 	sys->keyboard = syskeyboard;
+	sys->printer = sysprinter;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 
