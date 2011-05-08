@@ -24,9 +24,10 @@ clean:
 	rm -f *.o
 
 tar:
-	tar -czvf \
-		w600-sim.tgz *.[ch] Makefile README *.java \
-		wang600.rom *.class icons/*.gif
+	cd ..;\
+	tar -czvf w600-sim.tgz \
+		w600-sim/*.[ch] w600-sim/Makefile w600-sim/README w600-sim/*.java \
+		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif
 
 install: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
