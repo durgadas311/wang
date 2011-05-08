@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.13 2011/05/08 02:01:00 drmiller Exp $
+// $Id: w600_decode.c,v 1.14 2011/05/08 13:43:03 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -257,12 +257,24 @@ int instr_exec(w600_sys_t *sys) {
 	case 7:	printer_hammers(sys); break;
 	case 8:	printer_feed(sys); break;
 	case 9:	rc = 2; break;
-	case 10: /* sys->tape_rd(); */ break;
-	case 11: /* sys->tape_wr(); */ break;
-	case 12: printer_status(sys); break;
-	case 13: /* sys->tape_on(u->g & 1); */ break;
-	case 14: /* sys->tape_off(); */ break;
+	case 10: /* sys->tape_rd(); */
+		printf("tape_rd()\n");
+		break;
+	case 11: /* sys->tape_wr(); */
+		printf("tape_wr(%d)\n", sys->cpu.dl & 1);
+		break;
+	case 12:
+//printf("printer_status\n");
+		printer_status(sys);
+		break;
+	case 13: /* sys->tape_on(u->g & 1); */
+		printf("tape_on(%d)\n", u->g & 1);
+		break;
+	case 14: /* sys->tape_off(); */
+		printf("tape_off()\n");
+		break;
 	case 15:
+printf("XH/XL = %d %d [%d]\n", g, h, br_k & 0x07);
 		sys->cpu.xh = g;
 		sys->cpu.xl = h;
 		sys->cpu.xs = br_k & 0x07;
