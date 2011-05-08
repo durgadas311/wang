@@ -1,0 +1,26 @@
+$Id: README,v 1.1 2011/05/08 02:20:53 drmiller Exp $
+
+This is the start of a Wang 600 Simulator, using actual microcode from a Wang 600.
+
+By default it uses a Java front-end. That can be disabled with "-g".
+
+S basic help message is displayed when "w600-sim -h" is run.
+
+Defaults work with included files, namely the microcode image in "wang600.rom".
+
+Option -t will enable trace, with the expected volumes of output.
+
+Option -i enables "interactive mode" whereby the simulator starts in command mode.
+"help" will do the obvious. "go" will start executing the microcode image.
+Without a GUI, it is a very crude interface.
+
+Currently, the GUI requires all the *.class files in the main directory, plus the
+GIF images in the "icons" subdirectory. The GUI has a "test" mode, which is what
+runs when the java file "w600_fe.class" is run outside of the simulator.
+For example, by "java w600_fe".
+
+There is a simple disassembler for the microcode, "w600-dasm". It uses the 
+same format as the trace facility in the simulator, except there is no
+hardware state information.
+
+Some basic diagrams and notes on the hardware are in "wang600-block-diag.pdf".
