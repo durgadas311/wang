@@ -32,6 +32,7 @@ class _Key {
 	}
 
 	static final int SHIFT = -1;
+	static final int FEED = -2;
 
 	static final int PROG_CODE(int a, int b) {
 		// shift is += 01 00...
@@ -80,6 +81,9 @@ class _Key {
 	}
 	public boolean isSHIFT() {
 		return (code == SHIFT);
+	}
+	public boolean isFEED() {
+		return (code == FEED);
 	}
 
 	Color color;
@@ -409,6 +413,10 @@ class Wang600_Keyboard extends JComponent
 		}
 		if (_kbds[y]._keys[x].isSHIFT()) {
 			setShift(!_shift);
+			return;
+		}
+		if (_kbds[y]._keys[x].isFEED()) {
+			// TBD: advance printer paper...
 			return;
 		}
 		int type = _kbds[y]._keys[x].getType();
@@ -866,13 +874,13 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 			new _Key(_Key.green1, _Key.PROG_CODE(8,2)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/i_o.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(15,0)));
-		addButton(c,1, 1, 0, 1, "icons/group1.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(15,1)));
-		addButton(c,1, 1, 0, 2, "icons/group2.gif",
 			new _Key(_Key.pink1, _Key.PROG_CODE(15,2)));
+		addButton(c,1, 1, 0, 1, "icons/group1.gif",
+			new _Key(_Key.pink1, _Key.PROG_CODE(15,13)));
+		addButton(c,1, 1, 0, 2, "icons/group2.gif",
+			new _Key(_Key.pink1, _Key.PROG_CODE(15,14)));
 		addButton(c,1, 1, 0, 3, "icons/indir.gif",
-			new _Key(_Key.orange1, _Key.PROG_CODE(15,3)));
+			new _Key(_Key.orange1, _Key.PROG_CODE(15,11)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/set_pc.gif",
 			new _Key(_Key.green1, _Key.SPCL_KEY(2)));
@@ -1049,7 +1057,7 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		addPushButton(c, 5, 1, 12, 0,"Printer<BR>\u2193<BR>On","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(6,_Key.MODE1_CHG(2,2))));
 		addPushButton(c, 5, 1, 13, 0,"Paper<BR>Feed","",null, false,
-			new _Key(_Key.white1, _Key.PROG_CODE(0,0))); // TBD
+			new _Key(_Key.white1, _Key.FEED));
 		_col += 14;
 
 		c.gridx = _col;
