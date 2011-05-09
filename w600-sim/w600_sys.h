@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.8 2011/05/09 01:14:16 drmiller Exp $
+// $Id: w600_sys.h,v 1.9 2011/05/09 20:08:05 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -22,6 +22,7 @@ typedef struct w600_sys_s {
 	void (*display)(struct w600_sys_s *sys, int on);
 	void (*keyboard)(struct w600_sys_s *sys, uint8_t *kc);
 	void (*printer)(struct w600_sys_s *sys, int col, int drum);
+	uint8_t (*tape)(struct w600_sys_s *sys, int wr, uint8_t nibble);
 	int run;
 	int cmd;	// is command mode allowed?
 #ifdef TRACE
@@ -35,6 +36,9 @@ typedef struct w600_sys_s {
 extern void sys_init(w600_sys_t *sys);
 extern void sys_start(w600_sys_t *sys, int ops);
 extern void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
+extern void sys_loadram(w600_sys_t *sys, char *ram);
+extern void sys_loadrom(w600_sys_t *sys, char *rom);
+extern void sys_loadcass(w600_sys_t *sys, char *cass);
 extern int sys_go(w600_sys_t *sys, uint16_t entry);
 
 #endif // __w600_sys_h__

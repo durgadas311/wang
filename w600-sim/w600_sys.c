@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.14 2011/05/09 10:10:55 drmiller Exp $
+// $Id: w600_sys.c,v 1.16 2011/05/09 21:53:12 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -184,6 +184,72 @@ static void syskeyboard(w600_sys_t *sys, uint8_t *kc) {
 	}
 }
 
+char *_cass_file = "default_casette_tape.img";
+int _cass_fd = -1;
+off_t _cass_pos = 0;
+
+// we get "hi" nibble first... must also send "hi" nibble first
+// we use End Prog to know when to stop reading...
+static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
+	static uint8_t byte = 0;
+	static int bc = 0;
+	int rc;
+	if (nibble & 0x80) {	// tape-off...
+		if (_cass_fd >= 0) {
+			_cass_pos = lseek(_cass_fd, 0L, SEEK_CUR);
+fprintf(stderr, "cassette position = %04lx\n", _cass_pos);
+			close(_cass_fd);
+			_cass_fd = -1;
+		}
+		bc = 0;
+		return 0;
+	}
+	if (nibble & 0x40) {	// tape-on...
+		if (_cass_fd >= 0) return 0;
+		if (wr) {
+			_cass_fd = open(_cass_file, O_RDWR | O_CREAT, 0666);
+		} else {
+			_cass_fd = open(_cass_file, O_RDONLY);
+		}
+		if (_cass_fd < 0) {
+			perror(_cass_file);
+			return 0;
+		}
+		lseek(_cass_fd, _cass_pos, SEEK_SET);
+		bc = 0;
+		return 0;
+	}
+	if (wr) {
+		bc ^= 1;
+		if (bc) {
+			byte = (byte & 0x0f) | (nibble << 4);
+		} else {
+			byte = (byte & 0xf0) | nibble;
+			rc = write(_cass_fd, &byte, 1);
+			if (rc < 0) {
+				perror(_cass_file);
+			}
+		}
+	} else {
+		bc ^= 1;
+		if (bc) {
+			byte = 0;
+			rc = read(_cass_fd, &byte, 1);
+			if (rc < 0) {
+				perror(_cass_file);
+				return 0xff;
+			}
+			if (rc == 0) {
+				bc = 0;
+				return 0xff;
+			}
+			return (byte >> 4);
+		} else {
+			return (byte & 0x0f);
+		}
+	}
+}
+
 static int intr(w600_sys_t *sys, int sig) {
 	if (sig == SIGINT && sys->run) {
 		fflush(sys->trc_fp);
@@ -241,6 +307,7 @@ void sys_init(w600_sys_t *sys) {
 	sys->display = sysdisplay;
 	sys->keyboard = syskeyboard;
 	sys->printer = sysprinter;
+	sys->tape = systape;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 
@@ -304,6 +371,10 @@ static void __load_mem(uint8_t *mem, char *file) {
 		exit(1);
 	}
 	close(fd);
+}
+
+void sys_setcass(w600_sys_t *sys, char *cass) {
+	_cass_file = cass;
 }
 
 // NOTE: program steps are reverse order from registers.

@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.18 2011/05/09 14:23:19 drmiller Exp $
+// $Id: w600_decode.c,v 1.19 2011/05/09 20:08:05 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -46,6 +46,154 @@ static uint8_t sub3_c(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	sys->cpu.c = sys->cpu.i;
 	return s;
 }
+
+static uint8_t odd_parity[16] = {
+[0x0] = 1,
+[0x1] = 0,
+[0x2] = 0,
+[0x3] = 1,
+[0x4] = 0,
+[0x5] = 1,
+[0x6] = 1,
+[0x7] = 0,
+[0x8] = 0,
+[0x9] = 1,
+[0xa] = 1,
+[0xb] = 0,
+[0xc] = 1,
+[0xd] = 0,
+[0xe] = 0,
+[0xf] = 1,
+};
+
+static void tape_on(w600_sys_t *sys, int wr) {
+	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
+}
+
+static void tape_off(w600_sys_t *sys) {
+	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
+}
+
+static void tape_write(w600_sys_t *sys, int dat) {
+	static uint8_t last = 0;
+	static uint8_t data = 0;
+	static int bitc = 0;
+
+	last <<= 1;
+	last |= dat;
+	uint8_t h = last & 0x07;
+	if (h == 0x02 || h == 0x06 || h == 0x03) {
+		uint8_t bit = 0;
+		if (h == 0x02) bit = 1;
+		if (++bitc == 5) {
+			(void)sys->tape(sys, 1, data);
+			if (odd_parity[data] != bit) {
+				fprintf(stderr, "parity error in tape write\n");
+			}
+			data = 0;
+			bitc = 0;
+		} else {
+			data <<= 1;
+			data |= bit;
+		}
+	}
+}
+
+static int tape_read(w600_sys_t *sys) {
+	static uint8_t last = 0;
+	static uint8_t data = 0;
+	static int bitc = 0;
+	static int sigc = 0;
+	static int repc = 0;
+	static uint8_t z = 0x03;
+	static uint8_t bit = 0;
+	uint8_t nib;
+
+	if (repc) {
+reps:
+		--repc;
+		return bit;
+	}
+	if (sigc) {
+sigs:
+		--sigc;
+		bit = last & 1;
+fputc('0'+bit,stdout);
+		last >>= 1;
+		repc = 220;
+		goto reps;
+	}
+	if (bitc) {
+bits:
+		--bitc;
+		data <<= 1;
+#if 1
+		if (data & 0x20) {
+			last = 0x01;
+			z = 0x03;
+		} else {
+			last = z;
+			z ^= 0x03;
+		}
+		sigc = 2;
+#else
+		if (data & 0x20) {
+			last = 1;
+		} else {
+			last = 0;
+		}
+		sigc = 1;
+#endif
+		goto sigs;
+
+	}
+	nib = sys->tape(sys, 0, 0);
+	if (nib == 0xff) { // EOF
+fprintf(stderr, "EOF\n");
+		return 0;
+	}
+	data = (nib << 1) | odd_parity[nib];
+	bitc = 5;
+	goto bits;
+}
+#if 0
+
+
+	if (!bitc) {
+		// data was already shifted... 0bxxx00000
+		// but make room for parity bit in new data...
+		nib = sys->tape(sys, 0, 0);
+		if (nib == 0xff) { // EOF
+fprintf(stderr, "EOF\n");
+			return 0;
+		}
+		data |= (nib << 1) | odd_parity[nib];
+		bitc = 5;
+		sigc = 0;
+	}
+	if (!sigc) {
+		--bitc;
+		data <<= 1;
+		if (data & 0x20) {
+			last = 0x01;	// lsb first...
+			z = 0x03;
+		} else {
+			last = z;
+			z ^= 0x03;
+		}
+		sigc = 2;
+	}
+	if (!repc) {
+		--sigc;
+		bit = last & 1;
+		last >>= 1;
+		repc = 30;
+fputc('0'+bit,stdout);
+	}
+	--repc;
+	return bit;
+}
+#endif
 
 static char xlate[64] = {
 [0x00] = '-',
@@ -337,11 +485,16 @@ int instr_exec(w600_sys_t *sys) {
 	case 7:	printer_hammers(sys); break;
 	case 8:	printer_feed(sys); break;
 	case 9:	rc = 2; break;
-	case 10: /* sys->tape_rd(); */
-		printf("tape_rd()\n");
+	case 10:
+if (0) { static int count = 1;
+if (count) { --count; sys->trace = 1; sys->cpu.cylimit = sys->cpu.cycles + 500; }
+}
+		sys->cpu.dl = (sys->cpu.dl & ~1) | tape_read(sys);
+//fprintf(stderr, "tape read %d\n", sys->cpu.dl & 1);
 		break;
-	case 11: /* sys->tape_wr(); */
-		printf("tape_wr(%d)\n", sys->cpu.dl & 1);
+	case 11:
+//fprintf(stderr, "tape write %d\n", sys->cpu.dl & 1);
+		tape_write(sys, sys->cpu.dl & 1);
 		break;
 	case 12:
 //printf("printer_status\n");
@@ -349,11 +502,13 @@ int instr_exec(w600_sys_t *sys) {
 		// not just printer, but CN-24 as well...
 		sys->cpu.dl |= 2;
 		break;
-	case 13: /* sys->tape_on(u->g & 1); */
-		printf("tape_on(%d)\n", u->g & 1);
+	case 13:
+//fprintf(stderr, "tape on %d\n", u->g & 1);
+		tape_on(sys, u->g & 1);
 		break;
-	case 14: /* sys->tape_off(); */
-		printf("tape_off()\n");
+	case 14:
+fprintf(stderr, "tape off\n");
+		tape_off(sys);
 		break;
 	case 15:
 		sys->cpu.xh = sys->cpu.dh;	// sys->cpu.xh = g;

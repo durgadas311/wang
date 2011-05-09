@@ -1,4 +1,4 @@
-// $Id: w600-sim.c,v 1.6 2011/05/09 10:12:20 drmiller Exp $
+// $Id: w600-sim.c,v 1.7 2011/05/09 20:08:05 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
@@ -34,6 +34,7 @@ static void usage() {
 		"Options:\n"
 		"\t-g\tDisable GUI"
 		"\t-i\tInteractive mode enable\n"
+		"\t-c file\tUse file as a cassette tape\n"
 		"\t-m file\tLoad initial contents of RAM. 2048 bytes, Lo nibble in [0]\n"
 		"\t-r file\tLoad initial contents of ROM. 2048 bytes, Lo nibble in [0]\n"
 		"\t\tNOTE: RAM/ROM contents are reverse order for program steps.\n"
@@ -54,13 +55,17 @@ int main(int argc, char **argv) {
 	int sys_ops = SYS_START_GUI;
 	char *ram = NULL;
 	char *rom = NULL;
+	char *cass = NULL;
 
 	extern char *optarg;
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "e:gil:m:p:r:t:")) != EOF) {
+	while ((x = getopt(argc, argv, "c:e:gil:m:p:r:t:")) != EOF) {
 		switch(x) {
+		case 'c':
+			cass = optarg;
+			break;
 		case 'e':
 			entry = strtoul(optarg, NULL, 0);
 			break;
@@ -123,6 +128,9 @@ int main(int argc, char **argv) {
 	}
 	if (rom) {
 		sys_loadram(&sys, rom);
+	}
+	if (cass) {
+		sys_setcass(&sys, cass);
 	}
 
 	sys.cmd = (interact ? 1 : 0);
