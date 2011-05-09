@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <poll.h>
 
 #include "w600_gui.h"
 
@@ -13,13 +14,17 @@ pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 int __gui_dfd = -1;
 
+static int disp_good = 0;
+
 static void guidisplay(w600_sys_t *sys, int on) {
 	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
 	static uint16_t last = 0;
 	uint16_t b = 0;
 	int rc;
 
-	if (!on) return;
+	if (!on) {
+		return;
+	}
 
 	rc = waitpid(__gui_pid, NULL, WNOHANG);
 	if (rc == __gui_pid) {
@@ -35,9 +40,15 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	if (sys->cpu.me) {
 		b |= 0x200;
 	}
+
+	if (on == -1) {
+		disp_good = 0;
+		b |= 0x400;
+	}
 	uint8_t ds = sys->cpu.al;
 	uint8_t dc = sys->cpu.mr;
 	if (last != b || buf[ds] != dc) {
+		disp_good = 0;
 		buf[ds] = dc;
 		last = b;
 		b |= (ds << 4) | dc;
@@ -48,6 +59,8 @@ static void guidisplay(w600_sys_t *sys, int on) {
 			sys->run = 0;
 			return;
 		}
+	} else {
+		++disp_good;
 	}
 }
 
@@ -62,6 +75,14 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 		return;
 	}
 
+	if (disp_good > 32) {
+		struct pollfd fds;
+		fds.fd = __gui_kfd;
+		fds.events = POLLIN;
+		fds.revents = 0;
+		int rc = poll(&fds, 1, -1);
+		disp_good = 0;
+	}
 	rc = read(__gui_kfd, &b, sizeof(b));
 	if (rc < 0 && errno != EAGAIN) {
 		perror("guikeyboard");

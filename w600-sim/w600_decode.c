@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.16 2011/05/09 10:10:55 drmiller Exp $
+// $Id: w600_decode.c,v 1.17 2011/05/09 12:33:07 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -381,6 +381,7 @@ else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 				sys->cpu.dh = key >> 4;
 				sys->cpu.dl = key & 0x0f;
 				sys->cpu.kp = 0;
+				sys->display(sys, -1);	// blank out display
 			}
 			break;
 		case 7: rc = 3; break;
@@ -404,11 +405,11 @@ else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 	if ((sys->cpu.pc & 0xffc) == 0x51c) { // display refresh routine...
  		if (!disp) {
 			++disp;
-			sys->display(sys, disp);
+			sys->display(sys, 1);
 		}
 	} else if (disp) {
 		disp = 0;
-		sys->display(sys, disp);
+		sys->display(sys, 0);
 	}
 
 	sys->keyboard(sys, &key);

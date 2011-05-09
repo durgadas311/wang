@@ -206,13 +206,6 @@ class Wang600_Display extends JComponent
 	boolean flashing;
 	boolean state;
 	javax.swing.Timer timer;
-//	javax.swing.Timer timer2;
-
-//	private void blanker() {
-//		String blank = "                ";
-//		disp.setText(blank);
-//		// repaint(); ??
-//	}
 
 	private void flasher() {
 		if (!flashing) {
@@ -246,10 +239,6 @@ class Wang600_Display extends JComponent
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
-//		timer2 = new Timer(10, this);
-//		timer2.setRepeats(false);
-		//timer2.setInitialDelay(timer2.getDelay());
-		//timer.stop();
 
 		_fin = f;
 		setLayout(gridbag);
@@ -327,35 +316,38 @@ class Wang600_Display extends JComponent
 			if (n == 0) {
 				continue;
 			}
-			if (b[1] == 2) {
+			if ((b[1] & 2) != 0) {
 				me.setOn(true);
 				setFlashing(true);
+			} else {
+				me.setOn(false);
 			}
-			if (b[1] == 1) {
+			if ((b[1] & 1) != 0) {
 				pe.setOn(true);
 				setFlashing(true);
-			}
-			if (b[1] == 0) {
-				me.setOn(false);
+			} else {
 				pe.setOn(false);
+			}
+			if ((b[1] & 3) == 0) {
 				setFlashing(false);
 			}
 			String s;
-			ds = (b[0] >> 4) & 0x0f;
-			dc = b[0] & 0x0f;
-			if (ds == 0 || ds == 13) {
-				c = sign_chr[dc];
+			if ((b[1] & 4) != 0) {
+				// blank-out display while Wang is not refreshing...
+				s = new String("                ");
 			} else {
-				c = disp_chr[dc];
+				ds = (b[0] >> 4) & 0x0f;
+				dc = b[0] & 0x0f;
+				if (ds == 0 || ds == 13) {
+					c = sign_chr[dc];
+				} else {
+					c = disp_chr[dc];
+				}
+				disp_a[ds] = c;
+				s = new String(disp_a);
 			}
-			disp_a[ds] = c;
-			s = new String(disp_a);
 			disp.setText(s);
 			repaint();
-// need to work on this... ends up being cpu hog...
-//			if (ds == 0) {
-//				timer2.restart();
-//			}
 		}
 	}
 }
