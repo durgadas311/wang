@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.5 2011/05/05 18:29:19 drmiller Exp $
+// $Id: w600_exec.c,v 1.6 2011/05/09 10:10:55 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -45,38 +45,6 @@ char *get_psw_str(w600_sys_t *sys) {
 
 	*s = '\0';
 	return buf;
-}
-
-void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
-	uint16_t adr = (ah << 8) | (am << 4) | al;
-	uint8_t b = sys->ram[adr >> 1];
-	if (adr & 1) {
-		b >>= 4;
-	} else {
-		b &= 0x0f;
-	}
-	sys->cpu.mr = b;
-}
-
-void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
-	uint16_t adr = (ah << 8) | (am << 4) | al;
-	uint8_t a = sys->cpu.mr;
-	uint8_t b = sys->ram[adr >> 1];
-	if (adr & 1) {
-		a <<= 4;
-		b &= 0x0f;
-	} else {
-		b &= 0xf0;
-	}
-	sys->ram[adr >> 1] = b | a;
-}
-
-void rd_ram(w600_sys_t *sys) {
-	rd_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
-}
-
-void wr_ram(w600_sys_t *sys) {
-	wr_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
 }
 
 void ill_instr(w600_sys_t *sys) {

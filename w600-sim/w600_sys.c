@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.13 2011/05/09 01:14:16 drmiller Exp $
+// $Id: w600_sys.c,v 1.14 2011/05/09 10:10:55 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -287,6 +287,38 @@ static int sys_interact(w600_sys_t *sys) {
 		rc = sys_command(sys);
 	} while (rc == 0 && !sys->run);
 	return rc;
+}
+
+static void __load_mem(uint8_t *mem, char *file) {
+	int fd;
+	uint32_t max = 2 * 1024;
+
+	fd = open(file, O_RDONLY);
+	if (fd < 0) {
+		perror(file);
+		exit(1);
+	}
+	int rc = read(fd, mem, max);
+	if (fd < 0) {
+		perror(file);
+		exit(1);
+	}
+	close(fd);
+}
+
+// NOTE: program steps are reverse order from registers.
+// F6F is program step 000, but is register 15 06.
+// Register 01 00 is the last program steps (1840..1847).
+// F6F is hi nibble of byte, F6E is lo nibble of byte.
+// The above addresses are NIBBLE addresses, as used by the
+// Wang. Byte offsets in file are >> 1.
+void sys_loadrom(w600_sys_t *sys, char *rom) {
+	uint8_t *mem = sys->rom;
+	__load_mem(mem, rom);
+}
+void sys_loadram(w600_sys_t *sys, char *ram) {
+	uint8_t *mem = sys->ram;
+	__load_mem(mem, ram);
 }
 
 // ! This loads a microcode image!

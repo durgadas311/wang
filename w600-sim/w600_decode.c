@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.15 2011/05/09 01:13:14 drmiller Exp $
+// $Id: w600_decode.c,v 1.16 2011/05/09 10:10:55 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -124,6 +124,45 @@ static void printer_hammers(w600_sys_t *sys) {
 static void printer_feed(w600_sys_t *sys) {
 	// now, actually print it...
 	sys->printer(sys, -1, 0);
+}
+
+static void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
+	uint16_t adr = (ah << 8) | (am << 4) | al;
+	uint8_t b = sys->ram[adr >> 1];
+	if (adr & 1) {
+		b >>= 4;
+	} else {
+		b &= 0x0f;
+	}
+	sys->cpu.mr = b;
+	b = sys->rom[adr >> 1];
+	if (adr & 1) {
+		b >>= 4;
+	} else {
+		b &= 0x0f;
+	}
+	sys->cpu.xr = b;
+}
+
+static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
+	uint16_t adr = (ah << 8) | (am << 4) | al;
+	uint8_t a = sys->cpu.mr;
+	uint8_t b = sys->ram[adr >> 1];
+	if (adr & 1) {
+		a <<= 4;
+		b &= 0x0f;
+	} else {
+		b &= 0xf0;
+	}
+	sys->ram[adr >> 1] = b | a;
+}
+
+static void rd_ram(w600_sys_t *sys) {
+	rd_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
+}
+
+static void wr_ram(w600_sys_t *sys) {
+	wr_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
 }
 
 int instr_exec(w600_sys_t *sys) {
