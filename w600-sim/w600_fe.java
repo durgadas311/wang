@@ -12,7 +12,7 @@ class _Key {
 	static final Color pink1 = new Color(255, 220, 220, 255);
 	static final Color white1 = new Color(250, 250, 250, 255);
 	static final Color white2 = new Color(150, 150, 150, 255);
-	static final Color illum1 = new Color(255, 255, 230, 255);
+	static final Color illum1 = new Color(255, 255, 100, 255);
 	static final Color red1 = new Color(255, 128, 128, 255);
 	static final Color neon = new Color(244,157,33);
 	static final Color neon2 = new Color(214,127,13);
@@ -420,8 +420,9 @@ class Wang600_Keyboard extends JComponent
 
 	private void do_button(ActionEvent e, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
-		if (e.getModifiers() != 0) {
-//			...
+		if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+			// we really want to trap the "key down" event and set _shift then...
+			_shift = true;
 		}
 		if (_kbds[y]._keys[x].isSHIFT()) {
 			setShift(!_shift);

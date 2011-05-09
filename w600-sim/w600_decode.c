@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.17 2011/05/09 12:33:07 drmiller Exp $
+// $Id: w600_decode.c,v 1.18 2011/05/09 14:23:19 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -92,6 +92,9 @@ static uint8_t pr_tach = 0;
 static int pr_col = 0;
 
 static void printer_status(w600_sys_t *sys) {
+	if ((sys->cpu.mode1 & MODE1_PRT_ON) == 0) {
+		return;
+	}
 	if (pr_tach) {
 		pr_col = 0;
 		pr_drum = (pr_drum + 1) & 0x0f;

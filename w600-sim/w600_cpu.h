@@ -1,7 +1,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-// $Id: w600_cpu.h,v 1.6 2011/05/07 22:17:11 drmiller Exp $
+// $Id: w600_cpu.h,v 1.7 2011/05/09 14:23:19 drmiller Exp $
 #include <stdio.h>
 #include <stdint.h>
 
@@ -44,6 +44,6 @@ typedef struct {
 #define MODE0_STEP	0x08
 
 #define MODE1_DEGREES	0x01
-#define MODE1_PRT_OFF	0x02
+#define MODE1_PRT_ON	0x02
 
 #endif // __w600_cpu_h__
