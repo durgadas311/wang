@@ -206,6 +206,13 @@ class Wang600_Display extends JComponent
 	boolean flashing;
 	boolean state;
 	javax.swing.Timer timer;
+//	javax.swing.Timer timer2;
+
+//	private void blanker() {
+//		String blank = "                ";
+//		disp.setText(blank);
+//		// repaint(); ??
+//	}
 
 	private void flasher() {
 		if (!flashing) {
@@ -223,7 +230,13 @@ class Wang600_Display extends JComponent
 
 	public void actionPerformed(ActionEvent e) {
 		// verify the action is for the timer?
-		flasher();
+		if (e.getSource() == timer) {
+			flasher();
+//		} else if (e.getSource() == timer2) {
+//			blanker();
+		} else {
+			// what was it? e.getSource().stop()???
+		}
 	}
 
 	public Wang600_Display(FileInputStream f) {
@@ -233,6 +246,9 @@ class Wang600_Display extends JComponent
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
+//		timer2 = new Timer(10, this);
+//		timer2.setRepeats(false);
+		//timer2.setInitialDelay(timer2.getDelay());
 		//timer.stop();
 
 		_fin = f;
@@ -336,6 +352,10 @@ class Wang600_Display extends JComponent
 			s = new String(disp_a);
 			disp.setText(s);
 			repaint();
+// need to work on this... ends up being cpu hog...
+//			if (ds == 0) {
+//				timer2.restart();
+//			}
 		}
 	}
 }
