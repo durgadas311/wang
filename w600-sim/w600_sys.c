@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.12 2011/05/08 13:42:05 drmiller Exp $
+// $Id: w600_sys.c,v 1.13 2011/05/09 01:14:16 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -251,6 +251,12 @@ void sys_init(w600_sys_t *sys) {
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));
 	//memset(sys->ram, 0xff, sizeof(sys->ram));
+// put special pattern in RAM for debugging...
+if (0) { int x;
+for (x = 0; x < sizeof(sys->ram); ++x) {
+	sys->ram[x] = x & 0x0ff;
+}
+}
 
 	sys->intr = intr;
 	sys->trace = 0;
