@@ -27,6 +27,7 @@ tar:
 	cd ..;\
 	tar -czvf w600-sim/w600-sim.tgz \
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/README w600-sim/*.java \
+		w600-sim/wang600-block-diag.pdf \
 		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif
 
 install: tar
