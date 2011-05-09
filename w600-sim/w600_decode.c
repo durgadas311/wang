@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.14 2011/05/08 13:43:03 drmiller Exp $
+// $Id: w600_decode.c,v 1.15 2011/05/09 01:13:14 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -45,6 +45,44 @@ static uint8_t sub3_c(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = sub3_i(sys, a, b, c);
 	sys->cpu.c = sys->cpu.i;
 	return s;
+}
+
+static char xlate[64] = {
+[0x00] = '-',
+
+[0x02] = ' ',
+
+[0x16] = '.',
+
+[0x25] = '+',
+
+//[0x28] = '?',
+[0x29] = '1',
+[0x30] = '9',
+[0x31] = '0',
+
+[0x34] = '6',
+[0x35] = '5',
+[0x36] = '2',
+
+[0x39] = '4',
+
+[0x3c] = '8',
+[0x3d] = '7',
+[0x3e] = '3',
+};
+
+static void cn24_out(w600_sys_t *sys) {
+	// how to detect "carriage return"... or "new line"...
+	uint8_t c = (sys->cpu.dh << 4) | sys->cpu.dl;
+	c &= 0x3f;
+	char p = xlate[c];
+	if (!p) {
+		printf("\n<%02x>", c);
+	} else {
+		fputc(p, stdout);
+	}
+	fflush(stdout);
 }
 
 static uint8_t pr_buf[20];
@@ -266,6 +304,8 @@ int instr_exec(w600_sys_t *sys) {
 	case 12:
 //printf("printer_status\n");
 		printer_status(sys);
+		// not just printer, but CN-24 as well...
+		sys->cpu.dl |= 2;
 		break;
 	case 13: /* sys->tape_on(u->g & 1); */
 		printf("tape_on(%d)\n", u->g & 1);
@@ -274,10 +314,11 @@ int instr_exec(w600_sys_t *sys) {
 		printf("tape_off()\n");
 		break;
 	case 15:
-printf("XH/XL = %d %d [%d]\n", g, h, br_k & 0x07);
-		sys->cpu.xh = g;
-		sys->cpu.xl = h;
+		sys->cpu.xh = sys->cpu.dh;	// sys->cpu.xh = g;
+		sys->cpu.xl = sys->cpu.dl;	// sys->cpu.xl = h;
 		sys->cpu.xs = br_k & 0x07;
+		if (sys->cpu.xs == 1) cn24_out(sys);
+else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 		break;
 	}
 
