@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.17 2011/05/11 01:47:19 drmiller Exp $
+// $Id: w600_sys.c,v 1.18 2011/05/11 02:19:18 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -195,6 +195,7 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 	static int bc = 0;
 	int rc;
 	if (nibble & 0x80) {	// tape-off...
+		byte = 0;
 		if (_cass_fd >= 0) {
 			_cass_pos = lseek(_cass_fd, 0L, SEEK_CUR);
 			close(_cass_fd);
@@ -216,6 +217,7 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 		}
 		lseek(_cass_fd, _cass_pos, SEEK_SET);
 		bc = 0;
+		byte = 0;
 		return 0;
 	}
 	if (wr) {
@@ -230,8 +232,11 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			}
 		}
 	} else {
-		bc ^= 1;
-		if (bc) {
+		if (!bc) {
+			if (byte == 0x9e) { // End Prog
+				return 0xff;
+			}
+			bc ^= 1;
 			byte = 0;
 			rc = read(_cass_fd, &byte, 1);
 			if (rc < 0) {
@@ -244,6 +249,7 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			}
 			return (byte >> 4);
 		} else {
+			bc ^= 1;
 			return (byte & 0x0f);
 		}
 	}
