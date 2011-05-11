@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.10 2011/05/11 09:17:26 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.11 2011/05/11 14:41:03 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,11 +101,30 @@ static int _exam(w600_sys_t *sys, char *line) {
 static int _store(w600_sys_t *sys, char *line) {
 	char *s;
 	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	uint8_t b, v;
+
 	s = strtok(NULL, " \t");
-	if (s) {
-		adr = strtoul(s, NULL, 16);
+	if (!s) {
+		return 0;
 	}
-	// TBD...
+	if (*s == '@') {
+		adr = strtoul(s + 1, NULL, 16);
+		s = strtok(NULL, " \t");
+	}
+	while (s != NULL) {
+		v = strtoul(s, NULL, 16);
+		v &= 0x0f;
+		b = sys->ram[adr >> 1];
+		if (adr & 1) {
+			b &= 0x0f;
+			v <<= 4;
+		} else {
+			b &= 0xf0;
+		}
+		sys->ram[adr >> 1] = b | v;
+		++adr;
+		s = strtok(NULL, " \t");
+	}
 	return 0;
 }
 
@@ -274,41 +293,47 @@ static int _keyboard(w600_sys_t *sys, char *line) {
 	return 0;
 }
 
-static int _help(w600_sys_t *sys, char *line) {
-	printf(	"W600-SIM Commands:\n"
-		"\tquit\tEnd simulation\n"
-		"\ttrace [file]\tToggle trace on/off\n"
-		"\tdump\tDump processor state/registers\n"
-		"\texam [addr [words]]\tExamine RAM at AH,AM,AL [or hex addr]\n"
-		"\tdisas [addr [instrs]]\tDisassemble ROM at PC [or hex addr]\n"
-		"\tset reg=value\tSet register\n"
-		"\tstore [addr]\tStore value(s) in RAM at AH,AM,AL [or hex addr]\n"
-		"\tstep\tSingle-step one instruction\n"
-		"\tcore <file>\tDump all of RAM to <file>\n"
-		"\tgo [+cycles]\tResume program at current PC [break after <cycles>]\n"
-		"\thelp\tDisplay this help\n"
-		);
-	return 0;
-}
-
+static int _help(w600_sys_t *sys, char *line);
 struct {
 	char *cmd;
 	int (*func)(w600_sys_t *sys, char *line);
+	char *arg_help;
+	char *help;
 } commands[] = {
-	{ "quit", NULL },
-	{ "trace", _trace },
-	{ "dump", _dump },
-	{ "disas", _disas },
-	{ "exam", _exam },
-	{ "set", _set },
-	{ "store", _store },
-	{ "step", _step },
-	{ "keyboard", _keyboard },
-	{ "core", _core },
-	{ "go", _go },
-	{ "help", _help },
+	{ "quit", NULL,		NULL, "End simulation" },
+	{ "trace", _trace,	"[file]", "Toggle trace on/off" },
+	{ "dump", _dump,	NULL, "Dump processor state/registers" },
+	{ "disas", _disas,	"[addr [instrs]]", "Disassemble ROM at PC [or hex addr]" },
+	{ "exam", _exam,	"[addr [words]]", "Examine RAM at AH,AM,AL [or hex addr]" },
+	{ "set", _set,		"reg=value", "Set register" },
+	{ "store", _store,	"[@addr] val...", "Store hex val(s) in RAM at AH,AM,AL [or hex addr]" },
+	{ "step", _step,	NULL, "Single-step one instruction" },
+	{ "keyboard", _keyboard,"", "Hack to provide input when no GUI" },
+	{ "core", _core,	"file", "Dump all of RAM (2K) to <file>" },
+	{ "go", _go,		"[+cycles]", "Resume program at current PC [break after <cycles>]" },
+	{ "help", _help,	NULL, "Display this help" },
 };
 #define NUM_CMDS	(sizeof(commands) / sizeof(commands[0]))
+
+static int _help(w600_sys_t *sys, char *line) {
+	int x, m = 0, n;
+
+	for (x = 0; x < NUM_CMDS; ++x) {
+		n = strlen(commands[x].cmd);
+		if (commands[x].arg_help) {
+			n += strlen(commands[x].arg_help);
+		}
+		if (n > m) m = n;
+	}
+	printf(	"W600-SIM Commands:\n");
+	for (x = 0; x < NUM_CMDS; ++x) {
+		n = strlen(commands[x].cmd);
+		printf("  %s %-*s %s\n", commands[x].cmd, m - n,
+			commands[x].arg_help ? commands[x].arg_help : "",
+			commands[x].help);
+	}
+	return 0;
+}
 
 int sys_command(w600_sys_t *sys) {
 	char buf[128];
