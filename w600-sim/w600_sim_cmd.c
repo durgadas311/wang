@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.11 2011/05/11 14:41:03 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.12 2011/05/11 15:20:09 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -250,6 +250,7 @@ static int _core(w600_sys_t *sys, char *line) {
 	if (n != 1) {
 		fprintf(stderr, "failed to dump core\n");
 	}
+	fclose(fp);
 	return 0;
 }
 
