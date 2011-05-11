@@ -104,21 +104,25 @@ public class w600_fe {
 		java.io.FileInputStream fin = null;
 
 		if (args.length > 0) {
-			String fd = "/proc/self/fd/" + args[0];
-			try {
-				fout = new FileOutputStream(fd);
-			} catch (FileNotFoundException e) {
-				System.out.println("No pipe: " + fd);
-				System.exit(1);
-			}
-			if (args.length > 1) {
-				fd = "/proc/self/fd/" + args[1];
+			if (args[0].compareTo("-t") != 0) {
+// to be removed, once "./w600-sim -b" works...
+				String fd = "/proc/self/fd/" + args[0];
 				try {
-					fin = new FileInputStream(fd);
+					fout = new FileOutputStream(fd);
 				} catch (FileNotFoundException e) {
 					System.out.println("No pipe: " + fd);
 					System.exit(1);
 				}
+				if (args.length > 1) {
+					fd = "/proc/self/fd/" + args[1];
+					try {
+						fin = new FileInputStream(fd);
+					} catch (FileNotFoundException e) {
+						System.out.println("No pipe: " + fd);
+						System.exit(1);
+					}
+				}
+// ---------
 			}
 		}
 		JFrame front_end = new JFrame("Wang 600");
@@ -132,6 +136,9 @@ public class w600_fe {
 		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me);
 		front_end.add(kbd);
 
+		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp);
+
+		if (inp == null) System.out.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		front_end.setSize(1000,500);
@@ -189,8 +196,147 @@ class Wang600_ProgErr extends JComponent {
 	}
 }
 
+class Wang600_SimInput
+		implements Runnable
+{
+	Wang600_Display _dsp;
+	Wang600_Printer _prt;
+	Wang600_Tape _tape;
+	Wang600_CN24 _cn24;
+
+	FileInputStream _fin;
+
+	public Wang600_SimInput(FileInputStream f, Wang600_Display dsp) {
+		_dsp = dsp;
+		_fin = f;
+		if (f != null) {
+			Thread t = new Thread(this);
+			t.start();
+		}
+	}
+
+	// this really should be set aside in a neutral class, which is given
+	// access to display, tape, printer, etc...
+	public void run() {
+		int n = 0;
+		byte[] b = new byte[2];
+
+		while (true) {
+			try {
+				n = _fin.read(b);
+			} catch (IOException ee) {
+				System.err.println("Broken pipe for display!");
+				System.exit(1);
+			} finally {
+			}
+			if (n == 0) {
+				continue;
+			}
+			if ((b[1]  & ~7) == 0x00) {
+				_dsp.do_display(b);
+			} else if ((b[1]  & ~1) == 0x80) {
+				_prt.do_printer(b);
+			} else if ((b[1]  & ~3) == 0x0c) {
+				_tape.do_tape(b);
+			} else if (b[1] == 0x10) {
+				_cn24.do_cn24(b);
+			} else {
+				System.err.println("Unexpected traffic "+b[1]);
+			}
+		}
+	}
+}
+
+class Wang600_Printer
+{
+//	final int PR_NUM_COL = 20;
+//	final int PR_XCOL_WID = 3;
+//	final int PR_XCOL_STRT = 15;
+//
+//	final String[] pr_16 = {
+//		" E ", " T ", " + ", " - ", " x ", " / ", " ST", " RE",
+//		" * ", " * ", " f ", " F ", " A ", " B ", " C ", " D "
+//	};
+//	final String[] pr_17 = {
+//		"0  ", "1  ", "2  ", "3  ", "4  ", "5  ", "6  ", "7  ",
+//		"8  ", "9  ", "10 ", "11 ", "12 ", "13 ", "14 ", "15 "
+//	};
+//	final String[] pr_18 = {
+//		" S ", " RE", " W ", " Go", " Jo", " J+", " SN", " CS",
+//		" TN", " RD", " LN", " eX", " x2", " vX", " LP", "1/x"
+//	};
+//	final String[] pr_19 = {
+//		" M ", " ST", " a ", " Sp", " Jn", " Je", " S1", " C1",
+//		" T1", " DR", " LG", "10X", " I ", "|x|", " EP", " RT"
+//	};
+//	final String[] pr_20 = {
+//		" X ", " Y ", " Z ", " A ", " B ", " C ", " D ", " E ",
+//		" F ", " G ", " H ", " I ", " J ", " K ", " L ", " M "
+//	};
+//	final String[][] pr_16_20 = {
+//		pr_16, pr_17, pr_18, pr_19, pr_20
+//	}
+//	final String[] pr_ovr = { "....OVERFLOW...." };
+//	final String[] pr_0_15 = { "0123456789.o\0+- " };
+//	final byte[] _pr_ovr = pr_ovr.getBytes();
+//	final byte[] _pr_0_15 = pr_0_15.getBytes();
+//
+//	byte[] _pr_line;
+//
+//	private void clear_buf() {
+//		_pr_line = new byte(16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16);
+//	}
+//
+//	public Wang600_Printer() {
+//		clear_buf();
+//	}
+//
+	public void do_printer(byte[] b) {
+		if (b[1] == 0) return;
+//		if () {
+//
+//			String s = _pr_line.toString();
+//			# replace with output to printer panel...
+//			System.err.println(s);
+//			clear_buf();
+//			return;
+//		}
+//		int col = ((b[1] << 4) | (b[0] >> 4)) & 0x1f;
+//		int drm = (b[0] & 0x0f);
+//		byte chr;
+//		if (col < PR_XCOL_STRT) {
+//			chr = _pr_0_15[drm];
+//			if (chr == 0) {
+//				chr = _pr_ovr[col];
+//			}
+//			_pr_line[col] = chr;
+//		} else {
+//			col -= PR_XCOL_STRT;
+//			String yy = pr_16_20[col];
+//			byte[] xx = yy.getBytes();
+//			for (x = 0; x < PR_XCOL_WID; ++x) {
+//			}
+//		}
+//
+	}
+}
+
+class Wang600_Tape
+{
+	public void do_tape(byte[] b) {
+		if (b[1] == 0) return;
+	}
+}
+
+class Wang600_CN24
+{
+	public void do_cn24(byte[] b) {
+		if (b[1] == 0) return;
+	}
+}
+
 class Wang600_Display extends JComponent
-		implements Runnable, ActionListener
+		implements ActionListener
 {
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
@@ -279,10 +425,6 @@ class Wang600_Display extends JComponent
 		me = new Wang600_ProgErr("Mach<BR>Err");
 		me.setOn(false);
 
-		if (_fin != null) {
-			Thread t = new Thread(this);
-			t.start();
-		}
 	}
 
 	private void setFlashing(boolean on) {
@@ -298,57 +440,45 @@ class Wang600_Display extends JComponent
 		}
 	}
 
-	public void run() {
-		int n = 0;
-		byte[] b = new byte[2];
+	// this really should be set aside in a neutral class, which is given
+	// access to display, tape, printer, etc...
+	public void do_display(byte[] b) {
 		int ds;
 		int dc;
 		byte c;
 
-		while (true) {
-			try {
-				n = _fin.read(b);
-			} catch (IOException ee) {
-				System.err.println("Broken pipe for display!");
-				System.exit(1);
-			} finally {
-			}
-			if (n == 0) {
-				continue;
-			}
-			if ((b[1] & 2) != 0) {
-				me.setOn(true);
-				setFlashing(true);
-			} else {
-				me.setOn(false);
-			}
-			if ((b[1] & 1) != 0) {
-				pe.setOn(true);
-				setFlashing(true);
-			} else {
-				pe.setOn(false);
-			}
-			if ((b[1] & 3) == 0) {
-				setFlashing(false);
-			}
-			String s;
-			if ((b[1] & 4) != 0) {
-				// blank-out display while Wang is not refreshing...
-				s = new String("                ");
-			} else {
-				ds = (b[0] >> 4) & 0x0f;
-				dc = b[0] & 0x0f;
-				if (ds == 0 || ds == 13) {
-					c = sign_chr[dc];
-				} else {
-					c = disp_chr[dc];
-				}
-				disp_a[ds] = c;
-				s = new String(disp_a);
-			}
-			disp.setText(s);
-			repaint();
+		if ((b[1] & 2) != 0) {
+			me.setOn(true);
+			setFlashing(true);
+		} else {
+			me.setOn(false);
 		}
+		if ((b[1] & 1) != 0) {
+			pe.setOn(true);
+			setFlashing(true);
+		} else {
+			pe.setOn(false);
+		}
+		if ((b[1] & 3) == 0) {
+			setFlashing(false);
+		}
+		String s;
+		if ((b[1] & 4) != 0) {
+			// blank-out display while Wang is not refreshing...
+			s = new String("                ");
+		} else {
+			ds = (b[0] >> 4) & 0x0f;
+			dc = b[0] & 0x0f;
+			if (ds == 0 || ds == 13) {
+				c = sign_chr[dc];
+			} else {
+				c = disp_chr[dc];
+			}
+			disp_a[ds] = c;
+			s = new String(disp_a);
+		}
+		disp.setText(s);
+		repaint();
 	}
 }
 
