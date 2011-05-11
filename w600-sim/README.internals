@@ -1,16 +1,18 @@
-$Id: README.internals,v 1.1 2011/05/11 16:12:46 drmiller Exp $
+$Id: README.internals,v 1.2 2011/05/11 17:04:39 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
 
-The simulator reads and interprets the following codes on it's input pipe:
+The simulator reads and interprets the following (binary) codes on
+it's input pipe:
 
-(hex)
-00kk	Keyboard code 'kk' was entered. E.g. the user presses "Search" and
-	the code 0080 is sent to the simulator on the pipe.
+00000000kkkkkkkk
+	Keyboard code 'k' was entered. E.g. the user presses "Search" and
+	the code 0x0080 is sent to the simulator on the pipe.
 
-010k	"Special" key: PRIME, SET P.C., VERIFY PROG, RECORD PROG, and SHIFT
-	variations. 'k' is the ucode address to jump to:
+0000000100000kkk
+	"Special" key: PRIME, SET P.C., VERIFY PROG, RECORD PROG, and SHIFT
+	variations. 'k' is the microcode address to jump to:
 	0 = PRIME
 	1 = VERIFY PROG
 	2 = SET P.C.
@@ -20,45 +22,60 @@ The simulator reads and interprets the following codes on it's input pipe:
 	6 = INS
 	7 = DEL
 
-02mm	Mode register 0 changed, new value is 'mm'.
-	b0 = FP/Sc
+000000100000mmmm
+	Mode register 0 changed, new value is 'mm'.
+	Bit meanings, 1/(0):
+	b0 = Sc/(Fl)
 	b1 = List or Learn-and-Print
 	b2 = Learn or Learn-and-Print
-	b3 = Step
+	b3 = Step (implied pulse)
 
-03mm	Mode register 1 changed, new value is 'mm'.
-	b0 = Rad/Deg
-	b1 = Printer On
+000000110000mmmm
+	Mode register 1 changed, new value is 'mm'.
+	Bit meanings, 1/(0):
+	b0 = Rad/(Deg)
+	b1 = Printer On/(Off)
 	b2 = n.c.
 	b3 = n.c.
 
-04bb	Tape read data, byte 'bb'.
+00001100tttttttt
+	Tape read data, byte 'tt'.
 
 [TBD: I/O for "CN-36"]
 
 
-The simulator sends the following codes on it's output pipe:
+The simulator sends the following (binary) codes on it's output pipe:
 
-00sc	Display refresh data. 's' is digit select, 'c' is digit code.
-01sc	Note, traffic is "optimized" such that once a couple copies have
-02sc	been sent, the simulator stops sending until a key is pressed.
-03sc	Bits 8 and 9 indicate the current state of the Mach Err and
+00000eeessssgggg
+	Display refresh data. 's' is digit select, 'g' is digit code,
+	'e' is error/blanking code, bits 0-2.
+	Note, traffic is "optimized" such that once a couple copies have
+	been sent, the simulator stops sending until a key is pressed.
+	Bits 0 and 1 of 'e' indicate the current state of the Mach Err and
 	Prog Err lights, respectively. Either one of those results in
-	a flickering display.
+	a flickering display. Bit 2 of 'e' indicates display is blanked,
+	causing 's' and 'g' to be ignored.
 
-04bb	Tape "record" data, byte 'bb'. Implies "Tape On"(?).
-
-0500	Tape Off.
-
-08cd	Printer data, 'c' is column (overflows into lo bit of '8'),
-	'd' is drum code (character to print). 'c' value > 19 means
+0000100sssssgggg
+	Printer data, 's' is column (overflows into lo bit of '8'),
+	'g' is drum code (character to print). 's' value > 19 means
 	(print and) feed. Note, column/drum values are not sent in
 	a contiguous pattern. All columns for drum '0' (if any) are
 	sent at once, then all columns for drum '1', etc. A 'feed'
 	command that does not follow column/drum data prints a blank
 	line.
 
-10cc	Print data for "CN-24" (IBM Selectric?). 'cc' is a 6-bit
+00001100tttttttt
+	Tape "record" data, byte 'tt'.
+0000110100000000
+	Tape On for write
+0000111100000000
+	Tape On for read (FE should start sending data).
+0000111000000000
+	Tape Off (FE should stop sending, if read).
+
+0001000000rrrrrr
+	Print data for "CN-24" (IBM Selectric?). 'r' is a 6-bit
 	"rotate/tilt" code for the output device.
 	[TBD: what constitutes a CR-LF?]
 
