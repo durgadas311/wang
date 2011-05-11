@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.19 2011/05/09 20:08:05 drmiller Exp $
+// $Id: w600_decode.c,v 1.20 2011/05/11 01:47:19 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -66,13 +66,8 @@ static uint8_t odd_parity[16] = {
 [0xf] = 1,
 };
 
-static void tape_on(w600_sys_t *sys, int wr) {
-	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
-}
-
-static void tape_off(w600_sys_t *sys) {
-	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
-}
+static uint64_t cass_t0 = 0;
+static uint64_t cass_tb = 0;
 
 static void tape_write(w600_sys_t *sys, int dat) {
 	static uint8_t last = 0;
@@ -104,96 +99,84 @@ static int tape_read(w600_sys_t *sys) {
 	static uint8_t data = 0;
 	static int bitc = 0;
 	static int sigc = 0;
-	static int repc = 0;
+	static uint64_t repc = 0;
 	static uint8_t z = 0x03;
 	static uint8_t bit = 0;
 	uint8_t nib;
 
-	if (repc) {
+	// wait for TD 0->1
+	// delay 56 cycles
+	// wait 220 cycles (sample TD for end of loop)
+	// [15,15,6] ^= DL	; compute parity?
+	// CY = 0 - DL		; CY = bit0
+	// [15,15,5] <<= 1	; make space
+	// [15,15,5] += CY	; insert new bit
+	// ACC += 1		; count bits
+	// wait up to 256 cycles for TD 0->1
+	//         __    __
+	// "1" = _|  |__|  |_
+	//         __
+	// "0" = _|  |_______
+	//
+	if (sys == NULL) {
+		bit = 0;
+		last = 0;
+		sigc = 20;
+		bitc = 0;
+		repc = 0;
+		return 0;	// don't care...
+	}
+
+	if (sys->cpu.cycles < repc) {
 reps:
-		--repc;
 		return bit;
 	}
 	if (sigc) {
 sigs:
 		--sigc;
 		bit = last & 1;
-fputc('0'+bit,stdout);
 		last >>= 1;
-		repc = 220;
+		repc = sys->cpu.cycles + 97;	// very sensitive...
 		goto reps;
 	}
 	if (bitc) {
 bits:
 		--bitc;
 		data <<= 1;
-#if 1
 		if (data & 0x20) {
-			last = 0x01;
-			z = 0x03;
+			last = 0x05;	// lsb first out...
 		} else {
-			last = z;
-			z ^= 0x03;
+			last = 0x01;	// lsb first out...
 		}
-		sigc = 2;
-#else
-		if (data & 0x20) {
-			last = 1;
-		} else {
-			last = 0;
-		}
-		sigc = 1;
-#endif
+		sigc = 4;
 		goto sigs;
 
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-fprintf(stderr, "EOF\n");
 		return 0;
 	}
 	data = (nib << 1) | odd_parity[nib];
 	bitc = 5;
 	goto bits;
 }
-#if 0
 
+static int cass_on = 0;
 
-	if (!bitc) {
-		// data was already shifted... 0bxxx00000
-		// but make room for parity bit in new data...
-		nib = sys->tape(sys, 0, 0);
-		if (nib == 0xff) { // EOF
-fprintf(stderr, "EOF\n");
-			return 0;
-		}
-		data |= (nib << 1) | odd_parity[nib];
-		bitc = 5;
-		sigc = 0;
+static void tape_on(w600_sys_t *sys, int wr) {
+	if (cass_on) return;
+	cass_on = 1;
+
+	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
+	if (!wr) {
+		tape_read(NULL);
 	}
-	if (!sigc) {
-		--bitc;
-		data <<= 1;
-		if (data & 0x20) {
-			last = 0x01;	// lsb first...
-			z = 0x03;
-		} else {
-			last = z;
-			z ^= 0x03;
-		}
-		sigc = 2;
-	}
-	if (!repc) {
-		--sigc;
-		bit = last & 1;
-		last >>= 1;
-		repc = 30;
-fputc('0'+bit,stdout);
-	}
-	--repc;
-	return bit;
 }
-#endif
+
+static void tape_off(w600_sys_t *sys) {
+	cass_on = 0;
+	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
+}
 
 static char xlate[64] = {
 [0x00] = '-',
@@ -486,28 +469,20 @@ int instr_exec(w600_sys_t *sys) {
 	case 8:	printer_feed(sys); break;
 	case 9:	rc = 2; break;
 	case 10:
-if (0) { static int count = 1;
-if (count) { --count; sys->trace = 1; sys->cpu.cylimit = sys->cpu.cycles + 500; }
-}
 		sys->cpu.dl = (sys->cpu.dl & ~1) | tape_read(sys);
-//fprintf(stderr, "tape read %d\n", sys->cpu.dl & 1);
 		break;
 	case 11:
-//fprintf(stderr, "tape write %d\n", sys->cpu.dl & 1);
 		tape_write(sys, sys->cpu.dl & 1);
 		break;
 	case 12:
-//printf("printer_status\n");
 		printer_status(sys);
 		// not just printer, but CN-24 as well...
 		sys->cpu.dl |= 2;
 		break;
 	case 13:
-//fprintf(stderr, "tape on %d\n", u->g & 1);
 		tape_on(sys, u->g & 1);
 		break;
 	case 14:
-fprintf(stderr, "tape off\n");
 		tape_off(sys);
 		break;
 	case 15:
@@ -515,7 +490,7 @@ fprintf(stderr, "tape off\n");
 		sys->cpu.xl = sys->cpu.dl;	// sys->cpu.xl = h;
 		sys->cpu.xs = br_k & 0x07;
 		if (sys->cpu.xs == 1) cn24_out(sys);
-else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
+//else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 		break;
 	}
 

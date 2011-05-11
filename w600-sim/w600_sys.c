@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.16 2011/05/09 21:53:12 drmiller Exp $
+// $Id: w600_sys.c,v 1.17 2011/05/11 01:47:19 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,7 +197,6 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 	if (nibble & 0x80) {	// tape-off...
 		if (_cass_fd >= 0) {
 			_cass_pos = lseek(_cass_fd, 0L, SEEK_CUR);
-fprintf(stderr, "cassette position = %04lx\n", _cass_pos);
 			close(_cass_fd);
 			_cass_fd = -1;
 		}
