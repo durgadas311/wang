@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
 	int rc;
 	uint64_t *ucode;
 	size_t ucodez;
-	char *s;
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s ucode-file\n", argv[0]);

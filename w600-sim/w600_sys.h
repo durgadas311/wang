@@ -1,7 +1,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-// $Id: w600_sys.h,v 1.9 2011/05/09 20:08:05 drmiller Exp $
+// $Id: w600_sys.h,v 1.10 2011/05/11 09:17:26 drmiller Exp $
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -32,13 +32,17 @@ typedef struct w600_sys_s {
 } w600_sys_t;
 
 #define SYS_START_GUI	1
+#define SYS_BACK_END	2
 
 extern void sys_init(w600_sys_t *sys);
 extern void sys_start(w600_sys_t *sys, int ops);
-extern void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
+extern void sys_loaducode(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
+extern void sys_loadpgm(w600_sys_t *sys, char *pgm);
 extern void sys_loadram(w600_sys_t *sys, char *ram);
 extern void sys_loadrom(w600_sys_t *sys, char *rom);
 extern void sys_loadcass(w600_sys_t *sys, char *cass);
+extern void sys_setcass(w600_sys_t *sys, char *cass);
 extern int sys_go(w600_sys_t *sys, uint16_t entry);
+extern void sys_stop(w600_sys_t *sys, int ops);
 
 #endif // __w600_sys_h__

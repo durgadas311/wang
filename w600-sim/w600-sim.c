@@ -1,9 +1,10 @@
-// $Id: w600-sim.c,v 1.7 2011/05/09 20:08:05 drmiller Exp $
+// $Id: w600-sim.c,v 1.8 2011/05/11 09:17:26 drmiller Exp $
 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <string.h>
 
 #include "w600_sys.h"
 
@@ -32,9 +33,11 @@ static void usage() {
 	fprintf(stderr, "Usage: "
 		"%s [options]\n"
 		"Options:\n"
-		"\t-g\tDisable GUI"
+		"\t-b\tBack-end mode (for GUI FE)\n"
+		"\t-g\tDisable GUI\n"
 		"\t-i\tInteractive mode enable\n"
 		"\t-c file\tUse file as a cassette tape\n"
+		"\t-p file\tLoad initial contents of Program Space (conflicts with -m)\n"
 		"\t-m file\tLoad initial contents of RAM. 2048 bytes, Lo nibble in [0]\n"
 		"\t-r file\tLoad initial contents of ROM. 2048 bytes, Lo nibble in [0]\n"
 		"\t\tNOTE: RAM/ROM contents are reverse order for program steps.\n"
@@ -51,6 +54,7 @@ int main(int argc, char **argv) {
 	int x;
 	uint16_t entry = -1, load = -1;
 	char *pgm = NULL;
+	char *ucode = NULL;
 	int interact = 0;
 	int sys_ops = SYS_START_GUI;
 	char *ram = NULL;
@@ -61,8 +65,11 @@ int main(int argc, char **argv) {
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "c:e:gil:m:p:r:t:")) != EOF) {
+	while ((x = getopt(argc, argv, "bc:e:gil:m:p:r:t:u:")) != EOF) {
 		switch(x) {
+		case 'b':
+			sys_ops |= SYS_BACK_END;
+			break;
 		case 'c':
 			cass = optarg;
 			break;
@@ -101,6 +108,9 @@ int main(int argc, char **argv) {
 			sys.trace = 1;
 			break;
 #endif // TRACE
+		case 'u':
+			ucode = optarg;
+			break;
 		default:
 			usage();
 			exit(1);
@@ -114,20 +124,23 @@ int main(int argc, char **argv) {
 	if (entry == (uint16_t)-1) {
 		entry = load;
 	}
-	if (pgm == NULL) {
-		pgm = "wang600.rom";
+	if (ucode == NULL) {
+		ucode = "wang600.rom";
 	}
 
 	set_intr();
 
-	if (pgm) {
-		sys_loadpgm(&sys, pgm, load, entry);
+	if (ucode) {
+		sys_loaducode(&sys, ucode, load, entry);
 	}
 	if (ram) {
 		sys_loadram(&sys, ram);
 	}
 	if (rom) {
 		sys_loadram(&sys, rom);
+	}
+	if (pgm) {
+		sys_loadpgm(&sys, pgm);
 	}
 	if (cass) {
 		sys_setcass(&sys, cass);
@@ -136,6 +149,6 @@ int main(int argc, char **argv) {
 	sys.cmd = (interact ? 1 : 0);
 	sys.run = (interact ? 0 : 1);
 	sys_go(&sys, entry);
-	sys_stop(&sys);
+	sys_stop(&sys, sys_ops);
 	return 0;
 }

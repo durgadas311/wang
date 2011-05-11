@@ -80,7 +80,7 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 		fds.fd = __gui_kfd;
 		fds.events = POLLIN;
 		fds.revents = 0;
-		int rc = poll(&fds, 1, -1);
+		/* int rc = */ poll(&fds, 1, -1);
 		disp_good = 0;
 	}
 	rc = read(__gui_kfd, &b, sizeof(b));

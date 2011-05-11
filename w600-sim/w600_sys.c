@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.18 2011/05/11 02:19:18 drmiller Exp $
+// $Id: w600_sys.c,v 1.19 2011/05/11 09:17:26 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -128,7 +128,7 @@ static char pr_buf[128];
 
 static void sysprinter(w600_sys_t *sys, int col, int drum) {
 	char *s;
-	int x, c;
+	int c;
 
 	if (col == -1) {
 		// print what we got... then reset.
@@ -231,6 +231,7 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				perror(_cass_file);
 			}
 		}
+		return 0;
 	} else {
 		if (!bc) {
 			if (byte == 0x9e) { // End Prog
@@ -266,7 +267,6 @@ static int intr(w600_sys_t *sys, int sig) {
 
 static void dump(w600_sys_t *sys) {
 	char buf[1024];
-	char *s = buf;
 	fprintf(stderr, "at cycle %lld\n", sys->cpu.cycles);
 
 	// todo: call w600_sim_cmd.c:_dump()...
@@ -284,6 +284,7 @@ static void dump(w600_sys_t *sys) {
 	// more...
 }
 
+#if 0
 static void iofault(void *v, uint8_t port) {
 	w600_sys_t *sys = (w600_sys_t *)v;
 	fprintf(stderr, "I/O Fault at port %01x\n", port);
@@ -297,6 +298,7 @@ static void segfault(void *v, uint16_t adr) {
 	dump(sys);
 	exit(1);
 }
+#endif
 
 static void sysfault(w600_sys_t *sys, const char *str) {
 	fprintf(stderr, "%s\n", str);
@@ -371,7 +373,7 @@ static void __load_mem(uint8_t *mem, char *file) {
 		exit(1);
 	}
 	int rc = read(fd, mem, max);
-	if (fd < 0) {
+	if (rc < 0) {
 		perror(file);
 		exit(1);
 	}
@@ -398,7 +400,7 @@ void sys_loadram(w600_sys_t *sys, char *ram) {
 }
 
 // ! This loads a microcode image!
-void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
+void sys_loaducode(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	int fd;
 	uint32_t max = 2 * 1024;
 	adr &= 0x0fff;
@@ -412,7 +414,46 @@ void sys_loadpgm(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	}
 	uint64_t *m = &sys->ucode[adr];
 	int rc = read(fd, m, len);
+	if (rc < 0) {
+		perror(exe);
+		exit(1);
+	}
 	close(fd);
+}
+
+// need to load *backwards* since program steps advance backwards in RAM...
+void sys_loadpgm(w600_sys_t *sys, char *pgm) {
+	int fd;
+	uint8_t *buf;
+	struct stat stb;
+
+	fd = open(pgm, O_RDONLY);
+	if (fd < 0) {
+		perror(pgm);
+		exit(1);
+	}
+	fstat(fd, &stb);
+	buf = malloc(stb.st_size);
+	if (!buf) {
+		fprintf(stderr, "unable to malloc %ld bytes for \"%s\"\n", stb.st_size, pgm);
+		exit(1);
+	}
+	int rc = read(fd, buf, stb.st_size);
+	if (rc < 0) {
+		perror(pgm);
+		exit(1);
+	}
+	close(fd);
+
+	int w, x, y, z;
+	z = stb.st_size;
+	w = (0x0ff - 0xf6f) >> 1;	// max num bytes (prog steps)
+	x = 0xf6f >> 1;			// first program step, byte-address
+	for (y = 0; y < z && w > 0; ++y, --x) {
+		sys->ram[x] = buf[y];
+	}
+
+	free(buf);
 }
 
 static int run_some(w600_sys_t *sys, uint16_t entry) {
@@ -429,6 +470,7 @@ static int run_some(w600_sys_t *sys, uint16_t entry) {
 			sys->run = 0;
 		}
 	} while (sys->run || sys->cmd);
+	return 0;
 }
 
 

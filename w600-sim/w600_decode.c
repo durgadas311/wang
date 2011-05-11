@@ -1,4 +1,4 @@
-// $Id: w600_decode.c,v 1.20 2011/05/11 01:47:19 drmiller Exp $
+// $Id: w600_decode.c,v 1.21 2011/05/11 09:17:26 drmiller Exp $
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -66,9 +66,6 @@ static uint8_t odd_parity[16] = {
 [0xf] = 1,
 };
 
-static uint64_t cass_t0 = 0;
-static uint64_t cass_tb = 0;
-
 static void tape_write(w600_sys_t *sys, int dat) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
@@ -100,7 +97,6 @@ static int tape_read(w600_sys_t *sys) {
 	static int bitc = 0;
 	static int sigc = 0;
 	static uint64_t repc = 0;
-	static uint8_t z = 0x03;
 	static uint8_t bit = 0;
 	uint8_t nib;
 
@@ -216,7 +212,6 @@ static void cn24_out(w600_sys_t *sys) {
 	fflush(stdout);
 }
 
-static uint8_t pr_buf[20];
 static uint8_t pr_drum = 0;
 static uint32_t pr_hammers = 0;
 static uint8_t pr_tach = 0;
@@ -289,14 +284,6 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 		b &= 0xf0;
 	}
 	sys->ram[adr >> 1] = b | a;
-}
-
-static void rd_ram(w600_sys_t *sys) {
-	rd_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
-}
-
-static void wr_ram(w600_sys_t *sys) {
-	wr_ram_i(sys, sys->cpu.ah, sys->cpu.am, sys->cpu.al);
 }
 
 int instr_exec(w600_sys_t *sys) {

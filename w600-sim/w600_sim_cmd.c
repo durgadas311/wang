@@ -1,4 +1,4 @@
-// $Id: w600_sim_cmd.c,v 1.9 2011/05/04 23:36:51 drmiller Exp $
+// $Id: w600_sim_cmd.c,v 1.10 2011/05/11 09:17:26 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -181,6 +181,7 @@ static int _set(w600_sys_t *sys, char *line) {
 		}
 		printf("%s = %x\n", s, v);
 	}
+	return 0;
 }
 
 static int _trace(w600_sys_t *sys, char *line) {
@@ -210,6 +211,25 @@ static int _trace(w600_sys_t *sys, char *line) {
 			sys->trc_fp == stderr ? "stderr" : "file");
 	} else {
 		printf("trace is off\n");
+	}
+	return 0;
+}
+
+static int _core(w600_sys_t *sys, char *line) {
+	char *s;
+	s = strtok(NULL, " \t");
+	if (!s) {
+		fprintf(stderr, "requires core-file name\n");
+		return 0;
+	}
+	FILE *fp = fopen(s, "w");
+	if (!fp) {
+		perror(s);
+		return 0;
+	}
+	size_t n = fwrite(sys->ram, sizeof(sys->ram), 1, fp);
+	if (n != 1) {
+		fprintf(stderr, "failed to dump core\n");
 	}
 	return 0;
 }
@@ -251,6 +271,7 @@ static int _keyboard(w600_sys_t *sys, char *line) {
 		__keyb[x++] = (h << 4) | l;
 	}
 	__klen = x;
+	return 0;
 }
 
 static int _help(w600_sys_t *sys, char *line) {
@@ -263,6 +284,7 @@ static int _help(w600_sys_t *sys, char *line) {
 		"\tset reg=value\tSet register\n"
 		"\tstore [addr]\tStore value(s) in RAM at AH,AM,AL [or hex addr]\n"
 		"\tstep\tSingle-step one instruction\n"
+		"\tcore <file>\tDump all of RAM to <file>\n"
 		"\tgo [+cycles]\tResume program at current PC [break after <cycles>]\n"
 		"\thelp\tDisplay this help\n"
 		);
@@ -282,6 +304,7 @@ struct {
 	{ "store", _store },
 	{ "step", _step },
 	{ "keyboard", _keyboard },
+	{ "core", _core },
 	{ "go", _go },
 	{ "help", _help },
 };
@@ -303,7 +326,7 @@ int sys_command(w600_sys_t *sys) {
 	--x;
 	if (s[x] == '\n') s[x] = '\0';
 	s = strtok(buf, " \t");
-	if (!s) return;
+	if (!s) return 0;
 	for (x = 0; x < NUM_CMDS; ++x) {
 		if (strcmp(s, commands[x].cmd) == 0) {
 			break;
@@ -322,4 +345,5 @@ int sys_command(w600_sys_t *sys) {
 		// what is this for?
 		return rc;
 	}
+	return 0;
 }

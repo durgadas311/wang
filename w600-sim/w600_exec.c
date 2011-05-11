@@ -1,4 +1,4 @@
-// $Id: w600_exec.c,v 1.6 2011/05/09 10:10:55 drmiller Exp $
+// $Id: w600_exec.c,v 1.7 2011/05/11 09:17:26 drmiller Exp $
 
 #include <stdlib.h>
 
@@ -75,7 +75,6 @@ void sys_exec(w600_sys_t *sys) {
 	if (sys->trace) {
 		if (rc) fprintf(sys->trc_fp, "Illegal instruction break (%d)\n", rc);
 		uint64_t *m;
-		int c, x;
 #ifdef TRACE_CYCLES
 		nat_tsc = tsc() - nat_tsc;
 #endif // TRACE_CYCLES
