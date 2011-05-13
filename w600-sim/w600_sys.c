@@ -1,4 +1,4 @@
-// $Id: w600_sys.c,v 1.19 2011/05/11 09:17:26 drmiller Exp $
+// $Id: w600_sys.c,v 1.20 2011/05/13 00:55:04 drmiller Exp $
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -237,7 +237,6 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			if (byte == 0x9e) { // End Prog
 				return 0xff;
 			}
-			bc ^= 1;
 			byte = 0;
 			rc = read(_cass_fd, &byte, 1);
 			if (rc < 0) {
@@ -245,15 +244,53 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				return 0xff;
 			}
 			if (rc == 0) {
-				bc = 0;
 				return 0xff;
 			}
+			bc ^= 1;
 			return (byte >> 4);
 		} else {
 			bc ^= 1;
 			return (byte & 0x0f);
 		}
 	}
+}
+
+static char cn24_xlate[64] = {
+[0x00] = '-',
+
+[0x02] = ' ',
+
+[0x16] = '.',
+
+[0x25] = '+',
+
+//[0x18] = '\r',	// "RETURN" action...
+//[0x1a] = '\n',	// "INDEX" action... (newline)
+//[0x28] = '?',		// "PRINT" action... just reset for next characters? or power-up?
+[0x29] = '1',
+[0x30] = '9',
+[0x31] = '0',
+
+[0x34] = '6',
+[0x35] = '5',
+[0x36] = '2',
+
+[0x39] = '4',
+
+[0x3c] = '8',
+[0x3d] = '7',
+[0x3e] = '3',
+};
+
+static void syscn24(w600_sys_t *sys, uint8_t c) {
+	char p = cn24_xlate[c];
+	if (c == 0x28) return;
+	if (!p) {
+		printf("\n<%02x>", c);
+	} else {
+		fputc(p, stdout);
+	}
+	fflush(stdout);
 }
 
 static int intr(w600_sys_t *sys, int sig) {
@@ -315,6 +352,7 @@ void sys_init(w600_sys_t *sys) {
 	sys->keyboard = syskeyboard;
 	sys->printer = sysprinter;
 	sys->tape = systape;
+	sys->cn24 = syscn24;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 

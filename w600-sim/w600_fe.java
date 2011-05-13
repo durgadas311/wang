@@ -253,6 +253,7 @@ class Wang600_Printer
 //	final int PR_XCOL_WID = 3;
 //	final int PR_XCOL_STRT = 15;
 //
+//	// these will be replaced with some translation to a special font...
 //	final String[] pr_16 = {
 //		" E ", " T ", " + ", " - ", " x ", " / ", " ST", " RE",
 //		" * ", " * ", " f ", " F ", " A ", " B ", " C ", " D "
@@ -292,16 +293,15 @@ class Wang600_Printer
 //	}
 //
 	public void do_printer(byte[] b) {
-		if (b[1] == 0) return;
-//		if () {
-//
+		if (b[1] == 0) return; // dumb warnings
+//		int col = ((b[1] << 4) | (b[0] >> 4)) & 0x1f;
+//		if (col == 0x1f) {
 //			String s = _pr_line.toString();
 //			# replace with output to printer panel...
 //			System.err.println(s);
 //			clear_buf();
 //			return;
 //		}
-//		int col = ((b[1] << 4) | (b[0] >> 4)) & 0x1f;
 //		int drm = (b[0] & 0x0f);
 //		byte chr;
 //		if (col < PR_XCOL_STRT) {
@@ -379,7 +379,7 @@ class Wang600_Display extends JComponent
 	}
 
 	public Wang600_Display(FileInputStream f) {
-		String blank = "--- Wang 600 ---";
+		String blank = "--- ++++++++ ---";
 		disp_a = new byte[16];
 		disp_a = blank.getBytes();
 		flashing = false;
@@ -403,8 +403,14 @@ class Wang600_Display extends JComponent
 		disp.setForeground(_Key.neon);
 		disp.setBackground(_Key.empty);
 		disp.setOpaque(true);
-		disp.setPreferredSize(new Dimension(450, 75));
-		Font font = new Font("Monospaced", Font.PLAIN, 40);
+		Font font;
+		if (false) {
+			disp.setPreferredSize(new Dimension(450, 75));
+			font = new Font("Monospaced", Font.PLAIN, 40);
+		} else {
+			disp.setPreferredSize(new Dimension(475, 75));
+			font = new Font("Wang600Display", Font.PLAIN, 28);
+		}
 		disp.setFont(font);
 
 		s.gridx = 0;

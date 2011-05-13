@@ -64,6 +64,8 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	}
 }
 
+static uint16_t extraneous = 0;
+
 static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	uint16_t b;
 
@@ -74,52 +76,156 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 		sys->run = 0;
 		return;
 	}
-
-	if (disp_good > 32) {
-		struct pollfd fds;
-		fds.fd = __gui_kfd;
-		fds.events = POLLIN;
-		fds.revents = 0;
-		/* int rc = */ poll(&fds, 1, -1);
-		disp_good = 0;
+	if (extraneous) {
+		b = extraneous;
+		extraneous = 0;
+	} else {
+		if (disp_good > 32) {
+			struct pollfd fds;
+			fds.fd = __gui_kfd;
+			fds.events = POLLIN;
+			fds.revents = 0;
+			/* int rc = */ poll(&fds, 1, -1);
+			disp_good = 0;
+		}
+		rc = read(__gui_kfd, &b, sizeof(b));
+		if (rc < 0 && errno != EAGAIN) {
+			perror("guikeyboard");
+			// silently quit...
+			sys->run = 0;
+			return;
+		}
+		if (rc != sizeof(b)) {
+			return;
+		}
 	}
-	rc = read(__gui_kfd, &b, sizeof(b));
-	if (rc < 0 && errno != EAGAIN) {
-		perror("guikeyboard");
+	switch(b >> 8) {
+	case 0:
+		// can't really avoid overrun...
+		*kc = b;
+		sys->cpu.kp = 1;
+		break;
+	case 1:
+		// jam new PC...
+		b &= 0x07;
+		sys->cpu.pc = b;
+		if (b < 4) {
+			sys->cpu.pe = 0;
+		}
+		if (b == 0) {
+			sys->cpu.me = 0;
+		}
+		break;
+	case 2:
+		// FE gave us complete mode word... just update
+		sys->cpu.mode0 = b & 0x0f;
+		break;
+	case 3:
+		// DEG/RAD is inverted...
+		b ^= MODE1_DEGREES;
+		sys->cpu.mode1 = b & 0x0f;
+		break;
+	default:
+		// uh, this is embarassing...
+		// presumably this is tape data, we've lost it and can't continue?
+		fprintf(stderr, "gag me!\n");
+		sys->run = 0;
+		return;
+		break;
+	}
+}
+
+static void guiprinter(w600_sys_t *sys, int col, int drum) {
+	uint16_t b;
+	int rc;
+
+	b = 0x0800 | ((col & 0x1f) << 4) | (drum & 0x0f);
+	rc = write(__gui_dfd, &b, sizeof(b));
+	if (rc < 0) {
+		perror("guiprinter");
 		// silently quit...
 		sys->run = 0;
 		return;
 	}
-	if (rc == sizeof(b)) {
-		switch(b >> 8) {
-		case 0:
-			// can't really avoid overrun...
-			*kc = b;
-			sys->cpu.kp = 1;
-			break;
-		case 1:
-			// jam new PC...
-			b &= 0x07;
-			sys->cpu.pc = b;
-			if (b < 4) {
-				sys->cpu.pe = 0;
-			}
-			if (b == 0) {
-				sys->cpu.me = 0;
-			}
-			break;
-		case 2:
-			// FE gave us complete mode word... just update
-			sys->cpu.mode0 = b & 0x0f;
-			break;
-		case 3:
-			// DEG/RAD is inverted...
-			b ^= MODE1_DEGREES;
-			sys->cpu.mode1 = b & 0x0f;
-			break;
-		default:
-			break;
+}
+
+static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
+	static uint8_t byte;
+	static int bc = 0;
+	uint16_t b;
+	int rc;
+
+	if (nibble & 0x80) { // tape off
+		b = 0x0e00;
+		bc = 0;
+	} else if (nibble & 0x40) { // tape on
+		b = 0x0d00 | ((wr & 1) << 9);
+		bc = 0;
+	} else if (wr) {
+		bc ^= 1;
+		if (bc) {
+			byte = (byte & 0x0f) | (nibble << 4);
+		} else {
+			byte = (byte & 0xf0) | nibble;
 		}
+		b = 0x0c00 | byte;
+	} else {
+		if (!bc) {
+			if (byte == 0x9e) { // End Prog
+				return 0xff;
+			}
+			byte = 0;
+
+			// there must be data ready OR ELSE!
+			if (extraneous) {
+				return 0xff;	// EOF
+			}
+			struct pollfd fds;
+			fds.fd = __gui_kfd;
+			fds.events = POLLIN;
+			fds.revents = 0;
+			/* int rc = */ poll(&fds, 1, -1);
+			rc = read(__gui_kfd, &b, sizeof(b));
+			if (rc < 0 && errno != EAGAIN) {
+				perror("guikeyboard");
+				// silently quit...
+				sys->run = 0;
+				return 0xff;	// EOF
+			}
+			if ((b >> 8) != 0x0c) {
+				// oops...
+				// now we've really done it...
+				extraneous = b;
+				return 0xff;	// EOF
+			}
+			bc ^= 1;
+			return (byte >> 4);
+		} else {
+			bc ^= 1;
+			return (byte & 0x0f);
+		}
+	}
+	rc = write(__gui_dfd, &b, sizeof(b));
+	if (rc < 0) {
+		perror("guitape");
+		// silently quit...
+		sys->run = 0;
+		return 0xff;	// probably ignored
+	}
+	return 0;	// probably ignored
+}
+
+static void guicn24(w600_sys_t *sys, uint8_t c) {
+	uint16_t b;
+	int rc;
+
+	b = 0x1000 | c;
+	rc = write(__gui_dfd, &b, sizeof(b));
+	if (rc < 0) {
+		perror("guicn24");
+		// silently quit...
+		sys->run = 0;
+		return;
 	}
 }
 
@@ -179,6 +285,7 @@ static int spawn_fe(w600_sys_t *sys) {
 }
 
 int start_fe(w600_sys_t *sys) {
+	extraneous = 0;
 	int rc = spawn_fe(sys);
 	return rc;
 }

@@ -17,8 +17,11 @@ w600-dasm: w600-dasm.o $(DASM)
 w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
-w600_fe.class: w600_fe.java
+w600_fe.class: w600_fe.java ~/.fonts/Wang600Display.ttf
 	javac w600_fe.java
+
+~/.fonts/Wang600Display.ttf: fonts/Wang600Display.ttf
+	cp $? $@
 
 clean:
 	rm -f *.o
