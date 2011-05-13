@@ -23,15 +23,19 @@ w600_fe.class: w600_fe.java ~/.fonts/Wang600Display.ttf
 ~/.fonts/Wang600Display.ttf: fonts/Wang600Display.ttf
 	cp $? $@
 
+wang600-block-diag.pdf: ../wang600-docs/wang600-block-diag.pdf
+	cp $? $@
+
 clean:
 	rm -f *.o
 
-tar:
+tar: wang600-block-diag.pdf
 	cd ..;\
 	tar -czvf w600-sim/w600-sim.tgz \
-		w600-sim/*.[ch] w600-sim/Makefile w600-sim/README w600-sim/*.java \
-		w600-sim/wang600-block-diag.pdf \
-		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif
+		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
+		w600-sim/wang600-block-diag.pdf w600-sim/README* \
+		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif \
+		w600-sim/fonts/Wang600Display.ttf
 
 install: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
