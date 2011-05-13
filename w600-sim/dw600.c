@@ -1,4 +1,6 @@
-// $Id: dw600.c,v 1.9 2011/05/05 18:29:19 drmiller Exp $
+// Copyright (c) 2011 Douglas Miller
+
+#ident "$Id: dw600.c,v 1.10 2011/05/13 12:40:17 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"

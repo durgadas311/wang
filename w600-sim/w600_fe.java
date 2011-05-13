@@ -1,3 +1,5 @@
+// Copyright (c) 2011 Douglas Miller
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -5,6 +7,8 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
+
+	final String ident = "$Id: w600_fe.java,v 1.22 2011/05/13 12:40:17 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);

@@ -1,4 +1,6 @@
-// $Id: w600_sys.c,v 1.20 2011/05/13 00:55:04 drmiller Exp $
+// Copyright (c) 2011 Douglas Miller
+
+#ident "$Id: w600_sys.c,v 1.21 2011/05/13 12:40:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>

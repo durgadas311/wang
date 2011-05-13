@@ -1,7 +1,12 @@
+// Copyright (c) 2011 Douglas Miller
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#ident "$Id: w600_fe.c,v 1.3 2011/05/13 12:40:17 drmiller Exp $"
 
 char buf[128];
 

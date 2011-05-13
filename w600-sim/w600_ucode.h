@@ -1,4 +1,6 @@
-// $Id: w600_ucode.h,v 1.2 2011/05/01 00:05:40 drmiller Exp $
+// Copyright (c) 2011 Douglas Miller
+
+#ident "$Id: w600_ucode.h,v 1.3 2011/05/13 12:40:17 drmiller Exp $"
 
 #ifndef __w600_ucode_h__
 #define __w600_ucode_h__

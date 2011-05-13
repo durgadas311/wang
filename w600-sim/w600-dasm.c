@@ -1,3 +1,5 @@
+// Copyright (c) 2011 Douglas Miller
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -5,6 +7,8 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#ident "$Id: w600-dasm.c,v 1.6 2011/05/13 12:40:17 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 

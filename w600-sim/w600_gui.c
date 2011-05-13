@@ -1,3 +1,5 @@
+// Copyright (c) 2011 Douglas Miller
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,6 +11,8 @@
 #include <poll.h>
 
 #include "w600_gui.h"
+
+#ident "$Id: w600_gui.c,v 1.12 2011/05/13 12:40:17 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;

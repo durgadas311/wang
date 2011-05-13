@@ -1,4 +1,6 @@
-// $Id: w600_decode.c,v 1.22 2011/05/13 00:55:04 drmiller Exp $
+// Copyright (c) 2011 Douglas Miller
+
+#ident "$Id: w600_decode.c,v 1.23 2011/05/13 12:40:17 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"

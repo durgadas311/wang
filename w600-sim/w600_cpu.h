@@ -1,7 +1,9 @@
+// Copyright (c) 2011 Douglas Miller
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-// $Id: w600_cpu.h,v 1.7 2011/05/09 14:23:19 drmiller Exp $
+#ident "$Id: w600_cpu.h,v 1.8 2011/05/13 12:40:17 drmiller Exp $"
+
 #include <stdio.h>
 #include <stdint.h>
 
