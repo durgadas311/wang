@@ -44,5 +44,5 @@ tar: wang600-block-diag.pdf
 		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif \
 		w600-sim/fonts/Wang600Display.ttf
 
-install: tar
+ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
