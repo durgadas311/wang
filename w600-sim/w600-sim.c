@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600-sim.c,v 1.9 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600-sim.c,v 1.10 2011/05/15 23:10:44 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -36,7 +36,7 @@ static void usage() {
 		"%s [options]\n"
 		"Options:\n"
 		"\t-b\tBack-end mode (for GUI FE)\n"
-		"\t-g\tDisable GUI\n"
+		"\t-g\tSpawn GUI (normally GUI spawns w600-sim)\n"
 		"\t-i\tInteractive mode enable\n"
 		"\t-c file\tUse file as a cassette tape\n"
 		"\t-p file\tLoad initial contents of Program Space (conflicts with -m)\n"
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	char *pgm = NULL;
 	char *ucode = NULL;
 	int interact = 0;
-	int sys_ops = SYS_START_GUI;
+	int sys_ops = 0;
 	char *ram = NULL;
 	char *rom = NULL;
 	char *cass = NULL;
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 			entry = strtoul(optarg, NULL, 0);
 			break;
 		case 'g':
-			sys_ops &= ~SYS_START_GUI;
+			sys_ops |= SYS_START_GUI;
 			break;
 		case 'i':
 			interact = 1;

@@ -7,7 +7,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -101,32 +101,43 @@ class _Key {
 // XCHG is 14 xx
 // I/O, etc is 15 xx
 
-public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
-	public static void main(String[] args) {
-		java.io.FileOutputStream fout = null;
-		java.io.FileInputStream fin = null;
+class FEexit extends Thread {
+	private Process _be = null;
 
-		if (args.length > 0) {
-			if (args[0].compareTo("-t") != 0) {
-// to be removed, once "./w600-sim -b" works...
-				String fd = "/proc/self/fd/" + args[0];
-				try {
-					fout = new FileOutputStream(fd);
-				} catch (FileNotFoundException e) {
-					System.out.println("No pipe: " + fd);
-					System.exit(1);
-				}
-				if (args.length > 1) {
-					fd = "/proc/self/fd/" + args[1];
-					try {
-						fin = new FileInputStream(fd);
-					} catch (FileNotFoundException e) {
-						System.out.println("No pipe: " + fd);
-						System.exit(1);
-					}
-				}
-// ---------
+	public FEexit(Process be) {
+		_be = be;
+	}
+	public void run() {
+		if (_be != null) {
+			_be.destroy();
+			try {
+				_be.waitFor();
+			} catch (InterruptedException ee) {
+			}
+		}
+	}
+}
+
+public class w600_fe {
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
+
+	public static void main(String[] args) {
+		java.io.OutputStream fout = null;
+		java.io.InputStream fin = null;
+		java.io.InputStream ferr = null;
+
+		if (args.length == 0 || args[0].compareTo("-t") != 0) {
+			try {
+				Process _be = null;
+				_be = Runtime.getRuntime().exec("./w600-sim -b");
+				fout = _be.getOutputStream();
+				fin = _be.getInputStream();
+				ferr = _be.getErrorStream();
+				Runtime.getRuntime().addShutdownHook(new FEexit(_be));
+				new Wang600_SimError(ferr);
+			} catch (IOException ee) {
+				System.err.println("Unable to exec back-end!");
+				System.exit(1);
 			}
 		}
 		JFrame front_end = new JFrame("Wang 600");
@@ -140,9 +151,12 @@ public class w600_fe {
 		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me);
 		front_end.add(kbd);
 
-		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp);
+		Wang600_Printer prt = new Wang600_Printer();
+		Wang600_Tape tape = new Wang600_Tape(fout);
 
-		if (inp == null) System.out.println("damn warnings");
+		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape);
+
+		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		front_end.setSize(1000,500);
@@ -151,7 +165,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -201,19 +215,54 @@ class Wang600_ProgErr extends JComponent {
 	}
 }
 
+class Wang600_SimError
+		implements Runnable
+{
+	InputStream _fin;
+
+	public Wang600_SimError(InputStream f) {
+		_fin = f;
+		Thread t = new Thread(this);
+		t.start();
+	}
+
+	public void run() {
+		byte[] b = new byte[1];
+		int n = 0;
+		while (true) {
+			try {
+				n = _fin.read(b);
+			} catch (IOException ee) {
+				// System.err.println("Broken pipe for SimError!");
+				return;
+			}
+if (n == 1) {
+			try {
+				System.err.write(b);
+				System.err.flush();
+			} catch (IOException ee) {
+			}
+}
+		}
+	}
+}
+
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
 	Wang600_CN24 _cn24;
 
-	FileInputStream _fin;
+	InputStream _fin;
 
-	public Wang600_SimInput(FileInputStream f, Wang600_Display dsp) {
+	public Wang600_SimInput(InputStream f, Wang600_Display dsp,
+			Wang600_Printer prt, Wang600_Tape tape) {
 		_dsp = dsp;
+		_prt = prt;
+		_tape = tape;
 		_fin = f;
 		if (f != null) {
 			Thread t = new Thread(this);
@@ -231,9 +280,8 @@ class Wang600_SimInput
 			try {
 				n = _fin.read(b);
 			} catch (IOException ee) {
-				System.err.println("Broken pipe for display!");
-				System.exit(1);
-			} finally {
+				// System.err.println("Broken pipe for SimInput!");
+				return;
 			}
 			if (n == 0) {
 				continue;
@@ -247,7 +295,7 @@ class Wang600_SimInput
 			} else if (b[1] == 0x10) {
 				_cn24.do_cn24(b);
 			} else {
-				System.err.println("Unexpected traffic "+b[1]);
+				System.err.println("Unexpected traffic ("+n+")"+b[1]+" "+b[0]);
 			}
 		}
 	}
@@ -255,90 +303,188 @@ class Wang600_SimInput
 
 class Wang600_Printer
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
-//	final int PR_NUM_COL = 20;
-//	final int PR_XCOL_WID = 3;
-//	final int PR_XCOL_STRT = 15;
-//
-//	// these will be replaced with some translation to a special font...
-//	final String[] pr_16 = {
-//		" E ", " T ", " + ", " - ", " x ", " / ", " ST", " RE",
-//		" * ", " * ", " f ", " F ", " A ", " B ", " C ", " D "
-//	};
-//	final String[] pr_17 = {
-//		"0  ", "1  ", "2  ", "3  ", "4  ", "5  ", "6  ", "7  ",
-//		"8  ", "9  ", "10 ", "11 ", "12 ", "13 ", "14 ", "15 "
-//	};
-//	final String[] pr_18 = {
-//		" S ", " RE", " W ", " Go", " Jo", " J+", " SN", " CS",
-//		" TN", " RD", " LN", " eX", " x2", " vX", " LP", "1/x"
-//	};
-//	final String[] pr_19 = {
-//		" M ", " ST", " a ", " Sp", " Jn", " Je", " S1", " C1",
-//		" T1", " DR", " LG", "10X", " I ", "|x|", " EP", " RT"
-//	};
-//	final String[] pr_20 = {
-//		" X ", " Y ", " Z ", " A ", " B ", " C ", " D ", " E ",
-//		" F ", " G ", " H ", " I ", " J ", " K ", " L ", " M "
-//	};
-//	final String[][] pr_16_20 = {
-//		pr_16, pr_17, pr_18, pr_19, pr_20
-//	}
-//	final String[] pr_ovr = { "....OVERFLOW...." };
-//	final String[] pr_0_15 = { "0123456789.o\0+- " };
-//	final byte[] _pr_ovr = pr_ovr.getBytes();
-//	final byte[] _pr_0_15 = pr_0_15.getBytes();
-//
-//	byte[] _pr_line;
-//
-//	private void clear_buf() {
-//		_pr_line = new byte(16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16);
-//	}
-//
-//	public Wang600_Printer() {
-//		clear_buf();
-//	}
-//
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
+	final int PR_NUM_COL = 20;
+	final int PR_XCOL_WID = 3;
+	final int PR_XCOL_STRT = 16;
+	final int PR_BUF_LEN = PR_XCOL_STRT + PR_XCOL_WID * (PR_NUM_COL - PR_XCOL_STRT);
+
+	// these will be replaced with some translation to a special font...
+	final String[] pr_16 = {
+		" E ", " T ", " + ", " - ", " x ", " / ", " ST", " RE",
+		" * ", " * ", " f ", " F ", " A ", " B ", " C ", " D "
+	};
+	final String[] pr_17 = {
+		"0  ", "1  ", "2  ", "3  ", "4  ", "5  ", "6  ", "7  ",
+		"8  ", "9  ", "10 ", "11 ", "12 ", "13 ", "14 ", "15 "
+	};
+	final String[] pr_18 = {
+		" S ", " RE", " W ", " Go", " Jo", " J+", " SN", " CS",
+		" TN", " RD", " LN", " eX", " x2", " vX", " LP", "1/x"
+	};
+	final String[] pr_19 = {
+		" M ", " ST", " a ", " Sp", " Jn", " Je", " S1", " C1",
+		" T1", " DR", " LG", "10X", " I ", "|x|", " EP", " RT"
+	};
+	final String[] pr_20 = {
+		" X ", " Y ", " Z ", " A ", " B ", " C ", " D ", " E ",
+		" F ", " G ", " H ", " I ", " J ", " K ", " L ", " M "
+	};
+	final String[][] pr_16_20 = {
+		pr_16, pr_17, pr_18, pr_19, pr_20
+	};
+	final String pr_ovr = "....OVERFLOW....";
+	final String pr_0_15 = "0123456789.o\0+- ";
+	final byte[] _pr_ovr = pr_ovr.getBytes();
+	final byte[] _pr_0_15 = pr_0_15.getBytes();
+
+	byte[] _pr_line;
+
+	private void clear_buf() {
+		int x;
+		for (x = 0; x < PR_BUF_LEN; ++x) {
+			_pr_line[x] = ' ';
+		}
+	}
+
+	public Wang600_Printer() {
+		_pr_line = new byte[PR_BUF_LEN];
+		clear_buf();
+	}
+
 	public void do_printer(byte[] b) {
-		if (b[1] == 0) return; // dumb warnings
-//		int col = ((b[1] << 4) | (b[0] >> 4)) & 0x1f;
-//		if (col == 0x1f) {
-//			String s = _pr_line.toString();
-//			# replace with output to printer panel...
-//			System.err.println(s);
-//			clear_buf();
-//			return;
-//		}
-//		int drm = (b[0] & 0x0f);
-//		byte chr;
-//		if (col < PR_XCOL_STRT) {
-//			chr = _pr_0_15[drm];
-//			if (chr == 0) {
-//				chr = _pr_ovr[col];
-//			}
-//			_pr_line[col] = chr;
-//		} else {
-//			col -= PR_XCOL_STRT;
-//			String yy = pr_16_20[col];
-//			byte[] xx = yy.getBytes();
-//			for (x = 0; x < PR_XCOL_WID; ++x) {
-//			}
-//		}
-//
+		int x, y;
+		int col = ((b[1] << 4) | (b[0] >> 4)) & 0x1f;
+		if (col == 0x1f) {
+			String s = _pr_line.toString();
+			// replace with output to printer panel...
+			System.err.println(s);
+			clear_buf();
+			return;
+		}
+		int drm = (b[0] & 0x0f);
+		byte chr;
+		if (col < PR_XCOL_STRT) {
+			chr = _pr_0_15[drm];
+			if (chr == 0) {
+				chr = _pr_ovr[col];
+			}
+			_pr_line[col] = chr;
+		} else {
+			col -= PR_XCOL_STRT;
+			String[] ww = pr_16_20[col];
+			String yy = ww[drm];
+			byte[] xx = yy.getBytes();
+			y = PR_XCOL_STRT + PR_XCOL_WID * col;
+			for (x = 0; x < PR_XCOL_WID; ++x) {
+				_pr_line[y] = xx[x];
+				++y;
+			}
+		}
+
 	}
 }
 
 class Wang600_Tape
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
+	String _tape;
+	java.io.FileOutputStream _fo = null;
+	java.io.FileInputStream _fi = null;
+	java.io.OutputStream _fout = null;
+	byte[] bb = new byte[2];
+	byte[] b1 = new byte[1];
+
+	public Wang600_Tape(OutputStream fout) {
+		_tape = new String("default_casette_tape.img");
+		_fout = fout;
+	}
 	public void do_tape(byte[] b) {
-		if (b[1] == 0) return;
+		if (b[1] == 0x0d) {		// tape on - read
+			if (_fi != null) {
+				try {
+					_fi.close();
+				} catch (IOException ee) {
+				}
+			}
+			try {
+				_fi = new FileInputStream(_tape);
+			} catch (FileNotFoundException e) {
+				_fi = null;
+				b[0] = 0;
+				b[1] = 0x0e;
+				try {
+					_fout.write(b);
+					_fout.flush();
+				} catch (IOException ee) {
+				}
+				return;
+			}
+			while (true) {
+				int n = 0;
+				try {
+					n = _fi.read(b1);
+				} catch (IOException ee) {
+				}
+				if (n != 1) break;
+				b[0] = b1[0];
+				b[1] = 0x0c;
+				try {
+					_fout.write(b);
+					_fout.flush();
+				} catch (IOException ee) {
+				}
+				if (b[0] == 0x9e) {
+					return;
+				}
+			}
+			b[1] = 0x0e;
+			try {
+				_fout.write(b);
+				_fout.flush();
+			} catch (IOException ee) {
+			}
+			return;
+		} else if (b[1] == 0x0f) {	// tape on - write
+			if (_fo != null) {
+				try {
+					_fo.close();
+				} catch (IOException ee) {
+				}
+			}
+			try {
+				_fo = new FileOutputStream(_tape);
+			} catch (FileNotFoundException e) {
+			}
+		} else if (b[1] == 0x0e) {	// tape off
+			if (_fi != null) {
+				try {
+					_fi.close();
+				} catch (IOException ee) {
+				}
+				_fi = null;
+			}
+			if (_fo != null) {
+				try {
+					_fo.close();
+				} catch (IOException ee) {
+				}
+				_fo = null;
+			}
+		} else if (b[1] == 0x0c) {	// tape write
+			try {
+				_fo.write(b[0]);
+			} catch (IOException ee) {
+			}
+		} else {
+			System.err.println("invalid tape command");
+		}
 	}
 }
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	public void do_cn24(byte[] b) {
 		if (b[1] == 0) return;
 	}
@@ -347,14 +493,14 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
 
 	byte[] disp_a;
 	JLabel disp;
-	FileInputStream _fin;
+	InputStream _fin;
 	GridBagLayout gridbag = new GridBagLayout();
 
 	Wang600_ProgErr pe;
@@ -388,7 +534,7 @@ class Wang600_Display extends JComponent
 		}
 	}
 
-	public Wang600_Display(FileInputStream f) {
+	public Wang600_Display(InputStream f) {
 		String blank = "--- ++++++++ ---";
 		disp_a = new byte[16];
 		disp_a = blank.getBytes();
@@ -502,7 +648,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -517,7 +663,7 @@ class Wang600_Keyboard extends JComponent
 	int _meta;
 	int _mode0;
 	int _mode1;
-	FileOutputStream _fout;
+	OutputStream _fout;
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -621,13 +767,14 @@ class Wang600_Keyboard extends JComponent
 			int t = code >> 8;
 			int h = (code >> 4) & 0x0f;
 			int l = code & 0x0f;
-			System.out.format("%d %02d %02d (%04x)\n", t, h, l, code);
+			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
 		} else {
 			byte[] b = new byte[2];
 			b[0] = (byte)(code & 0x0ff);
 			b[1] = (byte)(code >> 8);
 			try {
 				_fout.write(b);
+				_fout.flush();	// why?
 			} catch (IOException ee) {
 				System.err.println("Broken pipe for keyboard!");
 				_fout = null;
@@ -635,7 +782,7 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
-	public Wang600_Keyboard(FileOutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me) {
+	public Wang600_Keyboard(OutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me) {
 		int x;
 		_kbds = new Wang600_Keyboards[num_kbds];
 		_nkbds = 0;
@@ -752,7 +899,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	public Wang600_Keyboards() { }
 
@@ -865,7 +1012,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1064,7 +1211,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1155,7 +1302,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.26 2011/05/15 20:02:34 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.27 2011/05/15 23:10:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 18;
 

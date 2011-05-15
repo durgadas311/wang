@@ -1,0 +1,10 @@
+$Id: README.gui,v 1.1 2011/05/15 23:10:44 drmiller Exp $
+
+The GUI is java based. All the *.class files are required, and optional fonts
+are desirable. All fonts are *.ttf and in the fonts subdirectory.
+
+The Wang 600 GUI is started with the command:
+
+	java w600_fe
+
+

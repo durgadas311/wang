@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.21 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.22 2011/05/15 23:10:44 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -346,7 +346,6 @@ static void sysfault(w600_sys_t *sys, const char *str) {
 }
 
 void sys_init(w600_sys_t *sys) {
-	printf("Wang 600 Programmable Calculator\n");
 	memset(pr_buf, ' ', sizeof(pr_buf));
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
@@ -385,6 +384,11 @@ void sys_start(w600_sys_t *sys, int ops) {
 		if (rc) {
 			fprintf(stderr, "GUI startup failed, reverting to stdio\n");
 		}
+	}
+	if (ops & SYS_BACK_END) {
+		setup_fe(sys, ops);
+	} else {
+		printf("Wang 600 Programmable Calculator\n");
 	}
 }
 

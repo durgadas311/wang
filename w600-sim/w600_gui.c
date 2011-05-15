@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.13 2011/05/15 15:02:45 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.14 2011/05/15 23:10:44 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -313,5 +313,22 @@ void stop_fe(w600_sys_t *sys) {
 		close(__gui_kfd);
 		kill(__gui_pid, SIGINT);
 		waitpid(__gui_pid, NULL, 0);
+	}
+}
+
+void setup_fe(w600_sys_t *sys, int ops) {
+	if (ops & SYS_BACK_END) {
+		sys->keyboard = guikeyboard;
+		sys->display = guidisplay;
+		sys->printer = guiprinter;
+		sys->tape = guitape;
+		sys->cn24 = guicn24;
+		__gui_kfd = dup(0);	// stdin
+		__gui_dfd = dup(1);	// stdout
+		dup2(2,1);
+		fclose(stdin);
+		long fl = fcntl(__gui_kfd, F_GETFL, 0);
+		fl |= O_NONBLOCK;
+		fcntl(__gui_kfd, F_SETFL, fl);
 	}
 }

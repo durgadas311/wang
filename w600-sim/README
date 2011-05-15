@@ -1,4 +1,7 @@
-$Id: README,v 1.2 2011/05/11 14:41:03 drmiller Exp $
+$Id: README,v 1.3 2011/05/15 23:10:44 drmiller Exp $
+
+See "README.gui" for information on how to run the GUI Wang 600. This file is
+for use the interactive simulator only.
 
 This is the start of a Wang 600 Simulator, using actual microcode from a Wang 600.
 
