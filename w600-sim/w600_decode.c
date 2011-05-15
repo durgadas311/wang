@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.23 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.24 2011/05/15 15:02:45 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -257,6 +257,29 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	sys->ram[adr >> 1] = b | a;
 }
 
+static inline void display_check(w600_sys_t *sys) {
+	// 51c: begin display-refresh delay loop... short-cut to 51f...
+	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
+		sys->cpu.pc = 0x51f;	// update some regs too?
+		sys->cpu.cycles += 272;
+		if (sys->trace) {
+			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp...\n");
+		}
+		sys->display(sys, 1);	// might sleep
+	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
+	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
+		sys->cpu.pc = 0x5c3;
+		sys->cpu.cycles += 272;
+		if (sys->trace) {
+			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp...\n");
+		}
+		sys->display(sys, -1);	// must not sleep!
+	} else if (sys->cpu.pc == 0x27b) {	// alpha-stop done...
+		sleep(1);
+		sys->display(sys, 0);
+	}
+}
+
 int instr_exec(w600_sys_t *sys) {
 	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[sys->cpu.pc];
 	uint16_t next;
@@ -472,7 +495,6 @@ else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 				sys->cpu.dh = key >> 4;
 				sys->cpu.dl = key & 0x0f;
 				sys->cpu.kp = 0;
-				sys->display(sys, -1);	// blank out display
 			}
 			break;
 		case 7: rc = 3; break;
@@ -492,16 +514,7 @@ else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 
 	++sys->cpu.cycles;
 
-	static int disp = 0;
-	if ((sys->cpu.pc & 0xffc) == 0x51c) { // display refresh routine...
- 		if (!disp) {
-			++disp;
-			sys->display(sys, 1);
-		}
-	} else if (disp) {
-		disp = 0;
-		sys->display(sys, 0);
-	}
+	display_check(sys);	// this might sleep until UI event...
 
 	sys->keyboard(sys, &key);
 

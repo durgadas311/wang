@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -12,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.12 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.13 2011/05/15 15:02:45 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -20,15 +21,14 @@ int __gui_dfd = -1;
 
 static int disp_good = 0;
 
+// 'on' = 1: refresh one digit (AL, MR)
+// 'on' = 0: blank display (reset everything)
 static void guidisplay(w600_sys_t *sys, int on) {
 	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
 	static uint16_t last = 0;
 	uint16_t b = 0;
 	int rc;
-
-	if (!on) {
-		return;
-	}
+	int flush = 0;
 
 	rc = waitpid(__gui_pid, NULL, WNOHANG);
 	if (rc == __gui_pid) {
@@ -44,18 +44,28 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	if (sys->cpu.me) {
 		b |= 0x200;
 	}
-
-	if (on == -1) {
-		disp_good = 0;
-		b |= 0x400;
+	if (last != b) {
+		last = b;
+		++flush;
 	}
+
 	uint8_t ds = sys->cpu.al;
 	uint8_t dc = sys->cpu.mr;
-	if (last != b || buf[ds] != dc) {
+	if (on == 0) {
+		// signal to blank display
+		memset(buf, 'x', sizeof(buf));
+		last = 0;
+		b |= 0x400;
+		++flush;
+	} else if (buf[ds] != dc) {
 		disp_good = 0;
 		buf[ds] = dc;
-		last = b;
 		b |= (ds << 4) | dc;
+		++flush;
+	}
+
+	if (flush) {
+		disp_good = 0;
 		rc = write(__gui_dfd, &b, sizeof(b));
 		if (rc < 0) {
 			perror("guidisplay");
@@ -65,6 +75,15 @@ static void guidisplay(w600_sys_t *sys, int on) {
 		}
 	} else {
 		++disp_good;
+		if (disp_good > 64) {
+			if (on > 0) {
+				struct pollfd fds;
+				fds.fd = __gui_kfd;
+				fds.events = POLLIN;
+				fds.revents = 0;
+				/* int rc = */ poll(&fds, 1, -1);
+			}
+		}
 	}
 }
 
@@ -84,14 +103,6 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 		b = extraneous;
 		extraneous = 0;
 	} else {
-		if (disp_good > 32) {
-			struct pollfd fds;
-			fds.fd = __gui_kfd;
-			fds.events = POLLIN;
-			fds.revents = 0;
-			/* int rc = */ poll(&fds, 1, -1);
-			disp_good = 0;
-		}
 		rc = read(__gui_kfd, &b, sizeof(b));
 		if (rc < 0 && errno != EAGAIN) {
 			perror("guikeyboard");
@@ -103,6 +114,9 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 			return;
 		}
 	}
+	// something came down the pipe...
+	// make sure display gets refreshed...
+	guidisplay(sys, 0);
 	switch(b >> 8) {
 	case 0:
 		// can't really avoid overrun...
