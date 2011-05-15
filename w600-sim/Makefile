@@ -3,6 +3,13 @@ COPTS =
 OBJS = w600_sys.o w600_sim_cmd.o \
 	w600_decode.o w600_exec.o w600_gui.o
 
+FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
+FONTDEST =
+
+ifneq ($(FONTDIR),)
+FONTDEST = $(FONTDIR)/Wang600Display.ttf
+endif
+
 XTRA = 
 
 DASM = dw600.o
@@ -17,10 +24,10 @@ w600-dasm: w600-dasm.o $(DASM)
 w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
-w600_fe.class: w600_fe.java ~/.fonts/Wang600Display.ttf
+w600_fe.class: w600_fe.java $(FONTDEST)
 	javac w600_fe.java
 
-~/.fonts/Wang600Display.ttf: fonts/Wang600Display.ttf
+$(FONTDEST): fonts/Wang600Display.ttf
 	cp $? $@
 
 wang600-block-diag.pdf: ../wang600-docs/wang600-block-diag.pdf
