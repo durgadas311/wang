@@ -1,3 +1,11 @@
+# $Id: Makefile,v 1.15 2011/05/16 14:18:07 drmiller Exp $
+
+INSNAME = wang600apc
+INSDIR = ~
+INSDEST = $(INSDIR)/$(INSNAME)
+TMPDIR = temp
+TMPDEST = $(TMPDIR)/$(INSNAME)
+
 COPTS =
 
 OBJS = w600_sys.o w600_sim_cmd.o \
@@ -53,7 +61,20 @@ Manifest.txt:
 wang600.jar: w600_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf
 
+# INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
+temp_dest: all wang600.jar
+	mkdir -p $(TMPDEST)
+	cp wang600.jar wang600.rom w600-sim $(TMPDEST)
+	echo -e '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
+	echo -e '#!/bin/sh\njar xvf wang600.jar fonts/Wang600Display.ttf\nmv -v fonts/Wang600Display.ttf $(FONTDEST)' >$(TMPDEST)/INSTALL
+	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+
+package: temp_dest
+	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
+	rm -rf $(TMPDIR)
+
 # remove $(FONTDEST) once we figure out how to get ttf from jar
-install: all wang600.jar $(FONTDEST)
-	mkdir -p ~/wang600apc
-	cp wang600.jar wang600.rom w600-sim ~/wang600apc
+install: temp_dest $(FONTDEST)
+	mv $(TMPDEST) $(INSDIR)
+	rmdir $(TMPDIR)
+	$(INSDEST)/INSTALL
