@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2011/05/16 14:18:07 drmiller Exp $
+# $Id: Makefile,v 1.16 2011/05/16 14:34:27 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -44,6 +44,10 @@ wang600-block-diag.pdf: ../wang600-docs/wang600-block-diag.pdf
 clean:
 	rm -f *.o
 
+clobber: clean
+	rm -f *.class w600-sim w600_fe w600-dasm Manifest.txt *.jar *.tgz
+	rm -rf $(TMPDIR)
+
 tar: wang600-block-diag.pdf
 	cd ..;\
 	tar -czvf w600-sim/w600-sim.tgz \
@@ -77,4 +81,4 @@ package: temp_dest
 install: temp_dest $(FONTDEST)
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
-	$(INSDEST)/INSTALL
+	cd $(INSDEST); ./INSTALL
