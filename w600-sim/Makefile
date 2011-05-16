@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2011/05/16 14:34:27 drmiller Exp $
+# $Id: Makefile,v 1.17 2011/05/16 14:42:57 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -53,8 +53,7 @@ tar: wang600-block-diag.pdf
 	tar -czvf w600-sim/w600-sim.tgz \
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
-		w600-sim/wang600.rom w600-sim/*.class w600-sim/icons/*.gif \
-		w600-sim/fonts/Wang600Display.ttf
+		w600-sim/wang600.rom w600-sim/icons/*.gif w600-sim/fonts/*.ttf
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
