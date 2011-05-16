@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2011/05/16 16:26:01 drmiller Exp $
+# $Id: Makefile,v 1.20 2011/05/16 18:34:58 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -60,7 +60,8 @@ tar: wang600-block-diag.pdf
 	tar -czvf w600-sim/w600-sim.tgz \
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
-		w600-sim/wang600.rom w600-sim/icons/*.gif w600-sim/fonts/*.ttf
+		w600-sim/wang600.rom w600-sim/icons/*.gif \
+		w600-sim/wang600.rom w600-sim/icons/*.png w600-sim/fonts/*.ttf
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
@@ -78,6 +79,8 @@ temp_dest: all wang600.jar
 	$(ECHOE) '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
 	$(ECHOE) '#!/bin/sh\necho Ready to launch $${PWD}/run' >$(TMPDEST)/INSTALL
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+	mkdir -p $(TMPDEST)/icons
+	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
 package: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
