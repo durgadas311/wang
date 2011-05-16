@@ -1,10 +1,16 @@
-$Id: README.gui,v 1.1 2011/05/15 23:10:44 drmiller Exp $
+$Id: README.gui,v 1.2 2011/05/16 00:23:26 drmiller Exp $
 
 The GUI is java based. All the *.class files are required, and optional fonts
-are desirable. All fonts are *.ttf and in the fonts subdirectory.
+are desirable. All fonts are *.ttf and in the "fonts" subdirectory.
+
+This does seem to build and run correctly on OSX as well as Linux (known only on Debian).
+
+Basic build procesdure is "make". This also attempts to install the font(s) in
+a subdirectory in your home directory.
 
 The Wang 600 GUI is started with the command:
 
 	java w600_fe
 
-
+This creates a sub-process to run the simulator. Currently, you still need
+the terminal window for the printer, and for any diagnostic output.
