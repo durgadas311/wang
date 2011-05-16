@@ -46,3 +46,14 @@ tar: wang600-block-diag.pdf
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
+
+Manifest.txt:
+	echo "Main-Class: w600_fe" >$@
+
+wang600.jar: w600_fe.class Manifest.txt
+	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf
+
+# remove $(FONTDEST) once we figure out how to get ttf from jar
+install: all wang600.jar $(FONTDEST)
+	mkdir -p ~/wang600apc
+	cp wang600.jar wang600.rom w600-sim ~/wang600apc
