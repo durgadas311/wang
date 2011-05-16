@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.24 2011/05/15 15:02:45 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.25 2011/05/16 20:15:12 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -152,7 +152,9 @@ bits:
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-		return 0;
+		repc = sys->cpu.cycles + 300;
+		bit = 0;
+		goto reps;
 	}
 	data = (nib << 1) | odd_parity[nib];
 	bitc = 5;

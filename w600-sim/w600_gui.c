@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.14 2011/05/15 23:10:44 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.15 2011/05/16 20:15:12 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -146,7 +146,7 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	default:
 		// uh, this is embarassing...
 		// presumably this is tape data, we've lost it and can't continue?
-		fprintf(stderr, "gag me!\n");
+		fprintf(stderr, "gag me! %04x\n", b);
 		sys->run = 0;
 		return;
 		break;
@@ -183,12 +183,14 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 		bc ^= 1;
 		if (bc) {
 			byte = (byte & 0x0f) | (nibble << 4);
+			return 0;
 		} else {
 			byte = (byte & 0xf0) | nibble;
 		}
 		b = 0x0c00 | byte;
 	} else {
 		if (!bc) {
+			// not needed? will GUI take care of it?
 			if (byte == 0x9e) { // End Prog
 				return 0xff;
 			}
@@ -198,6 +200,14 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			if (extraneous) {
 				return 0xff;	// EOF
 			}
+			b = 0x0d01;	// request a byte...
+			rc = write(__gui_dfd, &b, sizeof(b));
+			if (rc != sizeof(b)) {
+				perror("guitape");
+				// silently quit...
+				sys->run = 0;
+				return 0xff;	// EOF
+			}
 			struct pollfd fds;
 			fds.fd = __gui_kfd;
 			fds.events = POLLIN;
@@ -205,10 +215,13 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			/* int rc = */ poll(&fds, 1, -1);
 			rc = read(__gui_kfd, &b, sizeof(b));
 			if (rc < 0 && errno != EAGAIN) {
-				perror("guikeyboard");
+				perror("guitape");
 				// silently quit...
 				sys->run = 0;
 				return 0xff;	// EOF
+			}
+			if ((b >> 8) == 0x0e) {	// EOF
+				return 0xff;
 			}
 			if ((b >> 8) != 0x0c) {
 				// oops...
@@ -217,6 +230,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				return 0xff;	// EOF
 			}
 			bc ^= 1;
+			byte = (b & 0x0ff);
 			return (byte >> 4);
 		} else {
 			bc ^= 1;
@@ -230,7 +244,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 		sys->run = 0;
 		return 0xff;	// probably ignored
 	}
-	return 0;	// probably ignored
+	return 0;
 }
 
 static void guicn24(w600_sys_t *sys, uint8_t c) {

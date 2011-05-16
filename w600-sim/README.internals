@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.4 2011/05/15 23:10:44 drmiller Exp $
+$Id: README.internals,v 1.5 2011/05/16 20:15:12 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -70,7 +70,9 @@ The simulator sends the following (binary) codes on it's output pipe:
 00001100tttttttt
 	Tape "record" data, byte 'tt'.
 0000110100000000
-	Tape On for read (FE should start sending data).
+	Tape On for read.
+0000110100000001
+	Request front-end to send 1 byte from tape.
 0000111100000000
 	Tape On for write
 0000111000000000
