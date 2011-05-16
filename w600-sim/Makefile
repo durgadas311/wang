@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2011/05/16 14:42:57 drmiller Exp $
+# $Id: Makefile,v 1.18 2011/05/16 14:53:49 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -10,6 +10,13 @@ COPTS =
 
 OBJS = w600_sys.o w600_sim_cmd.o \
 	w600_decode.o w600_exec.o w600_gui.o
+
+TEST = $(shell echo -e this)
+ifeq ($(TEST),this)
+ECHOE = echo -e
+else
+ECHOE = echo
+endif
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
@@ -68,8 +75,8 @@ wang600.jar: w600_fe.class Manifest.txt
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
 	cp wang600.jar wang600.rom w600-sim $(TMPDEST)
-	echo -e '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
-	echo -e '#!/bin/sh\njar xvf wang600.jar fonts/Wang600Display.ttf\nmv -v fonts/Wang600Display.ttf $(FONTDEST)' >$(TMPDEST)/INSTALL
+	$(ECHOE) '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
+	$(ECHOE) '#!/bin/sh\njar xvf wang600.jar fonts/Wang600Display.ttf\nmv -v fonts/Wang600Display.ttf $(FONTDEST)' >$(TMPDEST)/INSTALL
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 
 package: temp_dest
