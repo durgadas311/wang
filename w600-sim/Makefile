@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2011/05/16 14:53:49 drmiller Exp $
+# $Id: Makefile,v 1.19 2011/05/16 16:26:01 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -39,7 +39,7 @@ w600-dasm: w600-dasm.o $(DASM)
 w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
-w600_fe.class: w600_fe.java $(FONTDEST)
+w600_fe.class: w600_fe.java
 	javac w600_fe.java
 
 $(FONTDEST): fonts/Wang600Display.ttf
@@ -76,15 +76,15 @@ temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
 	cp wang600.jar wang600.rom w600-sim $(TMPDEST)
 	$(ECHOE) '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
-	$(ECHOE) '#!/bin/sh\njar xvf wang600.jar fonts/Wang600Display.ttf\nmv -v fonts/Wang600Display.ttf $(FONTDEST)' >$(TMPDEST)/INSTALL
+	$(ECHOE) '#!/bin/sh\necho Ready to launch $${PWD}/run' >$(TMPDEST)/INSTALL
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 
 package: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-# remove $(FONTDEST) once we figure out how to get ttf from jar
-install: temp_dest $(FONTDEST)
+install: temp_dest
+	rm -rf $(INSDEST)
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
 	cd $(INSDEST); ./INSTALL
