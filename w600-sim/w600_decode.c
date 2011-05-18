@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.26 2011/05/18 19:05:38 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.27 2011/05/18 20:51:32 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -72,24 +72,25 @@ static void tape_write(w600_sys_t *sys, int dat) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
+	static int sigc = 0;
 
 	last <<= 1;
 	last |= dat;
-	uint8_t h = last & 0x07;
-	if (h == 0x02 || h == 0x06 || h == 0x03) {
-		uint8_t bit = 0;
-		if (h == 0x02) bit = 1;
-		if (++bitc == 5) {
-			(void)sys->tape(sys, 1, data);
-			if (odd_parity[data] != bit) {
-				fprintf(stderr, "parity error in tape write\n");
-			}
-			data = 0;
-			bitc = 0;
-		} else {
-			data <<= 1;
-			data |= bit;
+	sigc ^= 1;
+	if (sigc) return;
+	uint8_t bit = 0; 
+	uint8_t h = (last & 0x03);
+	if (h == 0x02 || h == 0x01) bit = 1;
+	if (++bitc == 5) {
+		(void)sys->tape(sys, 1, data);
+		if (odd_parity[data] != bit) {
+			fprintf(stderr, "parity error in tape write %x %d [%02x]\n", data, bit, last);
 		}
+		data = 0;
+		bitc = 0;
+	} else {
+		data <<= 1;
+		data |= bit;
 	}
 }
 
