@@ -7,7 +7,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -95,6 +95,9 @@ class _Key {
 	public boolean isFEED() {
 		return (code == FEED);
 	}
+	public boolean isTAPE() {
+		return (code <= TAPE_EJECT);
+	}
 
 	Color color;
 	Color altcolor;
@@ -126,7 +129,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
@@ -190,7 +193,7 @@ public class w600_fe {
 		gridbag.setConstraints(tape, s);
 		front_end.add(tape);
 
-		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me);
+		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me, tape);
 		s.gridx = 0;
 		s.gridy = 1;
 		s.gridwidth = 4;
@@ -211,7 +214,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -296,7 +299,7 @@ if (n == 1) {
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -349,7 +352,7 @@ class Wang600_SimInput
 
 class Wang600_Printer
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -433,7 +436,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	String _tape;
 	java.io.FileOutputStream _fo = null;
@@ -442,44 +445,80 @@ class Wang600_Tape extends JComponent
 	byte[] bb = new byte[2];
 	byte[] b1 = new byte[1];
 	boolean _end = false;
+	boolean _ready = false;
+	int _index;
+	JLabel _window;
+	String _file;
 
 	public Wang600_Tape(OutputStream fout) {
 		_tape = new String("default_casette_tape.img");
 		_fout = fout;
 		Font font;
+		_file = new String("default_cassette.img");
+		_index = 0;
 
 		setLayout(new FlowLayout());
 
-//		JLayeredPane jp = new JLayeredPane();
+		JLayeredPane jp = new JLayeredPane();
+		jp.setOpaque(true);
+		jp.setPreferredSize(new Dimension(300, 200));
 
-//		JLabel wind = new JLabel("<HTML>Tape Name:<BR>Tape File #</HTML>",
-//						SwingConstants.LEFT);
-//		wind.setVerticalAlignment(SwingConstants.TOP);
-//		wind.setForeground(Color.black);
-//		wind.setBackground(_Key.aqua);
-//		wind.setOpaque(true);
-//		font = null;
-//		font = new Font("Monospaced", Font.PLAIN, 12);
-//		wind.setPreferredSize(new Dimension(150, 100));
-//		wind.setFont(font);
-//		jp.add(wind);
-//		jp.setLayer(wind, 5);
+		_window = new JLabel("Tape Source/Dest");
+		_window.setVerticalAlignment(SwingConstants.BOTTOM);
+		_window.setHorizontalAlignment(SwingConstants.LEFT);
+		_window.setForeground(Color.black);
+		_window.setBackground(_Key.aqua);
+		_window.setOpaque(true);
+		font = null;
+		font = new Font("Monospaced", Font.PLAIN, 12);
+		_window.setPreferredSize(new Dimension(200, 100));
+		_window.setBounds(50, 75, 200, 100);
+		_window.setFont(font);
+		update_tape();
+		jp.add(_window, new Integer(1), 500);
 
 		JLabel cass = new JLabel("<HTML><BR><B>WANG</B> 600 Series</HTML>",
 						SwingConstants.CENTER);
 		cass.setVerticalAlignment(SwingConstants.TOP);
+		cass.setHorizontalAlignment(SwingConstants.CENTER);
 		cass.setForeground(Color.black);
 		cass.setBackground(_Key.beige);
 		cass.setOpaque(true);
 		font = null;
 		font = new Font("Monospaced", Font.PLAIN, 18);
 		cass.setPreferredSize(new Dimension(300, 200));
+		cass.setBounds(0, 0, 300, 200);
 		cass.setFont(font);
-//		jp.add(cass);
-//		jp.setLayer(cass, 4);
-//
-//		add(jp);
-		add(cass);
+		jp.add(cass, new Integer(0), 400);
+
+		add(jp);
+	}
+
+	private void update_tape() {
+		String txt = new String("<HTML><B>Tape Source/Dest</B><BR>" +
+				"<B>Name:</B> " + _file + "<BR>" +
+				"<B>File #</B> " + _index +
+				"</HTML>");
+		_window.setText(txt);
+		repaint();
+	}
+
+	public boolean do_button(_Key btn) {
+		System.err.println("Tape function " + btn.code);
+		if (btn.code == _Key.TAPE_READY) {
+			_ready = btn.state;
+			return false;
+		} else if (btn.code == _Key.TAPE_REW) {
+			if (_index > 0) --_index;
+			// TBD: change position of file I/O
+		} else if (btn.code == _Key.TAPE_FF) {
+			++_index;
+			// TBD: change position of file I/O
+		} else if (btn.code == _Key.TAPE_EJECT) {
+			// TBD: select new file...
+		}
+		update_tape();
+		return true;	// reset button OFF - i.e. momentary only
 	}
 
 	public void do_tape(byte[] b) {
@@ -567,7 +606,7 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	public void do_cn24(byte[] b) {
 		if (b[1] == 0) return;
 	}
@@ -576,7 +615,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -722,7 +761,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -738,6 +777,7 @@ class Wang600_Keyboard extends JComponent
 	int _mode0;
 	int _mode1;
 	OutputStream _fout;
+	Wang600_Tape _tape;
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -802,6 +842,15 @@ class Wang600_Keyboard extends JComponent
 		}
 		int type = _kbds[y]._keys[x].getType();
 		int g = _kbds[y]._keys[x].getGroup();
+		if (_kbds[y]._keys[x].isTAPE()) {
+			set_group(g, y, x);
+			boolean st = _tape.do_button(_kbds[y]._keys[x]);
+			if (st) {
+				setToggle(!_kbds[y]._keys[x].state,
+					_kbds[y]._keys[x], _kbds[y]._buttons[x]);
+			}
+			return;
+		}
 		if (g != 0) {
 			set_group(g, y, x);
 		}
@@ -856,8 +905,10 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
-	public Wang600_Keyboard(OutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me) {
+	public Wang600_Keyboard(OutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me,
+				Wang600_Tape tape) {
 		int x;
+		_tape = tape;
 		_kbds = new Wang600_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
@@ -973,7 +1024,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1137,7 +1188,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1336,7 +1387,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1427,7 +1478,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.35 2011/05/17 00:10:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.36 2011/05/18 16:15:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
