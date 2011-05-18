@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.25 2011/05/16 20:15:12 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.26 2011/05/18 19:05:38 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -497,6 +497,7 @@ else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 				sys->cpu.dh = key >> 4;
 				sys->cpu.dl = key & 0x0f;
 				sys->cpu.kp = 0;
+				sys->display(sys, 0);
 			}
 			break;
 		case 7: rc = 3; break;

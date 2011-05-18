@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.15 2011/05/16 20:15:12 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.16 2011/05/18 19:05:38 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -176,9 +176,11 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 	if (nibble & 0x80) { // tape off
 		b = 0x0e00;
 		bc = 0;
+		byte = 0;
 	} else if (nibble & 0x40) { // tape on
 		b = 0x0d00 | ((wr & 1) << 9);
 		bc = 0;
+		byte = 0;
 	} else if (wr) {
 		bc ^= 1;
 		if (bc) {
