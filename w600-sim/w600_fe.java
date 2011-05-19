@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $
+// $Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -130,7 +130,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
@@ -173,7 +173,9 @@ public class w600_fe {
 		pan.setPreferredSize(new Dimension(80, 25));
 		pan.setOpaque(false);
 		s.gridx = 0;
+		s.gridheight = 2;
 		gridbag.setConstraints(pan, s);
+		s.gridheight = 1;
 		front_end.add(pan);
 
 		Wang600_Display dsp = new Wang600_Display(fin);
@@ -182,23 +184,42 @@ public class w600_fe {
 		gridbag.setConstraints(dsp, s);
 		front_end.add(dsp);
 
+		url = w600_fe.class.getResource("icons/logo-sm.gif");
+		ImageIcon ic = new ImageIcon(url);
+		JLabel lab = new JLabel(ic);
+		s.gridx = 1;
+		s.gridy = 1;
+		s.insets.left = 10;
+		s.insets.bottom = 25;
+		s.anchor = GridBagConstraints.SOUTHWEST;
+		gridbag.setConstraints(lab, s);
+		s.anchor = GridBagConstraints.NORTH;
+		s.insets.left = 0;
+		s.insets.bottom = 0;
+		s.gridy = 0;
+		front_end.add(lab);
+
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(110, 25));
 		pan.setOpaque(false);
 		s.gridx = 2;
+		s.gridheight = 2;
 		gridbag.setConstraints(pan, s);
+		s.gridheight = 1;
 		front_end.add(pan);
 
 		Wang600_Tape tape = new Wang600_Tape(fout);
 		s.gridx = 3;
+		s.gridheight = 2;
 		gridbag.setConstraints(tape, s);
+		s.gridheight = 1;
 		front_end.add(tape);
 
 		Wang600_Printer prt = new Wang600_Printer();
 
 		Wang600_Keyboard kbd = new Wang600_Keyboard(fout, dsp.pe, dsp.me, prt, tape);
 		s.gridx = 0;
-		s.gridy = 1;
+		s.gridy = 2;
 		s.gridwidth = 4;
 		gridbag.setConstraints(kbd, s);
 		s.gridwidth = 1;
@@ -209,13 +230,13 @@ public class w600_fe {
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		front_end.setSize(1024,768);
+		front_end.setSize(1024,640);
 		front_end.setVisible(true);
 	}
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -297,7 +318,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -350,7 +371,7 @@ class Wang600_SimInput
 
 class Wang600_Printer
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -412,8 +433,9 @@ class Wang600_Printer
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		//_scroll.getViewport().setBackground(_Key.empty);
 		_frame.add(_scroll);
-		_frame.setSize(260,500);
-		//_frame.setVisible(true);
+		//_frame.setSize(260,500);
+		_frame.pack();	// set size according to content...
+		//_frame.setVisible(true);	// make visible based on "printer on"
 	}
 
 	public void onOff(boolean on) {
@@ -421,8 +443,10 @@ class Wang600_Printer
 	}
 
 	public void feed() {
+		// apparently, this changes getCaretPosition() here,
+		// but not in do_printer() below!
 		_text.append("\n");
-		_text.setCaretPosition(_text.getCaretPosition() + 1);
+		//_text.setCaretPosition(_text.getCaretPosition() + 1);
 	}
 
 	public void do_printer(byte[] b) {
@@ -463,7 +487,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -492,33 +516,39 @@ class Wang600_Tape extends JComponent
 
 		setLayout(new FlowLayout());
 
+		Border lb;
 		JLayeredPane jp = new JLayeredPane();
 		jp.setOpaque(true);
 		jp.setPreferredSize(new Dimension(300, 200));
 
 		_window = new JLabel("Tape Source/Dest");
+		lb = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
+		_window.setBorder(lb);
 		_window.setVerticalAlignment(SwingConstants.BOTTOM);
 		_window.setHorizontalAlignment(SwingConstants.LEFT);
 		_window.setForeground(Color.black);
 		_window.setBackground(_Key.aqua);
 		_window.setOpaque(true);
 		font = null;
-		font = new Font("Monospaced", Font.PLAIN, 12);
+		font = new Font("Sans-serif", Font.PLAIN, 12);
 		_window.setPreferredSize(new Dimension(200, 100));
 		_window.setBounds(50, 75, 200, 100);
 		_window.setFont(font);
 		update_tape();
 		jp.add(_window, new Integer(1), 500);
 
-		JLabel cass = new JLabel("<HTML><BR><B>WANG</B> 600 Series</HTML>",
+		JLabel cass = new JLabel("<HTML><BR><FONT SIZE=+2><B>WANG</B></FONT>" +
+					" 600 Series</HTML>",
 						SwingConstants.CENTER);
+		lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
+		cass.setBorder(lb);
 		cass.setVerticalAlignment(SwingConstants.TOP);
 		cass.setHorizontalAlignment(SwingConstants.CENTER);
 		cass.setForeground(Color.black);
-		cass.setBackground(_Key.beige);
+		cass.setBackground(_Key.ivory);
 		cass.setOpaque(true);
 		font = null;
-		font = new Font("Monospaced", Font.PLAIN, 18);
+		font = new Font("Serif", Font.PLAIN, 18);
 		cass.setPreferredSize(new Dimension(300, 200));
 		cass.setBounds(0, 0, 300, 200);
 		cass.setFont(font);
@@ -715,7 +745,7 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	public void do_cn24(byte[] b) {
 		if (b[1] == 0) return;
 	}
@@ -724,7 +754,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -865,7 +895,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1012,6 +1042,10 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
+	JFrame _frame;
+	JTextArea _text;
+	JScrollPane _scroll;
+
 	public Wang600_Keyboard(OutputStream fo, Wang600_ProgErr pe, Wang600_ProgErr me,
 				Wang600_Printer prt, Wang600_Tape tape) {
 		int x;
@@ -1024,6 +1058,23 @@ class Wang600_Keyboard extends JComponent
 		_shift = false;
 		_meta = 0;
 		_fout = fo;
+
+//		_frame = new JFrame("Wang 600 Help");
+//		// TBD icon or not
+//		_frame.setLayout(new FlowLayout());
+//		File h = new File("wang600.html");
+//		javax.swing.text.HTMLDocument d = new javax.swing.text.HTMLDocument(h);
+//		_text = new JTextArea(d, 32, 80);
+//		_text.setLineWrap(true);
+//		_text.setFont(new Font("Monospaced", Font.PLAIN, 12));
+//		_scroll = new JScrollPane(_text);
+//		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+//		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+//		//_scroll.getViewport().setBackground(_Key.empty);
+//		_frame.add(_scroll);
+//		_frame.setSize(1024,250);
+//		_frame.setVisible(true);
+
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JPanel pan;
@@ -1132,7 +1183,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1296,7 +1347,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1495,7 +1546,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1586,7 +1637,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.39 2011/05/18 22:02:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.40 2011/05/19 23:27:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
