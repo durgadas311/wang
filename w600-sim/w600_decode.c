@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.28 2011/05/20 09:15:27 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.29 2011/05/20 09:45:35 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -193,6 +193,9 @@ static int pr_col = 0;
 
 static void printer_status(w600_sys_t *sys) {
 	if ((sys->cpu.mode1 & MODE1_PRT_ON) == 0) {
+		// only if running program doesn't get here...
+		// printer is off, tach will never pulse, so don't spin
+		sys->keyboard(sys, NULL); // sleep until key event
 		return;
 	}
 	if (pr_tach) {
@@ -278,8 +281,9 @@ static inline void display_check(w600_sys_t *sys) {
 		}
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
-		sleep(1);
 		sys->display(sys, 0);
+	} else if (sys->cpu.pc == 0x27b) {	// alpha-stop in running program...
+		sleep(1);
 	}
 }
 
