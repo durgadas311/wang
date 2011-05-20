@@ -1,8 +1,8 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.1 2011/05/20 22:17:22 drmiller Exp $
+# $Id: INSTALL,v 1.2 2011/05/20 22:22:56 drmiller Exp $
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
-	cp progs/* ~/Wang600Files
+	cp -v progs/* ~/Wang600Files
 fi
 echo "Ready to launch ${PWD}/run"
