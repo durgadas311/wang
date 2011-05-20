@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $
+// $Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -131,7 +131,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -228,6 +228,7 @@ public class w600_fe {
 		gridbag.setConstraints(kbd, s);
 		s.gridwidth = 1;
 		front_end.add(kbd);
+		front_end.addKeyListener(kbd);
 
 		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape);
 
@@ -240,7 +241,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -322,7 +323,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -376,7 +377,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -576,7 +577,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -861,7 +862,7 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	public void do_cn24(byte[] b) {
 		if (b[1] == 0) return;
 	}
@@ -870,7 +871,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1008,10 +1009,30 @@ class Wang600_Display extends JComponent
 	}
 }
 
+//class FocusHog extends InputVerifier
+//	implements ActionListener
+//{
+//	public boolean verify(JComponent input) {
+//System.err.println("hog");
+//		return false;
+//	}
+//
+//	public boolean shouldYieldFocus(JComponent input) {
+//System.err.println("HOG");
+//		return false;
+//	}
+//
+//	public void actionPerformed(ActionEvent e) {
+//System.err.println("hog?");
+//		Wang600_Keyboard kb = (Wang600_Keyboard)e.getSource();
+//		shouldYieldFocus(kb);
+//	}
+//}
+
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1077,6 +1098,26 @@ class Wang600_Keyboard extends JComponent
 		setToggle(!_kbds[y]._keys[x].state, _kbds[y]._keys[x], _kbds[y]._buttons[x]);
 	}
 
+	private void do_keycode(int code) {
+		if (_fout == null) {
+			int t = code >> 8;
+			int h = (code >> 4) & 0x0f;
+			int l = code & 0x0f;
+			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
+		} else {
+			byte[] b = new byte[2];
+			b[0] = (byte)(code & 0x0ff);
+			b[1] = (byte)(code >> 8);
+			try {
+				_fout.write(b);
+				_fout.flush();	// why?
+			} catch (IOException ee) {
+				System.err.println("Broken pipe for keyboard!");
+				_fout = null;
+			}
+		}
+	}
+
 	private void do_button(ActionEvent e, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
 		if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
@@ -1139,23 +1180,7 @@ class Wang600_Keyboard extends JComponent
 			setShift(false);
 		}
 
-		if (_fout == null) {
-			int t = code >> 8;
-			int h = (code >> 4) & 0x0f;
-			int l = code & 0x0f;
-			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
-		} else {
-			byte[] b = new byte[2];
-			b[0] = (byte)(code & 0x0ff);
-			b[1] = (byte)(code >> 8);
-			try {
-				_fout.write(b);
-				_fout.flush();	// why?
-			} catch (IOException ee) {
-				System.err.println("Broken pipe for keyboard!");
-				_fout = null;
-			}
-		}
+		do_keycode(code);
 	}
 
 	JFrame _frame;
@@ -1283,12 +1308,33 @@ class Wang600_Keyboard extends JComponent
 		add(kbd);
 		_kbds[_nkbds] = kbd;
 		++_nkbds;
-		// This doesn't work... perhaps 'this' is not an "input object"?
-		// addKeyListener(this);
-		// setFocusTraversalKeysEnabled(false);
+
+		//setFocusTraversalKeysEnabled(false);
+		setFocusCycleRoot(true);
+		setRequestFocusEnabled(true);
+		// setTransferHandler(TransferHandler newHandler) 
+
+		// can't seem to stop losing focus...
+		//FocusHog fh = new FocusHog();
+		//this.setInputVerifier(fh);
+		//addActionListener(fh);
 	}
 
 	public void keyTyped(KeyEvent e) {
+//System.err.println("key pressed "+e.getKeyCode()+" "+e.getKeyChar());
+		char c = e.getKeyChar();
+		if (c >= '0' && c <= '9') {
+			do_keycode(c - '0');
+		}
+		if (c == 'e' || c == 'E') {
+			do_keycode(11);
+		}
+		if (c == '.') {
+			do_keycode(10);
+		}
+		if (c == '+' || c == '-') {
+			do_keycode(12);
+		}
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -1311,6 +1357,7 @@ class Wang600_Keyboard extends JComponent
 				_frame.pack();
 			}
 			_frame.setVisible(_help_on);
+			return;
 		}
 		int x, y;
 		for (y = 0; y < _nkbds; ++y) {
@@ -1326,7 +1373,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1490,7 +1537,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1706,7 +1753,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1797,7 +1844,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.49 2011/05/20 22:39:43 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.50 2011/05/20 23:46:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
