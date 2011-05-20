@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2011/05/16 18:34:58 drmiller Exp $
+# $Id: Makefile,v 1.21 2011/05/20 11:10:22 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -61,7 +61,8 @@ tar: wang600-block-diag.pdf
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
 		w600-sim/wang600.rom w600-sim/icons/*.gif \
-		w600-sim/wang600.rom w600-sim/icons/*.png w600-sim/fonts/*.ttf
+		w600-sim/wang600.rom w600-sim/icons/*.png w600-sim/fonts/*.ttf	\
+		w600-sim/docs/*.html
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
@@ -70,7 +71,7 @@ Manifest.txt:
 	echo "Main-Class: w600_fe" >$@
 
 wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf
+	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf docs/*.html
 
 # INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang600.jar
