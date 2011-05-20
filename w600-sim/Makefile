@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2011/05/20 11:10:22 drmiller Exp $
+# $Id: Makefile,v 1.22 2011/05/20 22:17:22 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -76,10 +76,10 @@ wang600.jar: w600_fe.class Manifest.txt
 # INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
-	cp wang600.jar wang600.rom w600-sim $(TMPDEST)
-	$(ECHOE) '#!/bin/sh\ncd $${0%/*}\nexec java -jar wang600.jar' >$(TMPDEST)/run
-	$(ECHOE) '#!/bin/sh\necho Ready to launch $${PWD}/run' >$(TMPDEST)/INSTALL
+	cp wang600.jar wang600.rom w600-sim run INSTALL $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+	mkdir -p $(TMPDEST)/progs
+	cp progs/*.lst progs/*.wng $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
