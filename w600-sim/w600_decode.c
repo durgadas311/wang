@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.29 2011/05/20 09:45:35 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.30 2011/05/20 12:02:26 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -281,9 +281,10 @@ static inline void display_check(w600_sys_t *sys) {
 		}
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
+		if (sys->cpu.stk1 == 0x27a) { // alpha-stop in running program...
+			sleep(1);
+		}
 		sys->display(sys, 0);
-	} else if (sys->cpu.pc == 0x27b) {	// alpha-stop in running program...
-		sleep(1);
 	}
 }
 
