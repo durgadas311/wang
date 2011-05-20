@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.27 2011/05/18 20:51:32 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.28 2011/05/20 09:15:27 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -277,7 +277,7 @@ static inline void display_check(w600_sys_t *sys) {
 			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp...\n");
 		}
 		sys->display(sys, -1);	// must not sleep!
-	} else if (sys->cpu.pc == 0x27b) {	// alpha-stop done...
+	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
 		sleep(1);
 		sys->display(sys, 0);
 	}
