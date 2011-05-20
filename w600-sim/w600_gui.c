@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.17 2011/05/20 09:15:55 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.18 2011/05/20 09:44:52 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -77,11 +77,7 @@ static void guidisplay(w600_sys_t *sys, int on) {
 		++disp_good;
 		if (disp_good > 64) {
 			if (on > 0) {
-				struct pollfd fds;
-				fds.fd = __gui_kfd;
-				fds.events = POLLIN;
-				fds.revents = 0;
-				/* int rc = */ poll(&fds, 1, -1);
+				sys->keyboard(sys, NULL); // sleep until key event
 			}
 		}
 	}
@@ -97,6 +93,14 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	if (rc == __gui_pid) {
 		// silently quit...
 		sys->run = 0;
+		return;
+	}
+	if (kc == NULL) {
+		struct pollfd fds;
+		fds.fd = __gui_kfd;
+		fds.events = POLLIN;
+		fds.revents = 0;
+		/* int rc = */ poll(&fds, 1, -1);
 		return;
 	}
 	if (extraneous) {
@@ -210,11 +214,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				sys->run = 0;
 				return 0xff;	// EOF
 			}
-			struct pollfd fds;
-			fds.fd = __gui_kfd;
-			fds.events = POLLIN;
-			fds.revents = 0;
-			/* int rc = */ poll(&fds, 1, -1);
+			sys->keyboard(sys, NULL); // sleep until key event
 			rc = read(__gui_kfd, &b, sizeof(b));
 			if (rc < 0 && errno != EAGAIN) {
 				perror("guitape");
@@ -224,11 +224,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			}
 			if ((b >> 8) == 0x0e) {	// EOF
 				// nothing good will happen now... until a key is pressed...
-				struct pollfd fds;
-				fds.fd = __gui_kfd;
-				fds.events = POLLIN;
-				fds.revents = 0;
-				/* int rc = */ poll(&fds, 1, -1);
+				sys->keyboard(sys, NULL); // sleep until key event
 				return 0xff;
 			}
 			if ((b >> 8) != 0x0c) {
