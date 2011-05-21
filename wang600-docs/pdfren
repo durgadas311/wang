@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# doc_data.txt:
+# -------------
+# ...
+# NumberOfPages: 47
+# BookmarkTitle: 5936.pdf
+# BookmarkLevel: 1
+# BookmarkPageNumber: 3
+# BookmarkTitle: 5948.pdf
+# BookmarkLevel: 1
+# BookmarkPageNumber: 4
+# BookmarkTitle: 5962.pdf
+
+unset title page
+cat doc_data.txt | while read label value; do
+	if [[ ${label} == "BookmarkTitle:" ]]; then
+		title=${value}
+	elif [[ ${label} == "BookmarkPageNumber:" ]]; then
+		in=$(printf pg_%04d.pdf ${value})
+		#echo "mv ${in} ${title}"
+		mv -v -i ${in} ${title}
+	fi
+done
