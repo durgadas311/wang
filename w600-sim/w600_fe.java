@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $
+// $Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -131,7 +131,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -241,7 +241,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -323,7 +323,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -377,7 +377,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -514,6 +514,8 @@ class Wang600_Printer
 		_frame.setVisible(on);
 	}
 
+	public JFrame getFrame() { return _frame; }
+
 	public void feed() {
 		// apparently, this changes getCaretPosition() here,
 		// but not in do_printer() below!
@@ -577,7 +579,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -862,7 +864,7 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	public void do_cn24(byte[] b) {
 		if (b[1] == 0) return;
 	}
@@ -871,7 +873,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1010,9 +1012,9 @@ class Wang600_Display extends JComponent
 }
 
 class Wang600_Keyboard extends JComponent
-	implements ActionListener, KeyListener
+	implements ActionListener, KeyListener, WindowListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1024,6 +1026,8 @@ class Wang600_Keyboard extends JComponent
 	boolean _shift;
 	int _shift_kbd;
 	int _shift_btn;
+	int _print_kbd;
+	int _print_btn;
 	int _meta;
 	int _mode0;
 	int _mode1;
@@ -1098,9 +1102,8 @@ class Wang600_Keyboard extends JComponent
 		}
 	}
 
-	private void do_button(ActionEvent e, int y, int x) {
+	private void do_button(boolean shifted, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
-		boolean shifted = ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0);
 		if (_kbds[y]._keys[x].isSHIFT()) {
 			if (!shifted) setShift(!_shift);
 			return;
@@ -1181,6 +1184,8 @@ class Wang600_Keyboard extends JComponent
 		_fout = fo;
 		_help_on = false;
 
+		_prt.getFrame().addWindowListener(this);
+
 		java.net.URL url = Wang600_Keyboard.class.getResource("docs/wang600.html");
 
 		_frame = new JFrame("Wang 600 Help");
@@ -1203,6 +1208,7 @@ class Wang600_Keyboard extends JComponent
 		_frame.add(_scroll);
 		_frame.pack();
 		//_frame.setVisible(true);
+		_frame.addWindowListener(this);
 
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
@@ -1221,6 +1227,10 @@ class Wang600_Keyboard extends JComponent
 
 		kbd = new Wang600_Keyboard_stick();
 		for (x = 0; x < kbd._nkeys; ++x) {
+			if (kbd._keys[x].code == _Key.GROUP(6,_Key.MODE1_CHG(2,2))) {
+				_print_kbd = _nkbds;
+				_print_btn = x;
+			}
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
 		}
@@ -1273,6 +1283,7 @@ class Wang600_Keyboard extends JComponent
 		_help.setFocusPainted(false);
 		_help.setPreferredSize(new Dimension(75,25));
 		_help.addActionListener(this);
+		_help.setFocusable(false);
 
 		kbd = new Wang600_Keyboard_main(_help);
 		for (x = 0; x < kbd._nkeys; ++x) {
@@ -1331,6 +1342,9 @@ class Wang600_Keyboard extends JComponent
 			if (_help_on) {
 				// this still isn't right...
 				_frame.pack();
+				_help.setBackground(_Key.neon2);
+			} else {
+				_help.setBackground(_Key.empty);
 			}
 			_frame.setVisible(_help_on);
 			return;
@@ -1339,17 +1353,38 @@ class Wang600_Keyboard extends JComponent
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					do_button(e, y, x);
+					boolean shifted = ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0);
+					do_button(shifted, y, x);
 					return;
 				}
 			}
+		}
+	}
+
+	public void windowActivated(WindowEvent e) { }
+	public void windowClosed(WindowEvent e) { }
+	public void windowIconified(WindowEvent e) { }
+	public void windowOpened(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeactivated(WindowEvent e) { }
+
+	public void windowClosing(WindowEvent e) {
+		if (e.getWindow() == _frame) {
+			_help_on = false;
+			_help.setBackground(_Key.empty);
+			_frame.setVisible(_help_on);
+			return;
+		}
+		if (e.getWindow() == _prt.getFrame()) {
+			do_button(false, _print_kbd, _print_btn);
+			return;
 		}
 	}
 }
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1513,7 +1548,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1729,7 +1764,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1820,7 +1855,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.52 2011/05/21 02:34:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.53 2011/05/21 14:42:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
