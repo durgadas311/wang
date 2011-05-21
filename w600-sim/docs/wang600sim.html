@@ -1,0 +1,48 @@
+<HTML>
+<!-- $Id: wang600sim.html,v 1.1 2011/05/21 21:31:14 drmiller Exp $ >
+
+<H2>Wang 600 Simulator Differences</H2>
+
+The simulator attempts to mimic operations of the original Wang 600 hardware as much as possible.
+Some obvious differences are the tape drive, since no physical cassettes tapes are used.
+
+<H3>Keyboard Operation</H3>
+
+The virtual keyboard may be entirely operated by the mouse. For convenience, some real keyboard shortcuts
+are allowed. The most useful one is that the real keyboard "Shift" key transfers directly to the
+Wang 600 SHIFT key. Holding down the real keyboard Shift will illuminate the Wang 600 keyboard SHIFT,
+as visual feedback.
+
+<P>In addition, the number entry keys are activated by the real keyboard digit keys, plus "e" or "E"
+map to SET EXP, "-" or "+" map to CHANGE SIGN, and "." maps to the decimal point.
+
+<H3>Tape Operation</H3>
+
+The tape drive uses files on the local system. These files have raw binary program codes only.
+The files may have multiple program images, each terminated by an END PROG code, but the
+preferred method of operation is to put only one program image in a file.
+
+<P>Program image files are normally stored in the user's home directory in a folder named "Wang600Files".
+
+<P>In order to LOAD PROG or RECORD PROG, the tape unit must be "Ready", but depressing the "Tape Ready" button.
+If these operations are attempted when the Tape Ready button is not depressed, the display will blank.
+Pressing PRIME will restore normal operations.
+
+<P>The "Release" (tape eject) button will pop-up a file-selection dialog to allow choosing a file to use
+as a tape image.
+
+<P>The "Forward" and "Rewind" buttons will move the current location inside a file to the next, or previous,
+program image. Since most files will have only one program image, these are not normally used.
+
+<H3>Printer Operation</H3>
+
+Like the original hardware, the printer must be "On" in order to print. In Run mode, attempts to print
+(or List Program, etc) will hang with a blank display (just like the original hardware). Programs that
+attempt to print will simply continue (again, like the original machine).
+
+<P>Since there is no physical printer, the printed output is put in a window where it may be viewed.
+In addition, this window allows Copy operations (e.g. Cut-n-Paste) to extract the contents (or a portion of it).
+In addition, a menu option "Save" may be used to save the current contents to a file.
+A menu option "Tear Off" will clear the print window and discard all current contents.
+
+</HTML>

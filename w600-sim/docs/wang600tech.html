@@ -1,0 +1,62 @@
+<HTML>
+<!-- $Id: wang600tech.html,v 1.1 2011/05/21 21:31:14 drmiller Exp $ >
+
+<H2>Wang 600 Programming Techniques</H2>
+
+In general, any key that can be used in Run mode may be entered into a program and
+used to perform the same function there. Exceptions are the keys PRIME, SET P.C.,
+VERIFY PROG, RECORD PROG, and STEP. These all directly affect the calculator
+and cannot be used in a program.
+
+<P>Unless otherwise directed by program codes, the execution of a program continues
+through the steps in numerical order.
+
+<H3>Example program: convert farenheit to celsius</H3>
+
+Here is a simple program to convert degrees
+farenheit to degrees celsius. The basic formula being used is:
+
+<PRE>
+C = (F - 32) * 5 / 9
+</PRE>
+
+<P>The program will assume that the user entered the degrees F before pressing GO.
+The following program will perform the conversion:
+
+<PRE>
+STORE (left)
+3
+2
+- (left)
+5
+&#215;= (left)
+9
+&divide;= (left)
+END PROG
+</PRE>
+
+<P>Note, the above keys (except for END PROG) are the same ones that would be used
+to perform the conversion manually, using the Wang 600 as a simple calculator.
+
+<P>Place the calculator in Learn mode (or Learn and Print) and enter the above codes.
+If you used Learn and Print, or List Program after entering it, you should have
+the following listing on the printer:
+
+<PRE>
+ 0000  06 15    ST15     
+ 0001  00 03     E3      
+ 0002  00 02     E2      
+ 0003  03 15     -15     
+ 0004  00 05     E5      
+ 0005  04 15     ×15     
+ 0006  00 09     E9      
+ 0007  05 15     ÷15     
+ 0008  09 14     *    EP 
+</PRE>
+
+<P>Now go back to Run mode, enter a number of degrees farenheit, and press GO.
+You should see in the display the number converted to degress celsius.
+
+<H3>Changing Program execution Sequence</H3>
+
+</HTML>

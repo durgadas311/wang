@@ -1,0 +1,44 @@
+<HTML>
+<!-- $Id: wang600prog.html,v 1.1 2011/05/21 21:31:14 drmiller Exp $ >
+
+<H2>Programming the Wang 600</H2>
+
+Programs may be entered into the calculator memory in the "Learn", or "Learn and Print" modes.
+In Learn and Print mode, each program step entered will be printed.
+The printer must be "On" to use Learn and Print.
+
+<P>Each key pressed in Learn mode will be entered into the current program step, and
+the program step (Program Counter, or P.C.) will advance to the next step.
+Pressing PRIME will return to step 0000. The "Set P.C." key may be used to go directly to any program step.
+Press Set P.C. followed by 4 digits to select a program step.
+This calculator has 1848 program steps, numbered 0000 through 1847.
+
+<H3>Listing a Program</H3>
+
+A program may be listed by going to "List Program" mode and pressing "GO" (actually, almost any key will
+start the listing). The printer msut be "On". The program listing will continue until an END PROG code
+is encountered (not printed). In addition, the calculator will stop listing every 100 steps (if you forgot
+to put and END PROG in your program, or your program is longer than 100 steps).
+
+<P><B>Simulator Note:</B> A program listing may be saved to a file by using the Save menu option in the printer window.
+Note, a program listing cannot be loaded back into the calculator, only tape image files may be loaded.
+
+<H3>Running a Program</H3>
+
+A program may be run by going to "Run" mode (depressing the Run bushbutton) and pressing "GO".
+The display will normally be blank during program execution, however a program may use the
+codes "alpha STOP" (SHIFT PRINT, SHIFT GO) to pause for 1 second, allowing the current display
+contents to be seen.
+
+<P>Also, programs may use the STOP code (SHIFT GO) to cause the program to stop. The user must press GO to continue
+running the program. This technique is often used to let the user enter variables for the program.
+It is common to CLEAR DISPLAY before the STOP, in order to make the request for input obvious.
+Alternatively, a special, meaningful, value may be in the display.
+
+<P>A program will also stop when it encounters an END PROG code. however, the program cannot be resumed
+after that, as the program counter is reset to 0000. Also note, having more than one END PROG is a program can
+be a problem. Not the least of which is for the List Program mode, but also for recording programs to tape.
+Normally, if a program has multiple exit points they will all be branches to a single END PROG and the
+physical end of all program codes. (See SEARCH/MARK in Programming Techniques).
+
+</HTML>
