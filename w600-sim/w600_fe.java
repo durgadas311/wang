@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $
+// $Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -31,6 +31,7 @@ class _Key {
 	static final int MODE1 = 0x0300;
 	static final int META = 0x0400;		// never sent
 	static final int METAP = 0x0500;	// never sent
+	static final int METAS = 0x0600;	// never sent
 
 	public _Key(Color sl, int c) {
 		this.color = sl;
@@ -68,6 +69,9 @@ class _Key {
 	static final int META_PRE(int a, int b) {
 		return (METAP | (a << 4) | b);
 	}
+	static final int META_SPL(int a, int b) {
+		return (METAS | (a << 4) | b);
+	}
 	// group is never sent.
 	// group=-1 is toggle (no group)
 	// group=0 is momentary switch (no group)
@@ -100,6 +104,9 @@ class _Key {
 	public boolean isTAPE() {
 		return (code <= TAPE_EJECT);
 	}
+	public boolean isMETA() {
+		return (getType() == METAP || getType() == METAS);
+	}
 
 	Color color;
 	Color altcolor;
@@ -131,7 +138,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -248,7 +255,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -330,7 +337,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -386,7 +393,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -630,7 +637,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -951,7 +958,7 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	private byte[] cn24_xlate;
 
 	public Wang600_CN24() {
@@ -1003,7 +1010,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1144,7 +1151,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1159,6 +1166,7 @@ class Wang600_Keyboard extends JComponent
 	int _print_kbd;
 	int _print_btn;
 	int _meta;
+	int _metas;
 	int _mode0;
 	int _mode1;
 	OutputStream _fout;
@@ -1178,6 +1186,8 @@ class Wang600_Keyboard extends JComponent
 		if (key.state == on) return;
 		if (key.getType() == _Key.METAP) {
 			_meta &= ~key.getMask();
+		} else if (key.getType() == _Key.METAS) {
+			_metas &= ~key.getMask();
 		} else if (key.getType() == _Key.MODE0) {
 			_mode0 &= ~key.getMask();
 		} else if (key.getType() == _Key.MODE1) {
@@ -1187,6 +1197,8 @@ class Wang600_Keyboard extends JComponent
 			btn.setBackground(key.altcolor);
 			if (key.getType() == _Key.METAP) {
 				_meta |= key.getMode();
+			} else if (key.getType() == _Key.METAS) {
+				_metas |= key.getMode();
 			} else if (key.getType() == _Key.MODE0) {
 				_mode0 |= key.getMode();
 			} else if (key.getType() == _Key.MODE1) {
@@ -1256,7 +1268,7 @@ class Wang600_Keyboard extends JComponent
 		if (g != 0) {
 			set_group(g, y, x);
 		}
-		if (type == _Key.METAP) {
+		if (_kbds[y]._keys[x]isMETA()) {
 			return;
 		}
 		// _mode0, _mode1, _meta were already updated above...
@@ -1284,7 +1296,7 @@ class Wang600_Keyboard extends JComponent
 		}
 		if (type == _Key.META) {
 			code &= 0x00f;
-			code |= (_meta << 4);
+			code |= ((_meta | _metas) << 4);
 			if (_shift) {
 				code |= 0x010;
 			}
@@ -1312,6 +1324,7 @@ class Wang600_Keyboard extends JComponent
 		_col = 0;
 		_shift = false;
 		_meta = 0;
+		_metas = 0;
 		_fout = fo;
 		_help_on = false;
 
@@ -1594,7 +1607,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1758,7 +1771,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1974,7 +1987,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2065,7 +2078,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.60 2011/05/22 16:55:38 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.61 2011/05/22 21:04:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
@@ -2128,7 +2141,7 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		addPushButton(c, 5, 1, 8, 0,"f(x)","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(15,10))));
 		addPushButton(c, 5, 1, 9, 0,"Sp<BR>\u2193<BR>On", "8",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.META_PRE(8,8))));
+			new _Key(_Key.white1, _Key.GROUP(3,_Key.META_SPL(8,8))));
 		addPushButton(c, 5, 1, 10, 0,"Fl<BR>\u2195<BR>Sc","",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(4,_Key.MODE0_CHG(1,1))));
 		addPushButton(c, 5, 1, 11, 0,"Deg<BR>\u2195<BR>Rad","",_Key.white2, false,
