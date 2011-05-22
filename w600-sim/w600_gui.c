@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.18 2011/05/20 09:44:52 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.19 2011/05/22 02:52:02 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -265,6 +265,7 @@ static void guicn24(w600_sys_t *sys, uint8_t c) {
 	}
 }
 
+// spawn the GUI as a back-end to us...
 static int spawn_fe(w600_sys_t *sys) {
 	int fd[2];
 	int fe[2];
@@ -294,18 +295,16 @@ static int spawn_fe(w600_sys_t *sys) {
 	}
 
 	if (__gui_pid == 0) {
-		char fdn[16];
-		char fen[16];
 		close(fd[0]);
 		close(fe[1]);
+		dup2(fe[0], 0);
+		dup2(fd[1], 1);
 		setsid();
-		sprintf(fdn, "%d", fd[1]);
-		sprintf(fen, "%d", fe[0]);
 #if 0
 		execlp("xterm", "xterm", "-e", "./w600_fe", fdn, (char *)NULL);
 		perror("xterm -e ./w600_fe");
 #else
-		execlp("java", "java", "w600_fe", fdn, fen, (char *)NULL);
+		execlp("java", "java", "w600_fe", "-b", (char *)NULL);
 		perror("java w600_fe");
 #endif
 		exit(1);
@@ -317,6 +316,9 @@ static int spawn_fe(w600_sys_t *sys) {
 	fcntl(__gui_kfd, F_SETFL, fl);
 	sys->keyboard = guikeyboard;
 	sys->display = guidisplay;
+	sys->printer = guiprinter;
+	sys->tape = guitape;
+	sys->cn24 = guicn24;
 	return 0;
 }
 
