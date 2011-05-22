@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $
+// $Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -131,7 +131,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -230,7 +230,9 @@ public class w600_fe {
 		front_end.add(kbd);
 		front_end.addKeyListener(kbd);
 
-		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape);
+		Wang600_CN24 cn24 = new Wang600_CN24();
+
+		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape, cn24);
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -241,7 +243,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -323,7 +325,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -332,10 +334,12 @@ class Wang600_SimInput
 	InputStream _fin;
 
 	public Wang600_SimInput(InputStream f, Wang600_Display dsp,
-			Wang600_Printer prt, Wang600_Tape tape) {
+			Wang600_Printer prt, Wang600_Tape tape,
+			Wang600_CN24 cn24) {
 		_dsp = dsp;
 		_prt = prt;
 		_tape = tape;
+		_cn24 = cn24;
 		_fin = f;
 		if (f != null) {
 			Thread t = new Thread(this);
@@ -377,7 +381,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -616,7 +620,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -901,16 +905,58 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
+	private byte[] cn24_xlate;
+
+	public Wang600_CN24() {
+		cn24_xlate = new byte[256];
+		cn24_xlate[0x00] = '-';
+		cn24_xlate[0x02] = ' ';
+
+		cn24_xlate[0x16] = '.';
+
+		cn24_xlate[0x25] = '+';
+
+//[0x18] = '\r',        // "RETURN" action...
+//[0x1a] = '\n',        // "INDEX" action... (newline)
+//[0x28] = '?',         // "PRINT" action... just reset for next characters? or power-up?
+		cn24_xlate[0x29] = '1';
+		cn24_xlate[0x30] = '9';
+		cn24_xlate[0x31] = '0';
+
+		cn24_xlate[0x34] = '6';
+		cn24_xlate[0x35] = '5';
+		cn24_xlate[0x36] = '2';
+
+		cn24_xlate[0x39] = '4';
+
+		cn24_xlate[0x3c] = '8';
+		cn24_xlate[0x3d] = '7';
+		cn24_xlate[0x3e] = '3';
+	}
+
 	public void do_cn24(byte[] b) {
-		if (b[1] == 0) return;
+		if (b[0] == 0x28) return;
+		byte p = cn24_xlate[b[0]];
+		byte[] bb;
+		if (p == 0) {
+			bb = new String("\n<"+b[0]+">").getBytes();
+		} else {
+			bb = new byte[1];
+			bb[0] = p;
+		}
+try {
+System.err.write(bb);
+System.err.flush();
+} catch (IOException e) {
+}
 	}
 }
 
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1051,7 +1097,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1258,6 +1304,9 @@ class Wang600_Keyboard extends JComponent
 		mi = new JMenuItem("Programming Techniques", KeyEvent.VK_T);
 		mi.addActionListener(this);
 		mu.add(mi);
+		mi = new JMenuItem("Programming Functions", KeyEvent.VK_F);
+		mi.addActionListener(this);
+		mu.add(mi);
 		mi = new JMenuItem("Simulator", KeyEvent.VK_S);
 		mi.addActionListener(this);
 		mu.add(mi);
@@ -1409,6 +1458,8 @@ class Wang600_Keyboard extends JComponent
 			url = Wang600_Keyboard.class.getResource("docs/wang600.html");
 		} else if (e.getActionCommand() == "Programming") {
 			url = Wang600_Keyboard.class.getResource("docs/wang600prog.html");
+		} else if (e.getActionCommand() == "Programming Functions") {
+			url = Wang600_Keyboard.class.getResource("docs/wang600func.html");
 		} else if (e.getActionCommand() == "Programming Techniques") {
 			url = Wang600_Keyboard.class.getResource("docs/wang600tech.html");
 		} else if (e.getActionCommand() == "Program Codes") {
@@ -1484,7 +1535,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1648,7 +1699,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -1864,7 +1915,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -1955,7 +2006,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.55 2011/05/21 21:31:14 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.56 2011/05/22 00:20:21 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

@@ -1,0 +1,38 @@
+<HTML>
+<HEAD>
+<!-- $Id: wang600func.html,v 1.1 2011/05/22 00:20:21 drmiller Exp $ >
+<STYLE TYPE="text/css">
+td {text-align: center;}
+</STYLE>
+</HEAD>
+<BODY>
+
+<H2>Wang 600 Program Codes</H2>
+
+<TABLE BORDER>
+<TR><TH>Key Sequence</TH><TH>Code</TH><TH>Function</TH></TR>
+<TR><TD>&#945; STOP</TD><TD>09 02, 09 03</TD><TD>1 second pause</TD></TR>
+<TR><TD>&#945; SEARCH</TD><TD>09 02, 08 00</TD><TD>&#960;</TD></TR>
+<TR><TD>&#945; PRINT</TD><TD>09 02, 08 02</TD><TD>enable key trace</TD></TR>
+<TR><TD>&#945; f(x)</TD><TD>09 02, 10 xx</TD><TD>display &#215;= 10<SUP>xx</SUP></TD></TR>
+<TR><TD>&#945; F(x)</TD><TD>09 02, 11 xx</TD><TD>display &divide;= 10<SUP>xx</SUP></TD></TR>
+<TR><TD>&#945; LOAD PROG</TD><TD>09 02, 08 14</TD><TD>execute directly from tape</TD></TR>
+<TR><TD>&#945; 1/X</TD><TD>09 02, 08 15</TD><TD>read something from tape...</TD></TR>
+<TR><TD>&#945; RECALL</TD><TD>09 02, 08 01</TD><TD>read something to tape...</TD></TR>
+<TR><TD>&#945; STORE</TD><TD>09 02, 09 01</TD><TD>store register(s) to tape,<BR>start with R(display), R(display - 1), ...</TD></TR>
+<TR><TD>&#945; J<SUP>IF</SUP>0</TD><TD>09 02, 08 04</TD><TD>jump if R0 = display</TD></TR>
+<TR><TD>&#945; J<SUP>IF</SUP>+</TD><TD>09 02, 08 05</TD><TD>jump if R0 &gt;= display</TD></TR>
+<TR><TD>&#945; SIN</TD><TD>09 02, 08 06</TD><TD>jump if R0 &lt; display</TD></TR>
+<TR><TD>I/O **</TD><TD>15 02, xx yy</TD><TD>xx: 00-09, yy: 00-15<BR>
+					Print display to "Output Writer 6053"<BR>
+					xx = integer places<BR>yy: decimal places</TD></TR>
+<TR><TD>I/O f*</TD><TD>15 02, 10 yy</TD><TD>unknown</TD></TR>
+<TR><TD>I/O F*</TD><TD>15 02, 11 yy</TD><TD>unknown</TD></TR>
+<TR><TD>I/O A*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
+<TR><TD>I/O B*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
+<TR><TD>I/O C0</TD><TD>15 02, 14 00</TD><TD>jump if R0 = display</TD></TR>
+<TR><TD>I/O D0</TD><TD>15 02, 15 00</TD><TD>jump if R0 &#8800; display</TD></TR>
+
+</TABLE>
+</BODY>
+</HTML>
