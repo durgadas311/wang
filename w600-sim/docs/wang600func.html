@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600func.html,v 1.4 2011/05/22 15:07:47 drmiller Exp $ >
+<!-- $Id: wang600func.html,v 1.5 2011/05/22 22:33:07 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td {text-align: center;}
 </STYLE>
@@ -31,25 +31,33 @@ td {text-align: center;}
 
 <TR><TH COLSPAN=3>Program Control</TH></TR>
 <TR><TD>MARK mm</TD><TD>09 00, mm mm</TD><TD>Set Label mm mm</TD></TR>
-<TR><TD>SEARCH mm</TD><TD>08 00, mm mm</TD><TD>Jump to (MARK, 10 xx)</TD></TR>
+<TR><TD>SEARCH mm</TD><TD>08 00, mm mm</TD><TD>Goto Label (MARK, 10 xx)</TD></TR>
 <TR><TD>f(x)</TD><TD>10 xx</TD><TD>Call function (MARK, 10 xx)</TD></TR>
 <TR><TD>F(x)</TD><TD>11 xx</TD><TD>Call function (MARK, 11 xx)</TD></TR>
-<TR><TD>D7* mm</TD><TD>15 07, mm mm</TD><TD>Call function (MARK, mm mm)</TD></TR>
+<TR><TD>D7* mm</TD><TD>15 07, mm mm</TD><TD>Call Label (MARK, mm mm)</TD></TR>
+<TR><TD>D15* mm</TD><TD>15 15, mm mm</TD><TD>Goto Label (MARK, mm mm)</TD></TR>
+<TR><TD>I/O fx*</TD><TD>15 02, 10 xx</TD><TD>Jump if R0 = display (xx: don't care)</TD></TR>
+<TR><TD>I/O Fx*</TD><TD>15 02, 11 xx</TD><TD>Jump if R0 &#8800; display (xx: don't care)</TD></TR>
+<TR><TD>I/O Cx*</TD><TD>15 02, 14 xx</TD><TD>Jump if R0 = display (xx: don't care)</TD></TR>
+<TR><TD>I/O Dx*</TD><TD>15 02, 15 xx</TD><TD>Jump if R0 &#8800; display (xx: don't care)</TD></TR>
 
 <TR><TH COLSPAN=3>Program Control in ROM</TH></TR>
 <TR><TD>Ax*</TD><TD>12 xx</TD><TD>Call ROM f(x) (MARK, 12 xx)</TD></TR>
 <TR><TD>Bx*</TD><TD>13 xx</TD><TD>Call ROM F(x) (MARK, 13 xx)</TD></TR>
-<TR><TD>D3* mm</TD><TD>15 03, mm mm</TD><TD>Jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>D4* mm</TD><TD>15 04, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>D5* mm</TD><TD>15 05, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>D6* mm</TD><TD>15 06, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>D12* mm</TD><TD>15 12, mm mm</TD><TD>Call ROM function (MARK, mm mm)</TD></TR>
+<TR><TD>D3* mm</TD><TD>15 03, mm mm</TD><TD>Goto Label ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D4* mm</TD><TD>15 04, mm mm</TD><TD>Goto Label ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D5* mm</TD><TD>15 05, mm mm</TD><TD>Goto Label ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D6* mm</TD><TD>15 06, mm mm</TD><TD>Goto Label ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D12* mm</TD><TD>15 12, mm mm</TD><TD>Call Label ROM (MARK, mm mm)</TD></TR>
 
 <TR><TH COLSPAN=3>Misc Data</TH></TR>
+<TR><TD>D0* rr</TD><TD>15 00, rr rr</TD><TD>Recall R(rr)</TD></TR>
 <TR><TD>INDIR cr</TD><TD>15 11, cc rr</TD><TD>Perform register OP 'cc' indirectly on R(rr)</TD></TR>
 <TR><TD>Cx*</TD><TD>14 xx</TD><TD>Exchange display and R(xx)</TD></TR>
 <TR><TD>D1* tf</TD><TD>15 01, tt ff</TD><TD>Print formatted, same as program print<BR>but works from keyboard</TD></TR>
-<TR><TD>D10* aa</TD><TD>15 10, aa aa</TD><TD>mimics alpha functions</TD></TR>
+<TR><TD>D10* aa</TD><TD>15 10, aa aa</TD><TD>Mimics alpha functions</TD></TR>
+<TR><TD>D8* xx</TD><TD>15 08, xx xx</TD><TD>unknown</TD></TR>
+<TR><TD>D9* xx</TD><TD>15 09, xx xx</TD><TD>unknown</TD></TR>
 
 <TR><TH COLSPAN=3>I/O Codes</TH></TR>
 
@@ -60,8 +68,8 @@ td {text-align: center;}
 <TR><TD>I/O F(x)</TD><TD>15 02, 11 xx</TD><TD>unknown</TD></TR>
 <TR><TD>I/O Ay*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
 <TR><TD>I/O By*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
-<TR><TD>I/O C0*</TD><TD>15 02, 14 00</TD><TD>jump if R0 = display</TD></TR>
-<TR><TD>I/O D0*</TD><TD>15 02, 15 00</TD><TD>jump if R0 &#8800; display</TD></TR>
+<TR><TD>GROUP1 xx</TD><TD>15 13, ?? ??</TD><TD>unknown I/O</TD></TR>
+<TR><TD>GROUP2 xx</TD><TD>15 14, ?? ??</TD><TD>unknown I/O</TD></TR>
 
 </TABLE>
 
