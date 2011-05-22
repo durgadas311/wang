@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.1 2011/05/21 21:31:14 drmiller Exp $ >
+<!-- $Id: wang600sim.html,v 1.2 2011/05/22 23:55:36 drmiller Exp $ >
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -24,7 +24,7 @@ preferred method of operation is to put only one program image in a file.
 
 <P>Program image files are normally stored in the user's home directory in a folder named "Wang600Files".
 
-<P>In order to LOAD PROG or RECORD PROG, the tape unit must be "Ready", but depressing the "Tape Ready" button.
+<P>In order to LOAD PROG or RECORD PROG, the tape unit must be "Ready", by depressing the "Tape Ready" button.
 If these operations are attempted when the Tape Ready button is not depressed, the display will blank.
 Pressing PRIME will restore normal operations.
 
@@ -38,11 +38,13 @@ program image. Since most files will have only one program image, these are not 
 
 Like the original hardware, the printer must be "On" in order to print. In Run mode, attempts to print
 (or List Program, etc) will hang with a blank display (just like the original hardware). Programs that
-attempt to print will simply continue (again, like the original machine).
+attempt to print will simply continue without printing anything (again, like the original machine).
 
 <P>Since there is no physical printer, the printed output is put in a window where it may be viewed.
 In addition, this window allows Copy operations (e.g. Cut-n-Paste) to extract the contents (or a portion of it).
 In addition, a menu option "Save" may be used to save the current contents to a file.
 A menu option "Tear Off" will clear the print window and discard all current contents.
+The window is only visible when the printer is "On", and if the window is closed then the
+printer is turned off. The contents of the window is not removed when the printer is off.
 
 </HTML>
