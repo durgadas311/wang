@@ -1,0 +1,128 @@
+<HTML>
+<!-- $Id: wang600calc.html,v 1.1 2011/05/22 16:55:38 drmiller Exp $ >
+
+<H2>Using the Wang 600 as a Calculator</H2>
+
+All calculations on the Wang 600 are performed on either the display
+or between one of the main registers 00 through 15 and the display.
+
+<H3>Display Functions</H3>
+
+The trigonometric, logarithmic, and root functions (keys on the left-most keypad)
+are all performed on the current value of the display. No registers are altered by
+these functions. Some of these functions interpret the
+display as being either Degrees or Radians, depending on the position of the pushbutton switch
+"Deg &#8596; Rad".
+
+<TABLE>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Function</TH></TR>
+<TR><TD>RAD-DEG</TD><TD>Assuming the display is in Radians, convert to Degrees</TD></TR>
+<TR><TD>DEG-RAD</TD><TD>Assuming the display is in Degrees, convert to Radians</TD></TR>
+<TR><TD>SIN</TD><TD>Compute the Sine of the display</TD></TR>
+<TR><TD>SIN<SUP>-1</SUP></TD><TD>Compute the ArcSine of the display</TD></TR>
+<TR><TD>COS</TD><TD>Compute the Cosine of the display</TD></TR>
+<TR><TD>COS<SUP>-1</SUP></TD><TD>Compute the ArcCosine of the display</TD></TR>
+<TR><TD>TAN</TD><TD>Compute the Tangent of the display</TD></TR>
+<TR><TD>TAN<SUP>-1</SUP></TD><TD>Compute the ArcTangent of the display</TD></TR>
+<TR><TD>1/X</TD><TD>Compute the Inverse of the display</TD></TR>
+<TR><TD>LOG<SUB>e</SUB>X</TD><TD>Compute the Natural Logarithm of the display</TD></TR>
+<TR><TD>LOG<SUB>10</SUB>X</TD><TD>Compute the Base-10 Logarithm of the display</TD></TR>
+<TR><TD>e<SUP>x</SUP></TD><TD>Compute the Natural Exponent of the display</TD></TR>
+<TR><TD>10<SUP>x</SUP></TD><TD>Compute the Base-10 Exponent of the display</TD></TR>
+<TR><TD>X<SUP>2</SUP></TD><TD>Compute the Square of the display</TD></TR>
+<TR><TD>INT X</TD><TD>Truncate the display to an integer</TD></TR>
+<TR><TD>&#8730;X</TD><TD>Compute the Square Root of the display</TD></TR>
+<TR><TD>|X|</TD><TD>Compute the Absolute value of the display</TD></TR>
+</TABLE>
+
+<H3>Register-Display Functions</H3>
+
+General math functions (add, subtract, multiply, divide), and moving data around,
+are all done between the display and a register.
+
+<P>For convenience, two of the main registers are available directly using the "left" and
+"right" access keys, located to the left and right, respectively, of the central numeric keypad.
+These keys have the following functions:
+
+<TABLE>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Function</TH></TR>
+<TR><TD>TOTAL</TD><TD>Move register value into display, and clear register</TD></TR>
+<TR><TD>STORE</TD><TD>Copy display value into register</TD></TR>
+<TR><TD>RECALL</TD><TD>Copy register value into display</TD></TR>
+<TR><TD>+</TD><TD>Add display to register, copy sum back into display</TD></TR>
+<TR><TD>-</TD><TD>Subtract display from register, copy difference back into display</TD></TR>
+<TR><TD>&#215;=</TD><TD>Multiply register by display, copy product back into display</TD></TR>
+<TR><TD>&divide;=</TD><TD>Divide register by display, copy quotient back into display</TD></TR>
+</TABLE>
+
+<P>The "left" register is register 15, the "right" register is register 14.
+
+<P>The rest of the main registers may be accessed using the same functions, but by using
+the pushbuttons labeled "T" (TOTAL), "+", "-", "&#215;", "&divide;", "St" (STORE), and "Re" (RECALL).
+This is accomplished by depressing one of the pushbuttons, for the desired function, and then
+pressing one of the keys 00 through 15 to perform that function on the specified register.
+No action is taken until one of the keys 00 through 15 is pressed, in other words changing the pushbuttons
+takes no action by itself it only prepares an action for when a key is pressed.
+
+<H3>Calculator Example</H3>
+
+As an example, consider converting degrees Farenheit into degrees Celsius. The basic formula is:
+
+<PRE>
+C = (F - 32) * 5 / 9
+</PRE>
+
+<P>Note, the calculator has no concept of precedence or paranthesis, so the calculation must be performed in
+a deliberate order so that precedence is maintained. The first part to perform is the <KBD>F - 32</KBD>.
+Next, that result is multiplied by 5. Finally, that result is divided by 9. Note, an alternate order is
+to compute <KBD>5 / 9</KBD> (and possibly store it someplace more permanent) and then multiply by that
+pre-computed value.  For simplicity in example, the first approach is used.
+
+<P>So, the steps required to convert 70 degrees Farenheit into degrees Celsius would be:
+
+<TABLE>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Display, after pressing key</TH></TR>
+<TR><TD>7</TD><TD>+7</TD></TR>
+<TR><TD>0</TD><TD>+70</TD></TR>
+<TR><TD>STORE (left)</TD><TD>+70.000000000</TD></TR>
+<TR><TD>3</TD><TD>+3</TD></TR>
+<TR><TD>2</TD><TD>+32</TD></TR>
+<TR><TD>- (left)</TD><TD>+38.000000000</TD></TR>
+<TR><TD>5</TD><TD>+5</TD></TR>
+<TR><TD>&#215;= (left)</TD><TD>+190.00000000</TD></TR>
+<TR><TD>9</TD><TD>+9</TD></TR>
+<TR><TD>&divide;= (left)</TD><TD>+21.111111111</TD></TR>
+</TABLE>
+
+<P>So, the answer is that 70 degrees Farenheit equals (approximately) 21 degress Celsius.
+
+<H3>Extended Registers</H3>
+
+Extended registers may be accessed using the RECALL and (SHIFT) STORE button (on the right-most keypad).
+This key expects another key to follow, which is used as the register to access. These registers
+are numbered by a pair of numbers, for example 01 00. Note, register 00 00 is the same as the register
+accessed using the 00 key. Likewise, register 00 15 is the same as that of the 15 key. Extended registers start
+with 01 15 and procede to 15 15. Note, however, that registers above 15 06 are actually system memory
+and using those registers may crash the calculator (requiring PRIME to recover).
+Also, registers 01 00 through 15 06 use the same memory as program steps 1847 through 0000, each register consumes
+8 program steps. For example, register 01 00 consumes program steps 1840 through 1847.
+
+<P>Using the extended registers normally requires constructing a special code that is not normally created by
+keys on the keyboard. This is done using the pushbutton switches labeled "1" through "7", and "8" (or "Sp").
+The pushbutton "8" actually adds 8 to the value selected by "1" through "7" (if none of "1" through "7" are
+depressed, then the value "0" is used). So, to create the code for register 15 06, you would depress
+pushbuttons "7" and "8", then press the key 06. So, to recall the value of register 15 06, you would
+press RECALL (not the blue left or right keys, but the green key in the right-most keypad) and then,
+with pushbuttons "7" and "8" depressed, press the 06 key.
+
+<P>While no math functions may be performed directly on extended registers, there is a way to indirectly
+access these registers. If the register number is converted to a decimal value, as such register 01 00 would
+be "16", and that value is stored in one of the main registers, then the INDIR key may be used in
+conjunction with the normal math functions on main registers to perform that same math function on
+an extended register. For example, if the value "16" were stored in register 00, then performing a
+INDIR +00 would add the display to register 01 00 (not register 00 00).
+
+<P>Converting a register number (pair) to a decimal value is done by multiplying the first number by 16 and
+adding the second. For example, register 15 06 would be <KBD>15 * 16 + 6</KBD> or 246.
+
+</HTML>
