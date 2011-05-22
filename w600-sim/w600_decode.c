@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.30 2011/05/20 12:02:26 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.31 2011/05/22 00:19:42 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -192,10 +192,14 @@ static uint8_t pr_tach = 0;
 static int pr_col = 0;
 
 static void printer_status(w600_sys_t *sys) {
+	// we don't want to do this unless it is really the
+	// drum printer we're looking at... can't tell?
 	if ((sys->cpu.mode1 & MODE1_PRT_ON) == 0) {
 		// only if running program doesn't get here...
 		// printer is off, tach will never pulse, so don't spin
-		sys->keyboard(sys, NULL); // sleep until key event
+		if (sys->cpu.pc == 0x6db) {
+			sys->keyboard(sys, NULL); // sleep until key event
+		}
 		return;
 	}
 	if (pr_tach) {
