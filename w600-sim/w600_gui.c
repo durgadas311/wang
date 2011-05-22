@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.19 2011/05/22 02:52:02 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.20 2011/05/22 15:09:04 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -22,6 +22,8 @@ int __gui_dfd = -1;
 static int disp_good = 0;
 
 // 'on' = 1: refresh one digit (AL, MR)
+// 'on' = -1: refresh one digit (AL, MR) - DO NOT SLEEP!
+// 'on' = -2: refresh only error lights - DO NOT SLEEP!
 // 'on' = 0: blank display (reset everything)
 static void guidisplay(w600_sys_t *sys, int on) {
 	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
@@ -51,17 +53,25 @@ static void guidisplay(w600_sys_t *sys, int on) {
 
 	uint8_t ds = sys->cpu.al;
 	uint8_t dc = sys->cpu.mr;
+	if (on == -2) {
+		// do not change any digits...
+		dc = buf[ds];
+	}
 	if (on == 0) {
 		// signal to blank display
 		memset(buf, 'x', sizeof(buf));
 		last = 0;
 		b |= 0x400;
 		++flush;
-	} else if (buf[ds] != dc) {
-		disp_good = 0;
-		buf[ds] = dc;
+	} else {
+		if (buf[ds] != dc) {
+			disp_good = 0;
+			buf[ds] = dc;
+			++flush;
+		}
+		// these fields are always interpretted,
+		// so send valid data...
 		b |= (ds << 4) | dc;
-		++flush;
 	}
 
 	if (flush) {
@@ -223,8 +233,10 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				return 0xff;	// EOF
 			}
 			if ((b >> 8) == 0x0e) {	// EOF
+#if 0 // can't do this! wang must detect EOT! maybe use some counter to detect "too long"?
 				// nothing good will happen now... until a key is pressed...
 				sys->keyboard(sys, NULL); // sleep until key event
+#endif
 				return 0xff;
 			}
 			if ((b >> 8) != 0x0c) {

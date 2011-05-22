@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.31 2011/05/22 00:19:42 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.32 2011/05/22 15:09:04 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -442,12 +442,14 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	case 12:
 		sys->cpu.pe = 1;
+		sys->display(sys, -2);
 		break;
 	case 13:
 		sys->cpu.acc = 0;
 		break;
 	case 14:
 		sys->cpu.me = 1;
+		sys->display(sys, -2);
 		break;
 	}
 
