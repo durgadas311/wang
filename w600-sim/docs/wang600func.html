@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600func.html,v 1.2 2011/05/22 02:50:56 drmiller Exp $ >
+<!-- $Id: wang600func.html,v 1.3 2011/05/22 13:41:19 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td {text-align: center;}
 </STYLE>
@@ -13,7 +13,7 @@ td {text-align: center;}
 <TR><TH>Key Sequence</TH><TH>Code</TH><TH>Function</TH></TR>
 
 <TR><TH COLSPAN=3>"Program Print" Codes</TH></TR>
-<TR><TD>PRINT tt ff</TD><TD>08 02, tt ff</TD><TD>Print, formatted, using 'ff' decimal places<BR>and with letter tag 'tt'</TD></TR>
+<TR><TD>PRINT tf</TD><TD>08 02, tt ff</TD><TD>Print, formatted, using 'ff' decimal places<BR>and with letter tag 'tt'</TD></TR>
 
 <TR><TH COLSPAN=3>"Alpha" Codes</TH></TR>
 <TR><TD>&#945; STOP</TD><TD>09 02, 09 03</TD><TD>1 second pause</TD></TR>
@@ -30,38 +30,38 @@ td {text-align: center;}
 <TR><TD>&#945; SIN</TD><TD>09 02, 08 06</TD><TD>jump if R0 &lt; display</TD></TR>
 
 <TR><TH COLSPAN=3>Program Control</TH></TR>
-<TR><TD>MARK mm-mm</TD><TD>09 00, mm mm</TD><TD>Set Label mm mm</TD></TR>
-<TR><TD>SEARCH mm-mm</TD><TD>08 00, mm mm</TD><TD>Jump to (MARK, 10 xx)</TD></TR>
+<TR><TD>MARK mm</TD><TD>09 00, mm mm</TD><TD>Set Label mm mm</TD></TR>
+<TR><TD>SEARCH mm</TD><TD>08 00, mm mm</TD><TD>Jump to (MARK, 10 xx)</TD></TR>
 <TR><TD>f(x)</TD><TD>10 xx</TD><TD>Call function (MARK, 10 xx)</TD></TR>
 <TR><TD>F(x)</TD><TD>11 xx</TD><TD>Call function (MARK, 11 xx)</TD></TR>
-<TR><TD>*</TD><TD>15 07, mm mm</TD><TD>Call function (MARK, mm mm)</TD></TR>
+<TR><TD>D7* mm</TD><TD>15 07, mm mm</TD><TD>Call function (MARK, mm mm)</TD></TR>
 
 <TR><TH COLSPAN=3>Program Control in ROM</TH></TR>
-<TR><TD>*</TD><TD>12 xx</TD><TD>Call ROM function (MARK, 12 xx)</TD></TR>
-<TR><TD>*</TD><TD>13 xx</TD><TD>Call ROM function (MARK, 13 xx)</TD></TR>
-<TR><TD>*</TD><TD>15 03, mm mm</TD><TD>Jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>*</TD><TD>15 04, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>*</TD><TD>15 05, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>*</TD><TD>15 06, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
-<TR><TD>*</TD><TD>15 12, mm mm</TD><TD>Call ROM function (MARK, mm mm)</TD></TR>
+<TR><TD>Ax*</TD><TD>12 xx</TD><TD>Call ROM f(x) (MARK, 12 xx)</TD></TR>
+<TR><TD>Bx*</TD><TD>13 xx</TD><TD>Call ROM F(x) (MARK, 13 xx)</TD></TR>
+<TR><TD>D3* mm</TD><TD>15 03, mm mm</TD><TD>Jump to ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D4* mm</TD><TD>15 04, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D5* mm</TD><TD>15 05, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D6* mm</TD><TD>15 06, mm mm</TD><TD>jump to ROM (MARK, mm mm)</TD></TR>
+<TR><TD>D12* mm</TD><TD>15 12, mm mm</TD><TD>Call ROM function (MARK, mm mm)</TD></TR>
 
 <TR><TH COLSPAN=3>Misc Data</TH></TR>
-<TR><TD>INDIR</TD><TD>15 11, cc rr</TD><TD>Perform register OP 'cc' indirectly on R(rr)</TD></TR>
-<TR><TD>*</TD><TD>14 xx</TD><TD>Exchange display and R(xx)</TD></TR>
-<TR><TD>*</TD><TD>15 01, tt ff</TD><TD>Print formatted, same as program print<BR>but works from keyboard</TD></TR>
-<TR><TD>*</TD><TD>15 10, aa aa</TD><TD>mimics alpha functions</TD></TR>
+<TR><TD>INDIR cr</TD><TD>15 11, cc rr</TD><TD>Perform register OP 'cc' indirectly on R(rr)</TD></TR>
+<TR><TD>Cx*</TD><TD>14 xx</TD><TD>Exchange display and R(xx)</TD></TR>
+<TR><TD>D1* tf</TD><TD>15 01, tt ff</TD><TD>Print formatted, same as program print<BR>but works from keyboard</TD></TR>
+<TR><TD>D10* aa</TD><TD>15 10, aa aa</TD><TD>mimics alpha functions</TD></TR>
 
 <TR><TH COLSPAN=3>I/O Codes</TH></TR>
 
-<TR><TD>I/O **</TD><TD>15 02, xx yy<BR>xx: 00-09<BR>yy: 00-15</TD><TD>
+<TR><TD>I/O xy*</TD><TD>15 02, xx yy<BR>xx: 00-09<BR>yy: 00-15</TD><TD>
 					Print display to "Output Writer 6053"<BR>
 					xx = integer places<BR>yy = decimal places</TD></TR>
-<TR><TD>I/O f*</TD><TD>15 02, 10 yy</TD><TD>unknown</TD></TR>
-<TR><TD>I/O F*</TD><TD>15 02, 11 yy</TD><TD>unknown</TD></TR>
-<TR><TD>I/O A*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
-<TR><TD>I/O B*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
-<TR><TD>I/O C0</TD><TD>15 02, 14 00</TD><TD>jump if R0 = display</TD></TR>
-<TR><TD>I/O D0</TD><TD>15 02, 15 00</TD><TD>jump if R0 &#8800; display</TD></TR>
+<TR><TD>I/O f(x)</TD><TD>15 02, 10 xx</TD><TD>unknown</TD></TR>
+<TR><TD>I/O F(x)</TD><TD>15 02, 11 xx</TD><TD>unknown</TD></TR>
+<TR><TD>I/O Ay*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
+<TR><TD>I/O By*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
+<TR><TD>I/O C0*</TD><TD>15 02, 14 00</TD><TD>jump if R0 = display</TD></TR>
+<TR><TD>I/O D0*</TD><TD>15 02, 15 00</TD><TD>jump if R0 &#8800; display</TD></TR>
 
 </TABLE>
 
