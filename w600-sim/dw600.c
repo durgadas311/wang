@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.10 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.11 2011/05/22 21:04:33 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -177,7 +177,7 @@ void diw600(char *buf, uint64_t *v) {
 	case 12:	sprintf(opA, "(DH,DL) = (Printer Status)"); break;
 	case 13:	sprintf(opA, "Tape On %s", u->g & 1 ? "WR" : "RD"); break;
 	case 14:	sprintf(opA, "Tape Off"); break;
-	case 15:	sprintf(opA, "XH=%s,XL=%s,XS=%s", g, h, k); break;
+	case 15:	sprintf(opA, "XH=DH,XL=DL,XS=%s", k); break;
 	}
 
 	s = buf;
