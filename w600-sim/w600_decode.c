@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.32 2011/05/22 15:09:04 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.33 2011/05/23 14:20:20 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -120,7 +120,7 @@ static int tape_read(w600_sys_t *sys) {
 	if (sys == NULL) {
 		bit = 0;
 		last = 0;
-		sigc = 20;
+		sigc = 0;
 		bitc = 0;
 		repc = 0;
 		return 0;	// don't care...
@@ -153,7 +153,7 @@ bits:
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-		repc = sys->cpu.cycles + 300;
+		repc = sys->cpu.cycles + 700;	// expects at least 650?
 		bit = 0;
 		goto reps;
 	}
@@ -162,12 +162,7 @@ bits:
 	goto bits;
 }
 
-static int cass_on = 0;
-
 static void tape_on(w600_sys_t *sys, int wr) {
-	if (cass_on) return;
-	cass_on = 1;
-
 	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
 	if (!wr) {
 		tape_read(NULL);
@@ -175,7 +170,6 @@ static void tape_on(w600_sys_t *sys, int wr) {
 }
 
 static void tape_off(w600_sys_t *sys) {
-	cass_on = 0;
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 }
 
@@ -273,7 +267,8 @@ static inline void display_check(w600_sys_t *sys) {
 		sys->cpu.pc = 0x51f;	// update some regs too?
 		sys->cpu.cycles += 272;
 		if (sys->trace) {
-			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp...\n");
+			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp... %lld\n",
+									sys->cpu.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
 	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
@@ -281,7 +276,8 @@ static inline void display_check(w600_sys_t *sys) {
 		sys->cpu.pc = 0x5c3;
 		sys->cpu.cycles += 272;
 		if (sys->trace) {
-			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp...\n");
+			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp... %lld\n",
+									sys->cpu.cycles);
 		}
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
