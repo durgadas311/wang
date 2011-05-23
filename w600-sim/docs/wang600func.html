@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600func.html,v 1.8 2011/05/23 15:16:03 drmiller Exp $ >
+<!-- $Id: wang600func.html,v 1.9 2011/05/23 23:50:32 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td {text-align: center;}
 </STYLE>
@@ -23,11 +23,15 @@ in a running program, although there is an alternate code that may be used in Ru
 <TR><TH COLSPAN=3>"Alpha" Codes</TH></TR>
 <TR><TD>&#945; STOP</TD><TD>09 02, 09 03</TD><TD>1 second pause</TD></TR>
 <TR><TD>&#945; SEARCH</TD><TD>09 02, 08 00</TD><TD>&#960;</TD></TR>
+<TR><TD>&#945; MARK</TD><TD>09 02, 09 00</TD><TD>&#960;</TD></TR>
 <TR><TD>&#945; PRINT</TD><TD>09 02, 08 02</TD><TD>enable key trace</TD></TR>
 <TR><TD>&#945; f(x)</TD><TD>09 02, 10 xx</TD><TD>display &#215;= 10<SUP>xx</SUP></TD></TR>
 <TR><TD>&#945; F(x)</TD><TD>09 02, 11 xx</TD><TD>display &divide;= 10<SUP>xx</SUP></TD></TR>
+<TR><TD>&#945; Cx*</TD><TD>09 02, 14 xx</TD><TD>display &#215;= 10<SUP>xx</SUP></TD></TR>
+<TR><TD>&#945; Dx*</TD><TD>09 02, 15 xx</TD><TD>display &divide;= 10<SUP>xx</SUP></TD></TR>
 <TR><TD>&#945; LOAD PROG</TD><TD>09 02, 08 14</TD><TD>Skip N "records" and load program from tape<BR>N = display</TD></TR>
 <TR><TD>&#945; 1/X</TD><TD>09 02, 08 15</TD><TD>Skip N "records" and load program from tape<BR>(same as &#945; LOAD PROG?)</TD></TR>
+<TR><TD>&#945; &#8730;X</TD><TD>09 02, 08 13</TD><TD>(same as &#945; LOAD PROG?)</TD></TR>
 <TR><TD>&#945; RECALL</TD><TD>09 02, 08 01</TD><TD>recall registers from tape,<BR>start with R(display), R(display - 1), ...</TD></TR>
 <TR><TD>&#945; STORE</TD><TD>09 02, 09 01</TD><TD>store register(s) to tape,<BR>start with R(display), R(display - 1), ...</TD></TR>
 <TR><TD>&#945; J<SUP>IF</SUP>0</TD><TD>09 02, 08 04</TD><TD>jump if R0 = display</TD></TR>
@@ -70,6 +74,8 @@ in a running program, although there is an alternate code that may be used in Ru
 					Print display to "Output Writer 6053"<BR>
 					xx = integer places<BR>yy = decimal places</TD></TR>
 <TR><TD>I/O Ay*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
+<TR><TD>&#945; cc...</TD><TD>09 02, cc cc ... 02 02</TD><TD>Prints string to OutputWriter<BR>
+						until 02 02 encountered<BR>cc cc must be 00 00 - 03 15</TD></TR>
 <TR><TD>I/O By*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
 <TR><TD>GROUP1 xx</TD><TD>15 13, ?? ??</TD><TD>unknown I/O</TD></TR>
 <TR><TD>GROUP2 xx</TD><TD>15 14, ?? ??</TD><TD>unknown I/O</TD></TR>
