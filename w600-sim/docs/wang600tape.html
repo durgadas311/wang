@@ -1,0 +1,43 @@
+<HTML>
+<!-- $Id: wang600tape.html,v 1.1 2011/05/23 15:16:03 drmiller Exp $ >
+
+<H2>Using the Tape Drive on the Simulator</H2>
+
+<H3>Inserting/Removing a Cassette</H3>
+
+The "Release" button (eject cassette on the Wang 600) will pop-up a file select dialog
+and allow you to select a file to use as a "tape cassette". An existing file may be
+used, although note that proper positioning is required unless you intend to overwrite the contents.
+If a new file name is typed in the dialog, then that file is created, empty.
+Clicking Release followed by Cancel (in the dialog window) will make the tape
+drive "empty", as if it had no cassette. Attempting to press "Ready" will fail,
+and attempts to load or record to the tape will hang with a blank display.
+
+<H3>Positioning the Tape</H3>
+
+The "Forward" and "Rewind" buttons will poisiton the tape forward, or backward,
+by "records". Each "record" on the tape is marked with a special code to
+indicate internally that the recorded image ends.  Note how this differs
+from the Wang 600 tape unit, where precise positioning using Forward and Reverse
+was difficult at best, if not impossible, due to the guesswork of where the
+tape records ended.
+
+<P>Note, there are Wang 600 keyboard commands that can also manage the
+tape position. 
+
+<P><B>Internal Details Note:</B>
+The tape "record marks" in the file are two bytes, the first being 0x9e (END PROG)
+and the second being either 0x9e (if it represents a real END PROG) or 0xff in case
+the tape was simply stopped without recording an END PROG code. The rest of the
+bytes in the file directly correspond to data, either program steps or digit-pairs
+from registers.
+
+<H3>Making the Tape Ready for Operations</H3>
+
+In order to record to, and load from, a tape the "Ready" button must be depressed.
+This is the only button on the tape unit that toggles. All others are "momentary operation".
+Pressing any of the buttons on the tape when Ready is engaged will release the Ready button,
+making the tape unit "not ready". This is especially noticable when using the tape
+positioning buttons.
+
+</HTML>
