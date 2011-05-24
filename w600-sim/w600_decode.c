@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.33 2011/05/23 14:20:20 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.34 2011/05/24 22:47:57 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -262,6 +262,8 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 }
 
 static inline void display_check(w600_sys_t *sys) {
+if (sys->cpu.pc == 0x252) {
+}
 	// 51c: begin display-refresh delay loop... short-cut to 51f...
 	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
 		sys->cpu.pc = 0x51f;	// update some regs too?
@@ -481,7 +483,7 @@ int instr_exec(w600_sys_t *sys) {
 		sys->cpu.xl = sys->cpu.dl;	// sys->cpu.xl = h;
 		sys->cpu.xs = br_k & 0x07;
 		if (sys->cpu.xs == 1) cn24_out(sys);
-else printf("XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
+else fprintf(stderr, "XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
 		break;
 	}
 
