@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $
+// $Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -137,8 +137,9 @@ class FEexit extends Thread {
 	}
 }
 
-public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+public class w600_fe
+{
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -242,10 +243,23 @@ public class w600_fe {
 		front_end.add(kbd);
 		front_end.addKeyListener(kbd);
 
-		Wang600_CN24 cn24 = new Wang600_CN24();
+		Wang600_Model611 m611f = new Wang600_Model611();
 
-		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape, cn24);
+		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, prt, tape, m611f, null);
 
+		JMenuBar mb = new JMenuBar();
+		JMenu mu;
+		mu = new JMenu("Devices");
+		mb.add(mu);
+		JMenuItem mi;
+		mi = new JMenuItem("Model 601/602/611 OutputWriter", KeyEvent.VK_O);
+		mi.addActionListener(inp);
+		mu.add(mi);
+		mi = new JMenuItem("Model 630 Disk", KeyEvent.VK_D);
+		mi.addActionListener(inp);
+		mu.add(mi);
+
+		front_end.setJMenuBar(mb);
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -255,7 +269,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -335,23 +349,45 @@ class Wang600_SimError
 }
 
 class Wang600_SimInput
-		implements Runnable
+		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
-	Wang600_CN24 _cn24;
+	boolean _m611on;
+	Wang600_Model611 _m611;
+	Wang600_Model630 _m630;
 
 	InputStream _fin;
 
+	public void actionPerformed(ActionEvent e) {
+		if (!(e.getSource() instanceof JMenuItem)) {
+			System.err.println("unknown Devices event source type");
+			return;
+		}
+		JMenuItem m = (JMenuItem)e.getSource();
+		if (m.getMnemonic() == KeyEvent.VK_O) {
+			_m611on = !_m611on;
+			_m611.onOff(_m611on);
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_D) {
+			return;
+		}
+	}
+
 	public Wang600_SimInput(InputStream f, Wang600_Display dsp,
 			Wang600_Printer prt, Wang600_Tape tape,
-			Wang600_CN24 cn24) {
+			Wang600_Model611 cn24,
+			Wang600_Model630 m630) {
 		_dsp = dsp;
 		_prt = prt;
 		_tape = tape;
-		_cn24 = cn24;
+		_m611 = cn24;
+		_m611on = false;
+		_m611.getFrame().addWindowListener(this);
+		_m630 = m630;
 		_fin = f;
 		if (f != null) {
 			Thread t = new Thread(this);
@@ -382,10 +418,25 @@ class Wang600_SimInput
 			} else if ((b[1]  & ~3) == 0x0c) {
 				_tape.do_tape(b);
 			} else if (b[1] == 0x10) {
-				_cn24.do_cn24(b);
+				_m611.do_cn24(b);
 			} else {
 				System.err.println("Unexpected traffic ("+n+")"+b[1]+" "+b[0]);
 			}
+		}
+	}
+
+	public void windowActivated(WindowEvent e) { }
+	public void windowClosed(WindowEvent e) { }
+	public void windowIconified(WindowEvent e) { }
+	public void windowOpened(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeactivated(WindowEvent e) { }
+
+	public void windowClosing(WindowEvent e) {
+		if (e.getWindow() == _m611.getFrame()) {
+			_m611on = false;
+			_m611.onOff(_m611on);
+			return;
 		}
 	}
 }
@@ -393,7 +444,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -567,7 +618,6 @@ class Wang600_Printer
 		}
 	}
 
-
 	public void onOff(boolean on) {
 		_frame.setVisible(on);
 	}
@@ -637,7 +687,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -956,13 +1006,17 @@ class Wang600_Tape extends JComponent
 	}
 }
 
-class Wang600_CN24
+class Wang600_Model630 {
+}
+
+class Wang600_Model611
+	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
-	public Wang600_CN24() {
+	private void setup_xlate() {
 		cn24_xlate = new byte[256];
 		cn24_xlate[0x00] = '-';
 		cn24_xlate[0x01] = 'y';
@@ -1090,8 +1144,114 @@ class Wang600_CN24
 		cn24_spcl[0x01] = "\u00BD";
 		cn24_spcl[0x02] = "\u00BC";
 		cn24_spcl[0x03] = "\u00A2";
+	}
+	private JFrame _frame;
+	private JTextArea _text;
+	private JScrollPane _scroll;
 
+	private int _xoff, _yoff, _eop;
+
+	public Wang600_Model611() {
+		setup_xlate();
 		_shifted = false;
+		_eop = 0;
+
+		_frame = new JFrame("Wang 611 Output Writer");
+		// TBD icon or not
+		_frame.setLayout(new FlowLayout());
+		_text = new JTextArea();
+		_text.setFont(new Font("Monospaced", Font.PLAIN, 10));
+		int z = _text.getFont().getSize();
+		_text.setPreferredSize(new Dimension(60 * z, 32 * z));
+		// doing this prevents "auto warp" when printing...
+		//_text.setEditable(false);
+
+		_scroll = new JScrollPane(_text);
+		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		//_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AUTO);
+		_frame.add(_scroll);
+
+		JMenuBar mb = new JMenuBar();
+		JMenu mu;
+		mu = new JMenu("File");
+		mb.add(mu);
+		JMenuItem mi;
+		mi = new JMenuItem("Print", KeyEvent.VK_P);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Save", KeyEvent.VK_S);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Tear Off", KeyEvent.VK_T);
+		mi.addActionListener(this);
+		mu.add(mi);
+
+		_frame.setJMenuBar(mb);
+		_frame.pack();	// set size according to content...
+
+		Dimension fdim = _frame.getSize();
+		Dimension sdim = _scroll.getSize();
+		_xoff = fdim.width - sdim.width;
+		_yoff = fdim.height - sdim.height;
+		
+		//_frame.setVisible(true);
+		_frame.addComponentListener(this);
+
+		//_frame.setVisible(true);	// make visible based on "printer on"
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (!(e.getSource() instanceof JMenuItem)) {
+			System.err.println("unknown 611 event source type");
+			return;
+		}
+		JMenuItem m = (JMenuItem)e.getSource();
+		if (m.getMnemonic() == KeyEvent.VK_T) {
+			_text.setText("");
+			_eop = 0;
+			_text.setCaretPosition(_eop);
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_S) {
+			FileOutputStream fo;
+			JFileChooser ch = new JFileChooser(w600_fe._dir);
+			int rv = ch.showOpenDialog(_frame);
+			if (rv == JFileChooser.APPROVE_OPTION) {
+				try {
+					fo = new FileOutputStream(ch.getSelectedFile());
+				} catch (FileNotFoundException ee) {
+					return;
+				}
+				try {
+					fo.write(_text.getText().getBytes());
+					fo.write('\n');
+					fo.close();
+				} catch (IOException ee) {
+				}
+			}
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_P) {
+			// TBD
+		}
+		System.err.println("611 menu " + e.getActionCommand() +
+						" not implemented yet");
+	}
+
+	public JFrame getFrame() { return _frame; }
+
+	public void componentHidden(ComponentEvent e) { }
+	public void componentMoved(ComponentEvent e) { }
+	public void componentShown(ComponentEvent e) { }
+
+	public void componentResized(ComponentEvent e) {
+		if (e.getComponent() == _frame) {
+			Dimension fdim = _frame.getSize(); 
+			_scroll.setSize(fdim.width - _xoff, fdim.height - _yoff);
+			_scroll.setPreferredSize(_scroll.getSize());
+			_frame.setSize(fdim.width, fdim.height); // redundant?
+			_frame.setPreferredSize(_frame.getSize());
+		}
 	}
 
 	private boolean _shifted;
@@ -1114,6 +1274,7 @@ class Wang600_CN24
 			p = cn24_xlate[b[0]];
 		}
 		byte[] bb;
+if (false) {
 		if (p == 0) {
 			bb = new String("<"+b[0]+">").getBytes();
 		} else if (p < 0x07) {
@@ -1128,13 +1289,32 @@ class Wang600_CN24
 			System.err.flush();
 		} catch (IOException e) {
 		}
+} else {
+		String s;
+		if (p == 0) {
+			s = new String("<"+b[0]+">");
+		} else if (p < 0x07) {
+			s = cn24_spcl[p];
+		} else {
+			bb = new byte[1];
+			bb[0] = p;
+			s = new String(bb);
+		}
+		_text.append(s);
+		_eop += s.length();
+		_text.setCaretPosition(_eop);
+}
+	}
+
+	public void onOff(boolean on) {
+		_frame.setVisible(on);
 	}
 }
 
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1275,7 +1455,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1741,7 +1921,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1906,7 +2086,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2122,7 +2302,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2213,7 +2393,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.68 2011/05/25 21:02:41 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

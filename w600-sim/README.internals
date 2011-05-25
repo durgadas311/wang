@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.6 2011/05/23 14:20:20 drmiller Exp $
+$Id: README.internals,v 1.7 2011/05/25 21:02:41 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -43,7 +43,14 @@ it's input pipe:
 0000111000000000
 	Tape read EOF. (END PROG)
 
-[TBD: I/O for "CN-36"]
+00110000xxxxxxxx
+	Input data for "Device 2", Model 630 "Fixed/Removable Disk".
+
+01000000xxxxxxxx
+	Input data for "Device 4", multiple possible devices. TBD
+
+01010000xxxxxxxx
+	Input data for "Device 5", multiple possible devices. TBD
 
 
 The simulator sends the following (binary) codes on it's output pipe:
@@ -79,8 +86,17 @@ The simulator sends the following (binary) codes on it's output pipe:
 	Tape Off (FE should stop sending, if read).
 
 0001000000rrrrrr
-	Print data for "CN-24" (IBM Selectric?). 'r' is a 6-bit
-	"rotate/tilt" code for the output device.
-	[TBD: what constitutes a CR-LF?]
+	Print data for "Device 1", Model 601/602/611 "Output Writer".
+	'r' is a 6-bit (2+4) "tilt/rotate" (or special-function) code for the printer.
+
+001c0000xxxxxxxx
+	Output data for "Device 2", Model 630 "Fixed/Removable Disk".
+	'c' is command/data bit (1 = data).
+
+01000000xxxxxxxx
+	Output data for "Device 4", multiple possible devices.
+
+01010000xxxxxxxx
+	Output data for "Device 5", multiple possible devices.
 
 [TBD: I/O for "CN-36"]
