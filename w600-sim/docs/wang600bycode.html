@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.3 2011/05/25 16:54:21 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.4 2011/05/25 17:38:22 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -377,7 +377,7 @@ td.tag {text-align: center;}
 	(no letter tag).
 	</TD></TR>
 
-<TR><TD CLASS="tag" ROWSPAN=9>I/O</TD>
+<TR><TD CLASS="tag" ROWSPAN=7>I/O</TD>
 	<TD>00 00 through 09 15: Print display, formatted, to OutputWriter (device 1). First number is
 	number of (blank-filled) integer places, second is number of decimal places.
 	00 xx is for scientific notation, also xx 11 through xx 15.
@@ -390,12 +390,12 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR>	<TD>13 xx: page-in/out blocks of program steps to/from "device 2", as follows.
 	"disk" address is R(00) (integer portion, 0 - 16M). R(01) is the starting program step number
-	(integer portion, 0000 - 1847). Length determined by low three bits of suffix:
-	0 = 1 step, 1 = 8 steps, 2 = 16 steps, 3 = 24 steps, 4 = 32 steps, 5 = 48 steps, 6 = 56 steps, 7 = 64 steps.
-	</TD></TR>
-<TR>	<TD>13 00 - 13 07: input program steps.
-	</TD></TR>
-<TR>	<TD>13 08 - 13 15: output program steps.
+	(integer portion, 0000 - 1847). Length determined by low three bits of 'xx':
+	0 = 1 step, 1 = 8 steps, 2 = 16 steps, 3 = 32 steps, 4 = 64 steps, 5 = 128 steps, 6 = 256 steps, 7 = 64 steps.
+	<BR>
+	13 00 - 13 07: input program steps.
+	<BR>
+	13 08 - 13 15: output program steps.
 	</TD></TR>
 <TR>	<TD>14 xx: same as 10 xx.
 	</TD></TR>
