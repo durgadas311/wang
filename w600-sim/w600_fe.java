@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $
+// $Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -138,7 +138,7 @@ class FEexit extends Thread {
 }
 
 public class w600_fe {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -255,7 +255,7 @@ public class w600_fe {
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -337,7 +337,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -393,7 +393,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -637,7 +637,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -958,8 +958,9 @@ class Wang600_Tape extends JComponent
 
 class Wang600_CN24
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	private byte[] cn24_xlate;
+	private String[] cn24_spcl;
 
 	public Wang600_CN24() {
 		cn24_xlate = new byte[256];
@@ -971,10 +972,10 @@ class Wang600_CN24
 		cn24_xlate[0x05] = 'p';
 		cn24_xlate[0x06] = '=';
 		cn24_xlate[0x07] = 'j';
-		// cn24_xlate[0x08] = ' ';
+		// cn24_xlate[0x08] = ' ';	// no op
 		cn24_xlate[0x09] = '/';
-		//cn24_xlate[0x0a] = ' ';
-		//cn24_xlate[0x0b] = ' ';
+		//cn24_xlate[0x0a] = ' ';	// no op
+		//cn24_xlate[0x0b] = ' ';	// no op
 		cn24_xlate[0x0c] = ',';
 		cn24_xlate[0x0d] = ';';
 		cn24_xlate[0x0e] = 'f';
@@ -982,12 +983,12 @@ class Wang600_CN24
 
 		cn24_xlate[0x10] = 'w';
 		cn24_xlate[0x11] = 's';
-		//cn24_xlate[0x12] = '.';	// shift dn
-		//cn24_xlate[0x13] = '.';	// shift up
+		//cn24_xlate[0x12] = '';	// shift dn
+		//cn24_xlate[0x13] = '';	// shift up
 		cn24_xlate[0x14] = 'i';
 		cn24_xlate[0x15] = '\'';
 		cn24_xlate[0x16] = '.';
-		//cn24_xlate[0x17] = '\u00BD';	// 1/2...
+		cn24_xlate[0x17] = '\001';	// 1/2...
 		cn24_xlate[0x18] = '\n';
 		cn24_xlate[0x19] = 'o';
 		cn24_xlate[0x1a] = '\n';
@@ -1030,20 +1031,99 @@ class Wang600_CN24
 		cn24_xlate[0x3d] = '7';
 		cn24_xlate[0x3e] = '3';
 		cn24_xlate[0x3f] = 'l';
+
+		// shifted versions...
+		cn24_xlate[0x40] = '_';
+		cn24_xlate[0x41] = 'Y';
+		cn24_xlate[0x42] = ' ';
+		cn24_xlate[0x43] = '\b';
+		cn24_xlate[0x44] = 'Q';
+		cn24_xlate[0x45] = 'P';
+		cn24_xlate[0x46] = '+';
+		cn24_xlate[0x47] = 'J';
+		cn24_xlate[0x49] = '?';
+		cn24_xlate[0x4c] = ',';
+		cn24_xlate[0x4d] = ':';
+		cn24_xlate[0x4e] = 'F';
+		cn24_xlate[0x4f] = 'G';
+
+		cn24_xlate[0x50] = 'W';
+		cn24_xlate[0x51] = 'S';
+		cn24_xlate[0x54] = 'I';
+		cn24_xlate[0x55] = '"';
+		cn24_xlate[0x56] = '.';
+		cn24_xlate[0x57] = '\002';	// 1/4
+		cn24_xlate[0x58] = '\n';
+		cn24_xlate[0x59] = 'O';
+		cn24_xlate[0x5a] = '\n';
+		//cn24_xlate[0x5b] = '\n';	// rev index
+		cn24_xlate[0x5c] = 'A';
+		cn24_xlate[0x5d] = 'R';
+		cn24_xlate[0x5e] = 'V';
+		cn24_xlate[0x5f] = 'M';
+
+		cn24_xlate[0x20] = 'B';
+		cn24_xlate[0x21] = 'H';
+		cn24_xlate[0x64] = 'K';
+		cn24_xlate[0x65] = 'E';
+		cn24_xlate[0x66] = 'N';
+		cn24_xlate[0x67] = 'T';
+		cn24_xlate[0x69] = '!';
+		cn24_xlate[0x6c] = 'C';
+		cn24_xlate[0x6d] = 'D';
+		cn24_xlate[0x6e] = 'U';
+		cn24_xlate[0x6f] = 'X';
+
+		cn24_xlate[0x70] = '(';
+		cn24_xlate[0x71] = ')';
+		cn24_xlate[0x74] = '\003';	// cent
+		cn24_xlate[0x75] = '%';
+		cn24_xlate[0x76] = '@';
+		cn24_xlate[0x77] = 'Z';
+		cn24_xlate[0x79] = '$';
+		cn24_xlate[0x7c] = '*';
+		cn24_xlate[0x7d] = '&';
+		cn24_xlate[0x7e] = '#';
+		cn24_xlate[0x7f] = 'L';
+
+		cn24_spcl = new String[32];
+		cn24_spcl[0x01] = "\u00BD";
+		cn24_spcl[0x02] = "\u00BC";
+		cn24_spcl[0x03] = "\u00A2";
+
+		_shifted = false;
 	}
+
+	private boolean _shifted;
 
 	// todo: need a OutputWriter panel a la Printer.
 	public void do_cn24(byte[] b) {
 		if (b[0] == 0x28) return;	// TBD: handle plot mode, and switch back to print
-		byte p = cn24_xlate[b[0]];
+		if (b[0] == 0x12) {
+			_shifted = false;
+			return;
+		}
+		if (b[0] == 0x13) {
+			_shifted = true;
+			return;
+		}
+		byte p;
+		if (_shifted) {
+			p = cn24_xlate[b[0] + 0x40];
+		} else {
+			p = cn24_xlate[b[0]];
+		}
 		byte[] bb;
 		if (p == 0) {
 			bb = new String("<"+b[0]+">").getBytes();
+		} else if (p < 0x07) {
+			bb = cn24_spcl[p].getBytes();
 		} else {
 			bb = new byte[1];
 			bb[0] = p;
 		}
 		try {
+			// TBD: new output frame, or just put to file?
 			System.err.write(bb);
 			System.err.flush();
 		} catch (IOException e) {
@@ -1054,7 +1134,7 @@ class Wang600_CN24
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1195,7 +1275,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1661,7 +1741,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -1826,7 +1906,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2042,7 +2122,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2133,7 +2213,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.66 2011/05/25 16:54:21 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.67 2011/05/25 18:34:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

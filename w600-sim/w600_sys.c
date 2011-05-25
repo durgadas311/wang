@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.23 2011/05/25 16:54:21 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.24 2011/05/25 18:34:23 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -257,7 +257,7 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 	}
 }
 
-static char cn24_xlate[64] = {
+static char cn24_xlate[256] = {
 [0x00] = '-',
 [0x01] = 'y',
 [0x02] = ' ',
@@ -325,6 +325,55 @@ static char cn24_xlate[64] = {
 [0x3d] = '7',
 [0x3e] = '3',
 [0x3f] = 'l',
+
+// shifted versions...
+[0x40] = '_',
+[0x41] = 'Y',
+[0x44] = 'Q',
+[0x45] = 'P',
+[0x46] = '+',
+[0x47] = 'J',
+[0x49] = '?',
+[0x4c] = ',',
+[0x4d] = ':',
+[0x4e] = 'F',
+[0x4f] = 'G',
+
+[0x50] = 'W',
+[0x51] = 'S',
+[0x54] = 'I',
+[0x55] = '"',
+[0x56] = '.',
+//[0x57] = '\u00BC',	// 1/4
+[0x59] = 'O',
+[0x5c] = 'A',
+[0x5d] = 'R',
+[0x5e] = 'V',
+[0x5f] = 'M',
+
+[0x20] = 'B',
+[0x21] = 'H',
+[0x64] = 'K',
+[0x65] = 'E',
+[0x66] = 'N',
+[0x67] = 'T',
+[0x69] = '!',
+[0x6c] = 'C',
+[0x6d] = 'D',
+[0x6e] = 'U',
+[0x6f] = 'X',
+
+[0x70] = '(',
+[0x71] = ')',
+//[0x74] = '\u00A2',	// cent
+[0x75] = '%',
+[0x76] = '@',
+[0x77] = 'Z',
+[0x79] = '$',
+[0x7c] = '*',
+[0x7d] = '&',
+[0x7e] = '#',
+[0x7f] = 'L',
 
 };
 
