@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.1 2011/05/24 22:47:34 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.2 2011/05/25 00:15:25 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -376,7 +376,7 @@ td.tag {text-align: center;}
 	(no letter tag).
 	</TD></TR>
 
-<TR><TD CLASS="tag" ROWSPAN=7>I/O</TD>
+<TR><TD CLASS="tag" ROWSPAN=8>I/O</TD>
 	<TD>00 00 through 09 15: Print display to OutputWriter. First number is
 	number of (blank-filled) integer places, second is number of decimal places.
 	00 xx is for scientific notation, also xx 11 through xx 15.
@@ -387,7 +387,14 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR>	<TD>12 xx: Print xx blanks to OutputWriter.
 	</TD></TR>
-<TR>	<TD>13 xx: TBD I/O
+<TR>	<TD>13 xx: xx = 00-07: input into program step R(01). Send R(00) as 3-byte binary value,
+	followed by length code (1 = 1 step, 2 = 8 steps, 4 = 16 steps, ... 0 = 64 steps),
+	N+1st byte must be 00 00 (?) to indicate success.
+	</TD></TR>
+<TR>	<TD>13 xx: xx = 08-15: output program steps starting at step R(01). Send R(00) as 3-byte binary value,
+	followed by length code (1 = 1 step, 2 = 8 steps, 4 = 16 steps, ... 0 = 64 steps) or'ed with 08 00,
+	N+1st byte sent as 00 00.
+	</TD></TR>
 <TR>	<TD>14 xx: same as 10 xx.
 	</TD></TR>
 <TR>	<TD>15 xx: same as 11 xx.
