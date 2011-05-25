@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.2 2011/05/25 00:15:25 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.3 2011/05/25 16:54:21 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -338,11 +338,12 @@ td.tag {text-align: center;}
 	the display to register 123 (which is also known as 07 11).
 	</TD></TR>
 <TR><TD CLASS="tag" ROWSPAN=13>&#945;</TD>
-	<TD>00 00 through 07 15: Print character(s) to OutputWriter. Output stops
+	<TD>00 00 through 03 15: Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
 	when 02 02 is seen (not printed).
 	Codes 04 00 through 07 15 print 00 00 through 03 15 but prefixed
-	with a 03 08 (shift?).
+	with a 03 08 (plot mode).
 	Resulting symbols are described in table below.
+	NOTE: this is not a two-step command, but variable length. Code 02 02 terminates command.
 	</TD></TR>
 <TR>	<TD>SEARCH: Value of &#960;
 	</TD></TR>
@@ -376,8 +377,8 @@ td.tag {text-align: center;}
 	(no letter tag).
 	</TD></TR>
 
-<TR><TD CLASS="tag" ROWSPAN=8>I/O</TD>
-	<TD>00 00 through 09 15: Print display to OutputWriter. First number is
+<TR><TD CLASS="tag" ROWSPAN=9>I/O</TD>
+	<TD>00 00 through 09 15: Print display, formatted, to OutputWriter (device 1). First number is
 	number of (blank-filled) integer places, second is number of decimal places.
 	00 xx is for scientific notation, also xx 11 through xx 15.
 	</TD></TR>
@@ -385,15 +386,16 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR>	<TD>11 xx: Jump if R0 &#8800; display (string compare, not numeric)
 	</TD></TR>
-<TR>	<TD>12 xx: Print xx blanks to OutputWriter.
+<TR>	<TD>12 xx: Print field of xx blanks to OutputWriter.
 	</TD></TR>
-<TR>	<TD>13 xx: xx = 00-07: input into program step R(01). Send R(00) as 3-byte binary value,
-	followed by length code (1 = 1 step, 2 = 8 steps, 4 = 16 steps, ... 0 = 64 steps),
-	N+1st byte must be 00 00 (?) to indicate success.
+<TR>	<TD>13 xx: page-in/out blocks of program steps to/from "device 2", as follows.
+	"disk" address is R(00) (integer portion, 0 - 16M). R(01) is the starting program step number
+	(integer portion, 0000 - 1847). Length determined by low three bits of suffix:
+	0 = 1 step, 1 = 8 steps, 2 = 16 steps, 3 = 24 steps, 4 = 32 steps, 5 = 48 steps, 6 = 56 steps, 7 = 64 steps.
 	</TD></TR>
-<TR>	<TD>13 xx: xx = 08-15: output program steps starting at step R(01). Send R(00) as 3-byte binary value,
-	followed by length code (1 = 1 step, 2 = 8 steps, 4 = 16 steps, ... 0 = 64 steps) or'ed with 08 00,
-	N+1st byte sent as 00 00.
+<TR>	<TD>13 00 - 13 07: input program steps.
+	</TD></TR>
+<TR>	<TD>13 08 - 13 15: output program steps.
 	</TD></TR>
 <TR>	<TD>14 xx: same as 10 xx.
 	</TD></TR>
@@ -402,11 +404,13 @@ td.tag {text-align: center;}
 	</TD></TR>
 
 <TR><TD CLASS="tag">GROUP 1</TD>
-	<TD>TBD I/O
+	<TD>Send next code to "device 4". In program, issues XS=0, then XS=4 with data, then program stops (press GO to continue).
+	(does device generate GO?)
 	</TD></TR>
 
 <TR><TD CLASS="tag">GROUP 2</TD>
-	<TD>TBD I/O
+	<TD>Send next code to "device 5". In program, issues XS=0, then XS=5 with data, then program stops (press GO to continue).
+	(does device generate GO?)
 	</TD></TR>
 
 </TABLE>
@@ -434,147 +438,75 @@ td.tag {text-align: center;}
 
 <TR><TH>00</TH>
 <TD CLASS="sym">-</TD>
+<TD CLASS="sym">y</TD>
+<TD CLASS="sym">space</TD>
+<TD CLASS="sym">back space</TD>
+<TD CLASS="sym">q</TD>
+<TD CLASS="sym">p</TD>
+<TD CLASS="sym">=</TD>
+<TD CLASS="sym">j</TD>
 <TD CLASS="sym"></TD>
-<TD CLASS="sym">blank</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">/</TD>
 <TD CLASS="sym"></TD>
 <TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
+<TD CLASS="sym">,</TD>
+<TD CLASS="sym">;</TD>
+<TD CLASS="sym">f</TD>
+<TD CLASS="sym">g</TR>
 
 <TR><TH>01</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">w</TD>
+<TD CLASS="sym">s</TD>
+<TD CLASS="sym">shift dn</TD>
+<TD CLASS="sym">shift up</TD>
+<TD CLASS="sym">i</TD>
+<TD CLASS="sym">'</TD>
 <TD CLASS="sym">.</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
+<TD CLASS="sym">&#189;</TD>
+<TD CLASS="sym">return index</TD>
+<TD CLASS="sym">o</TD>
+<TD CLASS="sym">index</TD>
+<TD CLASS="sym">rev index</TD>
+<TD CLASS="sym">a</TD>
+<TD CLASS="sym">r</TD>
+<TD CLASS="sym">v</TD>
+<TD CLASS="sym">m</TR>
 
 <TR><TH>02</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym">+</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">b</TD>
+<TD CLASS="sym">h</TD>
+<TD CLASS="sym">step x+</TD>
+<TD CLASS="sym">step x-</TD>
+<TD CLASS="sym">k</TD>
+<TD CLASS="sym">e</TD>
+<TD CLASS="sym">n</TD>
+<TD CLASS="sym">t</TD>
+<TD CLASS="sym">print mode</TD>
 <TD CLASS="sym">1</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
+<TD CLASS="sym">step y+</TD>
+<TD CLASS="sym">step y-</TD>
+<TD CLASS="sym">c</TD>
+<TD CLASS="sym">d</TD>
+<TD CLASS="sym">u</TD>
+<TD CLASS="sym">x</TR>
 
 <TR><TH>03</TH>
 <TD CLASS="sym">9</TD>
 <TD CLASS="sym">0</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">step x+y+</TD>
+<TD CLASS="sym">step x-y+</TD>
 <TD CLASS="sym">6</TD>
 <TD CLASS="sym">5</TD>
 <TD CLASS="sym">2</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">z</TD>
+<TD CLASS="sym">plot mode</TD>
 <TD CLASS="sym">4</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">step x+y-</TD>
+<TD CLASS="sym">step x-y-</TD>
 <TD CLASS="sym">8</TD>
 <TD CLASS="sym">7</TD>
 <TD CLASS="sym">3</TD>
-<TD CLASS="sym"></TR>
-
-<TR><TH>04</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
-
-<TR><TH>05</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
-
-<TR><TH>06</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
-
-<TR><TH>07</TH>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TR>
+<TD CLASS="sym">l</TR>
 
 </TABLE>
 

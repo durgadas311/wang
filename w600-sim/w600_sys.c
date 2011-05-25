@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.22 2011/05/15 23:10:44 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.23 2011/05/25 16:54:21 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -259,29 +259,73 @@ static uint8_t systape(w600_sys_t *sys, int wr, uint8_t nibble) {
 
 static char cn24_xlate[64] = {
 [0x00] = '-',
-
+[0x01] = 'y',
 [0x02] = ' ',
+[0x03] = '\b',
+[0x04] = 'q',
+[0x05] = 'p',
+[0x06] = '=',
+[0x07] = 'j',
+// [0x08] = ' ',
+[0x09] = '/',
+//[0x0a] = ' ',
+//[0x0b] = ' ',
+[0x0c] = ',',
+[0x0d] = ';',
+[0x0e] = 'f',
+[0x0f] = 'g',
 
+[0x10] = 'w',
+[0x11] = 's',
+//[0x12] = '.';       // shift dn
+//[0x13] = '.';       // shift up
+[0x14] = 'i',
+[0x15] = '\'',
 [0x16] = '.',
+//[0x17] = '\u00BD';  // 1/2...
+[0x18] = '\n',
+[0x19] = 'o',
+[0x1a] = '\n',
+//[0x1b] = '\n';      // rev index
+[0x1c] = 'a',
+[0x1d] = 'r',
+[0x1e] = 'v',
+[0x1f] = 'm',
 
-[0x25] = '+',
-
-//[0x18] = '\r',	// "RETURN" action...
-//[0x1a] = '\n',	// "INDEX" action... (newline)
-//[0x28] = '?',		// "PRINT" action... just reset for next characters? or power-up?
+[0x20] = 'b',
+[0x21] = 'h',
+//[0x22] = '+';       // step x+ 
+//[0x23] = '+';       // step x- 
+[0x24] = 'k',
+[0x25] = 'e',
+[0x26] = 'n',
+[0x27] = 't',
+//[0x28] = '';        // print mode
 [0x29] = '1',
+//[0x2a] = '+';       // step y+ 
+//[0x2b] = '+';       // step y- 
+[0x2c] = 'c',
+[0x2d] = 'd',
+[0x2e] = 'u',
+[0x2f] = 'x',
+
 [0x30] = '9',
 [0x31] = '0',
-
+//[0x32] = '+';       // step x+y+
+//[0x33] = '+';       // step x-y+
 [0x34] = '6',
 [0x35] = '5',
 [0x36] = '2',
-
+[0x37] = 'z',
+//[0x38] = 'z';       // plot mode
 [0x39] = '4',
-
+//[0x3a] = '4';       // step x+y-
+//[0x3b] = '4';       // step x-y-
 [0x3c] = '8',
 [0x3d] = '7',
 [0x3e] = '3',
+[0x3f] = 'l',
+
 };
 
 static void syscn24(w600_sys_t *sys, uint8_t c) {
