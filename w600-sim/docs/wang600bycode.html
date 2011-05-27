@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.7 2011/05/27 15:48:33 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.8 2011/05/27 16:40:43 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -388,11 +388,35 @@ td.tag {text-align: center;}
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH>Print prefix, and PRINT inside a program</TH></TR>
-<TR>
-	<TD>First half, 00 through 15, selects letter "tag" to be printed along side.
-	Second half, 00 through 14, select number format, or if 15 prints blank line
-	(no letter tag).
+<TR><TH COLSPAN=2>Print prefix, and PRINT inside a program</TH></TR>
+<TR><TD>xx&nbsp;00 through xx&nbsp;10</TD>
+	<TD>Print with 0-10 decimal places
+	</TD></TR>
+<TR><TD>xx&nbsp;11 through xx&nbsp;14</TD>
+	<TD>print in scientific notation
+	</TD></TR>
+<TR><TD>--&nbsp;15</TD>
+	<TD>prints blank line
+	</TD></TR>
+<TR><TD COLSPAN=2>
+	'xx' prints letter "tag" in column 21
+	<TABLE BORDER>
+	<TR><TD>00</TD><TD>X</TD><TD></TD>
+	    <TD>04</TD><TD>B</TD><TD></TD>
+	    <TD>08</TD><TD>F</TD><TD></TD>
+	    <TD>12</TD><TD>J</TD></TR>
+	<TR><TD>01</TD><TD>Y</TD><TD></TD>
+	    <TD>05</TD><TD>C</TD><TD></TD>
+	    <TD>09</TD><TD>G</TD><TD></TD>
+	    <TD>13</TD><TD>K</TD></TR>
+	<TR><TD>02</TD><TD>Z</TD><TD></TD>
+	    <TD>06</TD><TD>D</TD><TD></TD>
+	    <TD>10</TD><TD>H</TD><TD></TD>
+	    <TD>14</TD><TD>L</TD></TR>
+	<TR><TD>03</TD><TD>A</TD><TD></TD>
+	    <TD>07</TD><TD>E</TD><TD></TD>
+	    <TD>11</TD><TD>I</TD><TD></TD>
+	    <TD>15</TD><TD>M</TD></TR>
 	</TD></TR>
 </TABLE>
 
@@ -413,8 +437,8 @@ td.tag {text-align: center;}
 	<TD>Print field of xx blanks to OutputWriter.
 	</TD></TR>
 <TR>	<TD>13&nbsp;00 through 13&nbsp;07</TD>
-	<TD>page-in blocks of program steps from "device 2", as follows.
-	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M).
+	<TD>page-in blocks of program steps from "device 2".
+	"Source" address is in 00&nbsp;00 (integer portion, 0 - 16M).
 	In 00&nbsp;01 is the starting program step number
 	(integer portion, 0000 - 1847).
 	Length determined by 'xx':
@@ -431,12 +455,12 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR>	<TD>13&nbsp;08 through 13&nbsp;15</TD>
 	<TD>page-out blocks of program steps to "device 2".
-	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M).
+	"Destination" address is in 00&nbsp;00 (integer portion, 0 - 16M).
 	In 00&nbsp;01 is the starting program step number
 	(integer portion, 0000 - 1847).
 	Length determined 'xx':
 	<TABLE BORDER>
-	<TR><TR><TH>08</TH><TD>1 step</TD></TR>
+	<TR><TH>08</TH><TD>1 step</TD></TR>
 	<TR><TH>09</TH><TD>8 steps</TD></TR>
 	<TR><TH>10</TH><TD>16 steps</TD></TR>
 	<TR><TH>11</TH><TD>32 steps</TD></TR>
@@ -564,7 +588,7 @@ td.tag {text-align: center;}
 <TD CLASS="sym">3</TD>
 <TD CLASS="sym">l</TR>
 
-<TR><TH ROWSPAN=4>S H I F T E D</TH>
+<TR><TH ROWSPAN=4>S<BR>H<BR>I<BR>F<BR>T<BR>E<BR>D</TH>
 <TD CLASS="sym">_</TD>
 <TD CLASS="sym">Y</TD>
 <TD CLASS="sym">space</TD>
