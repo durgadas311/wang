@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.6 2011/05/27 15:23:11 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.7 2011/05/27 15:48:33 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -318,101 +318,157 @@ td.tag {text-align: center;}
 </TABLE>
 
 * Two-step command sequences, described below
-<P>
 
-<TABLE BORDER>
-<TR><TH>Prefix</TH><TH>Notes on use and second step</TH></TR>
+<P><TABLE BORDER>
+<TR><TH>SEARCH, MARK, and Call prefixes</TH></TR>
+<TR><TD>The second step is a "label", used to implement goto and call.
+	Any code may be used, however END&nbsp;PROG should be avoided.</TD></TR>
+</TABLE>
 
-<TR><TD CLASS="tag">SEARCH, MARK, and Call</TD>
-	<TD>The second step is a "label", used to implement goto and call.
-	Any code may be used, however END PROG should be avoided.</TD></TR>
-<TR><TD CLASS="tag">STORE and RECALL</TD>
-	<TD>The second step is a register number, 00&nbsp;00 through 15&nbsp;15.
+<P><TABLE BORDER>
+<TR><TH>STORE and RECALL prefixes</TH></TR>
+<TR><TD>The second step is a register number, 00&nbsp;00 through 15&nbsp;15.
 	Note, registers above 15&nbsp;06 are system memory and should not be used.
-	The register 09&nbsp;14 is the END PROG command and will affect program listings
+	The register 09&nbsp;14 is the END&nbsp;PROG command and will affect program listings
 	and recording/loading from tape.</TD></TR>
-<TR><TD CLASS="tag">INDIR</TD>
-	<TD>The second step is a register command. The operation is performed
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH>INDIR prefix</TH></TR>
+<TR><TD>The second step is a register command. The operation is performed
 	on the register number that is stored in the register.
-	If register 05 contains 123.00000000, then INDIR +05 will add
+	If register 05 contains 123.00000000, then INDIR&nbsp;+05 will add
 	the display to register 123 (which is also known as 07&nbsp;11).
 	</TD></TR>
-<TR><TD CLASS="tag" ROWSPAN=13>&#945;</TD>
-	<TD>00&nbsp;00 through 03&nbsp;15: Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>&#945; prefix</TH></TR>
+<TR><TD>00&nbsp;00 through 03&nbsp;15</TD>
+	<TD>Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
 	when 02&nbsp;02 is seen (not printed).
-	Codes 04&nbsp;00 through 07&nbsp;15 print 00 00 through 03&nbsp;15 but prefixed
+	Resulting symbols are described in table below.
+	NOTE: this is not a two-step command, but variable length. Code 02&nbsp;02 terminates command.
+	</TD></TR>
+<TR><TD>04&nbsp;00 through 07&nbsp;15</TD>
+	<TD>print 00 00 through 03&nbsp;15 but prefixed
 	with a 03&nbsp;08 (plot mode).
 	Resulting symbols are described in table below.
 	NOTE: this is not a two-step command, but variable length. Code 02&nbsp;02 terminates command.
 	</TD></TR>
-<TR>	<TD>SEARCH: Value of &#960;
+
+<TR>	<TD>SEARCH</TD><TD> Value of &#960; to display
 	</TD></TR>
-<TR>	<TD>PRINT: Turn on keyboard trace (Printer must be ON)
+<TR>	<TD>PRINT</TD><TD> Turn on keyboard trace (Printer must be ON)
 	</TD></TR>
-<TR>	<TD>&#945;: Turn off keyboard trace
+<TR>	<TD>&#945;</TD><TD> Turn off keyboard trace
 	</TD></TR>
-<TR>	<TD>STOP: 1 second pause
+<TR>	<TD>STOP</TD><TD> 1 second pause
 	</TD></TR>
-<TR>	<TD>10 xx: Multiply display by 10<SUP>xx</SUP>
+<TR>	<TD>10 xx</TD><TD> Multiply display by 10<SUP>xx</SUP>
 	</TD></TR>
-<TR>	<TD>11 xx: Multiply display by 10<SUP>-xx</SUP>
+<TR>	<TD>11 xx</TD><TD> Multiply display by 10<SUP>-xx</SUP>
 	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>0: Jump if 00&nbsp;00 = display
+<TR>	<TD>J<SUP>IF</SUP>0</TD><TD> Jump if 00&nbsp;00 = display
 	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>+: Jump if 00&nbsp;00 >= display
+<TR>	<TD>J<SUP>IF</SUP>+</TD><TD> Jump if 00&nbsp;00 >= display
 	</TD></TR>
-<TR>	<TD>SIN: Jump if 00&nbsp;00 < display
+<TR>	<TD>SIN</TD><TD> Jump if 00&nbsp;00 < display
 	</TD></TR>
-<TR>	<TD>LOAD PROG: Skip N records and load program from tape. N is integer portion of
-	current display value.
-<TR>	<TD>STORE: Record N registers to tape. Registers are recorded in reverse
-	order, N-1 through 00&nbsp;00.
-<TR>	<TD>RECALL: Load N registers from tape. Registers are loaded in reverse
-	order, N-1 through 00&nbsp;00.
+<TR>	<TD>LOAD PROG</TD><TD> Skip N records and load program from tape.
+	N is integer portion of current display value.
+<TR>	<TD>STORE</TD><TD> Record N+1 registers to tape.
+	N is integer portion of current display value.
+	Registers are recorded in reverse order, N through 00&nbsp;00.
+<TR>	<TD>RECALL</TD><TD> Load N+1 registers from tape.
+	N is integer portion of current display value.
+	Registers are loaded in reverse order, N through 00&nbsp;00.
 	</TD></TR>
 
-<TR><TD CLASS="tag">Print, and PRINT inside a program</TD>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH>Print prefix, and PRINT inside a program</TH></TR>
+<TR>
 	<TD>First half, 00 through 15, selects letter "tag" to be printed along side.
 	Second half, 00 through 14, select number format, or if 15 prints blank line
 	(no letter tag).
 	</TD></TR>
+</TABLE>
 
-<TR><TD CLASS="tag" ROWSPAN=7>I/O</TD>
-	<TD>00&nbsp;00 through 09&nbsp;15: Print display, formatted, to OutputWriter (device 1). First number is
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>I/O prefix</TH></TR>
+<TR><TD>00&nbsp;00 through 09&nbsp;15</TD>
+	<TD>Print display, formatted, to OutputWriter (device 1). First number is
 	number of (blank-filled) integer places, second is number of decimal places.
 	00&nbsp;xx is for scientific notation, also xx&nbsp;11 through xx&nbsp;15.
 	</TD></TR>
-<TR>	<TD>10 xx: Jump if 00&nbsp;00 = display (string compare, not numeric)
+<TR>	<TD>10 xx</TD>
+	<TD>Jump if 00&nbsp;00 = display (string compare, not numeric)
 	</TD></TR>
-<TR>	<TD>11 xx: Jump if 00&nbsp;00 &#8800; display (string compare, not numeric)
+<TR>	<TD>11 xx</TD>
+	<TD>Jump if 00&nbsp;00 &#8800; display (string compare, not numeric)
 	</TD></TR>
-<TR>	<TD>12 xx: Print field of xx blanks to OutputWriter.
+<TR>	<TD>12 xx</TD>
+	<TD>Print field of xx blanks to OutputWriter.
 	</TD></TR>
-<TR>	<TD>13 xx: page-in/out blocks of program steps to/from "device 2", as follows.
-	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M). In 00&nbsp;01 is the starting program step number
-	(integer portion, 0000 - 1847). Length determined by low three bits of 'xx':
-	0 = 1 step, 1 = 8 steps, 2 = 16 steps, 3 = 32 steps, 4 = 64 steps, 5 = 128 steps, 6 = 256 steps, 7 = 64 steps.
-	<BR>
-	13&nbsp;00 - 13&nbsp;07: input program steps.
-	<BR>
-	13&nbsp;08 - 13&nbsp;15: output program steps.
+<TR>	<TD>13&nbsp;00 through 13&nbsp;07</TD>
+	<TD>page-in blocks of program steps from "device 2", as follows.
+	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M).
+	In 00&nbsp;01 is the starting program step number
+	(integer portion, 0000 - 1847).
+	Length determined by 'xx':
+	<TABLE BORDER>
+	<TR><TH>00</TH><TD>1 step</TD></TR>
+	<TR><TH>01</TH><TD>8 steps</TD></TR>
+	<TR><TH>02</TH><TD>16 steps</TD></TR>
+	<TR><TH>03</TH><TD>32 steps</TD></TR>
+	<TR><TH>04</TH><TD>64 steps</TD></TR>
+	<TR><TH>05</TH><TD>128 steps</TD></TR>
+	<TR><TH>06</TH><TD>256 steps</TD></TR>
+	<TR><TH>07</TH><TD>64 steps</TD></TR>
+	</TABLE>
 	</TD></TR>
-<TR>	<TD>14 xx: same as 10&nbsp;xx.
+<TR>	<TD>13&nbsp;08 through 13&nbsp;15</TD>
+	<TD>page-out blocks of program steps to "device 2".
+	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M).
+	In 00&nbsp;01 is the starting program step number
+	(integer portion, 0000 - 1847).
+	Length determined 'xx':
+	<TABLE BORDER>
+	<TR><TR><TH>08</TH><TD>1 step</TD></TR>
+	<TR><TH>09</TH><TD>8 steps</TD></TR>
+	<TR><TH>10</TH><TD>16 steps</TD></TR>
+	<TR><TH>11</TH><TD>32 steps</TD></TR>
+	<TR><TH>12</TH><TD>64 steps</TD></TR>
+	<TR><TH>13</TH><TD>128 steps</TD></TR>
+	<TR><TH>14</TH><TD>256 steps</TD></TR>
+	<TR><TH>15</TH><TD>64 steps</TD></TR>
+	</TABLE>
 	</TD></TR>
-<TR>	<TD>15 xx: same as 11&nbsp;xx.
+<TR>	<TD>14 xx</TD>
+	<TD>same as 10&nbsp;xx.
+	</TD></TR>
+<TR>	<TD>15 xx</TD>
+	<TD>same as 11&nbsp;xx.
 	</TD></TR>
 	</TD></TR>
+</TABLE>
 
-<TR><TD CLASS="tag">GROUP 1</TD>
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>GROUP 1 prefix</TH></TR>
+<TR>
 	<TD>Send next code to "device 4". In program, issues XS=0, then XS=4 with data, then program stops (press GO to continue).
 	(does device generate GO?)
 	</TD></TR>
+</TABLE>
 
-<TR><TD CLASS="tag">GROUP 2</TD>
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>GROUP 2 prefix</TH></TR>
+<TR>
 	<TD>Send next code to "device 5". In program, issues XS=0, then XS=5 with data, then program stops (press GO to continue).
 	(does device generate GO?)
 	</TD></TR>
-
 </TABLE>
 
 <P>
