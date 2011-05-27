@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.5 2011/05/25 18:40:57 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.6 2011/05/27 15:23:11 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -327,23 +327,23 @@ td.tag {text-align: center;}
 	<TD>The second step is a "label", used to implement goto and call.
 	Any code may be used, however END PROG should be avoided.</TD></TR>
 <TR><TD CLASS="tag">STORE and RECALL</TD>
-	<TD>The second step is a register number, 00 00 through 15 15.
-	Note, registers above 15 06 are system memory and should not be used.
-	The register 09 14 is the END PROG command and will affect program listings
+	<TD>The second step is a register number, 00&nbsp;00 through 15&nbsp;15.
+	Note, registers above 15&nbsp;06 are system memory and should not be used.
+	The register 09&nbsp;14 is the END PROG command and will affect program listings
 	and recording/loading from tape.</TD></TR>
 <TR><TD CLASS="tag">INDIR</TD>
 	<TD>The second step is a register command. The operation is performed
 	on the register number that is stored in the register.
 	If register 05 contains 123.00000000, then INDIR +05 will add
-	the display to register 123 (which is also known as 07 11).
+	the display to register 123 (which is also known as 07&nbsp;11).
 	</TD></TR>
 <TR><TD CLASS="tag" ROWSPAN=13>&#945;</TD>
-	<TD>00 00 through 03 15: Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
-	when 02 02 is seen (not printed).
-	Codes 04 00 through 07 15 print 00 00 through 03 15 but prefixed
-	with a 03 08 (plot mode).
+	<TD>00&nbsp;00 through 03&nbsp;15: Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
+	when 02&nbsp;02 is seen (not printed).
+	Codes 04&nbsp;00 through 07&nbsp;15 print 00 00 through 03&nbsp;15 but prefixed
+	with a 03&nbsp;08 (plot mode).
 	Resulting symbols are described in table below.
-	NOTE: this is not a two-step command, but variable length. Code 02 02 terminates command.
+	NOTE: this is not a two-step command, but variable length. Code 02&nbsp;02 terminates command.
 	</TD></TR>
 <TR>	<TD>SEARCH: Value of &#960;
 	</TD></TR>
@@ -357,18 +357,18 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR>	<TD>11 xx: Multiply display by 10<SUP>-xx</SUP>
 	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>0: Jump if 00 00 = display
+<TR>	<TD>J<SUP>IF</SUP>0: Jump if 00&nbsp;00 = display
 	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>+: Jump if 00 00 >= display
+<TR>	<TD>J<SUP>IF</SUP>+: Jump if 00&nbsp;00 >= display
 	</TD></TR>
-<TR>	<TD>SIN: Jump if 00 00 < display
+<TR>	<TD>SIN: Jump if 00&nbsp;00 < display
 	</TD></TR>
 <TR>	<TD>LOAD PROG: Skip N records and load program from tape. N is integer portion of
 	current display value.
 <TR>	<TD>STORE: Record N registers to tape. Registers are recorded in reverse
-	order, N-1 through 00 00.
+	order, N-1 through 00&nbsp;00.
 <TR>	<TD>RECALL: Load N registers from tape. Registers are loaded in reverse
-	order, N-1 through 00 00.
+	order, N-1 through 00&nbsp;00.
 	</TD></TR>
 
 <TR><TD CLASS="tag">Print, and PRINT inside a program</TD>
@@ -378,28 +378,28 @@ td.tag {text-align: center;}
 	</TD></TR>
 
 <TR><TD CLASS="tag" ROWSPAN=7>I/O</TD>
-	<TD>00 00 through 09 15: Print display, formatted, to OutputWriter (device 1). First number is
+	<TD>00&nbsp;00 through 09&nbsp;15: Print display, formatted, to OutputWriter (device 1). First number is
 	number of (blank-filled) integer places, second is number of decimal places.
-	00 xx is for scientific notation, also xx 11 through xx 15.
+	00&nbsp;xx is for scientific notation, also xx&nbsp;11 through xx&nbsp;15.
 	</TD></TR>
-<TR>	<TD>10 xx: Jump if R0 = display (string compare, not numeric)
+<TR>	<TD>10 xx: Jump if 00&nbsp;00 = display (string compare, not numeric)
 	</TD></TR>
-<TR>	<TD>11 xx: Jump if R0 &#8800; display (string compare, not numeric)
+<TR>	<TD>11 xx: Jump if 00&nbsp;00 &#8800; display (string compare, not numeric)
 	</TD></TR>
 <TR>	<TD>12 xx: Print field of xx blanks to OutputWriter.
 	</TD></TR>
 <TR>	<TD>13 xx: page-in/out blocks of program steps to/from "device 2", as follows.
-	"disk" address is R(00) (integer portion, 0 - 16M). R(01) is the starting program step number
+	"disk" address is in 00&nbsp;00 (integer portion, 0 - 16M). In 00&nbsp;01 is the starting program step number
 	(integer portion, 0000 - 1847). Length determined by low three bits of 'xx':
 	0 = 1 step, 1 = 8 steps, 2 = 16 steps, 3 = 32 steps, 4 = 64 steps, 5 = 128 steps, 6 = 256 steps, 7 = 64 steps.
 	<BR>
-	13 00 - 13 07: input program steps.
+	13&nbsp;00 - 13&nbsp;07: input program steps.
 	<BR>
-	13 08 - 13 15: output program steps.
+	13&nbsp;08 - 13&nbsp;15: output program steps.
 	</TD></TR>
-<TR>	<TD>14 xx: same as 10 xx.
+<TR>	<TD>14 xx: same as 10&nbsp;xx.
 	</TD></TR>
-<TR>	<TD>15 xx: same as 11 xx.
+<TR>	<TD>15 xx: same as 11&nbsp;xx.
 	</TD></TR>
 	</TD></TR>
 
