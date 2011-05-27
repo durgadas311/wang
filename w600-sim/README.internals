@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.8 2011/05/27 00:06:10 drmiller Exp $
+$Id: README.internals,v 1.9 2011/05/27 11:45:24 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -52,6 +52,22 @@ it's input pipe:
 01010000xxxxxxxx
 	Input data for "Device 5", multiple possible devices. TBD
 
+0nnn0001xxxxxxxx
+	ACK for I/O devices N=1..5, in response to simulator sending
+	a byte with the same N. 'x' is (should be) ignored.
+
+10000001xxxxxxxx
+	Prepare for ROM download. 'x' is (should be) ignored.
+	Simulator ACKs. ROM begins loading at 0xfff and procedes
+	towards 0x000.
+
+10000000xxxxxxxx
+	Byte for ROM, sent in-bulk after ACK for prepare.
+	Simulator waits for each byte.
+
+11111111xxxxxxxx
+	End of ROM download. 'x' is (should be) ignored.
+
 
 The simulator sends the following (binary) codes on it's output pipe:
 
@@ -99,5 +115,13 @@ The simulator sends the following (binary) codes on it's output pipe:
 01010000xxxxxxxx
 	Output data for "Device 5", multiple possible devices.
 
-10000000xxxxxxxx
+0nnn0001xxxxxxxx
+	ACK for I/O devices N=1..5, in response to GUI sending
+	a byte with the same N. 'x' is (should be) ignored.
+
+01111111xxxxxxxx
 	Reset I/O. 'x' is (should be) ignored.
+
+10000001xxxxxxxx
+	ACK for ROM download. 'x' is (should be) ignored. GUI may now
+	send bulk ROM image.
