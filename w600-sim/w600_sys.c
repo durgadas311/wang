@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.25 2011/05/27 00:06:10 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.26 2011/05/27 20:18:02 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -176,7 +176,15 @@ static void sysdisplay(w600_sys_t *sys, int on) {
 	fflush(stdout);
 }
 
-static void syskeyboard(w600_sys_t *sys, uint16_t *kc) {
+static void syskeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
+	if (kc == NULL) {
+		// what to do?
+		return;
+	}
+	if (ack) {
+		*kc = 0;
+		return;
+	}
 	if (__klen && !*kc) {
 		--__klen;
 		*kc = 0x0100 | __keyb[__keyp];

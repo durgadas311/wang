@@ -13,11 +13,19 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.21 2011/05/27 00:06:10 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.22 2011/05/27 20:18:02 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 int __gui_dfd = -1;
+
+static inline void wait_key() {
+	struct pollfd fds;
+	fds.fd = __gui_kfd;
+	fds.events = POLLIN;
+	fds.revents = 0;
+	/* int rc = */ poll(&fds, 1, -1);
+}
 
 static int disp_good = 0;
 
@@ -87,7 +95,7 @@ static void guidisplay(w600_sys_t *sys, int on) {
 		++disp_good;
 		if (disp_good > 64) {
 			if (on > 0) {
-				sys->keyboard(sys, NULL); // sleep until key event
+				wait_key(); // sleep until key event
 			}
 		}
 	}
@@ -95,7 +103,9 @@ static void guidisplay(w600_sys_t *sys, int on) {
 
 static uint16_t extraneous = 0;
 
-static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
+static void guidevinput(w600_sys_t *sys, uint16_t *kc, uint16_t b);
+
+static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 	uint16_t b;
 
 	int rc;
@@ -106,11 +116,16 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
 		return;
 	}
 	if (kc == NULL) {
-		struct pollfd fds;
-		fds.fd = __gui_kfd;
-		fds.events = POLLIN;
-		fds.revents = 0;
-		/* int rc = */ poll(&fds, 1, -1);
+		wait_key();
+		return;
+	}
+	if (ack) {
+		b = *kc;
+		*kc = 0;
+		if ((b & 0xfc00) != 0) {
+			guidevinput(sys, NULL, b); // maybe ACK...
+		}
+		// don't ACK simple keyboard traffic
 		return;
 	}
 	if (extraneous) {
@@ -131,13 +146,16 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
 	// something came down the pipe...
 	// make sure display gets refreshed...
 	guidisplay(sys, 0);
+	if ((b & 0xfc00) != 0) {
+		guidevinput(sys, kc, b);
+		return;
+	}
 	switch(b >> 8) {
-	case 0:
-		// can't really avoid overrun...
+	case 0:	// simple key pressed
+		// can't really avoid overrun... ?
 		*kc = 0x0100 | b;	// ensure non-zero...
-		sys->cpu.kp = 1;
 		break;
-	case 1:
+	case 1:	// special key - force new microcode PC
 		// jam new PC...
 		b &= 0x07;
 		sys->cpu.pc = b;
@@ -148,19 +166,30 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
 			sys->cpu.me = 0;
 		}
 		break;
-	case 2:
+	case 2:	// mode0 switches changed
 		// FE gave us complete mode word... just update
 		sys->cpu.mode0 = b & 0x0f;
 		break;
-	case 3:
+	case 3:	// mode1 switches changed
 		// DEG/RAD is inverted...
 		b ^= MODE1_DEGREES;
 		sys->cpu.mode1 = b & 0x0f;
 		break;
-	case 0x20:
-	case 0x30:
-	//case 0x40:
-	//case 0x50:
+	}
+}
+
+static void guidevinput(w600_sys_t *sys, uint16_t *kc, uint16_t b) {
+	int rc;
+	if (kc == NULL) {	// ACK
+		if ((b & 0x0f00) != 0) return; // don't ACK ACK's
+		b = (b & 0xf0ff) | 0x0100;
+		write(__gui_dfd, &b, sizeof(b));
+		return;
+	}
+	if ((b & 0xe000) == 0x2000) {
+		//if ((b & 0x0f00) == 1) { // ACK
+		//	handle just like input...
+		//}
 		// this is handled exactly like keyboard input...
 		// bit make sure XS has valid pattern?
 		if (sys->cpu.xs != (b >> 12)) {
@@ -168,17 +197,46 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
 			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.xs);
 			return;
 		}
-		*kc = b;
-		sys->cpu.kp = 1;
-		break;
-	default:
-		// uh, this is embarassing...
-		// presumably this is tape data, we've lost it and can't continue?
-		fprintf(stderr, "gag me! %04x\n", b);
-		sys->run = 0;
+		*kc = b; // must be non-zero to be seen
+		//if ((b & 0x0f00) == 0) { // not ACK
+		//	// ACK is sent when Wang takes "key"...
+		//}
 		return;
-		break;
 	}
+	if ((b & 0xf000) == 0x4000) {
+		// TBD
+		return;
+	}
+	if ((b & 0xf000) == 0x5000) {
+		// TBD
+		return;
+	}
+	if ((b & 0xf000) == 0x8000) { // ROM download
+		int x = 0x0fff >> 1;
+		b = (b & 0xf0ff) | 0x0100; // ACK
+		write(__gui_dfd, &b, sizeof(b));
+		do {
+			wait_key();
+			rc = read(__gui_kfd, &b, sizeof(b));
+			if (rc < 0 && errno != EAGAIN) {
+				perror("guikeyboard");
+				// silently quit...
+				sys->run = 0;
+				return;
+			}
+			if (rc != sizeof(b)) {
+				return;
+			}
+			if (x >= 0 && (b & 0xff00) == 0x8000) {
+				sys->rom[x--] = (b & 0x00ff);
+			}
+		} while ((b & 0xff00) == 0x8000);
+		return;
+	}
+	// uh, this is embarassing...
+	// presumably this is tape data, we've lost it and can't continue?
+	fprintf(stderr, "gag me! %04x\n", b);
+	sys->run = 0;
 }
 
 static void guiprinter(w600_sys_t *sys, int col, int drum) {
@@ -238,7 +296,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 				sys->run = 0;
 				return 0xff;	// EOF
 			}
-			sys->keyboard(sys, NULL); // sleep until key event
+			wait_key(); // sleep until key event
 			rc = read(__gui_kfd, &b, sizeof(b));
 			if (rc < 0 && errno != EAGAIN) {
 				perror("guitape");
@@ -249,7 +307,7 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 			if ((b >> 8) == 0x0e) {	// EOF
 #if 0 // can't do this! wang must detect EOT! maybe use some counter to detect "too long"?
 				// nothing good will happen now... until a key is pressed...
-				sys->keyboard(sys, NULL); // sleep until key event
+				wait_key(); // sleep until key event
 #endif
 				return 0xff;
 			}
@@ -284,7 +342,7 @@ static void guidev(w600_sys_t *sys, uint8_t c, uint8_t sts) {
 	// sts might be 00... need to send "reset" to GUI...
 	b = (sts << 12);
 	if (sts == 0) {
-		b |= 0x8000;
+		b = 0x7f00;
 	} else if (sts == 1) {
 		c &= 0x3f;
 	}

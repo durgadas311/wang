@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.35 2011/05/27 00:06:10 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.36 2011/05/27 20:18:02 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -190,7 +190,7 @@ static void printer_status(w600_sys_t *sys) {
 		// only if running program doesn't get here...
 		// printer is off, tach will never pulse, so don't spin
 		if (sys->cpu.pc == 0x6db) {
-			sys->keyboard(sys, NULL); // sleep until key event
+			sys->keyboard(sys, NULL, 0); // sleep until key event
 		}
 		return;
 	}
@@ -506,7 +506,7 @@ int instr_exec(w600_sys_t *sys) {
 				sys->cpu.kp = 1;
 				sys->cpu.dh = (key >> 4) & 0x0f;
 				sys->cpu.dl = key & 0x0f;
-				key = 0;
+				sys->keyboard(sys, &key, 1);
 			}
 			next |= (sys->cpu.kp << 1);
 			if (sys->cpu.kp) {
@@ -533,7 +533,7 @@ int instr_exec(w600_sys_t *sys) {
 
 	display_check(sys);	// this might sleep until UI event...
 
-	sys->keyboard(sys, &key);
+	sys->keyboard(sys, &key, 0);
 
 	return rc;
 }
