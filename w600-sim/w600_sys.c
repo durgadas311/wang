@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.24 2011/05/25 18:34:23 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.25 2011/05/27 00:06:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -176,12 +176,11 @@ static void sysdisplay(w600_sys_t *sys, int on) {
 	fflush(stdout);
 }
 
-static void syskeyboard(w600_sys_t *sys, uint8_t *kc) {
-	if (__klen && !sys->cpu.kp) {
+static void syskeyboard(w600_sys_t *sys, uint16_t *kc) {
+	if (__klen && !*kc) {
 		--__klen;
-		*kc = __keyb[__keyp];
+		*kc = 0x0100 | __keyb[__keyp];
 		++__keyp;
-		sys->cpu.kp = 1;
 		return;
 	}
 }
@@ -377,7 +376,11 @@ static char cn24_xlate[256] = {
 
 };
 
-static void syscn24(w600_sys_t *sys, uint8_t c) {
+static void syscn24(w600_sys_t *sys, uint8_t c, uint8_t sts) {
+	if (sts != 1) {
+		fprintf(stderr, "XH/XL = %02x [%d]\n", c, sts);
+		return;
+	}
 	char p = cn24_xlate[c];
 	if (c == 0x28) return;
 	if (!p) {
@@ -446,7 +449,7 @@ void sys_init(w600_sys_t *sys) {
 	sys->keyboard = syskeyboard;
 	sys->printer = sysprinter;
 	sys->tape = systape;
-	sys->cn24 = syscn24;
+	sys->dev = syscn24;
 	//cpu_init(&sys->cpu);
 	sys->cpu.cylimit = (uint64_t)-1;
 

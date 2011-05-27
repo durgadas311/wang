@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.7 2011/05/25 21:02:41 drmiller Exp $
+$Id: README.internals,v 1.8 2011/05/27 00:06:10 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -99,4 +99,5 @@ The simulator sends the following (binary) codes on it's output pipe:
 01010000xxxxxxxx
 	Output data for "Device 5", multiple possible devices.
 
-[TBD: I/O for "CN-36"]
+10000000xxxxxxxx
+	Reset I/O. 'x' is (should be) ignored.

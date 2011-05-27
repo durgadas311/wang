@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.34 2011/05/24 22:47:57 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.35 2011/05/27 00:06:10 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -173,11 +173,9 @@ static void tape_off(w600_sys_t *sys) {
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 }
 
-static void cn24_out(w600_sys_t *sys) {
-	// how to detect "carriage return"... or "new line"...
+static void dev_out(w600_sys_t *sys) {
 	uint8_t c = (sys->cpu.dh << 4) | sys->cpu.dl;
-	c &= 0x3f;
-	sys->cn24(sys, c);
+	sys->dev(sys, c, sys->cpu.xs);
 }
 
 static uint8_t pr_drum = 0;
@@ -294,7 +292,7 @@ int instr_exec(w600_sys_t *sys) {
 	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[sys->cpu.pc];
 	uint16_t next;
 	int rc = 0;
-	static uint8_t key = 0;
+	static uint16_t key = 0;
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
@@ -430,6 +428,7 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	case 9:
 		// T.B.D. reset 6184...
+//fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.pc, key);
 		sys->cpu.kp = 0;
 		break;
 	case 10:
@@ -482,8 +481,7 @@ int instr_exec(w600_sys_t *sys) {
 		sys->cpu.xh = sys->cpu.dh;	// sys->cpu.xh = g;
 		sys->cpu.xl = sys->cpu.dl;	// sys->cpu.xl = h;
 		sys->cpu.xs = br_k & 0x07;
-		if (sys->cpu.xs == 1) cn24_out(sys);
-else fprintf(stderr, "XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.xs);
+		dev_out(sys);
 		break;
 	}
 
@@ -502,10 +500,16 @@ else fprintf(stderr, "XH/XL = %d %d [%d]\n", sys->cpu.xh, sys->cpu.xl, sys->cpu.
 		case 4: next |= (sys->cpu.pe << 1); break;
 		case 5: next |= (sys->cpu.i << 1); break;
 		case 6:
+			// todo: clean this up!
+			if (key) {
+//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
+				sys->cpu.kp = 1;
+				sys->cpu.dh = (key >> 4) & 0x0f;
+				sys->cpu.dl = key & 0x0f;
+				key = 0;
+			}
 			next |= (sys->cpu.kp << 1);
 			if (sys->cpu.kp) {
-				sys->cpu.dh = key >> 4;
-				sys->cpu.dl = key & 0x0f;
 				sys->cpu.kp = 0;
 				sys->display(sys, 0);
 			}

@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.20 2011/05/22 15:09:04 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.21 2011/05/27 00:06:10 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -95,7 +95,7 @@ static void guidisplay(w600_sys_t *sys, int on) {
 
 static uint16_t extraneous = 0;
 
-static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
+static void guikeyboard(w600_sys_t *sys, uint16_t *kc) {
 	uint16_t b;
 
 	int rc;
@@ -134,7 +134,7 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 	switch(b >> 8) {
 	case 0:
 		// can't really avoid overrun...
-		*kc = b;
+		*kc = 0x0100 | b;	// ensure non-zero...
 		sys->cpu.kp = 1;
 		break;
 	case 1:
@@ -156,6 +156,20 @@ static void guikeyboard(w600_sys_t *sys, uint8_t *kc) {
 		// DEG/RAD is inverted...
 		b ^= MODE1_DEGREES;
 		sys->cpu.mode1 = b & 0x0f;
+		break;
+	case 0x20:
+	case 0x30:
+	//case 0x40:
+	//case 0x50:
+		// this is handled exactly like keyboard input...
+		// bit make sure XS has valid pattern?
+		if (sys->cpu.xs != (b >> 12)) {
+			// oops... just spit out an error for now...
+			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.xs);
+			return;
+		}
+		*kc = b;
+		sys->cpu.kp = 1;
 		break;
 	default:
 		// uh, this is embarassing...
@@ -263,14 +277,21 @@ static uint8_t guitape(w600_sys_t *sys, int wr, uint8_t nibble) {
 	return 0;
 }
 
-static void guicn24(w600_sys_t *sys, uint8_t c) {
+static void guidev(w600_sys_t *sys, uint8_t c, uint8_t sts) {
 	uint16_t b;
 	int rc;
 
-	b = 0x1000 | c;
+	// sts might be 00... need to send "reset" to GUI...
+	b = (sts << 12);
+	if (sts == 0) {
+		b |= 0x8000;
+	} else if (sts == 1) {
+		c &= 0x3f;
+	}
+	b |= c;
 	rc = write(__gui_dfd, &b, sizeof(b));
 	if (rc < 0) {
-		perror("guicn24");
+		perror("guidev");
 		// silently quit...
 		sys->run = 0;
 		return;
@@ -330,7 +351,7 @@ static int spawn_fe(w600_sys_t *sys) {
 	sys->display = guidisplay;
 	sys->printer = guiprinter;
 	sys->tape = guitape;
-	sys->cn24 = guicn24;
+	sys->dev = guidev;
 	return 0;
 }
 
@@ -354,7 +375,7 @@ void setup_fe(w600_sys_t *sys, int ops) {
 		sys->display = guidisplay;
 		sys->printer = guiprinter;
 		sys->tape = guitape;
-		sys->cn24 = guicn24;
+		sys->dev = guidev;
 		__gui_kfd = dup(0);	// stdin
 		__gui_dfd = dup(1);	// stdout
 		dup2(2,1);

@@ -3,7 +3,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.12 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.13 2011/05/27 00:06:10 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -22,10 +22,10 @@ typedef struct w600_sys_s {
 	void (*fault)(struct w600_sys_s *sys, const char *str);
 	int (*intr)(struct w600_sys_s *sys, int sig);	// return != 0 if signal not handled
 	void (*display)(struct w600_sys_s *sys, int on);
-	void (*keyboard)(struct w600_sys_s *sys, uint8_t *kc);
+	void (*keyboard)(struct w600_sys_s *sys, uint16_t *kc);
 	void (*printer)(struct w600_sys_s *sys, int col, int drum);
 	uint8_t (*tape)(struct w600_sys_s *sys, int wr, uint8_t nibble);
-	void (*cn24)(struct w600_sys_s *sys, uint8_t chr);
+	void (*dev)(struct w600_sys_s *sys, uint8_t chr, uint8_t sts);
 	int run;
 	int cmd;	// is command mode allowed?
 #ifdef TRACE
