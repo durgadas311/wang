@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $
+// $Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 import java.io.*;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -139,7 +139,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -274,7 +274,7 @@ public class w600_fe
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -356,7 +356,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -461,7 +461,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -576,8 +576,8 @@ class Wang600_Printer
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
 			FileOutputStream fo;
-			JFileChooser ch = new JFileChooser(w600_fe._dir);
-			ch.setApproveButtonText("Save");
+			SuffFileChooser ch = new SuffFileChooser("Save",
+							"lst", "Wang list files");
 			int rv = ch.showOpenDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
 				try {
@@ -705,7 +705,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -800,15 +800,8 @@ class Wang600_Tape extends JComponent
 
 	private void pick_file() {
 		tape_close();
-		//
-		// TBD: select new file...
-		JFileChooser ch = new JFileChooser(w600_fe._dir);
-		ch.setApproveButtonText("Mount");
-		// setup filter....
-		// ExampleFileFilter filter = new ExampleFileFilter();
-		// filter.addExtension("wng");
-		// filter.setDescription("WANG program Images");
-		// ch.setFileFilter(filter);
+		SuffFileChooser ch = new SuffFileChooser("Mount",
+						"wng", "Wang program files");
 		int rv = ch.showOpenDialog(this);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -1087,8 +1080,8 @@ class Wang600_Model630 {
 	public void pickFile(JMenuItem m) {
 		disk_close();
 
-		JFileChooser ch = new JFileChooser(w600_fe._dir);
-		ch.setApproveButtonText("Mount");
+		SuffFileChooser ch = new SuffFileChooser("Mount",
+						"wng", "Wang program files");
 		int rv = ch.showOpenDialog(_kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -1234,8 +1227,8 @@ class Wang600_XROM {
 	}
 
 	public void pickFile(JMenuItem m) {
-		JFileChooser ch = new JFileChooser(w600_fe._dir);
-		ch.setApproveButtonText("Install");
+		SuffFileChooser ch = new SuffFileChooser("Install",
+							"wng", "Wang program files");
 		int rv = ch.showOpenDialog(_kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -1250,10 +1243,68 @@ class Wang600_XROM {
 	}
 }
 
+class SuffFileFilter extends javax.swing.filechooser.FileFilter {
+	private String _sfx;
+	private String _dsc;
+
+	private String getExtension(File f) {
+		String ext = null;
+		String s = f.getName();
+		int i = s.lastIndexOf('.');
+
+		if (i > 0 &&  i < s.length() - 1) {
+			ext = s.substring(i+1).toLowerCase();
+		}
+		return ext;
+	}
+
+	public SuffFileFilter(String suffix, String desc) {
+		_sfx = suffix;
+		_dsc = desc;
+	}
+
+	public boolean accept(File f) {
+		if (f.isDirectory()) return true;
+		String extension = getExtension(f);
+		if (extension != null &&
+				extension.equals(_sfx)) {
+			return true;
+		}
+		return false;
+	}
+
+	public String getDescription() {
+		return _dsc;
+	}
+}
+
+class SuffFileChooser extends JFileChooser {
+	static final long serialVersionUID = 311457692041L;
+	private String _sfx;
+	public SuffFileChooser(String btn, String sfx, String dsc) {
+		super(w600_fe._dir);
+		SuffFileFilter f = new SuffFileFilter(sfx, dsc);
+		setFileFilter(f);
+		setApproveButtonText(btn);
+		_sfx = "." + sfx;
+	}
+	public int showOpenDialog(Component frame) {
+		int rv = super.showOpenDialog(frame);
+		if (rv == JFileChooser.APPROVE_OPTION) {
+			if (getSelectedFile().getName().endsWith(_sfx)) {
+				return rv;
+			}
+			File f = new File(getSelectedFile().getAbsolutePath().concat(_sfx));
+			setSelectedFile(f);
+		}
+		return rv;
+	}
+}
+
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1391,28 +1442,43 @@ class Wang600_Model611
 		cn24_spcl[0x03] = "\u00A2";
 	}
 	private JFrame _frame;
-	private JTextArea _text;
+	//private JTextArea _text;
+	private PlotTextArea _text;
 	private JScrollPane _scroll;
 
 	private int _xoff, _yoff, _eop;
 	private boolean _onoff;
+	boolean _hasGraphic;
+
+	private void clear() {
+		_text.setText("");
+		_eop = 0;
+		_text.setCaretPosition(_eop);
+		_plot = false;
+		_shifted = false;
+		_x = _y = 0;
+		_text.clear();
+		_hasGraphic = false;
+	}
 
 	public Wang600_Model611() {
 		setup_xlate();
-		_shifted = false;
-		_eop = 0;
+
 		_onoff = false;
 
 		_frame = new JFrame("Wang 611 Output Writer");
 		// TBD icon or not
 		_frame.setLayout(new FlowLayout());
-		_text = new JTextArea();
+		//_text = new JTextArea();
+		_text = new PlotTextArea();
 		_text.setFont(new Font("Monospaced", Font.PLAIN, 10));
 		int z = _text.getFont().getSize();
 		// setting this messes up horiz scrollbar...
 		//_text.setPreferredSize(new Dimension(60 * z, 32 * z));
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
+
+		clear();
 
 		_scroll = new JScrollPane(_text);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -1449,6 +1515,36 @@ class Wang600_Model611
 		//_frame.setVisible(true);	// make visible based on "printer on"
 	}
 
+	private void save611(File file) {
+		if (_hasGraphic) {
+			java.awt.image.BufferedImage i =
+				new java.awt.image.BufferedImage(_text.getWidth(),
+								_text.getHeight(),
+					java.awt.image.BufferedImage.TYPE_BYTE_BINARY);
+			_text.paint(i.getGraphics());
+			try {
+				javax.imageio.ImageIO.write(i, "png", file);
+			} catch (IOException ee) {
+				System.err.println("error writing 611 PNG");
+			}
+		} else {
+			FileOutputStream fo;
+			try {
+				fo = new FileOutputStream(file);
+			} catch (FileNotFoundException ee) {
+				System.err.println("chosen 611 file not found?");
+				return;
+			}
+			try {
+				fo.write(_text.getText().getBytes());
+				fo.write('\n');
+				fo.close();
+			} catch (IOException ee) {
+				System.err.println("error writing 611 TXT");
+			}
+		}
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
 			System.err.println("unknown 611 event source type");
@@ -1456,28 +1552,22 @@ class Wang600_Model611
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
 		if (m.getMnemonic() == KeyEvent.VK_T) {
-			_text.setText("");
-			_eop = 0;
-			_text.setCaretPosition(_eop);
+			clear();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
-			FileOutputStream fo;
-			JFileChooser ch = new JFileChooser(w600_fe._dir);
-			ch.setApproveButtonText("Save");
+			String sfx, dsc;
+			if (_hasGraphic) {
+				sfx = "png";
+				dsc = "PNG image files";
+			} else {
+				sfx = "txt";
+				dsc = "Text files";
+			}
+			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc);
 			int rv = ch.showOpenDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
-				try {
-					fo = new FileOutputStream(ch.getSelectedFile());
-				} catch (FileNotFoundException ee) {
-					return;
-				}
-				try {
-					fo.write(_text.getText().getBytes());
-					fo.write('\n');
-					fo.close();
-				} catch (IOException ee) {
-				}
+				save611(ch.getSelectedFile());
 			}
 			return;
 		}
@@ -1508,6 +1598,52 @@ class Wang600_Model611
 	private boolean _plot;
 	private int _x, _y;
 	private int _dx, _dy;
+
+	class PlotTextArea extends JTextArea {
+		static final long serialVersionUID = 311457692040L;
+		class plot {
+			plot(String s_, int x_, int y_) {
+				s = s_;
+				x = x_;
+				y = y_;
+			}
+			public String s;
+			public int x;
+			public int y;
+		}
+
+		public void clear() {
+			_nplots = 0;
+			_xplots = 0;
+			_plotArray = null;
+		}
+
+		private plot[] _plotArray;
+		private int _nplots;
+		private int _xplots;
+
+		private void addPlot(String s, int x, int y) {
+			int n = _xplots++;
+			if (_xplots > _nplots) {
+				int o = _nplots;
+				_nplots += 256;
+				plot[] p = new plot[_nplots];
+				if (o > 0) {
+					System.arraycopy(_plotArray, 0, p, 0, o);
+				}
+				_plotArray = p;
+			}
+			_plotArray[n] = new plot(s, x, y);
+		}
+
+		public void paint(Graphics g) {
+			super.paint(g);
+			int x;
+			for (x = 0; x < _xplots; ++x) {
+				g.drawString(_plotArray[x].s, _plotArray[x].x, _plotArray[x].y);
+			}
+		}
+	}
 
 	// todo: need a OutputWriter panel a la Printer.
 	public void do_cn24(byte[] b) {
@@ -1572,16 +1708,6 @@ class Wang600_Model611
 				return;
 			}
 		}
-		if (_plot) {
-//System.err.println("plot("+_dx+","+_dy+")");
-			_x += _dx;
-			if (_x < 0) _x = 0;
-			if (_x > 1300) _x = 1300; // 13 in. platten
-			_y += _dy;
-			if (_y < 0) _y = 0;
-// for later use by gnuplot...
-System.err.println("gnuplot "+_x+" "+_y);
-		}
 		byte p;
 		if (_shifted) {
 			p = cn24_xlate[b[0] + 0x40];
@@ -1589,22 +1715,6 @@ System.err.println("gnuplot "+_x+" "+_y);
 			p = cn24_xlate[b[0]];
 		}
 		byte[] bb;
-if (false) {
-		if (p == 0) {
-			bb = new String("<"+b[0]+">").getBytes();
-		} else if (p < 0x07) {
-			bb = cn24_spcl[p].getBytes();
-		} else {
-			bb = new byte[1];
-			bb[0] = p;
-		}
-		try {
-			// TBD: new output frame, or just put to file?
-			System.err.write(bb);
-			System.err.flush();
-		} catch (IOException e) {
-		}
-} else {
 		String s;
 		if (p == 0) {
 			s = new String("<"+b[0]+">");
@@ -1615,10 +1725,22 @@ if (false) {
 			bb[0] = p;
 			s = new String(bb);
 		}
-		_text.append(s);
-		_eop += s.length();
-		_text.setCaretPosition(_eop);
-}
+		if (_plot) {
+			_x += _dx;
+			if (_x < 0) _x = 0;
+			if (_x > 1300) _x = 1300; // 13 in. platten
+			_y += _dy;
+			if (_y < 0) _y = 0;
+			//System.err.println("gnuplot "+_x+" "+_y);
+			_hasGraphic = true;
+			_text.addPlot(s, _x, _y);
+			_text.repaint();
+			//_text.getGraphics().drawString(s, _x, _y);
+		} else {
+			_text.append(s);
+			_eop += s.length();
+			_text.setCaretPosition(_eop);
+		}
 		// "auto raise"...
 		onOff(true);
 	}
@@ -1637,7 +1759,7 @@ if (false) {
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1778,7 +1900,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2244,7 +2366,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2409,7 +2531,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2625,7 +2747,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2716,7 +2838,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.76 2011/05/28 14:52:36 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.77 2011/05/28 22:02:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
