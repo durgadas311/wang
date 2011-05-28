@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.8 2011/05/27 16:40:43 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.9 2011/05/28 02:18:47 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -345,16 +345,22 @@ td.tag {text-align: center;}
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>&#945; prefix</TH></TR>
 <TR><TD>00&nbsp;00 through 03&nbsp;15</TD>
-	<TD>Print character(s) to OutputWriter, prefixed with 02 08 (print mode). Output stops
-	when 02&nbsp;02 is seen (not printed).
+	<TD>Print character(s) to OutputWriter.
+	Output stops when 02&nbsp;02 is seen (not printed).
+	Each character is prefixed by the "print mode" control character 02&nbsp;08.
 	Resulting symbols are described in table below.
-	NOTE: this is not a two-step command, but variable length. Code 02&nbsp;02 terminates command.
+	<BR>NOTE: this is not a two-step command, but variable length.
+	Code 02&nbsp;02 terminates command.
 	</TD></TR>
 <TR><TD>04&nbsp;00 through 07&nbsp;15</TD>
-	<TD>print 00 00 through 03&nbsp;15 but prefixed
-	with a 03&nbsp;08 (plot mode).
-	Resulting symbols are described in table below.
-	NOTE: this is not a two-step command, but variable length. Code 02&nbsp;02 terminates command.
+	<TD>Plot 00 00 through 03&nbsp;15 on OutputWriter.
+	The character is prefixed by the "plotting mode" control character 03&nbsp;08
+	and the "step control characters" needed to move the carriage
+	based on registers 00&nbsp;00 and 00&nbsp;01.
+	The integer portion of 00&nbsp;00 controls movement in the Y direction,
+	the integer portion of 00&nbsp;01 controls movement in the X direction.
+	<BR>NOTE: this is not a two-step command, but variable length.
+	Code 02&nbsp;02 terminates command.
 	</TD></TR>
 
 <TR>	<TD>SEARCH</TD><TD> Value of &#960; to display
