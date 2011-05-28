@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600prog.html,v 1.4 2011/05/27 15:23:11 drmiller Exp $ >
+<!-- $Id: wang600prog.html,v 1.5 2011/05/28 14:52:36 drmiller Exp $ >
 
 <H2>Programming the Wang 600</H2>
 
@@ -7,47 +7,61 @@ Programs may be entered into the calculator memory in the "Learn", or "Learn and
 In Learn and Print mode, each program step entered will be printed.
 The printer must be "On" to use Learn and Print.
 
-<P>Each key pressed in Learn mode will be entered into the current program step, and
-the program step (Program Counter, or P.C.) will advance to the next step.
-Pressing PRIME will return to step 0000. The "Set P.C." key may be used to go directly to any program step.
-Press Set P.C. followed by 4 digits to select a program step.
-This calculator has 1848 program steps, numbered 0000 through 1847.
+<P>Each key pressed in Learn mode will be entered into the current program
+step, and the program step (Program Counter, or P.C.) will advance to the
+next step.  Pressing PRIME will return to step 0000. The "Set P.C." key
+may be used to go directly to any program step.  Press Set P.C. followed
+by 4 digits to select a program step.  This calculator has 1848 program
+steps, numbered 0000 through 1847.
 
 <H3>Listing a Program</H3>
 
-A program may be listed by going to "List Program" mode and pressing "GO" (actually, almost any key will
-start the listing). The printer must be "On". The program listing will continue until an END PROG code
-is encountered (not printed). In addition, the calculator will stop listing every 100 steps (if you forgot
-to put and END PROG in your program, or your program is longer than 100 steps).
+A program may be listed by going to "List Program" mode and pressing "GO"
+(actually, almost any key will start the listing). The printer must
+be "On". The program listing will continue until an END PROG code is
+encountered (not printed). In addition, the calculator will stop listing
+every 100 steps (if you forgot to put and END PROG in your program,
+or your program is longer than 100 steps).
 
-<P><B>Simulator Note:</B> A program listing may be saved to a file by using the Save menu option in the printer window.
-Note, a program listing cannot be loaded back into the calculator, only tape image files may be loaded.
+<P><B>Simulator Note:</B> A program listing may be saved to a file
+by using the Save menu option in the printer window.  Note, a program
+listing cannot be loaded back into the calculator, only tape image files
+may be loaded.
 
 <H3>Running a Program</H3>
 
-A program may be run by going to "Run" mode (depressing the Run bushbutton) and pressing "GO".
-The display will normally be blank during program execution, however a program may use the
-codes "alpha STOP" (SHIFT PRINT, SHIFT GO) to pause for 1 second, allowing the current display
-contents to be seen.
+A program may be run by going to "Run" mode (depressing the Run
+bushbutton) and pressing "GO".  The display will normally be blank during
+program execution, however a program may use the codes "alpha STOP"
+(SHIFT PRINT, SHIFT GO) to pause for 1 second, allowing the current
+display contents to be seen.
 
-<P>Also, programs may use the STOP code (SHIFT GO) to cause the program to stop. The user must press GO to continue
-running the program. This technique is often used to let the user enter variables for the program.
-It is common to CLEAR DISPLAY before the STOP, in order to make the request for input obvious.
-Alternatively, a special, meaningful, value may be in the display.
+<P>Also, programs may use the STOP code (SHIFT GO) to cause the program
+to stop. The user must press GO to continue running the program. This
+technique is often used to let the user enter variables for the program.
+It is common to CLEAR DISPLAY before the STOP, in order to make the
+request for input obvious.  Alternatively, a special, meaningful, value
+may be in the display.
 
-<P>A program will also stop when it encounters an END PROG code. however, the program cannot be resumed
-after that (only started over at beginning), as the program counter is reset to 0000.
+<P>A program will also stop when it encounters an END PROG code. however,
+the program cannot be resumed after that (only started over at beginning),
+as the program counter is reset to 0000.
 
 <P>Also note, having more than one END PROG code in a program can
-be a problem. Not the least of which is for the List Program mode, but also for recording programs to tape.
-Normally, if a program has multiple exit points they will all be branches to a single END PROG, and that
-is at the physical end of all program codes. (See SEARCH/MARK in Programming Techniques).
-In other words, there should not be any program codes after an END PROG. This also includes
-any extended register data that might be stored in the program.
+be a problem. Not the least of which is for the List Program mode,
+but also for recording programs to tape.  Normally, if a program has
+multiple exit points they will all be branches to a single END PROG,
+and that is at the physical end of all program codes. (See SEARCH/MARK
+in Programming Techniques).  In other words, there should not be any
+program codes after an END PROG. This also includes any extended register
+data that might be stored in the program. In addition, the INS and DEL
+functions for editing programs will depend on a single END PROG code,
+at the end of all valid code.
 
-<P>Also note that one of the extended registers has same number as the END PROG code (09&nbsp;14).
-Acessing this register (using REALL/STORE) in a program will confuse List Program and the
-tape functions. This also applies to Program Print codes, and any "two step" program code that might
-have 09&nbsp;14 as the second code.
+<P>Also note that one of the extended registers has same number as the
+END PROG code (09&nbsp;14).  Acessing this register (using REALL/STORE)
+in a program will confuse List Program and the tape functions (and
+INS/DEL). This also applies to Program Print codes, and any "two step"
+program code that might have 09&nbsp;14 as the second code.
 
 </HTML>
