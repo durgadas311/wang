@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.36 2011/05/27 20:18:02 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.37 2011/05/29 00:35:21 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -497,7 +497,11 @@ int instr_exec(w600_sys_t *sys) {
 		case 1: next |= (1 << 1); break;
 		case 2: next |= ((br_acc & 2) >> 0); break;
 		case 3: next |= ((br_acc & 8) >> 2); break;
-		case 4: next |= (sys->cpu.pe << 1); break;
+		case 4:
+			next |= (sys->cpu.pe << 1);
+//fprintf(stderr,"%03x: chk pe\n", sys->cpu.pc);
+			sys->cpu.pe = 0;
+			break;
 		case 5: next |= (sys->cpu.i << 1); break;
 		case 6:
 			// todo: clean this up!
