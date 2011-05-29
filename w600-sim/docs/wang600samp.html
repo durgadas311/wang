@@ -1,0 +1,101 @@
+<HTML>
+<!-- $Id: wang600samp.html,v 1.1 2011/05/29 15:20:19 drmiller Exp $ >
+
+<H2>Sample Programs</H2>
+
+See "Using the Tape Drive" for instructions on how to load programs,
+and to verify the program loaded correctly.
+
+<H3>countdown.wng - Count Down timer</H3>
+
+VERIFY PROG: 133
+
+<P>USE: Enter a number and press GO. This display will count down that number until 0.
+
+<P>This program demonstrates basic use of ALPHA STOP and program loops.
+
+<H3>celsius.wng - Convert Degrees Farenheit to Celsius</H3>
+
+VERIFY PROG: 120
+
+<P>USE: Enter degrees Farenheit and press GO. The display will show the
+equivalent degrees Celsius.
+
+<P>This program demonstrates how to do basic math calculations
+using registers.
+
+<H3>factorial.wng - Compute Factorials</H3>
+
+VERIFY PROG: 260
+
+<P>USE: Enter a number and press GO. The display will show the
+result of N!. Note, N! or "N Factorial" is the product of
+<PRE>
+N * (N-1) * (N-2) ... * 1
+</PRE>
+
+<P>This program is from Rick Bensene's Old Calculator Museum,
+http://www.oldcalculatormuseum.com/wang600.html.
+
+<H3>prime_nums.wng - Find Prime Numbers</H3>
+
+VERIFY PROG: 503
+
+<P>USE: Turn on Printer and press GO. The program still start at 2
+and print all prime numbers.
+
+<P>This program is from Alf Urban, http://www.genealpha.de/wang/.
+
+<H3>hello.wng - Simple Example of the Model 611 OutputWriter</H3>
+
+VERIFY PROG: 195
+
+<P>USE: Press GO. The OutputWriter window should appear with the
+text "Hello World!" printed on it.
+
+<P>This program demonstrates how to print a text string to the OutputWriter.
+
+<H3>grapher.wng - Example of Plotting Graphs on the OutputWriter</H3>
+
+VERIFY PROG: 650
+
+<P>USE: Press GO. The OutputWriter window should appear and a graph
+of a sine wave is plotted on it. Note, the plotting takes up to a minute
+to complete, however progress should be visible as it is being plotted.
+The default OutputWriter window is not large enough to show the entire graph,
+so it may be resized as desired.
+
+<P>This program demonstrates a very simple graphing program, using
+fixed scaling. It is tailored to plotting functions that fit within
+a -1 to +1 range of 'f(x)' and a 0 to 360 range if 'x'.
+
+<H3>craps.wng - Game of Craps</H3>
+
+VERIFY PROG: 1618
+
+<P>USE: Optionally enter a random number (use decimal places), then press GO.
+The number 500 should appear on the display. This is your bank.
+Enter a bet and press GO. The first dice roll will appear for 1 second.
+If it is a win, the display will flash for 1 second and then you will see
+your new bank and can enter a new bet. If it is a lose, the display will blank
+for 1 second and then you will see your updated bank and can bet again.
+If the number is a "point", then repeated dice rolls will display for 1 second each,
+and the appropriate action taken (win, lose, repeat).
+
+<P>This program demonstrates use of the random number generator and simple game
+simulation. It also shows use of "special effects" like making the display
+flash without aborting the program, and making the display blank.
+
+<H3>random.wng - Low-Quality Pseudo-Random Number Generator</H3>
+
+VERIFY PROG: 164
+
+<P>USE: Press f0 (depress f(x) and press 00)
+to get (another) random number between 0 and 1.0.
+Optionally, a "Random seed" may be put in register 07 to alter
+the pattern of random numbers.
+
+<P>This program shows a poor-quality random number generator, but demonstrates
+use of the f(x) functions.
+
+</HTML>
