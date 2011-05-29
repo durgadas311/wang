@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $
+// $Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -14,7 +14,7 @@ import javax.print.attribute.standard.*;
 
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -144,7 +144,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -279,7 +279,7 @@ public class w600_fe
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -361,7 +361,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -466,7 +466,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -600,21 +600,6 @@ class Wang600_Printer
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_P) {
-//			java.awt.image.BufferedImage i =
-//				// 8.5x11 landscape mode...
-//				new java.awt.image.BufferedImage(792, 612,
-//					java.awt.image.BufferedImage.TYPE_BYTE_BINARY);
-//			i.getGraphics().setFont(_text.getFont());
-//			//i.getGraphics().setBackground(Color.white);
-//			//i.getGraphics().setForeground(Color.black);
-//			_text.paintPrint(i.getGraphics());
-//			File file = new File("list.png");
-//			try {
-//				javax.imageio.ImageIO.write(i, "png", file);
-//			} catch (IOException ee) {
-//				System.err.println("error writing PNG");
-//			}
-
 			DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
 			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 			aset.add(OrientationRequested.LANDSCAPE);
@@ -648,8 +633,8 @@ System.out.println("no selected printer!");
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
 			double x0 = pf.getImageableX();
 			double y0 = pf.getImageableY();
-//System.err.println(pageIndex+" printable "+x0+" " +y0);
-			//if (pageIndex != 0) return Printable.NO_SUCH_PAGE;
+			double w0 = pf.getImageableWidth();
+			double h0 = pf.getImageableHeight();
 			int pg = 0;
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.translate(x0, y0);
@@ -661,7 +646,7 @@ System.out.println("no selected printer!");
 			int off = 0;
 			String s;
 			g2d.setColor(Color.white);
-			g2d.fillRect(0,0,792,612);
+			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
 			int l = g2d.getFont().getSize();
 			while (pg <= pageIndex) {
@@ -795,7 +780,7 @@ System.out.println("no selected printer!");
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1394,7 +1379,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1532,7 +1517,6 @@ class Wang600_Model611
 		cn24_spcl[0x03] = "\u00A2";
 	}
 	private JFrame _frame;
-	//private JTextArea _text;
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
 
@@ -1665,7 +1649,26 @@ class Wang600_Model611
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_P) {
-			// TBD
+			DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
+			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+			aset.add(OrientationRequested.LANDSCAPE);
+			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
+				(float)1.0, (float)0.5, (float)6.5, (float)10.0, MediaPrintableArea.INCH));
+			PrintService[] services =
+				PrintServiceLookup.lookupPrintServices(flavor, aset);
+			if (services.length > 0) {
+				DocPrintJob pj = services[0].createPrintJob();
+				try {
+					Doc doc = new SimpleDoc(_text, flavor, null);
+					pj.print(doc, aset);
+				} catch (PrintException ee) { 
+System.out.println("print failed");
+				}
+} else {
+// Why does this sometimes fail? but work just by retry?
+System.out.println("no selected printer!");
+			}
+			return;
 		}
 		System.err.println("611 menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -1692,7 +1695,8 @@ class Wang600_Model611
 	private int _x, _y;
 	private int _dx, _dy;
 
-	class PlotTextArea extends JTextArea {
+	class PlotTextArea extends JTextArea
+			implements Printable {
 		static final long serialVersionUID = 311457692040L;
 		class plot {
 			plot(String s_, int x_, int y_) {
@@ -1708,6 +1712,7 @@ class Wang600_Model611
 		public void clear() {
 			_nplots = 0;
 			_xplots = 0;
+			//_plotArray.dispose();
 			_plotArray = null;
 		}
 
@@ -1737,6 +1742,75 @@ class Wang600_Model611
 				xx = (_plotArray[x].x * _gx) + 0.5;
 				yy = (_plotArray[x].y * _gy) + 0.5;
 				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
+			}
+		}
+
+		public int print(Graphics g, PageFormat pf, int pageIndex) {
+			double x0 = pf.getImageableX();
+			double y0 = pf.getImageableY();
+			double w0 = pf.getImageableWidth();
+			double h0 = pf.getImageableHeight();
+			int pg = 0;
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.translate(x0, y0);
+
+			FontMetrics fm = _text.getFontMetrics(_text.getFont());
+			// 156 chars platten width of IBM Selectric...
+			double nf = _text.getFont().getSize() * (w0 / 156.0) /
+							fm.charWidth('M');
+			g2d.setFont(_text.getFont().deriveFont((float)nf));
+
+			int did = 0;
+			String s;
+			g2d.setColor(Color.white);
+			g2d.fillRect(0, 0, (int)w0, (int)h0);
+			g2d.setColor(Color.black);
+			int l = g2d.getFont().getSize();
+			double gx = (w0 / 1300.0);
+			double gy = (l / (100.0 / 6.0));
+			int lpp = (int)(h0 / l);
+			int max = getLineCount();
+			int i = 0;
+			while (pg <= pageIndex) {
+				int ln;
+				for (ln = 0; ln < lpp; ++ln) {
+					int nn = ln + pg * lpp;
+					if (nn >= max) break;
+					try {
+						int ls = getLineStartOffset(nn);
+						int ll = getLineEndOffset(nn) - ls;
+						s = getText(ls, ll);
+					} catch(javax.swing.text.BadLocationException ee) {
+						break;
+					}
+					if (pg == pageIndex) {
+						++did;
+						if (s.length() > 0) { // not blank line...
+							g2d.drawString(s, 0, ln * l + l);
+						}
+					}
+				}
+				if (pg == pageIndex) {
+					int ps = (int)(h0 * pg);
+					int pe = (int)(ps + h0);
+					for (i = 0; i < _xplots; ++i) {
+						double xx, yy;
+						// convert 1/100ths to points...
+						xx = (_plotArray[i].x * gx) + 0.5;
+						yy = (_plotArray[i].y * gy) + 0.5;
+						if (yy >= ps && yy < pe) {
+							++did;
+							g2d.drawString(_plotArray[i].s,
+								(int)xx, (int)yy - ps);
+						}
+					}
+				}
+				++pg;
+			}
+			if (did > 0) {
+				return Printable.PAGE_EXISTS;
+			} else {
+				return Printable.NO_SUCH_PAGE;
 			}
 		}
 	}
@@ -1855,7 +1929,7 @@ class Wang600_Model611
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1996,7 +2070,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2467,7 +2541,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2632,7 +2706,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2848,7 +2922,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2939,7 +3013,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.81 2011/05/29 20:42:00 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.82 2011/05/29 23:35:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
