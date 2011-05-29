@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.3 2011/05/27 20:18:02 drmiller Exp $ >
+<!-- $Id: wang600sim.html,v 1.4 2011/05/29 23:40:57 drmiller Exp $ >
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -58,6 +58,10 @@ and discard all current contents.  The window is only visible when the
 printer is "On", and if the window is closed then the printer is turned
 off. The contents of the window is not removed when the printer is off.
 
+<P>The menu option "Print" will send the re-formatted output to the
+default printer. The "paper strip" will be formatted on a landscape page
+in four columns of 40 lines each, per page.
+
 <H3>Expansion ROM</H3>
 
 The expansion ROMs are handled as files, similar to the Tape unit.
@@ -75,7 +79,13 @@ Printing to this device causes the "output window" to become visible.
 Selecting the device from the "Devices" menu also makes it visible.
 Currently, the device is always considered "connected" and "on".
 The output may be consumed in the same way as for the built-in printer
-(Saved, (future)Printed, or Tear Off)..
+(Saved, Printed, or Tear Off).
+
+<P>The Print option formats the output onto separate pages that are
+156 characters wide and typically 58 lines long. Plotted data is
+printed in the same scale. Note that long plots will be split
+between several pages, as continuous-feed paper is not supported
+on most printers currently in use.
 
 <H3>630 Fixed/Removable Disk</H3>
 
