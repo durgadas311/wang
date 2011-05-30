@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $
+// $Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -14,7 +14,7 @@ import javax.print.attribute.standard.*;
 
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -144,7 +144,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 
 	public static File _dir = new File(System.getProperty("user.home") + "/Wang600Files");
 
@@ -279,7 +279,7 @@ public class w600_fe
 }
 
 class Wang600_ProgErr extends JComponent {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -361,7 +361,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Printer _prt;
 	Wang600_Tape _tape;
@@ -466,7 +466,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -676,6 +676,10 @@ System.out.println("no selected printer!");
 				}
 			}
 			if (did > 0) {
+				pg = pageIndex + 1; // 1-based
+				s = new String("Page " + pg +
+					" - Wang 600 Printer");
+				g2d.drawString(s, 0, (41 + 1) * l + (int)y0 + 36);
 				return Printable.PAGE_EXISTS;
 			} else {
 				return Printable.NO_SUCH_PAGE;
@@ -780,7 +784,7 @@ System.out.println("no selected printer!");
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1379,7 +1383,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1653,7 +1657,7 @@ class Wang600_Model611
 			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
 			aset.add(OrientationRequested.LANDSCAPE);
 			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
-				(float)1.0, (float)0.5, (float)6.5, (float)10.0, MediaPrintableArea.INCH));
+				(float)0.75, (float)0.5, (float)7.0, (float)10.0, MediaPrintableArea.INCH));
 			PrintService[] services =
 				PrintServiceLookup.lookupPrintServices(flavor, aset);
 			if (services.length > 0) {
@@ -1692,7 +1696,7 @@ System.out.println("no selected printer!");
 
 	private boolean _shifted;
 	private boolean _plot;
-	private int _x, _x3, _y, _y3;
+	private int _x, _y;
 	private int _dx, _dy;
 
 	class PlotTextArea extends JTextArea
@@ -1714,7 +1718,7 @@ System.out.println("no selected printer!");
 			_xplots = 0;
 			//_plotArray.dispose();
 			_plotArray = null;
-			_x = _x3 = _y = _y3 = 0;
+			_x = _y = 0;
 		}
 
 		private plot[] _plotArray;
@@ -1769,7 +1773,7 @@ System.out.println("no selected printer!");
 			int l = g2d.getFont().getSize();
 			double gx = (w0 / 1300.0);
 			double gy = (l / (100.0 / 6.0));
-			int lpp = (int)(h0 / l);
+			int lpp = 60; // (int)(h0 / l);
 			int max = getLineCount();
 			int i = 0;
 			while (pg <= pageIndex) {
@@ -1809,6 +1813,9 @@ System.out.println("no selected printer!");
 				++pg;
 			}
 			if (did > 0) {
+				s = new String("Page " + pg +
+					" - Wang 601/602/611 OutputWriter");
+				g2d.drawString(s, 0, (lpp + 1) * l + l);
 				return Printable.PAGE_EXISTS;
 			} else {
 				return Printable.NO_SUCH_PAGE;
@@ -1817,51 +1824,22 @@ System.out.println("no selected printer!");
 	}
 
 	private void index() {
-		_y += 16; // 6 lpi, in 1/100 in, 16.6666666.
-		_y3 += 2;
-		if (_y3 >= 3) {
-			_y3 -= 3;
-			++_y;
-		}
+		_y += 14;
 	}
 
 	private void revindex() {
-		_y -= 16; // 6 lpi, in 1/100 in, 16.6666666.
-		_y3 -= 2;
-		if (_y3 < 0) {
-			_y3 += 3;
-			--_y;
-		}
-		if (_y < 0) {
-			_y = 0;
-			_y3 = 0;
-		}
+		_y -= 14;
+		if (_y < 0) _y = 0;
 	}
 
 	private void space() {
-		_x += 8; // 12 cpi = 8.33333 1/100ths
-		_x3 += 1;
-		if (_x3 >= 3) {
-			_x3 -= 3;
-			++_x;
-		}
-		if (_x >= 1300) {
-			_x = 1299;
-			_x3 = 0;
-		}
+		_x += 10;
+		if (_x >= 1300) _x = 1299;
 	}
 
 	private void bkspace() {
-		_x -= 8; // 12 cpi = 8.33333 1/100ths
-		_x3 -= 1;
-		if (_x3 < 0) {
-			_x3 += 3;
-			--_x;
-		}
-		if (_x < 0) {
-			_x = 0;
-			_x3 = 0;
-		}
+		_x -= 10;
+		if (_x < 0) _x = 0;
 	}
 
 	public void do_cn24(byte[] b) {
@@ -1885,24 +1863,24 @@ System.out.println("no selected printer!");
 		} else if ((b[0] & 0x06) == 0x02) {
 			switch((b[0] & 0x30) >> 4) {
 			case 0: // space/bspace or nothing
+				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					space();
 				} else {
 					bkspace();
 				}
-				if (_plot) return;
 				break;
 			case 1:	// index/rev or shift...
 				if ((b[0] & 0x0e) == 0x02) {
 					_shifted = ((b[0] & 1) != 0);
 					return;
 				}
+				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					index();
 				} else {
 					revindex();
 				}
-				if (_plot) return;
 				break;
 			case 2:	// stepping
 			case 3:	// stepping
@@ -1958,18 +1936,16 @@ System.out.println("no selected printer!");
 			s = new String(bb);
 		}
 		if (_plot) {
-			if (_x3 > 1) ++_x;
-			_x3 = 0;
 			_x += _dx;
 			if (_x < 0) _x = 0;
 			if (_x >= 1300) _x = 1299; // 13 in. platten
-			if (_y3 > 1) ++_y;
-			_y3 = 0;
 			_y += _dy;
 			if (_y < 0) _y = 0;
 			_hasGraphic = true;
 			_text.addPlot(s, _x, _y);
 			_text.repaint();
+			//_text.setCaretPosition(_eop); // to what?
+			// todo: need to get JScrollPane to update...
 		} else {
 			_text.append(s);
 			_eop += s.length();
@@ -1993,7 +1969,7 @@ System.out.println("no selected printer!");
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -2134,7 +2110,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2605,7 +2581,7 @@ class Wang600_Keyboard extends JComponent
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2770,7 +2746,7 @@ class Wang600_Keyboards extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2986,7 +2962,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3077,7 +3053,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.83 2011/05/30 02:17:26 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.84 2011/05/30 15:44:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
