@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.23 2011/06/01 19:26:19 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.24 2011/06/01 19:56:46 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -164,6 +164,10 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 		}
 		if (b == 0) {
 			sys->cpu.me = 0;
+		}
+		if (sys->trace) {
+			fprintf(sys->trc_fp, "TRACE: %03x: Key Jam PC %03x\n",
+				sys->cpu.pc, sys->cpu.next);
 		}
 		break;
 	case 2:	// mode0 switches changed
