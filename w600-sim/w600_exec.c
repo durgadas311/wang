@@ -1,24 +1,11 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_exec.c,v 1.9 2011/06/01 19:26:19 drmiller Exp $"
+#ident "$Id: w600_exec.c,v 1.10 2011/06/01 21:47:55 drmiller Exp $"
 
 #include <stdlib.h>
 
 #include "w600_cpu.h"
 #include "w600_decode.h"
-
-#undef TRACE_CYCLES
-#define TRACE_RAW_UCODE
-
-#ifdef TRACE
-inline uint64_t tsc() {
-	uint64_t tsc;
-	__asm__ __volatile__ ("rdtsc" : "=A" (tsc));
-	return tsc;
-}
-
-extern int diw600(char *buf, uint64_t *t);
-#endif // TRACE
 
 char *get_mach_str(w600_sys_t *sys) {
 	static char buf[32];

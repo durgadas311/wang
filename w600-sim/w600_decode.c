@@ -1,9 +1,16 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.38 2011/06/01 19:26:19 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.39 2011/06/01 21:47:55 drmiller Exp $"
+
+#include <unistd.h>
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
+
+#ifdef TRACE
+extern int diw600(char *buf, uint64_t *t);
+extern char *get_psw_str(w600_sys_t *sys);
+#endif // TRACE
 
 static uint8_t add3_i(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
@@ -350,7 +357,8 @@ int instr_exec(w600_sys_t *sys) {
 	uint8_t br_k = u->k;
 	if (sys->cpu.pc == 0x008) br_k = 15;	// RAM size...
 
-	if (u->f == 7) {
+	int opf7 = (u->f == 7);
+	if (opf7) {
 		next = sys->cpu.stk1 | 1;
 		if (u->j) {
 			sys->cpu.stk1 = sys->cpu.stk2;
@@ -359,6 +367,8 @@ int instr_exec(w600_sys_t *sys) {
 			//sys->cpu.stk1 = sys->cpu.pc;	// bad?
 			// rc = 1;
 		}
+	} else {
+		next = u->next << 2;
 	}
 
 	uint8_t g = 0, h = 0;
@@ -521,12 +531,11 @@ int instr_exec(w600_sys_t *sys) {
 	}
 
 	// This is done "late" to ensure we use most recent flags for I and Z
-	if (u->f != 7) {
+	if (!opf7) {
 		if (u->j) {
 			sys->cpu.stk2 = sys->cpu.stk1;
 			sys->cpu.stk1 = sys->cpu.pc;
 		}
-		next = u->next << 2;
 		switch(u->e) {
 		case 0: next |= (0 << 1); break;
 		case 1: next |= (1 << 1); break;
