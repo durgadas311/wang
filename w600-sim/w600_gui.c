@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.22 2011/05/27 20:18:02 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.23 2011/06/01 19:26:19 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -158,7 +158,7 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 	case 1:	// special key - force new microcode PC
 		// jam new PC...
 		b &= 0x07;
-		sys->cpu.pc = b;
+		sys->cpu.next = b;
 		if (b < 4) {
 			sys->cpu.pe = 0;
 		}

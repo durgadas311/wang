@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w600_cpu.h,v 1.8 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600_cpu.h,v 1.9 2011/06/01 19:26:19 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -30,6 +30,7 @@ typedef struct {
 	uint8_t mode0;
 	uint8_t mode1;
 
+	uint16_t next;
 	uint16_t pc;
 	uint16_t stk1;
 	uint16_t stk2;

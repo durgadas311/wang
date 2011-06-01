@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.37 2011/05/29 00:35:21 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.38 2011/06/01 19:26:19 drmiller Exp $"
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -259,12 +259,46 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	sys->ram[adr >> 1] = b | a;
 }
 
+static void instr_trace(w600_sys_t *sys) {
+	uint64_t *m;
+	char buf[128];
+	m = &sys->ucode[sys->cpu.pc];
+	diw600(buf, m);
+#ifdef TRACE_RAW_UCODE
+	w600_ucode_t *u = (w600_ucode_t *)(m);
+#endif // TRACE_RAW_UCODE
+	fprintf(sys->trc_fp, "TRACE: %03x: "
+		"[%03x %03x %03x] %01x %01x %01x %01x "
+		"[%s] %01x %01x %01x : "
+#ifdef TRACE_RAW_UCODE
+		"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
+#endif // TRACE_RAW_UCODE
+		"%s\n",
+		sys->cpu.pc,
+		sys->cpu.next,
+		sys->cpu.stk1,
+		sys->cpu.stk2,
+		sys->cpu.ah,
+		sys->cpu.am,
+		sys->cpu.al,
+		sys->cpu.mr,
+		get_psw_str(sys),
+		sys->cpu.acc,
+		sys->cpu.dh,
+		sys->cpu.dl,
+#ifdef TRACE_RAW_UCODE
+		u->h, u->g, u->c, u->d, u->l, u->dd, u->a, u->k, u->b, u->j,
+		u->next << 2, u->e, u->f,
+#endif // TRACE_RAW_UCODE
+		buf);
+}
+
 static inline void display_check(w600_sys_t *sys) {
 if (sys->cpu.pc == 0x252) {
 }
 	// 51c: begin display-refresh delay loop... short-cut to 51f...
 	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
-		sys->cpu.pc = 0x51f;	// update some regs too?
+		sys->cpu.next = 0x51f;	// update some regs too?
 		sys->cpu.cycles += 272;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp... %lld\n",
@@ -273,7 +307,7 @@ if (sys->cpu.pc == 0x252) {
 		sys->display(sys, 1);	// might sleep
 	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
 	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
-		sys->cpu.pc = 0x5c3;
+		sys->cpu.next = 0x5c3;
 		sys->cpu.cycles += 272;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp... %lld\n",
@@ -281,7 +315,8 @@ if (sys->cpu.pc == 0x252) {
 		}
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
-		if (sys->cpu.stk1 == 0x27a) { // alpha-stop in running program...
+		if (sys->cpu.next == 0x27b) { // alpha-stop in running program...
+			// todo: should not sleep if key pressed - e.g. PRIME
 			sleep(1);
 		}
 		sys->display(sys, 0);
@@ -313,10 +348,10 @@ int instr_exec(w600_sys_t *sys) {
 	uint8_t m_am = sys->cpu.am;
 	uint8_t m_al = sys->cpu.al;
 	uint8_t br_k = u->k;
-	if (sys->cpu.pc == 0x008) br_k = 15;
+	if (sys->cpu.pc == 0x008) br_k = 15;	// RAM size...
 
 	if (u->f == 7) {
-		sys->cpu.pc = sys->cpu.stk1 | 1;
+		next = sys->cpu.stk1 | 1;
 		if (u->j) {
 			sys->cpu.stk1 = sys->cpu.stk2;
 		} else {
@@ -530,14 +565,22 @@ int instr_exec(w600_sys_t *sys) {
 		case 6: next |= (br_c << 0); break;
 		case 7: rc = 5; break;
 		}
-		sys->cpu.pc = next;
 	}
 
 	++sys->cpu.cycles;
+	sys->cpu.next = next;
+#ifdef TRACE
+	if (sys->trace) {
+		instr_trace(sys);
+	}
+#endif // TRACE
+	// the following are called in specific order...
+	// keyboard injection of next pc must override all, so is last.
 
 	display_check(sys);	// this might sleep until UI event...
 
 	sys->keyboard(sys, &key, 0);
 
+	sys->cpu.pc = sys->cpu.next;
 	return rc;
 }
