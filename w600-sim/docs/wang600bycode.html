@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.9 2011/05/28 02:18:47 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.10 2011/06/01 21:27:06 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -329,16 +329,20 @@ td.tag {text-align: center;}
 <TR><TH>STORE and RECALL prefixes</TH></TR>
 <TR><TD>The second step is a register number, 00&nbsp;00 through 15&nbsp;15.
 	Note, registers above 15&nbsp;06 are system memory and should not be used.
-	The register 09&nbsp;14 is the END&nbsp;PROG command and will affect program listings
-	and recording/loading from tape.</TD></TR>
+	The register 09&nbsp;14 is the code for the END&nbsp;PROG command,
+	and using it as a direct-target register in a program will affect
+	program listings, recording/loading from tape, and inserting/deleting
+	program steps.</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
 <TR><TH>INDIR prefix</TH></TR>
 <TR><TD>The second step is a register command. The operation is performed
-	on the register number that is stored in the register.
-	If register 05 contains 123.00000000, then INDIR&nbsp;+05 will add
-	the display to register 123 (which is also known as 07&nbsp;11).
+	on the register number that is stored in that register.
+	If register 05 contains 158.00000000, then INDIR&nbsp;+05 will add
+	the display to register 158 (which is also known as 09&nbsp;14).
+	Note, this method of accessing register 09&nbsp;14 (END&nbsp;PROG) will not
+	interfere with program control functions.
 	</TD></TR>
 </TABLE>
 
@@ -407,23 +411,24 @@ td.tag {text-align: center;}
 <TR><TD COLSPAN=2>
 	'xx' prints letter "tag" in column 21
 	<TABLE BORDER>
-	<TR><TD>00</TD><TD>X</TD><TD></TD>
-	    <TD>04</TD><TD>B</TD><TD></TD>
-	    <TD>08</TD><TD>F</TD><TD></TD>
+	<TR><TD>00</TD><TD>X</TD><TD WIDTH=10></TD>
+	    <TD>04</TD><TD>B</TD><TD WIDTH=10></TD>
+	    <TD>08</TD><TD>F</TD><TD WIDTH=10></TD>
 	    <TD>12</TD><TD>J</TD></TR>
-	<TR><TD>01</TD><TD>Y</TD><TD></TD>
-	    <TD>05</TD><TD>C</TD><TD></TD>
-	    <TD>09</TD><TD>G</TD><TD></TD>
+	<TR><TD>01</TD><TD>Y</TD><TD WIDTH=10></TD>
+	    <TD>05</TD><TD>C</TD><TD WIDTH=10></TD>
+	    <TD>09</TD><TD>G</TD><TD WIDTH=10></TD>
 	    <TD>13</TD><TD>K</TD></TR>
-	<TR><TD>02</TD><TD>Z</TD><TD></TD>
-	    <TD>06</TD><TD>D</TD><TD></TD>
-	    <TD>10</TD><TD>H</TD><TD></TD>
+	<TR><TD>02</TD><TD>Z</TD><TD WIDTH=10></TD>
+	    <TD>06</TD><TD>D</TD><TD WIDTH=10></TD>
+	    <TD>10</TD><TD>H</TD><TD WIDTH=10></TD>
 	    <TD>14</TD><TD>L</TD></TR>
-	<TR><TD>03</TD><TD>A</TD><TD></TD>
-	    <TD>07</TD><TD>E</TD><TD></TD>
-	    <TD>11</TD><TD>I</TD><TD></TD>
+	<TR><TD>03</TD><TD>A</TD><TD WIDTH=10></TD>
+	    <TD>07</TD><TD>E</TD><TD WIDTH=10></TD>
+	    <TD>11</TD><TD>I</TD><TD WIDTH=10></TD>
 	    <TD>15</TD><TD>M</TD></TR>
 	</TD></TR>
+	</TABLE>
 </TABLE>
 
 <P><TABLE BORDER>
