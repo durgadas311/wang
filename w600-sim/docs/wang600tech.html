@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600tech.html,v 1.3 2011/05/21 21:40:11 drmiller Exp $ >
+<!-- $Id: wang600tech.html,v 1.4 2011/06/03 18:27:23 drmiller Exp $ >
 
 <H2>Wang 600 Programming Techniques</H2>
 
@@ -61,5 +61,53 @@ You should see in the display the number converted to degress celsius.
 load it using the tape drive. It is named "celsius.wng".
 
 <H3>Changing Program execution Sequence</H3>
+
+Branching (Goto) is accomplished with the SEARCH command.
+SEARCH is followed by an arbitrary code that corresponds to
+a previously MARK'ed step using the same code. For example,
+SEARCH 00&nbsp;00 will cause the program to continue execution at
+step(s0 after the MARK 00&nbsp;00 in the program.
+
+<P>Subroutine calls are made by either the f(x) commands or through the
+extended command 15&nbsp;07. f(x), and SHIFT f(x), cause a "call" to
+the step MARK f(x). For example, 10&nbsp;00 will make a subroutine
+call to MARK 10&nbsp;00. 15&nbsp;07 (CALL) is followed by any code,
+and will make a subroutine call to MARK <I>code</I>.
+A subroutine ends with a RETURN code, which causes the program
+to resume at the step after the f(x) or CALL. Note, a complex
+subroutine may have multiple exit points, each with its own RETURN.
+
+<P>In addition, there are "Jump" codes that test some condition and
+then skip the next two program steps if that condition is true.
+Note, 2 programs steps is the number required for a SEARCH or CALL
+command. If less than 2 steps are required,
+the remaining may be filled with GO commands.
+The basic jump commands test the display, or the Program Error
+state.
+
+<P><TABLE BORDER>
+<TR><TD>J<SUP>IF</SUP>0</TD><TD>Skip the next 2 steps if the display equals 0</TD>
+<TR><TD>J<SUP>IF</SUP>&#8800;0</TD><TD>Skip the next 2 steps if the display does not equal 0</TD>
+<TR><TD>J<SUP>IF</SUP>+</TD><TD>Skip the next 2 steps if the display is positive (&gt;=0)</TD>
+<TR><TD>J<SUP>IF</SUP>ERROR</TD><TD>Skip the next 2 steps if the Program Error condition is true. This also clears the error condition.</TD>
+</TABLE>
+
+<P>There are additional jump codes:
+
+<P><TABLE BORDER>
+<TR><TD>&#945; J<SUP>IF</SUP>0</TD><TD>Skip the next 2 steps if register 00 00 equals the display</TD>
+<TR><TD>&#945; J<SUP>IF</SUP>+</TD><TD>Skip the next 2 steps if register 00 00 is &gt;= the display</TD>
+<TR><TD>&#945; SIN</TD><TD>Skip the next 2 steps if register 00 00 is &lt; the display</TD>
+</TABLE>
+
+<P>There are also "literal compare" jump codes:
+
+<P><TABLE BORDER>
+<TR><TD>I/O f(x)</TD><TD>Skip the next 2 steps if register 00 00 is identical to the display ('x' is don't-care)</TD>
+<TR><TD>I/O SHIFT f(x)</TD><TD>Skip the next 2 steps if register 00 00 is not identical to the display ('x' is don't-care)</TD>
+</TABLE>
+
+<P>TODO: find examples of where literal and numeric comparisons differ.
+
 
 </HTML>
