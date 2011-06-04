@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600tech.html,v 1.5 2011/06/03 18:28:41 drmiller Exp $ >
+<!-- $Id: wang600tech.html,v 1.6 2011/06/04 02:23:31 drmiller Exp $ >
 
 <H2>Wang 600 Programming Techniques</H2>
 
@@ -54,7 +54,7 @@ the following listing on the printer:
  0008  09 14     *    EP 
 </PRE>
 
-<P>Now go back to Run mode, enter a number of degrees farenheit, and press GO.
+<P>Now go back to Run mode, press PRIME, enter a number of degrees farenheit, and press GO.
 You should see in the display the number converted to degress celsius.
 
 <P>This program is included with the distribution. You should be able to
@@ -107,7 +107,10 @@ state.
 <TR><TD>I/O SHIFT f(x)</TD><TD>Skip the next 2 steps if register 00 00 is not identical to the display ('x' is don't-care)</TD>
 </TABLE>
 
-<P>TODO: find examples of where literal and numeric comparisons differ.
-
+<P>Note, the "literal compare" jumps are rather esoteric. One possible use could be
+to compare blocks of program steps. The main difference being that the numeric
+comparisons always convert the display and register 00 00 to numbers, while
+the literal compare only compares the digits codes directly. In normal cases
+there would not be any difference.
 
 </HTML>

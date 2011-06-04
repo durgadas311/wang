@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600func.html,v 1.9 2011/05/23 23:50:32 drmiller Exp $ >
+<!-- $Id: wang600func.html,v 1.10 2011/06/04 02:23:31 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td {text-align: center;}
 </STYLE>
@@ -9,10 +9,12 @@ td {text-align: center;}
 
 <H2>Wang 600 Program Codes</H2>
 
-This is an explaination of advance programming codes, some of which are undocumented in Wang manuals.
-Most of these codes are used only in programs, although many of them work from the keyboard in Run mode.
-One exception is the "progam print" command for printing a formatted number. This only functions whne it is
-in a running program, although there is an alternate code that may be used in Run mode.
+This is an explaination of advance programming codes, some of which
+are undocumented in Wang manuals.  Most of these codes are used only
+in programs, although many of them work from the keyboard in Run mode.
+One exception is the "progam print" command for printing a formatted
+number. This only functions when it is in a running program, although
+there is an alternate code that may be used in Run mode.
 
 <P><TABLE BORDER>
 <TR><TH>Key Sequence</TH><TH>Code</TH><TH>Function</TH></TR>
@@ -25,6 +27,7 @@ in a running program, although there is an alternate code that may be used in Ru
 <TR><TD>&#945; SEARCH</TD><TD>09 02, 08 00</TD><TD>&#960;</TD></TR>
 <TR><TD>&#945; MARK</TD><TD>09 02, 09 00</TD><TD>&#960;</TD></TR>
 <TR><TD>&#945; PRINT</TD><TD>09 02, 08 02</TD><TD>enable key trace</TD></TR>
+<TR><TD>&#945; &#945;</TD><TD>09 02, 09 02</TD><TD>disable key trace</TD></TR>
 <TR><TD>&#945; f(x)</TD><TD>09 02, 10 xx</TD><TD>display &#215;= 10<SUP>xx</SUP></TD></TR>
 <TR><TD>&#945; F(x)</TD><TD>09 02, 11 xx</TD><TD>display &divide;= 10<SUP>xx</SUP></TD></TR>
 <TR><TD>&#945; Cx*</TD><TD>09 02, 14 xx</TD><TD>display &#215;= 10<SUP>xx</SUP></TD></TR>
@@ -50,7 +53,7 @@ in a running program, although there is an alternate code that may be used in Ru
 <TR><TD>I/O Cx*</TD><TD>15 02, 14 xx</TD><TD>Jump if R0 = display (xx: don't care)</TD></TR>
 <TR><TD>I/O Dx*</TD><TD>15 02, 15 xx</TD><TD>Jump if R0 &#8800; display (xx: don't care)</TD></TR>
 
-<TR><TH COLSPAN=3>Program Control in ROM<BR>(all Jump codes work in ROM)</TH></TR>
+<TR><TH COLSPAN=3>Program Control in ROM<BR>(all Jump codes also work in ROM)</TH></TR>
 <TR><TD>Ax*</TD><TD>12 xx</TD><TD>Call ROM f(x) (MARK, 12 xx)</TD></TR>
 <TR><TD>Bx*</TD><TD>13 xx</TD><TD>Call ROM F(x) (MARK, 13 xx)</TD></TR>
 <TR><TD>D3* mm</TD><TD>15 03, mm mm</TD><TD>Goto Label ROM (MARK, mm mm)</TD></TR>
@@ -65,20 +68,27 @@ in a running program, although there is an alternate code that may be used in Ru
 <TR><TD>Cx*</TD><TD>14 xx</TD><TD>Exchange display and R(xx)</TD></TR>
 <TR><TD>D1* tf</TD><TD>15 01, tt ff</TD><TD>Print formatted, same as program print<BR>but works from keyboard</TD></TR>
 <TR><TD>D10* aa</TD><TD>15 10, aa aa</TD><TD>Mimics alpha functions<BR>(same as &#945;)</TD></TR>
-<TR><TD>D8* xx</TD><TD>15 08, xx xx</TD><TD>unknown</TD></TR>
-<TR><TD>D9* xx</TD><TD>15 09, xx xx</TD><TD>unknown</TD></TR>
+<TR><TD>D8* xx</TD><TD>15 08, xx xx</TD><TD>unknown - NO OP</TD></TR>
+<TR><TD>D9* rr</TD><TD>15 09, rr rr</TD><TD>Store R(rr)<BR>(same as STORE)</TD></TR>
 
 <TR><TH COLSPAN=3>I/O Codes</TH></TR>
 
 <TR><TD>I/O xy*</TD><TD>15 02, xx yy<BR>xx: 00-09<BR>yy: 00-15</TD><TD>
-					Print display to "Output Writer 6053"<BR>
+					Print display to "Output Writer"<BR>
 					xx = integer places<BR>yy = decimal places</TD></TR>
-<TR><TD>I/O Ay*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer 6053"</TD></TR>
+<TR><TD>I/O Ay*</TD><TD>15 02, 12 yy</TD><TD>Print yy blanks to "Output Writer"</TD></TR>
 <TR><TD>&#945; cc...</TD><TD>09 02, cc cc ... 02 02</TD><TD>Prints string to OutputWriter<BR>
-						until 02 02 encountered<BR>cc cc must be 00 00 - 03 15</TD></TR>
-<TR><TD>I/O By*</TD><TD>15 02, 13 yy</TD><TD>Other I/O</TD></TR>
-<TR><TD>GROUP1 xx</TD><TD>15 13, ?? ??</TD><TD>unknown I/O</TD></TR>
-<TR><TD>GROUP2 xx</TD><TD>15 14, ?? ??</TD><TD>unknown I/O</TD></TR>
+			until 02 02 encountered<BR>cc cc must be 00 00 - 07 15,<BR>
+			04 00 - 07 15 plot corresponding character 00 00 - 03 15
+			based on registers 00 00 (Y) and 00 01 (X)</TD></TR>
+<TR><TD>I/O By*</TD><TD>15 02, 13 yy</TD><TD>Page in/out blocks of program steps<BR>
+			to/from "Fixed/Removable Disk". Register 00 00 is
+			disk address, 00 01 is program step. 'xx' determines
+			in/out and number of steps.</TD></TR>
+<TR><TD>GROUP1 xx</TD><TD>15 13, xx xx</TD><TD>Ouput 'xx' to "device 4" and stop.<BR>
+				Device then takes over and issues GO when done.</TD></TR>
+<TR><TD>GROUP2 xx</TD><TD>15 14, xx xx</TD><TD>Ouput 'xx' to "device 5" and stop.<BR>
+				Device then takes over and issues GO when done.</TD></TR>
 
 </TABLE>
 
