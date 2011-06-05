@@ -1,11 +1,17 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.5 2011/06/05 02:32:05 drmiller Exp $ >
+<!-- $Id: wang600sim.html,v 1.6 2011/06/05 14:17:44 drmiller Exp $ >
 
 <H2>Wang 600 Simulator Differences</H2>
 
 The simulator attempts to mimic operations of the original Wang 600
-hardware as much as possible.  Some obvious differences are the tape
-drive, since no physical cassettes tapes are used.
+hardware as much as possible.  Some obvious differences are the
+peripherals (tape, printers, etc.), since no physical devices exist.
+
+<P>Because the simulator runs real microcode from an actual Wang 600,
+it should behave identically to the original. However, some practicalities
+as well as possible oversights in hardware simulation may result in
+subtle differences. See the section on "Simulator Internals", below,
+for more information.
 
 <H3>Keyboard Operation</H3>
 
@@ -68,7 +74,7 @@ The expansion ROMs are handled as files, similar to the Tape unit.
 Selecting the ROM item from the "Devices" menu will pop-up a file
 selection dialog, the chosen file will be downloaded to the simulator
 and placed in the ROM memory. Up to 2048 steps may be loaded.
-The file is formated like other program images, the first byte is
+The file is formatted like other program images, the first byte is
 loaded into the highest address, the next is loaded into the next lower
 address, etc.
 
@@ -96,6 +102,56 @@ Selecting the "630 Disk" option from the "Devices" menu will pop-up
 a file selection dialog from which a image may be selected to use as
 the disk. The file will be expanded as needed by writes. The file may
 also be "sparse", if writes are made beyond the current end of file.
-Un-written portions of the file will read back as zero.
+Unwritten portions of the file will read back as zero.
+
+<H3>Simulator Internals</H3>
+
+The original Wang 600 microcode was constantly executing instructions
+the entire time that the calculator was turned on. The simulator cannot
+afford to consume 100% CPU on the host system. One major area of
+consumption is the display refresh routines. To minimize system load,
+the refresh routines are "short cut" and long periods of refresh
+(stopped in Run mode, alpha-STOP when running a program, etc.) are
+converted into sleeps (waiting for a keyboard event, or sleep for
+a predetermined amount of time).
+
+<P>On the original calculator, the display was only visible during
+the time that the microcode was actually refreshing the display.
+All other times the display was blank, simply because it was not being
+refreshed. The simulator has a static display that does not go blank
+when refreshing stops. In order to better simulate the original hardware,
+specific places in the microcode have been identified and the display
+is explicitly blanked at those times. In addition, whenever a keyboard
+event takes place the display is blanked. It is possible, though, that
+there are places that have not been identified yet that the display
+would go blank on the original hardware but not in the simulator.
+
+<P>The simulator is capable of operating must faster than the original
+calculator. Because of this, there are subtle differences in the
+behavior of the display while running a program (for example). Consider
+a program that uses alpha-STOP to display intermediate results.
+The calculations between two alpha-STOP's may take so little time
+on the simulator that the interleaving blanked display is not
+perceptible.
+
+<P>Peripherals are handled by the microcode, and as such will behave
+the same as the original calculator up to the point that the
+microcode hands off control to the simulator.
+
+<P>One example is the original tape drive, which simply recorded a stream
+of 0's and 1's onto the tape. The simulator must interpret those 0's
+and 1's and convert them back into 4-bit words of data.  The simulator
+must also convert the 4-bits words back into signals that the microcode
+expects to see when reading the tap.  Also, the original microcode used
+1-second gaps on the tape to indicate the end/beginning of a program
+(or registers) image. That is not practical when using files, so the
+gaps are represented with a pair of END&nbsp;PROG codes and the simulator
+must convert to/from the equivalent signals and timing for the microcode.
+
+<P>Another example is the built-in drum printer. The simulator must
+convert "drum position" and "column hammer" values into characters
+that can be displayed (and printed) on modern computers. Also, the drum
+printer had some highly-specialized glyphs (symbols) that can only be
+approximated using modern, standard character-set, fonts.
 
 </HTML>

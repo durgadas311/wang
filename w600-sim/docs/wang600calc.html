@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600calc.html,v 1.3 2011/05/27 15:23:11 drmiller Exp $ >
+<!-- $Id: wang600calc.html,v 1.4 2011/06/05 14:17:44 drmiller Exp $ >
 
 <H2>Using the Wang 600 as a Calculator</H2>
 
@@ -66,19 +66,19 @@ takes no action by itself it only prepares an action for when a key is pressed.
 
 <H3>Calculator Example</H3>
 
-As an example, consider converting degrees Farenheit into degrees Celsius. The basic formula is:
+As an example, consider converting degrees Fahrenheit into degrees Celsius. The basic formula is:
 
 <PRE>
 C = (F - 32) * 5 / 9
 </PRE>
 
-<P>Note, the calculator has no concept of precedence or paranthesis, so the calculation must be performed in
+<P>Note, the calculator has no concept of precedence or parenthesis, so the calculation must be performed in
 a deliberate order so that precedence is maintained. The first part to perform is the <KBD>F - 32</KBD>.
 Next, that result is multiplied by 5. Finally, that result is divided by 9. Note, an alternate order is
 to compute <KBD>5 / 9</KBD> (and possibly store it someplace more permanent) and then multiply by that
 pre-computed value.  For simplicity in example, the first approach is used.
 
-<P>So, the steps required to convert 70 degrees Farenheit into degrees Celsius would be:
+<P>So, the steps required to convert 70 degrees Fahrenheit into degrees Celsius would be:
 
 <TABLE>
 <TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Display, after pressing key</TH></TR>
@@ -94,7 +94,7 @@ pre-computed value.  For simplicity in example, the first approach is used.
 <TR><TD>&divide;= (left)</TD><TD>+21.111111111</TD></TR>
 </TABLE>
 
-<P>So, the answer is that 70 degrees Farenheit equals (approximately) 21 degress Celsius.
+<P>So, the answer is that 70 degrees Fahrenheit equals (approximately) 21 degrees Celsius.
 
 <H3>Extended Registers</H3>
 
@@ -102,7 +102,7 @@ Extended registers may be accessed using the RECALL and (SHIFT) STORE button (on
 This key expects another key to follow, which is used as the register to access. These registers
 are numbered by a pair of numbers, for example 01&nbsp;00. Note, register 00&nbsp;00 is the same as the register
 accessed using the 00 key. Likewise, register 00&nbsp;15 is the same as that of the 15 key. Extended registers start
-with 01&nbsp;00 and procede to 15&nbsp;15. Note, however, that registers above 15&nbsp;06 are actually system memory
+with 01&nbsp;00 and proceed to 15&nbsp;15. Note, however, that registers above 15&nbsp;06 are actually system memory
 and using those registers may crash the calculator (requiring PRIME to recover).
 Also, registers 01&nbsp;00 through 15&nbsp;06 use the same memory as program steps 1847 through 0000, each register consumes
 8 program steps. For example, register 01&nbsp;00 consumes program steps 1840 through 1847.
