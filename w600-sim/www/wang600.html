@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Wang 600 Programmable Calculator Simulator</TITLE>
-<!-- $Id: wang600.html,v 1.4 2011/06/03 14:25:02 drmiller Exp $ >
+<!-- $Id: wang600.html,v 1.5 2011/06/06 16:32:11 drmiller Exp $ >
 <META NAME="keywords" LANG="en" CONTENT="Wang Laboratories Inc,
 Wang Programmable Calculator,
 Wang 520, Wang 600, Wang 700, Wang 720,
@@ -97,7 +97,38 @@ and modifications are submitted back to the author.
 
 <H4>Downloads</H4>
 
-(coming soon)
+The complete source, and pre-built bundles for select platforms, are available
+at:
+
+<P><A HREF="http://sebhc.durgadas.com">My Downloads Page</A>
+
+<P>Pre-built packages may be installed by unpacking the archive (creates a subdir
+named "wang600apc") and then changing directory to "./wang600apc" and running the
+INSTALL script (installs sample programs).
+The calculator simulation may be run using the "run" script
+in the same directory.
+
+<P>The source may be built by unpacking the w600-sim.tgz archive
+(creates subdirectory "w600-sim"), changing directory to "./w600-sim",
+and typing "make". The simulator can be run from that directory
+using the command "java w600_fe".
+Or you can type "make install" to install into
+a "wang600apc" subdirectory in your home directory, which also runs the INSTALL
+script from there to create the "Wang600Files" folder and sample programs.
+Then the simulator can be run the same as for the pre-built packages
+(use the "run" script).
+
+<P>The simulator may be run in a "backwards" mode where the simulator code
+runs in the foreground and the GUI runs "background". In this mode, the
+simulator is run interactively and may be used to trace and otherwise
+examine the state of the "machine". To run this mode, type "./w600-sim -i -g"
+from the "w600-sim" subdirectory. You will get a "%" prompt and the GUI will startup.
+Type "go" to initialize the calculator and GUI. Other commands are shown by
+the "help" command. The simulator may be interrupted with ctrl-C, which
+brings up the "%" prompt again, after which "go" will resume.
+Closing the GUI window also brings up the "%" prompt, but the calculator
+can no longer be run (GUI is not respawned). The command "quit" will
+end the simulation (and the GUI, if running).
 
 <H4>Contact</H4>
 
