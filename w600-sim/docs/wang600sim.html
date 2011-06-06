@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.7 2011/06/05 14:21:31 drmiller Exp $ >
+<!-- $Id: wang600sim.html,v 1.8 2011/06/06 12:51:42 drmiller Exp $ >
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -126,9 +126,9 @@ event takes place the display is blanked. It is possible, though, that
 there are places that have not been identified yet that the display
 would go blank on the original hardware but not in the simulator.
 
-<P>The simulator is capable of operating must faster than the original
+<P>The simulator is capable of operating much faster than the original
 calculator. Because of this, there are subtle differences in the
-behavior of the display while running a program (for example). Consider
+behavior of the display (for example) while running a program. Consider
 a program that uses alpha-STOP to display intermediate results.
 The calculations between two alpha-STOP's may take so little time
 on the simulator that the interleaving blanked display is not
@@ -141,7 +141,7 @@ microcode hands off control to the simulator.
 <P>One example is the original tape drive, which simply recorded a stream
 of 0's and 1's onto the tape. The simulator must interpret those 0's
 and 1's and convert them back into 4-bit words of data.  The simulator
-must also convert the 4-bits words back into signals that the microcode
+must also convert the 4-bits words back into signals, and timing, that the microcode
 expects to see when reading the tape.  Also, the original microcode used
 1-second gaps on the tape to indicate the end/beginning of a program
 (or registers) image. That is not practical when using files, so the
