@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.11 2011/06/01 23:56:11 drmiller Exp $ >
+<!-- $Id: wang600bycode.html,v 1.12 2011/06/07 23:59:47 drmiller Exp $ >
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -358,8 +358,8 @@ td.tag {text-align: center;}
 	</TD></TR>
 <TR><TD>04&nbsp;00 through 07&nbsp;15</TD>
 	<TD>Plot 00 00 through 03&nbsp;15 on OutputWriter.
-	The character is prefixed by the "plotting mode" control character 03&nbsp;08
-	and the "step control characters" needed to move the carriage
+	The characters are prefixed by the "plotting mode" control character, 03&nbsp;08,
+	and each character by the "step control characters" needed to move the carriage
 	based on registers 00&nbsp;00 and 00&nbsp;01.
 	The integer portion of 00&nbsp;00 controls movement in the Y direction,
 	the integer portion of 00&nbsp;01 controls movement in the X direction.
@@ -411,23 +411,38 @@ td.tag {text-align: center;}
 <TR><TD COLSPAN=2>
 	'xx' prints letter "tag" in column 21
 	<TABLE BORDER>
-	<TR><TD>00</TD><TD>X</TD><TD WIDTH=10></TD>
-	    <TD>04</TD><TD>B</TD><TD WIDTH=10></TD>
-	    <TD>08</TD><TD>F</TD><TD WIDTH=10></TD>
-	    <TD>12</TD><TD>J</TD></TR>
-	<TR><TD>01</TD><TD>Y</TD><TD WIDTH=10></TD>
-	    <TD>05</TD><TD>C</TD><TD WIDTH=10></TD>
-	    <TD>09</TD><TD>G</TD><TD WIDTH=10></TD>
-	    <TD>13</TD><TD>K</TD></TR>
-	<TR><TD>02</TD><TD>Z</TD><TD WIDTH=10></TD>
-	    <TD>06</TD><TD>D</TD><TD WIDTH=10></TD>
-	    <TD>10</TD><TD>H</TD><TD WIDTH=10></TD>
-	    <TD>14</TD><TD>L</TD></TR>
-	<TR><TD>03</TD><TD>A</TD><TD WIDTH=10></TD>
-	    <TD>07</TD><TD>E</TD><TD WIDTH=10></TD>
-	    <TD>11</TD><TD>I</TD><TD WIDTH=10></TD>
-	    <TD>15</TD><TD>M</TD></TR>
-	</TD></TR>
+	<TR><TH>00</TH>
+	<TH>01</TH>
+	<TH>02</TH>
+	<TH>03</TH>
+	<TH>04</TH>
+	<TH>05</TH>
+	<TH>06</TH>
+	<TH>07</TH>
+	<TH>08</TH>
+	<TH>09</TH>
+	<TH>10</TH>
+	<TH>11</TH>
+	<TH>12</TH>
+	<TH>13</TH>
+	<TH>14</TH>
+	<TH>15</TH></TR>
+	<TR><TD>X</TD>
+		<TD>Y</TD>
+		<TD>Z</TD>
+		<TD>A</TD>
+		<TD>B</TD>
+		<TD>C</TD>
+		<TD>D</TD>
+		<TD>E</TD>
+		<TD>F</TD>
+		<TD>G</TD>
+		<TD>H</TD>
+		<TD>I</TD>
+		<TD>J</TD>
+		<TD>K</TD>
+		<TD>L</TD>
+		<TD>M</TD></TR>
 	</TABLE>
 </TABLE>
 
@@ -454,14 +469,16 @@ td.tag {text-align: center;}
 	(integer portion, 0000 - 1847).
 	Length determined by 'xx':
 	<TABLE BORDER>
-	<TR><TH>00</TH><TD>1 step</TD></TR>
-	<TR><TH>01</TH><TD>8 steps</TD></TR>
-	<TR><TH>02</TH><TD>16 steps</TD></TR>
-	<TR><TH>03</TH><TD>32 steps</TD></TR>
-	<TR><TH>04</TH><TD>64 steps</TD></TR>
-	<TR><TH>05</TH><TD>128 steps</TD></TR>
-	<TR><TH>06</TH><TD>256 steps</TD></TR>
-	<TR><TH>07</TH><TD>64 steps</TD></TR>
+	<TR><TH>00</TH><TH>01</TH><TH>02</TH><TH>03</TH>
+		<TH>04</TH><TH>05</TH><TH>06</TH><TH>07</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>64 steps</TD></TR>
 	</TABLE>
 	</TD></TR>
 <TR>	<TD>13&nbsp;08 through 13&nbsp;15</TD>
@@ -471,14 +488,16 @@ td.tag {text-align: center;}
 	(integer portion, 0000 - 1847).
 	Length determined 'xx':
 	<TABLE BORDER>
-	<TR><TH>08</TH><TD>1 step</TD></TR>
-	<TR><TH>09</TH><TD>8 steps</TD></TR>
-	<TR><TH>10</TH><TD>16 steps</TD></TR>
-	<TR><TH>11</TH><TD>32 steps</TD></TR>
-	<TR><TH>12</TH><TD>64 steps</TD></TR>
-	<TR><TH>13</TH><TD>128 steps</TD></TR>
-	<TR><TH>14</TH><TD>256 steps</TD></TR>
-	<TR><TH>15</TH><TD>64 steps</TD></TR>
+	<TR><TH>08</TH><TH>09</TH><TH>10</TH><TH>11</TH>
+		<TH>12</TH><TH>13</TH><TH>14</TH><TH>15</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>64 steps</TD></TR>
 	</TABLE>
 	</TD></TR>
 <TR>	<TD>14 xx</TD>
