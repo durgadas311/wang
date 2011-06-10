@@ -1,0 +1,24 @@
+<HTML>
+<!-- $Id: wang600bugs.html,v 1.1 2011/06/10 15:27:00 drmiller Exp $ >
+
+<H2>Known Bugs and Problems</H2>
+
+<LI>On Linux platforms (and possibly others?) the Java VM sometimes throws
+a "Null Pointer Exception" when starting up. This appears in the terminal
+window that was used to start the GUI. Since the problem is intermittent,
+closing and starting again seems to get past the problem.
+
+<LI>On Linux platforms (at least), printing to a real printer sometimes
+produces lines that are different in appearance from the rest of the
+output. The differences are that the font used for the line is "wrong",
+in any or all of typeface, size, and weight. This is related to the
+PostScript generator when there are extended (16-bit) Unicode characters
+in a line. The PS generator seems to draw the entire line graphically
+instead of just using existing font(s). For whatever reason, the drawing
+does not match the font used for the rest of the output. Newer versions
+of Java compiler or runtime, or postscript libraries, may eliminate the problem.
+
+<LI>There is currently no way to add a descriptive header/footer to printed output.
+I am looking into printer dialog changes to allow that.
+
+</HTML>
