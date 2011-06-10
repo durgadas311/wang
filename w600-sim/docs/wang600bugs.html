@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600bugs.html,v 1.1 2011/06/10 15:27:00 drmiller Exp $ >
+<!-- $Id: wang600bugs.html,v 1.2 2011/06/10 19:25:20 drmiller Exp $ >
 
 <H2>Known Bugs and Problems</H2>
 
@@ -20,5 +20,28 @@ of Java compiler or runtime, or postscript libraries, may eliminate the problem.
 
 <LI>There is currently no way to add a descriptive header/footer to printed output.
 I am looking into printer dialog changes to allow that.
+
+<LI>There is currently no easy way to convert a program that runs in RAM (normal
+program memory) into one that can be run from ROM, since the ROM requires different
+instructions (and sometimes labels) for SEARCH, f(x), and CALL. It should be
+possible to write a convert routine to convert the commands and labels.
+The conversion could be an option on the file-chooser used to select the
+ROM image.
+
+<LI>There is currently no way to combine programs (subroutines) into a
+ROM image. In addition to converting commands as described previously,
+there also needs to be a way to handle label renaming so that conflicting
+labels can be resolved. Again, it should be possible to write a
+convert routine to do this. This also could be part of the options
+checkboxes on the file-chooser dialog.
+
+<LI>There is currently no easy way to assemble programs and subroutines,
+and register values, into an image for the Fixed/Removable Disk device.
+Not sure what the best way to do this is. Theoretically, this could all
+be done from the Wang 600 by getting the code/data into the program steps
+through "normal" means (Tape device or keyboard entry), and then using
+the I/O commands to write that out to a disk image.  But some method
+of assemblign the segments into aligned regions, and generating a "map"
+to be used to write program loaders, would be nice.
 
 </HTML>
