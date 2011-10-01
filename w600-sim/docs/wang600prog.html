@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600prog.html,v 1.8 2011/07/06 19:48:43 drmiller Exp $ -->
+<!-- $Id: wang600prog.html,v 1.9 2011/10/01 16:02:11 drmiller Exp $ -->
 
 <H2>Programming the Wang 600</H2>
 
@@ -64,5 +64,30 @@ END&nbsp;PROG code (09&nbsp;14).  Accessing this register (using RECALL/STORE)
 in a program will confuse List Program and the tape functions (and
 INS/DEL). This also applies to Program Print codes, and any "two step"
 program code that might have 09&nbsp;14 as the second code.
+
+<H3>Debugging a Program</H3>
+
+Programs may be traced by using the ALPHA&nbsp;LOG<SUB>e</SUB>X sequence to turn on
+tracing, and the ALPHA&nbsp;e<SUP>X</SUP> sequence to turn it off. These sequences may
+be used from the keyboard or may be embedded in programs.
+
+<P>Typically, the TRACE-ON sequence is keyed before pressing GO. Depending
+on the problem being debugged, the program may be canceled manually (pressing
+PRIME) or may stop on it's own. Then, the TRACE-OFF sequence is keyed to
+prevent accidental, unwanted, traces. The trace output is then examined
+to determine where the program goes off-plan. The STEP key may also be used
+to single-step the program while tracing.
+
+<P>Fine-grained debugging may require inserting steps in order add
+TRACE-ON and TRACE-OFF codes. Be aware of what the presence of extra
+09&nbsp;14 (END&nbsp;PROG) codes in a program will do to the use of INS and DEL.
+
+<P>Replacing TRACE codes with GO codes is an easy way to temporarely change
+tracing, and strategically placed GO codes in a program
+may allow for easier adding of tracing later.
+
+<P><B>Simulator Note:</B> On the original machine, tracing a program would
+often consume large amounts of paper. That is not a concern for virtual
+paper.
 
 </HTML>

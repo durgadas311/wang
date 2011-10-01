@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600bugs.html,v 1.4 2011/07/06 19:48:43 drmiller Exp $ -->
+<!-- $Id: wang600bugs.html,v 1.5 2011/10/01 16:02:11 drmiller Exp $ -->
 
 <H2>Known Bugs and Problems</H2>
 
@@ -43,5 +43,30 @@ through "normal" means (Tape device or keyboard entry), and then using
 the I/O commands to write that out to a disk image.  But some method
 of assembling the segments into aligned regions, and generating a "map"
 to be used to write program loaders, would be nice.
+
+<H3>To-do List</H3>
+
+<LI> Try to get ~/Wangfiles directory path from environment variable.
+Perhaps WANGHOME or WANG600HOME.
+
+<LI> Move the Help button up to the Menu bar. It detracts from the authenticity
+of the GUI to the original machine, and is difficult to find, in it's current position.
+
+<LI> Convert the "C" back-end to Java and integrate into the GUI. This might
+avoid the need to compile on most platforms - the Java VM should be able the
+run the code no matter where it was originally compiled.
+
+<LI> Enhance "tape file" formats to include Alf Urban's format, and possibly
+others. This may include enhancing the Tape File dialog in the case of a new
+file, to add tags such as description, author, and even help (or help-file links).
+
+<LI> It may be possible to concoct an ELF-based format that can leverage
+GNU tools for building program libraries and possible even building ROM and
+Disk images. It might also pave the way for a "compiler" for wang programs,
+possibly based on GNU tools such as cpp and gcc.
+
+<LI>Add support for the flat-bed plotter, model 612. This should use the
+same codes as the model 602 Plotting OutputWriter, refer to the
+Streitmatter Operation Manual from Rock Valley College for codes.
 
 </HTML>
