@@ -1,0 +1,104 @@
+<HTML>
+<HEAD>
+<!-- $Id: wang600arch.html,v 1.1 2011/10/02 23:05:46 drmiller Exp $ -->
+<STYLE TYPE="text/css">
+td.key {width: 50; height: 50; text-align: center; font-size: 10; }
+td.num { text-align: center; }
+</STYLE>
+</HEAD>
+<BODY>
+
+<H2>Architecture of the Wang 600</H2>
+
+<H3>Microcode Execution Sequence</H3>
+
+Unlike modern computer CPU hardware, the Wang 600 does not execute the
+microcode sequentially. Each microcode instruction contains the
+address of the next instruction to execute, with the exception
+of the "return from subroutine" instruction which ignores the
+"next address" field.
+
+<P>The "next address" may be optionally modified
+by certain status bits, which affect the low order 2 bits of
+the address.
+
+<P>A "return from subroutine" instruction pops the previously
+pushed address off the stack and forces the low bit to "1".
+This means that all "call subroutine" instructions must
+be placed at even addresses, or else the return will cause
+an endless loop. It is not known whether such loops exist
+in the Wang 600 microcode, either accidentally or intentionally.
+
+<P>Microcode instruction execution sequence is terminated,
+and a new instruction address is forced,
+when certain keys are pressed.
+Because this is handled in hardware, these keys
+will immediately terminate any operation in progress
+and force the calculator to perform the function programmed
+by that key.
+
+<P><TABLE BORDER>
+<TR><TH>Key</TH>
+<TD CLASS="key">PRIME</TD>
+<TD CLASS="key">VERIFY<BR>PROG</TD>
+<TD CLASS="key">SET<BR>P.C.</TD>
+<TD CLASS="key">RECORD<BR>PROG</TD>
+<TD CLASS="key">S.M.</TD>
+<TD CLASS="key">B.S.</TD>
+<TD CLASS="key">INS</TD>
+<TD CLASS="key">DEL</TD>
+</TR>
+<TR><TH>uCode<BR>Address</TH>
+<TD CLASS="num">000</TD>
+<TD CLASS="num">001</TD>
+<TD CLASS="num">002</TD>
+<TD CLASS="num">003</TD>
+<TD CLASS="num">004</TD>
+<TD CLASS="num">005</TD>
+<TD CLASS="num">006</TD>
+<TD CLASS="num">007</TD>
+</TR>
+<TABLE>
+
+<H3>Microcode Instruction Format</H3>
+
+Each microcode instruction is 42 bits long. The instruction fields are
+as follows.
+
+<P><TABLE BORDER>
+<TR><TH>Bits</TH>
+<TD CLASS="num">41-39</TD>
+<TD CLASS="num">38-36</TD>
+<TD CLASS="num">35-27</TD>
+<TD CLASS="num">26</TD>
+<TD CLASS="num">25-22</TD>
+<TD CLASS="num">21-18</TD>
+<TD CLASS="num">17-14</TD>
+<TD CLASS="num">13</TD>
+<TD CLASS="num">12</TD>
+<TD CLASS="num">11-9</TD>
+<TD CLASS="num">8-6</TD>
+<TD CLASS="num">5-3</TD>
+<TD CLASS="num">2-0</TD>
+</TR>
+<TR><TH>Field<BR>Name</TH>
+<TD CLASS="num">F</TD>
+<TD CLASS="num">E</TD>
+<TD CLASS="num">Next Address</TD>
+<TD CLASS="num">J</TD>
+<TD CLASS="num">B</TD>
+<TD CLASS="num">K</TD>
+<TD CLASS="num">A</TD>
+<TD CLASS="num">D'</TD>
+<TD CLASS="num">L</TD>
+<TD CLASS="num">D</TD>
+<TD CLASS="num">C</TD>
+<TD CLASS="num">G</TD>
+<TD CLASS="num">H</TD>
+</TR>
+</TABLE>
+
+<P>The instruction fields have the following effects on the hardware.
+
+
+</HTML>
