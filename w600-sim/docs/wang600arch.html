@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.1 2011/10/02 23:05:46 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.2 2011/10/03 20:57:38 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -9,6 +9,39 @@ td.num { text-align: center; }
 <BODY>
 
 <H2>Architecture of the Wang 600</H2>
+
+<H3>Block Diagram</H3>
+
+<A HREF="wang600-block-diag2.gif"><IMG SRC="wang600-block-diag2.gif" WIDTH="100%"></A>
+
+<P>In the above diagram, fine lines represent single-bit (and serial) data,
+while thicker lines represent multiple bits of data in parallel (typically 4).
+
+<P>Microcode execution happens continuously, as long as the calculator has power.
+Each instruction contains the address of the next instruction, so there is
+no "Instruction Counter" that increments. There is a "current instruction address"
+register, and two stack registers, used to control the flow of the microcode.
+In addition, certain keyboard conditions cause a hard-coded address to be forced
+into the current address register.
+
+<P>In normal operation, the current address is applied to the ROM and the resulting
+42-bit word is latched into the instruction register. For normal instructions,
+the "next address" field of the instruction is fed-back into the current address
+register, with the low-order 2 bits coming from a decoding of the condition
+address fields, Eop and Fop.
+
+<P>For "call" instructions, the previous value of the current address
+register is saved into the "stack1" register, also saving the
+"stack1" previous contents into "stack2".
+
+<P>For "return" instructions, the contents of the "next address" field
+is ignored and the current address register is loaded from stack1
+with the low-order bit forced to "1",
+and stack1 is loaded form stack2.
+
+<P>Note, a return instruction always
+returns to the odd address after the call-from address.
+This means that call instructions should always be at even addresses.
 
 <H3>Microcode Execution Sequence</H3>
 
@@ -60,6 +93,16 @@ by that key.
 </TR>
 <TABLE>
 
+<P>In addition, executing microcode instruction at 008 causes the Kop
+field to be filled with the memory size indicator, as follows:
+
+<TABLE BORDER>
+<TR><TH>Kop</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
+<TR><TD CLASS="num">1111</TD><TD CLASS="num">600-14</TD><TD CLASS="num">4Kx4</TD><TD CLASS="num">1848</TD><TD CLASS="num">247</TD></TR>
+<TR><TD CLASS="num">0111</TD><TD CLASS="num">600-6</TD><TD CLASS="num">2Kx4</TD><TD CLASS="num">824</TD><TD CLASS="num">119</TD></TR>
+<TR><TD CLASS="num">0011</TD><TD CLASS="num">600-2</TD><TD CLASS="num">1Kx4</TD><TD CLASS="num">312</TD><TD CLASS="num">55</TD></TR>
+</TABLE>
+
 <H3>Microcode Instruction Format</H3>
 
 Each microcode instruction is 42 bits long. The instruction fields are
@@ -82,23 +125,252 @@ as follows.
 <TD CLASS="num">2-0</TD>
 </TR>
 <TR><TH>Field<BR>Name</TH>
-<TD CLASS="num">F</TD>
-<TD CLASS="num">E</TD>
+<TD CLASS="num">Fop</TD>
+<TD CLASS="num">Eop</TD>
 <TD CLASS="num">Next Address</TD>
-<TD CLASS="num">J</TD>
-<TD CLASS="num">B</TD>
-<TD CLASS="num">K</TD>
-<TD CLASS="num">A</TD>
-<TD CLASS="num">D'</TD>
-<TD CLASS="num">L</TD>
-<TD CLASS="num">D</TD>
-<TD CLASS="num">C</TD>
-<TD CLASS="num">G</TD>
-<TD CLASS="num">H</TD>
+<TD CLASS="num">Jop</TD>
+<TD CLASS="num">Bop</TD>
+<TD CLASS="num">Kop</TD>
+<TD CLASS="num">Aop</TD>
+<TD CLASS="num">D'op</TD>
+<TD CLASS="num">Lop</TD>
+<TD CLASS="num">Dop</TD>
+<TD CLASS="num">Cop</TD>
+<TD CLASS="num">Gop</TD>
+<TD CLASS="num">Hop</TD>
 </TR>
 </TABLE>
 
 <P>The instruction fields have the following effects on the hardware.
 
+<P>The notation REG&lt;n&gt; refers to Bit "n" of register "REG".
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Eop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>000</TD><TD>current&lt;0&gt; = 0</TD></TR>
+<TR><TD>001</TD><TD>current&lt;0&gt; = 1</TD></TR>
+<TR><TD>010</TD><TD>current&lt;0&gt; = S&lt;0&gt;</TD></TR>
+<TR><TD>011</TD><TD>current&lt;0&gt; = S&lt;2&gt;</TD></TR>
+<TR><TD>100</TD><TD>current&lt;0&gt; = PE *</TD></TR>
+<TR><TD>101</TD><TD>current&lt;0&gt; = C</TD></TR>
+<TR><TD>110</TD><TD>current&lt;0&gt; = KP *</TD></TR>
+<TR><TD>111</TD><TD>Return<BR>
+	current&lt;0&gt; = 1,
+	current&lt;11:1&gt; = stack1,<BR>
+	stack1 = stack2</TD></TR>
+<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
+<TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Fop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>000</TD><TD>current&lt;1&gt; = 0</TD></TR>
+<TR><TD>001</TD><TD>current&lt;1&gt; = 1</TD></TR>
+<TR><TD>010</TD><TD>current&lt;1&gt; = S&lt;1&gt;</TD></TR>
+<TR><TD>011</TD><TD>current&lt;1&gt; = S&lt;3&gt;</TD></TR>
+<TR><TD>100</TD><TD>current&lt;1&gt; = Z</TD></TR>
+<TR><TD>101</TD><TD>current&lt;1&gt; = ?</TD></TR>
+<TR><TD>110</TD><TD>current&lt;1&gt; = C'</TD></TR>
+<TR><TD>111</TD><TD>current&lt;1&gt; = ?</TD></TR>
+<TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Jop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;11:2&gt; = next</TD></TR>
+<TR><TD>1</TD><TD>Call<BR>
+	stack2 = stack1, stack = current,<BR>
+	current&lt;11:2&gt; = next</TD></TR>
+<TR><TD COLSPAN=2>Eop != 111</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Bop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>0000</TD><TD>no-op</TD></TR>
+<TR><TD>0001</TD><TD>ACC&lt;0&gt; = 1</TD></TR>
+<TR><TD>0010</TD><TD>ACC&lt;1&gt; = 1</TD></TR>
+<TR><TD>0011</TD><TD>ACC&lt;2&gt; = 1</TD></TR>
+<TR><TD>0100</TD><TD>ACC&lt;3&gt; = 1</TD></TR>
+<TR><TD>0101</TD><TD>ACC&lt;0&gt; = 0</TD></TR>
+<TR><TD>0110</TD><TD>ACC&lt;1&gt; = 0</TD></TR>
+<TR><TD>0111</TD><TD>ACC&lt;2&gt; = 0</TD></TR>
+<TR><TD>1000</TD><TD>ACC&lt;3&gt; = 0</TD></TR>
+<TR><TD>1001</TD><TD>clear 6184 *</TD></TR>
+<TR><TD>1010</TD><TD>ACC&lt;0&gt; = ~Z</TD></TR>
+<TR><TD>1011</TD><TD>ACC&lt;1&gt; = Z</TD></TR>
+<TR><TD>1100</TD><TD>PE = 1</TD></TR>
+<TR><TD>1101</TD><TD>ACC = 0000</TD></TR>
+<TR><TD>1110</TD><TD>ME = 0</TD></TR>
+<TR><TD>1111</TD><TD>ACC = Zbus (if Cop == 000)</TD></TR>
+<TR><TD COLSPAN=2>* Resets various pieces of hardware</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Kop</TH></TR>
+<TR><TD>XXXX</TD><TD>Constant field</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Aop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>0000</TD><TD>no-op</TD></TR>
+<TR><TD>0001</TD><TD>ram(AH,AM,AL) = MR</TD></TR>
+<TR><TD>0010</TD><TD>ram(15,15,AL) = MR</TD></TR>
+<TR><TD>0011</TD><TD>ram(15,15,Kop) = MR</TD></TR>
+<TR><TD>0100</TD><TD>MR = ram(AH,AM,AL)</TD></TR>
+<TR><TD>0101</TD><TD>MR = ram(15,15,AL)</TD></TR>
+<TR><TD>0110</TD><TD>MR = ram(15,15,Kop)</TD></TR>
+<TR><TD>0111</TD><TD>Load Printer Hammer Bits</TD></TR>
+<TR><TD>1000</TD><TD>Printer Paper Feed</TD></TR>
+<TR><TD>1001</TD><TD>?</TD></TR>
+<TR><TD>1010</TD><TD>DL = periph_status</TD></TR>
+<TR><TD>1011</TD><TD>Tape Data = DL&lt;0&gt;</TD></TR>
+<TR><TD>1100</TD><TD>DH,DL = printer/tape status</TD></TR>
+<TR><TD>1101</TD><TD>Tape Motor ON</TD></TR>
+<TR><TD>1110</TD><TD>Tape Motor OFF</TD></TR>
+<TR><TD>1111</TD><TD>XH,XL = dat(Gop),dat(Hop)</TD></TR>
+<TR><TD COLSPAN=2></TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=3>D'op,Dop</TH></TR>
+<TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
+<TR><TD>0000</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) + dat(Gop)</TD></TR>
+<TR><TD>0001</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) + dat(Gop) + 1</TD></TR>
+<TR><TD>0010</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop)</TD></TR>
+<TR><TD>0011</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop) + C'</TD></TR>
+<TR><TD>0100</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop) + 1</TD></TR>
+<TR><TD>0101</TD><TD>Z</TD><TD>Zbus = dat(Hop) & dat(Gop)</TD></TR>
+<TR><TD>0110</TD><TD>Z</TD><TD>Zbus = dat(Hop) | dat(Gop)</TD></TR>
+<TR><TD>0111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
+<TR><TD>1000</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) - dat(Gop)</TD></TR>
+<TR><TD>1001</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) - dat(Gop) - 1</TD></TR>
+<TR><TD>1010</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop)</TD></TR>
+<TR><TD>1011</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop) - C'</TD></TR>
+<TR><TD>1100</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop) - 1</TD></TR>
+<TR><TD>1101</TD><TD>Z</TD><TD>Zbus = dat(Hop) & dat(Gop)</TD></TR>
+<TR><TD>1110</TD><TD>Z</TD><TD>Zbus = dat(Hop) ^ dat(Gop)</TD></TR>
+<TR><TD>1111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
+<TR><TD COLSPAN=3></TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Cop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>000</TD><TD>ACC = Zbus, if Bop == 1111</TD></TR>
+<TR><TD>001</TD><TD>AH = Zbus</TD></TR>
+<TR><TD>010</TD><TD>AM = Zbus</TD></TR>
+<TR><TD>011</TD><TD>AL = Zbus</TD></TR>
+<TR><TD>100</TD><TD>DH = Zbus</TD></TR>
+<TR><TD>101</TD><TD>DL = Zbus</TD></TR>
+<TR><TD>110</TD><TD>MR = Zbus</TD></TR>
+<TR><TD>111</TD><TD>no-op</TD></TR>
+<TR><TD COLSPAN=2></TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Lop,Hop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>0XXX</TD><TD>dat(Hop) = 0000</TD></TR>
+<TR><TD>1000</TD><TD>dat(Hop) = ACC</TD></TR>
+<TR><TD>1001</TD><TD>dat(Hop) = AH</TD></TR>
+<TR><TD>1010</TD><TD>dat(Hop) = AM</TD></TR>
+<TR><TD>1011</TD><TD>dat(Hop) = AL</TD></TR>
+<TR><TD>1100</TD><TD>dat(Hop) = DH</TD></TR>
+<TR><TD>1101</TD><TD>dat(Hop) = DL</TD></TR>
+<TR><TD>1110</TD><TD>dat(Hop) = MR</TD></TR>
+<TR><TD>1111</TD><TD>dat(Hop) = XR</TD></TR>
+<TR><TD COLSPAN=2></TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Gop</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>000</TD><TD>dat(Gop) = 0000</TD></TR>
+<TR><TD>001</TD><TD>dat(Gop) = Kop</TD></TR>
+<TR><TD>010</TD><TD>dat(Gop) = mode0 *</TD></TR>
+<TR><TD>011</TD><TD>dat(Gop) = mode1</TD></TR>
+<TR><TD>100</TD><TD>dat(Gop) = DH</TD></TR>
+<TR><TD>101</TD><TD>dat(Gop) = DL</TD></TR>
+<TR><TD>110</TD><TD>dat(Gop) = MR</TD></TR>
+<TR><TD>111</TD><TD>dat(Gop) = XR</TD></TR>
+<TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=5>mode0</TH></TR>
+<TR><TH>Bits</TH>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+</TR>
+<TR><TH>Input</TH>
+<TD CLASS="num">STEP</TD>
+<TD CLASS="num">Learn<BR>Learn and Print</TD>
+<TD CLASS="num">List<BR>Learn and Print</TD>
+<TD CLASS="num">Fl (!Sc)</TD>
+</TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=5>mode1</TH></TR>
+<TR><TH>Bits</TH>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+</TR>
+<TR><TH>Input</TH>
+<TD CLASS="num">N/A</TD>
+<TD CLASS="num">N/A</TD>
+<TD CLASS="num">Printer OFF</TD>
+<TD CLASS="num">Rad (!Deg)</TD>
+</TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=5>Aop == 1010</TH></TR>
+<TR><TH></TH><TH COLSPAN=4>DL</TH></TR>
+<TR><TH>Bits</TH>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+</TR>
+<TR><TH>Input</TH>
+<TD CLASS="num">Printer Index</TD>
+<TD CLASS="num">N/A</TD>
+<TD CLASS="num">CN-24 Status</TD>
+<TD CLASS="num">Tape Data</TD>
+</TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=9>Aop == 1100</TH></TR>
+<TR><TH></TH><TH COLSPAN=4>DH</TH>
+<TH COLSPAN=4>DL</TH></TR>
+<TR><TH>Bits</TH>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+</TR>
+<TR><TH>Input</TH>
+<TD CLASS="num" COLSPAN=4>Printer Drum<BR>Position</TD>
+<TD CLASS="num">Printer Index</TD>
+<TD CLASS="num">N/A</TD>
+<TD CLASS="num">CN-24 Status</TD>
+<TD CLASS="num">Tape Data</TD>
+</TR>
+</TABLE>
 
 </HTML>
