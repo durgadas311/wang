@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600tech.html,v 1.8 2011/07/06 19:48:43 drmiller Exp $ -->
+<!-- $Id: wang600tech.html,v 1.9 2011/10/03 14:19:02 drmiller Exp $ -->
 
 <H2>Wang 600 Programming Techniques</H2>
 
@@ -112,5 +112,39 @@ to compare blocks of program steps. The main difference being that the numeric
 comparisons always convert the display and register 00 00 to numbers, while
 the literal compare only compares the digits codes directly. In normal cases
 there would not be any difference.
+
+<P>There is also a variable-length, unconditional, jump code.
+INDIR 00&nbsp;rr will add the contents of register 'rr' to the current
+Program Counter step. The integer and absolute value are used, and must
+be within the range 000 and 999.
+
+<P>This is a rather obscure code, but it might be used to implement
+software constructs such as CASE statements and Jump Vectors. For example, the following
+code will branch to (MARK) E0, E1, E2, ... based on the contents of the display
+(0.000000000, 1.000000000, 2.000000000, ...):
+
+<PRE>
+ 0000  06 04    ST4
+ 0001  00 02     E2
+ 0002  04 04     &#215;4
+ 0003  00 01     E1
+ 0004  02 04     +4
+ 0005  15 11     D11
+ 0006  00 04     E4
+ 0007  08 00     *  S
+ 0008  00 00     E0
+ 0009  08 00     *  S
+ 0010  00 01     E1
+ 0011  08 00     *  S
+ 0012  00 02     E2
+ ...etc for more "vectors"...
+</PRE>
+
+<P>Note, the above code segment is not dependent on being placed at step 0000.
+For example, if the display contained 1.000000000 then at step 0002 register 04
+would contain 2.000000000 and at step 0004 will contain 3.000000000.
+Finally, at step 0006 the contents of 04 is added to
+the current step (0006 + 3.0 = 0009) which results in the
+SEARCH&nbsp;E1 code path being taken.
 
 </HTML>

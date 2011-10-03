@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600func.html,v 1.16 2011/10/01 16:09:36 drmiller Exp $ -->
+<!-- $Id: wang600func.html,v 1.17 2011/10/03 14:19:02 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td {text-align: center;}
 </STYLE>
@@ -65,7 +65,7 @@ there is an alternate code that may be used in Run mode.
 
 <TR><TH COLSPAN=3>Misc Data</TH></TR>
 <TR><TD>D0* rr</TD><TD>15&nbsp;00, rr&nbsp;rr</TD><TD>Recall R(rr)<BR>(same as RECALL)</TD></TR>
-<TR><TD>INDIR cr</TD><TD>15&nbsp;11, cc&nbsp;rr</TD><TD>Perform register OP 'cc' indirectly on R(rr)</TD></TR>
+<TR><TD>INDIR cr</TD><TD>15&nbsp;11, cc&nbsp;rr</TD><TD>Perform register OP 'cc' indirectly on R(rr). If 'cc' == 00 then add register contents to P.C.</TD></TR>
 <TR><TD>Cx*</TD><TD>14&nbsp;xx</TD><TD>Exchange display and R(xx)</TD></TR>
 <TR><TD>D1* tf</TD><TD>15&nbsp;01, tt&nbsp;ff</TD><TD>Print formatted, same as program print<BR>but works from keyboard</TD></TR>
 <TR><TD>D10* aa</TD><TD>15&nbsp;10, aa&nbsp;aa</TD><TD>Mimics alpha functions<BR>(same as &#945;)</TD></TR>

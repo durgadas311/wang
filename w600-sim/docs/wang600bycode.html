@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.15 2011/10/01 16:02:11 drmiller Exp $ -->
+<!-- $Id: wang600bycode.html,v 1.16 2011/10/03 14:19:02 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -343,6 +343,11 @@ td.tag {text-align: center;}
 	the display to register 158 (which is also known as 09&nbsp;14).
 	Note, this method of accessing register 09&nbsp;14 (END&nbsp;PROG) will not
 	interfere with program control functions.
+	</TD></TR>
+<TR><TD>A special case is for codes 00&nbsp;rr where 'rr' specifies a register
+	to be used indirectly. The integer, absolute value, contents of register
+	'rr' is added to the Program Counter (current program step). This effectively
+	is a variable-length jump. The value is limited to 000 through 999.
 	</TD></TR>
 </TABLE>
 
