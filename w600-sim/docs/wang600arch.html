@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.2 2011/10/03 20:57:38 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.3 2011/10/03 22:43:43 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -219,20 +219,21 @@ as follows.
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0000</TD><TD>no-op</TD></TR>
 <TR><TD>0001</TD><TD>ram(AH,AM,AL) = MR</TD></TR>
-<TR><TD>0010</TD><TD>ram(15,15,AL) = MR</TD></TR>
+<TR><TD>0010</TD><TD>ram(15,Kop,AL) = MR</TD></TR>
 <TR><TD>0011</TD><TD>ram(15,15,Kop) = MR</TD></TR>
-<TR><TD>0100</TD><TD>MR = ram(AH,AM,AL)</TD></TR>
-<TR><TD>0101</TD><TD>MR = ram(15,15,AL)</TD></TR>
-<TR><TD>0110</TD><TD>MR = ram(15,15,Kop)</TD></TR>
-<TR><TD>0111</TD><TD>Load Printer Hammer Bits</TD></TR>
+<TR><TD>0100</TD><TD>MR = ram(AH,AM,AL)<BR>XR = rom(AH,AM,AL)</TD></TR>
+<TR><TD>0101</TD><TD>MR = ram(15,Kop,AL)<BR>XR = rom(15,Kop,AL)</TD></TR>
+<TR><TD>0110</TD><TD>MR = ram(15,15,Kop)<BR>XR = rom(15,15,Kop)</TD></TR>
+<TR><TD>0111</TD><TD>(Printer Hammer Bits <<= 1) | DL&lt;0&gt;<BR>
+Hammers fire every 20th bit</TD></TR>
 <TR><TD>1000</TD><TD>Printer Paper Feed</TD></TR>
 <TR><TD>1001</TD><TD>?</TD></TR>
-<TR><TD>1010</TD><TD>DL = periph_status</TD></TR>
-<TR><TD>1011</TD><TD>Tape Data = DL&lt;0&gt;</TD></TR>
-<TR><TD>1100</TD><TD>DH,DL = printer/tape status</TD></TR>
+<TR><TD>1010</TD><TD>DL&lt;0&gt; = Tape Read Data</TD></TR>
+<TR><TD>1011</TD><TD>Tape Write Data = DL&lt;0&gt;</TD></TR>
+<TR><TD>1100</TD><TD>DH,DL = Printer/CN-24 Status</TD></TR>
 <TR><TD>1101</TD><TD>Tape Motor ON</TD></TR>
 <TR><TD>1110</TD><TD>Tape Motor OFF</TD></TR>
-<TR><TD>1111</TD><TD>XH,XL = dat(Gop),dat(Hop)</TD></TR>
+<TR><TD>1111</TD><TD>XH = DH,XL = DL, XS = Kop&lt;2:0&gt;</TD></TR>
 <TR><TD COLSPAN=2></TD></TR>
 </TABLE>
 
@@ -343,9 +344,9 @@ as follows.
 <TD CLASS="num">0</TD>
 </TR>
 <TR><TH>Input</TH>
-<TD CLASS="num">Printer Index</TD>
 <TD CLASS="num">N/A</TD>
-<TD CLASS="num">CN-24 Status</TD>
+<TD CLASS="num">N/A</TD>
+<TD CLASS="num">N/A</TD>
 <TD CLASS="num">Tape Data</TD>
 </TR>
 </TABLE>
@@ -368,8 +369,8 @@ as follows.
 <TD CLASS="num" COLSPAN=4>Printer Drum<BR>Position</TD>
 <TD CLASS="num">Printer Index</TD>
 <TD CLASS="num">N/A</TD>
-<TD CLASS="num">CN-24 Status</TD>
-<TD CLASS="num">Tape Data</TD>
+<TD CLASS="num">CN-24 !Busy</TD>
+<TD CLASS="num">N/A</TD>
 </TR>
 </TABLE>
 
