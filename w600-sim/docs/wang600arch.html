@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.4 2011/10/04 01:06:09 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.5 2011/10/04 23:09:45 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -14,7 +14,7 @@ td.num { text-align: center; }
 
 <A HREF="wang600-block-diag2.gif"><IMG SRC="wang600-block-diag2.gif" WIDTH="100%"></A>
 
-<P>In the above diagram, fine lines represent single-bit (and serial) data,
+<P>In the above diagram, fine lines represent single-bit (and serial) data paths,
 while thicker lines represent multiple bits of data in parallel (typically 4).
 
 <P><TABLE BORDER>
@@ -31,16 +31,16 @@ while thicker lines represent multiple bits of data in parallel (typically 4).
 <TR><TD>XL</TD><TD>4</TD><TD>Peripheral Output Data, Lo</TD></TR>
 <TR><TD>XS</TD><TD>3</TD><TD>Peripheral Strobe/Select</TD></TR>
 <TR><TD>K</TD><TD>4</TD><TD>Kop constant from instruction</TD></TR>
-<TR><TD>S</TD><TD>4</TD><TD>State bits latched from ACC</TD></TR>
 <TR><TD>C</TD><TD>1</TD><TD>Carry Flag</TD></TR>
 <TR><TD>Z</TD><TD>1</TD><TD>Zero Flag</TD></TR>
+<TR><TD>S</TD><TD>4</TD><TD>State bits latched from ACC</TD></TR>
 <TR><TD>C'</TD><TD>1</TD><TD>Saved Carry</TD></TR>
 <TR><TD>PE</TD><TD>1</TD><TD>Prog Error</TD></TR>
 <TR><TD>ME</TD><TD>1</TD><TD>Mach Error</TD></TR>
 <TR><TD>KP</TD><TD>1</TD><TD>Key Pressed (input ready)</TD></TR>
-<TR><TD>CURRENT</TD><TD>12</TD><TD>Current Instruction Address</TD></TR>
-<TR><TD>STACK1</TD><TD>11</TD><TD>Top of Stack</TD></TR>
-<TR><TD>STACK2</TD><TD>11</TD><TD>2nd on Stack</TD></TR>
+<TR><TD>CURRENT</TD><TD>11</TD><TD>Current Instruction Address</TD></TR>
+<TR><TD>STACK1</TD><TD>10</TD><TD>Top of Stack</TD></TR>
+<TR><TD>STACK2</TD><TD>10</TD><TD>2nd on Stack</TD></TR>
 <TR><TD COLSPAN=3>* Also used as general purpose registers, when non-conflicting</TD></TR>
 </TABLE>
 
@@ -406,8 +406,8 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Prog Steps<BR>or purpose</TH></TR>
 <TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD CLASS="num">System State</TD></TR>
 <TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD CLASS="num">Display Reg</TD></TR>
-<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD CLASS="num">Current Display</TD></TR>
-<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD CLASS="num">Sci Notation Display</TD></TR>
+<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD CLASS="num">Sci Notation Display</TD></TR>
+<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD CLASS="num">Floating Point Display</TD></TR>
 <TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD CLASS="num">Learn Mode Display</TD></TR>
 <TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD CLASS="num">Temp</TD></TR>
 <TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD CLASS="num">Temp</TD></TR>
@@ -439,5 +439,494 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01</TD></TR>
 </TABLE>
 
+<H3>Display</H3>
+
+The display is a "multiplexed" style, regardless of whether it is NIXIE
+tubes or 7-segment.  This means that the display only appears to be
+static, it is actually continuously flickering, but at a higher rate
+than the human eye can discern. This display is only lit as long as
+the calculator is actively refreshing. If the calculator is busy doing
+something else, the display will blank.
+
+<P>The microcode refreshes the display by sequentially loading each digit from memory,
+and pausing for a very long time. The display is fed directly from the output
+latch of RAM and the AL register. AL contains the column (digit) number to enable,
+and the RAM latch contains the code for the digit to be displayed.
+
+<P>Depending on the state of the mode switches, the display refresh routine will refresh
+from register 15&nbsp;13 (Sci notation), 15&nbsp;12 (Floating point),
+or 15&nbsp;11 (Learn modes). These "registers" contain the pre-formated
+pattern to be displayed in each case. For example, after PRIME, these registers
+will contain:
+
+<P><TABLE>
+<TR><TH>15&nbsp;11:</TH>
+	<TD>15</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>15</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+</TR>
+<TR><TH>15&nbsp;12:</TH>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>10</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+	<TD>15</TD>
+</TR>
+<TR><TH>15&nbsp;13:</TH>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>10</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+	<TD>00</TD>
+</TR>
+</TABLE>
+
+<P>The display decodes digit values differently depending on the column.
+Columns 0 and 13 are "sign" digits and will only display "+", "-", and blank.
+Column 12 is hard-wired blank on the circuit board, but internally
+the microcode maintains the digit value and even refreshes it.
+The columns will display symbols according to the following table:
+
+<P><IMG SRC="wang600display.gif">
+
+<H3>Printer</H3>
+
+The printer is a drum-style with 21 colunms and 16 rows (symbols per column).
+The drum has the following characters in the columns/rows indicated:
+
+<P><TABLE BORDER>
+<TR><TH>column:<BR>row</TH>
+	<TH>0</TH>
+	<TH>1</TH>
+	<TH>2</TH>
+	<TH>3</TH>
+	<TH>4</TH>
+	<TH>5</TH>
+	<TH>6</TH>
+	<TH>7</TH>
+	<TH>8</TH>
+	<TH>9</TH>
+	<TH>10</TH>
+	<TH>11</TH>
+	<TH>12</TH>
+	<TH>13</TH>
+	<TH>14</TH>
+	<TH>15</TH>
+	<TH>16</TH>
+	<TH>17</TH>
+	<TH>18</TH>
+	<TH>19</TH>
+	<TH>20</TH></TR>
+<TR><TH>00</TH>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">E</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">S</TD>
+	<TD CLASS="num">M</TD>
+	<TD CLASS="num">X</TD></TR>
+<TR><TH>01</TH>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">T</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">RE</TD>
+	<TD CLASS="num">ST</TD>
+	<TD CLASS="num">Y</TD></TR>
+<TR><TH>02</TH>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">W</TD>
+	<TD CLASS="num">&#945;</TD>
+	<TD CLASS="num">Z</TD></TR>
+<TR><TH>03</TH>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">GO</TD>
+	<TD CLASS="num">SP</TD>
+	<TD CLASS="num">A</TD></TR>
+<TR><TH>04</TH>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">&#215;</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">J<SUB>o</SUB></TD>
+	<TD CLASS="num">J<SUB>&#248;</SUB></TD>
+	<TD CLASS="num">B</TD></TR>
+<TR><TH>05</TH>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">&divide;</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">J<SUB>+</SUB></TD>
+	<TD CLASS="num">J<SUB>e</SUB></TD>
+	<TD CLASS="num">C</TD></TR>
+<TR><TH>06</TH>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">ST</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">SN</TD>
+	<TD CLASS="num">S<SUP>-1</SUP></TD>
+	<TD CLASS="num">D</TD></TR>
+<TR><TH>07</TH>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">RE</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">CS</TD>
+	<TD CLASS="num">C<SUP>-1</SUP></TD>
+	<TD CLASS="num">E</TD></TR>
+<TR><TH>08</TH>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">*</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">TN</TD>
+	<TD CLASS="num">T<SUP>-1</SUP></TD>
+	<TD CLASS="num">F</TD></TR>
+<TR><TH>09</TH>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">*</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">RD</TD>
+	<TD CLASS="num">DR</TD>
+	<TD CLASS="num">G</TD></TR>
+<TR><TH>10</TH>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">f</TD>
+	<TD CLASS="num">10</TD>
+	<TD CLASS="num">LN</TD>
+	<TD CLASS="num">LG</TD>
+	<TD CLASS="num">H</TD></TR>
+<TR><TH>11</TH>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">&#9711;</TD>
+	<TD CLASS="num">F</TD>
+	<TD CLASS="num">11</TD>
+	<TD CLASS="num">e<SUP>x</SUP></TD>
+	<TD CLASS="num">10<SUP>x</SUP></TD>
+	<TD CLASS="num">I</TD></TR>
+<TR><TH>12</TH>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">O</TD>
+	<TD CLASS="num">V</TD>
+	<TD CLASS="num">E</TD>
+	<TD CLASS="num">R</TD>
+	<TD CLASS="num">F</TD>
+	<TD CLASS="num">L</TD>
+	<TD CLASS="num">O</TD>
+	<TD CLASS="num">W</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">.</TD>
+	<TD CLASS="num">A</TD>
+	<TD CLASS="num">12</TD>
+	<TD CLASS="num">x<SUP>2</SUP></TD>
+	<TD CLASS="num">I</TD>
+	<TD CLASS="num">J</TD></TR>
+<TR><TH>13</TH>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">+</TD>
+	<TD CLASS="num">B</TD>
+	<TD CLASS="num">13</TD>
+	<TD CLASS="num">&#8730;x</TD>
+	<TD CLASS="num">|x|</TD>
+	<TD CLASS="num">K</TD></TR>
+<TR><TH>14</TH>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">C</TD>
+	<TD CLASS="num">14</TD>
+	<TD CLASS="num">LP</TD>
+	<TD CLASS="num">EP</TD>
+	<TD CLASS="num">L</TD></TR>
+<TR><TH>15</TH>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">&nbsp;</TD>
+	<TD CLASS="num">D</TD>
+	<TD CLASS="num">15</TD>
+	<TD CLASS="num"><SUP>1</SUP>/<SUB>X</SUB></TD>
+	<TD CLASS="num">RT</TD>
+	<TD CLASS="num">M</TD></TR>
+</TABLE>
+
+<P>Similar to the hard-wired-blank position on the display, column 15 of
+the printer is also not connected and cannot be printed.
+
+<P>When printing, the calculator builds a pattern in a temporary register
+that represents the desired line to be printed.
+
+<P>With the printer turned on, the drum rotates and the hardware keeps track
+of which row is currently positioned at the hammers.
+When an instruction with Aop == 1100 is executed, the current drum position
+is loaded into DH and the row alignment signal is loaded into DL&lt;3&gt;.
+The calculator uses that information to determine when a row is in
+position to print and which row it is.
+As a particular row
+comes into position, the calculator checks all codes in the pattern
+and each place it matches the current drum position it sets a "1" bit in
+the hammer shift-register (setting a "0" where they do not match).
+The hammer bit is set in DL&lt;0&gt; and an instruction with Aop == 0111
+is executed to shift the hammer bit into the register.
+When all 20 bits have been shifted (columns 0-14 and 16-20), the hammers fire
+and print that row of selected characters. The calculator then waits for the next
+row to rotate into position, and repeats the process for the next row code.
+When all 16 rows have been processed, the paper is advanced.
 
 </HTML>
