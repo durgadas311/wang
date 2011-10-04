@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.3 2011/10/03 22:43:43 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.4 2011/10/04 01:06:09 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -16,6 +16,33 @@ td.num { text-align: center; }
 
 <P>In the above diagram, fine lines represent single-bit (and serial) data,
 while thicker lines represent multiple bits of data in parallel (typically 4).
+
+<P><TABLE BORDER>
+<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Meaning/Use</TH></TR>
+<TR><TD>ACC</TD><TD>4</TD><TD>Accumulator, provides conditional address bits</TD></TR>
+<TR><TD>AH</TD><TD>4</TD><TD>Memory Address, Hi *</TD></TR>
+<TR><TD>AM</TD><TD>4</TD><TD>Memory Address, Mid *</TD></TR>
+<TR><TD>AL</TD><TD>4</TD><TD>Memory Address, Lo *</TD></TR>
+<TR><TD>MR</TD><TD>4</TD><TD>Data to/from RAM *</TD></TR>
+<TR><TD>XR</TD><TD>4</TD><TD>Data from ROM</TD></TR>
+<TR><TD>DH</TD><TD>4</TD><TD>Peripheral Input Data, Hi *</TD></TR>
+<TR><TD>DL</TD><TD>4</TD><TD>Peripheral Input Data, Lo *</TD></TR>
+<TR><TD>XH</TD><TD>4</TD><TD>Peripheral Output Data, Hi</TD></TR>
+<TR><TD>XL</TD><TD>4</TD><TD>Peripheral Output Data, Lo</TD></TR>
+<TR><TD>XS</TD><TD>3</TD><TD>Peripheral Strobe/Select</TD></TR>
+<TR><TD>K</TD><TD>4</TD><TD>Kop constant from instruction</TD></TR>
+<TR><TD>S</TD><TD>4</TD><TD>State bits latched from ACC</TD></TR>
+<TR><TD>C</TD><TD>1</TD><TD>Carry Flag</TD></TR>
+<TR><TD>Z</TD><TD>1</TD><TD>Zero Flag</TD></TR>
+<TR><TD>C'</TD><TD>1</TD><TD>Saved Carry</TD></TR>
+<TR><TD>PE</TD><TD>1</TD><TD>Prog Error</TD></TR>
+<TR><TD>ME</TD><TD>1</TD><TD>Mach Error</TD></TR>
+<TR><TD>KP</TD><TD>1</TD><TD>Key Pressed (input ready)</TD></TR>
+<TR><TD>CURRENT</TD><TD>12</TD><TD>Current Instruction Address</TD></TR>
+<TR><TD>STACK1</TD><TD>11</TD><TD>Top of Stack</TD></TR>
+<TR><TD>STACK2</TD><TD>11</TD><TD>2nd on Stack</TD></TR>
+<TR><TD COLSPAN=3>* Also used as general purpose registers, when non-conflicting</TD></TR>
+</TABLE>
 
 <P>Microcode execution happens continuously, as long as the calculator has power.
 Each instruction contains the address of the next instruction, so there is
@@ -373,5 +400,44 @@ Hammers fire every 20th bit</TD></TR>
 <TD CLASS="num">N/A</TD>
 </TR>
 </TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
+<TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Prog Steps<BR>or purpose</TH></TR>
+<TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD CLASS="num">System State</TD></TR>
+<TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD CLASS="num">Display Reg</TD></TR>
+<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD CLASS="num">Current Display</TD></TR>
+<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD CLASS="num">Sci Notation Display</TD></TR>
+<TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD CLASS="num">Learn Mode Display</TD></TR>
+<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD CLASS="num">Temp</TD></TR>
+<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD CLASS="num">Temp</TD></TR>
+<TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (247)</TD><TD CLASS="num">0000 - 0007</TD></TR>
+<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (246)</TD><TD CLASS="num">0008 - 0015</TD></TR>
+<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (245)</TD><TD CLASS="num">0016 - 0023</TD></TR>
+<TR><TD COLSPAN=3 CLASS="num">...</TD></TR>
+<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD CLASS="num">1824 - 1831</TD></TR>
+<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD CLASS="num">1832 - 1839</TD></TR>
+<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD CLASS="num">1840 - 1847</TD></TR>
+<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15</TD><TD CLASS="num">GP Reg, Left</TD></TR>
+<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14</TD><TD CLASS="num">GP Reg, Right</TD></TR>
+<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01</TD><TD CLASS="num">GP Reg *</TD></TR>
+<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00</TD><TD CLASS="num">GP Reg *</TD></TR>
+<TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01</TD></TR>
+</TABLE>
+
 
 </HTML>
