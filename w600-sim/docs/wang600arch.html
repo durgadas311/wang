@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.7 2011/10/05 19:28:09 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.8 2011/10/05 20:07:10 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -33,7 +33,7 @@ registers, and late pulses are used to finish-up and finalize operations
 
 <P>The registers in the block diagram are explained here:
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Meaning/Use</TH></TR>
 <TR><TD>ACC</TD><TD>4</TD><TD>Accumulator, provides conditional address bits</TD></TR>
 <TR><TD>AH</TD><TD>4</TD><TD>Memory Address, Hi *</TD></TR>
@@ -58,7 +58,7 @@ registers, and late pulses are used to finish-up and finalize operations
 <TR><TD>STACK1</TD><TD>10</TD><TD>Top of Stack</TD></TR>
 <TR><TD>STACK2</TD><TD>10</TD><TD>2nd on Stack</TD></TR>
 <TR><TD COLSPAN=3>* Also used as general purpose registers, when non-conflicting</TD></TR>
-</TABLE>
+</TABLE></UL>
 
 <H3>Microcode Execution Sequence</H3>
 
@@ -97,7 +97,7 @@ will immediately terminate any operation in progress
 and force the calculator to perform the function programmed
 by that key.
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH>Key</TH>
 <TD CLASS="key">PRIME</TD>
 <TD CLASS="key">VERIFY<BR>PROG</TD>
@@ -118,24 +118,24 @@ by that key.
 <TD CLASS="num">006</TD>
 <TD CLASS="num">007</TD>
 </TR>
-<TABLE>
+</TABLE></UL>
 
 <P>In addition, executing the microcode instruction at 008 causes the KK
 field to be filled with the memory size indicator, as follows:
 
-<TABLE BORDER>
+<UL><TABLE BORDER>
 <TR><TH>KK</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
 <TR><TD CLASS="num">1111</TD><TD CLASS="num">600-14</TD><TD CLASS="num">4Kx4</TD><TD CLASS="num">1848</TD><TD CLASS="num">247</TD></TR>
 <TR><TD CLASS="num">0111</TD><TD CLASS="num">600-6</TD><TD CLASS="num">2Kx4</TD><TD CLASS="num">824</TD><TD CLASS="num">119</TD></TR>
 <TR><TD CLASS="num">0011</TD><TD CLASS="num">600-2</TD><TD CLASS="num">1Kx4</TD><TD CLASS="num">312</TD><TD CLASS="num">55</TD></TR>
-</TABLE>
+</TABLE></UL>
 
 <H3>Microcode Instruction Format</H3>
 
 Each microcode instruction is 42 bits long. The instruction fields are
 as follows.
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH>Bits</TH>
 <TD CLASS="num">41-39</TD>
 <TD CLASS="num">38-36</TD>
@@ -166,19 +166,19 @@ as follows.
 <TD CLASS="num">BI</TD>
 <TD CLASS="num">AI</TD>
 </TR>
-</TABLE>
+</TABLE></UL>
 
 <P>The instruction fields have the following effects on the hardware.
 
 <P>The notation REG&lt;n&gt; refers to Bit "n" of register "REG".
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>JAD<BR>
 Fixed part of Next Address</TH></TR>
 <TR><TD>XXXXXXXXX</TD><TD>Next Address, bits 10:2</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>JL<BR>
 LSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
@@ -195,9 +195,9 @@ LSB conditional part of Next Address</TH></TR>
 	stack1 = stack2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 <TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>JH<BR>
 MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
@@ -210,9 +210,9 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TD>110</TD><TD>current&lt;1&gt; = C'</TD></TR>
 <TR><TD>111</TD><TD>current&lt;1&gt; = ?</TD></TR>
 <TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>CALL</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;10:2&gt; = next</TD></TR>
@@ -220,9 +220,9 @@ MSB conditional part of Next Address</TH></TR>
 	stack2 = stack1, stack = current,<BR>
 	current&lt;10:2&gt; = next</TD></TR>
 <TR><TD COLSPAN=2>JL != 111</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>ST<BR>
 Status Control</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
@@ -244,14 +244,14 @@ Status Control</TH></TR>
 <TR><TD>1111</TD><TD>(See ZO)</TD></TR>
 <TR><TD COLSPAN=2>* Resets various pieces of hardware,<BR>
 including PE and ME</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>KK</TH></TR>
 <TR><TD>XXXX</TD><TD>Constant field</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>MOP<BR>
 Memory/Peripheral Operations</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
@@ -273,9 +273,9 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>1110</TD><TD>Tape Motor OFF</TD></TR>
 <TR><TD>1111</TD><TD>XH = DH,XL = DL, XS = KK&lt;2:0&gt;</TD></TR>
 <TR><TD COLSPAN=2></TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>NEG,AOP<BR>
 ALU Function</TH></TR>
 <TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
@@ -296,9 +296,9 @@ ALU Function</TH></TR>
 <TR><TD>1110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
 <TR><TD>1111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
 <TR><TD COLSPAN=3></TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>ACC = Zbus *</TD></TR>
@@ -310,9 +310,9 @@ ALU Function</TH></TR>
 <TR><TD>110</TD><TD>MR = Zbus</TD></TR>
 <TR><TD>111</TD><TD>no-op</TD></TR>
 <TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>AC,AI<BR>Selects source for A bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0XXX</TD><TD>Abus = 0000</TD></TR>
@@ -325,9 +325,9 @@ ALU Function</TH></TR>
 <TR><TD>1110</TD><TD>Abus = MR</TD></TR>
 <TR><TD>1111</TD><TD>Abus = XR</TD></TR>
 <TR><TD COLSPAN=2></TD></TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>BI<BR>Selects source for B bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
@@ -339,11 +339,11 @@ ALU Function</TH></TR>
 <TR><TD>110</TD><TD>Bbus = MR</TD></TR>
 <TR><TD>111</TD><TD>Bbus = XR</TD></TR>
 <TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
-</TABLE>
+</TABLE></UL>
 
 <H4>Bit Assignments for inputs</H4>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=5>mode0</TH></TR>
 <TR><TH>Bits</TH>
 <TD CLASS="num">3</TD>
@@ -357,9 +357,9 @@ ALU Function</TH></TR>
 <TD CLASS="num">List<BR>Learn and Print</TD>
 <TD CLASS="num">Fl (!Sc)</TD>
 </TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=5>mode1</TH></TR>
 <TR><TH>Bits</TH>
 <TD CLASS="num">3</TD>
@@ -373,9 +373,9 @@ ALU Function</TH></TR>
 <TD CLASS="num">Printer OFF</TD>
 <TD CLASS="num">Rad (!Deg)</TD>
 </TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=5>MOP == 1010</TH></TR>
 <TR><TH></TH><TH COLSPAN=4>DL</TH></TR>
 <TR><TH>Bits</TH>
@@ -390,9 +390,9 @@ ALU Function</TH></TR>
 <TD CLASS="num">N/A</TD>
 <TD CLASS="num">Tape Data</TD>
 </TR>
-</TABLE>
+</TABLE></UL>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=9>MOP == 1100</TH></TR>
 <TR><TH></TH><TH COLSPAN=4>DH</TH>
 <TH COLSPAN=4>DL</TH></TR>
@@ -413,11 +413,11 @@ ALU Function</TH></TR>
 <TD CLASS="num">CN-24 !Busy</TD>
 <TD CLASS="num">N/A</TD>
 </TR>
-</TABLE>
+</TABLE></UL>
 
 <H4>Memory Usage</H4>
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
 <TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Prog Steps<BR>or purpose</TH></TR>
 <TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD CLASS="num">System State</TD></TR>
@@ -455,7 +455,7 @@ ALU Function</TH></TR>
 <TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01.<BR>
 For example, plotting commands expect<BR>
 00 to contain the Y delta, and 01 the X delta</TD></TR>
-</TABLE>
+</TABLE></UL>
 
 <H3>Display</H3>
 
@@ -471,13 +471,29 @@ and pausing for a very long time. The display is fed directly from the output
 latch of RAM and the AL register. AL contains the column (digit) number to enable,
 and the RAM latch contains the code for the digit to be displayed.
 
+<P>The display decodes digit values differently depending on the column.
+Columns 0 and 13 are "sign" digits and will only display "+", "-", and blank.
+Column 12 is hard-wired blank on the circuit board, but internally
+the microcode maintains the digit value and even refreshes it.
+The columns will display symbols according to the following table:
+
+<P><UL><IMG SRC="wang600display.gif"></UL>
+
+<P>For example, RE&nbsp;01 will cause the contents of register 01 to
+be copied into 15&nbsp;14, and then 15&nbsp;14 will be formatted
+for floating point and scientific notation and stored, respectively,
+in 15&nbsp;12 and 15&nbsp;13.
+Which ever mode is currently selected via the "Fl &#8596; Sc" pushbutton
+will determmine which register (15&nbsp;12 or 15&nbsp;13) will
+be refreshed to the display.
+
 <P>Depending on the state of the mode switches, the display refresh routine will refresh
 from register 15&nbsp;13 (Sci notation), 15&nbsp;12 (Floating point),
 or 15&nbsp;11 (Learn modes). These "registers" contain the pre-formated
 pattern to be displayed in each case. For example, after PRIME, these registers
 will contain:
 
-<P><TABLE>
+<P><UL><TABLE>
 <TR><TH>15&nbsp;11:</TH>
 	<TD>15</TD>
 	<TD>00</TD>
@@ -532,27 +548,14 @@ will contain:
 	<TD>00</TD>
 	<TD>00</TD>
 </TR>
-</TABLE>
-
-<P>The display decodes digit values differently depending on the column.
-Columns 0 and 13 are "sign" digits and will only display "+", "-", and blank.
-Column 12 is hard-wired blank on the circuit board, but internally
-the microcode maintains the digit value and even refreshes it.
-The columns will display symbols according to the following table:
-
-<P><IMG SRC="wang600display.gif">
-
-<P>For example, RE&nbsp;01 will cause the contents of register 01 to
-be copied into 15&nbsp;14, and then 15&nbsp;14 will be formatted
-for floating point and scientific notation and stored, respectively,
-in 15&nbsp;12 and 15&nbsp;13.
+</TABLE></UL>
 
 <H3>Printer</H3>
 
 The printer is a drum-style with 21 colunms and 16 rows (symbols per column).
 The drum has the following characters in the columns/rows indicated:
 
-<P><TABLE BORDER>
+<P><UL><TABLE BORDER>
 <TR><TH>column:<BR>row</TH>
 	<TH>0</TH>
 	<TH>1</TH>
@@ -927,7 +930,7 @@ The drum has the following characters in the columns/rows indicated:
 	<TD CLASS="num"><SUP>1</SUP>/<SUB>X</SUB></TD>
 	<TD CLASS="num">RT</TD>
 	<TD CLASS="num">M</TD></TR>
-</TABLE>
+</TABLE></UL>
 
 <P>Similar to the hard-wired-blank position on the display, column 15 of
 the printer is also not connected and cannot be printed.
@@ -938,7 +941,7 @@ that represents the desired line to be printed.
 <P>With the printer turned on, the drum rotates and the hardware keeps track
 of which row is currently positioned at the hammers.
 When an instruction with MOP == 1100 is executed, the current drum position
-is loaded into DH and the row alignment signal is loaded into DL&lt;3&gt;.
+is loaded into DH and the row position signal is loaded into DL&lt;3&gt;.
 The calculator uses that information to determine when a row is in
 position to print and which row it is.
 As a particular row
@@ -983,7 +986,7 @@ data into memory.
 
 <P>Consider this example, of writing 09&nbsp;00 to tape and reading it back:
 
-<P><IMG SRC="wang600tape.gif">
+<P><UL><IMG SRC="wang600tape.gif"></UL>
 
 <P>The code 09&nbsp;00 is broken into two nibbles, and each assigned an odd parity bit.
 Then each 5 bit datum is encoded into the tape stream by
