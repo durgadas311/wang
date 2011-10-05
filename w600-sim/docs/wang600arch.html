@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.5 2011/10/04 23:09:45 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.6 2011/10/05 17:13:32 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -16,6 +16,22 @@ td.num { text-align: center; }
 
 <P>In the above diagram, fine lines represent single-bit (and serial) data paths,
 while thicker lines represent multiple bits of data in parallel (typically 4).
+
+<P>The system clock starts with a 4MHz crystal that feeds a flip-flop,
+producing a 2MHz signal that is fed into a BCD counter and decoder,
+producing a series of "phase" clocks which repeats at 200KHz.
+One microcode instruction is entirely executed with the 10
+phase-clock pulses.
+This establishes the microcode instruction time (a "cycle") of 5uS, or
+200,000 instructions per second.
+
+<P>The phase-clock pulses orchestrate the operation of the calculator.
+Early pulses are used to prepare hardware and save ("freeze") data,
+middle pulses are used to serially transfer data around the calculator
+registers, and late pulses are used to finish-up and finalize operations
+(such as accessing RAM or loading the next microcode instruction).
+
+<P>The registers in the block diagram are explained here:
 
 <P><TABLE BORDER>
 <TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Meaning/Use</TH></TR>
@@ -44,9 +60,12 @@ while thicker lines represent multiple bits of data in parallel (typically 4).
 <TR><TD COLSPAN=3>* Also used as general purpose registers, when non-conflicting</TD></TR>
 </TABLE>
 
+<H3>Microcode Execution Sequence</H3>
+
 <P>Microcode execution happens continuously, as long as the calculator has power.
 Each instruction contains the address of the next instruction, so there is
-no "Instruction Counter" that increments. There is a "current instruction address"
+no traditional "Instruction Counter" that increments.
+There is a "current instruction address"
 register, and two stack registers, used to control the flow of the microcode.
 In addition, certain keyboard conditions cause a hard-coded address to be forced
 into the current address register.
@@ -69,25 +88,6 @@ and stack1 is loaded form stack2.
 <P>Note, a return instruction always
 returns to the odd address after the call-from address.
 This means that call instructions should always be at even addresses.
-
-<H3>Microcode Execution Sequence</H3>
-
-Unlike modern computer CPU hardware, the Wang 600 does not execute the
-microcode sequentially. Each microcode instruction contains the
-address of the next instruction to execute, with the exception
-of the "return from subroutine" instruction which ignores the
-"next address" field.
-
-<P>The "next address" may be optionally modified
-by certain status bits, which affect the low order 2 bits of
-the address.
-
-<P>A "return from subroutine" instruction pops the previously
-pushed address off the stack and forces the low bit to "1".
-This means that all "call subroutine" instructions must
-be placed at even addresses, or else the return will cause
-an endless loop. It is not known whether such loops exist
-in the Wang 600 microcode, either accidentally or intentionally.
 
 <P>Microcode instruction execution sequence is terminated,
 and a new instruction address is forced,
@@ -120,7 +120,7 @@ by that key.
 </TR>
 <TABLE>
 
-<P>In addition, executing microcode instruction at 008 causes the Kop
+<P>In addition, executing the microcode instruction at 008 causes the Kop
 field to be filled with the memory size indicator, as follows:
 
 <TABLE BORDER>
@@ -184,7 +184,7 @@ as follows.
 <TR><TD>110</TD><TD>current&lt;0&gt; = KP *</TD></TR>
 <TR><TD>111</TD><TD>Return<BR>
 	current&lt;0&gt; = 1,
-	current&lt;11:1&gt; = stack1,<BR>
+	current&lt;10:1&gt; = stack1,<BR>
 	stack1 = stack2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 <TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
@@ -207,10 +207,10 @@ as follows.
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Jop</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;11:2&gt; = next</TD></TR>
+<TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;10:2&gt; = next</TD></TR>
 <TR><TD>1</TD><TD>Call<BR>
 	stack2 = stack1, stack = current,<BR>
-	current&lt;11:2&gt; = next</TD></TR>
+	current&lt;10:2&gt; = next</TD></TR>
 <TR><TD COLSPAN=2>Eop != 111</TD></TR>
 </TABLE>
 
@@ -231,9 +231,10 @@ as follows.
 <TR><TD>1011</TD><TD>ACC&lt;1&gt; = Z</TD></TR>
 <TR><TD>1100</TD><TD>PE = 1</TD></TR>
 <TR><TD>1101</TD><TD>ACC = 0000</TD></TR>
-<TR><TD>1110</TD><TD>ME = 0</TD></TR>
+<TR><TD>1110</TD><TD>ME = 1</TD></TR>
 <TR><TD>1111</TD><TD>ACC = Zbus (if Cop == 000)</TD></TR>
-<TR><TD COLSPAN=2>* Resets various pieces of hardware</TD></TR>
+<TR><TD COLSPAN=2>* Resets various pieces of hardware,<BR>
+including PE and ME</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
@@ -436,7 +437,9 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02</TD><TD CLASS="num">GP Reg</TD></TR>
 <TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01</TD><TD CLASS="num">GP Reg *</TD></TR>
 <TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00</TD><TD CLASS="num">GP Reg *</TD></TR>
-<TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01</TD></TR>
+<TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01.<BR>
+For example, plotting commands expect<BR>
+00 to contain the Y delta, and 01 the X delta</TD></TR>
 </TABLE>
 
 <H3>Display</H3>
@@ -523,6 +526,11 @@ the microcode maintains the digit value and even refreshes it.
 The columns will display symbols according to the following table:
 
 <P><IMG SRC="wang600display.gif">
+
+<P>For example, RE&nbsp;01 will cause the contents of register 01 to
+be copied into 15&nbsp;14, and then 15&nbsp;14 will be formatted
+for floating point and scientific notation and stored, respectively,
+in 15&nbsp;12 and 15&nbsp;13.
 
 <H3>Printer</H3>
 
@@ -928,5 +936,67 @@ When all 20 bits have been shifted (columns 0-14 and 16-20), the hammers fire
 and print that row of selected characters. The calculator then waits for the next
 row to rotate into position, and repeats the process for the next row code.
 When all 16 rows have been processed, the paper is advanced.
+
+<H3>Cassette Tape</H3>
+
+Most cassette storage of the era used audio modulation, similar to the
+"singing tones" of a modem, and used standard audio cassette tapes.
+But the Wang 600 used magnetic saturation, like mainframe computer tape drives.
+It did work on audio cassettes, but Wang recommended high quality "metal"
+tape.
+
+<P>Because magnetic media only works when there are changes in magnetic fields,
+the encoding had to ensure that the magnetic field changed frequently.
+This means that, for example, a long string of zeroes must not result in
+a long period of blank tape. Instead, there is guaranteed to be a transition
+at the beginning of every bit, and a transition in the middle if the bit was
+a "1". In addition, a parity bit was added every 4 data bits, to help
+detect errors.
+
+<P>The timing of each bit was precise, because the tape read code had to be
+able to stay synchronized without saving state information or doing much
+processing. Each unit of output was 198 cycles (data bit width 396),
+and each program (tape image) was preceded by a 211,220 cycle
+(approximately 1 second) blank gap
+(no magnetic field transitions).
+
+<P>During read, the calculator waits for the "bit start" transition, then
+delays 272 cycles before sampling again. If the sample reveals that there
+was a second transition, then the bit is considered a "1", otherwise it is "0".
+From this stream, the calculator assembles nibbles and checks parity, loading
+data into memory.
+
+<P>Consider this example, of writing 09&nbsp;00 to tape and reading it back:
+
+<P><IMG SRC="wang600tape.gif">
+
+<P>The code 09&nbsp;00 is broken into two nibbles, and each assigned an odd parity bit.
+Then each 5 bit datum is encoded into the tape stream by
+converting "1" into "1 0" or "0 1"
+and "0" into either "1 1" or "0 0",
+depending on the previous bit, to ensure that
+there is always a transition at the beginning of each bit.
+The resulting stream is fed to the record head and produces
+alternating segments of strong and weak (no) magenetic field on the tape.
+
+<P>During read, the changes between strong and weak magnetic fields show
+up a "blips" in the signal from the tape read head. These blips are fed
+into a "one-shot" flip-flop whose timing is set to about 97 cycles. This means
+that for 97 cycles after a transition there will be a "1" signal, and it will
+return to "0" after those 97 cycles.
+
+<P>The calculator monitors the signal from the one-shot. The first "1" it
+sees indicates the beginning of a bit. It then delays 272 cycles and
+checks the signal again. If it is still "1" (was actually re-triggered by
+a second transition) then the data bit is interpreted to be a "1".
+Otherwise, the data bit is interprented to be "0". These bits are
+assembled into a 4-bit word and a parity bit, which is then checked for odd parity
+and, if correct, the data word is stored in memory.
+
+<P>A parity error will cause the calculator to turn on the Mach Error flag (ME)
+and stop processing the tape.
+
+<P>Other problems with the tape will generally cause the calculator to
+"hang" with a blank display. Pressing PRIME is usually required in order to recover.
 
 </HTML>
