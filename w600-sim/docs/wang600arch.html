@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.6 2011/10/05 17:13:32 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.7 2011/10/05 19:28:09 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -46,7 +46,7 @@ registers, and late pulses are used to finish-up and finalize operations
 <TR><TD>XH</TD><TD>4</TD><TD>Peripheral Output Data, Hi</TD></TR>
 <TR><TD>XL</TD><TD>4</TD><TD>Peripheral Output Data, Lo</TD></TR>
 <TR><TD>XS</TD><TD>3</TD><TD>Peripheral Strobe/Select</TD></TR>
-<TR><TD>K</TD><TD>4</TD><TD>Kop constant from instruction</TD></TR>
+<TR><TD>K</TD><TD>4</TD><TD>KK constant from instruction</TD></TR>
 <TR><TD>C</TD><TD>1</TD><TD>Carry Flag</TD></TR>
 <TR><TD>Z</TD><TD>1</TD><TD>Zero Flag</TD></TR>
 <TR><TD>S</TD><TD>4</TD><TD>State bits latched from ACC</TD></TR>
@@ -74,7 +74,7 @@ into the current address register.
 42-bit word is latched into the instruction register. For normal instructions,
 the "next address" field of the instruction is fed-back into the current address
 register, with the low-order 2 bits coming from a decoding of the condition
-address fields, Eop and Fop.
+address fields, JL and JH.
 
 <P>For "call" instructions, the previous value of the current address
 register is saved into the "stack1" register, also saving the
@@ -120,11 +120,11 @@ by that key.
 </TR>
 <TABLE>
 
-<P>In addition, executing the microcode instruction at 008 causes the Kop
+<P>In addition, executing the microcode instruction at 008 causes the KK
 field to be filled with the memory size indicator, as follows:
 
 <TABLE BORDER>
-<TR><TH>Kop</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
+<TR><TH>KK</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
 <TR><TD CLASS="num">1111</TD><TD CLASS="num">600-14</TD><TD CLASS="num">4Kx4</TD><TD CLASS="num">1848</TD><TD CLASS="num">247</TD></TR>
 <TR><TD CLASS="num">0111</TD><TD CLASS="num">600-6</TD><TD CLASS="num">2Kx4</TD><TD CLASS="num">824</TD><TD CLASS="num">119</TD></TR>
 <TR><TD CLASS="num">0011</TD><TD CLASS="num">600-2</TD><TD CLASS="num">1Kx4</TD><TD CLASS="num">312</TD><TD CLASS="num">55</TD></TR>
@@ -152,19 +152,19 @@ as follows.
 <TD CLASS="num">2-0</TD>
 </TR>
 <TR><TH>Field<BR>Name</TH>
-<TD CLASS="num">Fop</TD>
-<TD CLASS="num">Eop</TD>
-<TD CLASS="num">Next Address</TD>
-<TD CLASS="num">Jop</TD>
-<TD CLASS="num">Bop</TD>
-<TD CLASS="num">Kop</TD>
-<TD CLASS="num">Aop</TD>
-<TD CLASS="num">D'op</TD>
-<TD CLASS="num">Lop</TD>
-<TD CLASS="num">Dop</TD>
-<TD CLASS="num">Cop</TD>
-<TD CLASS="num">Gop</TD>
-<TD CLASS="num">Hop</TD>
+<TD CLASS="num">JH</TD>
+<TD CLASS="num">JL</TD>
+<TD CLASS="num">JAD</TD>
+<TD CLASS="num">CALL</TD>
+<TD CLASS="num">ST</TD>
+<TD CLASS="num">KK</TD>
+<TD CLASS="num">MOP</TD>
+<TD CLASS="num">NEG</TD>
+<TD CLASS="num">AC</TD>
+<TD CLASS="num">AOP</TD>
+<TD CLASS="num">ZO</TD>
+<TD CLASS="num">BI</TD>
+<TD CLASS="num">AI</TD>
 </TR>
 </TABLE>
 
@@ -173,7 +173,14 @@ as follows.
 <P>The notation REG&lt;n&gt; refers to Bit "n" of register "REG".
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Eop</TH></TR>
+<TR><TH COLSPAN=2>JAD<BR>
+Fixed part of Next Address</TH></TR>
+<TR><TD>XXXXXXXXX</TD><TD>Next Address, bits 10:2</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>JL<BR>
+LSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>current&lt;0&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>current&lt;0&gt; = 1</TD></TR>
@@ -191,7 +198,8 @@ as follows.
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Fop</TH></TR>
+<TR><TH COLSPAN=2>JH<BR>
+MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>current&lt;1&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>current&lt;1&gt; = 1</TD></TR>
@@ -205,17 +213,18 @@ as follows.
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Jop</TH></TR>
+<TR><TH COLSPAN=2>CALL</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;10:2&gt; = next</TD></TR>
-<TR><TD>1</TD><TD>Call<BR>
+<TR><TD>1</TD><TD>Call Subroutine<BR>
 	stack2 = stack1, stack = current,<BR>
 	current&lt;10:2&gt; = next</TD></TR>
-<TR><TD COLSPAN=2>Eop != 111</TD></TR>
+<TR><TD COLSPAN=2>JL != 111</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Bop</TH></TR>
+<TR><TH COLSPAN=2>ST<BR>
+Status Control</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0000</TD><TD>no-op</TD></TR>
 <TR><TD>0001</TD><TD>ACC&lt;0&gt; = 1</TD></TR>
@@ -226,32 +235,33 @@ as follows.
 <TR><TD>0110</TD><TD>ACC&lt;1&gt; = 0</TD></TR>
 <TR><TD>0111</TD><TD>ACC&lt;2&gt; = 0</TD></TR>
 <TR><TD>1000</TD><TD>ACC&lt;3&gt; = 0</TD></TR>
-<TR><TD>1001</TD><TD>clear 6184 *</TD></TR>
+<TR><TD>1001</TD><TD>RESET *</TD></TR>
 <TR><TD>1010</TD><TD>ACC&lt;0&gt; = ~Z</TD></TR>
 <TR><TD>1011</TD><TD>ACC&lt;1&gt; = Z</TD></TR>
 <TR><TD>1100</TD><TD>PE = 1</TD></TR>
 <TR><TD>1101</TD><TD>ACC = 0000</TD></TR>
 <TR><TD>1110</TD><TD>ME = 1</TD></TR>
-<TR><TD>1111</TD><TD>ACC = Zbus (if Cop == 000)</TD></TR>
+<TR><TD>1111</TD><TD>(See ZO)</TD></TR>
 <TR><TD COLSPAN=2>* Resets various pieces of hardware,<BR>
 including PE and ME</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Kop</TH></TR>
+<TR><TH COLSPAN=2>KK</TH></TR>
 <TR><TD>XXXX</TD><TD>Constant field</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Aop</TH></TR>
+<TR><TH COLSPAN=2>MOP<BR>
+Memory/Peripheral Operations</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0000</TD><TD>no-op</TD></TR>
 <TR><TD>0001</TD><TD>ram(AH,AM,AL) = MR</TD></TR>
-<TR><TD>0010</TD><TD>ram(15,Kop,AL) = MR</TD></TR>
-<TR><TD>0011</TD><TD>ram(15,15,Kop) = MR</TD></TR>
+<TR><TD>0010</TD><TD>ram(15,KK,AL) = MR</TD></TR>
+<TR><TD>0011</TD><TD>ram(15,15,KK) = MR</TD></TR>
 <TR><TD>0100</TD><TD>MR = ram(AH,AM,AL)<BR>XR = rom(AH,AM,AL)</TD></TR>
-<TR><TD>0101</TD><TD>MR = ram(15,Kop,AL)<BR>XR = rom(15,Kop,AL)</TD></TR>
-<TR><TD>0110</TD><TD>MR = ram(15,15,Kop)<BR>XR = rom(15,15,Kop)</TD></TR>
+<TR><TD>0101</TD><TD>MR = ram(15,KK,AL)<BR>XR = rom(15,KK,AL)</TD></TR>
+<TR><TD>0110</TD><TD>MR = ram(15,15,KK)<BR>XR = rom(15,15,KK)</TD></TR>
 <TR><TD>0111</TD><TD>(Printer Hammer Bits <<= 1) | DL&lt;0&gt;<BR>
 Hammers fire every 20th bit</TD></TR>
 <TR><TD>1000</TD><TD>Printer Paper Feed</TD></TR>
@@ -261,36 +271,37 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>1100</TD><TD>DH,DL = Printer/CN-24 Status</TD></TR>
 <TR><TD>1101</TD><TD>Tape Motor ON</TD></TR>
 <TR><TD>1110</TD><TD>Tape Motor OFF</TD></TR>
-<TR><TD>1111</TD><TD>XH = DH,XL = DL, XS = Kop&lt;2:0&gt;</TD></TR>
+<TR><TD>1111</TD><TD>XH = DH,XL = DL, XS = KK&lt;2:0&gt;</TD></TR>
 <TR><TD COLSPAN=2></TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=3>D'op,Dop</TH></TR>
+<TR><TH COLSPAN=3>NEG,AOP<BR>
+ALU Function</TH></TR>
 <TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
-<TR><TD>0000</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) + dat(Gop)</TD></TR>
-<TR><TD>0001</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) + dat(Gop) + 1</TD></TR>
-<TR><TD>0010</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop)</TD></TR>
-<TR><TD>0011</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop) + C'</TD></TR>
-<TR><TD>0100</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) + dat(Gop) + 1</TD></TR>
-<TR><TD>0101</TD><TD>Z</TD><TD>Zbus = dat(Hop) & dat(Gop)</TD></TR>
-<TR><TD>0110</TD><TD>Z</TD><TD>Zbus = dat(Hop) | dat(Gop)</TD></TR>
+<TR><TD>0000</TD><TD>Z, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0001</TD><TD>Z, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0010</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0011</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus + C'</TD></TR>
+<TR><TD>0100</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
+<TR><TD>0110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
 <TR><TD>0111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
-<TR><TD>1000</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) - dat(Gop)</TD></TR>
-<TR><TD>1001</TD><TD>Z, C</TD><TD>Zbus = dat(Hop) - dat(Gop) - 1</TD></TR>
-<TR><TD>1010</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop)</TD></TR>
-<TR><TD>1011</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop) - C'</TD></TR>
-<TR><TD>1100</TD><TD>Z, C, C'</TD><TD>Zbus = dat(Hop) - dat(Gop) - 1</TD></TR>
-<TR><TD>1101</TD><TD>Z</TD><TD>Zbus = dat(Hop) & dat(Gop)</TD></TR>
-<TR><TD>1110</TD><TD>Z</TD><TD>Zbus = dat(Hop) ^ dat(Gop)</TD></TR>
+<TR><TD>1000</TD><TD>Z, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1001</TD><TD>Z, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1010</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1011</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus - C'</TD></TR>
+<TR><TD>1100</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
+<TR><TD>1110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
 <TR><TD>1111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
 <TR><TD COLSPAN=3></TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Cop</TH></TR>
+<TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>ACC = Zbus, if Bop == 1111</TD></TR>
+<TR><TD>000</TD><TD>ACC = Zbus *</TD></TR>
 <TR><TD>001</TD><TD>AH = Zbus</TD></TR>
 <TR><TD>010</TD><TD>AM = Zbus</TD></TR>
 <TR><TD>011</TD><TD>AL = Zbus</TD></TR>
@@ -298,37 +309,39 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>101</TD><TD>DL = Zbus</TD></TR>
 <TR><TD>110</TD><TD>MR = Zbus</TD></TR>
 <TR><TD>111</TD><TD>no-op</TD></TR>
+<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>AC,AI<BR>Selects source for A bus</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>0XXX</TD><TD>Abus = 0000</TD></TR>
+<TR><TD>1000</TD><TD>Abus = ACC</TD></TR>
+<TR><TD>1001</TD><TD>Abus = AH</TD></TR>
+<TR><TD>1010</TD><TD>Abus = AM</TD></TR>
+<TR><TD>1011</TD><TD>Abus = AL</TD></TR>
+<TR><TD>1100</TD><TD>Abus = DH</TD></TR>
+<TR><TD>1101</TD><TD>Abus = DL</TD></TR>
+<TR><TD>1110</TD><TD>Abus = MR</TD></TR>
+<TR><TD>1111</TD><TD>Abus = XR</TD></TR>
 <TR><TD COLSPAN=2></TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>Lop,Hop</TH></TR>
+<TR><TH COLSPAN=2>BI<BR>Selects source for B bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>0XXX</TD><TD>dat(Hop) = 0000</TD></TR>
-<TR><TD>1000</TD><TD>dat(Hop) = ACC</TD></TR>
-<TR><TD>1001</TD><TD>dat(Hop) = AH</TD></TR>
-<TR><TD>1010</TD><TD>dat(Hop) = AM</TD></TR>
-<TR><TD>1011</TD><TD>dat(Hop) = AL</TD></TR>
-<TR><TD>1100</TD><TD>dat(Hop) = DH</TD></TR>
-<TR><TD>1101</TD><TD>dat(Hop) = DL</TD></TR>
-<TR><TD>1110</TD><TD>dat(Hop) = MR</TD></TR>
-<TR><TD>1111</TD><TD>dat(Hop) = XR</TD></TR>
-<TR><TD COLSPAN=2></TD></TR>
-</TABLE>
-
-<P><TABLE BORDER>
-<TR><TH COLSPAN=2>Gop</TH></TR>
-<TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>dat(Gop) = 0000</TD></TR>
-<TR><TD>001</TD><TD>dat(Gop) = Kop</TD></TR>
-<TR><TD>010</TD><TD>dat(Gop) = mode0 *</TD></TR>
-<TR><TD>011</TD><TD>dat(Gop) = mode1</TD></TR>
-<TR><TD>100</TD><TD>dat(Gop) = DH</TD></TR>
-<TR><TD>101</TD><TD>dat(Gop) = DL</TD></TR>
-<TR><TD>110</TD><TD>dat(Gop) = MR</TD></TR>
-<TR><TD>111</TD><TD>dat(Gop) = XR</TD></TR>
+<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
+<TR><TD>001</TD><TD>Bbus = K</TD></TR>
+<TR><TD>010</TD><TD>Bbus = mode0 *</TD></TR>
+<TR><TD>011</TD><TD>Bbus = mode1</TD></TR>
+<TR><TD>100</TD><TD>Bbus = DH</TD></TR>
+<TR><TD>101</TD><TD>Bbus = DL</TD></TR>
+<TR><TD>110</TD><TD>Bbus = MR</TD></TR>
+<TR><TD>111</TD><TD>Bbus = XR</TD></TR>
 <TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
 </TABLE>
+
+<H4>Bit Assignments for inputs</H4>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=5>mode0</TH></TR>
@@ -363,7 +376,7 @@ Hammers fire every 20th bit</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=5>Aop == 1010</TH></TR>
+<TR><TH COLSPAN=5>MOP == 1010</TH></TR>
 <TR><TH></TH><TH COLSPAN=4>DL</TH></TR>
 <TR><TH>Bits</TH>
 <TD CLASS="num">3</TD>
@@ -380,7 +393,7 @@ Hammers fire every 20th bit</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=9>Aop == 1100</TH></TR>
+<TR><TH COLSPAN=9>MOP == 1100</TH></TR>
 <TR><TH></TH><TH COLSPAN=4>DH</TH>
 <TH COLSPAN=4>DL</TH></TR>
 <TR><TH>Bits</TH>
@@ -401,6 +414,8 @@ Hammers fire every 20th bit</TD></TR>
 <TD CLASS="num">N/A</TD>
 </TR>
 </TABLE>
+
+<H4>Memory Usage</H4>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
@@ -922,7 +937,7 @@ that represents the desired line to be printed.
 
 <P>With the printer turned on, the drum rotates and the hardware keeps track
 of which row is currently positioned at the hammers.
-When an instruction with Aop == 1100 is executed, the current drum position
+When an instruction with MOP == 1100 is executed, the current drum position
 is loaded into DH and the row alignment signal is loaded into DL&lt;3&gt;.
 The calculator uses that information to determine when a row is in
 position to print and which row it is.
@@ -930,7 +945,7 @@ As a particular row
 comes into position, the calculator checks all codes in the pattern
 and each place it matches the current drum position it sets a "1" bit in
 the hammer shift-register (setting a "0" where they do not match).
-The hammer bit is set in DL&lt;0&gt; and an instruction with Aop == 0111
+The hammer bit is set in DL&lt;0&gt; and an instruction with MOP == 0111
 is executed to shift the hammer bit into the register.
 When all 20 bits have been shifted (columns 0-14 and 16-20), the hammers fire
 and print that row of selected characters. The calculator then waits for the next
