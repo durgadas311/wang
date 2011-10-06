@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.9 2011/10/05 22:15:03 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.10 2011/10/06 00:09:12 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -83,13 +83,13 @@ register, with the low-order 2 bits coming from a decoding of the condition
 address fields, JL and JH.
 
 <P>For "call" instructions, the previous value of the current address
-register is saved into the "stack1" register, also saving the
-"stack1" previous contents into "stack2".
+register is saved into the "STACK1" register, also saving the
+"STACK1" previous contents into "STACK2".
 
 <P>For "return" instructions, the contents of the "next address" field
-is ignored and the current address register is loaded from stack1
+is ignored and the current address register is loaded from STACK1
 with the low-order bit forced to "1",
-and stack1 is loaded form stack2.
+and STACK1 is loaded form STACK2.
 
 <P>Note, a return instruction always
 returns to the odd address after the call-from address.
@@ -188,17 +188,17 @@ Fixed part of Next Address</TH></TR>
 <TR><TH COLSPAN=2>JL<BR>
 LSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>current&lt;0&gt; = 0</TD></TR>
-<TR><TD>001</TD><TD>current&lt;0&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>current&lt;0&gt; = S&lt;0&gt;</TD></TR>
-<TR><TD>011</TD><TD>current&lt;0&gt; = S&lt;2&gt;</TD></TR>
-<TR><TD>100</TD><TD>current&lt;0&gt; = PE *</TD></TR>
-<TR><TD>101</TD><TD>current&lt;0&gt; = C</TD></TR>
-<TR><TD>110</TD><TD>current&lt;0&gt; = KP *</TD></TR>
+<TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
+<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S&lt;0&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S&lt;2&gt;</TD></TR>
+<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = PE *</TD></TR>
+<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = C</TD></TR>
+<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KP *</TD></TR>
 <TR><TD>111</TD><TD>Return<BR>
-	current&lt;0&gt; = 1,
-	current&lt;10:1&gt; = stack1,<BR>
-	stack1 = stack2</TD></TR>
+	CURRENT&lt;0&gt; = 1,
+	CURRENT&lt;10:1&gt; = STACK1,<BR>
+	STACK1 = STACK2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 <TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
 </TABLE></UL>
@@ -207,24 +207,24 @@ LSB conditional part of Next Address</TH></TR>
 <TR><TH COLSPAN=2>JH<BR>
 MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>current&lt;1&gt; = 0</TD></TR>
-<TR><TD>001</TD><TD>current&lt;1&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>current&lt;1&gt; = S&lt;1&gt;</TD></TR>
-<TR><TD>011</TD><TD>current&lt;1&gt; = S&lt;3&gt;</TD></TR>
-<TR><TD>100</TD><TD>current&lt;1&gt; = Z</TD></TR>
-<TR><TD>101</TD><TD>current&lt;1&gt; = ?</TD></TR>
-<TR><TD>110</TD><TD>current&lt;1&gt; = C'</TD></TR>
-<TR><TD>111</TD><TD>current&lt;1&gt; = ?</TD></TR>
+<TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
+<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S&lt;1&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S&lt;3&gt;</TD></TR>
+<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z</TD></TR>
+<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
+<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
+<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
 <TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>CALL</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>0</TD><TD>Jump (normal)<BR>current&lt;10:2&gt; = next</TD></TR>
+<TR><TD>0</TD><TD>Jump (normal)<BR>CURRENT&lt;10:2&gt; = next</TD></TR>
 <TR><TD>1</TD><TD>Call Subroutine<BR>
-	stack2 = stack1, stack = current,<BR>
-	current&lt;10:2&gt; = next</TD></TR>
+	STACK2 = STACK1, STACK = CURRENT,<BR>
+	CURRENT&lt;10:2&gt; = next</TD></TR>
 <TR><TD COLSPAN=2>JL != 111</TD></TR>
 </TABLE></UL>
 
