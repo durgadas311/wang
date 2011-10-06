@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.13 2011/10/06 00:16:14 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.14 2011/10/06 19:53:58 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -135,6 +135,51 @@ field to be filled with the memory size indicator, as follows:
 <TR><TD CLASS="num">0111</TD><TD CLASS="num">600-6</TD><TD CLASS="num">2Kx4</TD><TD CLASS="num">824</TD><TD CLASS="num">119</TD></TR>
 <TR><TD CLASS="num">0011</TD><TD CLASS="num">600-2</TD><TD CLASS="num">1Kx4</TD><TD CLASS="num">312</TD><TD CLASS="num">55</TD></TR>
 </TABLE></UL>
+
+<H3>Microcode Instruction Timing</H3>
+
+The instruction cycle is divided into three main phases: Early Latching,
+Serial Data Transfer, and Late Latching. The following activities are performed
+in/about the various phases.
+
+<P><UL><TABLE BORDER>
+<TR><TD ROWSPAN=2>Early<BR>Latching</TD>
+	<TD>Machine State saved:<BR>
+	S = ACC<BR>
+	C' = C</TD></TR>
+<TR>	<TD>AH,AM,AL latched to memory</TD></TR>
+<TR><TD ROWSPAN=3>Serial<BR>Data<BR>Transfer</TD>
+	<TD>Data shifted over A, B, and Z buses,<BR>
+	to/from selected registers *</TD></TR>
+<TR>	<TD>"return" pop stack *</TD></TR>
+<TR>	<TD>"call" push stack *</TD></TR>
+<TR><TD ROWSPAN=5>Late<BR>Latching</TD>
+	<TD>RAM = MR *</TD></TR>
+<TR>	<TD>MR = RAM *</TD></TR>
+<TR>	<TD>XR = ROM *</TD></TR>
+<TR>	<TD>CURRENT = next</TD></TR>
+<TR>	<TD>DH,DL = keyboard/peripheral *</TD></TR>
+<TR><TD COLSPAN=2>* Activities are dependent on<BR>
+microcode ops of instruction</TD></TR>
+</TABLE></UL>
+
+<P>Some notes on timing:
+
+<UL>
+<LI>Instructions that
+modify AH, AM, or AL but also access memory will use the <U>old</U>
+value for AH, AM, or AL.
+<LI>Instructions that
+modify MR and write memory will use the <U>new</U> value for MR.
+<LI>Instructions the access MR and do memory read will get the <U>old</U>
+value from MR, and will not see the value read from memory until
+the subsequent instruction.
+<LI>Conditional parts of the next address will use <U>old</U> S and C' values
+(ACC, C), while using <U>new</U> C and Z (KP, PE).
+</UL>
+
+<P>In summary, interpreting (and writing) microcode instructions requires
+careful consideration of these timing anomalies.
 
 <H3>Microcode Instruction Format</H3>
 
