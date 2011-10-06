@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.14 2011/10/06 19:53:58 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.15 2011/10/06 23:45:02 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -47,10 +47,11 @@ registers, and late pulses are used to finish-up and finalize operations
 <TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD>Peripheral Output Data, Lo</TD></TR>
 <TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD>Peripheral Strobe/Select</TD></TR>
 <TR><TD CLASS="num">K</TD><TD CLASS="num">4</TD><TD>KK field from instruction</TD></TR>
+<TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD>Carry Flag</TD></TR>
 <TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD>Zero Flag</TD></TR>
-<TR><TD CLASS="num">S</TD><TD CLASS="num">4</TD><TD>State bits latched from ACC</TD></TR>
-<TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD>Saved Carry</TD></TR>
+<TR><TD CLASS="num">ACC'</TD><TD CLASS="num">4</TD><TD>Saved ACC</TD></TR>
+<TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD>Saved C</TD></TR>
 <TR><TD CLASS="num">PE</TD><TD CLASS="num">1</TD><TD>Prog Error</TD></TR>
 <TR><TD CLASS="num">ME</TD><TD CLASS="num">1</TD><TD>Mach Error</TD></TR>
 <TR><TD CLASS="num">KP</TD><TD CLASS="num">1</TD><TD>Key Pressed (input ready)</TD></TR>
@@ -58,7 +59,9 @@ registers, and late pulses are used to finish-up and finalize operations
 <TR><TD CLASS="num">TW</TD><TD CLASS="num">1</TD><TD>Tape Write (record) Data</TD></TR>
 <TR><TD CLASS="num">TR</TD><TD CLASS="num">1</TD><TD>Tape Read Data (one-shot)</TD></TR>
 <TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD>Print Hammers, shift register</TD></TR>
-<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD>Print Drum position</TD></TR>
+<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD>Print Drum Row</TD></TR>
+<TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD>Print Drum Index</TD></TR>
+<TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD>CN-24 Strobe/Ack</TD></TR>
 <TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD>Current Instruction Address</TD></TR>
 <TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD>Top of Stack</TD></TR>
 <TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD>2nd on Stack</TD></TR>
@@ -145,9 +148,10 @@ in/about the various phases.
 <P><UL><TABLE BORDER>
 <TR><TD ROWSPAN=2>Early<BR>Latching</TD>
 	<TD>Machine State saved:<BR>
-	S = ACC<BR>
+	ACC' = ACC<BR>
 	C' = C</TD></TR>
-<TR>	<TD>AH,AM,AL latched to memory</TD></TR>
+<TR>	<TD>AH,AM,AL latched to memory<BR>
+	address decoders</TD></TR>
 <TR><TD ROWSPAN=3>Serial<BR>Data<BR>Transfer</TD>
 	<TD>Data shifted over A, B, and Z buses,<BR>
 	to/from selected registers *</TD></TR>
@@ -171,11 +175,10 @@ modify AH, AM, or AL but also access memory will use the <U>old</U>
 value for AH, AM, or AL.
 <LI>Instructions that
 modify MR and write memory will use the <U>new</U> value for MR.
-<LI>Instructions the access MR and do memory read will get the <U>old</U>
-value from MR, and will not see the value read from memory until
-the subsequent instruction.
-<LI>Conditional parts of the next address will use <U>old</U> S and C' values
-(ACC, C), while using <U>new</U> C and Z (KP, PE).
+<LI>Instructions that access MR and do memory read will get the <U>old</U>
+value from MR.
+<LI>Conditional parts of the next address will use <U>old</U> ACC' and C' values
+(ACC, C), while using <U>new</U> I and Z (KP, PE).
 </UL>
 
 <P>In summary, interpreting (and writing) microcode instructions requires
@@ -235,17 +238,17 @@ LSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S&lt;0&gt;</TD></TR>
-<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S&lt;2&gt;</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = ACC'&lt;0&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = ACC'&lt;2&gt;</TD></TR>
 <TR><TD>100</TD><TD>CURRENT&lt;0&gt; = PE *</TD></TR>
-<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = C</TD></TR>
+<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = I</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KP *</TD></TR>
-<TR><TD>111</TD><TD>Return<BR>
-	CURRENT&lt;0&gt; = 1,
-	CURRENT&lt;10:1&gt; = STACK1,<BR>
+<TR><TD>111</TD><TD>Return:<BR>
+	CURRENT&lt;0&gt; = 1<BR>
+	CURRENT&lt;10:1&gt; = STACK1<BR>
 	STACK1 = STACK2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
-<TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+<TR><TD COLSPAN=2>ACC' and C' are latched from<BR>ACC and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -254,13 +257,13 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S&lt;1&gt;</TD></TR>
-<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S&lt;3&gt;</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = ACC'&lt;1&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = ACC'&lt;3&gt;</TD></TR>
 <TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z</TD></TR>
 <TR><TD>101</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
 <TR><TD>111</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
-<TR><TD COLSPAN=2>S and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+<TR><TD COLSPAN=2>ACC' and C' are latched from<BR>ACC and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -268,7 +271,7 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0</TD><TD>Jump (normal) *<BR>CURRENT&lt;10:2&gt; = JAD</TD></TR>
 <TR><TD>1</TD><TD>Call Subroutine *<BR>
-	STACK2 = STACK1, STACK = CURRENT,<BR>
+	STACK2 = STACK1<BR>STACK = CURRENT<BR>
 	CURRENT&lt;10:2&gt; = JAD</TD></TR>
 <TR><TD COLSPAN=2>* no-op if JL == 111</TD></TR>
 </TABLE></UL>
@@ -319,47 +322,33 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>1001</TD><TD>?</TD></TR>
 <TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
 <TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
-<TR><TD>1100</TD><TD>DH,DL = Printer/CN-24 Status</TD></TR>
+<TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = SB</TD></TR>
 <TR><TD>1101</TD><TD>TM = 1</TD></TR>
 <TR><TD>1110</TD><TD>TM = 0</TD></TR>
-<TR><TD>1111</TD><TD>XH = DH,XL = DL, XS = KK&lt;2:0&gt;</TD></TR>
+<TR><TD>1111</TD><TD>XH = DH<BR>XL = DL<BR>XS = KK&lt;2:0&gt;</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>NEG,AOP<BR>
 ALU Function</TH></TR>
 <TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
-<TR><TD>0000</TD><TD>Z, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
-<TR><TD>0001</TD><TD>Z, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-<TR><TD>0010</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus</TD></TR>
-<TR><TD>0011</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus + C'</TD></TR>
-<TR><TD>0100</TD><TD>Z, C, C'</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0001</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0010</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0011</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + C'</TD></TR>
+<TR><TD>0100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 <TR><TD>0101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 <TR><TD>0110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
 <TR><TD>0111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
-<TR><TD>1000</TD><TD>Z, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
-<TR><TD>1001</TD><TD>Z, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
-<TR><TD>1010</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus</TD></TR>
-<TR><TD>1011</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus - C'</TD></TR>
-<TR><TD>1100</TD><TD>Z, C, C'</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1011</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - C'</TD></TR>
+<TR><TD>1100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 <TR><TD>1101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 <TR><TD>1110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
 <TR><TD>1111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
 <TR><TD COLSPAN=3></TD></TR>
-</TABLE></UL>
-
-<P><UL><TABLE BORDER>
-<TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
-<TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>ACC = Zbus *</TD></TR>
-<TR><TD>001</TD><TD>AH = Zbus</TD></TR>
-<TR><TD>010</TD><TD>AM = Zbus</TD></TR>
-<TR><TD>011</TD><TD>AL = Zbus</TD></TR>
-<TR><TD>100</TD><TD>DH = Zbus</TD></TR>
-<TR><TD>101</TD><TD>DL = Zbus</TD></TR>
-<TR><TD>110</TD><TD>MR = Zbus</TD></TR>
-<TR><TD>111</TD><TD>no-op</TD></TR>
-<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -388,6 +377,20 @@ ALU Function</TH></TR>
 <TR><TD>110</TD><TD>Bbus = MR</TD></TR>
 <TR><TD>111</TD><TD>Bbus = XR</TD></TR>
 <TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
+<TR><TH>op</TH><TH>affect</TH></TR>
+<TR><TD>000</TD><TD>ACC = Zbus *</TD></TR>
+<TR><TD>001</TD><TD>AH = Zbus</TD></TR>
+<TR><TD>010</TD><TD>AM = Zbus</TD></TR>
+<TR><TD>011</TD><TD>AL = Zbus</TD></TR>
+<TR><TD>100</TD><TD>DH = Zbus</TD></TR>
+<TR><TD>101</TD><TD>DL = Zbus</TD></TR>
+<TR><TD>110</TD><TD>MR = Zbus</TD></TR>
+<TR><TD>111</TD><TD>no-op</TD></TR>
+<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
 </TABLE></UL>
 
 <H4>Bit Assignments for inputs</H4>
