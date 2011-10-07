@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.19 2011/10/07 20:50:50 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.20 2011/10/07 23:35:10 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -46,7 +46,6 @@ registers, and late pulses are used to finish-up and finalize operations
 <TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD>Expansion Output, Hi</TD></TR>
 <TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD>Expansion Output, Lo</TD></TR>
 <TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD>Expansion Select</TD></TR>
-<TR><TD CLASS="num">K</TD><TD CLASS="num">4</TD><TD>KK field</TD></TR>
 <TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD>Carry Flag</TD></TR>
 <TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD>Zero Flag</TD></TR>
@@ -308,9 +307,9 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TD>010</TD><TD>CURRENT&lt;1&gt; = MS'&lt;1&gt;</TD></TR>
 <TR><TD>011</TD><TD>CURRENT&lt;1&gt; = MS'&lt;3&gt;</TD></TR>
 <TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z</TD></TR>
-<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
+<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = n.c.</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
-<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
+<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
 <TR><TD COLSPAN=2>MS' and C' are latched from<BR>MS and C early in cycle</TD></TR>
 </TABLE></UL>
 
@@ -345,7 +344,8 @@ Machine Status Control</TH></TR>
 <TR><TD>1110</TD><TD>ME = 1</TD></TR>
 <TR><TD>1111</TD><TD>(See ZO)</TD></TR>
 <TR><TD COLSPAN=2>* Resets various pieces of hardware,<BR>
-including PE and ME</TD></TR>
+including PE, KP, and ME<BR>
+DH = DL = 0000</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -373,7 +373,8 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = SB</TD></TR>
 <TR><TD>1101</TD><TD>TM = 1<BR>
 			wr = BI&lt;0&gt;</TD></TR>
-<TR><TD>1110</TD><TD>TM = 0</TD></TR>
+<TR><TD>1110</TD><TD>TM = 0<BR>
+			no reset if BI&lt;0&gt; == 1</TD></TR>
 <TR><TD>1111</TD><TD>XH = DH<BR>XL = DL<BR>XS = KK&lt;2:0&gt;</TD></TR>
 </TABLE></UL>
 
@@ -417,7 +418,7 @@ ALU Function</TH></TR>
 <TR><TH COLSPAN=2>BI<BR>Selects source for B bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
-<TR><TD>001</TD><TD>Bbus = K</TD></TR>
+<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
 <TR><TD>010</TD><TD>Bbus = mode0 *</TD></TR>
 <TR><TD>011</TD><TD>Bbus = mode1</TD></TR>
 <TR><TD>100</TD><TD>Bbus = DH</TD></TR>
@@ -476,27 +477,12 @@ ALU Function</TH></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=5>MOP == 1010</TH></TR>
-<TR><TH></TH><TH COLSPAN=4>DL</TH></TR>
-<TR><TH>Bits</TH>
-<TD CLASS="num">3</TD>
-<TD CLASS="num">2</TD>
-<TD CLASS="num">1</TD>
-<TD CLASS="num">0</TD>
-</TR>
-<TR><TH>Input</TH>
-<TD CLASS="num">N/A</TD>
-<TD CLASS="num">N/A</TD>
-<TD CLASS="num">N/A</TD>
-<TD CLASS="num">Tape Data</TD>
-</TR>
-</TABLE></UL>
-
-<P><UL><TABLE BORDER>
-<TR><TH COLSPAN=9>MOP == 1100</TH></TR>
-<TR><TH></TH><TH COLSPAN=4>DH</TH>
+<TR><TH>&nbsp;</TH>
+<TH>&nbsp;</TH>
+<TH COLSPAN=4>DH</TH>
 <TH COLSPAN=4>DL</TH></TR>
-<TR><TH>Bits</TH>
+<TR><TH>&nbsp;</TH>
+<TH>&nbsp;</TH>
 <TD CLASS="num">3</TD>
 <TD CLASS="num">2</TD>
 <TD CLASS="num">1</TD>
@@ -506,12 +492,31 @@ ALU Function</TH></TR>
 <TD CLASS="num">1</TD>
 <TD CLASS="num">0</TD>
 </TR>
-<TR><TH>Input</TH>
-<TD CLASS="num" COLSPAN=4>Printer Drum<BR>Position</TD>
-<TD CLASS="num">Printer Index</TD>
-<TD CLASS="num">N/A</TD>
-<TD CLASS="num">CN-24 !Busy</TD>
-<TD CLASS="num">N/A</TD>
+<TR><TH>MOP == 0111</TH><TH>Out</TH>
+	<TD CLASS="num" COLSPAN=4>N/A</TD>
+	<TD CLASS="num" COLSPAN=3>N/A</TD>
+	<TD CLASS="num">Print Hammer bit</TD>
+</TR>
+<TR><TH>MOP == 1010</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>N/A</TD>
+	<TD CLASS="num" COLSPAN=3>N/A</TD>
+	<TD CLASS="num">Tape Data (TR)</TD>
+</TR>
+<TR><TH>MOP == 1011</TH><TH>Out</TH>
+	<TD CLASS="num" COLSPAN=4>N/A</TD>
+	<TD CLASS="num" COLSPAN=3>N/A</TD>
+	<TD CLASS="num">Tape Data (TW)</TD>
+</TR>
+<TR><TH>MOP == 1100</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>Printer Drum<BR>Position</TD>
+	<TD CLASS="num">Printer Index</TD>
+	<TD CLASS="num">N/A</TD>
+	<TD CLASS="num">CN-24 !Busy</TD>
+	<TD CLASS="num">N/A</TD>
+</TR>
+<TR><TH>JL == 110 (?)</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>Key/Periph Hi</TD>
+	<TD CLASS="num" COLSPAN=4>Key/Periph Lo</TD>
 </TR>
 </TABLE></UL>
 
