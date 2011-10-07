@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.16 2011/10/06 23:47:09 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.17 2011/10/07 15:49:11 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -35,22 +35,22 @@ registers, and late pulses are used to finish-up and finalize operations
 
 <P><UL><TABLE BORDER>
 <TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Meaning/Use</TH></TR>
-<TR><TD CLASS="num">ACC</TD><TD CLASS="num">4</TD><TD>Accumulator, Machine Status</TD></TR>
+<TR><TD CLASS="num">MS</TD><TD CLASS="num">4</TD><TD>Machine State *</TD></TR>
 <TR><TD CLASS="num">AH</TD><TD CLASS="num">4</TD><TD>Memory Address, Hi *</TD></TR>
 <TR><TD CLASS="num">AM</TD><TD CLASS="num">4</TD><TD>Memory Address, Mid *</TD></TR>
 <TR><TD CLASS="num">AL</TD><TD CLASS="num">4</TD><TD>Memory Address, Lo *</TD></TR>
 <TR><TD CLASS="num">MR</TD><TD CLASS="num">4</TD><TD>Data to/from RAM *</TD></TR>
 <TR><TD CLASS="num">XR</TD><TD CLASS="num">4</TD><TD>Data from ROM</TD></TR>
-<TR><TD CLASS="num">DH</TD><TD CLASS="num">4</TD><TD>Peripheral Input Data, Hi *</TD></TR>
-<TR><TD CLASS="num">DL</TD><TD CLASS="num">4</TD><TD>Peripheral Input Data, Lo *</TD></TR>
-<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD>Peripheral Output Data, Hi</TD></TR>
-<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD>Peripheral Output Data, Lo</TD></TR>
-<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD>Peripheral Strobe/Select</TD></TR>
-<TR><TD CLASS="num">K</TD><TD CLASS="num">4</TD><TD>KK field from instruction</TD></TR>
+<TR><TD CLASS="num">DH</TD><TD CLASS="num">4</TD><TD>Input Data, Hi *</TD></TR>
+<TR><TD CLASS="num">DL</TD><TD CLASS="num">4</TD><TD>Input Data, Lo *</TD></TR>
+<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD>Expansion Output, Hi</TD></TR>
+<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD>Expansion Output, Lo</TD></TR>
+<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">K</TD><TD CLASS="num">4</TD><TD>KK field</TD></TR>
 <TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD>Carry Flag</TD></TR>
 <TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD>Zero Flag</TD></TR>
-<TR><TD CLASS="num">ACC'</TD><TD CLASS="num">4</TD><TD>Saved ACC</TD></TR>
+<TR><TD CLASS="num">MS'</TD><TD CLASS="num">4</TD><TD>Saved MS</TD></TR>
 <TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD>Saved C</TD></TR>
 <TR><TD CLASS="num">PE</TD><TD CLASS="num">1</TD><TD>Prog Error</TD></TR>
 <TR><TD CLASS="num">ME</TD><TD CLASS="num">1</TD><TD>Mach Error</TD></TR>
@@ -148,7 +148,7 @@ in/about the various phases.
 <P><UL><TABLE BORDER>
 <TR><TD ROWSPAN=2>Early<BR>Latching</TD>
 	<TD>Machine State saved:<BR>
-	ACC' = ACC<BR>
+	MS' = MS<BR>
 	C' = C</TD></TR>
 <TR>	<TD>AH,AM,AL latched to memory<BR>
 	address decoders</TD></TR>
@@ -177,8 +177,8 @@ value for AH, AM, or AL.
 modify MR and write memory will use the <U>new</U> value for MR.
 <LI>Instructions that access MR and do memory read will get the <U>old</U>
 value from MR.
-<LI>Conditional parts of the next address will use <U>old</U> ACC' and C' values
-(ACC, C), while using <U>new</U> I and Z (KP, PE).
+<LI>Conditional parts of the next address will use <U>old</U> MS' and C' values
+(MS, C), while using <U>new</U> I and Z (KP, PE).
 </UL>
 
 <P>In summary, interpreting (and writing) microcode instructions requires
@@ -189,23 +189,23 @@ careful consideration of these timing anomalies.
 Each microcode instruction is 42 bits long. The instruction fields are
 as follows.
 
-<P><UL><TABLE BORDER>
+<P><UL><TABLE BORDER WIDTH=800>
 <TR><TH>Bits</TH>
-<TD CLASS="num">41-39</TD>
-<TD CLASS="num">38-36</TD>
-<TD CLASS="num">35-27</TD>
-<TD CLASS="num">26</TD>
-<TD CLASS="num">25-22</TD>
-<TD CLASS="num">21-18</TD>
-<TD CLASS="num">17-14</TD>
-<TD CLASS="num">13</TD>
-<TD CLASS="num">12</TD>
-<TD CLASS="num">11-9</TD>
-<TD CLASS="num">8-6</TD>
-<TD CLASS="num">5-3</TD>
-<TD CLASS="num">2-0</TD>
+<TD CLASS="num" WIDTH="6%">41-39</TD>
+<TD CLASS="num" WIDTH="6%">38-36</TD>
+<TD CLASS="num" WIDTH="18%">35-27</TD>
+<TD CLASS="num" WIDTH="2%">26</TD>
+<TD CLASS="num" WIDTH="8%">25-22</TD>
+<TD CLASS="num" WIDTH="8%">21-18</TD>
+<TD CLASS="num" WIDTH="8%">17-14</TD>
+<TD CLASS="num" WIDTH="2%">13</TD>
+<TD CLASS="num" WIDTH="2%">12</TD>
+<TD CLASS="num" WIDTH="6%">11-9</TD>
+<TD CLASS="num" WIDTH="6%">8-6</TD>
+<TD CLASS="num" WIDTH="6%">5-3</TD>
+<TD CLASS="num" WIDTH="6%">2-0</TD>
 </TR>
-<TR><TH>Field<BR>Name</TH>
+<TR><TH>Field</TH>
 <TD CLASS="num">JH</TD>
 <TD CLASS="num">JL</TD>
 <TD CLASS="num">JAD</TD>
@@ -213,7 +213,7 @@ as follows.
 <TD CLASS="num">ST</TD>
 <TD CLASS="num">KK</TD>
 <TD CLASS="num">MOP</TD>
-<TD CLASS="num">NEG</TD>
+<TD CLASS="num">AN</TD>
 <TD CLASS="num">AC</TD>
 <TD CLASS="num">AOP</TD>
 <TD CLASS="num">ZO</TD>
@@ -238,8 +238,8 @@ LSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = ACC'&lt;0&gt;</TD></TR>
-<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = ACC'&lt;2&gt;</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = MS'&lt;0&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = MS'&lt;2&gt;</TD></TR>
 <TR><TD>100</TD><TD>CURRENT&lt;0&gt; = PE *</TD></TR>
 <TR><TD>101</TD><TD>CURRENT&lt;0&gt; = I</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KP *</TD></TR>
@@ -248,7 +248,7 @@ LSB conditional part of Next Address</TH></TR>
 	CURRENT&lt;10:1&gt; = STACK1<BR>
 	STACK1 = STACK2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
-<TR><TD COLSPAN=2>ACC' and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+<TR><TD COLSPAN=2>MS' and C' are latched from<BR>MS and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -257,13 +257,13 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
 <TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
-<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = ACC'&lt;1&gt;</TD></TR>
-<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = ACC'&lt;3&gt;</TD></TR>
+<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = MS'&lt;1&gt;</TD></TR>
+<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = MS'&lt;3&gt;</TD></TR>
 <TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z</TD></TR>
 <TR><TD>101</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
 <TR><TD>111</TD><TD>CURRENT&lt;1&gt; = ?</TD></TR>
-<TR><TD COLSPAN=2>ACC' and C' are latched from<BR>ACC and C early in cycle</TD></TR>
+<TR><TD COLSPAN=2>MS' and C' are latched from<BR>MS and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -281,19 +281,19 @@ MSB conditional part of Next Address</TH></TR>
 Machine Status Control</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0000</TD><TD>no-op</TD></TR>
-<TR><TD>0001</TD><TD>ACC&lt;0&gt; = 1</TD></TR>
-<TR><TD>0010</TD><TD>ACC&lt;1&gt; = 1</TD></TR>
-<TR><TD>0011</TD><TD>ACC&lt;2&gt; = 1</TD></TR>
-<TR><TD>0100</TD><TD>ACC&lt;3&gt; = 1</TD></TR>
-<TR><TD>0101</TD><TD>ACC&lt;0&gt; = 0</TD></TR>
-<TR><TD>0110</TD><TD>ACC&lt;1&gt; = 0</TD></TR>
-<TR><TD>0111</TD><TD>ACC&lt;2&gt; = 0</TD></TR>
-<TR><TD>1000</TD><TD>ACC&lt;3&gt; = 0</TD></TR>
+<TR><TD>0001</TD><TD>MS&lt;0&gt; = 1</TD></TR>
+<TR><TD>0010</TD><TD>MS&lt;1&gt; = 1</TD></TR>
+<TR><TD>0011</TD><TD>MS&lt;2&gt; = 1</TD></TR>
+<TR><TD>0100</TD><TD>MS&lt;3&gt; = 1</TD></TR>
+<TR><TD>0101</TD><TD>MS&lt;0&gt; = 0</TD></TR>
+<TR><TD>0110</TD><TD>MS&lt;1&gt; = 0</TD></TR>
+<TR><TD>0111</TD><TD>MS&lt;2&gt; = 0</TD></TR>
+<TR><TD>1000</TD><TD>MS&lt;3&gt; = 0</TD></TR>
 <TR><TD>1001</TD><TD>RESET *</TD></TR>
-<TR><TD>1010</TD><TD>ACC&lt;0&gt; = ~Z</TD></TR>
-<TR><TD>1011</TD><TD>ACC&lt;1&gt; = Z</TD></TR>
+<TR><TD>1010</TD><TD>MS&lt;0&gt; = ~Z</TD></TR>
+<TR><TD>1011</TD><TD>MS&lt;1&gt; = Z</TD></TR>
 <TR><TD>1100</TD><TD>PE = 1</TD></TR>
-<TR><TD>1101</TD><TD>ACC = 0000</TD></TR>
+<TR><TD>1101</TD><TD>MS = 0000</TD></TR>
 <TR><TD>1110</TD><TD>ME = 1</TD></TR>
 <TR><TD>1111</TD><TD>(See ZO)</TD></TR>
 <TR><TD COLSPAN=2>* Resets various pieces of hardware,<BR>
@@ -329,7 +329,7 @@ Hammers fire every 20th bit</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=3>NEG,AOP<BR>
+<TR><TH COLSPAN=3>AN,AOP<BR>
 ALU Function</TH></TR>
 <TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
 <TR><TD>0000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
@@ -339,7 +339,7 @@ ALU Function</TH></TR>
 <TR><TD>0100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 <TR><TD>0101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 <TR><TD>0110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
-<TR><TD>0111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
+<TR><TD>0111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
 <TR><TD>1000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
 <TR><TD>1001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 <TR><TD>1010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
@@ -347,15 +347,14 @@ ALU Function</TH></TR>
 <TR><TD>1100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 <TR><TD>1101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 <TR><TD>1110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-<TR><TD>1111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
-<TR><TD COLSPAN=3></TD></TR>
+<TR><TD>1111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>AC,AI<BR>Selects source for A bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
 <TR><TD>0XXX</TD><TD>Abus = 0000</TD></TR>
-<TR><TD>1000</TD><TD>Abus = ACC</TD></TR>
+<TR><TD>1000</TD><TD>Abus = MS</TD></TR>
 <TR><TD>1001</TD><TD>Abus = AH</TD></TR>
 <TR><TD>1010</TD><TD>Abus = AM</TD></TR>
 <TR><TD>1011</TD><TD>Abus = AL</TD></TR>
@@ -382,7 +381,7 @@ ALU Function</TH></TR>
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>000</TD><TD>ACC = Zbus *</TD></TR>
+<TR><TD>000</TD><TD>MS = Zbus *</TD></TR>
 <TR><TD>001</TD><TD>AH = Zbus</TD></TR>
 <TR><TD>010</TD><TD>AM = Zbus</TD></TR>
 <TR><TD>011</TD><TD>AL = Zbus</TD></TR>
@@ -484,29 +483,29 @@ ALU Function</TH></TR>
 <TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (247)</TD><TD CLASS="num">0000 - 0007</TD></TR>
 <TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (246)</TD><TD CLASS="num">0008 - 0015</TD></TR>
 <TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (245)</TD><TD CLASS="num">0016 - 0023</TD></TR>
-<TR><TD COLSPAN=3 CLASS="num">...</TD></TR>
+<TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
 <TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD CLASS="num">1824 - 1831</TD></TR>
 <TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD CLASS="num">1832 - 1839</TD></TR>
 <TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD CLASS="num">1840 - 1847</TD></TR>
-<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15</TD><TD CLASS="num">GP Reg, Left</TD></TR>
-<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14</TD><TD CLASS="num">GP Reg, Right</TD></TR>
-<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01</TD><TD CLASS="num">GP Reg *</TD></TR>
-<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00</TD><TD CLASS="num">GP Reg *</TD></TR>
-<TR><TD COLSPAN=3>* Certain commands depend on values in registers 00 and 01.<BR>
+<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD CLASS="num">GP Reg, Left</TD></TR>
+<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD CLASS="num">GP Reg, Right</TD></TR>
+<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12 (12)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11 (11)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10 (10)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09 (9)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08 (8)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07 (7)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06 (6)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05 (5)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04 (4)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03 (3)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02 (2)</TD><TD CLASS="num">GP Reg</TD></TR>
+<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01 (1)</TD><TD CLASS="num">GP Reg *</TD></TR>
+<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00 (0)</TD><TD CLASS="num">GP Reg *</TD></TR>
+<TR><TD COLSPAN=3>* Certain commands depend on values in registers 0 and 1.<BR>
 For example, plotting commands expect<BR>
-00 to contain the Y delta, and 01 the X delta</TD></TR>
+0 to contain the Y delta, and 1 the X delta</TD></TR>
 </TABLE></UL>
 
 <H3>Display</H3>
@@ -987,8 +986,10 @@ The drum has the following characters in the columns/rows indicated:
 <P>Similar to the hard-wired-blank position on the display, column 15 of
 the printer is also not connected and cannot be printed.
 
-<P>When printing, the calculator builds a pattern in a temporary register
-that represents the desired line to be printed.
+<P>When printing, the calculator builds a pattern in register 15&nbsp;09
+that represents the first 16 columns to be printed (column 15 not printed).
+The last 5 columns are formatted "on the fly" based on context, modes,
+and operations being performed.
 
 <P>With the printer turned on, the drum rotates and the hardware keeps track
 of which row is currently positioned at the hammers.
