@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.17 2011/10/07 15:49:11 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.18 2011/10/07 16:01:18 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -177,12 +177,14 @@ value for AH, AM, or AL.
 modify MR and write memory will use the <U>new</U> value for MR.
 <LI>Instructions that access MR and do memory read will get the <U>old</U>
 value from MR.
-<LI>Conditional parts of the next address will use <U>old</U> MS' and C' values
-(MS, C), while using <U>new</U> I and Z (KP, PE).
+<LI>Conditional parts of the next address will use <U>old</U> MS and C values
+(MS', C'), while using <U>new</U> I and Z (also KP, PE) values.
 </UL>
 
 <P>In summary, interpreting (and writing) microcode instructions requires
 careful consideration of these timing anomalies.
+
+<P><A HREF="wang600src.html">Here is some sample microcode</A>
 
 <H3>Microcode Instruction Format</H3>
 
