@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.18 2011/10/07 16:01:18 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.19 2011/10/07 20:50:50 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -189,39 +189,85 @@ careful consideration of these timing anomalies.
 <H3>Microcode Instruction Format</H3>
 
 Each microcode instruction is 42 bits long. The instruction fields are
-as follows.
+as follows (layout for Solid State ROM).
 
-<P><UL><TABLE BORDER WIDTH=800>
+<P><UL><TABLE BORDER>
 <TR><TH>Bits</TH>
-<TD CLASS="num" WIDTH="6%">41-39</TD>
-<TD CLASS="num" WIDTH="6%">38-36</TD>
-<TD CLASS="num" WIDTH="18%">35-27</TD>
-<TD CLASS="num" WIDTH="2%">26</TD>
-<TD CLASS="num" WIDTH="8%">25-22</TD>
-<TD CLASS="num" WIDTH="8%">21-18</TD>
-<TD CLASS="num" WIDTH="8%">17-14</TD>
-<TD CLASS="num" WIDTH="2%">13</TD>
-<TD CLASS="num" WIDTH="2%">12</TD>
-<TD CLASS="num" WIDTH="6%">11-9</TD>
-<TD CLASS="num" WIDTH="6%">8-6</TD>
-<TD CLASS="num" WIDTH="6%">5-3</TD>
-<TD CLASS="num" WIDTH="6%">2-0</TD>
+	<TD CLASS="num">41</TD>
+	<TD CLASS="num">40</TD>
+	<TD CLASS="num">39</TD>
+	<TD CLASS="num">38</TD>
+	<TD CLASS="num">37</TD>
+	<TD CLASS="num">36</TD>
+	<TD CLASS="num">35</TD>
+	<TD CLASS="num">34</TD>
+	<TD CLASS="num">33</TD>
+	<TD CLASS="num">32</TD>
+	<TD CLASS="num">31</TD>
+	<TD CLASS="num">30</TD>
+	<TD CLASS="num">29</TD>
+	<TD CLASS="num">28</TD>
+	<TD CLASS="num">27</TD>
+	<TD CLASS="num">26</TD>
+	<TD CLASS="num">25</TD>
+	<TD CLASS="num">24</TD>
+	<TD CLASS="num">23</TD>
+	<TD CLASS="num">22</TD>
+	<TD CLASS="num">21</TD>
+	<TD CLASS="num">20</TD>
+	<TD CLASS="num">19</TD>
+	<TD CLASS="num">18</TD>
+	<TD CLASS="num">17</TD>
+	<TD CLASS="num">16</TD>
+	<TD CLASS="num">15</TD>
+	<TD CLASS="num">14</TD>
+	<TD CLASS="num">13</TD>
+	<TD CLASS="num">12</TD>
+	<TD CLASS="num">11</TD>
+	<TD CLASS="num">10</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">X</TD>
+	<TD CLASS="num">X</TD>
 </TR>
-<TR><TH>Field</TH>
-<TD CLASS="num">JH</TD>
-<TD CLASS="num">JL</TD>
-<TD CLASS="num">JAD</TD>
-<TD CLASS="num">JC</TD>
-<TD CLASS="num">ST</TD>
-<TD CLASS="num">KK</TD>
-<TD CLASS="num">MOP</TD>
-<TD CLASS="num">AN</TD>
-<TD CLASS="num">AC</TD>
-<TD CLASS="num">AOP</TD>
-<TD CLASS="num">ZO</TD>
-<TD CLASS="num">BI</TD>
-<TD CLASS="num">AI</TD>
+<TR><TH>ROMs</TH>
+	<TD CLASS="num" COLSPAN=4>CM6020</TD>
+	<TD CLASS="num" COLSPAN=4>CM6030</TD>
+	<TD CLASS="num" COLSPAN=4>CM6040</TD>
+	<TD CLASS="num" COLSPAN=4>CM6050</TD>
+	<TD CLASS="num" COLSPAN=4>CM6060</TD>
+	<TD CLASS="num" COLSPAN=4>CM6070</TD>
+	<TD CLASS="num" COLSPAN=4>CM6080</TD>
+	<TD CLASS="num" COLSPAN=4>CM6090</TD>
+	<TD CLASS="num" COLSPAN=4>CM6160</TD>
+	<TD CLASS="num" COLSPAN=4>CM6170</TD>
+	<TD CLASS="num" COLSPAN=4>CM6180</TD>
 </TR>
+<TR><TH>Fields</TH>
+	<TD CLASS="num" COLSPAN=3>AI</TD>
+	<TD CLASS="num" COLSPAN=3>BI</TD>
+	<TD CLASS="num" COLSPAN=3>ZO</TD>
+	<TD CLASS="num" COLSPAN=3>AOP</TD>
+	<TD CLASS="num" COLSPAN=1>AC</TD>
+	<TD CLASS="num" COLSPAN=1>AN</TD>
+	<TD CLASS="num" COLSPAN=4>MOP</TD>
+	<TD CLASS="num" COLSPAN=4>KK</TD>
+	<TD CLASS="num" COLSPAN=4>ST</TD>
+	<TD CLASS="num" COLSPAN=1>JC</TD>
+	<TD CLASS="num" COLSPAN=9>JAD</TD>
+	<TD CLASS="num" COLSPAN=3>JH</TD>
+	<TD CLASS="num" COLSPAN=3>JL</TD>
+	<TD CLASS="num" COLSPAN=2>-</TD>
+</TR>
+
 </TABLE></UL>
 
 <P>The instruction fields have the following effects on the hardware.
@@ -325,7 +371,8 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
 <TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
 <TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = SB</TD></TR>
-<TR><TD>1101</TD><TD>TM = 1</TD></TR>
+<TR><TD>1101</TD><TD>TM = 1<BR>
+			wr = BI&lt;0&gt;</TD></TR>
 <TR><TD>1110</TD><TD>TM = 0</TD></TR>
 <TR><TD>1111</TD><TD>XH = DH<BR>XL = DL<BR>XS = KK&lt;2:0&gt;</TD></TR>
 </TABLE></UL>
