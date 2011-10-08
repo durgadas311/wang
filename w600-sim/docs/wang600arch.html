@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.20 2011/10/07 23:35:10 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.21 2011/10/08 00:50:08 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -477,12 +477,10 @@ ALU Function</TH></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH>&nbsp;</TH>
-<TH>&nbsp;</TH>
+<TR><TH COLSPAN=2 ROWSPAN=2>&nbsp;</TH>
 <TH COLSPAN=4>DH</TH>
 <TH COLSPAN=4>DL</TH></TR>
-<TR><TH>&nbsp;</TH>
-<TH>&nbsp;</TH>
+<TR>
 <TD CLASS="num">3</TD>
 <TD CLASS="num">2</TD>
 <TD CLASS="num">1</TD>
@@ -522,9 +520,12 @@ ALU Function</TH></TR>
 
 <H4>Memory Usage</H4>
 
+All memory in the calculator is organized as 4-bit words.
+Memory addresses are not byte-addresses, but 4-bit-word addresses.
+
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
-<TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Prog Steps<BR>or purpose</TH></TR>
+<TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Purpose</TH></TR>
 <TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD CLASS="num">System State</TD></TR>
 <TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD CLASS="num">Display Reg</TD></TR>
 <TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD CLASS="num">Sci Notation Display</TD></TR>
@@ -534,13 +535,13 @@ ALU Function</TH></TR>
 <TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD CLASS="num">Temp</TD></TR>
 <TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
 <TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
-<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (247)</TD><TD CLASS="num">0000 - 0007</TD></TR>
-<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (246)</TD><TD CLASS="num">0008 - 0015</TD></TR>
-<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (245)</TD><TD CLASS="num">0016 - 0023</TD></TR>
+<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD CLASS="num">Steps 0000 - 0007</TD></TR>
+<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (245)</TD><TD CLASS="num">Steps 0008 - 0015</TD></TR>
+<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (244)</TD><TD CLASS="num">Steps 0016 - 0023</TD></TR>
 <TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD CLASS="num">1824 - 1831</TD></TR>
-<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD CLASS="num">1832 - 1839</TD></TR>
-<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD CLASS="num">1840 - 1847</TD></TR>
+<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD CLASS="num">Steps 1824 - 1831</TD></TR>
+<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD CLASS="num">Steps 1832 - 1839</TD></TR>
+<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD CLASS="num">Steps 1840 - 1847</TD></TR>
 <TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD CLASS="num">GP Reg, Left</TD></TR>
 <TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD CLASS="num">GP Reg, Right</TD></TR>
 <TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD CLASS="num">GP Reg</TD></TR>
@@ -1102,10 +1103,10 @@ and "0" into either "1 1" or "0 0",
 depending on the previous bit, to ensure that
 there is always a transition at the beginning of each bit.
 The resulting stream is fed to the record head and produces
-alternating segments of strong and weak (no) magenetic field on the tape.
+alternating segments of positive and negative magenetic fields on the tape.
 
-<P>During read, the changes between strong and weak magnetic fields show
-up a "blips" in the signal from the tape read head. These blips are fed
+<P>During read, the changes between positive and negative magnetic fields show
+up as "blips" in the signal from the tape read head. These blips are fed
 into a "one-shot" flip-flop whose timing is set to about 97 cycles. This means
 that for 97 cycles after a transition there will be a "1" signal, and it will
 return to "0" after those 97 cycles.
