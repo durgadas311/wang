@@ -1,8 +1,9 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.39 2011/06/01 21:47:55 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.40 2011/10/08 15:11:12 drmiller Exp $"
 
 #include <unistd.h>
+#include <time.h>
 
 #include "w600_sys.h"
 #include "w600_ucode.h"
@@ -323,8 +324,12 @@ if (sys->cpu.pc == 0x252) {
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
 		if (sys->cpu.next == 0x27b) { // alpha-stop in running program...
+			static struct timespec alpha_stop = {
+				0, 500000000L
+			};
 			// todo: should not sleep if key pressed - e.g. PRIME
-			sleep(1);
+			nanosleep(&alpha_stop, NULL);
+			// sleep(1);
 		}
 		sys->display(sys, 0);
 	}
