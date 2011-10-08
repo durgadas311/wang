@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.28 2011/10/08 21:53:29 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.29 2011/10/08 22:02:27 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -48,7 +48,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">TW</TD><TD CLASS="num">1</TD><TD CLASS="num">WDT</TD><TD CLASS="num">W/O</TD><TD>Tape Write (record) Data</TD></TR>
 <TR><TD CLASS="num">TR</TD><TD CLASS="num">1</TD><TD CLASS="num">MHG/MHO</TD><TD CLASS="num">R/O</TD><TD>Tape Read Data (one-shot)</TD></TR>
 <TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Print Hammers, shift register</TD></TR>
-<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>0-3</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
+<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>3-0</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
 <TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Index</TD></TR>
 <TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">W/O</TD><TD>Print Paper Feed (one-shot)</TD></TR>
 <TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD CLASS="num">TKWS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Strobe/Ack</TD></TR>
@@ -194,6 +194,9 @@ value from MR (the new value, loaded from memory,
 is not available until the next instruction).
 <LI>Conditional parts of the next address will use <U>old</U> MS and C values
 (MS', C'), while using <U>new</U> I, Z, KP, and PE values.
+<LI>Instructions that access DH or DL and also test KP (JL == 110) will
+use the <U>old</U> value of DH or DL, the input data (if KP == 1)
+is not available until the next instruction.
 </UL>
 
 <P>In summary, interpreting (and writing) microcode instructions requires
@@ -612,9 +615,9 @@ For example, plotting commands expect<BR>
 The display is a "multiplexed" style, regardless of whether it is NIXIE
 tubes or 7-segment.  This means that the display only appears to be
 static, it is actually continuously flickering, but at a higher rate
-than the human eye can discern. This display is only lit as long as
+than the human eye can discern. The display is only lit as long as
 the calculator is actively refreshing. If the calculator is busy doing
-something else, the display will blank.
+something else, the display will go blank (from lack of refresh).
 
 <P>The microcode refreshes the display by sequentially loading each digit from memory,
 and pausing for a very long time. The display is fed directly from the output
