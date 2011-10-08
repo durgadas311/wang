@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.23 2011/10/08 08:24:15 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.24 2011/10/08 14:52:41 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -17,56 +17,42 @@ td.num { text-align: center; }
 <P>In the above diagram, fine lines represent single-bit (and serial) data paths,
 while thicker lines represent multiple bits of data in parallel (typically 4).
 
-<P>The system clock starts with a 4MHz crystal that feeds a flip-flop,
-producing a 2MHz signal, and a 5-bit Johnson Counter,
-producing a series of "phase" clocks which repeat at 400KHz.
-One microcode instruction is entirely executed within the
-Johnson Counter cycle.
-This establishes the microcode instruction time (a "cycle") of 2.5uS, or
-400,000 instructions per second.
-
-<P>The phase-clock signals, in combination with the 4MHz and 2MHz clocks,
-orchestrate the operation of the calculator.
-Early pulses are used to prepare hardware and save ("freeze") data,
-middle pulses are used to serially transfer data around the calculator
-registers, and late pulses are used to finish-up and finalize operations
-(such as accessing RAM or loading the next microcode instruction).
+<H3>Hardware Registers</H3>
 
 <P>The registers in the block diagram are explained here:
 
 <P><UL><TABLE BORDER>
-<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Meaning/Use</TH></TR>
-<TR><TD CLASS="num">MS</TD><TD CLASS="num">4</TD><TD>Machine State *</TD></TR>
-<TR><TD CLASS="num">AH</TD><TD CLASS="num">4</TD><TD>Memory Address, Hi *</TD></TR>
-<TR><TD CLASS="num">AM</TD><TD CLASS="num">4</TD><TD>Memory Address, Mid *</TD></TR>
-<TR><TD CLASS="num">AL</TD><TD CLASS="num">4</TD><TD>Memory Address, Lo *</TD></TR>
-<TR><TD CLASS="num">MR</TD><TD CLASS="num">4</TD><TD>Data to/from RAM *</TD></TR>
-<TR><TD CLASS="num">XR</TD><TD CLASS="num">4</TD><TD>Data from ROM</TD></TR>
-<TR><TD CLASS="num">DH</TD><TD CLASS="num">4</TD><TD>Input Data, Hi *</TD></TR>
-<TR><TD CLASS="num">DL</TD><TD CLASS="num">4</TD><TD>Input Data, Lo *</TD></TR>
-<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD>Expansion Output, Hi</TD></TR>
-<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD>Expansion Output, Lo</TD></TR>
-<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD>Expansion Select</TD></TR>
-<TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD>Internal Carry Flag</TD></TR>
-<TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD>Carry Flag</TD></TR>
-<TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD>Zero Flag</TD></TR>
-<TR><TD CLASS="num">MS'</TD><TD CLASS="num">4</TD><TD>Saved MS</TD></TR>
-<TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD>Saved C</TD></TR>
-<TR><TD CLASS="num">PE</TD><TD CLASS="num">1</TD><TD>Prog Error</TD></TR>
-<TR><TD CLASS="num">ME</TD><TD CLASS="num">1</TD><TD>Mach Error</TD></TR>
-<TR><TD CLASS="num">KP</TD><TD CLASS="num">1</TD><TD>Key Pressed (input ready)</TD></TR>
-<TR><TD CLASS="num">TM</TD><TD CLASS="num">1</TD><TD>Tape Motor</TD></TR>
-<TR><TD CLASS="num">TW</TD><TD CLASS="num">1</TD><TD>Tape Write (record) Data</TD></TR>
-<TR><TD CLASS="num">TR</TD><TD CLASS="num">1</TD><TD>Tape Read Data (one-shot)</TD></TR>
-<TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD>Print Hammers, shift register</TD></TR>
-<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD>Print Drum Row</TD></TR>
-<TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD>Print Drum Index</TD></TR>
-<TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD>CN-24 Strobe/Ack</TD></TR>
-<TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD>Current Instruction Address</TD></TR>
-<TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD>Top of Stack</TD></TR>
-<TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD>2nd on Stack</TD></TR>
-<TR><TD CLASS="num">INSTRUCTION</TD><TD CLASS="num">42</TD><TD>Current Instruction latch</TD></TR>
-<TR><TD COLSPAN=3>* Also used as general purpose registers, when non-conflicting</TD></TR>
+<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Schem<BR>Name</TH><TH>Meaning/Use</TH></TR>
+<TR><TD CLASS="num">MS</TD><TD CLASS="num">4</TD><TD CLASS="num">S</TD><TD>Machine State *</TD></TR>
+<TR><TD CLASS="num">AH</TD><TD CLASS="num">4</TD><TD CLASS="num">T</TD><TD>Memory Address, Hi *</TD></TR>
+<TR><TD CLASS="num">AM</TD><TD CLASS="num">4</TD><TD CLASS="num">U</TD><TD>Memory Address, Mid *</TD></TR>
+<TR><TD CLASS="num">AL</TD><TD CLASS="num">4</TD><TD CLASS="num">V</TD><TD>Memory Address, Lo *</TD></TR>
+<TR><TD CLASS="num">MR</TD><TD CLASS="num">4</TD><TD CLASS="num">CA</TD><TD>Data to/from RAM *</TD></TR>
+<TR><TD CLASS="num">XR</TD><TD CLASS="num">4</TD><TD CLASS="num">CB</TD><TD>Data from ROM</TD></TR>
+<TR><TD CLASS="num">DH</TD><TD CLASS="num">4</TD><TD CLASS="num">KA</TD><TD>Input Data, Hi *</TD></TR>
+<TR><TD CLASS="num">DL</TD><TD CLASS="num">4</TD><TD CLASS="num">KB</TD><TD>Input Data, Lo *</TD></TR>
+<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Expansion Output, Hi</TD></TR>
+<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Expansion Output, Lo</TD></TR>
+<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD CLASS="num">n/a</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD CLASS="num">CC</TD><TD>Internal Carry Flag</TD></TR>
+<TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD CLASS="num">SC</TD><TD>Carry Flag</TD></TR>
+<TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD CLASS="num">Z<SUB>o</SUB></TD><TD>Zero Flag</TD></TR>
+<TR><TD CLASS="num">MS'</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Saved MS</TD></TR>
+<TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved C</TD></TR>
+<TR><TD CLASS="num">PE</TD><TD CLASS="num">1</TD><TD CLASS="num">OV</TD><TD>Prog Error</TD></TR>
+<TR><TD CLASS="num">ME</TD><TD CLASS="num">1</TD><TD CLASS="num">ERR</TD><TD>Mach Error</TD></TR>
+<TR><TD CLASS="num">KP</TD><TD CLASS="num">1</TD><TD CLASS="num">KBD</TD><TD>Key Pressed (input ready)</TD></TR>
+<TR><TD CLASS="num">TM</TD><TD CLASS="num">1</TD><TD CLASS="num">TMR</TD><TD>Tape Motor</TD></TR>
+<TR><TD CLASS="num">TW</TD><TD CLASS="num">1</TD><TD CLASS="num">WDT</TD><TD>Tape Write (record) Data</TD></TR>
+<TR><TD CLASS="num">TR</TD><TD CLASS="num">1</TD><TD CLASS="num">MHG/MHO</TD><TD>Tape Read Data (one-shot)</TD></TR>
+<TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD CLASS="num">n/a</TD><TD>Print Hammers, shift register</TD></TR>
+<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC</TD><TD>Print Drum Row</TD></TR>
+<TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD>Print Drum Index</TD></TR>
+<TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD CLASS="num">TKWS</TD><TD>CN-24 Strobe/Ack</TD></TR>
+<TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">XX</TD><TD>Current Instruction Address</TD></TR>
+<TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD>Top of Stack</TD></TR>
+<TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD>2nd on Stack</TD></TR>
+<TR><TD COLSPAN=4>* Also used as general purpose registers, when non-conflicting</TD></TR>
 </TABLE></UL>
 
 <H3>Microcode Execution Sequence</H3>
@@ -129,8 +115,10 @@ by that key.
 </TR>
 </TABLE></UL>
 
-<P>In addition, executing the microcode instruction at 008 causes the KK
-field to be filled with the memory size indicator, as follows:
+<P>In addition, the microcode logic allows for hard-wired overriding
+of certain instructions. The only instruction that is overridden is at 008,
+which is replaced with a "MR = KK; return" instruction where KK is
+wired to indicate the RAM size, as follows:
 
 <UL><TABLE BORDER>
 <TR><TH>KK</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
@@ -141,7 +129,26 @@ field to be filled with the memory size indicator, as follows:
 
 <H3>Microcode Instruction Timing</H3>
 
-The instruction cycle is divided into three main phases: Early Latching,
+<P>The system clock starts with a 4MHz crystal that feeds a flip-flop
+(producing a 2MHz signal), and a 5-bit Johnson Counter
+producing a series of "phase" clocks which repeat at 400KHz.
+One microcode instruction is entirely executed within the
+Johnson Counter cycle.
+This establishes the microcode instruction time (a "cycle") of 2.5uS, or
+400,000 instructions per second.
+
+<P>The phase-clock signals, in combination with the 4MHz and 2MHz clocks,
+orchestrate the operation of the calculator.
+Early pulses are used to prepare hardware and save ("freeze") data,
+middle pulses are used to serially transfer data around the calculator
+registers, and late pulses are used to finish-up and finalize operations
+(such as accessing RAM or loading the next microcode instruction).
+
+Here are some key timing signals:
+
+<P><UL><IMG SRC="wang600timing.gif"></UL>
+
+<P>The instruction cycle is divided into three main phases: Early Latching,
 Serial Data Transfer, and Late Latching. The following activities are performed
 in/about the various phases.
 
@@ -154,7 +161,8 @@ in/about the various phases.
 	address decoders</TD></TR>
 <TR><TD ROWSPAN=3>Serial<BR>Data<BR>Transfer</TD>
 	<TD>Data shifted over A, B, and Z buses,<BR>
-	to/from selected registers *</TD></TR>
+	to/from selected registers<BR>
+	and through ALU *</TD></TR>
 <TR>	<TD>"return" pop stack *</TD></TR>
 <TR>	<TD>"call" push stack *</TD></TR>
 <TR><TD ROWSPAN=5>Late<BR>Latching</TD>
@@ -164,7 +172,7 @@ in/about the various phases.
 <TR>	<TD>CURRENT = next</TD></TR>
 <TR>	<TD>DH,DL = keyboard/peripheral *</TD></TR>
 <TR><TD COLSPAN=2>* Activities are dependent on<BR>
-microcode ops of instruction</TD></TR>
+selected microcode ops of instruction</TD></TR>
 </TABLE></UL>
 
 <P>Some notes on timing:
@@ -172,13 +180,14 @@ microcode ops of instruction</TD></TR>
 <UL>
 <LI>Instructions that
 modify AH, AM, or AL but also access memory will use the <U>old</U>
-value for AH, AM, or AL.
+value for AH, AM, or AL for the memory address.
 <LI>Instructions that
-modify MR and write memory will use the <U>new</U> value for MR.
-<LI>Instructions that access MR and do memory read will get the <U>old</U>
-value from MR.
+modify MR and write memory will store the <U>new</U> value for MR in memory.
+<LI>Instructions that access MR and also do memory read will get the <U>old</U>
+value from MR (the new value, loaded from memory,
+is not available until the next instruction).
 <LI>Conditional parts of the next address will use <U>old</U> MS and C values
-(MS', C'), while using <U>new</U> I and Z (also KP, PE) values.
+(MS', C'), while using <U>new</U> I, Z, KP, and PE values.
 </UL>
 
 <P>In summary, interpreting (and writing) microcode instructions requires
@@ -296,7 +305,6 @@ LSB conditional part of Next Address</TH></TR>
 	CURRENT&lt;10:1&gt; = STACK1<BR>
 	STACK1 = STACK2</TD></TR>
 <TR><TD COLSPAN=2>* condition is also reset</TD></TR>
-<TR><TD COLSPAN=2>MS' and C' are latched from<BR>MS and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -311,7 +319,6 @@ MSB conditional part of Next Address</TH></TR>
 <TR><TD>101</TD><TD>CURRENT&lt;1&gt; = n.c.</TD></TR>
 <TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
 <TR><TD>111</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
-<TR><TD COLSPAN=2>MS' and C' are latched from<BR>MS and C early in cycle</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -368,7 +375,7 @@ Memory/Peripheral Operations</TH></TR>
 <TR><TD>0111</TD><TD>(PH <<= 1) |= DL&lt;0&gt;<BR>
 Hammers fire every 20th bit</TD></TR>
 <TR><TD>1000</TD><TD>Printer Paper Feed</TD></TR>
-<TR><TD>1001</TD><TD>?</TD></TR>
+<TR><TD>1001</TD><TD>undefined</TD></TR>
 <TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
 <TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
 <TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = SB</TD></TR>
@@ -527,38 +534,38 @@ Memory addresses are not byte-addresses, but 4-bit-word addresses.
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
 <TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Purpose</TH></TR>
-<TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD CLASS="num">System State</TD></TR>
-<TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD CLASS="num">Display Reg</TD></TR>
-<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD CLASS="num">Sci Notation Display</TD></TR>
-<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD CLASS="num">Floating Point Display</TD></TR>
-<TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD CLASS="num">Learn Mode Display</TD></TR>
-<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD CLASS="num">Temp</TD></TR>
-<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD CLASS="num">Temp</TD></TR>
-<TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
-<TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD CLASS="num">Prog Subr Stack</TD></TR>
-<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD CLASS="num">Steps 0000 - 0007</TD></TR>
-<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (245)</TD><TD CLASS="num">Steps 0008 - 0015</TD></TR>
-<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (244)</TD><TD CLASS="num">Steps 0016 - 0023</TD></TR>
+<TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD>System State</TD></TR>
+<TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD>Display Reg</TD></TR>
+<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD>Sci Notation Display</TD></TR>
+<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD>Floating Point Display</TD></TR>
+<TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD>Learn Mode Display</TD></TR>
+<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD>Temp</TD></TR>
+<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD>Temp</TD></TR>
+<TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD>Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD>Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD>Steps 0000 - 0007</TD></TR>
+<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (245)</TD><TD>Steps 0008 - 0015</TD></TR>
+<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (244)</TD><TD>Steps 0016 - 0023</TD></TR>
 <TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD CLASS="num">Steps 1824 - 1831</TD></TR>
-<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD CLASS="num">Steps 1832 - 1839</TD></TR>
-<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD CLASS="num">Steps 1840 - 1847</TD></TR>
-<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD CLASS="num">GP Reg, Left</TD></TR>
-<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD CLASS="num">GP Reg, Right</TD></TR>
-<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12 (12)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11 (11)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10 (10)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09 (9)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08 (8)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07 (7)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06 (6)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05 (5)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04 (4)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03 (3)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02 (2)</TD><TD CLASS="num">GP Reg</TD></TR>
-<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01 (1)</TD><TD CLASS="num">GP Reg *</TD></TR>
-<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00 (0)</TD><TD CLASS="num">GP Reg *</TD></TR>
+<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD>Steps 1824 - 1831</TD></TR>
+<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD>Steps 1832 - 1839</TD></TR>
+<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD>Steps 1840 - 1847</TD></TR>
+<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD>GP Reg, Left</TD></TR>
+<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD>GP Reg, Right</TD></TR>
+<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12 (12)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11 (11)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10 (10)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09 (9)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08 (8)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07 (7)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06 (6)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05 (5)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04 (4)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03 (3)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02 (2)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01 (1)</TD><TD>GP Reg *</TD></TR>
+<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00 (0)</TD><TD>GP Reg *</TD></TR>
 <TR><TD COLSPAN=3>* Certain commands depend on values in registers 0 and 1.<BR>
 For example, plotting commands expect<BR>
 0 to contain the Y delta, and 1 the X delta</TD></TR>
