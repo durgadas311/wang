@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.24 2011/10/08 14:52:41 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.25 2011/10/08 15:18:58 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -322,13 +322,14 @@ MSB conditional part of Next Address</TH></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=2>JC</TH></TR>
+<TR><TH COLSPAN=2>JC<BR>
+Jump/Call<BR>
+(no-op if JL == 111)</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>0</TD><TD>Jump (normal) *<BR>CURRENT&lt;10:2&gt; = JAD</TD></TR>
-<TR><TD>1</TD><TD>Call Subroutine *<BR>
+<TR><TD>0</TD><TD>Jump (normal)<BR>CURRENT&lt;10:2&gt; = JAD</TD></TR>
+<TR><TD>1</TD><TD>Call Subroutine<BR>
 	STACK2 = STACK1<BR>STACK = CURRENT<BR>
 	CURRENT&lt;10:2&gt; = JAD</TD></TR>
-<TR><TD COLSPAN=2>* no-op if JL == 111</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -390,36 +391,36 @@ Hammers fire every 20th bit</TD></TR>
 <TR><TH COLSPAN=3>AN,AOP<BR>
 ALU Function</TH></TR>
 <TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
-<TR><TD>0000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
-<TR><TD>0001</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-<TR><TD>0010</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
-<TR><TD>0011</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + C</TD></TR>
-<TR><TD>0100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-<TR><TD>0101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
-<TR><TD>0110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
-<TR><TD>0111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
-<TR><TD>1000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
-<TR><TD>1001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
-<TR><TD>1010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
-<TR><TD>1011</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - C</TD></TR>
-<TR><TD>1100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
-<TR><TD>1101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
-<TR><TD>1110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-<TR><TD>1111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
+<TR><TD>0,000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0,001</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
+<TR><TD>0,011</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + C</TD></TR>
+<TR><TD>0,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+<TR><TD>0,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
+<TR><TD>0,110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
+<TR><TD>0,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
+<TR><TD>1,000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1,001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
+<TR><TD>1,011</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - C</TD></TR>
+<TR><TD>1,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+<TR><TD>1,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
+<TR><TD>1,110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
+<TR><TD>1,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>AC,AI<BR>Selects source for A bus</TH></TR>
 <TR><TH>op</TH><TH>affect</TH></TR>
-<TR><TD>0XXX</TD><TD>Abus = 0000</TD></TR>
-<TR><TD>1000</TD><TD>Abus = MS</TD></TR>
-<TR><TD>1001</TD><TD>Abus = AH</TD></TR>
-<TR><TD>1010</TD><TD>Abus = AM</TD></TR>
-<TR><TD>1011</TD><TD>Abus = AL</TD></TR>
-<TR><TD>1100</TD><TD>Abus = DH</TD></TR>
-<TR><TD>1101</TD><TD>Abus = DL</TD></TR>
-<TR><TD>1110</TD><TD>Abus = MR</TD></TR>
-<TR><TD>1111</TD><TD>Abus = XR</TD></TR>
+<TR><TD>0,XXX</TD><TD>Abus = 0000</TD></TR>
+<TR><TD>1,000</TD><TD>Abus = MS</TD></TR>
+<TR><TD>1,001</TD><TD>Abus = AH</TD></TR>
+<TR><TD>1,010</TD><TD>Abus = AM</TD></TR>
+<TR><TD>1,011</TD><TD>Abus = AL</TD></TR>
+<TR><TD>1,100</TD><TD>Abus = DH</TD></TR>
+<TR><TD>1,101</TD><TD>Abus = DL</TD></TR>
+<TR><TD>1,110</TD><TD>Abus = MR</TD></TR>
+<TR><TD>1,111</TD><TD>Abus = XR</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
@@ -453,30 +454,30 @@ ALU Function</TH></TR>
 <H4>Bit Assignments for inputs</H4>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=5>mode0</TH></TR>
-<TR><TH>Bits</TH>
+<TR><TH COLSPAN=4>mode0</TH></TR>
+<TR>
 <TD CLASS="num">3</TD>
 <TD CLASS="num">2</TD>
 <TD CLASS="num">1</TD>
 <TD CLASS="num">0</TD>
 </TR>
-<TR><TH>Input</TH>
+<TR>
 <TD CLASS="num">STEP</TD>
-<TD CLASS="num">Learn<BR>Learn and Print</TD>
-<TD CLASS="num">List<BR>Learn and Print</TD>
+<TD CLASS="num">Learn/<BR>Learn and Print</TD>
+<TD CLASS="num">List/<BR>Learn and Print</TD>
 <TD CLASS="num">Fl (!Sc)</TD>
 </TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=5>mode1</TH></TR>
-<TR><TH>Bits</TH>
+<TR><TH COLSPAN=4>mode1</TH></TR>
+<TR>
 <TD CLASS="num">3</TD>
 <TD CLASS="num">2</TD>
 <TD CLASS="num">1</TD>
 <TD CLASS="num">0</TD>
 </TR>
-<TR><TH>Input</TH>
+<TR>
 <TD CLASS="num">N/A</TD>
 <TD CLASS="num">N/A</TD>
 <TD CLASS="num">Printer OFF</TD>
