@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.26 2011/10/08 21:36:40 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.27 2011/10/08 21:49:55 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -50,7 +50,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Print Hammers, shift register</TD></TR>
 <TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>0-3</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
 <TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Index</TD></TR>
-<TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">W/O</TD><TD>Print Paper Feed</TD></TR>
+<TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">W/O</TD><TD>Print Paper Feed (one-shot)</TD></TR>
 <TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD CLASS="num">TKWS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Strobe/Ack</TD></TR>
 <TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
 <TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>Top of Stack</TD></TR>
@@ -201,7 +201,7 @@ careful consideration of these timing anomalies.
 
 <P><B>Editors Note:</B> While the schematics seem to imply that input data
 is forced into DH and DL on every instruction while KP == 1,
-proper operation seems to dictate the DH and DL are latch only
+proper operation seems to dictate the DH and DL are latched only
 on instructions that use KP in a conditional address (JL == 110).
 Also, unlike the schematics, KP is reset when JL == 110 and not
 exclusively by ST == 1001 (RESET).
@@ -306,13 +306,13 @@ as follows (layout for Solid State ROM).
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>JAD<BR>
 	Fixed part of Next Address</TH></TR>
-	<TR><TD>XXXXXXXXX</TD><TD>Next Address, bits 10:2</TD></TR>
+	<TR><TD>XXXXXXXXX</TD><TD>Next Address&lt;10:2&gt;</TD></TR>
 	</TABLE>
 </TD>
 <TD ROWSPAN=2 VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>JH<BR>
-	MSB conditional part of Next Address</TH></TR>
+	MSB conditional part of<BR>Next Address</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
 	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
@@ -327,7 +327,7 @@ as follows (layout for Solid State ROM).
 <TD ROWSPAN=2 VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>JL<BR>
-	LSB conditional part of Next Address</TH></TR>
+	LSB conditional part of<BR>Next Address</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
 	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
@@ -413,7 +413,7 @@ as follows (layout for Solid State ROM).
 	<TABLE BORDER>
 	<TR><TH COLSPAN=3>AN,AOP<BR>
 	ALU Function</TH></TR>
-	<TR><TH>op</TH><TH>flags updated</TH><TH>affect</TH></TR>
+	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
 	<TR><TD>0,000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
 	<TR><TD>0,001</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 	<TR><TD>0,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
@@ -421,7 +421,6 @@ as follows (layout for Solid State ROM).
 	<TR><TD>0,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 	<TR><TD>0,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 	<TR><TD>0,110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
-	<TR><TD>0,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
 	<TR><TD>1,000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
 	<TR><TD>1,001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 	<TR><TD>1,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
@@ -429,7 +428,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 	<TR><TD>1,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 	<TR><TD>1,110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>1,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
+	<TR><TD>X,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
 	</TABLE>
 </TD></TR>
 </TABLE></UL>
@@ -437,7 +436,7 @@ as follows (layout for Solid State ROM).
 <P><UL><TABLE>
 <TR><TD VALIGN="TOP">
 	<TABLE BORDER>
-	<TR><TH COLSPAN=2>AC,AI<BR>Selects source for A bus</TH></TR>
+	<TR><TH COLSPAN=2>AC,AI<BR>Source for A bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>0,XXX</TD><TD>Abus = 0000</TD></TR>
 	<TR><TD>1,000</TD><TD>Abus = MS</TD></TR>
@@ -452,7 +451,7 @@ as follows (layout for Solid State ROM).
 </TD>
 <TD VALIGN="TOP">
 	<TABLE BORDER>
-	<TR><TH COLSPAN=2>BI<BR>Selects source for B bus</TH></TR>
+	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
 	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
@@ -467,7 +466,7 @@ as follows (layout for Solid State ROM).
 </TD>
 <TD VALIGN="TOP">
 	<TABLE BORDER>
-	<TR><TH COLSPAN=2>ZO<BR>Select dest. for Z bus</TH></TR>
+	<TR><TH COLSPAN=2>ZO<BR>Dest. for Z bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>MS = Zbus *</TD></TR>
 	<TR><TD>001</TD><TD>AH = Zbus</TD></TR>
@@ -512,8 +511,8 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">0</TD>
 	</TR>
 	<TR>
-	<TD CLASS="num">N/A</TD>
-	<TD CLASS="num">N/A</TD>
+	<TD CLASS="num">n/a</TD>
+	<TD CLASS="num">n/a</TD>
 	<TD CLASS="num">Printer OFF</TD>
 	<TD CLASS="num">Rad (!Deg)</TD>
 	</TR>
@@ -536,26 +535,26 @@ as follows (layout for Solid State ROM).
 <TD CLASS="num">0</TD>
 </TR>
 <TR><TH>MOP == 0111</TH><TH>Out</TH>
-	<TD CLASS="num" COLSPAN=4>N/A</TD>
-	<TD CLASS="num" COLSPAN=3>N/A</TD>
-	<TD CLASS="num">Print Hammer bit</TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num" COLSPAN=3>n/a</TD>
+	<TD CLASS="num">PH<0></TD>
 </TR>
 <TR><TH>MOP == 1010</TH><TH>In</TH>
-	<TD CLASS="num" COLSPAN=4>N/A</TD>
-	<TD CLASS="num" COLSPAN=3>N/A</TD>
-	<TD CLASS="num">Tape Data (TR)</TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num" COLSPAN=3>n/a</TD>
+	<TD CLASS="num">TR</TD>
 </TR>
 <TR><TH>MOP == 1011</TH><TH>Out</TH>
-	<TD CLASS="num" COLSPAN=4>N/A</TD>
-	<TD CLASS="num" COLSPAN=3>N/A</TD>
-	<TD CLASS="num">Tape Data (TW)</TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num" COLSPAN=3>n/a</TD>
+	<TD CLASS="num">TW</TD>
 </TR>
 <TR><TH>MOP == 1100</TH><TH>In</TH>
-	<TD CLASS="num" COLSPAN=4>Printer Drum<BR>Position</TD>
-	<TD CLASS="num">Printer Index</TD>
-	<TD CLASS="num">N/A</TD>
-	<TD CLASS="num">CN-24 !Busy</TD>
-	<TD CLASS="num">N/A</TD>
+	<TD CLASS="num" COLSPAN=4>PD</TD>
+	<TD CLASS="num">PI</TD>
+	<TD CLASS="num">n/a</TD>
+	<TD CLASS="num">SB</TD>
+	<TD CLASS="num">n/a</TD>
 </TR>
 <TR><TH>JL == 110 (?)</TH><TH>In</TH>
 	<TD CLASS="num" COLSPAN=4>Key/Periph Hi</TD>
