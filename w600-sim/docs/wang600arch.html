@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.30 2011/10/09 01:28:58 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.31 2011/10/09 11:32:36 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -431,7 +431,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
 	<TR><TD>1,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
 	<TR><TD>1,110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>X,111</TD><TD>&nbsp;</TD><TD>Zbus = 0000</TD></TR>
+	<TR><TD>X,111</TD><TD>Z</TD><TD>Zbus = 0000</TD></TR>
 	</TABLE>
 </TD></TR>
 </TABLE></UL>
@@ -578,8 +578,8 @@ Memory addresses are not byte-addresses, but 4-bit-word addresses.
 <TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD>Sci Notation Display</TD></TR>
 <TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD>Floating Point Display</TD></TR>
 <TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD>Learn Mode Display</TD></TR>
-<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD>Temp</TD></TR>
-<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD>Temp</TD></TR>
+<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD>Temp Register</TD></TR>
+<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD>Temp Register</TD></TR>
 <TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD>Prog Subr Stack</TD></TR>
 <TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD>Prog Subr Stack</TD></TR>
 <TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD>Steps 0000 - 0007</TD></TR>
@@ -608,6 +608,70 @@ Memory addresses are not byte-addresses, but 4-bit-word addresses.
 <TR><TD COLSPAN=3>* Certain commands depend on values in registers 0 and 1.<BR>
 For example, plotting commands expect<BR>
 0 to contain the Y delta, and 1 the X delta</TD></TR>
+</TABLE></UL>
+
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=6>System State Memory Usage</TH></TR>
+<TR><TH>RAM<BR>Address</TH><TH>AH,AM,AL</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR><TD>0xfff</TD><TD>15,15,15</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Keyboard<BR>Trace</TD></TR>
+<TR><TD>0xffe</TD><TD>15,15,14</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Program<BR>Trace</TD></TR>
+<TR><TD>0xffc</TD><TD>15,15,12</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xffb</TD><TD>15,15,11</TD><TD COLSPAN=4>Prog Subr Stack Level</TD></TR>
+<TR><TD>0xffa</TD><TD>15,15,10</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xff9</TD><TD>15,15,9</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xff8</TD><TD>15,15,8</TD><TD COLSPAN=4>DL Keyboard code</TD></TR>
+<TR><TD>0xff7</TD><TD>15,15,7</TD><TD COLSPAN=4>DH Keyboard code</TD></TR>
+<TR><TD>0xff6</TD><TD>15,15,6</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xff5</TD><TD>15,15,5</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xff4</TD><TD>15,15,4</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Running</TD></TR>
+<TR><TD>0xff3</TD><TD>15,15,3</TD><TD>?</TD><TD>ROM</TD><TD>?</TD><TD>Run</TD></TR>
+<TR><TD>0xff2</TD><TD>15,15,2</TD><TD COLSPAN=4>P.C. Mem Addr, L</TD></TR>
+<TR><TD>0xff1</TD><TD>15,15,1</TD><TD COLSPAN=4>P.C. Mem Addr, M</TD></TR>
+<TR><TD>0xff0</TD><TD>15,15,0</TD><TD COLSPAN=4>P.C. Mem Addr, H</TD></TR>
+<TR><TD COLSPAN=6>"Run" indicates Go vs. Stop status,<BR>
+"Running" indicates that the program state is active.
+</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=4>Prog Subr Stack</TH></TR>
+<TR><TH>RAM<BR>Address</TH><TH>AH,AM,AL</TH><TH COLSPAN=2>Use</TH></TR>
+<TR><TD>0xf8f</TD><TD>15,8,15</TD><TD ROWSPAN=4 COLSPAN=2>Level 3</TD></TR>
+<TR><TD>0xf8e</TD><TD>15,8,14</TD></TR>
+<TR><TD>0xf8d</TD><TD>15,8,13</TD></TR>
+<TR><TD>0xf8c</TD><TD>15,8,12</TD></TR>
+<TR><TD>0xf8b</TD><TD>15,8,11</TD><TD ROWSPAN=4 COLSPAN=2>Level 2</TD></TR>
+<TR><TD>0xf8a</TD><TD>15,8,10</TD></TR>
+<TR><TD>0xf89</TD><TD>15,8,9</TD></TR>
+<TR><TD>0xf88</TD><TD>15,8,8</TD></TR>
+<TR><TD>0xf87</TD><TD>15,8,7</TD><TD ROWSPAN=4 COLSPAN=2>Level 1</TD></TR>
+<TR><TD>0xf86</TD><TD>15,8,6</TD></TR>
+<TR><TD>0xf85</TD><TD>15,8,5</TD></TR>
+<TR><TD>0xf84</TD><TD>15,8,4</TD></TR>
+<TR><TD>0xf83</TD><TD>15,8,3</TD><TD ROWSPAN=4>Level 0</TD><TD>P.C. Mem Addr, L</TD></TR>
+<TR><TD>0xf82</TD><TD>15,8,2</TD><TD>P.C. Mem Addr, M</TD></TR>
+<TR><TD>0xf81</TD><TD>15,8,1</TD><TD>P.C. Mem Addr, H</TD></TR>
+<TR><TD>0xf80</TD><TD>15,8,0</TD><TD>Mode (15,15,3)</TD></TR>
+<TR><TD>0xf7f</TD><TD>15,7,15</TD><TD ROWSPAN=4 COLSPAN=2>Level 7</TD></TR>
+<TR><TD>0xf7e</TD><TD>15,7,14</TD></TR>
+<TR><TD>0xf7d</TD><TD>15,7,13</TD></TR>
+<TR><TD>0xf7c</TD><TD>15,7,12</TD></TR>
+<TR><TD>0xf7b</TD><TD>15,7,11</TD><TD ROWSPAN=4 COLSPAN=2>Level 6</TD></TR>
+<TR><TD>0xf7a</TD><TD>15,7,10</TD></TR>
+<TR><TD>0xf79</TD><TD>15,7,9</TD></TR>
+<TR><TD>0xf78</TD><TD>15,7,8</TD></TR>
+<TR><TD>0xf77</TD><TD>15,7,7</TD><TD ROWSPAN=4 COLSPAN=2>Level 5</TD></TR>
+<TR><TD>0xf76</TD><TD>15,7,6</TD></TR>
+<TR><TD>0xf75</TD><TD>15,7,5</TD></TR>
+<TR><TD>0xf74</TD><TD>15,7,4</TD></TR>
+<TR><TD>0xf73</TD><TD>15,7,3</TD><TD ROWSPAN=4 COLSPAN=2>Level 4</TD></TR>
+<TR><TD>0xf72</TD><TD>15,7,2</TD></TR>
+<TR><TD>0xf71</TD><TD>15,7,1</TD></TR>
+<TR><TD>0xf70</TD><TD>15,7,0</TD></TR>
+<TR><TD COLSPAN=4>Note, P.C. Mem Addr points to the <U>calling</U> step,<BR>
+not the step to return to.</TD></TR>
 </TABLE></UL>
 
 <H3>Display</H3>
