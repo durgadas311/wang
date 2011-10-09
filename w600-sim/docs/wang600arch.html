@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.29 2011/10/08 22:02:27 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.30 2011/10/09 01:28:58 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -50,7 +50,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Print Hammers, shift register</TD></TR>
 <TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>3-0</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
 <TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Index</TD></TR>
-<TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">W/O</TD><TD>Print Paper Feed (one-shot)</TD></TR>
+<TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">n/a</TD><TD>Print Paper Feed (one-shot)</TD></TR>
 <TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD CLASS="num">TKWS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Strobe/Ack</TD></TR>
 <TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
 <TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>Top of Stack</TD></TR>
@@ -202,11 +202,11 @@ is not available until the next instruction.
 <P>In summary, interpreting (and writing) microcode instructions requires
 careful consideration of these timing anomalies.
 
-<P><B>Editors Note:</B> While the schematics seem to imply that input data
+<P><B>Editor's Note:</B> While the schematics seem to imply that input data
 is forced into DH and DL on every instruction while KP == 1,
 proper operation seems to dictate the DH and DL are latched only
 on instructions that use KP in a conditional address (JL == 110).
-Also, unlike the schematics, KP is reset when JL == 110 and not
+Also, unlike the schematics, KP must be reset when JL == 110 and not
 exclusively by ST == 1001 (RESET).
 
 <P><A HREF="wang600src.html">Here is some sample microcode</A>
@@ -400,7 +400,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>0101</TD><TD>MR = ram(15,KK,AL)<BR>XR = rom(15,KK,AL)</TD></TR>
 	<TR><TD>0110</TD><TD>MR = ram(15,15,KK)<BR>XR = rom(15,15,KK)</TD></TR>
 	<TR><TD>0111</TD><TD>(PH <<= 1) |= DL&lt;0&gt;</TD></TR>
-	<TR><TD>1000</TD><TD>Printer Paper Feed</TD></TR>
+	<TR><TD>1000</TD><TD>PF = 1</TD></TR>
 	<TR><TD>1001</TD><TD>undefined</TD></TR>
 	<TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
 	<TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
