@@ -31,6 +31,7 @@
 #define tag_L	14
 #define tag_M	15
 #define dp_sci	11
+#define dp_blank 15
 
 #define E(dig)		_regop(0, dig)
 #define DP()		_opcode(0x0a)
@@ -96,6 +97,22 @@
 #define ROM_CALL(label)	_opcode(0xfc) _opcode(label)
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)
 #define GROUP2(func)	_opcode(0xfe) _opcode(func)
+
+#define J_IF_EQ()	IO(0xa0)
+#define J_IF_NE()	IO(0xb0)
+
+#define KTRACE_ON()	ALPHA(_opcode(0x82))
+#define KTRACE_OFF()	ALPHA(_opcode(0x92))
+#define PTRACE_ON()	ALPHA(LOG_E_X())
+#define PTRACE_OFF()	ALPHA(E_X())
+#define PAUSE()		ALPHA(STOP())
+#define PI()		ALPHA(f(0))
+#define POW10(n)	ALPHA(f(n))
+#define POW_10(n)	ALPHA(F(n))
+#define J_IF_EQUAL()	ALPHA(J_IF_0())
+#define J_IF_GT		ALPHA(J_IF_P())
+#define J_IF_LT		ALPHA(SIN())
+#define JUMP(reg)	INDIR(E(reg))
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".err run wang600 preprocessor");
