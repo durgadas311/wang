@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.26 2011/05/27 20:18:02 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.27 2011/10/09 15:11:26 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -421,7 +421,7 @@ static void dump(w600_sys_t *sys) {
 	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
 				sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
 	fprintf(stderr, "ACC = %01x Z = %d I = %d C = %d\n",
-				sys->cpu.acc, sys->cpu.z, sys->cpu.i, sys->cpu.c);
+				sys->cpu.ms, sys->cpu.z, sys->cpu.i, sys->cpu.c);
 	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
 			sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
 	// more...

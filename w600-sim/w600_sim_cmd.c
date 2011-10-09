@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sim_cmd.c,v 1.14 2011/05/22 02:51:19 drmiller Exp $"
+#ident "$Id: w600_sim_cmd.c,v 1.15 2011/10/09 15:11:26 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static int _dump(w600_sys_t *sys, char *line) {
 	fprintf(stderr, "STK1 = %03x STK2 = %03x\n",
 			sys->cpu.stk1, sys->cpu.stk2);
 
-	fprintf(stderr, "ACC  = %01x [ %s ]\n", sys->cpu.acc, get_psw_str(sys));
+	fprintf(stderr, "ACC  = %01x [ %s ]\n", sys->cpu.ms, get_psw_str(sys));
 	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
 		sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
 	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
@@ -190,8 +190,8 @@ static int _set(w600_sys_t *sys, char *line) {
 			r = &sys->cpu.am;
 		} else if (strcasecmp(s, "al") == 0) {
 			r = &sys->cpu.al;
-		} else if (strcasecmp(s, "acc") == 0) {
-			r = &sys->cpu.acc;
+		} else if (strcasecmp(s, "ms") == 0) {
+			r = &sys->cpu.ms;
 		} else if (strcasecmp(s, "mr") == 0) {
 			r = &sys->cpu.mr;
 		} else if (strcasecmp(s, "dh") == 0) {

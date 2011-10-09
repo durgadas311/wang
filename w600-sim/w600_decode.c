@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.40 2011/10/08 15:11:12 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.41 2011/10/09 15:11:26 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -291,12 +291,12 @@ static void instr_trace(w600_sys_t *sys) {
 		sys->cpu.al,
 		sys->cpu.mr,
 		get_psw_str(sys),
-		sys->cpu.acc,
+		sys->cpu.ms,
 		sys->cpu.dh,
 		sys->cpu.dl,
 #ifdef TRACE_RAW_UCODE
-		u->h, u->g, u->c, u->d, u->l, u->dd, u->a, u->k, u->b, u->j,
-		u->next << 2, u->e, u->f,
+		u->ai, u->bi, u->zo, u->aop, u->ac, u->an, u->mop, u->kk, u->st,
+		u->jc, u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 		buf);
 }
@@ -354,18 +354,18 @@ int instr_exec(w600_sys_t *sys) {
 	//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
 	//
 	// For conditional jump/call, these bits are latched early...
-	uint8_t br_acc = sys->cpu.acc;
+	uint8_t br_acc = sys->cpu.ms;
 	uint8_t br_c = sys->cpu.c;
 	uint8_t m_ah = sys->cpu.ah;
 	uint8_t m_am = sys->cpu.am;
 	uint8_t m_al = sys->cpu.al;
-	uint8_t br_k = u->k;
+	uint8_t br_k = u->kk;
 	if (sys->cpu.pc == 0x008) br_k = 15;	// RAM size...
 
-	int opf7 = (u->f == 7);
+	int opf7 = (u->jl == 7);
 	if (opf7) {
 		next = sys->cpu.stk1 | 1;
-		if (u->j) {
+		if (u->jc) {
 			sys->cpu.stk1 = sys->cpu.stk2;
 		} else {
 			sys->cpu.stk1 = sys->cpu.stk2; // bugfix?
@@ -373,12 +373,12 @@ int instr_exec(w600_sys_t *sys) {
 			// rc = 1;
 		}
 	} else {
-		next = u->next << 2;
+		next = u->jad << 2;
 	}
 
 	uint8_t g = 0, h = 0;
-	switch(u->h) {
-	case 0: h = sys->cpu.acc; break;
+	switch(u->ai) {
+	case 0: h = sys->cpu.ms; break;
 	case 1: h = sys->cpu.ah; break;
 	case 2: h = sys->cpu.am; break;
 	case 3: h = sys->cpu.al; break;
@@ -388,7 +388,7 @@ int instr_exec(w600_sys_t *sys) {
 	case 7: h = sys->cpu.xr; break;
 	}
 
-	switch(u->g) {
+	switch(u->bi) {
 	case 0: g = 0; break;
 	case 1: g = br_k; break;
 	case 2:
@@ -404,33 +404,33 @@ int instr_exec(w600_sys_t *sys) {
 
 	uint8_t alu = 0;
 
-	if (!u->l) h = 0; // "15"? "0"? ???
-	switch (u->d) {
+	if (!u->ac) h = 0; // "15"? "0"? ???
+	switch (u->aop) {
 	case 0:
-		if (u->dd) alu = sub3_i(sys, h, g, 0);
+		if (u->an) alu = sub3_i(sys, h, g, 0);
 		else alu = add3_i(sys, h, g, 0);
 		break;
 	case 1:
-		if (u->dd) alu = sub3_i(sys, h, g, 1);
+		if (u->an) alu = sub3_i(sys, h, g, 1);
 		else alu = add3_i(sys, h, g, 1);
 		break;
 	case 2:
-		if (u->dd) alu = sub3_c(sys, h, g, 0);
+		if (u->an) alu = sub3_c(sys, h, g, 0);
 		else alu = add3_c(sys, h, g, 0);
 		break;
 	case 3:
-		if (u->dd) alu = sub3_c(sys, h, g, sys->cpu.c);
+		if (u->an) alu = sub3_c(sys, h, g, sys->cpu.c);
 		else alu = add3_c(sys, h, g, sys->cpu.c);
 		break;
 	case 4:
-		if (u->dd) alu = sub3_c(sys, h, g, 1);
+		if (u->an) alu = sub3_c(sys, h, g, 1);
 		else alu = add3_c(sys, h, g, 1);
 		break;
 	case 5:
 		alu = and2(sys, h, g);
 		break;
 	case 6:
-		if (u->dd) alu = xor2(sys, h, g);
+		if (u->an) alu = xor2(sys, h, g);
 		else alu = or2(sys, h, g);
 		break;
 	case 7:
@@ -438,8 +438,8 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	}
 
-	switch(u->c) {
-	case 0:	if (u->b == 15) sys->cpu.acc = alu; break;
+	switch(u->zo) {
+	case 0:	if (u->st == 15) sys->cpu.ms = alu; break;
 	case 1:	sys->cpu.ah = alu; break;
 	case 2:	sys->cpu.am = alu; break;
 	case 3:	sys->cpu.al = alu; break;
@@ -448,33 +448,33 @@ int instr_exec(w600_sys_t *sys) {
 	case 6:	sys->cpu.mr = alu; break;
 	}
 
-	switch(u->b) {
+	switch(u->st) {
 	case 0:
 		// nop
 		break;
 	case 1:
-		sys->cpu.acc |= 1;
+		sys->cpu.ms |= 1;
 		break;
 	case 2:
-		sys->cpu.acc |= 2;
+		sys->cpu.ms |= 2;
 		break;
 	case 3:
-		sys->cpu.acc |= 4;
+		sys->cpu.ms |= 4;
 		break;
 	case 4:
-		sys->cpu.acc |= 8;
+		sys->cpu.ms |= 8;
 		break;
 	case 5:
-		sys->cpu.acc &= ~1;
+		sys->cpu.ms &= ~1;
 		break;
 	case 6:
-		sys->cpu.acc &= ~2;
+		sys->cpu.ms &= ~2;
 		break;
 	case 7:
-		sys->cpu.acc &= ~4;
+		sys->cpu.ms &= ~4;
 		break;
 	case 8:
-		sys->cpu.acc &= ~8;
+		sys->cpu.ms &= ~8;
 		break;
 	case 9:
 		// T.B.D. reset 6184...
@@ -482,17 +482,17 @@ int instr_exec(w600_sys_t *sys) {
 		sys->cpu.kp = 0;
 		break;
 	case 10:
-		sys->cpu.acc = (sys->cpu.acc & 0x0e) | (sys->cpu.z ^ 1);
+		sys->cpu.ms = (sys->cpu.ms & 0x0e) | (sys->cpu.z ^ 1);
 		break;
 	case 11:
-		sys->cpu.acc = (sys->cpu.acc & 0x0d) | (sys->cpu.z << 1);
+		sys->cpu.ms = (sys->cpu.ms & 0x0d) | (sys->cpu.z << 1);
 		break;
 	case 12:
 		sys->cpu.pe = 1;
 		sys->display(sys, -2);
 		break;
 	case 13:
-		sys->cpu.acc = 0;
+		sys->cpu.ms = 0;
 		break;
 	case 14:
 		sys->cpu.me = 1;
@@ -500,7 +500,7 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	}
 
-	switch(u->a) {
+	switch(u->mop) {
 	case 1:	wr_ram_i(sys, m_ah, m_am, m_al); break;
 	case 2:	wr_ram_i(sys, 15, br_k, m_al); break;
 	case 3:	wr_ram_i(sys, 15, 15, br_k); break;
@@ -522,10 +522,10 @@ int instr_exec(w600_sys_t *sys) {
 		sys->cpu.dl |= 2;
 		break;
 	case 13:
-		tape_on(sys, u->g & 1);
+		tape_on(sys, u->bi & 1);
 		break;
 	case 14:
-		tape_off(sys);
+		tape_off(sys); // u->bi & 1 affects this...
 		break;
 	case 15:
 		sys->cpu.xh = sys->cpu.dh;	// sys->cpu.xh = g;
@@ -537,11 +537,11 @@ int instr_exec(w600_sys_t *sys) {
 
 	// This is done "late" to ensure we use most recent flags for I and Z
 	if (!opf7) {
-		if (u->j) {
+		if (u->jc) {
 			sys->cpu.stk2 = sys->cpu.stk1;
 			sys->cpu.stk1 = sys->cpu.pc;
 		}
-		switch(u->e) {
+		switch(u->jh) {
 		case 0: next |= (0 << 1); break;
 		case 1: next |= (1 << 1); break;
 		case 2: next |= ((br_acc & 2) >> 0); break;
@@ -569,7 +569,7 @@ int instr_exec(w600_sys_t *sys) {
 			break;
 		case 7: rc = 3; break;
 		}
-		switch(u->f) {
+		switch(u->jl) {
 		case 0: next |= (0 << 0); break;
 		case 1: next |= (1 << 0); break;
 		case 2: next |= ((br_acc & 1) >> 0); break;

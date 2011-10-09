@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ident "$Id: w600-dasm.c,v 1.6 2011/05/13 12:40:17 drmiller Exp $"
+#ident "$Id: w600-dasm.c,v 1.7 2011/10/09 15:11:26 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 
@@ -57,8 +57,8 @@ int main(int argc, char **argv) {
 #endif // TRACE_RAW_UCODE
 			"%s\n", x,
 #ifdef TRACE_RAW_UCODE
-			u->h, u->g, u->c, u->d, u->l, u->dd, u->a, u->k, u->b, u->j,
-			u->next << 2, u->e, u->f,
+			u->ai, u->bi, u->zo, u->aop, u->ac, u->an, u->mop, u->kk, u->st,
+			u->jc, u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 			buf);
 	}

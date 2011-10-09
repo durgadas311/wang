@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2011/10/03 20:57:38 drmiller Exp $
+# $Id: Makefile,v 1.26 2011/10/09 15:11:26 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -45,9 +45,6 @@ w600_fe.class: w600_fe.java
 $(FONTDEST): fonts/Wang600Display.ttf
 	cp $? $@
 
-wang600-block-diag.pdf: ../wang600-docs/wang600-block-diag.pdf
-	cp $? $@
-
 clean:
 	rm -f *.o
 
@@ -55,14 +52,14 @@ clobber: clean
 	rm -f *.class w600-sim w600_fe w600-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
-tar: wang600-block-diag.pdf
+tar:
 	cd ..;\
 	tar -czvf w600-sim/w600-sim.tgz \
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
 		w600-sim/wang600.rom w600-sim/icons/*.gif \
 		w600-sim/icons/*.png w600-sim/fonts/*.ttf	\
-		w600-sim/progs/*.wng w600-sim/docs/*.html
+		w600-sim/progs/*.wng w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc
@@ -70,8 +67,10 @@ ship: tar
 Manifest.txt:
 	echo "Main-Class: w600_fe" >$@
 
+SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
+
 wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf docs/*.html
+	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf $(SHIP_DOCS)
 
 # INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang600.jar

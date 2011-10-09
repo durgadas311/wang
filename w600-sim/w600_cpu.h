@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w600_cpu.h,v 1.9 2011/06/01 19:26:19 drmiller Exp $"
+#ident "$Id: w600_cpu.h,v 1.10 2011/10/09 15:11:26 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -12,7 +12,7 @@ typedef struct {
 	uint8_t am;
 	uint8_t al;
 	uint8_t mr;
-	uint8_t acc;
+	uint8_t ms;
 	uint8_t dh;
 	uint8_t dl;
 	uint8_t xh;

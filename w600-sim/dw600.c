@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.11 2011/05/22 21:04:33 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.12 2011/10/09 15:11:26 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -28,7 +28,7 @@ void diw600(char *buf, uint64_t *v) {
 	targ[0] = '\0';
 	opA[0] = '\0';
 
-	sprintf(k, "%d.", u->k);
+	sprintf(k, "%d", u->kk);
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
@@ -43,37 +43,37 @@ void diw600(char *buf, uint64_t *v) {
 	//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
 	//
 	s = stack;
-	next = u->next << 2;
-	if (u->e < 2) {
-		next |= (u->e << 1);
+	next = u->jad << 2;
+	if (u->jh < 2) {
+		next |= (u->jh << 1);
 	}
-	if (u->f < 2) {
-		next |= (u->f << 0);
+	if (u->jl < 2) {
+		next |= (u->jl << 0);
 	}
-	if (u->f == 7) {
+	if (u->jl == 7) {
 		s += sprintf(s, "return");
 	} else {
-		if (u->j) {
+		if (u->jc) {
 			s += sprintf(s, "call");
 		} else {
 			s += sprintf(s, "jump");
 		}
 		s += sprintf(s, " %03x", next);
-		if (u->e >= 2 || u->f >= 2) {
+		if (u->jh >= 2 || u->jl >= 2) {
 			s += sprintf(s, "[");
-			switch(u->e) {
-			case 2: s += sprintf(s, "bit1(ACC)"); break;
-			case 3: s += sprintf(s, "bit3(ACC)"); break;
-			case 4: s += sprintf(s, "Prog Err"); break;
+			switch(u->jh) {
+			case 2: s += sprintf(s, "MS<1>"); break;
+			case 3: s += sprintf(s, "MS<3>"); break;
+			case 4: s += sprintf(s, "PE"); break;
 			case 5: s += sprintf(s, "I"); break;
-			case 6: s += sprintf(s, "Key Down"); break;
+			case 6: s += sprintf(s, "KP"); break;
 			}
 			s += sprintf(s, ":");
-			switch(u->f) {
-			case 2: s += sprintf(s, "bit0(ACC)"); break;
-			case 3: s += sprintf(s, "bit2(ACC)"); break;
+			switch(u->jl) {
+			case 2: s += sprintf(s, "MS<0>"); break;
+			case 3: s += sprintf(s, "MS<2>"); break;
 			case 4: s += sprintf(s, "Z"); break;
-			case 5: s += sprintf(s, "X?"); break;
+			case 5: s += sprintf(s, "Q?"); break;
 			case 6: s += sprintf(s, "C"); break;
 			case 7: s += sprintf(s, "1?"); break;
 			}
@@ -81,8 +81,8 @@ void diw600(char *buf, uint64_t *v) {
 		}
 	}
 
-	switch(u->h) {
-	case 0: h = "ACC"; break;
+	switch(u->ai) {
+	case 0: h = "MS"; break;
 	case 1: h = "AH"; break;
 	case 2: h = "AM"; break;
 	case 3: h = "AL"; break;
@@ -92,7 +92,7 @@ void diw600(char *buf, uint64_t *v) {
 	case 7: h = "XR"; break;
 	}
 
-	switch(u->g) {
+	switch(u->bi) {
 	case 0: g = "0"; break;
 	case 1: g = k; break;
 	case 2: g = "mode0"; break;
@@ -103,26 +103,26 @@ void diw600(char *buf, uint64_t *v) {
 	case 7: g = "XR"; break;
 	}
 
-	if (!u->l) h = "0*"; // "15"? "0"? ???
-	if (u->dd) ops = "-----&^$";
-	if (u->d == 7) {
+	if (!u->ac) h = "0"; // "15"? "0"? ???
+	if (u->an) ops = "-----&^$";
+	if (u->aop == 7) {
 		sprintf(alu, "0");
 	} else {
 		s = alu;
-		s += sprintf(s, "%s %c %s", h, ops[u->d], g);
-		switch (u->d) {
+		s += sprintf(s, "%s %c %s", h, ops[u->aop], g);
+		switch (u->aop) {
 		case 1:
 		case 4:
-			s += sprintf(s, " %c 1", ops[u->d]);
+			s += sprintf(s, " %c 1", ops[u->aop]);
 			break;
 		case 3:
-			s += sprintf(s, " %c CY", ops[u->d]);
+			s += sprintf(s, " %c C", ops[u->aop]);
 			break;
 		}
 		s += sprintf(s, " ->[Z");
-		if (u->d < 5) {
+		if (u->aop < 5) {
 			s += sprintf(s, ",I");
-			switch (u->d) {
+			switch (u->aop) {
 			case 2:
 			case 3:
 			case 4:
@@ -133,24 +133,24 @@ void diw600(char *buf, uint64_t *v) {
 		s += sprintf(s, "]");
 	}
 	char *t = targ;
-	if (u->b >=1 && u->b <= 8) {
-		sprintf(acc, "bit%d(ACC)=%d", (u->b - 1) & 3, ((u->b - 1) >> 2) ^ 1);
+	if (u->st >=1 && u->st <= 8) {
+		sprintf(acc, "MS<%d>=%d", (u->st - 1) & 3, ((u->st - 1) >> 2) ^ 1);
 	} else {
-		switch(u->b) {
+		switch(u->st) {
 		case 0: /* sprintf(mach, "NOP"); */ break;
-		case 9: sprintf(mach, "reset 6184"); break;
-		case 10: sprintf(acc, "bit0(ACC)=!Z"); break;
-		case 11: sprintf(acc, "bit1(ACC)=Z"); break;
-		case 12: sprintf(mach, "Prog Err"); break;
-		case 13: sprintf(acc, "ACC=0"); break;
-		case 14: sprintf(mach, "Mach Err"); break;
+		case 9: sprintf(mach, "RESET"); break;
+		case 10: sprintf(acc, "MS<0>=!Z"); break;
+		case 11: sprintf(acc, "MS<1>=Z"); break;
+		case 12: sprintf(mach, "PE=1"); break;
+		case 13: sprintf(acc, "MS=0"); break;
+		case 14: sprintf(mach, "ME=1"); break;
 		}
 	}
-	if (targ[0] && u->c != 7) {
+	if (targ[0] && u->zo != 7) {
 		t += sprintf(t, " = ");
 	}
-	switch(u->c) {
-	case 0:	if (u->b == 15) t += sprintf(t, "ACC"); break;
+	switch(u->zo) {
+	case 0:	if (u->st == 15) t += sprintf(t, "MS"); break;
 	case 1:	t += sprintf(t, "AH"); break;
 	case 2:	t += sprintf(t, "AM"); break;
 	case 3:	t += sprintf(t, "AL"); break;
@@ -162,26 +162,26 @@ void diw600(char *buf, uint64_t *v) {
 		t += sprintf(t, " = ");
 	}
 
-	switch(u->a) {
+	switch(u->mop) {
 	case 1:	sprintf(opA, "mem(AH,AM,AL) = MR"); break;
 	case 2:	sprintf(opA, "mem(15,%s,AL) = MR", k); break;
 	case 3:	sprintf(opA, "mem(15,15,%s) = MR", k); break;
-	case 4:	sprintf(opA, "MR = mem(AH,AM,AL)"); break;
-	case 5:	sprintf(opA, "MR = mem(15,%s,AL)", k); break;
-	case 6:	sprintf(opA, "MR = mem(15,15,%s)", k); break;
-	case 7:	sprintf(opA, "Printer Hammer = bit0(DL)"); break;
-	case 8:	sprintf(opA, "Printer Feed"); break;
+	case 4:	sprintf(opA, "MR = mem(AH,AM,AL), XR = rom(AH,AM,AL)"); break;
+	case 5:	sprintf(opA, "MR = mem(15,%s,AL), XR = rom(15,%s,AL)", k); break;
+	case 6:	sprintf(opA, "MR = mem(15,15,%s), XR = rom(15,15,%s)", k); break;
+	case 7:	sprintf(opA, "PH += DL<0>"); break;
+	case 8:	sprintf(opA, "PF=1"); break;
 	case 9:	sprintf(opA, "<A9>"); break;
-	case 10:	sprintf(opA, "bit0(DL) = Tape Data"); break;
-	case 11:	sprintf(opA, "Tape Data = bit0(DL)"); break;
-	case 12:	sprintf(opA, "(DH,DL) = (Printer Status)"); break;
-	case 13:	sprintf(opA, "Tape On %s", u->g & 1 ? "WR" : "RD"); break;
-	case 14:	sprintf(opA, "Tape Off"); break;
-	case 15:	sprintf(opA, "XH=DH,XL=DL,XS=%s", k); break;
+	case 10:	sprintf(opA, "DL<0> = TR"); break;
+	case 11:	sprintf(opA, "TW = DL<0>"); break;
+	case 12:	sprintf(opA, "DH=PD, DL<3>=PI, DL<1>=SB"); break;
+	case 13:	sprintf(opA, "TM=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
+	case 14:	sprintf(opA, "TM=0%s", u->bi & 1 ? "(noreset)" : ""); break;
+	case 15:	sprintf(opA, "XH=DH, XL=DL, XS=%s", k); break;
 	}
 
 	s = buf;
-	//if (u->l) *s++ = '*'; else *s++ = '_';
+	//if (u->ac) *s++ = '*'; else *s++ = '_';
 	s += sprintf(s, "%s%s", targ, alu);
 	if (acc[0]) {
 		s += sprintf(s, "; %s", acc);
