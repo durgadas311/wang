@@ -7,11 +7,40 @@
 #ifndef __wpcc_wang600_h__
 #define __wpcc_wang600_h__
 
-#define BEGIN()		asm(".section .wang600, \"a\"");
-#define END()
+asm(".ident \"Wang 600 Compiler over GCC\"");
+
+asm(".section .wang600code, \"a\"");
+
+#define BEGIN()
+#define END()			asm(".byte 0x80; .byte _end_prog");
 
 #define _opcode(byte)		asm(" .byte (" # byte ")" );
 #define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
+
+#define LABEL(label)		asm(" .pushsection .wang600label,\"a\";" \
+					".global " #label ";" \
+					#label ":  .byte 0;" \
+					" .popsection");
+#define FLABEL(label)		asm(" .pushsection .wang600flabel,\"a\";" \
+					".global " #label ";" \
+					#label ":  .byte 0;" \
+					" .popsection");
+
+#define EXTERNAL(label)		asm(" .pushsection .wang600label,\"a\";" \
+					".global " #label ";" \
+					" .popsection");
+
+#define FEXTERNAL(label)	asm(" .pushsection .wang600flabel,\"a\";" \
+					".global " #label ";" \
+					" .popsection");
+
+#define AUTHOR(name)		asm(".pushsection .wang600author,\"\",@note;" \
+					".string \"" name "\";" \
+					" .popsection");
+
+#define TITLE(title)		asm(".pushsection .wang600title,\"\",@note;" \
+					".string \"" title "\";" \
+					" .popsection");
 
 /* util macros for printer formating */
 #define tag_X	0
@@ -115,7 +144,7 @@
 #define JUMP(reg)	INDIR(E(reg))
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
-#define ENTER(num)		asm(".err run wang600 preprocessor");
-#define ALPHA_STRING(num)	asm(".err run wang600 preprocessor");
+#define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");
+#define ALPHA_STRING(num)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
 
 #endif /* __wpcc_wang600_h__ */
