@@ -1,0 +1,104 @@
+/*
+ * Main include file for WPCC: Wang Programmable Calculator Compiler
+ *
+ *
+ */
+
+#ifndef __wpcc_wang600_h__
+#define __wpcc_wang600_h__
+
+#define BEGIN()		asm(".section .wang600, \"a\"");
+#define END()
+
+#define _opcode(byte)		asm(" .byte (" # byte ")" );
+#define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
+
+/* util macros for printer formating */
+#define tag_X	0
+#define tag_Y	1
+#define tag_Z	2
+#define tag_A	3
+#define tag_B	4
+#define tag_C	5
+#define tag_D	6
+#define tag_E	7
+#define tag_F	8
+#define tag_G	9
+#define tag_H	10
+#define tag_I	11
+#define tag_J	12
+#define tag_K	13
+#define tag_L	14
+#define tag_M	15
+#define dp_sci	11
+
+#define E(dig)		_regop(0, dig)
+#define DP()		_opcode(0x0a)
+#define SET_EXP()	_opcode(0x0b)
+#define CHANGE_SIGN()	_opcode(0x0c)
+#define CLEAR()		_opcode(0x0e)
+#define CLR_DISP()	_opcode(0x0f)
+#define T(reg)		_regop(1, reg)
+#define ADD(reg)	_regop(2, reg)
+#define SUB(reg)	_regop(3, reg)
+#define MULT(reg)	_regop(4, reg)
+#define DIV(reg)	_regop(5, reg)
+#define ST(reg)		_regop(6, reg)
+#define RE(reg)		_regop(7, reg)
+
+#define SEARCH(label)	_opcode(0x80) _opcode(label)
+#define RECALL(longreg)	_opcode(0x81) _opcode(longreg)
+#define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
+#define GO()		_opcode(0x83)
+#define J_IF_0()	_opcode(0x84)
+#define J_IF_P()	_opcode(0x85)
+#define SIN()		_opcode(0x86)
+#define COS()		_opcode(0x87)
+#define TAN()		_opcode(0x88)
+#define RAD_DEG()	_opcode(0x89)
+#define LOG_E_X()	_opcode(0x8a)
+#define E_X()		_opcode(0x8b)
+#define X_2()		_opcode(0x8c)
+#define SQRT()		_opcode(0x8d)
+#define LOAD_PROG()	_opcode(0x8e)
+#define INV()		_opcode(0x8f)
+
+#define MARK(label)	_opcode(0x90) _opcode(label)
+#define STORE(longreg)	_opcode(0x91) _opcode(longreg)
+#define ALPHA(cmd)	_opcode(0x92) cmd
+#define STOP()		_opcode(0x93)
+#define J_IF_N0()	_opcode(0x94)
+#define J_IF_ERR()	_opcode(0x95)
+#define SIN_1()		_opcode(0x96)
+#define COS_1()		_opcode(0x97)
+#define TAN_1()		_opcode(0x98)
+#define DEG_RAD()	_opcode(0x99)
+#define LOG_10_X()	_opcode(0x9a)
+#define E10_X()		_opcode(0x9b)
+#define INT()		_opcode(0x9c)
+#define ABS()		_opcode(0x9d)
+/* NOTE: tape format wants double-END PROG */
+#define END_PROG()	_opcode(0x9e) _opcode(0x9e)
+#define RETURN()	_opcode(0x9f)
+
+#define f(x)		_regop(10, x)
+#define F(x)		_regop(11, x)
+
+#define ROM_f(x)	_regop(12, x)
+#define ROM_F(x)	_regop(13, x)
+
+#define EXCHG(reg)	_regop(14, reg)
+
+#define IO(func)	_opcode(0xf2) _opcode(func)
+#define ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
+#define CALL(label)	_opcode(0xf7) _opcode(label)
+#define INDIR(regop)	_opcode(0xfb) regop
+#define ROM_CALL(label)	_opcode(0xfc) _opcode(label)
+#define GROUP1(func)	_opcode(0xfd) _opcode(func)
+#define GROUP2(func)	_opcode(0xfe) _opcode(func)
+
+/* These should be pre-rpocessed and never exist when gcc invoked */
+#define ENTER(num)		asm(".err run wang600 preprocessor");
+#define ALPHA_STRING(num)	asm(".err run wang600 preprocessor");
+
+#endif /* __wpcc_wang600_h__ */
