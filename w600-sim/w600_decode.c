@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.41 2011/10/09 15:11:26 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.42 2011/10/12 19:01:36 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -12,6 +12,9 @@
 extern int diw600(char *buf, uint64_t *t);
 extern char *get_psw_str(w600_sys_t *sys);
 #endif // TRACE
+
+uint8_t __keytrc = 0;
+uint8_t __systrc[16] = {0};
 
 static uint8_t add3_i(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
@@ -258,13 +261,27 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	uint16_t adr = (ah << 8) | (am << 4) | al;
 	uint8_t a = sys->cpu.mr;
 	uint8_t b = sys->ram[adr >> 1];
+	uint8_t c = a;
+	uint8_t d;
 	if (adr & 1) {
 		a <<= 4;
+		d = (b >> 4) & 0x0f;
 		b &= 0x0f;
 	} else {
+		d = b & 0x0f;
 		b &= 0xf0;
 	}
 	sys->ram[adr >> 1] = b | a;
+	if (__keytrc && adr == 0xff8) {
+		b = sys->ram[0xff8 >> 1];
+		a = sys->ram[0xff7 >> 1];
+		fprintf(stderr, "Code %02d %02d\n", (a >> 4) & 0x0f, b & 0x0f);
+	}
+	if (adr >= 0xff0) {
+		if (__systrc[adr & 0x00f]) {
+			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, c);
+		}
+	}
 }
 
 static void instr_trace(w600_sys_t *sys) {
@@ -556,6 +573,7 @@ int instr_exec(w600_sys_t *sys) {
 			// todo: clean this up!
 			if (key) {
 //fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
+//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 				sys->cpu.kp = 1;
 				sys->cpu.dh = (key >> 4) & 0x0f;
 				sys->cpu.dl = key & 0x0f;

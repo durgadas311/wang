@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sim_cmd.c,v 1.15 2011/10/09 15:11:26 drmiller Exp $"
+#ident "$Id: w600_sim_cmd.c,v 1.16 2011/10/12 19:01:36 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +14,8 @@
 
 extern int diw600(char *buf, uint64_t *t);
 
+extern uint8_t __systrc[16];
+extern uint8_t __keytrc;
 extern uint8_t __keyb[32];
 extern int __klen;
 extern int __keyp;
@@ -321,6 +323,42 @@ static int _step(w600_sys_t *sys, char *line) {
 	return 0;
 }
 
+static int _systrc(w600_sys_t *sys, char *line) {
+	char *s;
+	int x = 0;
+	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(__systrc)) {
+		if (strcmp(s, "off") == 0) {
+			memset(__systrc, 0, sizeof(__systrc));
+			x = 0;
+		} else {
+			int n = strtoul(s, NULL, 10);
+			__systrc[x++] = (n != 0);
+		}
+	}
+	printf("Tracing system words (15,15,0):"
+		" %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+		__systrc[0], __systrc[1], __systrc[2], __systrc[3],
+		__systrc[4], __systrc[5], __systrc[6], __systrc[7],
+		__systrc[8], __systrc[9], __systrc[10], __systrc[11],
+		__systrc[12], __systrc[13], __systrc[14], __systrc[15]);
+	return 0;
+}
+
+static int _keytrc(w600_sys_t *sys, char *line) {
+	char *s;
+	int x = 0;
+	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(__systrc)) {
+		if (strcmp(s, "off") == 0) {
+			__keytrc = 0;
+		} else if (strcmp(s, "on") == 0) {
+			__keytrc = 1;
+		} else {
+		}
+	}
+	printf("Tracing keys is %s\n", __keytrc ? "on" : "off");
+	return 0;
+}
+
 static int _keyboard(w600_sys_t *sys, char *line) {
 	char *s;
 	__keyp = 0;
@@ -359,6 +397,8 @@ struct {
 	{ "core", _core,	"file", "Dump all of RAM (2K) to <file>" },
 	{ "dup", _dup,		"", "Copy program space into ROM" },
 	{ "go", _go,		"[+cycles]", "Resume program at current PC [break after <cycles>]" },
+	{ "systrc", _systrc,	"[[off] pattern]", "Enable tracing of sys mem bytes" },
+	{ "keytrc", _keytrc,	"on/off", "Enable tracing of key presses" },
 	{ "help", _help,	NULL, "Display this help" },
 };
 #define NUM_CMDS	(sizeof(commands) / sizeof(commands[0]))
