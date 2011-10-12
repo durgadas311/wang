@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.12 2011/10/09 15:11:26 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.13 2011/10/12 18:59:30 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -167,8 +167,8 @@ void diw600(char *buf, uint64_t *v) {
 	case 2:	sprintf(opA, "mem(15,%s,AL) = MR", k); break;
 	case 3:	sprintf(opA, "mem(15,15,%s) = MR", k); break;
 	case 4:	sprintf(opA, "MR = mem(AH,AM,AL), XR = rom(AH,AM,AL)"); break;
-	case 5:	sprintf(opA, "MR = mem(15,%s,AL), XR = rom(15,%s,AL)", k); break;
-	case 6:	sprintf(opA, "MR = mem(15,15,%s), XR = rom(15,15,%s)", k); break;
+	case 5:	sprintf(opA, "MR = mem(15,%s,AL), XR = rom(15,%s,AL)", k, k); break;
+	case 6:	sprintf(opA, "MR = mem(15,15,%s), XR = rom(15,15,%s)", k, k); break;
 	case 7:	sprintf(opA, "PH += DL<0>"); break;
 	case 8:	sprintf(opA, "PF=1"); break;
 	case 9:	sprintf(opA, "<A9>"); break;
