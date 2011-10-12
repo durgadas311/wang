@@ -76,7 +76,7 @@ asm(".section .wang600code, \"a\"");
 #define ST(reg)		_regop(6, reg)
 #define RE(reg)		_regop(7, reg)
 
-#define SEARCH(label)	_opcode(0x80) _opcode(label)
+#define SEARCH(label)	_opcode(_loc_search) _opcode(label)
 #define RECALL(longreg)	_opcode(0x81) _opcode(longreg)
 #define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
 #define GO()		_opcode(0x83)
@@ -121,7 +121,7 @@ asm(".section .wang600code, \"a\"");
 
 #define IO(func)	_opcode(0xf2) _opcode(func)
 #define ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
-#define CALL(label)	_opcode(0xf7) _opcode(label)
+#define CALL(label)	_opcode(_loc_call) _opcode(label)
 #define INDIR(regop)	_opcode(0xfb) regop
 #define ROM_CALL(label)	_opcode(0xfc) _opcode(label)
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)

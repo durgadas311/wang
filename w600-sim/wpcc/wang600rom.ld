@@ -1,10 +1,10 @@
-_loc_search = 0x80;
-_loc_call = 0xf7;
+_loc_search = 0xf3;
+_loc_call = 0xfc;
 
 MEMORY {
 	labels : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
-	flabels : ORIGIN = 0xa0, LENGTH = 0x20 /* for ROM use 0xc0 */
-	code : ORIGIN = 0x1000, LENGTH = 0xe70 >> 1 /* 0x100-0xf6f */
+	flabels : ORIGIN = 0xc0, LENGTH = 0x20
+	code : ORIGIN = 0x1000, LENGTH = 0x1000 >> 1 /* 0x000-0xfff */
 }
 SECTIONS
 {
