@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.32 2011/10/10 23:22:57 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.33 2011/10/12 19:02:53 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -604,26 +604,64 @@ For example, plotting commands expect<BR>
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=6>System State Memory Usage</TH></TR>
 <TR><TH>RAM<BR>Address</TH><TH>AH,AM,AL</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
-<TR><TD>0xfff</TD><TD>15,15,15</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Keyboard<BR>Trace</TD></TR>
-<TR><TD>0xffe</TD><TD>15,15,14</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
-<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Program<BR>Trace</TD></TR>
-<TR><TD>0xffc</TD><TD>15,15,12</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xfff</TD><TD>15,15,15</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>Keyboard<BR>Trace</TD></TR>
+<TR><TD>0xffe</TD><TD>15,15,14</TD><TD COLSPAN=4>scratch</TD></TR>
+<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>-</TD><TD>-</TD><TD>Group<BR>I/O</TD><TD>Program<BR>Trace</TD></TR>
+<TR><TD>0xffc</TD><TD>15,15,12</TD><TD COLSPAN=4>unused?</TD></TR>
 <TR><TD>0xffb</TD><TD>15,15,11</TD><TD COLSPAN=4>Prog Subr Stack Level</TD></TR>
-<TR><TD>0xffa</TD><TD>15,15,10</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
-<TR><TD>0xff9</TD><TD>15,15,9</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
+<TR><TD>0xffa</TD><TD>15,15,10</TD><TD COLSPAN=4>Prefix State</TD></TR>
+<TR><TD>0xff9</TD><TD>15,15,9</TD><TD COLSPAN=4>unknown</TD></TR>
 <TR><TD>0xff8</TD><TD>15,15,8</TD><TD COLSPAN=4>DL Keyboard code</TD></TR>
 <TR><TD>0xff7</TD><TD>15,15,7</TD><TD COLSPAN=4>DH Keyboard code</TD></TR>
-<TR><TD>0xff6</TD><TD>15,15,6</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
-<TR><TD>0xff5</TD><TD>15,15,5</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>?</TD></TR>
-<TR><TD>0xff4</TD><TD>15,15,4</TD><TD>?</TD><TD>?</TD><TD>?</TD><TD>Running</TD></TR>
-<TR><TD>0xff3</TD><TD>15,15,3</TD><TD>?</TD><TD>ROM</TD><TD>?</TD><TD>Run</TD></TR>
+<TR><TD>0xff6</TD><TD>15,15,6</TD><TD COLSPAN=4>Tape Bit</TD></TR>
+<TR><TD>0xff5</TD><TD>15,15,5</TD><TD COLSPAN=4>Tape Word</TD></TR>
+<TR><TD>0xff4</TD><TD>15,15,4</TD><TD COLSPAN=4>Number Entry State</TD></TR>
+<TR><TD>0xff3</TD><TD>15,15,3</TD><TD>Prefix</TD><TD>ROM</TD><TD>Stop</TD><TD>Run</TD></TR>
 <TR><TD>0xff2</TD><TD>15,15,2</TD><TD COLSPAN=4>P.C. Mem Addr, L</TD></TR>
 <TR><TD>0xff1</TD><TD>15,15,1</TD><TD COLSPAN=4>P.C. Mem Addr, M</TD></TR>
 <TR><TD>0xff0</TD><TD>15,15,0</TD><TD COLSPAN=4>P.C. Mem Addr, H</TD></TR>
-<TR><TD COLSPAN=6>"Run" indicates Go vs. Stop status,<BR>
-"Running" indicates that the program state is active.
 </TD></TR>
-</TABLE></UL>
+</TABLE>
+
+<P><DL>
+	<DT><B>Keyboard Trace (15,15,15)<0>:</B>
+	<DD>	Tracing of keyboard commands is enabled
+	<DT><B>Goup I/O (15,15,13)<1>:</B>
+	<DD>	A Group I/O sequence is running
+	<DT><B>Program Trace (15,15,13)<0>:</B>
+	<DD>	Tracing of program commands is enabled
+	<DT><B>Prefix State (15,15,10):</B>
+	<DD>	00 = SEARCH<BR>
+		01 = RECALL<BR>
+		02 = PRINT<BR>
+		03 = I/O<BR>
+		04 = SEARCH ROM (15 03)<BR>
+		05 = SEARCH ROM (15 04)<BR>
+		06 = SEARCH ROM (15 05)<BR>
+		07 = SEARCH ROM (15 06)<BR>
+		08 = CALL<BR>
+		09 = MARK<BR>
+		10 = STORE<BR>
+		11 = ALPHA<BR>
+		12 = INDIR<BR>
+		13 = CALL ROM<BR>
+		14 = GROUP 1<BR>
+		15 = GROUP 2<BR>
+	<DT><B>Number Entry State (15,15,4):</B>
+	<DD>	01 = Mantissa, whole part<BR>
+		03 = Exponent<BR>
+		04 = Mantissa, fractional part<BR>
+		15 = Set P.C.
+	<DT><B>Prefix (15,15,3)<3>:</B>
+	<DD>	Next code is interpreted according to Prefix State.
+	<DT><B>ROM (15,15,3)<2>:</B>
+	<DD>	Program is running in ROM (codes taken from ROM instead of RAM)
+	<DT><B>Stop (15,15,3)<1>:</B>
+	<DD>	Program is running but stopped
+	<DT><B>Run (15,15,3)<0>:</B>
+	<DD>	Program is running
+</DL>
+</UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=4>Prog Subr Stack</TH></TR>
