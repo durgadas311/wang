@@ -16,6 +16,22 @@ asm(".section .wang600code, \"a\"");
 
 #define _opcode(byte)		asm(" .byte (" # byte ")" );
 #define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
+#define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
+				asm(" .pushsection .wang600regs,\"a\";" \
+					".global _reg_base;" \
+					".global " #reg ";" \
+					#reg ": .byte 0;"	\
+					".section .wang600data,\"a\";" \
+					".align 8;"		\
+					".byte ((" #b1 ") << 4) | (" #b0 ");"	\
+					".byte ((" #b3 ") << 4) | (" #b2 ");"	\
+					".byte ((" #b5 ") << 4) | (" #b4 ");"	\
+					".byte ((" #b7 ") << 4) | (" #b6 ");"	\
+					".byte ((" #b9 ") << 4) | (" #b8 ");"	\
+					".byte ((" #b11 ") << 4) | (" #b10 ");"	\
+					".byte ((" #b13 ") << 4) | (" #b12 ");"	\
+					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
+					" .popsection");
 
 #define LABEL(label)		asm(" .pushsection .wang600label,\"a\";" \
 					".global " #label ";" \
@@ -34,11 +50,11 @@ asm(".section .wang600code, \"a\"");
 					".global " #label ";" \
 					" .popsection");
 
-#define AUTHOR(name)		asm(".pushsection .wang600author,\"\",@note;" \
+#define AUTHOR(name)		asm(".pushsection .wang600author,\"a\",@note;" \
 					".string \"" name "\";" \
 					" .popsection");
 
-#define TITLE(title)		asm(".pushsection .wang600title,\"\",@note;" \
+#define TITLE(title)		asm(".pushsection .wang600title,\"a\",@note;" \
 					".string \"" title "\";" \
 					" .popsection");
 
@@ -77,7 +93,12 @@ asm(".section .wang600code, \"a\"");
 #define RE(reg)		_regop(7, reg)
 
 #define SEARCH(label)	_opcode(_loc_search) _opcode(label)
-#define RECALL(longreg)	_opcode(0x81) _opcode(longreg)
+#define RECALL(longreg)	_opcode(0x81) \
+				asm(" .pushsection .wang600regs,\"a\";" \
+					".global _reg_base;" \
+					".global " #longreg ";" \
+					" .popsection");	\
+			_opcode(_reg_base - longreg)
 #define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
 #define GO()		_opcode(0x83)
 #define J_IF_0()	_opcode(0x84)
