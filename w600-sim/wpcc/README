@@ -1,0 +1,51 @@
+"object" file sections:
+
+	.wang600label
+		Abstract. Allocation of labels for nun-subroutine (non-f(x)) use.
+		00 00 - 09 13, to prevent accidental use of END PROG (09 14).
+
+	.wang600flabel
+		Abstract. Allocation of labels for subroutine (f(x)) use.
+		10 00 - 11 15 for RAM code, 12 00 - 13 15 for ROM code.
+
+	.wang600data
+		Loaded. Register data. Defines symbols used for "long registers"
+		(INDIR and RECALL/STORE), but also provides initialization data.
+		Aligned on 8-byte boundaries.
+
+	.wang600prog
+		Loaded. Program codes, and references to labels and data (long registers).
+		Also may reference _loc_search and _loc_call which are
+		defined as 08 00, 15 07 (respectively) for RAM code, and
+		15 03, 15 12 for ROM code.
+
+
+"executable" file layout (binary):
+
+	+----------------+
+	| (optional)     |
+	| Header         |
+	+----------------+
+	|                |
+	| Program Codes  |
+	|                |
+	+----------------+
+	| pad to 8-byte  |
+	+----------------+
+	|                |
+	| Register Data  |
+	|                |
+	+----------------+
+	| MARK _end_prog |
+	| END PROG       |
+	+----------------+
+
+Linking targets:
+
+	RAM Program
+
+	ROM Image
+
+	RAM+ROM Program
+
+	m630 Disk Image
