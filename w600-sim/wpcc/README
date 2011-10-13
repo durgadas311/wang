@@ -23,29 +23,65 @@
 "executable" file layout (binary):
 
 	+----------------+
-	| (optional)     |
 	| Header         |
 	+----------------+
-	|                |
-	| Program Codes  |
+	| (optional)     |
+	| Program Notes  |
 	|                |
 	+----------------+
-	| pad to 8-byte  |
-	+----------------+
 	|                |
+	| Program Code   |
+	|                |
+	+- - - - - - - - +
+	| MARK _end_prog |
+	| END-PROG *     |
+	+----------------+
+	| (optional)     |
 	| Register Data  |
 	|                |
+	+- - - - - - - - +
+	| END-PROG 15-15 |
 	+----------------+
-	| MARK _end_prog |
-	| END PROG       |
+	| (optional)     |
+	| ROM code       |
+	|                |
+	+- - - - - - - - +
+	| END-PROG *     |
 	+----------------+
+	| (optional)     |
+	| W630 Image     |
+	|                |
+	+- - - - - - - - +
+	| END-PROG *     |
+	+----------------+
+	| EOF            |
+	+----------------+
+
+Header:
+	struct {
+		char id[4] = "w600";
+		short code_offset;
+		short data_offset;
+		short rom_offset;
+		short w630_offset;
+		short _reserved1;
+		short _reserved2;
+	};
 
 Linking targets:
 
 	RAM Program
 
+	RAM Program + Register Data
+
 	ROM Image
 
-	RAM+ROM Program
+	ROM Image + Register Data
+
+	RAM Program + ROM Image
+
+	RAM Program + Register Data + ROM Image
 
 	m630 Disk Image
+
+	m630 Disk Image + ROM Image
