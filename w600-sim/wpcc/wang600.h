@@ -9,12 +9,22 @@
 
 asm(".ident \"Wang 600 Compiler over GCC\"");
 
-asm(".section .wang600code, \"a\"");
+asm(	".section .wang600code, \"a\";"
+	".pushsection .wang600search,\"a\";"
+	".global _search_base;"
+	".global _search_end_prog;"
+	".set _search_end_prog, _search_base;"
+	".section .wang600call,\"a\";"
+	".global _call_base;"
+	" .popsection"
+);
 
 #define BEGIN()
-#define END()			asm(".byte 0x80; .byte _end_prog");
+#define END()			_oplabel(_search_,end_prog);
 
 #define _opcode(byte)		asm(" .byte (" # byte ")" );
+#define _oplabel(prefix,label)	asm(" .byte (" # prefix # label ")," \
+					"(" # label ")" );
 #define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(" .pushsection .wang600regs,\"a\";" \
@@ -33,21 +43,40 @@ asm(".section .wang600code, \"a\"");
 					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
 					" .popsection");
 
-#define LABEL(label)		asm(" .pushsection .wang600label,\"a\";" \
+#define LABEL(label)\
+				asm(".pushsection .wang600label,\"a\";" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
+					".section .wang600search,\"a\";" \
+					".global _search_" #label ";" \
+					".set _search_" #label ", _search_base;" \
+					".section .wang600call,\"a\";" \
+					".global _call_" #label ";" \
+					".set _call_" #label ", _call_base;" \
 					" .popsection");
+
 #define FLABEL(label)		asm(" .pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
 					" .popsection");
 
-#define EXTERNAL(label)		asm(" .pushsection .wang600label,\"a\";" \
+#define EXTERNAL(label)	\
+				asm(".pushsection .wang600label,\"a\";" \
 					".global " #label ";" \
+					".section .wang600search,\"a\";" \
+					".global _search_" #label ";" \
+					".set _search_" #label ", _search_base;" \
+					".section .wang600call,\"a\";" \
+					".global _call_" #label ";" \
+					".set _call_" #label ", _call_base;" \
 					" .popsection");
 
 #define FEXTERNAL(label)	asm(" .pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
+					" .popsection");
+
+#define NAME(prog_name)		asm(".pushsection .wang600name,\"a\",@note;" \
+					".string \"" prog_name "\";" \
 					" .popsection");
 
 #define AUTHOR(name)		asm(".pushsection .wang600author,\"a\",@note;" \
@@ -56,6 +85,11 @@ asm(".section .wang600code, \"a\"");
 
 #define TITLE(title)		asm(".pushsection .wang600title,\"a\",@note;" \
 					".string \"" title "\";" \
+					" .popsection");
+
+#define HELP_BEGIN()		asm(".pushsection .wang600help,\"a\",@note;" \
+					".string \"");
+#define HELP_END()		asm("\";"\
 					" .popsection");
 
 /* util macros for printer formating */
@@ -92,7 +126,7 @@ asm(".section .wang600code, \"a\"");
 #define ST(reg)		_regop(6, reg)
 #define RE(reg)		_regop(7, reg)
 
-#define SEARCH(label)	_opcode(_loc_search) _opcode(label)
+#define SEARCH(label)	_oplabel(_search_,label)
 #define RECALL(longreg)	_opcode(0x81) \
 				asm(" .pushsection .wang600regs,\"a\";" \
 					".global " #longreg ";" \
@@ -141,7 +175,7 @@ asm(".section .wang600code, \"a\"");
 
 #define IO(func)	_opcode(0xf2) _opcode(func)
 #define ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
-#define CALL(label)	_opcode(_loc_call) _opcode(label)
+#define CALL(label)	_oplabel(_call_,label)
 #define INDIR(regop)	_opcode(0xfb) regop
 #define ROM_CALL(label)	_opcode(0xfc) _opcode(label)
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)
