@@ -95,10 +95,9 @@ asm(".section .wang600code, \"a\"");
 #define SEARCH(label)	_opcode(_loc_search) _opcode(label)
 #define RECALL(longreg)	_opcode(0x81) \
 				asm(" .pushsection .wang600regs,\"a\";" \
-					".global _reg_base;" \
 					".global " #longreg ";" \
 					" .popsection");	\
-			_opcode(_reg_base - longreg)
+			_opcode(longreg)
 #define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
 #define GO()		_opcode(0x83)
 #define J_IF_0()	_opcode(0x84)
