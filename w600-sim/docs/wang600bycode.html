@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.17 2011/10/12 19:02:34 drmiller Exp $ -->
+<!-- $Id: wang600bycode.html,v 1.18 2011/10/14 22:01:07 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -306,7 +306,7 @@ td.tag {text-align: center;}
 <TD CLASS="key">SEARCH ROM *</TD>
 <TD CLASS="key">SEARCH ROM *</TD>
 <TD CLASS="key">Call *</TD>
-<TD CLASS="key">MARK *</TD>
+<TD CLASS="key">(MARK) *</TD>
 <TD CLASS="key">STORE *</TD>
 <TD CLASS="key">&#945; *</TD>
 <TD CLASS="key">INDIR *</TD>
@@ -322,7 +322,11 @@ td.tag {text-align: center;}
 <P><TABLE BORDER>
 <TR><TH>SEARCH, MARK, and Call prefixes</TH></TR>
 <TR><TD>The second step is a "label", used to implement goto and call.
-	Any code may be used, however END&nbsp;PROG should be avoided.</TD></TR>
+	Any code may be used, however END&nbsp;PROG should be avoided.<BR>
+	<B>Note:</B> while the 15&nbsp;08 variant of MARK is executed identically
+	to 09&nbsp;00, it does not actually mark a label. It is, in affect,
+	a two-step no-op.
+	</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
