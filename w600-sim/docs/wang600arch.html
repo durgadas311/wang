@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.33 2011/10/12 19:02:53 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.34 2011/10/15 16:47:49 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -1245,5 +1245,156 @@ and stop processing the tape.
 
 <P>Other problems with the tape will generally cause the calculator to
 "hang" with a blank display. Pressing PRIME is usually required in order to recover.
+
+<H3>Expansion (Peripheral) Ports</H3>
+
+<H4>CN-24</H4>
+
+The CN-24 (Centronix 24-pin connector) is an output-only port, used primarily for
+printers and plotters. Only 6 bits of data output are provided. The pin-out is:
+
+<P><UL><TABLE BORDER>
+<TR><TD COLSPAN=4>XL<0:3></TD>
+    <TD COLSPAN=2>XH<0:1></TD>
+    <TD>ostb</TD>
+    <TD>oack(i)</TD>
+    <TD COLSPAN=2>n/c</TD>
+    <TD>gnd</TD>
+    <TD>pwr</TD></TR>
+<TR><TH>1</TH>
+    <TH>2</TH>
+    <TH>3</TH>
+    <TH>4</TH>
+    <TH>5</TH>
+    <TH>6</TH>
+    <TH>7</TH>
+    <TH>8</TH>
+    <TH>9</TH>
+    <TH>10</TH>
+    <TH>11</TH>
+    <TH>12</TH></TR>
+<TR><TD COLSPAN=12 BGCOLOR="lightgray">&nbsp;</TD></TR>
+<TR><TH>13</TH>
+    <TH>14</TH>
+    <TH>15</TH>
+    <TH>16</TH>
+    <TH>17</TH>
+    <TH>18</TH>
+    <TH>19</TH>
+    <TH>20</TH>
+    <TH>21</TH>
+    <TH>22</TH>
+    <TH>23</TH>
+    <TH>24</TH></TR>
+<TR><TD COLSPAN=8>gnd</TD>
+    <TD COLSPAN=2>n/c</TD>
+    <TD>chass</TD>
+    <TD>gnd</TD></TR>
+</TABLE>
+
+<P>Signals with (i) are inputs to the calculator, all others are outputs.
+
+<DL>
+<DT><B>ostb</B><DD>Strobe for output to device
+<DT><B>oack</B><DD>Ack from device - output was processed
+</DL></UL>
+
+<H4>CN-36</H4>
+
+The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
+(daisy-chained). The pin-out is:
+
+<P><UL><TABLE BORDER>
+<TR><TD COLSPAN=4>DH<0:3>(i)</TD>
+    <TD COLSPAN=4>DL<0:3>(i)</TD>
+    <TD>istb(i)</TD>
+    <TD>PRIME(i)</TD>
+    <TD>Learn(i)</TD>
+    <TD COLSPAN=4>AL<0:3></TD>
+    <TD COLSPAN=3>D<0:2></TD></TR>
+<TR><TH>1</TH>
+    <TH>2</TH>
+    <TH>3</TH>
+    <TH>4</TH>
+    <TH>5</TH>
+    <TH>6</TH>
+    <TH>7</TH>
+    <TH>8</TH>
+    <TH>9</TH>
+    <TH>10</TH>
+    <TH>11</TH>
+    <TH>12</TH>
+    <TH>13</TH>
+    <TH>14</TH>
+    <TH>15</TH>
+    <TH>16</TH>
+    <TH>17</TH>
+    <TH>18</TH></TR>
+<TR><TD COLSPAN=18 BGCOLOR="lightgray">&nbsp;</TD></TR>
+<TR><TH>19</TH>
+    <TH>20</TH>
+    <TH>21</TH>
+    <TH>22</TH>
+    <TH>23</TH>
+    <TH>24</TH>
+    <TH>25</TH>
+    <TH>26</TH>
+    <TH>27</TH>
+    <TH>28</TH>
+    <TH>29</TH>
+    <TH>30</TH>
+    <TH>31</TH>
+    <TH>32</TH>
+    <TH>33</TH>
+    <TH>34</TH>
+    <TH>35</TH>
+    <TH>36</TH></TR>
+<TR><TD>D<3></TD>
+    <TD COLSPAN=4>XL<0:3></TD>
+    <TD COLSPAN=4>XH<0:3></TD>
+    <TD COLSPAN=3>XS<0:2></TD>
+    <TD>ostb</TD>
+    <TD>iack</TD>
+    <TD COLSPAN=3>gnd</TD>
+    <TD>chass</TD></TR>
+</TABLE>
+
+<P>Signals with (i) are inputs to the calculator, all others are outputs.
+
+<DL>
+<DT><B>istb</B><DD>Strobe for input from device
+<DT><B>ostb</B><DD>Strobe for output to device
+<DT><B>iack</B><DD>Ack from calculator - input was processed
+</DL></UL>
+
+<P>The connector supplies the "always on" signals from AL<0:3> and D<0:3>,
+which are essentially display refresh data. This supports a device known as
+"Classroom Display" which was a large-digit remote copy of the main display.
+
+<P>The signals from XS<0:2> are used to select devices on the daisy-chain.
+The following codes are used:
+
+<P><UL><TABLE BORDER>
+<TR><TH>XS</TH><TH>Device</TH><TH>Command(s)</TH></TR>
+<TR><TD>000</TD><TD COLSPAN=2>no device</TD></TR>
+<TR><TD>001</TD><TD>CN-24 (no device on CN-36)</TD><TD>ALPHA ... 02&nbsp;02<BR>
+					I/O 00&nbsp;xx thru 09&nbsp;xx<BR>
+					I/O 12&nbsp;xx</TD></TR>
+<TR><TD>01X</TD><TD>Model 630 Disk</TD><TD>I/O 13&nbsp;xx</TD></TR>
+<TR><TD>100</TD><TD ROWSPAN=2>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx</TD></TR>
+<TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx</TD></TR>
+<TR><TD>110</TD><TD COLSPAN=2 ROWSPAN=2>Future Expansion</TD></TR>
+<TR><TD>111</TD></TR>
+</TABLE></UL>
+
+<P>The "Group I/O" peripherals were fairly limited. The devices generally
+responded to a byte code from the calculator, and then asserted Learn
+(and strobed PRIME as needed) and pushed program steps to the calculator.
+
+<P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
+Fixed/Removable Disk. The protocol is a block input/output of program steps,
+but could be used for (extended) register data as well. Sufficiently sophisticated
+code in ROM could allow all of RAM to be used for registers, and/or implement
+a simple "operating system" that demand-paged program and register data in RAM.
 
 </HTML>
