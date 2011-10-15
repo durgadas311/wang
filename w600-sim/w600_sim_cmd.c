@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sim_cmd.c,v 1.16 2011/10/12 19:01:36 drmiller Exp $"
+#ident "$Id: w600_sim_cmd.c,v 1.17 2011/10/15 03:30:46 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -359,6 +359,33 @@ static int _keytrc(w600_sys_t *sys, char *line) {
 	return 0;
 }
 
+#ifdef COVERAGE
+static int _cover(w600_sys_t *sys, char *line) {
+	char *s;
+	int x, y = 0;
+	extern uint8_t cov[2048];
+
+	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(__systrc)) {
+		if (strcmp(s, "clear") == 0) {
+			memset(cov, 0, sizeof(cov));
+			return 0;
+		} else {
+		}
+	}
+	for (x = 0; x < 2048; ++x) {
+		if (x && (x & 0x3f) == 0) putchar('\n');
+		if (cov[x]) {
+			putchar('!');
+			++y;
+		} else {
+			putchar('.');
+		}
+	}
+	printf("\nCoverage %d%%\n", (y * 100 + 1024) / 2048);
+	return 0;
+}
+#endif // COVERAGE
+
 static int _keyboard(w600_sys_t *sys, char *line) {
 	char *s;
 	__keyp = 0;
@@ -399,6 +426,9 @@ struct {
 	{ "go", _go,		"[+cycles]", "Resume program at current PC [break after <cycles>]" },
 	{ "systrc", _systrc,	"[[off] pattern]", "Enable tracing of sys mem bytes" },
 	{ "keytrc", _keytrc,	"on/off", "Enable tracing of key presses" },
+#ifdef COVERAGE
+	{ "cover", _cover,	"[clear]", "Dump/clear coverage data" },
+#endif // COVERAGE
 	{ "help", _help,	NULL, "Display this help" },
 };
 #define NUM_CMDS	(sizeof(commands) / sizeof(commands[0]))

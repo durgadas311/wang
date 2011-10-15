@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.42 2011/10/12 19:01:36 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.43 2011/10/15 03:30:46 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -12,6 +12,10 @@
 extern int diw600(char *buf, uint64_t *t);
 extern char *get_psw_str(w600_sys_t *sys);
 #endif // TRACE
+
+#ifdef COVERAGE
+uint8_t cov[2048] = {0};
+#endif // COVERAGE
 
 uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
@@ -377,6 +381,9 @@ int instr_exec(w600_sys_t *sys) {
 	uint8_t m_am = sys->cpu.am;
 	uint8_t m_al = sys->cpu.al;
 	uint8_t br_k = u->kk;
+#ifdef COVERAGE
+	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
+#endif // COVERAGE
 	if (sys->cpu.pc == 0x008) br_k = 15;	// RAM size...
 
 	int opf7 = (u->jl == 7);
