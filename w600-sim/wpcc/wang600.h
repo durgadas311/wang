@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600_h__
 #define __wpcc_wang600_h__
 
-asm(".ident \"Wang 600 Compiler over GCC\"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.8 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -16,18 +16,17 @@ asm(	".section .wang600code, \"a\";"
 	".set _search_end_prog, _search_base;"
 	".section .wang600call,\"a\";"
 	".global _call_base;"
-	" .popsection"
+	".popsection"
 );
 
 #define BEGIN()
-#define END()			_oplabel(_search_,end_prog);
+#define END()
 
-#define _opcode(byte)		asm(" .byte (" # byte ")" );
-#define _oplabel(prefix,label)	asm(" .byte (" # prefix # label ")," \
-					"(" # label ")" );
+#define _opcode(byte)		asm(".byte (" # byte ")" );
+#define _oplabel(prefix,label)	asm(".byte (" # prefix # label "),(" # label ")" );
 #define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
-				asm(" .pushsection .wang600regs,\"a\";" \
+				asm(".pushsection .wang600regs,\"a\";" \
 					".global _reg_base;" \
 					".global " #reg ";" \
 					#reg ": .byte 0;"	\
@@ -41,7 +40,12 @@ asm(	".section .wang600code, \"a\";"
 					".byte ((" #b11 ") << 4) | (" #b10 ");"	\
 					".byte ((" #b13 ") << 4) | (" #b12 ");"	\
 					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
-					" .popsection");
+					".popsection");
+#define _longreg(op,reg)	_opcode(op) \
+				asm(".pushsection .wang600regs,\"a\";" \
+				".global " # reg ";" \
+				".popsection");	\
+				_opcode(reg)
 
 #define LABEL(label)\
 				asm(".pushsection .wang600label,\"a\";" \
@@ -53,12 +57,12 @@ asm(	".section .wang600code, \"a\";"
 					".section .wang600call,\"a\";" \
 					".global _call_" #label ";" \
 					".set _call_" #label ", _call_base;" \
-					" .popsection");
+					".popsection");
 
-#define FLABEL(label)		asm(" .pushsection .wang600flabel,\"a\";" \
+#define FLABEL(label)		asm(".pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
-					" .popsection");
+					".popsection");
 
 #define EXTERNAL(label)	\
 				asm(".pushsection .wang600label,\"a\";" \
@@ -69,28 +73,27 @@ asm(	".section .wang600code, \"a\";"
 					".section .wang600call,\"a\";" \
 					".global _call_" #label ";" \
 					".set _call_" #label ", _call_base;" \
-					" .popsection");
+					".popsection");
 
-#define FEXTERNAL(label)	asm(" .pushsection .wang600flabel,\"a\";" \
+#define FEXTERNAL(label)	asm(".pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
-					" .popsection");
+					".popsection");
 
 #define NAME(prog_name)		asm(".pushsection .wang600name,\"a\",@note;" \
 					".string \"" prog_name "\";" \
-					" .popsection");
+					".popsection");
 
 #define AUTHOR(name)		asm(".pushsection .wang600author,\"a\",@note;" \
 					".string \"" name "\";" \
-					" .popsection");
+					".popsection");
 
 #define TITLE(title)		asm(".pushsection .wang600title,\"a\",@note;" \
 					".string \"" title "\";" \
-					" .popsection");
+					".popsection");
 
-#define HELP_BEGIN()		asm(".pushsection .wang600help,\"a\",@note;" \
-					".string \"");
-#define HELP_END()		asm("\";"\
-					" .popsection");
+#define HELP_BEGIN(string)	asm(".pushsection .wang600help,\"a\",@note;" \
+					".string \"" #string "\";"\
+					".popsection");
 
 /* util macros for printer formating */
 #define tag_X	0
@@ -112,7 +115,7 @@ asm(	".section .wang600code, \"a\";"
 #define dp_sci	11
 #define dp_blank 15
 
-#define E(dig)		_regop(0, dig)
+#define E(dig)		_opcode(dig)
 #define DP()		_opcode(0x0a)
 #define SET_EXP()	_opcode(0x0b)
 #define CHANGE_SIGN()	_opcode(0x0c)
@@ -127,11 +130,7 @@ asm(	".section .wang600code, \"a\";"
 #define RE(reg)		_regop(7, reg)
 
 #define SEARCH(label)	_oplabel(_search_,label)
-#define RECALL(longreg)	_opcode(0x81) \
-				asm(" .pushsection .wang600regs,\"a\";" \
-					".global " #longreg ";" \
-					" .popsection");	\
-			_opcode(longreg)
+#define RECALL(longreg)	_longreg(0x81,longreg)
 #define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
 #define GO()		_opcode(0x83)
 #define J_IF_0()	_opcode(0x84)
@@ -148,7 +147,7 @@ asm(	".section .wang600code, \"a\";"
 #define INV()		_opcode(0x8f)
 
 #define MARK(label)	_opcode(0x90) _opcode(label)
-#define STORE(longreg)	_opcode(0x91) _opcode(longreg)
+#define STORE(longreg)	_longreg(0x91,longreg)
 #define ALPHA(cmd)	_opcode(0x92) cmd
 #define STOP()		_opcode(0x93)
 #define J_IF_N0()	_opcode(0x94)
@@ -161,23 +160,25 @@ asm(	".section .wang600code, \"a\";"
 #define E10_X()		_opcode(0x9b)
 #define INT()		_opcode(0x9c)
 #define ABS()		_opcode(0x9d)
-/* NOTE: tape format wants double-END PROG */
-#define END_PROG()	_opcode(0x9e) _opcode(0x9e)
+/* NOTE: not actual END PROG, but SEARCH to end_prog */
+#define END_PROG()	_oplabel(_search_,end_prog);
 #define RETURN()	_opcode(0x9f)
 
-#define f(x)		_regop(10, x)
-#define F(x)		_regop(11, x)
+#define FCALL(fx)	_opcode(fx)
 
-#define ROM_f(x)	_regop(12, x)
-#define ROM_F(x)	_regop(13, x)
+/* these should not be used? */
+#define _f(x)		_regop(10, x)
+#define _F(x)		_regop(11, x)
+#define _ROM_f(x)	_regop(12, x)
+#define _ROM_F(x)	_regop(13, x)
 
 #define EXCHG(reg)	_regop(14, reg)
 
 #define IO(func)	_opcode(0xf2) _opcode(func)
-#define ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
+#define _ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
 #define CALL(label)	_oplabel(_call_,label)
 #define INDIR(regop)	_opcode(0xfb) regop
-#define ROM_CALL(label)	_opcode(0xfc) _opcode(label)
+#define _ROM_CALL(label) _opcode(0xfc) _opcode(label)
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)
 #define GROUP2(func)	_opcode(0xfe) _opcode(func)
 
@@ -189,9 +190,9 @@ asm(	".section .wang600code, \"a\";"
 #define PTRACE_ON()	ALPHA(LOG_E_X())
 #define PTRACE_OFF()	ALPHA(E_X())
 #define PAUSE()		ALPHA(STOP())
-#define PI()		ALPHA(f(0))
-#define POW10(n)	ALPHA(f(n))
-#define POW_10(n)	ALPHA(F(n))
+#define PI()		ALPHA(_f(0))
+#define POW10(n)	ALPHA(_f(n))
+#define POW_10(n)	ALPHA(_F(n))
 #define J_IF_EQUAL()	ALPHA(J_IF_0())
 #define J_IF_GT		ALPHA(J_IF_P())
 #define J_IF_LT		ALPHA(SIN())
@@ -199,6 +200,6 @@ asm(	".section .wang600code, \"a\";"
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");
-#define ALPHA_STRING(num)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
+#define ALPHA_STRING(str)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
 
 #endif /* __wpcc_wang600_h__ */
