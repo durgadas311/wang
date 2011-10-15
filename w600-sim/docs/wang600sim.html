@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.9 2011/07/06 19:48:43 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.10 2011/10/15 00:48:24 drmiller Exp $ -->
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -143,7 +143,7 @@ of 0's and 1's onto the tape. The simulator must interpret those 0's
 and 1's and convert them back into 4-bit words of data.  The simulator
 must also convert the 4-bits words back into signals, and timing, that the microcode
 expects to see when reading the tape.  Also, the original microcode used
-1-second gaps on the tape to indicate the end/beginning of a program
+0.5-second gaps on the tape to indicate the end/beginning of a program
 (or registers) image. That is not practical when using files, so the
 gaps are represented with a pair of END&nbsp;PROG codes and the simulator
 must convert to/from the equivalent signals and timing for the microcode.
