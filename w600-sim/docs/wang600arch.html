@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.34 2011/10/15 16:47:49 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.35 2011/10/15 21:50:30 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -626,7 +626,7 @@ For example, plotting commands expect<BR>
 <P><DL>
 	<DT><B>Keyboard Trace (15,15,15)<0>:</B>
 	<DD>	Tracing of keyboard commands is enabled
-	<DT><B>Goup I/O (15,15,13)<1>:</B>
+	<DT><B>Group I/O (15,15,13)<1>:</B>
 	<DD>	A Group I/O sequence is running
 	<DT><B>Program Trace (15,15,13)<0>:</B>
 	<DD>	Tracing of program commands is enabled
@@ -708,12 +708,12 @@ be copied into 15&nbsp;14, and then 15&nbsp;14 will be formatted
 for floating point and scientific notation and stored, respectively,
 in 15&nbsp;12 and 15&nbsp;13.
 Which ever mode is currently selected via the "Fl &#8596; Sc" pushbutton
-will determmine which register (15&nbsp;12 or 15&nbsp;13) will
+will determine which register (15&nbsp;12 or 15&nbsp;13) will
 be refreshed to the display.
 
 <P>Depending on the state of the mode switches, the display refresh routine will refresh
 from register 15&nbsp;13 (Sci notation), 15&nbsp;12 (Floating point),
-or 15&nbsp;11 (Learn modes). These "registers" contain the pre-formated
+or 15&nbsp;11 (Learn modes). These "registers" contain the pre-formatted
 pattern to be displayed in each case. For example, after PRIME, these registers
 will contain:
 
@@ -779,7 +779,7 @@ will contain:
 
 <H3>Printer</H3>
 
-The printer is a drum-style with 21 colunms and 16 rows (symbols per column).
+The printer is a drum-style with 21 columns and 16 rows (symbols per column).
 The drum has the following characters in the columns/rows indicated:
 
 <P><UL><TABLE BORDER>
@@ -1224,7 +1224,7 @@ and "0" into either "1 1" or "0 0",
 depending on the previous data to ensure that
 there is always a transition at the beginning of each bit.
 The resulting stream is fed to the record head and produces
-alternating segments of positive and negative magenetic fields on the tape.
+alternating segments of positive and negative magnetic fields on the tape.
 
 <P>During read, the changes between positive and negative magnetic fields show
 up as "blips" in the signal from the tape read head. These blips are fed
@@ -1236,7 +1236,7 @@ return to "0" after those 97 cycles.
 sees indicates the beginning of a bit. It then delays 272 cycles and
 checks the signal again. If it is still "1" (was actually re-triggered by
 a second transition) then the data bit is interpreted to be a "1".
-Otherwise, the data bit is interprented to be "0". These bits are
+Otherwise, the data bit is interpreted to be "0". These bits are
 assembled into a 4-bit word and a parity bit, which is then checked for odd parity
 and, if correct, the data word is stored in memory.
 
@@ -1387,9 +1387,80 @@ The following codes are used:
 <TR><TD>111</TD></TR>
 </TABLE></UL>
 
+<H5>Devices 100 and 101</H5>
+
 <P>The "Group I/O" peripherals were fairly limited. The devices generally
 responded to a byte code from the calculator, and then asserted Learn
 (and strobed PRIME as needed) and pushed program steps to the calculator.
+The devices and/or operators orchestrated the interaction.
+
+<P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
+
+<UL>
+<LI>The calculator outputs (XH,XL) xx&nbsp;xx
+	with XS=10y (4+y) and suspends normal operation
+<LI>The device then typically asserts Learn
+<LI>The device sends program codes, which the calculator handles "normally"
+<LI>The device de-asserts Learn and sends GO
+<LI>The calculator sets XS=000 and resumes normal operation
+</UL>
+
+Note: The calculator cannot tell the difference between codes sent by device and
+codes entered from keyboard.
+
+<H5>Device 01X</H5>
+
+<P>The protocol is as follows (I/O 13&nbsp;xx command):
+
+<UL>
+<LI>The calculator sends the 3-byte address equivalent
+of the integer contents of register 00, most significant byte first, all with XS=010
+<LI>The calculator sends the size code, with XS=010
+<LI>For Read operations:
+	<UL>
+	<LI>The calculator sets XS=011 (data ignored by device)
+	<LI>The device sends N bytes
+	<LI>The calculator stores N bytes,
+	starting at program step in register 01
+	<LI>The device sends 00 (result)
+	</UL>
+<LI>For Write operations:
+	<UL>
+	<LI>The calculator sends N bytes,
+	starting from program step in register 01, with XS=011
+	<LI>The device stores N bytes at address
+	<LI>The device sends 00 (result)
+	</UL>
+<LI>The calculator sets XS=000
+</UL>
+
+<P>If the result code is not 00, the calculator sets PE (Prog Error).
+
+<P>Each byte sent from device is "seen" by the calculator as
+keyboard input, and is acknowledged by the act of reading that "keyboard code".
+
+<P>Each byte sent from the calculator is acknowledged by the device
+by sending a dummy "keyboard code".
+
+<P><UL><TABLE BORDER>
+<TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
+<TR><TD>00</TD><TD>0x01</TD><TD>Read 1 byte (step)</TD></TR>
+<TR><TD>01</TD><TD>0x02</TD><TD>Read 4 bytes (steps)</TD></TR>
+<TR><TD>02</TD><TD>0x04</TD><TD>Read 8 bytes (steps)</TD></TR>
+<TR><TD>03</TD><TD>0x08</TD><TD>Read 16 bytes (steps)</TD></TR>
+<TR><TD>04</TD><TD>0x10</TD><TD>Read 32 bytes (steps)</TD></TR>
+<TR><TD>05</TD><TD>0x20</TD><TD>Read 64 bytes (steps)</TD></TR>
+<TR><TD>06</TD><TD>0x40</TD><TD>Read 128 bytes (steps)</TD></TR>
+<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD></TR>
+<TR><TD>08</TD><TD>0x81</TD><TD>Write 1 byte (step)</TD></TR>
+<TR><TD>09</TD><TD>0x82</TD><TD>Write 4 bytes (steps)</TD></TR>
+<TR><TD>10</TD><TD>0x84</TD><TD>Write 8 bytes (steps)</TD></TR>
+<TR><TD>11</TD><TD>0x88</TD><TD>Write 16 bytes (steps)</TD></TR>
+<TR><TD>12</TD><TD>0x90</TD><TD>Write 32 bytes (steps)</TD></TR>
+<TR><TD>13</TD><TD>0xa0</TD><TD>Write 64 bytes (steps)</TD></TR>
+<TR><TD>14</TD><TD>0xc0</TD><TD>Write 128 bytes (steps)</TD></TR>
+<TR><TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
+</TABLE></UL>
 
 <P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
 Fixed/Removable Disk. The protocol is a block input/output of program steps,
