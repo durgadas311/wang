@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.24 2011/06/01 19:56:46 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.25 2011/10/15 21:51:24 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -201,6 +201,7 @@ static void guidevinput(w600_sys_t *sys, uint16_t *kc, uint16_t b) {
 			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.xs);
 			return;
 		}
+//fprintf(stderr, "\tDEV< %02x %x\n", b & 0x0ff, sys->cpu.xs);
 		*kc = b; // must be non-zero to be seen
 		//if ((b & 0x0f00) == 0) { // not ACK
 		//	// ACK is sent when Wang takes "key"...

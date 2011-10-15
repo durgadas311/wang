@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.43 2011/10/15 03:30:46 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.44 2011/10/15 21:51:24 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -190,6 +190,7 @@ static void tape_off(w600_sys_t *sys) {
 
 static void dev_out(w600_sys_t *sys) {
 	uint8_t c = (sys->cpu.dh << 4) | sys->cpu.dl;
+//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.xs);
 	sys->dev(sys, c, sys->cpu.xs);
 }
 

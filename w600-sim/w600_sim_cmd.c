@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sim_cmd.c,v 1.17 2011/10/15 03:30:46 drmiller Exp $"
+#ident "$Id: w600_sim_cmd.c,v 1.18 2011/10/15 21:51:24 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -363,25 +363,32 @@ static int _keytrc(w600_sys_t *sys, char *line) {
 static int _cover(w600_sys_t *sys, char *line) {
 	char *s;
 	int x, y = 0;
+	int m = 0, c = 0;
 	extern uint8_t cov[2048];
 
 	while ((s = strtok(NULL, " \t")) != NULL && x < sizeof(__systrc)) {
 		if (strcmp(s, "clear") == 0) {
-			memset(cov, 0, sizeof(cov));
-			return 0;
+			++c;
+		} else if (strcmp(s, "map") == 0) {
+			++m;
 		} else {
 		}
 	}
 	for (x = 0; x < 2048; ++x) {
-		if (x && (x & 0x3f) == 0) putchar('\n');
+		if (m && x && (x & 0x3f) == 0) putchar('\n');
 		if (cov[x]) {
-			putchar('!');
+			if (m) putchar('!');
 			++y;
 		} else {
-			putchar('.');
+			if (m) putchar('.');
 		}
 	}
-	printf("\nCoverage %d%%\n", (y * 100 + 1024) / 2048);
+	printf("\nCoverage %d/%d %d%%", y, 2048, (y * 100 + 1024) / 2048);
+	if (c) {
+		memset(cov, 0, sizeof(cov));
+		printf(" (cleared)");
+	}
+	printf("\n");
 	return 0;
 }
 #endif // COVERAGE
@@ -427,7 +434,7 @@ struct {
 	{ "systrc", _systrc,	"[[off] pattern]", "Enable tracing of sys mem bytes" },
 	{ "keytrc", _keytrc,	"on/off", "Enable tracing of key presses" },
 #ifdef COVERAGE
-	{ "cover", _cover,	"[clear]", "Dump/clear coverage data" },
+	{ "cover", _cover,	"[map][clear]", "Dump/clear coverage data" },
 #endif // COVERAGE
 	{ "help", _help,	NULL, "Display this help" },
 };
