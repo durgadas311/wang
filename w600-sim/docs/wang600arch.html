@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.37 2011/10/16 00:49:44 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.38 2011/10/16 16:46:12 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -51,7 +51,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>3-0</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
 <TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Index</TD></TR>
 <TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">n/a</TD><TD>Print Paper Feed (one-shot)</TD></TR>
-<TR><TD CLASS="num">SB</TD><TD CLASS="num">1</TD><TD CLASS="num">TKWS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Strobe/Ack</TD></TR>
+<TR><TD CLASS="num">AK</TD><TD CLASS="num">1</TD><TD CLASS="num">RBS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Ack (on device)</TD></TR>
 <TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
 <TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>Top of Stack</TD></TR>
 <TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>2nd on Stack</TD></TR>
@@ -404,7 +404,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1001</TD><TD>undefined</TD></TR>
 	<TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
 	<TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
-	<TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = SB</TD></TR>
+	<TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = AK</TD></TR>
 	<TR><TD>1101</TD><TD>TM = 1<BR>
 			wr = BI&lt;0&gt;</TD></TR>
 	<TR><TD>1110</TD><TD>TM = 0<BR>
@@ -546,7 +546,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=4>PD</TD>
 	<TD CLASS="num">PI</TD>
 	<TD CLASS="num">n/a</TD>
-	<TD CLASS="num">SB</TD>
+	<TD CLASS="num">AK</TD>
 	<TD CLASS="num">n/a</TD>
 </TR>
 <TR><TH>JL == 110 (?)</TH><TH>In</TH>
@@ -1257,7 +1257,7 @@ printers and plotters. Only 6 bits of data output are provided. The pin-out is:
 <TR><TD COLSPAN=4>XL<0:3></TD>
     <TD COLSPAN=2>XH<0:1></TD>
     <TD>ostb</TD>
-    <TD>oack(i)</TD>
+    <TD>AK(i)</TD>
     <TD COLSPAN=2>n/c</TD>
     <TD>gnd</TD>
     <TD>pwr</TD></TR>
@@ -1296,7 +1296,7 @@ printers and plotters. Only 6 bits of data output are provided. The pin-out is:
 
 <DL>
 <DT><B>ostb</B><DD>Strobe for output to device
-<DT><B>oack</B><DD>Ack from device - output was processed
+<DT><B>AK</B><DD>Ack from device - output was processed
 </DL></UL>
 
 <H4>CN-36</H4>
