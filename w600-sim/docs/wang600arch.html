@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.39 2011/10/16 20:28:20 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.40 2011/10/16 22:24:10 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -631,27 +631,24 @@ For example, plotting commands expect<BR>
 	<DT><B>Program Trace (15,15,13)<0>:</B>
 	<DD>	Tracing of program commands is enabled
 	<DT><B>Prefix State (15,15,10):</B>
-	<DD>	00 = SEARCH<BR>
-		01 = RECALL<BR>
-		02 = PRINT<BR>
-		03 = I/O<BR>
-		04 = SEARCH ROM (15 03)<BR>
-		05 = SEARCH ROM (15 04)<BR>
-		06 = SEARCH ROM (15 05)<BR>
-		07 = SEARCH ROM (15 06)<BR>
-		08 = CALL<BR>
-		09 = MARK<BR>
-		10 = STORE<BR>
-		11 = ALPHA<BR>
-		12 = INDIR<BR>
-		13 = CALL ROM<BR>
-		14 = GROUP 1<BR>
-		15 = GROUP 2<BR>
+	<DD>	<TABLE BORDER>
+		<TR><TD>00 = SEARCH</TD>		<TD>08 = CALL</TD></TR>
+		<TR><TD>01 = RECALL</TD>		<TD>09 = MARK</TD></TR>
+		<TR><TD>02 = PRINT</TD>			<TD>10 = STORE</TD></TR>
+		<TR><TD>03 = I/O</TD>			<TD>11 = ALPHA</TD></TR>
+		<TR><TD>04 = SEARCH ROM (15 03)</TD>	<TD>12 = INDIR</TD></TR>
+		<TR><TD>05 = SEARCH ROM (15 04)</TD>	<TD>13 = CALL ROM</TD></TR>
+		<TR><TD>06 = SEARCH ROM (15 05)</TD>	<TD>14 = GROUP 1</TD></TR>
+		<TR><TD>07 = SEARCH ROM (15 06)</TD>	<TD>15 = GROUP 2</TD></TR>
+		</TABLE>
 	<DT><B>Number Entry State (15,15,4):</B>
-	<DD>	01 = Mantissa, whole part<BR>
-		03 = Exponent<BR>
-		04 = Mantissa, fractional part<BR>
-		15 = Set P.C.
+	<DD>	<TABLE BORDER>
+		<TR><TD>00 = Not currently entering number</TD></TR>
+		<TR><TD>01 = Mantissa, whole part</TD></TR>
+		<TR><TD>03 = Exponent</TD></TR>
+		<TR><TD>04 = Mantissa, fractional part</TD></TR>
+		<TR><TD>15 = Set P.C.</TD></TR>
+		</TABLE>
 	<DT><B>Prefix (15,15,3)<3>:</B>
 	<DD>	Next code is interpreted according to Prefix State.
 	<DT><B>ROM (15,15,3)<2>:</B>
