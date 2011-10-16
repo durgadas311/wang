@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.36 2011/10/16 00:28:55 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.37 2011/10/16 00:49:44 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -1398,7 +1398,7 @@ The devices and/or operators orchestrated the interaction.
 
 <UL>
 <LI>The calculator outputs (XH,XL) xx&nbsp;xx
-	with XS=10y (4+y) and suspends normal operation
+	with XS=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) and suspends normal operation
 <LI>The device then typically asserts Learn
 <LI>The device sends program codes, which the calculator handles "normally"
 <LI>The device de-asserts Learn and sends GO
@@ -1422,15 +1422,14 @@ of the integer contents of register 00, most significant byte first, all with XS
 	<LI>The device sends N bytes
 	<LI>The calculator stores N bytes,
 	starting at program step in register 01
-	<LI>The device sends 00 (result)
 	</UL>
 <LI>For Write operations:
 	<UL>
 	<LI>The calculator sends N bytes,
 	starting from program step in register 01, with XS=011
 	<LI>The device stores N bytes at address
-	<LI>The device sends 00 (result)
 	</UL>
+<LI>The device sends 00 (result)
 <LI>The calculator sets XS=000
 </UL>
 
