@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.40 2011/10/16 22:24:10 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.41 2011/10/17 15:39:49 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -774,9 +774,17 @@ will contain:
 </TR>
 </TABLE></UL>
 
+<P> The "panaplex" display provides 9 segments per digit, plus decimal point.
+The 2 center vertical segments are not addressable through standard 7-segment
+decoders.
+The display hardware uses discrete logic to override the 7-segment decoder
+for "+" (plus), "-" (minus), and "." (dp),
+as well as to relocate the segments for "1"
+into the center segments to produce a more-symmetrical string of digits.
+
 <H3>Printer</H3>
 
-The printer is a drum-style with 21 columns and 16 rows (symbols per column).
+The printer is a rotating-drum style with 21 columns and 16 rows (symbols per column).
 The drum has the following characters in the columns/rows indicated:
 
 <P><UL><TABLE BORDER>
@@ -1184,7 +1192,7 @@ When all 16 rows have been processed, the paper is advanced.
 <H3>Cassette Tape</H3>
 
 Most cassette storage of the era used audio modulation, similar to the
-"singing tones" of a modem, and used standard audio cassette tapes.
+"musical tones" of a modem, and used standard audio cassette tapes.
 But the Wang 600 used magnetic saturation like mainframe computer tape drives.
 It did work on audio cassettes, but Wang recommended high quality "metal"
 tape.
@@ -1194,7 +1202,9 @@ the encoding had to ensure that the magnetic field changed frequently.
 This means that, for example, a long string of zeroes must not result in
 a long period of blank tape. Instead, there is guaranteed to be a transition
 at the beginning of every bit, and a transition in the middle if the bit was
-a "1". In addition, a parity bit was added every 4 data bits, to help
+a "1". This is known as "Biphase-Mark" encoding or BMC, a variation of
+Differential Manchester encoding.
+In addition, a parity bit was added every 4 data bits, to help
 detect errors.
 
 <P>The timing of each bit was precise, because the tape read code had to be
@@ -1242,6 +1252,15 @@ and stop processing the tape.
 
 <P>Other problems with the tape will generally cause the calculator to
 "hang" with a blank display. Pressing PRIME is usually required in order to recover.
+
+<P>The calculator reads/writes the tape at about 1000 bits/second. Assuming standard
+tape speed, this makes a tape density of about 533 bpi
+(compare to mainframe "9-track" tapes which were 800 or 1600 bpi, and later 6250 bpi).
+The smallest common audio cassette was 15 minutes (C15) which would hold an
+overwhelming 90,000 program steps (on both sides) or
+45 complete copies of the calculator memory (a program rarely consumed all of memory).
+For this reason, Wang data cassettes were much shorter,
+typically only having a few minutes of tape.
 
 <H3>Expansion (Peripheral) Ports</H3>
 
@@ -1292,8 +1311,10 @@ printers and plotters. Only 6 bits of data output are provided. The pin-out is:
 <P>Signals with (i) are inputs to the calculator, all others are outputs.
 
 <DL>
-<DT><B>ostb</B><DD>Strobe for output to device
-<DT><B>AK</B><DD>Ack from device - output was processed
+<DT><B>ostb (<span style="text-decoration: overline">TKWS</span>)</B>
+	<DD>Strobe for output to device
+<DT><B>AK (<span style="text-decoration: overline">RBS</span>)</B>
+	<DD>Ack from device - output was processed
 </DL></UL>
 
 <H4>CN-36</H4>
@@ -1359,9 +1380,12 @@ The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
 <P>Signals with (i) are inputs to the calculator, all others are outputs.
 
 <DL>
-<DT><B>istb</B><DD>Strobe for input from device
-<DT><B>ostb</B><DD>Strobe for output to device
-<DT><B>iack</B><DD>Ack from calculator - input was processed
+<DT><B>istb (<span style="text-decoration: overline">GISN</span>)</B>
+	<DD>Strobe for input from device, sets KP=1
+<DT><B>ostb (<span style="text-decoration: overline">GISO</span>)</B>
+	<DD>Strobe for output to device
+<DT><B>iack (<span style="text-decoration: overline">GKBD</span>)</B>
+	<DD>Ack from calculator - input was processed, reflects KP=0
 </DL></UL>
 
 <P>The connector supplies the "always on" signals from AL<0:3> and D<0:3>,
@@ -1395,12 +1419,29 @@ The devices and/or operators orchestrated the interaction.
 <P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
 
 <UL>
-<LI>The calculator outputs (XH,XL) xx&nbsp;xx
+<LI>The calculator outputs xx&nbsp;xx
 	with XS=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) and suspends normal operation
+	(<B>ostb</B> activated)
+	<UL>
+	<LI>Device sees <B>ostb</B> and interprets byte
+	</UL>
 <LI>The device then typically asserts Learn
-<LI>The device sends program codes, which the calculator handles "normally"
-<LI>The device de-asserts Learn and sends GO
+<LI>The device sends program codes,
+	which the calculator handles "normally" via KP
+	<UL>
+	<LI>Device waits for <B>iack</B> (KP=0)
+	<LI>Device sends byte and activates <B>istb</B> (sets KP=1)
+	<LI>Calculator sees KP and processes input, which resets KP and <B>iack</B>
+	</UL>
+<LI>The device de-asserts Learn if previously asserted
+<LI>The device sends GO
+	<UL>
+	<LI>(same protocol as above, for all bytes sent)
+	</UL>
 <LI>The calculator sets XS=000 and resumes normal operation
+	<UL>
+	<LI>Data ignored by all devices, since XS=000
+	</UL>
 </UL>
 
 Note: The calculator cannot tell the difference between codes sent by device and
@@ -1408,16 +1449,44 @@ codes entered from keyboard.
 
 <H5>Device 01X</H5>
 
+<UL><TABLE BORDER>
+<TR><TD>X=0</TD><TD>Command mode (Calculator to Device)</TD></TR>
+<TR><TD>X=1</TD><TD>Data mode (direction depends on command)</TD></TR>
+</TABLE></UL>
+
 <P>The protocol is as follows (I/O 13&nbsp;xx command):
 
 <UL>
 <LI>The calculator sends the 3-byte address equivalent
 of the integer contents of register 00, most significant byte first, all with XS=010
+(command mode)
+	<UL>
+	For each byte:
+	<LI>Device sees <B>ostb</B> and interprets byte
+	<LI>Device waits for <B>iack</B> (KP=0)
+	<LI>Device activates <B>istb</B> (sets KP=1)
+	<LI>Calculator sees KP and ignores data, resets KP and <B>iack</B>
+	</UL>
 <LI>The calculator sends the size code, with XS=010
+	<UL>
+	<LI>Device sees <B>ostb</B> and interprets byte
+	<LI>Device waits for <B>iack</B> (KP=0)
+	<LI>Device activates <B>istb</B> (sets KP=1)
+	<LI>Calculator sees KP and ignores data, resets KP and <B>iack</B>
+	</UL>
 <LI>For Read operations:
 	<UL>
 	<LI>The calculator sets XS=011 (data ignored by device)
+		<UL>
+		<LI>Device sees <B>ostb</B> and ignores byte
+		<LI>Device sees XS=011 and switches to "data mode"
+		</UL>
 	<LI>The device sends N bytes
+		<UL>
+		<LI>Device waits for <B>iack</B> (KP=0)
+		<LI>Device sends byte and activates <B>istb</B> (sets KP=1)
+		<LI>Calculator sees KP and processes data, resets KP and <B>iack</B>
+		</UL>
 	<LI>The calculator stores N bytes,
 	starting at program step in register 01
 	</UL>
@@ -1425,10 +1494,25 @@ of the integer contents of register 00, most significant byte first, all with XS
 	<UL>
 	<LI>The calculator sends N bytes,
 	starting from program step in register 01, with XS=011
+		<UL>
+		<LI>Device sees XS=011 and switches to "data mode"
+		<LI>Device sees <B>ostb</B> and processes byte
+		<LI>Device waits for <B>iack</B> (KP=0)
+		<LI>Device activates <B>istb</B> (sets KP=1)
+		<LI>Calculator sees KP and ignores data, resets KP and <B>iack</B>
+		</UL>
 	<LI>The device stores N bytes at address
 	</UL>
 <LI>The device sends 00 (result)
+	<UL>
+	<LI>Device waits for <B>iack</B> (KP=0)
+	<LI>Device sends result code and activates <B>istb</B> (sets KP=1)
+	<LI>Calculator sees KP and handles result, resets KP and <B>iack</B>
+	</UL>
 <LI>The calculator sets XS=000
+	<UL>
+	<LI>Data ignored by all devices, since XS=000
+	</UL>
 </UL>
 
 <P>If the result code is not 00, the calculator sets PE (Prog Error).
@@ -1440,23 +1524,24 @@ keyboard input, and is acknowledged by the act of reading that "keyboard code".
 by sending a dummy "keyboard code".
 
 <P><UL><TABLE BORDER>
-<TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
-<TR><TD>00</TD><TD>0x01</TD><TD>Read 1 byte (step)</TD></TR>
-<TR><TD>01</TD><TD>0x02</TD><TD>Read 8 bytes (steps)</TD></TR>
-<TR><TD>02</TD><TD>0x04</TD><TD>Read 16 bytes (steps)</TD></TR>
-<TR><TD>03</TD><TD>0x08</TD><TD>Read 32 bytes (steps)</TD></TR>
-<TR><TD>04</TD><TD>0x10</TD><TD>Read 64 bytes (steps)</TD></TR>
-<TR><TD>05</TD><TD>0x20</TD><TD>Read 128 bytes (steps)</TD></TR>
-<TR><TD>06</TD><TD>0x40</TD><TD>Read 256 bytes (steps)</TD></TR>
-<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD></TR>
-<TR><TD>08</TD><TD>0x81</TD><TD>Write 1 byte (step)</TD></TR>
-<TR><TD>09</TD><TD>0x82</TD><TD>Write 8 bytes (steps)</TD></TR>
-<TR><TD>10</TD><TD>0x84</TD><TD>Write 16 bytes (steps)</TD></TR>
-<TR><TD>11</TD><TD>0x88</TD><TD>Write 32 bytes (steps)</TD></TR>
-<TR><TD>12</TD><TD>0x90</TD><TD>Write 64 bytes (steps)</TD></TR>
-<TR><TD>13</TD><TD>0xa0</TD><TD>Write 128 bytes (steps)</TD></TR>
-<TR><TD>14</TD><TD>0xc0</TD><TD>Write 256 bytes (steps)</TD></TR>
-<TR><TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
+<TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH><TD ROWSPAN=9>&nbsp;</TD>
+	<TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
+<TR><TD>00</TD><TD>0x01</TD><TD>Read 1 byte (step)</TD>
+	<TD>08</TD><TD>0x81</TD><TD>Write 1 byte (step)</TD></TR>
+<TR><TD>01</TD><TD>0x02</TD><TD>Read 8 bytes (steps)</TD>
+	<TD>09</TD><TD>0x82</TD><TD>Write 8 bytes (steps)</TD></TR>
+<TR><TD>02</TD><TD>0x04</TD><TD>Read 16 bytes (steps)</TD>
+	<TD>10</TD><TD>0x84</TD><TD>Write 16 bytes (steps)</TD></TR>
+<TR><TD>03</TD><TD>0x08</TD><TD>Read 32 bytes (steps)</TD>
+	<TD>11</TD><TD>0x88</TD><TD>Write 32 bytes (steps)</TD></TR>
+<TR><TD>04</TD><TD>0x10</TD><TD>Read 64 bytes (steps)</TD>
+	<TD>12</TD><TD>0x90</TD><TD>Write 64 bytes (steps)</TD></TR>
+<TR><TD>05</TD><TD>0x20</TD><TD>Read 128 bytes (steps)</TD>
+	<TD>13</TD><TD>0xa0</TD><TD>Write 128 bytes (steps)</TD></TR>
+<TR><TD>06</TD><TD>0x40</TD><TD>Read 256 bytes (steps)</TD>
+	<TD>14</TD><TD>0xc0</TD><TD>Write 256 bytes (steps)</TD></TR>
+<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD>
+	<TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
 </TABLE></UL>
 
 <P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
