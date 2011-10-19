@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600_h__
 #define __wpcc_wang600_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.8 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.9 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -182,7 +182,7 @@ asm(	".section .wang600code, \"a\";"
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)
 #define GROUP2(func)	_opcode(0xfe) _opcode(func)
 
-#define J_IF_EQ()	IO(0xa0)
+#define J_IF_E()	IO(0xa0)
 #define J_IF_NE()	IO(0xb0)
 
 #define KTRACE_ON()	ALPHA(_opcode(0x82))
@@ -193,7 +193,7 @@ asm(	".section .wang600code, \"a\";"
 #define PI()		ALPHA(_f(0))
 #define POW10(n)	ALPHA(_f(n))
 #define POW_10(n)	ALPHA(_F(n))
-#define J_IF_EQUAL()	ALPHA(J_IF_0())
+#define J_IF_EQ()	ALPHA(J_IF_0())
 #define J_IF_GT		ALPHA(J_IF_P())
 #define J_IF_LT		ALPHA(SIN())
 #define JUMP(reg)	INDIR(E(reg))
