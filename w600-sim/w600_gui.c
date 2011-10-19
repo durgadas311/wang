@@ -13,7 +13,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.25 2011/10/15 21:51:24 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.26 2011/10/19 16:55:17 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -418,7 +418,7 @@ static int spawn_fe(w600_sys_t *sys) {
 	return 0;
 }
 
-int start_fe(w600_sys_t *sys) {
+int start_fe(w600_sys_t *sys, int ops) {
 	extraneous = 0;
 	int rc = spawn_fe(sys);
 	return rc;

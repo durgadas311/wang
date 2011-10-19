@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.44 2011/10/15 21:51:24 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.45 2011/10/19 16:55:17 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -244,8 +244,11 @@ static void printer_feed(w600_sys_t *sys) {
 	sys->printer(sys, -1, 0);
 }
 
+extern uint16_t ram_mask;
+
 static void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	uint16_t adr = (ah << 8) | (am << 4) | al;
+	adr &= ram_mask;
 	uint8_t b = sys->ram[adr >> 1];
 	if (adr & 1) {
 		b >>= 4;
@@ -264,6 +267,7 @@ static void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 
 static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	uint16_t adr = (ah << 8) | (am << 4) | al;
+	adr &= ram_mask;
 	uint8_t a = sys->cpu.mr;
 	uint8_t b = sys->ram[adr >> 1];
 	uint8_t c = a;
@@ -385,8 +389,6 @@ int instr_exec(w600_sys_t *sys) {
 #ifdef COVERAGE
 	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
 #endif // COVERAGE
-	if (sys->cpu.pc == 0x008) br_k = 15;	// RAM size...
-
 	int opf7 = (u->jl == 7);
 	if (opf7) {
 		next = sys->cpu.stk1 | 1;

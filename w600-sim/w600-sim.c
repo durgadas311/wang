@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600-sim.c,v 1.10 2011/05/15 23:10:44 drmiller Exp $"
+#ident "$Id: w600-sim.c,v 1.11 2011/10/19 16:55:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -35,6 +35,7 @@ static void usage() {
 	fprintf(stderr, "Usage: "
 		"%s [options]\n"
 		"Options:\n"
+		"\t-M model\tRun simulation for model, default \"600-14TP\"\n"
 		"\t-b\tBack-end mode (for GUI FE)\n"
 		"\t-g\tSpawn GUI (normally GUI spawns w600-sim)\n"
 		"\t-i\tInteractive mode enable\n"
@@ -62,12 +63,13 @@ int main(int argc, char **argv) {
 	char *ram = NULL;
 	char *rom = NULL;
 	char *cass = NULL;
+	char *model = NULL;
 
 	extern char *optarg;
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "bc:e:gil:m:p:r:t:u:")) != EOF) {
+	while ((x = getopt(argc, argv, "bc:e:gil:m:M:p:r:t:u:")) != EOF) {
 		switch(x) {
 		case 'b':
 			sys_ops |= SYS_BACK_END;
@@ -89,6 +91,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'm':
 			ram = optarg;
+			break;
+		case 'M':
+			model = optarg;
 			break;
 		case 'p':
 			pgm = optarg;
@@ -118,6 +123,25 @@ int main(int argc, char **argv) {
 			exit(1);
 			break;
 		}
+	}
+	if (model == NULL) model = "600-14TP";
+	char *s = model;
+	if (strncmp(s, "600-", 4) == 0) s += 4;
+	/* for now, assume TP */
+	x = strtoul(s, NULL, 10);
+	switch(x) {
+	case 14:
+		sys_ops |= (SYS_MODEL600_14TP << SYS_MODEL_SHIFT);
+		break;
+	case 6:
+		sys_ops |= (SYS_MODEL600_6TP << SYS_MODEL_SHIFT);
+		break;
+	case 2:
+		sys_ops |= (SYS_MODEL600_2TP << SYS_MODEL_SHIFT);
+		break;
+	default:
+		fprintf(stderr, "unknown model \"%s\"\n", model);
+		exit(1);
 	}
 	sys_start(&sys, sys_ops);
 	if (load == (uint16_t)-1) {

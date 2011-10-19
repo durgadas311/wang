@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_sys.c,v 1.27 2011/10/09 15:11:26 drmiller Exp $"
+#ident "$Id: w600_sys.c,v 1.28 2011/10/19 16:55:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +14,10 @@
 #include "w600_sys.h"
 #include "w600_exec.h"
 #include "w600_gui.h"
+
+static int _sys_ops = 0;
+
+uint16_t ram_mask = 0;
 
 extern int diw600(char *buf, uint64_t *t);
 
@@ -483,8 +487,9 @@ for (x = 0; x < sizeof(sys->ram); ++x) {
 }
 
 void sys_start(w600_sys_t *sys, int ops) {
+	_sys_ops = ops;
 	if (ops & SYS_START_GUI) {
-		int rc = start_fe(sys);
+		int rc = start_fe(sys, ops);
 		if (rc) {
 			fprintf(stderr, "GUI startup failed, reverting to stdio\n");
 		}
@@ -547,6 +552,22 @@ void sys_loadram(w600_sys_t *sys, char *ram) {
 	__load_mem(mem, ram);
 }
 
+struct ucode_ovr_s {
+	uint16_t adr;
+	union {
+		uint64_t word;
+		w600_ucode_t flds;
+	} instr[SYS_MODEL_NUM];
+};
+static struct ucode_ovr_s ucode_ovr[] = {
+	{ 0x008, {
+[SYS_MODEL600_2TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  3 }},
+[SYS_MODEL600_6TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  7 }},
+[SYS_MODEL600_14TP] = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk = 15 }}
+	}}
+};
+#define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
+
 // ! This loads a microcode image!
 void sys_loaducode(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	int fd;
@@ -567,6 +588,19 @@ void sys_loaducode(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 		exit(1);
 	}
 	close(fd);
+	/*
+	 * overidden instructions were done as ucode was executed,
+	 * but rather than searching table on every instruction
+	 * we just patch our local copy of the ucode now.
+	 */
+	int model = (_sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
+	for (fd = 0; fd < NUM_UCODE_OVR; ++fd) {
+		sys->ucode[ucode_ovr[fd].adr] = ucode_ovr[fd].instr[model].word;
+	}
+
+	/* now get RAM address mask... */
+	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[0x008];
+	ram_mask = (u->kk << 8) | 0x0ff;
 }
 
 // need to load *backwards* since program steps advance backwards in RAM...

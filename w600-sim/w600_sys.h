@@ -3,7 +3,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.14 2011/05/27 20:18:02 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.15 2011/10/19 16:55:17 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -34,8 +34,15 @@ typedef struct w600_sys_s {
 #endif // TRACE
 } w600_sys_t;
 
-#define SYS_START_GUI	1
-#define SYS_BACK_END	2
+#define SYS_START_GUI		1
+#define SYS_BACK_END		2
+#define SYS_MODEL_SHIFT		12
+#define SYS_MODEL_NUM		16
+#define SYS_MODEL_MASK		((SYS_MODEL_NUM - 1) << SYS_MODEL_SHIFT)
+
+#define SYS_MODEL600_2TP	0
+#define SYS_MODEL600_6TP	1
+#define SYS_MODEL600_14TP	2
 
 extern void sys_init(w600_sys_t *sys);
 extern void sys_start(w600_sys_t *sys, int ops);
