@@ -121,7 +121,7 @@ void dump(uint8_t *buf, int len) {
 		uint8_t b = c & 0x0f;
 		++s;
 		--n;
-		printf(" %04d  %02d %02d %2s", step, a, b, col_16[a]);
+		printf(" %04d  %02d %02d    %2s", step, a, b, col_16[a]);
 		if (a == 8) {
 			printf("  %s\n", col_18[b]);
 		} else if (a == 9) {
