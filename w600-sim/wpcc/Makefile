@@ -4,6 +4,9 @@ all: wpcpp
 wpcpp: wpcpp.c
 	$(CC) $(CFLAGS) wpcpp.c -o wpcpp
 
+lst: lst.c
+	$(CC) $(CFLAGS) -std=c99 lst.c -o lst
+
 %.wpo: %.wpc
 	$(CC) -x c -c $^ -o $@
 
