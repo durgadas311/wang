@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.41 2011/10/17 15:39:49 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.42 2011/10/19 15:37:30 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -10,7 +10,17 @@ td.num { text-align: center; }
 
 <H2>Architecture of the Wang 600</H2>
 
-<H3>Block Diagram</H3>
+<A HREF="#block"><LI>Block Diagram</A>
+<A HREF="#hwreg"><LI>Hardware Registers</A>
+<A HREF="#exec"><LI>Microcode Execution Sequence</A>
+<A HREF="#timing"><LI>Microcode Instruction Timing</A>
+<A HREF="#instrfmt"><LI>Microcode Instruction Format</A>
+<A HREF="#display"><LI>Display</A>
+<A HREF="#printer"><LI>Printer</A>
+<A HREF="#tape"><LI>Cassette Tape</A>
+<A HREF="#periph"><LI>Expansion (Peripheral) Ports</A>
+
+<A NAME="block"><H3>Block Diagram</H3></A>
 
 <A HREF="wang600-block-diag2.gif"><IMG SRC="wang600-block-diag2.gif" WIDTH="100%"></A>
 
@@ -19,7 +29,7 @@ while thicker lines represent multiple bits of data in parallel (typically 4).
 Note, the hardware implements both parallel and serial paths,
 depending on registers and access operations.
 
-<H3>Hardware Registers</H3>
+<A NAME="hwreg"><H3>Hardware Registers</H3></A>
 
 <P>The registers in the block diagram are explained here:
 
@@ -58,7 +68,7 @@ depending on registers and access operations.
 <TR><TD COLSPAN=5>* Also used as general purpose registers, when non-conflicting</TD></TR>
 </TABLE></UL>
 
-<H3>Microcode Execution Sequence</H3>
+<A NAME="exec"><H3>Microcode Execution Sequence</H3></A>
 
 <P>Microcode execution happens continuously, as long as the calculator has power.
 Each instruction contains the address of the next instruction, so there is
@@ -133,7 +143,7 @@ wired to indicate the RAM size, as follows:
 <P>This allows the microcode to detect what size memory is currently installed in
 the machine.
 
-<H3>Microcode Instruction Timing</H3>
+<A NAME="timing"><H3>Microcode Instruction Timing</H3></A>
 
 <P>The system clock starts with a 4MHz crystal that feeds a flip-flop
 (producing a 2MHz signal), and a 5-bit Johnson Counter
@@ -211,7 +221,7 @@ exclusively by ST == 1001 (RESET).
 
 <P><A HREF="wang600src.html">Here is some sample microcode</A>
 
-<H3>Microcode Instruction Format</H3>
+<A NAME="instrfmt"><H3>Microcode Instruction Format</H3></A>
 
 Each microcode instruction is 42 bits long. The instruction fields are
 as follows (layout for Solid State ROM).
@@ -678,7 +688,7 @@ For example, plotting commands expect<BR>
 not the step to return to.</TD></TR>
 </TABLE></UL>
 
-<H3>Display</H3>
+<A NAME="display"><H3>Display</H3></A>
 
 The display is a "multiplexed" style, regardless of whether it is NIXIE
 tubes or 7-segment.  This means that the display only appears to be
@@ -782,7 +792,7 @@ for "+" (plus), "-" (minus), and "." (dp),
 as well as to relocate the segments for "1"
 into the center segments to produce a more-symmetrical string of digits.
 
-<H3>Printer</H3>
+<A NAME="printer"><H3>Printer</H3></A>
 
 The printer is a rotating-drum style with 21 columns and 16 rows (symbols per column).
 The drum has the following characters in the columns/rows indicated:
@@ -1189,7 +1199,7 @@ and print that row of selected characters. The calculator then waits for the nex
 row to rotate into position, and repeats the process for the next row code.
 When all 16 rows have been processed, the paper is advanced.
 
-<H3>Cassette Tape</H3>
+<A NAME="tape"><H3>Cassette Tape</H3></A>
 
 Most cassette storage of the era used audio modulation, similar to the
 "musical tones" of a modem, and used standard audio cassette tapes.
@@ -1262,7 +1272,7 @@ overwhelming 90,000 program steps (on both sides) or
 For this reason, Wang data cassettes were much shorter,
 typically only having a few minutes of tape.
 
-<H3>Expansion (Peripheral) Ports</H3>
+<A NAME="periph"><H3>Expansion (Peripheral) Ports</H3></A>
 
 <H4>CN-24</H4>
 
