@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.42 2011/10/19 15:37:30 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.43 2011/10/19 21:50:28 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -698,9 +698,13 @@ the calculator is actively refreshing. If the calculator is busy doing
 something else, the display will go blank (from lack of refresh).
 
 <P>The microcode refreshes the display by sequentially loading each digit from memory,
-and pausing for a very long time. The display is fed directly from the output
-latch of RAM and the AL register. AL contains the column (digit) number to enable,
-and the RAM latch contains the code for the digit to be displayed.
+and pausing for about 276 cycles (almost 700 uS).
+This means the entire display (16 digits) is refreshed every 11 mS, or about
+90 times a second.
+The display decoders are fed directly from the output
+latch of RAM (D) and the AL register. AL contains the column (digit) number to enable,
+and the RAM latch contains the code for the digit to be displayed,
+and both must be kept static during the pause.
 
 <P>The display decodes digit values differently depending on the column.
 Columns 0 and 13 are "sign" digits and will only display "+", "-", and blank.
