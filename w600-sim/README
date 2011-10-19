@@ -1,4 +1,4 @@
-$Id: README,v 1.4 2011/05/16 00:23:26 drmiller Exp $
+$Id: README,v 1.5 2011/10/19 20:17:25 drmiller Exp $
 
 See "README.gui" for information on how to run the GUI Wang 600. This file is
 for use the interactive simulator only. The GUI is the "normal" way to run.
@@ -29,12 +29,13 @@ There is a simple disassembler for the microcode, "w600-dasm". It uses the
 same format as the trace facility in the simulator, except there is no
 hardware state information.
 
-Some basic diagrams and notes on the hardware are in "wang600-block-diag.pdf".
+Some basic diagrams and notes on the hardware are in "docs/wang600arch.html".
 
 w600-sim usage/help text:
 
 Usage: ./w600-sim [options]
 Options:
+        -M      Simulate model: 600-14TP (default), 600-6TP, 600-2TP.
         -b      Back-end mode (for GUI FE)
         -g      Enable GUI (don't use this way! currently broken)
         -i      Interactive mode enable
@@ -64,5 +65,9 @@ W600-SIM Commands:
   keyboard              Hack to provide input when no GUI
   core file             Dump all of RAM (2K) to <file>
   go [+cycles]          Resume program at current PC [break after <cycles>]
+  systrc off|pattern    Tracing of writes to system memory (15,15,0-15)
+  keytrc on|off         Trace key presses and commands executed (run)
+* cover [map|clear]     Dump current ucode coverage data
   help                  Display this help
 
+* coverage is only available when compiled with -DCOVERAGE (make COPTS=-DCOVERAGE)
