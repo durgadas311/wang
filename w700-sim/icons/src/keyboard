@@ -1,0 +1,18 @@
+write	end		recall	<->	<->	recall		change	vx	x2	clear		load	skip	mark	prime (s.m.)
+alpha	alpha		indir	indir	direct	dir		sign			x		prog	if
+														error
+
+write	1/x		store	/	/	store		/	7	8	9		end	skip	return	verify (b.s)
+			indir	indir	direct	dir							prog	if		prog
+														y>=x
+
+integer	|x|		recall	*	*	|		*	4	5	6		stop	skip	group	set (ins)
+x			resedue	indir	direct	V								if	1	p.c.
+														y=x
+
+10x	log10x		pi	-	-	^		-	1	2	3		go	skip	group	record (del)
+				indir	direct	|								if	2	prog
+														y<x
+
+ex	logex		^|	+	+	(")		+	0	.	set		(")	search......	step
+			|v	indir	direct						exp
