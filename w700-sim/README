@@ -1,0 +1,73 @@
+$Id: README,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+
+See "README.gui" for information on how to run the GUI Wang 600. This file is
+for use the interactive simulator only. The GUI is the "normal" way to run.
+Using the bare simulator is for experimentation and debugging.
+
+==================
+
+This is the start of a Wang 600 Simulator, using actual microcode from a Wang 600.
+
+By default it uses a Java front-end. That can be disabled with "-g".
+
+Some basic help message is displayed when "w600-sim -h" is run.
+
+Defaults work with included files, namely the microcode image in "wang600.rom".
+
+Option -t will enable trace, with the expected voluminous output.
+
+Option -i enables "interactive mode" whereby the simulator starts in command mode.
+"help" will do the obvious. "go" will start executing the microcode image.
+Without a GUI, it is a very crude interface.
+
+Currently, the GUI requires all the *.class files in the main directory, plus the
+GIF images in the "icons" subdirectory. The GUI has a "test" mode, which is what
+runs when the java file "w600_fe.class" is run outside of the simulator.
+For example, by "java w600_fe".
+
+There is a simple disassembler for the microcode, "w600-dasm". It uses the 
+same format as the trace facility in the simulator, except there is no
+hardware state information.
+
+Some basic diagrams and notes on the hardware are in "docs/wang600arch.html".
+
+w600-sim usage/help text:
+
+Usage: ./w600-sim [options]
+Options:
+        -M      Simulate model: 600-14TP (default), 600-6TP, 600-2TP.
+        -b      Back-end mode (for GUI FE)
+        -g      Enable GUI (don't use this way! currently broken)
+        -i      Interactive mode enable
+        -c file Use file as a cassette tape
+        -p file Load initial contents of Program Space (conflicts with -m)
+        -m file Load initial contents of RAM. 2048 bytes, Lo nibble in [0]
+        -r file Load initial contents of ROM. 2048 bytes, Lo nibble in [0]
+                NOTE: RAM/ROM contents are reverse order for program steps.
+                ROM addr FFF is program step 0000 (RAM F6F is step 0000)
+        -t file Turn on TRACE to file, '-' for stderr (huge file alert!)
+        -p file Use microcode image in 'file', default 'wang600.rom'
+        -l addr Load microcode into 'addr', default 000
+        -e addr Start running at 'addr', default 000
+
+
+simulator commands help:
+
+W600-SIM Commands:
+  quit                  End simulation
+  trace [file]          Toggle trace on/off
+  dump                  Dump processor state/registers
+  disas [addr [instrs]] Disassemble ROM at PC [or hex addr]
+  exam [addr [words]]   Examine RAM at AH,AM,AL [or hex addr]
+  set reg=value         Set register
+  store [@addr] val...  Store hex val(s) in RAM at AH,AM,AL [or hex addr]
+  step                  Single-step one instruction
+  keyboard              Hack to provide input when no GUI
+  core file             Dump all of RAM (2K) to <file>
+  go [+cycles]          Resume program at current PC [break after <cycles>]
+  systrc off|pattern    Tracing of writes to system memory (15,15,0-15)
+  keytrc on|off         Trace key presses and commands executed (run)
+* cover [map|clear]     Dump current ucode coverage data
+  help                  Display this help
+
+* coverage is only available when compiled with -DCOVERAGE (make COPTS=-DCOVERAGE)

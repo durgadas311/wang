@@ -1,0 +1,8 @@
+#!/bin/sh
+# $Id: INSTALL,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+
+if [[ -d progs ]]; then
+	mkdir -p ~/Wang600Files
+	cp -v progs/* ~/Wang600Files
+fi
+echo "Ready to launch ${PWD}/run"
