@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# after: pdftk ../Wang_700_schematics.pdf  burst
+#
 # doc_data.txt:
 # -------------
 # ...
