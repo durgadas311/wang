@@ -1,0 +1,628 @@
+// Copyright (c) 2011 Douglas Miller
+
+#ident "$Id: w700_decode.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+
+#include <unistd.h>
+#include <time.h>
+
+#include "w700_sys.h"
+#include "w700_ucode.h"
+
+#ifdef TRACE
+extern int diw700(char *buf, uint64_t *t);
+extern char *get_psw_str(w700_sys_t *sys);
+#endif // TRACE
+
+#ifdef COVERAGE
+uint8_t cov[2048] = {0};
+#endif // COVERAGE
+
+uint8_t __keytrc = 0;
+uint8_t __systrc[16] = {0};
+
+static uint8_t add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = a + b + c;
+	sys->cpu.z = ((s & 0x0f) == 0);
+	sys->cpu.i = ((s & 0x10) != 0);
+	return s & 0x0f;
+}
+
+static uint8_t sub3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = a - b - c;
+	sys->cpu.z = ((s & 0x0f) == 0);
+	sys->cpu.i = ((s & 0x10) != 0);
+	return s & 0x0f;
+}
+
+static uint8_t and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	uint8_t s = a & b;
+	sys->cpu.z = ((s & 0x0f) == 0);
+	return s & 0x0f;
+}
+
+static uint8_t or2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	uint8_t s = a | b;
+	sys->cpu.z = ((s & 0x0f) == 0);
+	return s & 0x0f;
+}
+
+static uint8_t xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	uint8_t s = a ^ b;
+	sys->cpu.z = ((s & 0x0f) == 0);
+	return s & 0x0f;
+}
+
+static uint8_t add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = add3_i(sys, a, b, c);
+	sys->cpu.c = sys->cpu.i;
+	return s;
+}
+
+static uint8_t sub3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = sub3_i(sys, a, b, c);
+	sys->cpu.c = sys->cpu.i;
+	return s;
+}
+
+static uint8_t odd_parity[16] = {
+[0x0] = 1,
+[0x1] = 0,
+[0x2] = 0,
+[0x3] = 1,
+[0x4] = 0,
+[0x5] = 1,
+[0x6] = 1,
+[0x7] = 0,
+[0x8] = 0,
+[0x9] = 1,
+[0xa] = 1,
+[0xb] = 0,
+[0xc] = 1,
+[0xd] = 0,
+[0xe] = 0,
+[0xf] = 1,
+};
+
+static void tape_write(w700_sys_t *sys, int dat) {
+	static uint8_t last = 0;
+	static uint8_t data = 0;
+	static int bitc = 0;
+	static int sigc = 0;
+
+	last <<= 1;
+	last |= dat;
+	sigc ^= 1;
+	if (sigc) return;
+	uint8_t bit = 0; 
+	uint8_t h = (last & 0x03);
+	if (h == 0x02 || h == 0x01) bit = 1;
+	if (++bitc == 5) {
+		(void)sys->tape(sys, 1, data);
+		if (odd_parity[data] != bit) {
+			fprintf(stderr, "parity error in tape write %x %d [%02x]\n", data, bit, last);
+		}
+		data = 0;
+		bitc = 0;
+	} else {
+		data <<= 1;
+		data |= bit;
+	}
+}
+
+static int tape_read(w700_sys_t *sys) {
+	static uint8_t last = 0;
+	static uint8_t data = 0;
+	static int bitc = 0;
+	static int sigc = 0;
+	static uint64_t repc = 0;
+	static uint8_t bit = 0;
+	uint8_t nib;
+
+	// wait for TD 0->1
+	// delay 56 cycles
+	// wait 220 cycles (sample TD for end of loop)
+	// [15,15,6] ^= DL	; compute parity?
+	// CY = 0 - DL		; CY = bit0
+	// [15,15,5] <<= 1	; make space
+	// [15,15,5] += CY	; insert new bit
+	// ACC += 1		; count bits
+	// wait up to 256 cycles for TD 0->1
+	//         __    __
+	// "1" = _|  |__|  |_
+	//         __
+	// "0" = _|  |_______
+	//
+	if (sys == NULL) {
+		bit = 0;
+		last = 0;
+		sigc = 0;
+		bitc = 0;
+		repc = 0;
+		return 0;	// don't care...
+	}
+
+	if (sys->cpu.cycles < repc) {
+reps:
+		return bit;
+	}
+	if (sigc) {
+sigs:
+		--sigc;
+		bit = last & 1;
+		last >>= 1;
+		repc = sys->cpu.cycles + 97;	// very sensitive...
+		goto reps;
+	}
+	if (bitc) {
+bits:
+		--bitc;
+		data <<= 1;
+		if (data & 0x20) {
+			last = 0x05;	// lsb first out...
+		} else {
+			last = 0x01;	// lsb first out...
+		}
+		sigc = 4;
+		goto sigs;
+
+	}
+	nib = sys->tape(sys, 0, 0);
+	if (nib == 0xff) { // EOF
+		repc = sys->cpu.cycles + 700;	// expects at least 650?
+		bit = 0;
+		goto reps;
+	}
+	data = (nib << 1) | odd_parity[nib];
+	bitc = 5;
+	goto bits;
+}
+
+static void tape_on(w700_sys_t *sys, int wr) {
+	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
+	if (!wr) {
+		tape_read(NULL);
+	}
+}
+
+static void tape_off(w700_sys_t *sys) {
+	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
+}
+
+static void dev_out(w700_sys_t *sys) {
+	uint8_t c = (sys->cpu.dh << 4) | sys->cpu.dl;
+//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.xs);
+	sys->dev(sys, c, sys->cpu.xs);
+}
+
+static uint8_t pr_drum = 0;
+static uint32_t pr_hammers = 0;
+static uint8_t pr_tach = 0;
+static int pr_col = 0;
+
+static void printer_status(w700_sys_t *sys) {
+	// we don't want to do this unless it is really the
+	// drum printer we're looking at... can't tell?
+	if ((sys->cpu.mode1 & MODE1_PRT_ON) == 0) {
+		// only if running program doesn't get here...
+		// printer is off, tach will never pulse, so don't spin
+		if (sys->cpu.pc == 0x6db) {
+			sys->keyboard(sys, NULL, 0); // sleep until key event
+		}
+		return;
+	}
+	if (pr_tach) {
+		pr_col = 0;
+		pr_drum = (pr_drum + 1) & 0x0f;
+		pr_hammers = 0;
+	}
+	pr_tach ^= 0x08;
+	sys->cpu.dh = pr_drum;
+	sys->cpu.dl = pr_tach;
+}
+
+static void printer_hammers(w700_sys_t *sys) {
+	int x;
+	uint32_t h;
+
+	pr_hammers <<= 1;
+	pr_hammers &= 0x0fffff;
+	pr_hammers |= sys->cpu.dl & 1;
+	if (++pr_col >= 20) {
+		h = pr_hammers;
+		for (x = 0; h; ++x) {
+			if (h & 1) {
+				sys->printer(sys, x, pr_drum);
+			}
+			h >>= 1;
+		}
+		pr_col = 0;
+	}
+}
+
+static void printer_feed(w700_sys_t *sys) {
+	// now, actually print it...
+	sys->printer(sys, -1, 0);
+}
+
+extern uint16_t ram_mask;
+
+static void rd_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
+	uint16_t adr = (ah << 8) | (am << 4) | al;
+	adr &= ram_mask;
+	uint8_t b = sys->ram[adr >> 1];
+	if (adr & 1) {
+		b >>= 4;
+	} else {
+		b &= 0x0f;
+	}
+	sys->cpu.mr = b;
+	b = sys->rom[adr >> 1];
+	if (adr & 1) {
+		b >>= 4;
+	} else {
+		b &= 0x0f;
+	}
+	sys->cpu.xr = b;
+}
+
+static void wr_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
+	uint16_t adr = (ah << 8) | (am << 4) | al;
+	adr &= ram_mask;
+	uint8_t a = sys->cpu.mr;
+	uint8_t b = sys->ram[adr >> 1];
+	uint8_t c = a;
+	uint8_t d;
+	if (adr & 1) {
+		a <<= 4;
+		d = (b >> 4) & 0x0f;
+		b &= 0x0f;
+	} else {
+		d = b & 0x0f;
+		b &= 0xf0;
+	}
+	sys->ram[adr >> 1] = b | a;
+	if (__keytrc && adr == 0xff8) {
+		b = sys->ram[0xff8 >> 1];
+		a = sys->ram[0xff7 >> 1];
+		fprintf(stderr, "Code %02d %02d\n", (a >> 4) & 0x0f, b & 0x0f);
+	}
+	if (adr >= 0xff0) {
+		if (__systrc[adr & 0x00f]) {
+			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, c);
+		}
+	}
+}
+
+static void instr_trace(w700_sys_t *sys) {
+	uint64_t *m;
+	char buf[128];
+	m = &sys->ucode[sys->cpu.pc];
+	diw700(buf, m);
+#ifdef TRACE_RAW_UCODE
+	w700_ucode_t *u = (w700_ucode_t *)(m);
+#endif // TRACE_RAW_UCODE
+	fprintf(sys->trc_fp, "TRACE: %03x: "
+		"[%03x %03x %03x] %01x %01x %01x %01x "
+		"[%s] %01x %01x %01x : "
+#ifdef TRACE_RAW_UCODE
+		"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
+#endif // TRACE_RAW_UCODE
+		"%s\n",
+		sys->cpu.pc,
+		sys->cpu.next,
+		sys->cpu.stk1,
+		sys->cpu.stk2,
+		sys->cpu.ah,
+		sys->cpu.am,
+		sys->cpu.al,
+		sys->cpu.mr,
+		get_psw_str(sys),
+		sys->cpu.ms,
+		sys->cpu.dh,
+		sys->cpu.dl,
+#ifdef TRACE_RAW_UCODE
+		u->ai, u->bi, u->zo, u->aop, u->ac, u->an, u->mop, u->kk, u->st,
+		u->jc, u->jad << 2, u->jh, u->jl,
+#endif // TRACE_RAW_UCODE
+		buf);
+}
+
+static inline void display_check(w700_sys_t *sys) {
+if (sys->cpu.pc == 0x252) {
+}
+	// 51c: begin display-refresh delay loop... short-cut to 51f...
+	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
+		sys->cpu.next = 0x51f;	// update some regs too?
+		sys->cpu.cycles += 272;
+		if (sys->trace) {
+			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp... %lld\n",
+									sys->cpu.cycles);
+		}
+		sys->display(sys, 1);	// might sleep
+	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
+	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
+		sys->cpu.next = 0x5c3;
+		sys->cpu.cycles += 272;
+		if (sys->trace) {
+			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp... %lld\n",
+									sys->cpu.cycles);
+		}
+		sys->display(sys, -1);	// must not sleep!
+	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
+		if (sys->cpu.next == 0x27b) { // alpha-stop in running program...
+			static struct timespec alpha_stop = {
+				0, 500000000L
+			};
+			// todo: should not sleep if key pressed - e.g. PRIME
+			nanosleep(&alpha_stop, NULL);
+			// sleep(1);
+		}
+		sys->display(sys, 0);
+	}
+}
+
+int instr_exec(w700_sys_t *sys) {
+	w700_ucode_t *u = (w700_ucode_t *)&sys->ucode[sys->cpu.pc];
+	uint16_t next;
+	int rc = 0;
+	static uint16_t key = 0;
+
+	// F==7 && J==0:
+	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
+	//
+	// F==7 && J==1:
+	//	PC <= STK1, STK1 <= STK2, STK2 <= STK1
+	//
+	// F!=7 && J==0:
+	//	PC <= NEXT**
+	//
+	// F!=7 && J==1:
+	//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
+	//
+	// For conditional jump/call, these bits are latched early...
+	uint8_t br_acc = sys->cpu.ms;
+	uint8_t br_c = sys->cpu.c;
+	uint8_t m_ah = sys->cpu.ah;
+	uint8_t m_am = sys->cpu.am;
+	uint8_t m_al = sys->cpu.al;
+	uint8_t br_k = u->kk;
+#ifdef COVERAGE
+	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
+#endif // COVERAGE
+	int opf7 = (u->jl == 7);
+	if (opf7) {
+		next = sys->cpu.stk1 | 1;
+		if (u->jc) {
+			sys->cpu.stk1 = sys->cpu.stk2;
+		} else {
+			sys->cpu.stk1 = sys->cpu.stk2; // bugfix?
+			//sys->cpu.stk1 = sys->cpu.pc;	// bad?
+			// rc = 1;
+		}
+	} else {
+		next = u->jad << 2;
+	}
+
+	uint8_t g = 0, h = 0;
+	switch(u->ai) {
+	case 0: h = sys->cpu.ms; break;
+	case 1: h = sys->cpu.ah; break;
+	case 2: h = sys->cpu.am; break;
+	case 3: h = sys->cpu.al; break;
+	case 4: h = sys->cpu.dh; break;
+	case 5: h = sys->cpu.dl; break;
+	case 6: h = sys->cpu.mr; break;
+	case 7: h = sys->cpu.xr; break;
+	}
+
+	switch(u->bi) {
+	case 0: g = 0; break;
+	case 1: g = br_k; break;
+	case 2:
+		g = sys->cpu.mode0;
+		sys->cpu.mode0 &= ~MODE0_STEP;
+		break;
+	case 3: g = sys->cpu.mode1; break;
+	case 4: g = sys->cpu.dh; break;
+	case 5: g = sys->cpu.dl; break;
+	case 6: g = sys->cpu.mr; break;
+	case 7: g = sys->cpu.xr; break;
+	}
+
+	uint8_t alu = 0;
+
+	if (!u->ac) h = 0; // "15"? "0"? ???
+	switch (u->aop) {
+	case 0:
+		if (u->an) alu = sub3_i(sys, h, g, 0);
+		else alu = add3_i(sys, h, g, 0);
+		break;
+	case 1:
+		if (u->an) alu = sub3_i(sys, h, g, 1);
+		else alu = add3_i(sys, h, g, 1);
+		break;
+	case 2:
+		if (u->an) alu = sub3_c(sys, h, g, 0);
+		else alu = add3_c(sys, h, g, 0);
+		break;
+	case 3:
+		if (u->an) alu = sub3_c(sys, h, g, sys->cpu.c);
+		else alu = add3_c(sys, h, g, sys->cpu.c);
+		break;
+	case 4:
+		if (u->an) alu = sub3_c(sys, h, g, 1);
+		else alu = add3_c(sys, h, g, 1);
+		break;
+	case 5:
+		alu = and2(sys, h, g);
+		break;
+	case 6:
+		if (u->an) alu = xor2(sys, h, g);
+		else alu = or2(sys, h, g);
+		break;
+	case 7:
+		// alu = 0;
+		break;
+	}
+
+	switch(u->zo) {
+	case 0:	if (u->st == 15) sys->cpu.ms = alu; break;
+	case 1:	sys->cpu.ah = alu; break;
+	case 2:	sys->cpu.am = alu; break;
+	case 3:	sys->cpu.al = alu; break;
+	case 4:	sys->cpu.dh = alu; break;
+	case 5:	sys->cpu.dl = alu; break;
+	case 6:	sys->cpu.mr = alu; break;
+	}
+
+	switch(u->st) {
+	case 0:
+		// nop
+		break;
+	case 1:
+		sys->cpu.ms |= 1;
+		break;
+	case 2:
+		sys->cpu.ms |= 2;
+		break;
+	case 3:
+		sys->cpu.ms |= 4;
+		break;
+	case 4:
+		sys->cpu.ms |= 8;
+		break;
+	case 5:
+		sys->cpu.ms &= ~1;
+		break;
+	case 6:
+		sys->cpu.ms &= ~2;
+		break;
+	case 7:
+		sys->cpu.ms &= ~4;
+		break;
+	case 8:
+		sys->cpu.ms &= ~8;
+		break;
+	case 9:
+		// T.B.D. reset 6184...
+//fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.pc, key);
+		sys->cpu.kp = 0;
+		break;
+	case 10:
+		sys->cpu.ms = (sys->cpu.ms & 0x0e) | (sys->cpu.z ^ 1);
+		break;
+	case 11:
+		sys->cpu.ms = (sys->cpu.ms & 0x0d) | (sys->cpu.z << 1);
+		break;
+	case 12:
+		sys->cpu.pe = 1;
+		sys->display(sys, -2);
+		break;
+	case 13:
+		sys->cpu.ms = 0;
+		break;
+	case 14:
+		sys->cpu.me = 1;
+		sys->display(sys, -2);
+		break;
+	}
+
+	switch(u->mop) {
+	case 1:	wr_ram_i(sys, m_ah, m_am, m_al); break;
+	case 2:	wr_ram_i(sys, 15, br_k, m_al); break;
+	case 3:	wr_ram_i(sys, 15, 15, br_k); break;
+	case 4:	rd_ram_i(sys, m_ah, m_am, m_al); break;
+	case 5:	rd_ram_i(sys, 15, br_k, m_al); break;
+	case 6:	rd_ram_i(sys, 15, 15, br_k); break;
+	case 7:	printer_hammers(sys); break;
+	case 8:	printer_feed(sys); break;
+	case 9:	rc = 2; break;
+	case 10:
+		sys->cpu.dl = (sys->cpu.dl & ~1) | tape_read(sys);
+		break;
+	case 11:
+		tape_write(sys, sys->cpu.dl & 1);
+		break;
+	case 12:
+		printer_status(sys);
+		// not just printer, but CN-24 as well...
+		sys->cpu.dl |= 2;
+		break;
+	case 13:
+		tape_on(sys, u->bi & 1);
+		break;
+	case 14:
+		tape_off(sys); // u->bi & 1 affects this...
+		break;
+	case 15:
+		sys->cpu.xh = sys->cpu.dh;	// sys->cpu.xh = g;
+		sys->cpu.xl = sys->cpu.dl;	// sys->cpu.xl = h;
+		sys->cpu.xs = br_k & 0x07;
+		dev_out(sys);
+		break;
+	}
+
+	// This is done "late" to ensure we use most recent flags for I and Z
+	if (!opf7) {
+		if (u->jc) {
+			sys->cpu.stk2 = sys->cpu.stk1;
+			sys->cpu.stk1 = sys->cpu.pc;
+		}
+		switch(u->jh) {
+		case 0: next |= (0 << 1); break;
+		case 1: next |= (1 << 1); break;
+		case 2: next |= ((br_acc & 2) >> 0); break;
+		case 3: next |= ((br_acc & 8) >> 2); break;
+		case 4:
+			next |= (sys->cpu.pe << 1);
+//fprintf(stderr,"%03x: chk pe\n", sys->cpu.pc);
+			sys->cpu.pe = 0;
+			break;
+		case 5: next |= (sys->cpu.i << 1); break;
+		case 6:
+			// todo: clean this up!
+			if (key) {
+//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
+//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+				sys->cpu.kp = 1;
+				sys->cpu.dh = (key >> 4) & 0x0f;
+				sys->cpu.dl = key & 0x0f;
+				sys->keyboard(sys, &key, 1);
+			}
+			next |= (sys->cpu.kp << 1);
+			if (sys->cpu.kp) {
+				sys->cpu.kp = 0;
+				sys->display(sys, 0);
+			}
+			break;
+		case 7: rc = 3; break;
+		}
+		switch(u->jl) {
+		case 0: next |= (0 << 0); break;
+		case 1: next |= (1 << 0); break;
+		case 2: next |= ((br_acc & 1) >> 0); break;
+		case 3: next |= ((br_acc & 4) >> 2); break;
+		case 4: next |= (sys->cpu.z << 0); break;
+		case 5: rc = 4; break;
+		case 6: next |= (br_c << 0); break;
+		case 7: rc = 5; break;
+		}
+	}
+
+	++sys->cpu.cycles;
+	sys->cpu.next = next;
+#ifdef TRACE
+	if (sys->trace) {
+		instr_trace(sys);
+	}
+#endif // TRACE
+	// the following are called in specific order...
+	// keyboard injection of next pc must override all, so is last.
+
+	display_check(sys);	// this might sleep until UI event...
+
+	sys->keyboard(sys, &key, 0);
+
+	sys->cpu.pc = sys->cpu.next;
+	return rc;
+}
