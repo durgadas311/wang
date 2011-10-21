@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $
+// $Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -34,7 +34,6 @@ class _Key {
 	static final int MODE1 = 0x0300;
 	static final int META = 0x0400;		// never sent
 	static final int METAP = 0x0500;	// never sent
-	static final int METAS = 0x0600;	// never sent
 
 	public _Key(Color sl, int c) {
 		this.color = sl;
@@ -43,15 +42,12 @@ class _Key {
 		this.state = false;
 	}
 
-	static final int SHIFT = -1;
-	static final int FEED = -2;
 	static final int TAPE_EJECT = -3;
 	static final int TAPE_REW = -4;
 	static final int TAPE_FF = -5;
 	static final int TAPE_READY = -6;
 
 	static final int PROG_CODE(int a, int b) {
-		// shift is += 01 00...
 		return ((a << 4) | b);
 	}
 	static final int SPCL_KEY(int b) {
@@ -71,9 +67,6 @@ class _Key {
 	// a = mask
 	static final int META_PRE(int a, int b) {
 		return (METAP | (a << 4) | b);
-	}
-	static final int META_SPL(int a, int b) {
-		return (METAS | (a << 4) | b);
 	}
 	// group is never sent.
 	// group=-1 is toggle (no group)
@@ -98,17 +91,11 @@ class _Key {
 	public int getGroup() {
 		return (code >> 12);
 	}
-	public boolean isSHIFT() {
-		return (code == SHIFT);
-	}
-	public boolean isFEED() {
-		return (code == FEED);
-	}
 	public boolean isTAPE() {
 		return (code <= TAPE_EJECT);
 	}
 	public boolean isMETA() {
-		return (getType() == METAP || getType() == METAS);
+		return (getType() == METAP);
 	}
 
 	Color color;
@@ -142,7 +129,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -201,16 +188,19 @@ public class w700_fe
 		s.insets.bottom = 0;
 		s.anchor = GridBagConstraints.NORTH;
 		JPanel pan;
+		JLabel lab;
 
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 25));
-		pan.setOpaque(false);
+		lab = new JLabel("Y");
+		lab.setFont(new Font("Sans-serif", Font.PLAIN, 24));
+		lab.setForeground(Color.white);
+		lab.setPreferredSize(new Dimension(20, 75));
+		lab.setOpaque(false);
 		s.gridx = 0;
 		s.gridy = 0;
-		s.gridheight = 3;
+		s.gridheight = 1;
 		s.gridwidth = 1;
-		gridbag.setConstraints(pan, s);
-		front_end.add(pan);
+		gridbag.setConstraints(lab, s);
+		front_end.add(lab);
 
 		Wang700_Display dspy = new Wang700_Display(fin);
 		s.gridx = 1;
@@ -223,12 +213,24 @@ public class w700_fe
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(50, 25));
 		pan.setOpaque(false);
-		s.gridx = 1;
+		s.gridx = 0;
 		s.gridy = 1;
 		s.gridheight = 1;
-		s.gridwidth = 1;
+		s.gridwidth = 2;
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
+
+		lab = new JLabel("X");
+		lab.setFont(new Font("Sans-serif", Font.PLAIN, 24));
+		lab.setForeground(Color.white);
+		lab.setPreferredSize(new Dimension(20, 75));
+		lab.setOpaque(false);
+		s.gridx = 0;
+		s.gridy = 2;
+		s.gridheight = 1;
+		s.gridwidth = 1;
+		gridbag.setConstraints(lab, s);
+		front_end.add(lab);
 
 		Wang700_Display dspx = new Wang700_Display(fin);
 		s.gridx = 1;
@@ -302,7 +304,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -384,7 +386,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -481,7 +483,7 @@ class Wang700_SimInput
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1012,7 +1014,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1599,7 +1601,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1640,7 +1642,7 @@ class Wang700_Display extends JComponent
 	}
 
 	public Wang700_Display(InputStream f) {
-		String blank = "--- ++++++++ ---";
+		String blank = "+0.00000000000 +00";
 		disp_a = new byte[16];
 		disp_a = blank.getBytes();
 		flashing = false;
@@ -1668,7 +1670,7 @@ class Wang700_Display extends JComponent
 		}
 		if (font == null) {
 			System.err.println("Missing font \"Wang700Display.ttf\", using default");
-			font = new Font("Monospaced", Font.PLAIN, 40);
+			font = new Font("Sans-serif", Font.PLAIN, 40);
 		}
 		disp.setPreferredSize(new Dimension(475, 75));
 		disp.setFont(font);
@@ -1740,7 +1742,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1749,33 +1751,16 @@ class Wang700_Keyboard extends JComponent
 	Wang700_Keyboards[] _kbds;
 	int _row;
 	int _col;
-	boolean _shift;
-	int _shift_kbd;
-	int _shift_btn;
-	int _print_kbd;
-	int _print_btn;
 	int _meta;
-	int _metas;
 	int _mode0;
 	int _mode1;
 	OutputStream _fout;
 	Wang700_Tape _tape;
 
-	private void setShift(boolean _new) {
-		_shift = _new;
-		if (_shift) {
-			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_Key.illum1);
-		} else {
-			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_kbds[_shift_kbd]._keys[_shift_btn].color);
-		}
-	}
-
 	private void setToggle(boolean on, _Key key, JButton btn) {
 		if (key.state == on) return;
 		if (key.getType() == _Key.METAP) {
 			_meta &= ~key.getMask();
-		} else if (key.getType() == _Key.METAS) {
-			_metas &= ~key.getMask();
 		} else if (key.getType() == _Key.MODE0) {
 			_mode0 &= ~key.getMask();
 		} else if (key.getType() == _Key.MODE1) {
@@ -1785,8 +1770,6 @@ class Wang700_Keyboard extends JComponent
 			btn.setBackground(key.altcolor);
 			if (key.getType() == _Key.METAP) {
 				_meta |= key.getMode();
-			} else if (key.getType() == _Key.METAS) {
-				_metas |= key.getMode();
 			} else if (key.getType() == _Key.MODE0) {
 				_mode0 |= key.getMode();
 			} else if (key.getType() == _Key.MODE1) {
@@ -1802,6 +1785,7 @@ class Wang700_Keyboard extends JComponent
 		int z;
 		for (z = 0; z < _kbds[y]._keys.length; ++z) {
 			if (z == x) continue;
+			if (_kbds[y]._keys[z] == null) continue;
 			int tg = _kbds[y]._keys[z].getGroup();
 			if (tg != g) continue;
 			// might check event modifiers to see if multiple-downs allowed...
@@ -1832,7 +1816,7 @@ class Wang700_Keyboard extends JComponent
 		}
 	}
 
-	private void do_button(boolean shifted, int y, int x) {
+	private void do_button(int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
 		int type = _kbds[y]._keys[x].getType();
 		int g = _kbds[y]._keys[x].getGroup();
@@ -1862,7 +1846,7 @@ class Wang700_Keyboard extends JComponent
 		}
 		if (type == _Key.SPCL) {
 			code |= _Key.SPCL;
-			if (_shift) {
+			if (false) { // how to shift special keys...
 				code += 4;
 			}
 		}
@@ -1871,18 +1855,10 @@ class Wang700_Keyboard extends JComponent
 			// _prt.onOff(on);
 			code = _Key.MODE1 | _mode1;
 		}
-		if (type == 0 && _shift && (code & 0x0f0) == 0x080) {
-			code |= 0x010;
-		}
 		if (type == _Key.META) {
 			code &= 0x00f;
-			code |= ((_meta | _metas) << 4);
-			if (_shift) {
-				code |= 0x010;
-			}
+			code |= (_meta << 4);
 		}
-		if (!shifted) setShift(false);
-
 		do_keycode(code);
 	}
 
@@ -1899,9 +1875,7 @@ class Wang700_Keyboard extends JComponent
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
-		_shift = false;
 		_meta = 0;
-		_metas = 0;
 		_fout = fo;
 
 		java.net.URL url = Wang700_Keyboard.class.getResource("docs/wang700.html");
@@ -1992,10 +1966,6 @@ class Wang700_Keyboard extends JComponent
 
 		kbd = new Wang700_Keyboard_stick();
 		for (x = 0; x < kbd._nkeys; ++x) {
-			if (kbd._keys[x].code == _Key.GROUP(6,_Key.MODE1_CHG(2,2))) {
-				_print_kbd = _nkbds;
-				_print_btn = x;
-			}
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
 		}
@@ -2042,10 +2012,6 @@ class Wang700_Keyboard extends JComponent
 
 		kbd = new Wang700_Keyboard_main();
 		for (x = 0; x < kbd._nkeys; ++x) {
-			if (kbd._keys[x].code == _Key.SHIFT) {
-				_shift_kbd = _nkbds;
-				_shift_btn = x;
-			}
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
 		}
@@ -2083,15 +2049,9 @@ class Wang700_Keyboard extends JComponent
 	}
 
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-			setShift(true);
-		}
 	}
 
 	public void keyReleased(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-			setShift(false);
-		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -2137,8 +2097,7 @@ class Wang700_Keyboard extends JComponent
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					boolean shifted = ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0);
-					do_button(shifted, y, x);
+					do_button(y, x);
 					return;
 				}
 			}
@@ -2171,7 +2130,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2248,7 +2207,6 @@ class Wang700_Keyboards extends JComponent
 		c.insets.left = py; // stupid warnings
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		c.anchor = GridBagConstraints.CENTER;
 
 		JLabel lab ;
 		if (toplab.length() > 0) {
@@ -2260,10 +2218,12 @@ class Wang700_Keyboards extends JComponent
 			c.insets.right = 0;
 			c.gridx = _col + px;
 			c.gridy = _row + 0;
+			c.anchor = GridBagConstraints.SOUTH;
 			gridbag.setConstraints(lab, c);
 			add(lab);
 		}
 
+		c.anchor = GridBagConstraints.CENTER;
 		c.gridx = _col + px;
 		c.gridy = _row + 1;
 		c.insets.left = lx;
@@ -2332,7 +2292,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2557,7 +2517,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2599,6 +2559,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 			new _Key(_Key.white1, _Key.GROUP(5,_Key.META_PRE(7,1))));
 		_col += 4;
 
+		c.anchor = GridBagConstraints.SOUTH;
 		addButton(c,1, -2, 0, 0, "icons/k00.gif",
 			new _Key(_Key.white1, _Key.META_KEY(0)));
 		addButton(c,1, -2, 1, 0, "icons/k01.gif",
@@ -2658,7 +2619,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.2 2011/10/21 21:37:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
@@ -2727,16 +2688,16 @@ class Wang700_Keyboard_stick extends Wang700_Keyboards
 		++_col;
 
 		addTapeButton(c, 5, 1, 0, 0, "Release", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(7,_Key.TAPE_EJECT)));
+			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_EJECT)));
 
 		addTapeButton(c, 5, 1, 1, 0, "Forward", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(7,_Key.TAPE_FF)));
+			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_FF)));
 
 		addTapeButton(c, 5, 1, 2, 0, "Tape Ready", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(7,_Key.TAPE_READY)));
+			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_READY)));
 
 		addTapeButton(c, 5, 1, 3, 0, "Rewind", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(7,_Key.TAPE_REW)));
+			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_REW)));
 		_col += 4;
 
 		c.gridx = _col;
