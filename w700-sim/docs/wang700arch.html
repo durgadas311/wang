@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.1 2011/10/20 17:22:31 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.2 2011/10/22 21:50:41 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -17,7 +17,6 @@ td.num { text-align: center; }
 <A HREF="#timing"><LI>Microcode Instruction Timing</LI></A>
 <A HREF="#instrfmt"><LI>Microcode Instruction Format</LI></A>
 <A HREF="#display"><LI>Display</LI></A>
-<A HREF="#printer"><LI>Printer</LI></A>
 <A HREF="#tape"><LI>Cassette Tape</LI></A>
 <A HREF="#periph"><LI>Expansion (Peripheral) Ports</LI></A>
 </UL>
@@ -36,37 +35,33 @@ depending on registers and access operations.
 <P>The registers in the block diagram are explained here:
 
 <P><UL><TABLE BORDER>
-<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Schem.<BR>Name</TH><TH>Access</TH><TH>Meaning/Use</TH></TR>
-<TR><TD CLASS="num">MS</TD><TD CLASS="num">4</TD><TD CLASS="num">S</TD><TD CLASS="num">R/W</TD><TD>Machine State *</TD></TR>
-<TR><TD CLASS="num">AH</TD><TD CLASS="num">4</TD><TD CLASS="num">T</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Hi *</TD></TR>
-<TR><TD CLASS="num">AM</TD><TD CLASS="num">4</TD><TD CLASS="num">U</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Mid *</TD></TR>
-<TR><TD CLASS="num">AL</TD><TD CLASS="num">4</TD><TD CLASS="num">V</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Lo *</TD></TR>
-<TR><TD CLASS="num">MR</TD><TD CLASS="num">4</TD><TD CLASS="num">CA</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM *</TD></TR>
-<TR><TD CLASS="num">XR</TD><TD CLASS="num">4</TD><TD CLASS="num">CB</TD><TD CLASS="num">R/O</TD><TD>Data from ROM</TD></TR>
-<TR><TD CLASS="num">DH</TD><TD CLASS="num">4</TD><TD CLASS="num">KA</TD><TD CLASS="num">R/W</TD><TD>Input Data, Hi *</TD></TR>
-<TR><TD CLASS="num">DL</TD><TD CLASS="num">4</TD><TD CLASS="num">KB</TD><TD CLASS="num">R/W</TD><TD>Input Data, Lo *</TD></TR>
-<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
-<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
-<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
-<TR><TD CLASS="num">I</TD><TD CLASS="num">1</TD><TD CLASS="num">CC</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
-<TR><TD CLASS="num">C</TD><TD CLASS="num">1</TD><TD CLASS="num">SC</TD><TD CLASS="num">n/a</TD><TD>Carry Flag</TD></TR>
-<TR><TD CLASS="num">Z</TD><TD CLASS="num">1</TD><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
-<TR><TD CLASS="num">MS'</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Saved MS</TD></TR>
-<TR><TD CLASS="num">C'</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Saved C</TD></TR>
-<TR><TD CLASS="num">PE</TD><TD CLASS="num">1</TD><TD CLASS="num">OV</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
-<TR><TD CLASS="num">ME</TD><TD CLASS="num">1</TD><TD CLASS="num">ERR</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
-<TR><TD CLASS="num">KP</TD><TD CLASS="num">1</TD><TD CLASS="num">KBD</TD><TD CLASS="num">n/a</TD><TD>Key Pressed (input ready)</TD></TR>
-<TR><TD CLASS="num">TM</TD><TD CLASS="num">1</TD><TD CLASS="num">TMR</TD><TD CLASS="num">W/O</TD><TD>Tape Motor</TD></TR>
-<TR><TD CLASS="num">TW</TD><TD CLASS="num">1</TD><TD CLASS="num">WDT</TD><TD CLASS="num">W/O</TD><TD>Tape Write (record) Data</TD></TR>
-<TR><TD CLASS="num">TR</TD><TD CLASS="num">1</TD><TD CLASS="num">MHG/MHO</TD><TD CLASS="num">R/O</TD><TD>Tape Read Data (one-shot)</TD></TR>
-<TR><TD CLASS="num">PH</TD><TD CLASS="num">20</TD><TD CLASS="num">n/a</TD><TD CLASS="num">W/O</TD><TD>Print Hammers, shift register</TD></TR>
-<TR><TD CLASS="num">PD</TD><TD CLASS="num">4</TD><TD CLASS="num">PC<SUB>3-0</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Row</TD></TR>
-<TR><TD CLASS="num">PI</TD><TD CLASS="num">1</TD><TD CLASS="num">PC<SUB>4</SUB></TD><TD CLASS="num">R/O</TD><TD>Print Drum Index</TD></TR>
-<TR><TD CLASS="num">PF</TD><TD CLASS="num">1</TD><TD CLASS="num">PPF</TD><TD CLASS="num">n/a</TD><TD>Print Paper Feed (one-shot)</TD></TR>
-<TR><TD CLASS="num">AK</TD><TD CLASS="num">1</TD><TD CLASS="num">RBS</TD><TD CLASS="num">R/O</TD><TD>CN-24 Ack (on device)</TD></TR>
-<TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
-<TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>Top of Stack</TD></TR>
-<TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD CLASS="num">SAVI</TD><TD CLASS="num">n/a</TD><TD>2nd on Stack</TD></TR>
+<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Access</TH><TH>Meaning/Use</TH></TR>
+<TR><TD CLASS="num">S</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Machine State *</TD></TR>
+<TR><TD CLASS="num">T</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Hi *</TD></TR>
+<TR><TD CLASS="num">U</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Mid *</TD></TR>
+<TR><TD CLASS="num">V</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Lo *</TD></TR>
+<TR><TD CLASS="num">RA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM, Hi</TD></TR>
+<TR><TD CLASS="num">RB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM, Lo</TD></TR>
+<TR><TD CLASS="num">KA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Hi *</TD></TR>
+<TR><TD CLASS="num">KB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Lo *</TD></TR>
+<TR><TD CLASS="num">CA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>General Data, Hi *</TD></TR>
+<TR><TD CLASS="num">CB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>General Data, Lo *</TD></TR>
+<TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
+<TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
+<TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
+<TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Carry Flag</TD></TR>
+<TR><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
+<TR><TD CLASS="num">S'</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Saved MS</TD></TR>
+<TR><TD CLASS="num">SC'</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved C</TD></TR>
+<TR><TD CLASS="num">OV</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
+<TR><TD CLASS="num">ERR</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
+<TR><TD CLASS="num">KBD</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Key Pressed (input ready)</TD></TR>
+<TR><TD CLASS="num">TMR</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Motor</TD></TR>
+<TR><TD CLASS="num">WDT</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Write (record) Data</TD></TR>
+<TR><TD CLASS="num">MHG/MHO</TD><TD CLASS="num">1</TD><TD CLASS="num">R/O</TD><TD>Tape Read Data (one-shot)</TD></TR>
+<TR><TD CLASS="num">RBS</TD><TD CLASS="num">1</TD><TD CLASS="num">R/O</TD><TD>CN-24 Ack (on device)</TD></TR>
+<TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
 <TR><TD COLSPAN=5>* Also used as general purpose registers, when non-conflicting</TD></TR>
 </TABLE></UL>
 
@@ -229,20 +224,8 @@ Each microcode instruction is 42 bits long. The instruction fields are
 as follows (layout for Solid State ROM).
 
 <P><UL><TABLE BORDER>
-<TR><TH>ROMs</TH>
-	<TD CLASS="num" COLSPAN=4>CM6020</TD>
-	<TD CLASS="num" COLSPAN=4>CM6030</TD>
-	<TD CLASS="num" COLSPAN=4>CM6040</TD>
-	<TD CLASS="num" COLSPAN=4>CM6050</TD>
-	<TD CLASS="num" COLSPAN=4>CM6060</TD>
-	<TD CLASS="num" COLSPAN=4>CM6070</TD>
-	<TD CLASS="num" COLSPAN=4>CM6080</TD>
-	<TD CLASS="num" COLSPAN=4>CM6090</TD>
-	<TD CLASS="num" COLSPAN=4>CM6160</TD>
-	<TD CLASS="num" COLSPAN=4>CM6170</TD>
-	<TD CLASS="num" COLSPAN=4>CM6180</TD>
-</TR>
 <TR><TH>Bits</TH>
+	<TD CLASS="num">42</TD>
 	<TD CLASS="num">41</TD>
 	<TD CLASS="num">40</TD>
 	<TD CLASS="num">39</TD>
@@ -285,8 +268,6 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">2</TD>
 	<TD CLASS="num">1</TD>
 	<TD CLASS="num">0</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
 </TR>
 <TR><TH>Fields</TH>
 	<TD CLASS="num" COLSPAN=3>AI</TD>
@@ -294,15 +275,14 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=3>ZO</TD>
 	<TD CLASS="num" COLSPAN=3>AOP</TD>
 	<TD CLASS="num" COLSPAN=1>AC</TD>
-	<TD CLASS="num" COLSPAN=1>AN</TD>
+	<TD CLASS="num" COLSPAN=2>BC</TD>
+	<TD CLASS="num" COLSPAN=1>Bd</TD>
 	<TD CLASS="num" COLSPAN=4>MOP</TD>
 	<TD CLASS="num" COLSPAN=4>KK</TD>
 	<TD CLASS="num" COLSPAN=4>ST</TD>
-	<TD CLASS="num" COLSPAN=1>JC</TD>
 	<TD CLASS="num" COLSPAN=9>JAD</TD>
 	<TD CLASS="num" COLSPAN=3>JH</TD>
 	<TD CLASS="num" COLSPAN=3>JL</TD>
-	<TD CLASS="num" COLSPAN=2>-</TD>
 </TR>
 
 </TABLE></UL>
@@ -324,52 +304,37 @@ as follows (layout for Solid State ROM).
 	<TR><TD>XXXXXXXXX</TD><TD>Address&lt;10:2&gt;</TD></TR>
 	</TABLE>
 </TD>
-<TD ROWSPAN=2 VALIGN="TOP">
+<TD VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>JH<BR>
 	MSB conditional part of<BR>Next Address</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
 	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
-	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = MS'&lt;1&gt;</TD></TR>
-	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = MS'&lt;3&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z</TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = n.c.</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = C'</TD></TR>
-	<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
+	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S'&lt;1&gt;</TD></TR>
+	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S'&lt;3&gt;</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = Q</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = SC'</TD></TR>
+	<TR><TD>111</TD><TD>undefined</TD></TR>
 	</TABLE>
 </TD>
-<TD ROWSPAN=2 VALIGN="TOP">
+<TD VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>JL<BR>
 	LSB conditional part of<BR>Next Address</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
 	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
-	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = MS'&lt;0&gt;</TD></TR>
-	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = MS'&lt;2&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = PE *</TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = I</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KP *</TD></TR>
-	<TR><TD>111</TD><TD>Return:<BR>
-		CURRENT&lt;0&gt; = 1<BR>
-		CURRENT&lt;10:1&gt; = STACK1<BR>
-		STACK1 = STACK2</TD></TR>
+	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S'&lt;0&gt;</TD></TR>
+	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S'&lt;2&gt;</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = OV *</TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = CC</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KBD *</TD></TR>
+	<TR><TD>111</TD><TD>undefined</TD></TR>
 	<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 	</TABLE>
 <TD></TR>
-<TR><TD VALIGN="BOTTOM">
-	<TABLE BORDER>
-	<TR><TH COLSPAN=2>JC<BR>
-	Jump/Call<BR>
-	(no-op if JL == 111)</TH></TR>
-	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>0</TD><TD>Jump (normal)<BR>CURRENT&lt;10:2&gt; = JAD</TD></TR>
-	<TR><TD>1</TD><TD>Call Subroutine<BR>
-		STACK2 = STACK1<BR>STACK1 = CURRENT<BR>
-		CURRENT&lt;10:2&gt; = JAD</TD></TR>
-	</TABLE>
-</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE>
@@ -379,21 +344,21 @@ as follows (layout for Solid State ROM).
 	Machine Status Control</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>0000</TD><TD>no-op</TD></TR>
-	<TR><TD>0001</TD><TD>MS&lt;0&gt; = 1</TD></TR>
-	<TR><TD>0010</TD><TD>MS&lt;1&gt; = 1</TD></TR>
-	<TR><TD>0011</TD><TD>MS&lt;2&gt; = 1</TD></TR>
-	<TR><TD>0100</TD><TD>MS&lt;3&gt; = 1</TD></TR>
-	<TR><TD>0101</TD><TD>MS&lt;0&gt; = 0</TD></TR>
-	<TR><TD>0110</TD><TD>MS&lt;1&gt; = 0</TD></TR>
-	<TR><TD>0111</TD><TD>MS&lt;2&gt; = 0</TD></TR>
-	<TR><TD>1000</TD><TD>MS&lt;3&gt; = 0</TD></TR>
+	<TR><TD>0001</TD><TD>S&lt;0&gt; = 1</TD></TR>
+	<TR><TD>0010</TD><TD>S&lt;1&gt; = 1</TD></TR>
+	<TR><TD>0011</TD><TD>S&lt;2&gt; = 1</TD></TR>
+	<TR><TD>0100</TD><TD>S&lt;3&gt; = 1</TD></TR>
+	<TR><TD>0101</TD><TD>S&lt;0&gt; = 0</TD></TR>
+	<TR><TD>0110</TD><TD>S&lt;1&gt; = 0</TD></TR>
+	<TR><TD>0111</TD><TD>S&lt;2&gt; = 0</TD></TR>
+	<TR><TD>1000</TD><TD>S&lt;3&gt; = 0</TD></TR>
 	<TR><TD>1001</TD><TD>RESET *</TD></TR>
-	<TR><TD>1010</TD><TD>MS&lt;0&gt; = ~Z</TD></TR>
-	<TR><TD>1011</TD><TD>MS&lt;1&gt; = Z</TD></TR>
-	<TR><TD>1100</TD><TD>PE = 1</TD></TR>
-	<TR><TD>1101</TD><TD>MS = 0000</TD></TR>
-	<TR><TD>1110</TD><TD>ME = 1</TD></TR>
-	<TR><TD>1111</TD><TD>(See ZO)</TD></TR>
+	<TR><TD>1010</TD><TD>S&lt;0&gt; = ~Z</TD></TR>
+	<TR><TD>1011</TD><TD>S&lt;1&gt; = Z</TD></TR>
+	<TR><TD>1100</TD><TD>OVR = 1</TD></TR>
+	<TR><TD>1101</TD><TD>S = 0000</TD></TR>
+	<TR><TD>1110</TD><TD>ERR = 1</TD></TR>
+	<TR><TD>1111</TD><TD>undefined</TD></TR>
 	<TR><TD COLSPAN=2>* Resets hardware,<BR>
 	including PE, KP, and ME<BR>
 	DH = DL = 0000</TD></TR>
@@ -404,94 +369,102 @@ as follows (layout for Solid State ROM).
 	<TR><TH COLSPAN=2>MOP<BR>
 	Memory/Peripheral Operations</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>0000</TD><TD>no-op</TD></TR>
-	<TR><TD>0001</TD><TD>ram(AH,AM,AL) = MR</TD></TR>
-	<TR><TD>0010</TD><TD>ram(15,KK,AL) = MR</TD></TR>
-	<TR><TD>0011</TD><TD>ram(15,15,KK) = MR</TD></TR>
-	<TR><TD>0100</TD><TD>MR = ram(AH,AM,AL)<BR>XR = rom(AH,AM,AL)</TD></TR>
-	<TR><TD>0101</TD><TD>MR = ram(15,KK,AL)<BR>XR = rom(15,KK,AL)</TD></TR>
-	<TR><TD>0110</TD><TD>MR = ram(15,15,KK)<BR>XR = rom(15,15,KK)</TD></TR>
-	<TR><TD>0111</TD><TD>(PH <<= 1) |= DL&lt;0&gt;</TD></TR>
-	<TR><TD>1000</TD><TD>PF = 1</TD></TR>
-	<TR><TD>1001</TD><TD>undefined</TD></TR>
-	<TR><TD>1010</TD><TD>DL&lt;0&gt; = TR</TD></TR>
-	<TR><TD>1011</TD><TD>TW = DL&lt;0&gt;</TD></TR>
-	<TR><TD>1100</TD><TD>DH = PD<BR>DL&lt;3&gt; = PI<BR>DL&lt;1&gt; = AK</TD></TR>
-	<TR><TD>1101</TD><TD>TM = 1<BR>
-			wr = BI&lt;0&gt;</TD></TR>
-	<TR><TD>1110</TD><TD>TM = 0<BR>
-			no reset if BI&lt;0&gt; == 1</TD></TR>
-	<TR><TD>1111</TD><TD>XH = DH<BR>XL = DL<BR>XS = KK&lt;2:0&gt;</TD></TR>
+	<TR><TD>0000</TD><TD>RA = Zbus, ram(L,M,N) ^= RA,RB</TD></TR>
+	<TR><TD>0001</TD><TD>RB = Zbus, ram(L,M,N) ^= RA,RB</TD></TR>
+	<TR><TD>0010</TD><TD>CA,CB = RA,RB = ram(T,U,V) *</TD></TR>
+	<TR><TD>0011</TD><TD>CA,CB = RA,RB = ram(T,U,V) *</TD></TR>
+	<TR><TD>0100</TD><TD>CA,CB = RA,RB = ram(15,KK,V) *</TD></TR>
+	<TR><TD>0101</TD><TD>RA,RB = ram(15,KK,V) *</TD></TR>
+	<TR><TD>0110</TD><TD>KA,KB = periph</TD></TR>
+	<TR><TD>0111</TD><TD>periph = KA,KB</TD></TR>
+	<TR><TD>1000</TD><TD>no-op</TD></TR>
+	<TR><TD>1001</TD><TD>Q = ~Q</TD></TR>
+	<TR><TD>1010</TD><TD>KB&lt;0&gt; = TR</TD></TR>
+	<TR><TD>1011</TD><TD>TWD = 1</TD></TR>
+	<TR><TD>1100</TD><TD>TM = 1</TD></TR>
+	<TR><TD>1101</TD><TD>TM = 0</TD></TR>
+	<TR><TD>1110</TD><TD>unknown</TD></TR>
+	<TR><TD>1111</TD><TD>undefined</TD></TR>
+	<TR><TD COLSPAN=2>* destructive read</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
 	<TABLE BORDER>
-	<TR><TH COLSPAN=3>AN,AOP<BR>
+	<TR><TH COLSPAN=3>AOP<BR>
 	ALU Function</TH></TR>
 	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
-	<TR><TD>0,000</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>0,001</TD><TD>Z, I</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>0,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>0,011</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + C</TD></TR>
-	<TR><TD>0,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>0,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
-	<TR><TD>0,110</TD><TD>Z</TD><TD>Zbus = Abus | Bbus</TD></TR>
-	<TR><TD>1,000</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus</TD></TR>
-	<TR><TD>1,001</TD><TD>Z, I</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
-	<TR><TD>1,010</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus</TD></TR>
-	<TR><TD>1,011</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - C</TD></TR>
-	<TR><TD>1,100</TD><TD>Z, I, C</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
-	<TR><TD>1,101</TD><TD>Z</TD><TD>Zbus = Abus & Bbus</TD></TR>
-	<TR><TD>1,110</TD><TD>Z</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>X,111</TD><TD>Z</TD><TD>Zbus = 0000</TD></TR>
+	<TR><TD>000</TD><TD>Z<SUB>o</SUB>, CC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>001</TD><TD>Z<SUB>o</SUB>, CC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>010</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>011</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
+	<TR><TD>100</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>101</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus & Bbus</TD></TR>
+	<TR><TD>110</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
+	<TR><TD>111</TD><TD>Z<SUB>o</SUB>, SC</TD><TD>Zbus = (Abus ^ Bbus) << 1</TD></TR>
 	</TABLE>
 </TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE>
-<TR><TD VALIGN="TOP">
+<TR><TD ROWSPAN=2 VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>AC,AI<BR>Source for A bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
 	<TR><TD>0,XXX</TD><TD>Abus = 0000</TD></TR>
-	<TR><TD>1,000</TD><TD>Abus = MS</TD></TR>
-	<TR><TD>1,001</TD><TD>Abus = AH</TD></TR>
-	<TR><TD>1,010</TD><TD>Abus = AM</TD></TR>
-	<TR><TD>1,011</TD><TD>Abus = AL</TD></TR>
-	<TR><TD>1,100</TD><TD>Abus = DH</TD></TR>
-	<TR><TD>1,101</TD><TD>Abus = DL</TD></TR>
-	<TR><TD>1,110</TD><TD>Abus = MR</TD></TR>
-	<TR><TD>1,111</TD><TD>Abus = XR</TD></TR>
+	<TR><TD>1,000</TD><TD>Abus = S</TD></TR>
+	<TR><TD>1,001</TD><TD>Abus = T</TD></TR>
+	<TR><TD>1,010</TD><TD>Abus = U</TD></TR>
+	<TR><TD>1,011</TD><TD>Abus = V</TD></TR>
+	<TR><TD>1,100</TD><TD>Abus = KA</TD></TR>
+	<TR><TD>1,101</TD><TD>Abus = KB</TD></TR>
+	<TR><TD>1,110</TD><TD>Abus = CA</TD></TR>
+	<TR><TD>1,111</TD><TD>Abus = CB</TD></TR>
+	</TABLE>
+</TD>
+<TD ROWSPAN=2 VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>000</TD><TD>Bbus = undefined</TD></TR>
+	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
+	<TR><TD>010</TD><TD>Bbus = D *</TD></TR>
+	<TR><TD>011</TD><TD>Bbus = undefined</TD></TR>
+	<TR><TD>100</TD><TD>Bbus = KA</TD></TR>
+	<TR><TD>101</TD><TD>Bbus = KB</TD></TR>
+	<TR><TD>110</TD><TD>Bbus = CA</TD></TR>
+	<TR><TD>111</TD><TD>Bbus = CB</TD></TR>
+	<TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
 	<TABLE BORDER>
-	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
-	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
-	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
-	<TR><TD>010</TD><TD>Bbus = mode0 *</TD></TR>
-	<TR><TD>011</TD><TD>Bbus = mode1</TD></TR>
-	<TR><TD>100</TD><TD>Bbus = DH</TD></TR>
-	<TR><TD>101</TD><TD>Bbus = DL</TD></TR>
-	<TR><TD>110</TD><TD>Bbus = MR</TD></TR>
-	<TR><TD>111</TD><TD>Bbus = XR</TD></TR>
-	<TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
-	</TABLE></UL>
+	<TR><TH COLSPAN=2>BC<BR>Bbus modifier</TH></TR>
+	<TR><TD>00</TD><TD>0000</TD></TR>
+	<TR><TD>01</TD><TD>no change</TD></TR>
+	<TR><TD>10</TD><TD>1111 or 1001 *</TD></TR>
+	<TR><TD>11</TD><TD>2's or 9's compliment *</TD></TR>
+	<TR><TD COLSPAN=2>* see Bd</TD></TR>
+	</TABLE>
 </TD>
-<TD VALIGN="TOP">
+<TD ROWSPAN=2 VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>ZO<BR>Dest. for Z bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>MS = Zbus *</TD></TR>
-	<TR><TD>001</TD><TD>AH = Zbus</TD></TR>
-	<TR><TD>010</TD><TD>AM = Zbus</TD></TR>
-	<TR><TD>011</TD><TD>AL = Zbus</TD></TR>
-	<TR><TD>100</TD><TD>DH = Zbus</TD></TR>
-	<TR><TD>101</TD><TD>DL = Zbus</TD></TR>
-	<TR><TD>110</TD><TD>MR = Zbus</TD></TR>
-	<TR><TD>111</TD><TD>no-op</TD></TR>
-	<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
+	<TR><TD>000</TD><TD>S = Zbus</TD></TR>
+	<TR><TD>001</TD><TD>T = Zbus</TD></TR>
+	<TR><TD>010</TD><TD>U = Zbus</TD></TR>
+	<TR><TD>011</TD><TD>V = Zbus</TD></TR>
+	<TR><TD>100</TD><TD>KA = Zbus</TD></TR>
+	<TR><TD>101</TD><TD>KB = Zbus</TD></TR>
+	<TR><TD>110</TD><TD>CA = Zbus</TD></TR>
+	<TR><TD>111</TD><TD>CB = Zbus</TD></TR>
+	</TABLE>
+</TD></TR>
+<TR><TD VALIGN="BOTTOM">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>Bd<BR>ALU mode</TH></TR>
+	<TR><TD>0</TD><TD>Binary (0000-1111)</TD></TR>
+	<TR><TD>1</TD><TD>BCD (0000-1001)</TD></TR>
 	</TABLE>
 </TD></TR>
 </TABLE></UL>
@@ -499,14 +472,8 @@ as follows (layout for Solid State ROM).
 <H4>Bit Assignments for I/O Ops</H4>
 
 <P><UL><TABLE BORDER>
-	<TR><TH COLSPAN=4>mode0</TH>
-	<TH COLSPAN=4>mode1</TH></TR>
+	<TR><TH COLSPAN=4>D</TH></TR>
 	<TR>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">0</TD>
-
 	<TD CLASS="num">3</TD>
 	<TD CLASS="num">2</TD>
 	<TD CLASS="num">1</TD>
@@ -516,19 +483,14 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">STEP</TD>
 	<TD CLASS="num">Learn/<BR>Learn and Print</TD>
 	<TD CLASS="num">List/<BR>Learn and Print</TD>
-	<TD CLASS="num">Fl (!Sc)</TD>
-
-	<TD CLASS="num">n/a</TD>
-	<TD CLASS="num">n/a</TD>
-	<TD CLASS="num">Printer OFF</TD>
-	<TD CLASS="num">Rad (!Deg)</TD>
+	<TD CLASS="num">unknown</TD>
 	</TR>
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2 ROWSPAN=2>&nbsp;</TH>
-<TH COLSPAN=4>DH</TH>
-<TH COLSPAN=4>DL</TH></TR>
+<TH COLSPAN=4>KA</TH>
+<TH COLSPAN=4>KB</TH></TR>
 <TR>
 <TD CLASS="num">3</TD>
 <TD CLASS="num">2</TD>
@@ -538,11 +500,6 @@ as follows (layout for Solid State ROM).
 <TD CLASS="num">2</TD>
 <TD CLASS="num">1</TD>
 <TD CLASS="num">0</TD>
-</TR>
-<TR><TH>MOP == 0111</TH><TH>Out</TH>
-	<TD CLASS="num" COLSPAN=4>n/a</TD>
-	<TD CLASS="num" COLSPAN=3>n/a</TD>
-	<TD CLASS="num">PH<0></TD>
 </TR>
 <TR><TH>MOP == 1010</TH><TH>In</TH>
 	<TD CLASS="num" COLSPAN=4>n/a</TD>
@@ -569,8 +526,8 @@ as follows (layout for Solid State ROM).
 
 <H4>Memory Usage</H4>
 
-All memory in the calculator is organized as 4-bit words.
-Memory addresses are not byte-addresses, but 4-bit-word addresses.
+All memory in the calculator is organized as 8-bit words.
+Memory addresses are not byte-addresses, but 8-bit-word addresses.
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
@@ -692,8 +649,8 @@ not the step to return to.</TD></TR>
 
 <A NAME="display"><H3>Display</H3></A>
 
-The display is a "multiplexed" style, regardless of whether it is NIXIE
-tubes or 7-segment.  This means that the display only appears to be
+The display is a "multiplexed" style using NIXIE tubes.
+This means that the display only appears to be
 static, it is actually continuously flickering, but at a higher rate
 than the human eye can discern. The display is only lit as long as
 the calculator is actively refreshing. If the calculator is busy doing
@@ -709,501 +666,15 @@ and the RAM latch contains the code for the digit to be displayed,
 and both must be kept static during the pause.
 
 <P>The display decodes digit values differently depending on the column.
-Columns 0 and 13 are "sign" digits and will only display "+", "-", and blank.
-Column 12 is hard-wired blank on the circuit board, but internally
-the microcode maintains the digit value and even refreshes it.
-The columns will display symbols according to the following table:
-
-<P><UL><IMG SRC="wang700display.gif"></UL>
-
-<P>For example, RE&nbsp;01 will cause the contents of register 01 to
-be copied into 15&nbsp;14, and then 15&nbsp;14 will be formatted
-for floating point and scientific notation and stored, respectively,
-in 15&nbsp;12 and 15&nbsp;13.
-Which ever mode is currently selected via the "Fl &#8596; Sc" pushbutton
-will determine which register (15&nbsp;12 or 15&nbsp;13) will
-be refreshed to the display.
-
-<P>Depending on the state of the mode switches, the display refresh routine will refresh
-from register 15&nbsp;13 (Sci notation), 15&nbsp;12 (Floating point),
-or 15&nbsp;11 (Learn modes). These "registers" contain the pre-formatted
-pattern to be displayed in each case. For example, after PRIME, these registers
-will contain:
-
-<P><UL><TABLE>
-<TR><TH>15&nbsp;11:</TH>
-	<TD>15</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>15</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD><IMG SRC="wang700disp1511.gif"></TD>
-</TR>
-<TR><TH>15&nbsp;12:</TH>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>10</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD>15</TD>
-	<TD><IMG SRC="wang700disp1512.gif"></TD>
-</TR>
-<TR><TH>15&nbsp;13:</TH>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>10</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD>00</TD>
-	<TD><IMG SRC="wang700disp1513.gif"></TD>
-</TR>
-</TABLE></UL>
-
-<P> The "panaplex" display provides 9 segments per digit, plus decimal point.
-The 2 center vertical segments are not addressable through standard 7-segment
-decoders.
-The display hardware uses discrete logic to override the 7-segment decoder
-for "+" (plus), "-" (minus), and "." (dp),
-as well as to relocate the segments for "1"
-into the center segments to produce a more-symmetrical string of digits.
-
-<A NAME="printer"><H3>Printer</H3></A>
-
-The printer is a rotating-drum style with 21 columns and 16 rows (symbols per column).
-The drum has the following characters in the columns/rows indicated:
-
-<P><UL><TABLE BORDER>
-<TR><TH>column:<BR>row:</TH>
-	<TH>0<BR>&nbsp;</TH>
-	<TH>1<BR>&nbsp;</TH>
-	<TH>2<BR>&nbsp;</TH>
-	<TH>3<BR>&nbsp;</TH>
-	<TH>4<BR>&nbsp;</TH>
-	<TH>5<BR>&nbsp;</TH>
-	<TH>6<BR>&nbsp;</TH>
-	<TH>7<BR>&nbsp;</TH>
-	<TH>8<BR>&nbsp;</TH>
-	<TH>9<BR>&nbsp;</TH>
-	<TH>10<BR>&nbsp;</TH>
-	<TH>11<BR>&nbsp;</TH>
-	<TH>12<BR>&nbsp;</TH>
-	<TH>13<BR>&nbsp;</TH>
-	<TH>14<BR>&nbsp;</TH>
-	<TH>15<BR>&nbsp;</TH>
-	<TH>16<BR>&nbsp;</TH>
-	<TH>17<BR>&nbsp;</TH>
-	<TH>18<BR>&nbsp;</TH>
-	<TH>19<BR>&nbsp;</TH>
-	<TH>20<BR>&nbsp;</TH></TR>
-<TR><TH>00</TH>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">E</TD>
-	<TD CLASS="num">0</TD>
-	<TD CLASS="num">S</TD>
-	<TD CLASS="num">M</TD>
-	<TD CLASS="num">X</TD></TR>
-<TR><TH>01</TH>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">T</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">RE</TD>
-	<TD CLASS="num">ST</TD>
-	<TD CLASS="num">Y</TD></TR>
-<TR><TH>02</TH>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">W</TD>
-	<TD CLASS="num">&#945;</TD>
-	<TD CLASS="num">Z</TD></TR>
-<TR><TH>03</TH>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">GO</TD>
-	<TD CLASS="num">SP</TD>
-	<TD CLASS="num">A</TD></TR>
-<TR><TH>04</TH>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">&#215;</TD>
-	<TD CLASS="num">4</TD>
-	<TD CLASS="num">J<SUB>o</SUB></TD>
-	<TD CLASS="num">J<SUB>&#248;</SUB></TD>
-	<TD CLASS="num">B</TD></TR>
-<TR><TH>05</TH>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">&divide;</TD>
-	<TD CLASS="num">5</TD>
-	<TD CLASS="num">J<SUB>+</SUB></TD>
-	<TD CLASS="num">J<SUB>e</SUB></TD>
-	<TD CLASS="num">C</TD></TR>
-<TR><TH>06</TH>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">ST</TD>
-	<TD CLASS="num">6</TD>
-	<TD CLASS="num">SN</TD>
-	<TD CLASS="num">S<SUP>-1</SUP></TD>
-	<TD CLASS="num">D</TD></TR>
-<TR><TH>07</TH>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">RE</TD>
-	<TD CLASS="num">7</TD>
-	<TD CLASS="num">CS</TD>
-	<TD CLASS="num">C<SUP>-1</SUP></TD>
-	<TD CLASS="num">E</TD></TR>
-<TR><TH>08</TH>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">*</TD>
-	<TD CLASS="num">8</TD>
-	<TD CLASS="num">TN</TD>
-	<TD CLASS="num">T<SUP>-1</SUP></TD>
-	<TD CLASS="num">F</TD></TR>
-<TR><TH>09</TH>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">*</TD>
-	<TD CLASS="num">9</TD>
-	<TD CLASS="num">RD</TD>
-	<TD CLASS="num">DR</TD>
-	<TD CLASS="num">G</TD></TR>
-<TR><TH>10</TH>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">f</TD>
-	<TD CLASS="num">10</TD>
-	<TD CLASS="num">LN</TD>
-	<TD CLASS="num">LG</TD>
-	<TD CLASS="num">H</TD></TR>
-<TR><TH>11</TH>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">&#9711;</TD>
-	<TD CLASS="num">F</TD>
-	<TD CLASS="num">11</TD>
-	<TD CLASS="num">e<SUP>x</SUP></TD>
-	<TD CLASS="num">10<SUP>x</SUP></TD>
-	<TD CLASS="num">I</TD></TR>
-<TR><TH>12</TH>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">O</TD>
-	<TD CLASS="num">V</TD>
-	<TD CLASS="num">E</TD>
-	<TD CLASS="num">R</TD>
-	<TD CLASS="num">F</TD>
-	<TD CLASS="num">L</TD>
-	<TD CLASS="num">O</TD>
-	<TD CLASS="num">W</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">.</TD>
-	<TD CLASS="num">A</TD>
-	<TD CLASS="num">12</TD>
-	<TD CLASS="num">x<SUP>2</SUP></TD>
-	<TD CLASS="num">I</TD>
-	<TD CLASS="num">J</TD></TR>
-<TR><TH>13</TH>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">+</TD>
-	<TD CLASS="num">B</TD>
-	<TD CLASS="num">13</TD>
-	<TD CLASS="num">&#8730;x</TD>
-	<TD CLASS="num">|x|</TD>
-	<TD CLASS="num">K</TD></TR>
-<TR><TH>14</TH>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">-</TD>
-	<TD CLASS="num">C</TD>
-	<TD CLASS="num">14</TD>
-	<TD CLASS="num">LP</TD>
-	<TD CLASS="num">EP</TD>
-	<TD CLASS="num">L</TD></TR>
-<TR><TH>15</TH>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">&nbsp;</TD>
-	<TD CLASS="num">D</TD>
-	<TD CLASS="num">15</TD>
-	<TD CLASS="num"><SUP>1</SUP>/<SUB>X</SUB></TD>
-	<TD CLASS="num">RT</TD>
-	<TD CLASS="num">M</TD></TR>
-</TABLE></UL>
-
-<P>Similar to the hard-wired-blank position on the display, column 15 of
-the printer is also not connected and cannot be printed.
-
-<P>When printing, the calculator builds a pattern in register 15&nbsp;09
-that represents the first 15 columns (0-14) to be printed.
-The last 5 columns are formatted "on the fly" based on context, modes,
-and operations being performed.
-
-<P>With the printer turned on, the drum rotates and the hardware keeps track
-of which row is currently positioned at the hammers.
-When an instruction with MOP == 1100 is executed, the current drum position
-is loaded into DH and the row position signal is loaded into DL&lt;3&gt;.
-The calculator uses that information to determine when a row is in
-position to print and which row it is.
-As a particular row
-comes into position, the calculator checks all codes in the pattern
-and each place it matches the current drum position it sets a "1" bit in
-the hammer shift-register (setting a "0" where they do not match).
-The hammer bit is set in DL&lt;0&gt; and an instruction with MOP == 0111
-is executed to shift the hammer bit into the register.
-When all 20 bits have been shifted (columns 0-14 and 16-20), the hammers fire
-and print that row of selected characters. The calculator then waits for the next
-row to rotate into position, and repeats the process for the next row code.
-When all 16 rows have been processed, the paper is advanced.
+Column 0 is a "sign/dp" digit and will only display "+", "-", "." and blank.
+Column 13 is a "sign" digit and will only display "+", "-", and blank.
+The decimal point does not consume a column, but is displayed either fixed
+on column 0 (for scientific notation) for floating point, when columns 13, 14, and 15
+are always blank, the hardware uses the value of the "digit" in column 15 as the
+decimal point selector.
+Both X and Y displays are refreshed simultaniously, and both independently
+select fixed or floating decimal point. The machine state register holds
+the bits (during refresh) for selecting fixed/floating for both X and Y displays.
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
 
