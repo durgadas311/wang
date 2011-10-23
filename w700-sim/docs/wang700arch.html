@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.2 2011/10/22 21:50:41 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.3 2011/10/23 00:18:13 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -49,12 +49,13 @@ depending on registers and access operations.
 <TR><TD CLASS="num">XH</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
 <TR><TD CLASS="num">XL</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
 <TR><TD CLASS="num">XS</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">Q</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>State</TD></TR>
 <TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Carry Flag</TD></TR>
 <TR><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
 <TR><TD CLASS="num">S'</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Saved MS</TD></TR>
 <TR><TD CLASS="num">SC'</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved C</TD></TR>
-<TR><TD CLASS="num">OV</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
+<TR><TD CLASS="num">OFL</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
 <TR><TD CLASS="num">ERR</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
 <TR><TD CLASS="num">KBD</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Key Pressed (input ready)</TD></TR>
 <TR><TD CLASS="num">TMR</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Motor</TD></TR>
@@ -105,12 +106,12 @@ for that key.
 <P><UL><TABLE BORDER>
 <TR><TH>Key</TH>
 <TD CLASS="key">PRIME</TD>
-<TD CLASS="key">VERIFY<BR>PROG</TD>
 <TD CLASS="key">SET<BR>P.C.</TD>
+<TD CLASS="key">VERIFY<BR>PROG</TD>
 <TD CLASS="key">RECORD<BR>PROG</TD>
 <TD CLASS="key">S.M.</TD>
-<TD CLASS="key">B.S.</TD>
 <TD CLASS="key">INS</TD>
+<TD CLASS="key">B.S.</TD>
 <TD CLASS="key">DEL</TD>
 </TR>
 <TR><TH>uCode<BR>Address</TH>
@@ -118,10 +119,10 @@ for that key.
 <TD CLASS="num">001</TD>
 <TD CLASS="num">002</TD>
 <TD CLASS="num">003</TD>
-<TD CLASS="num">004</TD>
-<TD CLASS="num">005</TD>
-<TD CLASS="num">006</TD>
-<TD CLASS="num">007</TD>
+<TD CLASS="num">?</TD>
+<TD CLASS="num">?</TD>
+<TD CLASS="num">?</TD>
+<TD CLASS="num">?</TD>
 </TR>
 </TABLE></UL>
 
@@ -220,8 +221,8 @@ exclusively by ST == 1001 (RESET).
 
 <A NAME="instrfmt"><H3>Microcode Instruction Format</H3></A>
 
-Each microcode instruction is 42 bits long. The instruction fields are
-as follows (layout for Solid State ROM).
+Each microcode instruction is 43 bits long. The instruction fields are
+as follows:
 
 <P><UL><TABLE BORDER>
 <TR><TH>Bits</TH>
@@ -268,6 +269,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">2</TD>
 	<TD CLASS="num">1</TD>
 	<TD CLASS="num">0</TD>
+	<TD CLASS="num">-</TD>
 </TR>
 <TR><TH>Fields</TH>
 	<TD CLASS="num" COLSPAN=3>AI</TD>
@@ -283,6 +285,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=9>JAD</TD>
 	<TD CLASS="num" COLSPAN=3>JH</TD>
 	<TD CLASS="num" COLSPAN=3>JL</TD>
+	<TD CLASS="num" COLSPAN=1>-</TD>
 </TR>
 
 </TABLE></UL>
@@ -328,7 +331,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S'&lt;0&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S'&lt;2&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = OV *</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = OFL *</TD></TR>
 	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = CC</TD></TR>
 	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KBD *</TD></TR>
 	<TR><TD>111</TD><TD>undefined</TD></TR>
@@ -355,7 +358,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1001</TD><TD>RESET *</TD></TR>
 	<TR><TD>1010</TD><TD>S&lt;0&gt; = ~Z</TD></TR>
 	<TR><TD>1011</TD><TD>S&lt;1&gt; = Z</TD></TR>
-	<TR><TD>1100</TD><TD>OVR = 1</TD></TR>
+	<TR><TD>1100</TD><TD>OFL = 1</TD></TR>
 	<TR><TD>1101</TD><TD>S = 0000</TD></TR>
 	<TR><TD>1110</TD><TD>ERR = 1</TD></TR>
 	<TR><TD>1111</TD><TD>undefined</TD></TR>
@@ -375,17 +378,18 @@ as follows (layout for Solid State ROM).
 	<TR><TD>0011</TD><TD>CA,CB = RA,RB = ram(T,U,V) *</TD></TR>
 	<TR><TD>0100</TD><TD>CA,CB = RA,RB = ram(15,KK,V) *</TD></TR>
 	<TR><TD>0101</TD><TD>RA,RB = ram(15,KK,V) *</TD></TR>
-	<TR><TD>0110</TD><TD>KA,KB = periph</TD></TR>
-	<TR><TD>0111</TD><TD>periph = KA,KB</TD></TR>
+	<TR><TD>0110</TD><TD>KB&lt;0&gt; = RBS (was: KA,KB = periph)</TD></TR>
+	<TR><TD>0111</TD><TD>XS = KB&lt;2:0&gt;<SUP>1</SUP></TD></TR>
 	<TR><TD>1000</TD><TD>no-op</TD></TR>
-	<TR><TD>1001</TD><TD>Q = ~Q</TD></TR>
-	<TR><TD>1010</TD><TD>KB&lt;0&gt; = TR</TD></TR>
-	<TR><TD>1011</TD><TD>TWD = 1</TD></TR>
-	<TR><TD>1100</TD><TD>TM = 1</TD></TR>
-	<TR><TD>1101</TD><TD>TM = 0</TD></TR>
-	<TR><TD>1110</TD><TD>unknown</TD></TR>
+	<TR><TD>1001</TD><TD>Q = ?</TD></TR>
+	<TR><TD>1010</TD><TD>KB&lt;0&gt; = D<SUB>OT</SUB></TD></TR>
+	<TR><TD>1011</TD><TD>D<SUB>IN</SUB> = KB&lt;0&gt;</TD></TR>
+	<TR><TD>1100</TD><TD>TMR = 1</TD></TR>
+	<TR><TD>1101</TD><TD>TMR = 0</TD></TR>
+	<TR><TD>1110</TD><TD>XH,XL = KA,KB (TWS)</TD></TR>
 	<TR><TD>1111</TD><TD>undefined</TD></TR>
 	<TR><TD COLSPAN=2>* destructive read</TD></TR>
+	<TR><TD COLSPAN=2>1. IOB&lt;3:1&gt; asserted from decoded KB</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -400,7 +404,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>100</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 	<TR><TD>101</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus & Bbus</TD></TR>
 	<TR><TD>110</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>111</TD><TD>Z<SUB>o</SUB>, SC</TD><TD>Zbus = (Abus ^ Bbus) << 1</TD></TR>
+	<TR><TD>111</TD><TD>Z<SUB>o</SUB>, CC, SC, Q?</TD><TD>Zbus = (Abus ^ Bbus) << 1</TD></TR>
 	</TABLE>
 </TD></TR>
 </TABLE></UL>
