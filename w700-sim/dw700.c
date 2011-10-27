@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.3 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.4 2011/10/27 21:45:31 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -87,7 +87,6 @@ void diw700(char *buf, uint64_t *v) {
 	}
 
 	if (!u->ac) h = "0";
-	if (u->bc) ops = "-----&^$";
 	switch (u->bc) {
 	case 0:
 		g = "0";
