@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2011/10/20 17:18:07 drmiller Exp $
+# $Id: Makefile,v 1.2 2011/10/27 18:33:01 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -9,7 +9,7 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 COPTS =
 
 OBJS = w700_sys.o w700_sim_cmd.o \
-	w700_decode.o w700_exec.o w700_gui.o
+	w700_decode.o w700_exec.o w700_gui.o loaducode_txt.o
 
 TEST = $(shell echo -e this)
 ifeq ($(TEST),this)
@@ -27,7 +27,7 @@ endif
 
 XTRA = 
 
-DASM = dw700.o
+DASM = dw700.o loaducode_txt.o
 
 all: w700-sim
 

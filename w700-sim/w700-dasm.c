@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ident "$Id: w700-dasm.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700-dasm.c,v 1.2 2011/10/27 18:33:01 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 
@@ -35,15 +35,22 @@ int main(int argc, char **argv) {
 	}
 	struct stat stb;
 	fstat(fd, &stb);
-	ucode = (uint64_t *)malloc(stb.st_size);
-	rc = read(fd, ucode, stb.st_size);
-	if (rc != stb.st_size) {
-		perror(argv[1]);
-		return 1;
+	if (stb.st_size > 2*1024*8) { // must be text format...
+		extern int loaducode_txt(int fd, uint64_t *m, int len);
+		ucode = (uint64_t *)malloc(2*1024*8);
+		rc = loaducode_txt(fd, ucode, 2*1024*8);
+		// what's a good error check?
+	} else {
+		ucode = (uint64_t *)malloc(stb.st_size);
+		rc = read(fd, ucode, stb.st_size);
+		if (rc != stb.st_size) {
+			perror(argv[1]);
+			return 1;
+		}
 	}
 	close(fd);
 
-	ucodez = stb.st_size / sizeof(*ucode);
+	ucodez = rc / sizeof(*ucode);
 
 	for (x = 0; x < ucodez; ++x) {
 		uint64_t *m = ucode + x;
@@ -57,8 +64,9 @@ int main(int argc, char **argv) {
 #endif // TRACE_RAW_UCODE
 			"%s\n", x,
 #ifdef TRACE_RAW_UCODE
-			u->ai, u->bi, u->zo, u->aop, u->ac, u->an, u->mop, u->kk, u->st,
-			u->jc, u->jad << 2, u->jh, u->jl,
+			u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->bd,
+			u->mop, u->kk, u->st,
+			u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 			buf);
 	}

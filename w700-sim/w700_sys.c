@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.2 2011/10/27 18:33:01 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -543,30 +543,10 @@ void sys_setcass(w700_sys_t *sys, char *cass) {
 // F6F is hi nibble of byte, F6E is lo nibble of byte.
 // The above addresses are NIBBLE addresses, as used by the
 // Wang. Byte offsets in file are >> 1.
-void sys_loadrom(w700_sys_t *sys, char *rom) {
-	uint8_t *mem = sys->rom;
-	__load_mem(mem, rom);
-}
 void sys_loadram(w700_sys_t *sys, char *ram) {
 	uint8_t *mem = sys->ram;
 	__load_mem(mem, ram);
 }
-
-struct ucode_ovr_s {
-	uint16_t adr;
-	union {
-		uint64_t word;
-		w700_ucode_t flds;
-	} instr[SYS_MODEL_NUM];
-};
-static struct ucode_ovr_s ucode_ovr[] = {
-	{ 0x008, {
-[SYS_MODEL700_2TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  3 }},
-[SYS_MODEL700_6TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  7 }},
-[SYS_MODEL700_14TP] = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk = 15 }}
-	}}
-};
-#define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
 
 // ! This loads a microcode image!
 void sys_loaducode(w700_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
@@ -581,26 +561,25 @@ void sys_loaducode(w700_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 		perror(exe);
 		exit(1);
 	}
+	struct stat stb;
+	fstat(fd, &stb);
 	uint64_t *m = &sys->ucode[adr];
-	int rc = read(fd, m, len);
-	if (rc < 0) {
-		perror(exe);
-		exit(1);
+	int rc;
+	if (stb.st_size > 2*1024*8) { /* must be text format... */
+		extern int loaducode_txt(int fd, uint64_t *m, int len);
+		rc = loaducode_txt(fd, m, len);
+		// what is good error-checking?
+	} else {
+		rc = read(fd, m, len);
+		if (rc < 0) {
+			perror(exe);
+			exit(1);
+		}
 	}
 	close(fd);
-	/*
-	 * overidden instructions were done as ucode was executed,
-	 * but rather than searching table on every instruction
-	 * we just patch our local copy of the ucode now.
-	 */
-	int model = (_sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
-	for (fd = 0; fd < NUM_UCODE_OVR; ++fd) {
-		sys->ucode[ucode_ovr[fd].adr] = ucode_ovr[fd].instr[model].word;
-	}
 
 	/* now get RAM address mask... */
-	w700_ucode_t *u = (w700_ucode_t *)&sys->ucode[0x008];
-	ram_mask = (u->kk << 8) | 0x0ff;
+	// ram_mask = (u->kk << 8) | 0x0ff;
 }
 
 // need to load *backwards* since program steps advance backwards in RAM...
