@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $
+// $Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -129,7 +129,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -202,7 +202,7 @@ public class w700_fe
 		gridbag.setConstraints(lab, s);
 		front_end.add(lab);
 
-		Wang700_Display dspy = new Wang700_Display(fin);
+		Wang700_Display dspy = new Wang700_Display(false);
 		s.gridx = 1;
 		s.gridy = 0;
 		s.gridheight = 1;
@@ -232,7 +232,7 @@ public class w700_fe
 		gridbag.setConstraints(lab, s);
 		front_end.add(lab);
 
-		Wang700_Display dspx = new Wang700_Display(fin);
+		Wang700_Display dspx = new Wang700_Display(true);
 		s.gridx = 1;
 		s.gridy = 2;
 		s.gridheight = 1;
@@ -304,7 +304,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -386,7 +386,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -444,8 +444,12 @@ class Wang700_SimInput
 			if (n == 0) {
 				continue;
 			}
-			if ((b[1] & ~7) == 0x00) {
-				_dspx.do_display(b);
+			if ((b[1] & ~0x80) != 0) {
+				if ((b[1] & ~0x20) != 0) {
+					_dspy.do_display(b);
+				} else {
+					_dspx.do_display(b);
+				}
 			} else if ((b[1] & ~1) == 0x08) {
 				System.err.println("invalid printer outout");
 			} else if ((b[1]  & ~3) == 0x0c) {
@@ -483,7 +487,7 @@ class Wang700_SimInput
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1014,7 +1018,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1601,19 +1605,19 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
 
 	byte[] disp_a;
 	JLabel disp;
-	InputStream _fin;
 
 	Wang700_ProgErr pe;
 	Wang700_ProgErr me;
 	boolean flashing;
 	boolean state;
+	boolean ismain;
 	javax.swing.Timer timer;
 
 	private void flasher() {
@@ -1641,15 +1645,14 @@ class Wang700_Display extends JComponent
 		}
 	}
 
-	public Wang700_Display(InputStream f) {
+	public Wang700_Display(boolean m) {
 		String blank = "+0.00000000000 +00";
-		disp_a = new byte[16];
+		disp_a = new byte[18];
 		disp_a = blank.getBytes();
 		flashing = false;
 		state = false;
+		ismain = m;
 		timer = new Timer(100, this);
-
-		_fin = f;
 
 		setLayout(new FlowLayout());
 		disp = new JLabel(blank, SwingConstants.CENTER);
@@ -1677,10 +1680,12 @@ class Wang700_Display extends JComponent
 
 		add(disp);
 
-		pe = new Wang700_ProgErr("Prog<BR>Error");
-		pe.setOn(false);
-		me = new Wang700_ProgErr("Mach<BR>Error");
-		me.setOn(false);
+		if (ismain) {
+			pe = new Wang700_ProgErr("Prog<BR>Error");
+			pe.setOn(false);
+			me = new Wang700_ProgErr("Mach<BR>Error");
+			me.setOn(false);
+		}
 
 	}
 
@@ -1704,34 +1709,47 @@ class Wang700_Display extends JComponent
 		int dc;
 		byte c;
 
-		if ((b[1] & 2) != 0) {
-			me.setOn(true);
+		if ((b[1] & 0x2) != 0) {
+			if (ismain) me.setOn(true);
 			setFlashing(true);
 		} else {
-			me.setOn(false);
+			if (ismain) me.setOn(false);
 		}
-		if ((b[1] & 1) != 0) {
-			pe.setOn(true);
+		if ((b[1] & 0x1) != 0) {
+			if (ismain) pe.setOn(true);
 			setFlashing(true);
 		} else {
-			pe.setOn(false);
+			if (ismain) pe.setOn(false);
 		}
-		if ((b[1] & 3) == 0) {
+		if ((b[1] & 0x3) == 0) {
 			setFlashing(false);
 		}
 		String s;
-		if ((b[1] & 4) != 0) {
+		if ((b[1] & 0x4) != 0) {
 			// blank-out display while Wang is not refreshing...
 			s = new String("                ");
 		} else {
 			ds = (b[0] >> 4) & 0x0f;
+
 			dc = b[0] & 0x0f;
-			if (ds == 0 || ds == 13) {
+			if (ds == 15 && (b[1] & 0x10) != 0) {
+				byte a;
+				ds = dc;
+				// insert dp AFTER digit 'ds'...
+				++ds;
+				a = '.';
+				while (ds < 18) {
+					c = disp_a[ds];
+					disp_a[ds] = a;
+					++ds;
+				}
+			} else if (ds == 0 || ds == 13) {
 				c = sign_chr[dc];
+				disp_a[ds] = c;
 			} else {
 				c = disp_chr[dc];
+				disp_a[ds] = c;
 			}
-			disp_a[ds] = c;
 			s = new String(disp_a);
 		}
 		disp.setText(s);
@@ -1742,7 +1760,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2130,7 +2148,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2292,7 +2310,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2517,7 +2535,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2619,7 +2637,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.3 2011/10/21 23:52:34 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.4 2011/10/27 21:39:09 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

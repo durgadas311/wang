@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700-sim.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700-sim.c,v 1.2 2011/10/27 21:39:09 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -46,7 +46,7 @@ static void usage() {
 		"\t\tNOTE: RAM/ROM contents are reverse order for program steps.\n"
 		"\t\tROM addr FFF is program step 0000 (RAM F6F is step 0000)\n"
 		"\t-t file\tTurn on TRACE to file, '-' for stderr (huge file alert!)\n"
-		"\t-p file\tUse microcode image in 'file', default 'wang700.rom'\n"
+		"\t-p file\tUse microcode image in 'file', default 'ROM720C.txt'\n"
 		"\t-l addr\tLoad microcode into 'addr', default 000\n"
 		"\t-e addr\tStart running at 'addr', default 000\n"
 		,argv0);
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
 		entry = load;
 	}
 	if (ucode == NULL) {
-		ucode = "wang700.rom";
+		ucode = "ROM720C.txt";
 	}
 
 	set_intr();

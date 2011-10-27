@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.3 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.4 2011/10/27 21:39:09 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,6 +167,7 @@ static void sysdisplay(w700_sys_t *sys, int on) {
 	if (sys->cpu.ofl || sys->cpu.err) c = '!';
 	uint8_t ds = sys->cpu.n;
 	uint8_t dc = sys->cpu.kb;
+	// doesn't handle Y display... yet...
 	if (ds == 0) {
 		fputc('\r', stdout);
 		fputc(c, stdout);

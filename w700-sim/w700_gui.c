@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.3 2011/10/27 21:39:09 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -34,9 +34,11 @@ static int disp_good = 0;
 // 'on' = -2: refresh only error lights - DO NOT SLEEP!
 // 'on' = 0: blank display (reset everything)
 static void guidisplay(w700_sys_t *sys, int on) {
-	static char buf[16] = { "xxxxxxxxxxxxxxxx" };
-	static uint16_t last = 0;
-	uint16_t b = 0;
+	static char bufx[16] = { "xxxxxxxxxxxxxxxx" };
+	static char bufy[16] = { "yyyyyyyyyyyyyyyy" };
+	static uint16_t lastx = 0, lasty = 0;
+	uint16_t bx = 0;
+	uint16_t by = 0;
 	int rc;
 	int flush = 0;
 
@@ -49,42 +51,71 @@ static void guidisplay(w700_sys_t *sys, int on) {
 
 	// piggy-back error lights in hi order bits...
 	if (sys->cpu.ofl) {
-		b |= 0x100;
+		bx |= 0x0100;
 	}
 	if (sys->cpu.err) {
-		b |= 0x200;
+		bx |= 0x0200;
 	}
-	if (last != b) {
-		last = b;
+	if (lastx != bx) {
+		lastx = bx;
+		++flush;
+	}
+	if (lasty != by) {
+		lasty = by;
 		++flush;
 	}
 
 	uint8_t ds = sys->cpu.n;
-	uint8_t dc = sys->cpu.rb;
+	if (sys->cpu.s & 1) {
+		by |= 0x1000;
+	}
+	if (sys->cpu.s & 2) {
+		bx |= 0x1000;
+	}
+	uint8_t dcx = sys->cpu.rb;
+	uint8_t dcy = sys->cpu.ra;
 	if (on == -2) {
 		// do not change any digits...
-		dc = buf[ds];
+		dcx = bufx[ds];
+		dcy = bufy[ds];
 	}
 	if (on == 0) {
 		// signal to blank display
-		memset(buf, 'x', sizeof(buf));
-		last = 0;
-		b |= 0x400;
+		memset(bufx, 'x', sizeof(bufx));
+		memset(bufy, 'y', sizeof(bufy));
+		lastx = lasty = 0;
+		bx |= 0x0400;
+		by |= 0x0400;
 		++flush;
 	} else {
-		if (buf[ds] != dc) {
+		if (bufx[ds] != dcx) {
 			disp_good = 0;
-			buf[ds] = dc;
+			bufx[ds] = dcx;
+			++flush;
+		}
+		if (bufy[ds] != dcy) {
+			disp_good = 0;
+			bufy[ds] = dcy;
 			++flush;
 		}
 		// these fields are always interpretted,
 		// so send valid data...
-		b |= (ds << 4) | dc;
+		bx |= (ds << 4) | dcx;
+		by |= (ds << 4) | dcy;
 	}
 
 	if (flush) {
 		disp_good = 0;
-		rc = write(__gui_dfd, &b, sizeof(b));
+		bx |= 0x8000;
+		rc = write(__gui_dfd, &bx, sizeof(bx));
+		if (rc < 0) {
+			perror("guidisplay");
+			// silently quit...
+			sys->run = 0;
+			return;
+		}
+		by |= 0xa000;
+		rc = write(__gui_dfd, &by, sizeof(by));
 		if (rc < 0) {
 			perror("guidisplay");
 			// silently quit...

@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+$Id: README.internals,v 1.2 2011/10/27 21:39:09 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -56,39 +56,22 @@ it's input pipe:
 	ACK for I/O devices N=1..5, in response to simulator sending
 	a byte with the same N. 'x' is (should be) ignored.
 
-10000001xxxxxxxx
-	Prepare for ROM download. 'x' is (should be) ignored.
-	Simulator ACKs. ROM begins loading at 0xfff and procedes
-	towards 0x000.
-
-10000000xxxxxxxx
-	Byte for ROM, sent in-bulk after ACK for prepare.
-	Simulator waits for each byte.
-
-11111111xxxxxxxx
-	End of ROM download. 'x' is (should be) ignored.
 
 
 The simulator sends the following (binary) codes on it's output pipe:
 
-00000eeessssgggg
-	Display refresh data. 's' is digit select, 'g' is digit code,
+10xp0eeessssgggg
+	Display refresh data. 's' is digit select,
+	'g' is digit code,
 	'e' is error/blanking code, bits 0-2.
+	'p' is floating point (else fixed).
+	'x' is display select, 0=X 1=Y.
 	Note, traffic is "optimized" such that once a couple copies have
 	been sent, the simulator stops sending until a key is pressed.
 	Bits 0 and 1 of 'e' indicate the current state of the Mach Err and
 	Prog Err lights, respectively. Either one of those results in
 	a flickering display. Bit 2 of 'e' indicates display is blanked,
-	causing 's' and 'g' to be ignored.
-
-0000100sssssgggg
-	Printer data, 's' is column (overflows into lo bit of '8'),
-	'g' is drum code (character to print). 's' value > 19 means
-	(print and) feed. Note, column/drum values are not sent in
-	a contiguous pattern. All columns for drum '0' (if any) are
-	sent at once, then all columns for drum '1', etc. A 'feed'
-	command that does not follow column/drum data prints a blank
-	line.
+	causing 's', 'f', and 'g' to be ignored.
 
 00001100tttttttt
 	Tape "record" data, byte 'tt'.
@@ -121,7 +104,3 @@ The simulator sends the following (binary) codes on it's output pipe:
 
 01111111xxxxxxxx
 	Reset I/O. 'x' is (should be) ignored.
-
-10000001xxxxxxxx
-	ACK for ROM download. 'x' is (should be) ignored. GUI may now
-	send bulk ROM image.
