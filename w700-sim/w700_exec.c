@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_exec.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700_exec.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
 
 #include <stdlib.h>
 
@@ -11,11 +11,10 @@ char *get_mach_str(w700_sys_t *sys) {
 	static char buf[32];
 	char *s = buf;
 
-	s += sprintf(s, "mode0=%01x", sys->cpu.mode0);
-	s += sprintf(s, "|mode1=%01x", sys->cpu.mode1);
-	if (sys->cpu.pe) s += sprintf(s, "|Prog Err");
-	if (sys->cpu.me) s += sprintf(s, "|Mach Err");
-	if (sys->cpu.me) s += sprintf(s, "|Key Pressed");
+	s += sprintf(s, "mode0=%01x", sys->cpu.d);
+	if (sys->cpu.ofl) s += sprintf(s, "|Prog Err");
+	if (sys->cpu.err) s += sprintf(s, "|Mach Err");
+	if (sys->cpu.kbd) s += sprintf(s, "|Key Pressed");
 
 	*s = '\0';
 	return buf;
@@ -25,12 +24,14 @@ char *get_psw_str(w700_sys_t *sys) {
 	static char buf[32];
 	char *s = buf;
 
-	if (sys->cpu.z) *s++ = 'Z';
+	if (sys->cpu.zo) *s++ = 'Z';
 	else *s++ = 'z';
-	if (sys->cpu.i) *s++ = 'I';
+	if (sys->cpu.cc) *s++ = 'I';
 	else *s++ = 'i';
-	if (sys->cpu.c) *s++ = 'C';
+	if (sys->cpu.sc) *s++ = 'C';
 	else *s++ = 'c';
+	if (sys->cpu.q) *s++ = 'Q';
+	else *s++ = 'q';
 
 	*s = '\0';
 	return buf;

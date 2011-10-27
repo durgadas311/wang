@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.2 2011/10/27 18:33:01 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.3 2011/10/27 20:45:07 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -166,10 +166,10 @@ void diw700(char *buf, uint64_t *v) {
 	switch(u->mop) {
 	case 0:	sprintf(opA, "mem(L,M,N) = Z,RB"); break;
 	case 1:	sprintf(opA, "mem(L,M,N) = RA,Z"); break;
-	case 2:	sprintf(opA, "mem(15,%s,AL) = MR", k); break;
-	case 3:	sprintf(opA, "mem(15,15,%s) = MR", k); break;
-	case 4:	sprintf(opA, "MR = mem(AH,AM,AL), XR = rom(AH,AM,AL)"); break;
-	case 5:	sprintf(opA, "MR = mem(15,%s,AL), XR = rom(15,%s,AL)", k, k); break;
+	case 2:	sprintf(opA, "L,M,N=T,U,V; CA,CB = RA,RB = mem(L,M,N)"); break;
+	case 3:	sprintf(opA, "L,M,N=T,U,V; RA,RB = mem(L,M,N)"); break;
+	case 4:	sprintf(opA, "L,M,N=T,U,V; CA,CB = RA,RB = mem(15,%s,N)", k); break;
+	case 5:	sprintf(opA, "L,M,N=T,U,V; RA,RB = mem(15,%s,N)", k); break;
 	case 6:	sprintf(opA, "KB<0> = RBS"); break;
 	case 7:	sprintf(opA, "IOB = KB"); break;
 	case 8:	sprintf(opA, "no-op"); break;

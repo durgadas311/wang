@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sim_cmd.c,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700_sim_cmd.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,14 +26,12 @@ static int _dump(w700_sys_t *sys, char *line) {
 	uint64_t *pc = &sys->ucode[sys->cpu.pc];
 	diw700(buf, pc);
 	fprintf(stderr, "PC = %03x %s\n", sys->cpu.pc, buf);
-	fprintf(stderr, "STK1 = %03x STK2 = %03x\n",
-			sys->cpu.stk1, sys->cpu.stk2);
 
-	fprintf(stderr, "ACC  = %01x [ %s ]\n", sys->cpu.ms, get_psw_str(sys));
-	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
-		sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
-	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
-		sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
+	fprintf(stderr, "S  = %01x [ %s ]\n", sys->cpu.s, get_psw_str(sys));
+	fprintf(stderr, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
+		sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
+	fprintf(stderr, "KA = %01x KB = %01x GIOA = %01x GIOB = %01x\n",
+		sys->cpu.ka, sys->cpu.kb, sys->cpu.gioa, sys->cpu.giob);
 
 	fprintf(stderr, "[%s]\n", get_mach_str(sys));
 
@@ -73,7 +71,7 @@ static int _disas(w700_sys_t *sys, char *line) {
 
 static int _exam(w700_sys_t *sys, char *line) {
 	char *s;
-	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	int len = 256;
 	s = strtok(NULL, " \t");
 	if (s) {
@@ -104,7 +102,7 @@ static int _exam(w700_sys_t *sys, char *line) {
 
 static int _rom(w700_sys_t *sys, char *line) {
 	char *s;
-	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	int len = 256;
 	s = strtok(NULL, " \t");
 	if (s) {
@@ -135,7 +133,7 @@ static int _rom(w700_sys_t *sys, char *line) {
 
 static int _store(w700_sys_t *sys, char *line) {
 	char *s;
-	uint16_t adr = (sys->cpu.ah << 8) | (sys->cpu.am << 4) | sys->cpu.al;
+	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	uint8_t b, v;
 
 	s = strtok(NULL, " \t");
@@ -180,48 +178,40 @@ static int _set(w700_sys_t *sys, char *line) {
 		if (strcasecmp(s, "pc") == 0) {
 			z = 11;
 			r = (uint8_t *)&sys->cpu.pc;	// casted back later
-		} else if (strcasecmp(s, "stk1") == 0) {
-			z = 11;
-			r = (uint8_t *)&sys->cpu.stk1;	// casted back later
-		} else if (strcasecmp(s, "stk2") == 0) {
-			z = 11;
-			r = (uint8_t *)&sys->cpu.stk2;	// casted back later
-		} else if (strcasecmp(s, "ah") == 0) {
-			r = &sys->cpu.ah;
-		} else if (strcasecmp(s, "am") == 0) {
-			r = &sys->cpu.am;
-		} else if (strcasecmp(s, "al") == 0) {
-			r = &sys->cpu.al;
-		} else if (strcasecmp(s, "ms") == 0) {
-			r = &sys->cpu.ms;
-		} else if (strcasecmp(s, "mr") == 0) {
-			r = &sys->cpu.mr;
-		} else if (strcasecmp(s, "dh") == 0) {
-			r = &sys->cpu.dh;
-		} else if (strcasecmp(s, "dl") == 0) {
-			r = &sys->cpu.dl;
-		} else if (strcasecmp(s, "xh") == 0) {
-			r = &sys->cpu.xh;
-		} else if (strcasecmp(s, "xl") == 0) {
-			r = &sys->cpu.xl;
-		} else if (strcasecmp(s, "xr") == 0) {
-			r = &sys->cpu.xr;
-		} else if (strcasecmp(s, "xs") == 0) {
+		} else if (strcasecmp(s, "t") == 0) {
+			r = &sys->cpu.t;
+		} else if (strcasecmp(s, "u") == 0) {
+			r = &sys->cpu.u;
+		} else if (strcasecmp(s, "v") == 0) {
+			r = &sys->cpu.v;
+		} else if (strcasecmp(s, "s") == 0) {
+			r = &sys->cpu.s;
+		} else if (strcasecmp(s, "ca") == 0) {
+			r = &sys->cpu.ca;
+		} else if (strcasecmp(s, "cb") == 0) {
+			r = &sys->cpu.cb;
+		} else if (strcasecmp(s, "ka") == 0) {
+			r = &sys->cpu.ka;
+		} else if (strcasecmp(s, "kb") == 0) {
+			r = &sys->cpu.kb;
+		} else if (strcasecmp(s, "gioa") == 0) {
+			r = &sys->cpu.gioa;
+		} else if (strcasecmp(s, "giob") == 0) {
+			r = &sys->cpu.giob;
+		} else if (strcasecmp(s, "iob") == 0) {
 			z = 3;
-			r = &sys->cpu.xs;
-		} else if (strcasecmp(s, "mode0") == 0) {
-			r = &sys->cpu.mode0;
-		} else if (strcasecmp(s, "mode1") == 0) {
-			r = &sys->cpu.mode1;
-		} else if (strcasecmp(s, "pe") == 0) {
+			r = &sys->cpu.iob;
+		} else if (strcasecmp(s, "d") == 0) {
+			r = &sys->cpu.d;
+		} else if (strcasecmp(s, "ofl") == 0) {
 			z = 1;
-			r = &sys->cpu.pe;
-		} else if (strcasecmp(s, "me") == 0) {
+			r = &sys->cpu.ofl;
+		} else if (strcasecmp(s, "err") == 0) {
 			z = 1;
-			r = &sys->cpu.me;
-		} else if (strcasecmp(s, "kp") == 0) {
+			r = &sys->cpu.err;
+		} else if (strcasecmp(s, "kbd") == 0) {
 			z = 1;
-			r = &sys->cpu.kp;
+			r = &sys->cpu.kbd;
 		} else {
 			printf("Unknown register name\n");
 			return 0;

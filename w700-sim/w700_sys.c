@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.2 2011/10/27 18:33:01 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.3 2011/10/27 20:45:07 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -164,9 +164,9 @@ static void sysdisplay(w700_sys_t *sys, int on) {
 		return;
 	}
 	int c = ' ';
-	if (sys->cpu.pe || sys->cpu.me) c = '!';
-	uint8_t ds = sys->cpu.al;
-	uint8_t dc = sys->cpu.mr;
+	if (sys->cpu.ofl || sys->cpu.err) c = '!';
+	uint8_t ds = sys->cpu.n;
+	uint8_t dc = sys->cpu.kb;
 	if (ds == 0) {
 		fputc('\r', stdout);
 		fputc(c, stdout);
@@ -421,13 +421,12 @@ static void dump(w700_sys_t *sys) {
 
 	diw700(buf, pc);
 	fprintf(stderr, "PC = %03x [ %s ]\n", sys->cpu.pc, buf);
-	fprintf(stderr, "STK1 = %03x STK2 = %03x\n", sys->cpu.stk1, sys->cpu.stk2);
-	fprintf(stderr, "AH = %01x AM = %01x AL = %01x MR = %01x\n",
-				sys->cpu.ah, sys->cpu.am, sys->cpu.al, sys->cpu.mr);
-	fprintf(stderr, "ACC = %01x Z = %d I = %d C = %d\n",
-				sys->cpu.ms, sys->cpu.z, sys->cpu.i, sys->cpu.c);
-	fprintf(stderr, "DH = %01x DL = %01x XH = %01x XL = %01x XR = %01x\n",
-			sys->cpu.dh, sys->cpu.dl, sys->cpu.xh, sys->cpu.xl, sys->cpu.xr);
+	fprintf(stderr, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
+				sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
+	fprintf(stderr, "S = %01x Zo = %d CC = %d SC = %d\n",
+				sys->cpu.s, sys->cpu.zo, sys->cpu.cc, sys->cpu.sc);
+	fprintf(stderr, "KA = %01x KB = %01x GIOA = %01x GIOB = %01x IOB = %01x\n",
+			sys->cpu.ka, sys->cpu.kb, sys->cpu.gioa, sys->cpu.giob, sys->cpu.iob);
 	// more...
 }
 
@@ -466,8 +465,7 @@ void sys_init(w700_sys_t *sys) {
 	sys->cpu.cylimit = (uint64_t)-1;
 
 	// need to get initial values from "keyboard"...
-	sys->cpu.mode0 = 0;
-	sys->cpu.mode1 = MODE1_DEGREES;	// keyboard default... ?
+	sys->cpu.d = 0;
 
 	// already done by memset above...
 	//memset(sys->ucode, 0, sizeof(sys->ucode));
