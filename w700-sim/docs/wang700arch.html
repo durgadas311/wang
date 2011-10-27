@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.4 2011/10/23 21:16:21 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.5 2011/10/27 20:13:23 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -285,15 +285,15 @@ as follows:
 	<TR><TD>0000</TD><TD>ram(L,M,N) = Zbus,RB</TD></TR>
 	<TR><TD>0001</TD><TD>ram(L,M,N) = RA,Zbus</TD></TR>
 	<TR><TD>0010</TD><TD>	L,M,N = T,U,V<BR>
-				RA,RB = ram(T,U,V) *<BR>
+				RA,RB = ram(L,M,N) *<BR>
 				CA,CB = RA,RB</TD></TR>
 	<TR><TD>0011</TD><TD>	L,M,N = T,U,V<BR>
-				RA,RB = ram(15,KK,V) *</TD></TR>
+				RA,RB = ram(L,M,N) *</TD></TR>
 	<TR><TD>0100</TD><TD>	L,M,N = T,U,V<BR>
-				RA,RB = ram(T,U,V) *<BR>
+				RA,RB = ram(15,KK,N) *<BR>
 				CA,CB = RA,RB</TD></TR>
 	<TR><TD>0101</TD><TD>	L,M,N = T,U,V<BR>
-				RA,RB = ram(15,KK,V) *</TD></TR>
+				RA,RB = ram(15,KK,N) *</TD></TR>
 	<TR><TD>0110</TD><TD>KB&lt;0&gt; = RBS</TD></TR>
 	<TR><TD>0111</TD><TD>IOB&lt;3:1&gt; = KB&lt;2:0&gt;</TD></TR>
 	<TR><TD>1000</TD><TD>no-op</TD></TR>
