@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.4 2011/10/28 17:41:12 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.5 2011/10/28 20:56:11 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -204,7 +204,7 @@ static void tape_off(w700_sys_t *sys) {
 
 static void dev_out(w700_sys_t *sys) {
 	uint8_t c = (sys->cpu.gioa << 4) | sys->cpu.giob;
-//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.xs);
+fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 	sys->dev(sys, c, sys->cpu.iob);
 }
 
@@ -273,12 +273,12 @@ static void instr_trace(w700_sys_t *sys) {
 
 static inline void display_check(w700_sys_t *sys) {
 	// 034: begin display-refresh delay loop... short-cut to 472...
-	if (sys->cpu.pc == 0x034) {	// display refresh routine...
+	if ((sys->cpu.pc & 0xffe) == 0x034) {	// display refresh routine...
 		sys->cpu.next = 0x472;	// update some regs too?
 		sys->cpu.cycles += 431;
 		if (sys->trace) {
-			fprintf(sys->trc_fp, "TRACE: 034: Display Warp... %lld\n",
-									sys->cpu.cycles);
+			fprintf(sys->trc_fp, "TRACE: %03x: Display Warp... %lld\n",
+							sys->cpu.pc, sys->cpu.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
 	}

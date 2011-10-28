@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.4 2011/10/28 17:41:12 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.5 2011/10/28 20:56:11 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -49,6 +49,8 @@ static void guidisplay(w700_sys_t *sys, int on) {
 		return;
 	}
 
+	bx |= 0x8000;
+	by |= 0xa000;
 	// piggy-back error lights in hi order bits...
 	if (sys->cpu.ofl) {
 		bx |= 0x0100;
@@ -101,13 +103,16 @@ static void guidisplay(w700_sys_t *sys, int on) {
 		// these fields are always interpretted,
 		// so send valid data...
 		bx |= (ds << 4) | dcx;
+		bx |= (sys->cpu.s & 2) << 11;	// FXDX
+		bx ^= 0x1000;
+
 		by |= (ds << 4) | dcy;
+		by |= (sys->cpu.s & 1) << 12;	// FXDY
+		//by ^= 0x1000;
 	}
 
 	if (flush) {
 		disp_good = 0;
-		bx |= 0x8000;
-		bx |= (sys->cpu.s & 2) << 11;
 		rc = write(__gui_dfd, &bx, sizeof(bx));
 		if (rc < 0) {
 			perror("guidisplay");
@@ -115,9 +120,6 @@ static void guidisplay(w700_sys_t *sys, int on) {
 			sys->run = 0;
 			return;
 		}
-		by |= 0xa000;
-		by |= (sys->cpu.s & 1) << 12;
-		by ^= 0x1000;
 		rc = write(__gui_dfd, &by, sizeof(by));
 		if (rc < 0) {
 			perror("guidisplay");
@@ -245,28 +247,6 @@ static void guidevinput(w700_sys_t *sys, uint16_t *kc, uint16_t b) {
 	}
 	if ((b & 0xf000) == 0x5000) {
 		// TBD
-		return;
-	}
-	if ((b & 0xf000) == 0x8000) { // ROM download
-		int x = 0x0fff >> 1;
-		b = (b & 0xf0ff) | 0x0100; // ACK
-		write(__gui_dfd, &b, sizeof(b));
-		do {
-			wait_key();
-			rc = read(__gui_kfd, &b, sizeof(b));
-			if (rc < 0 && errno != EAGAIN) {
-				perror("guikeyboard");
-				// silently quit...
-				sys->run = 0;
-				return;
-			}
-			if (rc != sizeof(b)) {
-				return;
-			}
-			if (x >= 0 && (b & 0xff00) == 0x8000) {
-				sys->rom[x--] = (b & 0x00ff);
-			}
-		} while ((b & 0xff00) == 0x8000);
 		return;
 	}
 	// uh, this is embarassing...
