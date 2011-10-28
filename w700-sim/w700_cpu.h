@@ -2,7 +2,7 @@
 #ifndef __w700_cpu_h__
 #define __w700_cpu_h__
 
-#ident "$Id: w700_cpu.h,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_cpu.h,v 1.3 2011/10/28 01:12:50 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -26,7 +26,7 @@ typedef struct {
 	uint8_t gioa;
 	uint8_t iob;
 	// flags...
-	uint8_t zo;
+	uint8_t alu;
 	uint8_t cc;
 	uint8_t sc;
 	uint8_t q;

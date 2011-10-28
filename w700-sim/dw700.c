@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.4 2011/10/27 21:45:31 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.5 2011/10/28 01:12:50 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -11,7 +11,7 @@ void diw700(char *buf, uint64_t *v) {
 
 	char *g = NULL;
 	char *h = NULL;
-	char *ops = "+++++&|+";
+	char *ops = "+++++&^+";
 	static char k[4096];
 	static char alu[4096];
 	static char acc[4096];
@@ -56,7 +56,7 @@ void diw700(char *buf, uint64_t *v) {
 		switch(u->jl) {
 		case 2: s += sprintf(s, "S<0>"); break;
 		case 3: s += sprintf(s, "S<2>"); break;
-		case 4: s += sprintf(s, "Zo"); break;
+		case 4: s += sprintf(s, "ALU"); break;
 		case 5: s += sprintf(s, "Q"); break;
 		case 6: s += sprintf(s, "SC"); break;
 		case 7: s += sprintf(s, "?"); break;
@@ -117,7 +117,8 @@ void diw700(char *buf, uint64_t *v) {
 		s += sprintf(s, " >> 1");
 		break;
 	}
-	s += sprintf(s, " ->[Zo");
+	if (u->bd) s += sprintf(s, "(bcd)");
+	s += sprintf(s, " ->[ALU");
 	if (u->aop < 5 || u->aop > 6) {
 		s += sprintf(s, ",CC");
 		switch (u->aop) {

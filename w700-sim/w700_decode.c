@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.3 2011/10/28 01:12:50 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -20,36 +20,60 @@ uint8_t cov[2048] = {0};
 uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
 
-static uint8_t add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bin_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
-	sys->cpu.zo = ((s & 0x0f) == 0);
+	sys->cpu.alu = ((s & 0x0f) == 0);
 	sys->cpu.cc = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
+static uint8_t bcd_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = a + b + c;
+	if (s > 9) {
+		s -= 10;
+		s |= 0x10;
+	}
+	sys->cpu.alu = ((s & 0x0f) == 0);
+	sys->cpu.cc = ((s & 0x10) != 0);
+	return s & 0x0f;
+}
+
+static uint8_t bin_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = bin_add3_i(sys, a, b, c);
+	sys->cpu.sc = sys->cpu.cc;
+	return s;
+}
+
+static uint8_t bcd_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = bcd_add3_i(sys, a, b, c);
+	sys->cpu.sc = sys->cpu.cc;
+	return s;
+}
+
+static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = bin_add3_i(sys, a, b, 0);
+	s |= (c << 4);
+	sys->cpu.sc = (s & 1);
+	s >>= 1;
+}
+
+static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+	uint8_t s = bcd_add3_i(sys, a, b, 0);
+	s |= (c << 4);
+	sys->cpu.sc = (s & 1);
+	s >>= 1;
+}
+
 static uint8_t and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a & b;
-	sys->cpu.zo = ((s & 0x0f) == 0);
+	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
 static uint8_t xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a ^ b;
-	sys->cpu.zo = ((s & 0x0f) == 0);
+	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
-}
-
-static uint8_t add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
-	uint8_t s = add3_i(sys, a, b, c);
-	sys->cpu.sc = sys->cpu.cc;
-	return s;
-}
-
-static uint8_t shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
-	uint8_t s = add3_i(sys, a, b, 0);
-	s |= (c << 4);
-	sys->cpu.sc = (s & 1);
-	s >>= 1;
 }
 
 static uint8_t odd_parity[16] = {
@@ -286,8 +310,9 @@ int instr_exec(w700_sys_t *sys) {
 	static uint16_t key = 0;
 
 	// For conditional jump, these bits are latched early...
-	uint8_t br_acc = sys->cpu.s;
-	uint8_t br_c = sys->cpu.sc;
+	uint8_t br_s = sys->cpu.s;
+	uint8_t br_sc = sys->cpu.sc;
+	uint8_t br_q = sys->cpu.q;
 	uint8_t br_k = u->kk;
 #ifdef COVERAGE
 	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
@@ -323,7 +348,7 @@ int instr_exec(w700_sys_t *sys) {
 	uint8_t alu = 0;
 
 	if (!u->ac) h = 0; 
-	switch (u->aop) {
+	switch (u->bc) {
 	case 0:
 		g = 0;
 		break;
@@ -333,35 +358,64 @@ int instr_exec(w700_sys_t *sys) {
 		g = (u->bd ? 9 : 15);
 		break;
 	case 3:
-		g = (u->bd ? 9 : 15) - g;
+		g = ((u->bd ? 10 : 16) - g) & 0x0f;
 		break;
 	}
 
-	switch (u->aop) {
-	case 0:
-		alu = add3_i(sys, h, g, 0);
-		break;
-	case 1:
-		alu = add3_i(sys, h, g, 1);
-		break;
-	case 2:
-		alu = add3_c(sys, h, g, 0);
-		break;
-	case 3:
-		alu = add3_c(sys, h, g, sys->cpu.sc);
-		break;
-	case 4:
-		alu = add3_c(sys, h, g, 1);
-		break;
-	case 5:
-		alu = and2(sys, h, g);
-		break;
-	case 6:
-		alu = xor2(sys, h, g);
-		break;
-	case 7:
-		alu = shift3_c(sys, h, g, sys->cpu.sc);
-		break;
+	if (u->bd) {
+		switch (u->aop) {
+		case 0:
+			alu = bcd_add3_i(sys, h, g, 0);
+			break;
+		case 1:
+			alu = bcd_add3_i(sys, h, g, 1);
+			break;
+		case 2:
+			alu = bcd_add3_c(sys, h, g, 0);
+			break;
+		case 3:
+			alu = bcd_add3_c(sys, h, g, br_sc);
+			break;
+		case 4:
+			alu = bcd_add3_c(sys, h, g, 1);
+			break;
+		case 5:
+			alu = and2(sys, h, g);
+			break;
+		case 6:
+			alu = xor2(sys, h, g);
+			break;
+		case 7:
+			alu = bcd_shift3_c(sys, h, g, br_sc);
+			break;
+		}
+	} else {
+		switch (u->aop) {
+		case 0:
+			alu = bin_add3_i(sys, h, g, 0);
+			break;
+		case 1:
+			alu = bin_add3_i(sys, h, g, 1);
+			break;
+		case 2:
+			alu = bin_add3_c(sys, h, g, 0);
+			break;
+		case 3:
+			alu = bin_add3_c(sys, h, g, br_sc);
+			break;
+		case 4:
+			alu = bin_add3_c(sys, h, g, 1);
+			break;
+		case 5:
+			alu = and2(sys, h, g);
+			break;
+		case 6:
+			alu = xor2(sys, h, g);
+			break;
+		case 7:
+			alu = bin_shift3_c(sys, h, g, br_sc);
+			break;
+		}
 	}
 
 	switch(u->zo) {
@@ -409,10 +463,10 @@ int instr_exec(w700_sys_t *sys) {
 		sys->cpu.kbd = 0;
 		break;
 	case 10:
-		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.zo ^ 1);
+		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.alu ^ 1);
 		break;
 	case 11:
-		sys->cpu.s = (sys->cpu.s & 0x0d) | (sys->cpu.zo << 1);
+		sys->cpu.s = (sys->cpu.s & 0x0d) | (sys->cpu.alu << 1);
 		break;
 	case 12:
 		sys->cpu.ofl = 1;
@@ -489,8 +543,8 @@ int instr_exec(w700_sys_t *sys) {
 	switch(u->jh) {
 	case 0: next |= (0 << 1); break;
 	case 1: next |= (1 << 1); break;
-	case 2: next |= ((br_acc & 2) >> 0); break;
-	case 3: next |= ((br_acc & 8) >> 2); break;
+	case 2: next |= ((br_s & 2) >> 0); break;
+	case 3: next |= ((br_s & 8) >> 2); break;
 	case 4:
 		next |= (sys->cpu.ofl << 1);
 //fprintf(stderr,"%03x: chk pe\n", sys->cpu.pc);
@@ -518,11 +572,11 @@ int instr_exec(w700_sys_t *sys) {
 	switch(u->jl) {
 	case 0: next |= (0 << 0); break;
 	case 1: next |= (1 << 0); break;
-	case 2: next |= ((br_acc & 1) >> 0); break;
-	case 3: next |= ((br_acc & 4) >> 2); break;
-	case 4: next |= (sys->cpu.zo << 0); break;
-	case 5: next |= (sys->cpu.q << 0); break;
-	case 6: next |= (br_c << 0); break;
+	case 2: next |= ((br_s & 1) >> 0); break;
+	case 3: next |= ((br_s & 4) >> 2); break;
+	case 4: next |= (sys->cpu.alu << 0); break;
+	case 5: next |= (br_q << 0); break;
+	case 6: next |= (br_sc << 0); break;
 	case 7: rc = 5; break;
 	}
 

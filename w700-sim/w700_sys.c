@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.4 2011/10/27 21:39:09 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.5 2011/10/28 01:12:50 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -424,8 +424,8 @@ static void dump(w700_sys_t *sys) {
 	fprintf(stderr, "PC = %03x [ %s ]\n", sys->cpu.pc, buf);
 	fprintf(stderr, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
 				sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
-	fprintf(stderr, "S = %01x Zo = %d CC = %d SC = %d\n",
-				sys->cpu.s, sys->cpu.zo, sys->cpu.cc, sys->cpu.sc);
+	fprintf(stderr, "S = %01x ALU = %d CC = %d SC = %d\n",
+				sys->cpu.s, sys->cpu.alu, sys->cpu.cc, sys->cpu.sc);
 	fprintf(stderr, "KA = %01x KB = %01x GIOA = %01x GIOB = %01x IOB = %01x\n",
 			sys->cpu.ka, sys->cpu.kb, sys->cpu.gioa, sys->cpu.giob, sys->cpu.iob);
 	// more...

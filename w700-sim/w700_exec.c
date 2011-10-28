@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_exec.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_exec.c,v 1.3 2011/10/28 01:12:50 drmiller Exp $"
 
 #include <stdlib.h>
 
@@ -24,7 +24,7 @@ char *get_psw_str(w700_sys_t *sys) {
 	static char buf[32];
 	char *s = buf;
 
-	if (sys->cpu.zo) *s++ = 'Z';
+	if (sys->cpu.alu) *s++ = 'Z';
 	else *s++ = 'z';
 	if (sys->cpu.cc) *s++ = 'I';
 	else *s++ = 'i';
