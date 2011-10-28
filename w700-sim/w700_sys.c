@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.5 2011/10/28 01:12:50 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.6 2011/10/28 17:41:12 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@
 
 static int _sys_ops = 0;
 
-uint16_t ram_mask = 0;
+uint16_t ram_mask = 0x3ff;
 
 extern int diw700(char *buf, uint64_t *t);
 

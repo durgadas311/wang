@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.3 2011/10/28 01:12:50 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.4 2011/10/28 17:41:12 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -67,12 +67,14 @@ static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 static uint8_t and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a & b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
+	sys->cpu.cc = 0;
 	return s & 0x0f;
 }
 
 static uint8_t xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a ^ b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
+	sys->cpu.cc = 0;
 	return s & 0x0f;
 }
 
@@ -224,6 +226,7 @@ static void wr_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al,
 	uint8_t a = sys->ram[adr];
 	uint8_t b = (ra << 4) | rb;
 	sys->ram[adr] = b;
+#if 0
 	if (__keytrc && adr == 0xff8) {
 		fprintf(stderr, "Code %02d %02d\n", (b >> 4) & 0x0f, b & 0x0f);
 	}
@@ -232,6 +235,7 @@ static void wr_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al,
 			fprintf(stderr, "[%03x] %02x -> %02x\n", adr, a, b);
 		}
 	}
+#endif
 }
 
 static void instr_trace(w700_sys_t *sys) {
@@ -268,18 +272,17 @@ static void instr_trace(w700_sys_t *sys) {
 }
 
 static inline void display_check(w700_sys_t *sys) {
-#if 0
-if (sys->cpu.pc == 0x252) {
-}
-	// 51c: begin display-refresh delay loop... short-cut to 51f...
-	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
-		sys->cpu.next = 0x51f;	// update some regs too?
-		sys->cpu.cycles += 272;
+	// 034: begin display-refresh delay loop... short-cut to 472...
+	if (sys->cpu.pc == 0x034) {	// display refresh routine...
+		sys->cpu.next = 0x472;	// update some regs too?
+		sys->cpu.cycles += 431;
 		if (sys->trace) {
-			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp... %lld\n",
+			fprintf(sys->trc_fp, "TRACE: 034: Display Warp... %lld\n",
 									sys->cpu.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
+	}
+#if 0
 	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
 	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
 		sys->cpu.next = 0x5c3;
@@ -358,7 +361,7 @@ int instr_exec(w700_sys_t *sys) {
 		g = (u->bd ? 9 : 15);
 		break;
 	case 3:
-		g = ((u->bd ? 10 : 16) - g) & 0x0f;
+		g = ((u->bd ? 9 : 15) - g) & 0x0f;
 		break;
 	}
 
@@ -418,6 +421,46 @@ int instr_exec(w700_sys_t *sys) {
 		}
 	}
 
+	/*
+	 * Now... we start changing machine state... pay attention to clock phases!
+	 */
+
+	// clock = P4
+	if (u->mop >= 2 && u->mop <= 5) {
+		sys->cpu.l = (u->mop >= 4 ?   15 : sys->cpu.t);
+		sys->cpu.m = (u->mop >= 4 ? br_k : sys->cpu.u);
+		sys->cpu.n = sys->cpu.v;
+	}
+
+	// clock = P4-5
+	switch(u->mop) {
+	case 10:
+		sys->cpu.kb = (sys->cpu.kb & ~1) | tape_read(sys);
+		break;
+	case 11:
+		tape_write(sys, sys->cpu.kb & 1);
+		break;
+	case 12:
+		tape_on(sys, u->bi & 1);
+		break;
+	case 13:
+		tape_off(sys);
+		break;
+	}
+
+	// clock = P5-6
+	switch(u->mop) {
+	case 7:
+		sys->cpu.iob = sys->cpu.kb & 0x07;
+		break;
+	case 14:
+		sys->cpu.gioa = sys->cpu.ka;
+		sys->cpu.giob = sys->cpu.kb;
+		dev_out(sys);
+		break;
+	}
+
+	// clock = P9
 	switch(u->zo) {
 	case 0:	sys->cpu.s = alu; break;
 	case 1:	sys->cpu.t = alu; break;
@@ -434,27 +477,35 @@ int instr_exec(w700_sys_t *sys) {
 		// nop
 		break;
 	case 1:
+		// clock = P10
 		sys->cpu.s |= 1;
 		break;
 	case 2:
+		// clock = P10
 		sys->cpu.s |= 2;
 		break;
 	case 3:
+		// clock = P10
 		sys->cpu.s |= 4;
 		break;
 	case 4:
+		// clock = P10
 		sys->cpu.s |= 8;
 		break;
 	case 5:
+		// clock = P10
 		sys->cpu.s &= ~1;
 		break;
 	case 6:
+		// clock = P10
 		sys->cpu.s &= ~2;
 		break;
 	case 7:
+		// clock = P10
 		sys->cpu.s &= ~4;
 		break;
 	case 8:
+		// clock = P10
 		sys->cpu.s &= ~8;
 		break;
 	case 9:
@@ -463,9 +514,11 @@ int instr_exec(w700_sys_t *sys) {
 		sys->cpu.kbd = 0;
 		break;
 	case 10:
+		// clock = P10
 		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.alu ^ 1);
 		break;
 	case 11:
+		// clock = P10
 		sys->cpu.s = (sys->cpu.s & 0x0d) | (sys->cpu.alu << 1);
 		break;
 	case 12:
@@ -473,66 +526,70 @@ int instr_exec(w700_sys_t *sys) {
 		sys->display(sys, -2);
 		break;
 	case 13:
+		// clock = P10
 		sys->cpu.s = 0;
 		break;
 	case 14:
 		sys->cpu.err = 1;
 		sys->display(sys, -2);
 		break;
-	}
-
-	if (u->mop >= 2 && u->mop <= 5) {
-		sys->cpu.l = sys->cpu.t;
-		sys->cpu.m = sys->cpu.u;
-		sys->cpu.n = sys->cpu.v;
+	case 15:
+		break;
 	}
 
 	switch(u->mop) {
 	case 0:
+		// clock = P9
 		wr_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n, alu, sys->cpu.rb);
 		break;
 	case 1:
+		// clock = P9
 		wr_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n, sys->cpu.ra, alu);
 		break;
 	case 2:
+		// L,M,N already setup...
+		// clock = P9 (overrides ZO)
 		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
 		sys->cpu.ca = sys->cpu.ra;
 		sys->cpu.cb = sys->cpu.rb;
 		break;
 	case 3:
+		// L,M,N already setup...
+		// clock = P9
 		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
 		break;
 	case 4:
-		rd_ram_i(sys, 15, br_k, sys->cpu.n);
+		// L,M,N already setup...
+		// clock = P9 (overrides ZO)
+		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
 		sys->cpu.ca = sys->cpu.ra;
 		sys->cpu.cb = sys->cpu.rb;
 		break;
 	case 5:
-		rd_ram_i(sys, 15, br_k, sys->cpu.n);
+		// L,M,N already setup...
+		// clock = P9
+		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
 		break;
 	case 6:
 		// CN-24 status... RBS
 		sys->cpu.kb |= 1;
 		break;
-	case 7:	sys->cpu.iob = sys->cpu.kb & 0x07; break;
+	case 7:
+		// done at clock P5-6
+		break;
 	case 8:	break;
-	case 9:	sys->cpu.q = sys->cpu.cc; break;
+	case 9:
+		// clock = P9
+		sys->cpu.q = sys->cpu.cc;
+		break;
 	case 10:
-		sys->cpu.kb = (sys->cpu.kb & ~1) | tape_read(sys);
-		break;
 	case 11:
-		tape_write(sys, sys->cpu.kb & 1);
-		break;
 	case 12:
-		tape_on(sys, u->bi & 1);
-		break;
 	case 13:
-		tape_off(sys);
+		// done at clock = P4-5
 		break;
 	case 14:
-		sys->cpu.gioa = sys->cpu.ka;
-		sys->cpu.giob = sys->cpu.kb;
-		dev_out(sys);
+		// done at clock P5-6
 		break;
 	case 15:
 		rc = 2;
@@ -540,6 +597,7 @@ int instr_exec(w700_sys_t *sys) {
 	}
 
 	// This is done "late" to ensure we use most recent flags for I and Z
+	// clock = P9
 	switch(u->jh) {
 	case 0: next |= (0 << 1); break;
 	case 1: next |= (1 << 1); break;
@@ -555,7 +613,7 @@ int instr_exec(w700_sys_t *sys) {
 		// todo: clean this up!
 		if (key) {
 //fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
-//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+if (1 || __keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 			sys->cpu.kbd = 1;
 			sys->cpu.ka = (key >> 4) & 0x0f;
 			sys->cpu.kb = key & 0x0f;
@@ -579,9 +637,9 @@ int instr_exec(w700_sys_t *sys) {
 	case 6: next |= (br_sc << 0); break;
 	case 7: rc = 5; break;
 	}
+	sys->cpu.next = next;
 
 	++sys->cpu.cycles;
-	sys->cpu.next = next;
 #ifdef TRACE
 	if (sys->trace) {
 		instr_trace(sys);

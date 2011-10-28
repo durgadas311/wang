@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.3 2011/10/27 21:39:09 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.4 2011/10/28 17:41:12 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -107,6 +107,7 @@ static void guidisplay(w700_sys_t *sys, int on) {
 	if (flush) {
 		disp_good = 0;
 		bx |= 0x8000;
+		bx |= (sys->cpu.s & 2) << 11;
 		rc = write(__gui_dfd, &bx, sizeof(bx));
 		if (rc < 0) {
 			perror("guidisplay");
@@ -115,6 +116,8 @@ static void guidisplay(w700_sys_t *sys, int on) {
 			return;
 		}
 		by |= 0xa000;
+		by |= (sys->cpu.s & 1) << 12;
+		by ^= 0x1000;
 		rc = write(__gui_dfd, &by, sizeof(by));
 		if (rc < 0) {
 			perror("guidisplay");
