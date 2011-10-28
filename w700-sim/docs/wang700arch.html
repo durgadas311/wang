@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.5 2011/10/27 20:13:23 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.6 2011/10/28 01:11:40 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -51,7 +51,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">IOB</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
 <TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved Carry Flag</TD></TR>
-<TR><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
+<TR><TD CLASS="num">ALU</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
 <TR><TD CLASS="num">Q</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Aux Saved Carry</TD></TR>
 <TR><TD CLASS="num">OFL</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
 <TR><TD CLASS="num">ERR</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
@@ -226,7 +226,7 @@ as follows:
 	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S&lt;1&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S&lt;3&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = ALU</TD></TR>
 	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = Q</TD></TR>
 	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = SC</TD></TR>
 	<TR><TD>111</TD><TD>undefined</TD></TR>
@@ -266,8 +266,8 @@ as follows:
 	<TR><TD>0111</TD><TD>S&lt;2&gt; = 0</TD></TR>
 	<TR><TD>1000</TD><TD>S&lt;3&gt; = 0</TD></TR>
 	<TR><TD>1001</TD><TD>RESET *</TD></TR>
-	<TR><TD>1010</TD><TD>S&lt;0&gt; = ~Z</TD></TR>
-	<TR><TD>1011</TD><TD>S&lt;1&gt; = Z</TD></TR>
+	<TR><TD>1010</TD><TD>S&lt;0&gt; = ~ALU</TD></TR>
+	<TR><TD>1011</TD><TD>S&lt;1&gt; = ALU</TD></TR>
 	<TR><TD>1100</TD><TD>OFL = 1</TD></TR>
 	<TR><TD>1101</TD><TD>S = 0000</TD></TR>
 	<TR><TD>1110</TD><TD>ERR = 1</TD></TR>
@@ -312,14 +312,14 @@ as follows:
 	<TR><TH COLSPAN=3>AOP<BR>
 	ALU Function</TH></TR>
 	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>Z<SUB>o</SUB>, CC</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>001</TD><TD>Z<SUB>o</SUB>, CC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>010</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>011</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
-	<TR><TD>100</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>101</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus & Bbus</TD></TR>
-	<TR><TD>110</TD><TD>Z<SUB>o</SUB></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>111</TD><TD>Z<SUB>o</SUB>, CC, SC</TD><TD>Zbus = SC|(Abus + Bbus) >> 1 *</TD></TR>
+	<TR><TD>000</TD><TD>ALU, CC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>001</TD><TD>ALU, CC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>010</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>011</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
+	<TR><TD>100</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>101</TD><TD>ALU</TD><TD>Zbus = Abus & Bbus</TD></TR>
+	<TR><TD>110</TD><TD>ALU</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
+	<TR><TD>111</TD><TD>ALU, CC, SC</TD><TD>Zbus = SC|(Abus + Bbus) >> 1 *</TD></TR>
 	<TR><TD COLSPAN=3>*<UL>
 			Zbus<SUB>3</SUB> = SC<BR>
 			Zbus<SUB>2</SUB> = (Abus + Bbus)<SUB>3</SUB><BR>
@@ -492,6 +492,22 @@ decimal point selector.
 Both X and Y displays are refreshed simultaniously, and both independently
 select fixed or floating decimal point. The machine state register holds
 the bits (during refresh) for selecting fixed/floating for both X and Y displays.
+
+<P>The following are provided by the calculator during refresh:
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=4>S</TH><TH COLSPAN=4>RA</TH><TH COLSPAN=4>RB</TH><TH COLSPAN=4>N</TH></TR>
+<TR>	<TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH>
+	<TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH>
+	<TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH>
+	<TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR>	<TD COLSPAN=2>n/a</TD>
+		<TD><span style="text-decoration: overline">FXDX</span></TD>
+		<TD><span style="text-decoration: none">FXDY</span></TD>
+	<TD COLSPAN=4>Y digit</TD>
+	<TD COLSPAN=4>X digit</TD>
+	<TD COLSPAN=4>Column</TD></TR>
+</TABLE></UL>
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
 
