@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.8 2011/10/29 22:07:29 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.9 2011/10/29 22:31:39 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -226,8 +226,8 @@ fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 
 extern uint16_t ram_mask;
 
-static void rd_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
-	uint16_t adr = (ah << 8) | (am << 4) | al;
+static void rd_ram_i(w700_sys_t *sys) {
+	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	adr &= ram_mask;
 	uint8_t b = sys->ram[adr];
 	sys->ram[adr] = 0; // core memory has destructive read!
@@ -235,12 +235,11 @@ static void rd_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	sys->cpu.rb = b & 0x0f;
 }
 
-static void wr_ram_i(w700_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al,
-						uint8_t ra, uint8_t rb) {
-	uint16_t adr = (ah << 8) | (am << 4) | al;
+static void wr_ram_i(w700_sys_t *sys) {
+	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	adr &= ram_mask;
 	uint8_t a = sys->ram[adr];
-	uint8_t b = (ra << 4) | rb;
+	uint8_t b = (sys->cpu.ra << 4) | sys->cpu.rb;
 	sys->ram[adr] = b;
 #if 0
 	if (__keytrc && adr == 0xff8) {
@@ -554,36 +553,40 @@ int instr_exec(w700_sys_t *sys) {
 
 	switch(u->mop) {
 	case 0:
+		// L,M,N already setup...
 		// clock = P9
-		wr_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n, alu, sys->cpu.rb);
+		sys->cpu.ra = alu;
+		wr_ram_i(sys);
 		break;
 	case 1:
+		// L,M,N already setup...
 		// clock = P9
-		wr_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n, sys->cpu.ra, alu);
+		sys->cpu.rb = alu;
+		wr_ram_i(sys);
 		break;
 	case 2:
 		// L,M,N already setup...
 		// clock = P9 (overrides ZO)
-		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
+		rd_ram_i(sys);
 		sys->cpu.ca = sys->cpu.ra;
 		sys->cpu.cb = sys->cpu.rb;
 		break;
 	case 3:
 		// L,M,N already setup...
 		// clock = P9
-		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
+		rd_ram_i(sys);
 		break;
 	case 4:
 		// L,M,N already setup...
 		// clock = P9 (overrides ZO)
-		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
+		rd_ram_i(sys);
 		sys->cpu.ca = sys->cpu.ra;
 		sys->cpu.cb = sys->cpu.rb;
 		break;
 	case 5:
 		// L,M,N already setup...
 		// clock = P9
-		rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n);
+		rd_ram_i(sys);
 		break;
 	case 6:
 		// CN-24 status... RBS
