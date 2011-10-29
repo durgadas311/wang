@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.7 2011/10/29 15:51:22 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.8 2011/10/29 22:07:29 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -66,17 +66,31 @@ static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	return s;
 }
 
-static uint8_t and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bin_and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	(void)bin_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a & b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
-	sys->cpu.cc = 0;
 	return s & 0x0f;
 }
 
-static uint8_t xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bcd_and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	(void)bcd_add3_i(sys, a, b, 0);	// set CC
+	uint8_t s = a & b;
+	sys->cpu.alu = ((s & 0x0f) == 0);
+	return s & 0x0f;
+}
+
+static uint8_t bin_xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	(void)bin_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a ^ b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
-	sys->cpu.cc = 0;
+	return s & 0x0f;
+}
+
+static uint8_t bcd_xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+	(void)bcd_add3_i(sys, a, b, 0);	// set CC
+	uint8_t s = a ^ b;
+	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
@@ -384,10 +398,10 @@ int instr_exec(w700_sys_t *sys) {
 			alu = bcd_add3_c(sys, h, g, 1);
 			break;
 		case 5:
-			alu = and2(sys, h, g);
+			alu = bcd_and2(sys, h, g);
 			break;
 		case 6:
-			alu = xor2(sys, h, g);
+			alu = bcd_xor2(sys, h, g);
 			break;
 		case 7:
 			alu = bcd_shift3_c(sys, h, g, br_sc);
@@ -411,10 +425,10 @@ int instr_exec(w700_sys_t *sys) {
 			alu = bin_add3_c(sys, h, g, 1);
 			break;
 		case 5:
-			alu = and2(sys, h, g);
+			alu = bin_and2(sys, h, g);
 			break;
 		case 6:
-			alu = xor2(sys, h, g);
+			alu = bin_xor2(sys, h, g);
 			break;
 		case 7:
 			alu = bin_shift3_c(sys, h, g, br_sc);

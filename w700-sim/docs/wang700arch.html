@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.7 2011/10/28 17:41:01 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.8 2011/10/29 22:07:29 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -91,8 +91,8 @@ for that key.
 <P><UL><TABLE BORDER>
 <TR><TH>Key</TH>
 <TD CLASS="key">PRIME</TD>
-<TD CLASS="key">SET<BR>P.C.</TD>
 <TD CLASS="key">VERIFY<BR>PROG</TD>
+<TD CLASS="key">SET<BR>P.C.</TD>
 <TD CLASS="key">RECORD<BR>PROG</TD>
 <TD CLASS="key">S.M.</TD>
 <TD CLASS="key">INS</TD>
@@ -111,13 +111,14 @@ for that key.
 </TR>
 </TABLE></UL>
 
-<P>Does the Wang 700 support S.M., INS, DEL, and B.S. keys? Photos of calculators
-show keycaps that imply this, but so far have not found proof in the schematics.
-There is no SHIFT key, but perhaps the microcode was able to detect what the
-user intended?
+<P>Wang 700 support for S.M., INS, DEL, and B.S. is pending. The schematics
+(5930) show a signal "ADF" that modifies the "next" address accordingly, but I have
+yet to find what generates that signal. First guess is "Run+Learn" but available
+keyboard schematics do not show that wiring.
 
 <P> T.B.D. How the Wang 700 Series detects memory size.  Perhaps the microcode
-was changed to reflect larger memory?
+was changed to reflect larger memory? From tracing microcode, it seems that memory
+size is hard-coded. So, 720C microcode could not run with less than 2Kx8 RAM.
 
 <P><UL><TABLE BORDER>
 <TR><TH>KK</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sim_cmd.c,v 1.4 2011/10/29 15:51:22 drmiller Exp $"
+#ident "$Id: w700_sim_cmd.c,v 1.5 2011/10/29 22:07:29 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,20 +85,25 @@ static int _exam(w700_sys_t *sys, char *line) {
 	}
 
 	len = (len + 1) & ~1;
-	int x, y;
+	int x, y, i;
 	for (x = 0; x < len;) {
-		printf("%03x:", adr);
 		if (adr >= sizeof(sys->ram)) {
 			printf(" no memory\n");
 			break;
 		}
-		for (y = 0; x + y < len && y < 16; y += 2) {
-			uint8_t b = sys->ram[adr];
-			printf(" %01x-%01x", (b & 0x0f), (b >> 4));
-			++adr;
+		for (i = 0; i < 2; ++i) {
+			if (!i) printf("%03x:", adr);
+			else    printf("    ");
+			for (y = 0; x + y < len && y < 16; ++y) {
+				uint8_t b = sys->ram[adr + y];
+				if (!i) b = (b >> 4);
+				else    b = (b & 0x0f);
+				printf(" %01x", b);
+			}
+			printf("\n");
 		}
-		printf("\n");
-		x += y / 2;
+		adr += y;
+		x += y;
 	}
 	return 0;
 }
