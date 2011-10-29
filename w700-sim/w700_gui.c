@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.5 2011/10/28 20:56:11 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.6 2011/10/29 03:16:09 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -58,30 +58,35 @@ static void guidisplay(w700_sys_t *sys, int on) {
 	if (sys->cpu.err) {
 		bx |= 0x0200;
 	}
-	if (lastx != bx) {
-		lastx = bx;
-		++flush;
-	}
-	if (lasty != by) {
-		lasty = by;
-		++flush;
-	}
-
-	uint8_t ds = sys->cpu.n;
 	if (sys->cpu.s & 1) {
 		by |= 0x1000;
 	}
 	if (sys->cpu.s & 2) {
 		bx |= 0x1000;
 	}
+	if (lastx != bx) {
+		// harsh?
+		memset(bufx, 'x', sizeof(bufx));
+		lastx = bx;
+		++flush;
+	}
+	if (lasty != by) {
+		// harsh?
+		memset(bufy, 'y', sizeof(bufy));
+		lasty = by;
+		++flush;
+	}
+
+	uint8_t ds = sys->cpu.n;
 	uint8_t dcx = sys->cpu.rb;
 	uint8_t dcy = sys->cpu.ra;
 	if (on == -2) {
 		// do not change any digits...
-		dcx = bufx[ds];
-		dcy = bufy[ds];
+		dcx = bufx[ds]-0x40;
+		dcy = bufy[ds]-0x40;
 	}
 	if (on == 0) {
+//fprintf(stderr, "blank all \"%.*s\" \"%.*s\"\n", 16, bufx, 16, bufy);
 		// signal to blank display
 		memset(bufx, 'x', sizeof(bufx));
 		memset(bufy, 'y', sizeof(bufy));
@@ -90,14 +95,14 @@ static void guidisplay(w700_sys_t *sys, int on) {
 		by |= 0x0400;
 		++flush;
 	} else {
-		if (bufx[ds] != dcx) {
+		if (bufx[ds] != 0x40+dcx) {
 			disp_good = 0;
-			bufx[ds] = dcx;
+			bufx[ds] = 0x40+dcx;
 			++flush;
 		}
-		if (bufy[ds] != dcy) {
+		if (bufy[ds] != 0x40+dcy) {
 			disp_good = 0;
-			bufy[ds] = dcy;
+			bufy[ds] = 0x40+dcy;
 			++flush;
 		}
 		// these fields are always interpretted,
@@ -120,12 +125,14 @@ static void guidisplay(w700_sys_t *sys, int on) {
 			sys->run = 0;
 			return;
 		}
-		rc = write(__gui_dfd, &by, sizeof(by));
-		if (rc < 0) {
-			perror("guidisplay");
-			// silently quit...
-			sys->run = 0;
-			return;
+		if ((sys->cpu.d & MODE0_LRN_L_P) == 0) {
+			rc = write(__gui_dfd, &by, sizeof(by));
+			if (rc < 0) {
+				perror("guidisplay");
+				// silently quit...
+				sys->run = 0;
+				return;
+			}
 		}
 	} else {
 		++disp_good;

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.5 2011/10/28 20:56:11 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.6 2011/10/29 03:16:09 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -281,21 +281,21 @@ static inline void display_check(w700_sys_t *sys) {
 							sys->cpu.pc, sys->cpu.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
-	}
-#if 0
-	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
-	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
-		sys->cpu.next = 0x5c3;
-		sys->cpu.cycles += 272;
+	// 5ed: begin alpha-stop display-refresh delay loop... short-cut to 4ae... 531cy
+	} else if (sys->cpu.pc == 0x5ed) {	// alpha-stop refresh routine...
+		sys->cpu.next = 0x4ae;
+		sys->cpu.cycles += 531;
 		if (sys->trace) {
-			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp... %lld\n",
-									sys->cpu.cycles);
+			fprintf(sys->trc_fp, "TRACE: %03x: Alpha-Stop Warp... %lld\n",
+							sys->cpu.pc, sys->cpu.cycles);
 		}
 		sys->display(sys, -1);	// must not sleep!
-	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
-		if (sys->cpu.next == 0x27b) { // alpha-stop in running program...
+	} else if (sys->cpu.pc == 0x4af) {	// alpha-stop done...
+		if (sys->cpu.next == 0x081) { // alpha-stop in running program...
+			// currently can't tell difference!
+			// observed 528385 cycles, or 0.66 second
 			static struct timespec alpha_stop = {
-				0, 500000000L
+				0, 666666666L
 			};
 			// todo: should not sleep if key pressed - e.g. PRIME
 			nanosleep(&alpha_stop, NULL);
@@ -303,7 +303,6 @@ static inline void display_check(w700_sys_t *sys) {
 		}
 		sys->display(sys, 0);
 	}
-#endif
 }
 
 int instr_exec(w700_sys_t *sys) {
