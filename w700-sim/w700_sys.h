@@ -3,7 +3,7 @@
 #ifndef __w700_sys_h__
 #define __w700_sys_h__
 
-#ident "$Id: w700_sys.h,v 1.1 2011/10/20 17:18:07 drmiller Exp $"
+#ident "$Id: w700_sys.h,v 1.2 2011/10/29 14:41:11 drmiller Exp $"
 
 #include "w700_ucode.h"
 #include "w700_cpu.h"
@@ -17,8 +17,7 @@
 typedef struct w700_sys_s {
 	w700_cpu_t cpu;
 	uint64_t ucode[2048];
-	uint8_t ram[2048]; // 4096x4
-	uint8_t rom[2048]; // 4096x4
+	uint8_t ram[2048];
 	void (*fault)(struct w700_sys_s *sys, const char *str);
 	int (*intr)(struct w700_sys_s *sys, int sig);	// return != 0 if signal not handled
 	void (*display)(struct w700_sys_s *sys, int on);

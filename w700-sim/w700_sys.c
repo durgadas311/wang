@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.6 2011/10/28 17:41:12 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.7 2011/10/29 14:41:11 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@
 
 static int _sys_ops = 0;
 
-uint16_t ram_mask = 0x3ff;
+uint16_t ram_mask = sizeof(((w700_sys_t *)0)->ram) - 1;
 
 extern int diw700(char *buf, uint64_t *t);
 
@@ -508,10 +508,19 @@ static int sys_interact(w700_sys_t *sys) {
 	extern int sys_command(w700_sys_t *sys);
 	int rc;
 
+	struct sigaction save_intr;
+	struct sigaction temp_intr;
+
+	sigemptyset(&temp_intr.sa_mask);
+	temp_intr.sa_handler = SIG_IGN;
+	temp_intr.sa_flags = SA_RESTART;
+	sigaction(SIGINT, &temp_intr, &save_intr);
+
 	printf("break at %03x\n", sys->cpu.pc);
 	do {
 		rc = sys_command(sys);
 	} while (rc == 0 && !sys->run);
+	sigaction(SIGINT, &save_intr, NULL);
 	return rc;
 }
 

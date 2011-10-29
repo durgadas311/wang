@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sim_cmd.c,v 1.2 2011/10/27 20:45:07 drmiller Exp $"
+#ident "$Id: w700_sim_cmd.c,v 1.3 2011/10/29 14:41:11 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +43,7 @@ static int _disas(w700_sys_t *sys, char *line) {
 	char *s;
 	uint16_t adr = sys->cpu.pc;
 	int len = 16;
-	uint16_t max = 2 * 1024;
+	uint16_t max = 2 * 1024;	// sizeof(sys->ucode) / sizeof(sys->ucode[0])
 
 	s = strtok(NULL, " \t");
 	if (s) {
@@ -84,44 +84,16 @@ static int _exam(w700_sys_t *sys, char *line) {
 		}
 	}
 
-	adr >>= 1;
 	len = (len + 1) & ~1;
 	int x, y;
 	for (x = 0; x < len;) {
-		printf("%03x:", adr << 1);
+		printf("%03x:", adr);
+		if (adr >= sizeof(sys->ram)) {
+			printf(" no memory\n");
+			break;
+		}
 		for (y = 0; x + y < len && y < 16; y += 2) {
 			uint8_t b = sys->ram[adr];
-			printf(" %01x-%01x", (b & 0x0f), (b >> 4));
-			++adr;
-		}
-		printf("\n");
-		x += y;
-	}
-	return 0;
-}
-
-static int _rom(w700_sys_t *sys, char *line) {
-	char *s;
-	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
-	int len = 256;
-	s = strtok(NULL, " \t");
-	if (s) {
-		if (strcmp(s, ".") != 0) {
-			adr = strtoul(s, NULL, 16);
-		}
-		s = strtok(NULL, " \t");
-		if (s) {
-			len = strtoul(s, NULL, 0);
-		}
-	}
-
-	adr >>= 1;
-	len = (len + 1) & ~1;
-	int x, y;
-	for (x = 0; x < len;) {
-		printf("%03x:", adr << 1);
-		for (y = 0; x + y < len && y < 16; y += 2) {
-			uint8_t b = sys->rom[adr];
 			printf(" %01x-%01x", (b & 0x0f), (b >> 4));
 			++adr;
 		}
@@ -146,15 +118,8 @@ static int _store(w700_sys_t *sys, char *line) {
 	}
 	while (s != NULL) {
 		v = strtoul(s, NULL, 16);
-		v &= 0x0f;
-		b = sys->ram[adr >> 1];
-		if (adr & 1) {
-			b &= 0x0f;
-			v <<= 4;
-		} else {
-			b &= 0xf0;
-		}
-		sys->ram[adr >> 1] = b | v;
+		b = sys->ram[adr];
+		sys->ram[adr] = v;
 		++adr;
 		s = strtok(NULL, " \t");
 	}
@@ -295,18 +260,6 @@ static int _go(w700_sys_t *sys, char *line) {
 	return 0;
 }
 
-static int _dup(w700_sys_t *sys, char *line) {
-	uint8_t *ram = &sys->ram[0xf6f >> 1];
-	uint8_t *rom = &sys->rom[0xfff >> 1];
-	int len = ram - &sys->ram[0x100 >> 1] + 1;
-	printf("copying %d bytes from RAM to ROM...\n", len);
-	while (len > 0) {
-		*rom-- = *ram--;
-		--len;
-	}
-	return 0;
-}
-
 static int _step(w700_sys_t *sys, char *line) {
 	sys->cpu.cylimit = sys->cpu.cycles + 1;
 	sys->run = 1;
@@ -411,15 +364,13 @@ struct {
 	{ "quit", NULL,		NULL, "End simulation" },
 	{ "trace", _trace,	"[file]", "Toggle trace on/off" },
 	{ "dump", _dump,	NULL, "Dump processor state/registers" },
-	{ "disas", _disas,	"[addr [instrs]]", "Disassemble ROM at PC [or hex addr]" },
-	{ "exam", _exam,	"[addr [words]]", "Examine RAM at AH,AM,AL [or hex addr]" },
-	{ "rom", _rom,		"[addr [words]]", "Examine ROM at AH,AM,AL [or hex addr]" },
+	{ "disas", _disas,	"[addr [instrs]]", "Disassemble ucode ROM at PC [or hex addr]" },
+	{ "exam", _exam,	"[addr [words]]", "Examine RAM at L,M,N [or hex addr]" },
 	{ "set", _set,		"reg=value", "Set register" },
-	{ "store", _store,	"[@addr] val...", "Store hex val(s) in RAM at AH,AM,AL [or hex addr]" },
+	{ "store", _store,	"[@addr] val...", "Store hex val(s) in RAM at L,M,N [or hex addr]" },
 	{ "step", _step,	NULL, "Single-step one instruction" },
 	{ "keyboard", _keyboard,"", "Hack to provide input when no GUI" },
 	{ "core", _core,	"file", "Dump all of RAM (2K) to <file>" },
-	{ "dup", _dup,		"", "Copy program space into ROM" },
 	{ "go", _go,		"[+cycles]", "Resume program at current PC [break after <cycles>]" },
 	{ "systrc", _systrc,	"[[off] pattern]", "Enable tracing of sys mem bytes" },
 	{ "keytrc", _keytrc,	"on/off", "Enable tracing of key presses" },
