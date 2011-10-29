@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.6 2011/10/29 03:16:09 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.7 2011/10/29 03:54:24 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -109,11 +109,11 @@ static void guidisplay(w700_sys_t *sys, int on) {
 		// so send valid data...
 		bx |= (ds << 4) | dcx;
 		bx |= (sys->cpu.s & 2) << 11;	// FXDX
-		bx ^= 0x1000;
+		//bx ^= 0x1000;
 
 		by |= (ds << 4) | dcy;
 		by |= (sys->cpu.s & 1) << 12;	// FXDY
-		//by ^= 0x1000;
+		by ^= 0x1000;
 	}
 
 	if (flush) {
