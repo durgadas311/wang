@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sim_cmd.c,v 1.3 2011/10/29 14:41:11 drmiller Exp $"
+#ident "$Id: w700_sim_cmd.c,v 1.4 2011/10/29 15:51:22 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,7 +98,7 @@ static int _exam(w700_sys_t *sys, char *line) {
 			++adr;
 		}
 		printf("\n");
-		x += y;
+		x += y / 2;
 	}
 	return 0;
 }

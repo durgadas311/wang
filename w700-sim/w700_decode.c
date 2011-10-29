@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.6 2011/10/29 03:16:09 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.7 2011/10/29 15:51:22 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -55,6 +55,7 @@ static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
 	s >>= 1;
+	return s;
 }
 
 static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
@@ -62,6 +63,7 @@ static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
 	s >>= 1;
+	return s;
 }
 
 static uint8_t and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
@@ -579,7 +581,11 @@ int instr_exec(w700_sys_t *sys) {
 	case 8:	break;
 	case 9:
 		// clock = P9
-		sys->cpu.q = sys->cpu.cc;
+		if (u->aop == 7) {
+			sys->cpu.q = sys->cpu.sc;
+		} else {
+			sys->cpu.q = sys->cpu.cc;
+		}
 		break;
 	case 10:
 	case 11:

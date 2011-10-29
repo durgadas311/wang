@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.6 2011/10/28 17:41:12 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.7 2011/10/29 15:51:22 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -173,7 +173,7 @@ void diw700(char *buf, uint64_t *v) {
 	case 6:	sprintf(opA, "KB<0> = RBS"); break;
 	case 7:	sprintf(opA, "IOB = KB"); break;
 	case 8:	sprintf(opA, "no-op"); break;
-	case 9:	sprintf(opA, "Q = CC"); break;
+	case 9:	sprintf(opA, "Q = %s", u->aop == 7 ? "SC" : "CC"); break;
 	case 10:	sprintf(opA, "KB<0> = Dot"); break;
 	case 11:	sprintf(opA, "Din = KB<0>"); break;
 	case 12:	sprintf(opA, "TMR=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
