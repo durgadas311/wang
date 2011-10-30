@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.10 2011/10/30 01:56:06 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.11 2011/10/30 16:45:32 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -20,6 +20,43 @@ uint8_t cov[2048] = {0};
 uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
 
+#if 0 // NO!!!
+static uint8_t bcd_logic[32] = {
+[0] = 0x00,
+[1] = 0x01,
+[2] = 0x02,
+[3] = 0x03,
+[4] = 0x04,
+[5] = 0x05,
+[6] = 0x06,
+[7] = 0x07,
+[8] = 0x08,
+[9] = 0x09,
+[10] = 0x10,
+[11] = 0x11,
+[12] = 0x12,
+[13] = 0x13,
+[14] = 0x14,
+[15] = 0x15,
+[16] = 0x06,
+[17] = 0x07,
+[18] = 0x08,
+[19] = 0x09,
+[20] = 0x16,
+[21] = 0x17,
+[22] = 0x1c,
+[23] = 0x1d,
+[24] = 0x06,
+[25] = 0x07,
+[26] = 0x18,
+[27] = 0x19,
+[28] = 0x16,
+[29] = 0x17,
+[30] = 0x1c,
+[31] = 0x1d
+};
+#endif
+
 static uint8_t bin_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
 	sys->cpu.alu = ((s & 0x0f) == 0);
@@ -29,25 +66,27 @@ static uint8_t bin_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 
 static uint8_t bcd_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
-	if (s > 9) {
+	uint8_t cc = 0;
+	//s = bcd_logic[s & 0x1f];
+	while (s >= 10) {
 		s -= 10;
-		s |= 0x10;
+		cc = 1;
 	}
 	sys->cpu.alu = ((s & 0x0f) == 0);
-	sys->cpu.cc = ((s & 0x10) != 0);
+	sys->cpu.cc = cc;
 	return s & 0x0f;
 }
 
 static uint8_t bin_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bin_add3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
-	return s;
+	return s & 0x0f;
 }
 
 static uint8_t bcd_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bcd_add3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
-	return s;
+	return s & 0x0f;
 }
 
 static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
@@ -55,7 +94,7 @@ static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
 	s >>= 1;
-	return s;
+	return s & 0x0f;
 }
 
 static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
@@ -63,7 +102,7 @@ static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
 	s >>= 1;
-	return s;
+	return s & 0x0f;
 }
 
 static uint8_t bin_and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
