@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2011/10/30 23:53:59 drmiller Exp $
+# $Id: Makefile,v 1.5 2011/10/30 23:55:47 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -53,7 +53,7 @@ clobber: clean
 	rm -rf $(TMPDIR)
 
 rom.diff: ROM720C.txt
-	cvs diff -r 1.1 ROM720C.txt >rom.diff
+	-cvs diff -r 1.1 ROM720C.txt >rom.diff
 
 tar: rom.diff
 	cd ..;\
@@ -61,7 +61,7 @@ tar: rom.diff
 		w700-sim/*.[ch] w700-sim/Makefile w700-sim/*.java \
 		w700-sim/README*  w700-sim/LICENSE* \
 		w700-sim/rom.diff \
-		w700-sim/icons/*.gif w700-sim/icons/*.png \
+		w700-sim/icons/*.gif \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
 ship: tar
