@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.9 2011/10/30 01:56:06 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.10 2011/10/30 16:45:11 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -450,6 +450,35 @@ as follows:
 
 All memory in the calculator is organized as 8-bit words.
 Memory addresses are not byte-addresses, but 8-bit-word addresses.
+
+<P><UL><TABLE BORDER> 
+<TR><TH COLSPAN=5>Memory Usage (Model 720C)</TH></TR>
+<TR><TH ROWSPAN=2>RAM Address</TH>
+		<TH COLSPAN=2>Registers</TH>		<TH COLSPAN=2>Purpose</TH></TR>
+<TR>		<TH>Upper</TH><TH>Lower</TH>		<TH>Upper</TH><TH>Lower</TH></TR>
+<TR><TD CLASS="num">0x7ff - 0x7f0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Display Register Y</TD><TD>Display Register X</TD></TR>
+<TR><TD CLASS="num">0x7ef - 0x7e0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Temp</TD><TD>Temp</TD></TR>
+<TR><TD CLASS="num">0x7df - 0x7d0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>System State</TD><TD>Learn Mode Display</TD></TR>
+<TR><TD CLASS="num">0x7cf - 0x7c0</TD><TD CLASS="num">248 (n/a)</TD><TD CLASS="num">n/a</TD><TD COLSPAN=2>(no prog steps)</TD></TR>
+<TR><TD CLASS="num">0x7bf - 0x7b0</TD><TD CLASS="num">246 (n/a)</TD><TD CLASS="num">247 (n/a)</TD><TD COLSPAN=2>Steps 0000 - 0015</TD></TR>
+<TR><TD CLASS="num">0x7af - 0x7a0</TD><TD CLASS="num">244 (n/a)</TD><TD CLASS="num">245 (n/a)</TD><TD COLSPAN=2>Steps 0016 - 0031</TD></TR>
+<TR><TD CLASS="num">0x79f - 0x790</TD><TD CLASS="num">242 (n/a)</TD><TD CLASS="num">243 (n/a)</TD><TD COLSPAN=2>Steps 0032 - 0047</TD></TR>
+<TR><TD COLSPAN=5 CLASS="num">... etc ...</TD></TR>
+<TR><TD CLASS="num">0x64f - 0x640</TD><TD CLASS="num">200 (n/a)</TD><TD CLASS="num">201 (n/a)</TD><TD COLSPAN=2>Steps 0368 - 0383</TD></TR>
+<TR><TD CLASS="num">0x63f - 0x630</TD><TD CLASS="num">198 (09 08*)</TD><TD CLASS="num">199 (09 09*)</TD><TD COLSPAN=2>Steps 0384 - 0399</TD></TR>
+<TR><TD CLASS="num">0x62f - 0x620</TD><TD CLASS="num">196 (09 06*)</TD><TD CLASS="num">197 (09 07*)</TD><TD COLSPAN=2>Steps 0400 - 0415</TD></TR>
+<TR><TD COLSPAN=5 CLASS="num">... etc ...</TD></TR>
+<TR><TD CLASS="num">0x32f - 0x320</TD><TD CLASS="num">100 (00 00*)</TD><TD CLASS="num">101 (00 01*)</TD><TD COLSPAN=2>Steps 1168 - 1183</TD></TR>
+<TR><TD CLASS="num">0x31f - 0x310</TD><TD CLASS="num">98 (09 08)</TD><TD CLASS="num">99 (09 09)</TD><TD COLSPAN=2>Steps 1184 - 1199</TD></TR>
+<TR><TD CLASS="num">0x30f - 0x300</TD><TD CLASS="num">96 (09 06)</TD><TD CLASS="num">97 (09 07)</TD><TD COLSPAN=2>Steps 1200 - 1215</TD></TR>
+<TR><TD COLSPAN=5 CLASS="num">... etc ...</TD></TR>
+<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">4 (00 04)</TD><TD CLASS="num">5 (00 05)</TD><TD COLSPAN=2>Steps 1936 - 1951</TD></TR>
+<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">2 (00 02)</TD><TD CLASS="num">3 (00 03)</TD><TD COLSPAN=2>Steps 1952 - 1967</TD></TR>
+<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">0 (00 00)</TD><TD CLASS="num">1 (00 01)</TD><TD COLSPAN=2>Steps 1968 - 1983</TD></TR>
+<TR><TD COLSPAN=3>* Access direct only by "+100" function codes
+</TD></TR>
+</TABLE></UL>
+
 
 <A NAME="display"><H3>Display</H3></A>
 
