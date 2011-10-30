@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $
+// $Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -125,7 +125,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -300,7 +300,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -382,7 +382,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -481,7 +481,7 @@ class Wang700_SimInput
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -614,7 +614,7 @@ class Wang700_Tape extends JComponent
 		int nb = 0;
 		int n = 1;
 		b1[0] = 0;
-		while (n == 1 && (b1[0] & 0x00ff) != 0x9e) {
+		while (n == 1 && (b1[0] & 0x00ff) != 0x5c) {
 			try {
 				n = _tf.read(b1);
 //System.err.println(_index + ": at " + _tf.getFilePointer() + " got " + b1[0]);
@@ -741,15 +741,15 @@ class Wang700_Tape extends JComponent
 				_wr = false; // redundant
 			} else { // request for next byte
 				tape_read();
-				if ((bb[0] & 0x00ff) == 0x9e) { // END PROG
+				if ((bb[0] & 0x00ff) == 0x5c) { // END PROG
 					// there is always one more byte..
 					tape_read();
 					// might be old image... treat EOF same...
 					if ((bb[1] & 0x00ff) == 0x0e) {	// saw EOF
-						bb[0] = (byte)0x9e;
+						bb[0] = (byte)0x5c;
 						bb[1] = 0x0c;
 					}
-					if ((bb[0] & 0x00ff) != 0x9e) {
+					if ((bb[0] & 0x00ff) != 0x5c) {
 						bb[0] = 0;
 						bb[1] = 0x0e;
 					}
@@ -767,9 +767,9 @@ class Wang700_Tape extends JComponent
 			if (_wr && !_end && _ready) {
 				// did not just write END PROG, so need
 				// to mark end of tape "file".
-				// use 0x9e 0xff to mean "invisible" END PROG
+				// use 0x5c 0xff to mean "invisible" END PROG
 				b[1] = 0x0c;
-				b[0] = (byte)0x9e;
+				b[0] = (byte)0x5c;
 				tape_write(b);
 				b[0] = (byte)0xff;
 				tape_write(b);
@@ -784,9 +784,9 @@ class Wang700_Tape extends JComponent
 			if (!_ready) return;
 			tape_write(b);
 			// only if last byte before tape-off is END PROG...
-			_end = ((b[0] & 0x00ff) == 0x9e); // END PROG
+			_end = ((b[0] & 0x00ff) == 0x5c); // END PROG
 			if (_end) {
-				tape_write(b); // write 0x9e 0x9e - true END PROG
+				tape_write(b); // write 0x5c 0x5c - true END PROG
 				++_index; // display updated later..
 			}
 		} else {
@@ -1013,7 +1013,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1603,7 +1603,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1785,7 +1785,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2110,19 +2110,19 @@ class Wang700_Keyboard extends JComponent
 //System.err.println("key pressed "+e.getKeyCode()+" "+e.getKeyChar());
 		char c = e.getKeyChar();
 		if (c >= '0' && c <= '9') {
-			do_keycode(c - '0');
+			do_keycode(0x70 + (c - '0'));
 		}
 		if (c == 'e' || c == 'E') {
-			do_keycode(11);
+			do_keycode(0x7a);
 		}
 		if (c == '.') {
-			do_keycode(10);
+			do_keycode(0x7c);
 		}
-		if (c == '+' || c == '-') {
-			do_keycode(12);
+		if (c == '-') {
+			do_keycode(0x7b);
 		}
 		if (c == '\b') {
-			do_keycode(15);
+			do_keycode(0x7f);
 		}
 	}
 
@@ -2209,7 +2209,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2371,7 +2371,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2596,7 +2596,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2698,7 +2698,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.12 2011/10/30 16:48:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
