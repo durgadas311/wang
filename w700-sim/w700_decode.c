@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.11 2011/10/30 16:45:32 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.12 2011/10/30 23:53:59 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -259,7 +259,7 @@ static void tape_off(w700_sys_t *sys) {
 
 static void dev_out(w700_sys_t *sys) {
 	uint8_t c = (sys->cpu.gioa << 4) | sys->cpu.giob;
-fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
+//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 	sys->dev(sys, c, sys->cpu.iob);
 }
 
@@ -674,7 +674,7 @@ int instr_exec(w700_sys_t *sys) {
 		// todo: clean this up!
 		if (key) {
 //fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
-if (1 || __keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+//if (1 || __keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 			sys->cpu.kbd = 1;
 			sys->cpu.ka = (key >> 4) & 0x0f;
 			sys->cpu.kb = key & 0x0f;

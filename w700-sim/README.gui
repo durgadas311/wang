@@ -1,4 +1,4 @@
-$Id: README.gui,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+$Id: README.gui,v 1.2 2011/10/30 23:53:59 drmiller Exp $
 
 The GUI is java based. All the *.class files are required, and optional fonts
 are desirable. All fonts are *.ttf and in the "fonts" subdirectory.
@@ -10,13 +10,19 @@ Simplest build procedure is
 
 	make install
 
-which should build everything and install it in ~/wang600apc.
+which should build everything and install it in ~/wang700apc.
 All the java is packaged into a jar file, along with fonts and icons.
 The GUI may then be launched with the command:
 
-	~/wang600apc/run
+	~/wang700apc/run
 
 This creates a sub-process to run the simulator. Currently, you still need
 the terminal window for the printer(s), and for any diagnostic output.
 This means that if you want to setup an "Application Launcher" button
 on your desktop or panel, you need to select the "in Terminal Window" option.
+
+Note, "Run-Learn" mode (both Run and Learn buttons pushed together) works
+using your native keyboard shift key. With either Run or Learn down,
+press Shift and click the other.  both will be down and the alternate functions
+of the special keys is available. Clicking, without Shift, on either button
+will release the other.

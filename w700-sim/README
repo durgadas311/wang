@@ -1,18 +1,18 @@
-$Id: README,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+$Id: README,v 1.2 2011/10/30 23:53:59 drmiller Exp $
 
-See "README.gui" for information on how to run the GUI Wang 600. This file is
+See "README.gui" for information on how to run the GUI Wang 700. This file is
 for use the interactive simulator only. The GUI is the "normal" way to run.
 Using the bare simulator is for experimentation and debugging.
 
 ==================
 
-This is the start of a Wang 600 Simulator, using actual microcode from a Wang 600.
+This is the start of a Wang 700 Simulator, using actual microcode from a Wang 700.
 
 By default it uses a Java front-end. That can be disabled with "-g".
 
-Some basic help message is displayed when "w600-sim -h" is run.
+Some basic help message is displayed when "w700-sim -h" is run.
 
-Defaults work with included files, namely the microcode image in "wang600.rom".
+Defaults work with included files, namely the microcode image in "ROM720C.txt".
 
 Option -t will enable trace, with the expected voluminous output.
 
@@ -22,20 +22,20 @@ Without a GUI, it is a very crude interface.
 
 Currently, the GUI requires all the *.class files in the main directory, plus the
 GIF images in the "icons" subdirectory. The GUI has a "test" mode, which is what
-runs when the java file "w600_fe.class" is run outside of the simulator.
-For example, by "java w600_fe".
+runs when the java file "w700_fe.class" is run outside of the simulator.
+For example, by "java w700_fe".
 
-There is a simple disassembler for the microcode, "w600-dasm". It uses the 
+There is a simple disassembler for the microcode, "w700-dasm". It uses the 
 same format as the trace facility in the simulator, except there is no
 hardware state information.
 
-Some basic diagrams and notes on the hardware are in "docs/wang600arch.html".
+Some basic diagrams and notes on the hardware are in "docs/wang700arch.html".
 
-w600-sim usage/help text:
+w700-sim usage/help text:
 
-Usage: ./w600-sim [options]
+Usage: ./w700-sim [options]
 Options:
-        -M      Simulate model: 600-14TP (default), 600-6TP, 600-2TP.
+        -M      Simulate model: (not implemented)
         -b      Back-end mode (for GUI FE)
         -g      Enable GUI (don't use this way! currently broken)
         -i      Interactive mode enable
@@ -46,14 +46,14 @@ Options:
                 NOTE: RAM/ROM contents are reverse order for program steps.
                 ROM addr FFF is program step 0000 (RAM F6F is step 0000)
         -t file Turn on TRACE to file, '-' for stderr (huge file alert!)
-        -p file Use microcode image in 'file', default 'wang600.rom'
+        -p file Use microcode image in 'file', default 'ROM720C.txt'
         -l addr Load microcode into 'addr', default 000
         -e addr Start running at 'addr', default 000
 
 
 simulator commands help:
 
-W600-SIM Commands:
+W700-SIM Commands:
   quit                  End simulation
   trace [file]          Toggle trace on/off
   dump                  Dump processor state/registers
