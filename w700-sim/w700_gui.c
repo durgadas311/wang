@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.8 2011/10/29 22:07:29 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.9 2011/10/30 01:56:06 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -370,7 +370,7 @@ static void guidev(w700_sys_t *sys, uint8_t c, uint8_t sts) {
 		c &= 0x3f;
 	}
 	b |= c;
-fprintf(stderr, "device %04x\n", b);
+//fprintf(stderr, "device %04x\n", b);
 	rc = write(__gui_dfd, &b, sizeof(b));
 	if (rc < 0) {
 		perror("guidev");

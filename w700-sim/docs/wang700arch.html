@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.8 2011/10/29 22:07:29 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.9 2011/10/30 01:56:06 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -95,8 +95,8 @@ for that key.
 <TD CLASS="key">SET<BR>P.C.</TD>
 <TD CLASS="key">RECORD<BR>PROG</TD>
 <TD CLASS="key">S.M.</TD>
-<TD CLASS="key">INS</TD>
 <TD CLASS="key">B.S.</TD>
+<TD CLASS="key">INS</TD>
 <TD CLASS="key">DEL</TD>
 </TR>
 <TR><TH>uCode<BR>Address</TH>
@@ -104,26 +104,23 @@ for that key.
 <TD CLASS="num">001</TD>
 <TD CLASS="num">002</TD>
 <TD CLASS="num">003</TD>
-<TD CLASS="num">?</TD>
-<TD CLASS="num">?</TD>
-<TD CLASS="num">?</TD>
-<TD CLASS="num">?</TD>
+<TD CLASS="num">004</TD>
+<TD CLASS="num">005</TD>
+<TD CLASS="num">006</TD>
+<TD CLASS="num">007</TD>
 </TR>
 </TABLE></UL>
 
-<P>Wang 700 support for S.M., INS, DEL, and B.S. is pending. The schematics
-(5930) show a signal "ADF" that modifies the "next" address accordingly, but I have
-yet to find what generates that signal. First guess is "Run+Learn" but available
-keyboard schematics do not show that wiring.
+<P>Wang 700 support for S.M., INS, DEL, and B.S. was by forcing both the
+Run and Learn buttons down together.
 
-<P> T.B.D. How the Wang 700 Series detects memory size.  Perhaps the microcode
-was changed to reflect larger memory? From tracing microcode, it seems that memory
-size is hard-coded. So, 720C microcode could not run with less than 2Kx8 RAM.
+<P>From tracing microcode, it seems that memory
+size is hard-coded. So, for example, 720C microcode could not run with less than 2Kx8 RAM.
 
 <P><UL><TABLE BORDER>
-<TR><TH>KK</TH><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
-<TR><TD CLASS="num">?</TD><TD CLASS="num">720C</TD><TD CLASS="num">2Kx8</TD><TD CLASS="num">1984?</TD><TD CLASS="num">248?</TD></TR>
-<TR><TD CLASS="num">?</TD><TD CLASS="num">700A</TD><TD CLASS="num">1Kx8</TD><TD CLASS="num">960</TD><TD CLASS="num">120</TD></TR>
+<TR><TH>Model</TH><TH>Memory size</TH><TH>Steps</TH><TH>Registers</TH></TR>
+<TR><TD CLASS="num">720C</TD><TD CLASS="num">2Kx8</TD><TD CLASS="num">1984</TD><TD CLASS="num">248</TD></TR>
+<TR><TD CLASS="num">700A</TD><TD CLASS="num">1Kx8</TD><TD CLASS="num">960</TD><TD CLASS="num">120</TD></TR>
 </TABLE></UL>
 
 <A NAME="timing"><H3>Microcode Instruction Timing</H3></A>

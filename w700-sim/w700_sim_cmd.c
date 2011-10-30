@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sim_cmd.c,v 1.5 2011/10/29 22:07:29 drmiller Exp $"
+#ident "$Id: w700_sim_cmd.c,v 1.6 2011/10/30 01:56:06 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -271,6 +271,8 @@ static int _step(w700_sys_t *sys, char *line) {
 	return 0;
 }
 
+extern uint16_t trc_adr;
+
 static int _systrc(w700_sys_t *sys, char *line) {
 	char *s;
 	int x = 0;
@@ -283,8 +285,9 @@ static int _systrc(w700_sys_t *sys, char *line) {
 			__systrc[x++] = (n != 0);
 		}
 	}
-	printf("Tracing system words (15,15,0):"
+	printf("Tracing system words (%d,%d,0):"
 		" %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+		(trc_adr >> 8) & 0x0f, (trc_adr >> 4) & 0x0f,
 		__systrc[0], __systrc[1], __systrc[2], __systrc[3],
 		__systrc[4], __systrc[5], __systrc[6], __systrc[7],
 		__systrc[8], __systrc[9], __systrc[10], __systrc[11],

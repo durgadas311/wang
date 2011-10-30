@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $
+// $Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -125,7 +125,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -300,7 +300,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -382,7 +382,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -481,7 +481,7 @@ class Wang700_SimInput
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -797,10 +797,10 @@ class Wang700_Tape extends JComponent
 
 class Wang700_Model730 {
 	private int _cmd;
-//	private int _adr;
-//	private boolean _wr;
-//	private int _len;
-//	private int _idx;
+	private int _adr;
+	private boolean _wr;
+	private int _len;
+	private int _idx;
 	private Wang700_Keyboard _kbd;
 	java.io.RandomAccessFile _f;
 	File _file;
@@ -834,25 +834,25 @@ class Wang700_Model730 {
 		}
 	}
 
-//	private int disk_read(int len) {
-//		int n = 0;
-//		try {
-//			_f.read(_buf, 0, len);
-//		} catch (IOException ee) {
-//			n = 1;
-//		}
-//		return n;
-//	}
+	private int disk_read(int len) {
+		int n = 0;
+		try {
+			_f.read(_buf, 0, len);
+		} catch (IOException ee) {
+			n = 1;
+		}
+		return n;
+	}
 
-//	private int disk_write(int len) {
-//		int n = 0;
-//		try {
-//			_f.write(_buf, 0, len);
-//		} catch (IOException ee) {
-//			n = 1;
-//		}
-//		return n;
-//	}
+	private int disk_write(int len) {
+		int n = 0;
+		try {
+			_f.write(_buf, 0, len);
+		} catch (IOException ee) {
+			n = 1;
+		}
+		return n;
+	}
 
 	public void pickFile(JMenuItem m) {
 		disk_close();
@@ -872,18 +872,18 @@ class Wang700_Model730 {
 	}
 
 	public void do_dev(byte[] b) {
-//		int res;
-System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-//		if (_cmd == 0 && (b[1] & 0x0f) == 1) { // ACK when no command
-//			return;
-//		}
+		int res;
+//System.err.println("dev 2 ["+_cmd+"] "+b[0]);
+		if (_cmd == 0 && (b[1] & 0x0f) == 1) { // ACK when no command
+			return;
+		}
 		++_cmd;
 //System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-//		boolean dat = ((b[1] & 0x10) != 0);
-//		if (_cmd <= 4 && dat || _cmd > 4 && !dat) {
-//System.err.println("sync error");
-//			return;
-//		}
+		boolean dat = ((b[1] & 0x10) != 0);
+		if (_cmd <= 4 && dat || _cmd > 4 && !dat) {
+System.err.println("sync error");
+			return;
+		}
 		int bb;
 //try{
 // Thread.currentThread().sleep(50);
@@ -891,54 +891,53 @@ System.err.println("dev 2 ["+_cmd+"] "+b[0]);
 //catch(InterruptedException ie){
 //}
 		// unless we know otherwise, just ACK with a "0"...
-//		bb = ((b[1] & 0xf0) << 8) | (_cmd & 0x0ff); // temp! debug
-		bb = ((b[1] & 0xf0) << 8);
-//		if (_cmd < 4) {
-//			_adr <<= 8;
-//			_adr |= (b[0] & 0x00ff);
-//			bb |= 0x0100;
-//		} else if (_cmd == 4) {
-//			_wr = ((b[0] & 0x80) != 0);
-//			_len = (b[0] & 0x7f);
-//			bb |= 0x0100;
-//			if (_len == 0) {
-//				_len = 64;
-//			} else if (_len > 1) {
-//				_len <<= 2;
-//			}
+		bb = ((b[1] & 0xf0) << 8) | (_cmd & 0x0ff); // temp! debug
+		if (_cmd < 4) {
+			_adr <<= 8;
+			_adr |= (b[0] & 0x00ff);
+			bb |= 0x0100;
+		} else if (_cmd == 4) {
+			_wr = ((b[0] & 0x80) != 0);
+			_len = (b[0] & 0x7f);
+			bb |= 0x0100;
+			if (_len == 0) {
+				_len = 64;
+			} else if (_len > 1) {
+				_len <<= 2;
+			}
 //System.err.println("command "+_adr+" "+_wr+" "+_len);
-//			try {
-//				_f.seek(_adr);
-//			} catch (IOException ee) {
+			try {
+				_f.seek(_adr);
+			} catch (IOException ee) {
 //System.err.println("seek "+_adr+" failed");
-//			}
-//			_idx = 0;
-//			if (!_wr) {
-//				res = disk_read(_len);
-//				bb = (bb & 0xff00) | (res & 0x00ff); // result code
+			}
+			_idx = 0;
+			if (!_wr) {
+				res = disk_read(_len);
+				bb = (bb & 0xff00) | (res & 0x00ff); // result code
 //System.err.println("rd result "+res+" ("+_len+")");
-//			}
-//		} else {
-//			if (_idx < _len) {
-//				if (_wr) {
-//					bb |= 0x0100;
-//					_buf[_idx] = b[0];
-//				} else {
-//					bb = (bb & 0xff00) | (_buf[_idx] & 0x00ff);
-//				}
-//			} else {
-//				if (_wr) {
-//					bb |= 0x0100;
-//					res = disk_write(_len);
-//				} else {
-//					res = 0; // something else?
-//				}
-//				bb = (bb & 0xff00) | (res & 0x00ff); // result code
-//				_cmd = 0;
+			}
+		} else {
+			if (_idx < _len) {
+				if (_wr) {
+					bb |= 0x0100;
+					_buf[_idx] = b[0];
+				} else {
+					bb = (bb & 0xff00) | (_buf[_idx] & 0x00ff);
+				}
+			} else {
+				if (_wr) {
+					bb |= 0x0100;
+					res = disk_write(_len);
+				} else {
+					res = 0; // something else?
+				}
+				bb = (bb & 0xff00) | (res & 0x00ff); // result code
+				_cmd = 0;
 //System.err.println("result "+res+" ("+_idx+")");
-//			}
-//			++_idx;
-//		}
+			}
+			++_idx;
+		}
 //System.err.printf("got %02x%02x put %04x\n", b[1], b[0], bb);
 		_kbd.do_keycode(bb);
 	}
@@ -946,9 +945,9 @@ System.err.println("dev 2 ["+_cmd+"] "+b[0]);
 	public void reset() {
 //System.err.println("clear ("+_len+")");
 		_cmd = 0;
-//		_adr = 0;
-//		_len = 0;
-//		_wr = false;
+		_adr = 0;
+		_len = 0;
+		_wr = false;
 		// cancel anything...
 	}
 }
@@ -1014,7 +1013,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1586,7 +1585,6 @@ class Wang700_Model711
 			_eop += s.length();
 			_text.setCaretPosition(_eop);
 		}
-		_kbd.do_keycode(0);
 		// "auto raise"...
 		onOff(true);
 	}
@@ -1605,7 +1603,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','>','u','<','t',' '};
@@ -1787,7 +1785,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2211,7 +2209,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2373,7 +2371,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2598,7 +2596,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2700,7 +2698,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.10 2011/10/29 22:07:29 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.11 2011/10/30 01:56:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

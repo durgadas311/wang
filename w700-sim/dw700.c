@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.7 2011/10/29 15:51:22 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.8 2011/10/30 01:56:06 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -50,7 +50,7 @@ void diw700(char *buf, uint64_t *v) {
 		case 4: s += sprintf(s, "OFL"); break;
 		case 5: s += sprintf(s, "CC"); break;
 		case 6: s += sprintf(s, "KBD"); break;
-		case 7: s += sprintf(s, "?"); break;
+		case 7: s += sprintf(s, "jh7?"); break;
 		}
 		s += sprintf(s, ":");
 		switch(u->jl) {
@@ -59,7 +59,7 @@ void diw700(char *buf, uint64_t *v) {
 		case 4: s += sprintf(s, "ALU"); break;
 		case 5: s += sprintf(s, "Q"); break;
 		case 6: s += sprintf(s, "SC"); break;
-		case 7: s += sprintf(s, "?"); break;
+		case 7: s += sprintf(s, "jl7?"); break;
 		}
 		s += sprintf(s, "]");
 	}
@@ -76,10 +76,10 @@ void diw700(char *buf, uint64_t *v) {
 	}
 
 	switch(u->bi) {
-	case 0: g = "?"; break;
+	case 0: g = "bi0?"; break;
 	case 1: g = k; break;
 	case 2: g = "D"; break;
-	case 3: g = "?"; break;
+	case 3: g = "bi3?"; break;
 	case 4: g = "KA"; break;
 	case 5: g = "KB"; break;
 	case 6: g = "CA"; break;
@@ -118,19 +118,19 @@ void diw700(char *buf, uint64_t *v) {
 		break;
 	}
 	if (u->bd) s += sprintf(s, "(bcd)");
-	s += sprintf(s, " ->[ALU");
+	/* s += sprintf(s, " ->[ALU"); */
 	if (u->aop < 5 || u->aop > 6) {
-		s += sprintf(s, ",CC");
+		/* s += sprintf(s, ",CC"); */
 		switch (u->aop) {
 		case 2:
 		case 3:
 		case 4:
 		case 7:
-			s += sprintf(s, ",SC");
+			s += sprintf(s, " ->SC");
 			break;
 		}
 	}
-	s += sprintf(s, "]");
+	/* s += sprintf(s, "]"); */
 
 	char *t = targ;
 	if (u->st >=1 && u->st <= 8) {
@@ -139,11 +139,12 @@ void diw700(char *buf, uint64_t *v) {
 		switch(u->st) {
 		case 0: /* sprintf(mach, "NOP"); */ break;
 		case 9: sprintf(mach, "RESET"); break;
-		case 10: sprintf(acc, "S<0>=!Z"); break;
-		case 11: sprintf(acc, "S<1>=Z"); break;
+		case 10: sprintf(acc, "S<0>=!ALU"); break;
+		case 11: sprintf(acc, "S<1>=ALU"); break;
 		case 12: sprintf(mach, "OFL=1"); break;
 		case 13: sprintf(acc, "S=0"); break;
 		case 14: sprintf(mach, "ERR=1"); break;
+		case 15: sprintf(mach, "st15?"); break;
 		}
 	}
 	if (targ[0] && u->zo != 7) {
@@ -164,22 +165,22 @@ void diw700(char *buf, uint64_t *v) {
 	}
 
 	switch(u->mop) {
-	case 0:	sprintf(opA, "mem(L,M,N) = Z,RB"); break;
-	case 1:	sprintf(opA, "mem(L,M,N) = RA,Z"); break;
+	case 0:	sprintf(opA, "mem(L,M,N) = (RA=z),RB"); break;
+	case 1:	sprintf(opA, "mem(L,M,N) = RA,(RB=z)"); break;
 	case 2:	sprintf(opA, "CA,CB = RA,RB = mem(L,M,N=T,U,V)"); break;
 	case 3:	sprintf(opA, "RA,RB = mem(L,M,N=T,U,V)"); break;
 	case 4:	sprintf(opA, "CA,CB = RA,RB = mem(L,M,N=15,%s,V)", k); break;
 	case 5:	sprintf(opA, "RA,RB = mem(L,M,N=15,%s,V)", k); break;
 	case 6:	sprintf(opA, "KB<0> = RBS"); break;
 	case 7:	sprintf(opA, "IOB = KB"); break;
-	case 8:	sprintf(opA, "no-op"); break;
+	case 8:	/* sprintf(opA, "no-op"); */ break;
 	case 9:	sprintf(opA, "Q = %s", u->aop == 7 ? "SC" : "CC"); break;
 	case 10:	sprintf(opA, "KB<0> = Dot"); break;
 	case 11:	sprintf(opA, "Din = KB<0>"); break;
 	case 12:	sprintf(opA, "TMR=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
 	case 13:	sprintf(opA, "TMR=0"); break;
 	case 14:	sprintf(opA, "GIOA,GIOB=KA,KB"); break;
-	case 15:	sprintf(opA, "?"); break;
+	case 15:	sprintf(opA, "mop15?"); break;
 	}
 
 	s = buf;

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.9 2011/10/29 22:31:39 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.10 2011/10/30 01:56:06 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -225,6 +225,7 @@ fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 }
 
 extern uint16_t ram_mask;
+uint16_t trc_adr = 0xfd0;
 
 static void rd_ram_i(w700_sys_t *sys) {
 	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
@@ -237,20 +238,20 @@ static void rd_ram_i(w700_sys_t *sys) {
 
 static void wr_ram_i(w700_sys_t *sys) {
 	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
-	adr &= ram_mask;
-	uint8_t a = sys->ram[adr];
+	uint16_t madr = adr & ram_mask;
+	uint8_t a = sys->ram[madr];
 	uint8_t b = (sys->cpu.ra << 4) | sys->cpu.rb;
-	sys->ram[adr] = b;
+	sys->ram[madr] = b;
 #if 0
 	if (__keytrc && adr == 0xff8) {
 		fprintf(stderr, "Code %02d %02d\n", (b >> 4) & 0x0f, b & 0x0f);
 	}
-	if (adr >= 0xff0) {
+#endif
+	if ((adr & 0xff0) == trc_adr) {
 		if (__systrc[adr & 0x00f]) {
 			fprintf(stderr, "[%03x] %02x -> %02x\n", adr, a, b);
 		}
 	}
-#endif
 }
 
 static void instr_trace(w700_sys_t *sys) {
@@ -523,8 +524,6 @@ int instr_exec(w700_sys_t *sys) {
 		sys->cpu.s &= ~8;
 		break;
 	case 9:
-		// T.B.D. reset 6184...
-//fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.pc, key);
 		sys->cpu.kbd = 0;
 		break;
 	case 10:
@@ -548,6 +547,7 @@ int instr_exec(w700_sys_t *sys) {
 		sys->display(sys, -2);
 		break;
 	case 15:
+		// error?
 		break;
 	}
 
