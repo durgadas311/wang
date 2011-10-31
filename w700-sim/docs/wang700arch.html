@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.11 2011/10/30 22:42:22 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.12 2011/10/31 16:43:13 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -449,7 +449,12 @@ as follows:
 <H4>Memory Usage</H4>
 
 All memory in the calculator is organized as 8-bit words.
-Memory addresses are not byte-addresses, but 8-bit-word addresses.
+Memory addresses are byte-addresses, but the calculator
+interlaces the memory usage by upper (i.e. RA) and
+lower (i.e. RB) nibbles.
+Even numbered registers use the upper part of a
+range of 16 bytes, odd registers use the lower part.
+Program steps are not interlaced.
 
 <P><UL><TABLE BORDER> 
 <TR><TH COLSPAN=5>Memory Usage (Model 720C)</TH></TR>
@@ -475,10 +480,14 @@ Memory addresses are not byte-addresses, but 8-bit-word addresses.
 <TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">4 (00 04)</TD><TD CLASS="num">5 (00 05)</TD><TD COLSPAN=2>Steps 1936 - 1951</TD></TR>
 <TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">2 (00 02)</TD><TD CLASS="num">3 (00 03)</TD><TD COLSPAN=2>Steps 1952 - 1967</TD></TR>
 <TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">0 (00 00)</TD><TD CLASS="num">1 (00 01)</TD><TD COLSPAN=2>Steps 1968 - 1983</TD></TR>
-<TR><TD COLSPAN=3>* Access direct only by "+100" function codes
+<TR><TD COLSPAN=5>* Access directly only by "direct +100" function codes
 </TD></TR>
 </TABLE></UL>
 
+<P>It is not known whether the 249th register (0x7cf - 0x7c0 upper) is an
+anomaly of the microcode or actually intended as a register.
+T.B.D. whether that memory gets used by the microcode for something else
+(e.g. temporary storage during certain operations).
 
 <A NAME="display"><H3>Display</H3></A>
 
@@ -535,6 +544,12 @@ the bits (during refresh) for selecting fixed/floating for both X and Y displays
 	<TD COLSPAN=4>X digit</TD>
 	<TD COLSPAN=4>Column</TD></TR>
 </TABLE></UL>
+
+<P>The display hardware decodes the register contents without modification, other
+than selecting fixed or floating point. The display pattern is the same as
+the register pattern.  This means the calculator does not need
+to keep a "formatted" copy of each display, it directly refreshes the
+actual register contents.
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
 
