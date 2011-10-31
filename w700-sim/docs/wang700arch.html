@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.13 2011/10/31 16:46:22 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.14 2011/10/31 17:46:14 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -464,7 +464,7 @@ Program steps are not interlaced.
 <TR><TD CLASS="num">0x7ff - 0x7f0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Display Register Y</TD><TD>Display Register X</TD></TR>
 <TR><TD CLASS="num">0x7ef - 0x7e0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Temp</TD><TD>Temp</TD></TR>
 <TR><TD CLASS="num">0x7df - 0x7d0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>System State</TD><TD>Learn Mode Display</TD></TR>
-<TR><TD CLASS="num">0x7cf - 0x7c0</TD><TD CLASS="num">248 (n/a)</TD><TD CLASS="num">n/a</TD><TD COLSPAN=2>(no prog steps)</TD></TR>
+<TR><TD CLASS="num">0x7cf - 0x7c0</TD><TD CLASS="num">248 (n/a)</TD><TD CLASS="num">n/a</TD><TD></TD><TD>Program Stack</TD></TR>
 <TR><TD CLASS="num">0x7bf - 0x7b0</TD><TD CLASS="num">246 (n/a)</TD><TD CLASS="num">247 (n/a)</TD><TD COLSPAN=2>Steps 0000 - 0015</TD></TR>
 <TR><TD CLASS="num">0x7af - 0x7a0</TD><TD CLASS="num">244 (n/a)</TD><TD CLASS="num">245 (n/a)</TD><TD COLSPAN=2>Steps 0016 - 0031</TD></TR>
 <TR><TD CLASS="num">0x79f - 0x790</TD><TD CLASS="num">242 (n/a)</TD><TD CLASS="num">243 (n/a)</TD><TD COLSPAN=2>Steps 0032 - 0047</TD></TR>
@@ -489,6 +489,18 @@ It is not known whether the 249th register (0x7cf - 0x7c0 upper) is an
 anomaly of the microcode or actually intended as a register.
 T.B.D. whether that memory gets used by the microcode for something else
 (e.g. temporary storage during certain operations).
+
+<P>The Program Stack is organized as five 12-bit values stored
+big-endian, with the low 11 bits being the
+memory address of the the program step that made the call (i.e. return must
+decrement this address for the next program code to execute) and
+the high bit is a flag indicating the mode which called the subroutine:
+1 = Keyboard (stopped), 0 = Running Program.
+Address 0x7c0 lower is the high 4 bits of the "top of stack". Each time the
+stack is "pushed" the entire contents is copied/shifted right.
+When the stack is "popped" it is copied left.
+The stack is not guarded against overflow, with entries being pushed off the end
+and lost.
 
 <A NAME="display"><H3>Display</H3></A>
 
