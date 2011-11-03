@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_sys.c,v 1.7 2011/10/29 14:41:11 drmiller Exp $"
+#ident "$Id: w700_sys.c,v 1.8 2011/11/03 20:55:14 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -248,7 +248,7 @@ static uint8_t systape(w700_sys_t *sys, int wr, uint8_t nibble) {
 		return 0;
 	} else {
 		if (!bc) {
-			if (byte == 0x9e) { // End Prog
+			if (byte == 0x5c) { // End Prog
 				return 0xff;
 			}
 			byte = 0;

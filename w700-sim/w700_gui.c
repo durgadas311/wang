@@ -13,7 +13,7 @@
 
 #include "w700_gui.h"
 
-#ident "$Id: w700_gui.c,v 1.9 2011/10/30 01:56:06 drmiller Exp $"
+#ident "$Id: w700_gui.c,v 1.10 2011/11/03 20:54:46 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -302,7 +302,7 @@ static uint8_t guitape(w700_sys_t *sys, int wr, uint8_t nibble) {
 	} else {
 		if (!bc) {
 			// not needed? will GUI take care of it?
-			if (byte == 0x9e) { // End Prog
+			if (byte == 0x5c) { // End Prog
 				return 0xff;
 			}
 			byte = 0;
