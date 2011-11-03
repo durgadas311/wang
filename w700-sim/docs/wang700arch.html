@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.16 2011/11/03 23:47:15 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.17 2011/11/03 23:51:19 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -619,11 +619,9 @@ tape.
 <P>Because magnetic media only works when there are changes in magnetic fields,
 the encoding had to ensure that the magnetic field changed frequently.
 This means that, for example, a long string of zeroes must not result in
-a long period of blank tape. Instead, there is guaranteed to be a transition
-at the beginning of every bit, and a transition in the middle if the bit was
-a "1". This is known as "Biphase-Mark" encoding or BMC, a variation of
-Differential Manchester encoding.
-In addition, a parity bit was added every 4 data bits, to help
+a long period of blank tape.
+The data encoding used a clock with data pulse between each clock.
+A parity bit was added every 8 data bits, to help
 detect errors.
 
 <P>The timing of each bit was precise, because the tape read code had to be
