@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.14 2011/10/31 17:46:14 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.15 2011/11/03 20:55:31 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -464,12 +464,12 @@ Program steps are not interlaced.
 <TR><TD CLASS="num">0x7ff - 0x7f0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Display Register Y</TD><TD>Display Register X</TD></TR>
 <TR><TD CLASS="num">0x7ef - 0x7e0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>Temp</TD><TD>Temp</TD></TR>
 <TR><TD CLASS="num">0x7df - 0x7d0</TD><TD CLASS="num">n/a</TD><TD CLASS="num">n/a</TD><TD>System State</TD><TD>Learn Mode Display</TD></TR>
-<TR><TD CLASS="num">0x7cf - 0x7c0</TD><TD CLASS="num">248 (n/a)</TD><TD CLASS="num">n/a</TD><TD></TD><TD>Program Stack</TD></TR>
-<TR><TD CLASS="num">0x7bf - 0x7b0</TD><TD CLASS="num">246 (n/a)</TD><TD CLASS="num">247 (n/a)</TD><TD COLSPAN=2>Steps 0000 - 0015</TD></TR>
-<TR><TD CLASS="num">0x7af - 0x7a0</TD><TD CLASS="num">244 (n/a)</TD><TD CLASS="num">245 (n/a)</TD><TD COLSPAN=2>Steps 0016 - 0031</TD></TR>
-<TR><TD CLASS="num">0x79f - 0x790</TD><TD CLASS="num">242 (n/a)</TD><TD CLASS="num">243 (n/a)</TD><TD COLSPAN=2>Steps 0032 - 0047</TD></TR>
+<TR><TD CLASS="num">0x7cf - 0x7c0</TD><TD CLASS="num">248 (14 08*)</TD><TD CLASS="num">n/a</TD><TD>unknown</TD><TD>Program Stack</TD></TR>
+<TR><TD CLASS="num">0x7bf - 0x7b0</TD><TD CLASS="num">246 (14 06*)</TD><TD CLASS="num">247 (14 07*)</TD><TD COLSPAN=2>Steps 0000 - 0015</TD></TR>
+<TR><TD CLASS="num">0x7af - 0x7a0</TD><TD CLASS="num">244 (14 04*)</TD><TD CLASS="num">245 (14 05*)</TD><TD COLSPAN=2>Steps 0016 - 0031</TD></TR>
+<TR><TD CLASS="num">0x79f - 0x790</TD><TD CLASS="num">242 (14 02*)</TD><TD CLASS="num">243 (14 03*)</TD><TD COLSPAN=2>Steps 0032 - 0047</TD></TR>
 <TR><TD COLSPAN=5 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0x64f - 0x640</TD><TD CLASS="num">200 (n/a)</TD><TD CLASS="num">201 (n/a)</TD><TD COLSPAN=2>Steps 0368 - 0383</TD></TR>
+<TR><TD CLASS="num">0x64f - 0x640</TD><TD CLASS="num">200 (10 00*)</TD><TD CLASS="num">201 (10 01*)</TD><TD COLSPAN=2>Steps 0368 - 0383</TD></TR>
 <TR><TD CLASS="num">0x63f - 0x630</TD><TD CLASS="num">198 (09 08*)</TD><TD CLASS="num">199 (09 09*)</TD><TD COLSPAN=2>Steps 0384 - 0399</TD></TR>
 <TR><TD CLASS="num">0x62f - 0x620</TD><TD CLASS="num">196 (09 06*)</TD><TD CLASS="num">197 (09 07*)</TD><TD COLSPAN=2>Steps 0400 - 0415</TD></TR>
 <TR><TD COLSPAN=5 CLASS="num">... etc ...</TD></TR>
@@ -501,6 +501,50 @@ stack is "pushed" the entire contents is copied/shifted right.
 When the stack is "popped" it is copied left.
 The stack is not guarded against overflow, with entries being pushed off the end
 and lost.
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>System State (0x7df - 0x7d0 upper)</TH></TR>
+<TR><TD>0x7d0</TD><TD>P.C. Hi</TD></TR>
+<TR><TD>0x7d1</TD><TD>P.C. Med</TD></TR>
+<TR><TD>0x7d2</TD><TD>P.C. Lo</TD></TR>
+<TR><TD>0x7d3</TD><TD>Prefix State</TD></TR>
+<TR><TD>0x7d4</TD><TD></TD></TR>
+<TR><TD>0x7d5</TD><TD>Number Entry State</TD></TR>
+<TR><TD>0x7d6</TD><TD></TD></TR>
+<TR><TD>0x7d7</TD><TD></TD></TR>
+<TR><TD>0x7d8</TD><TD></TD></TR>
+<TR><TD>0x7d9</TD><TD></TD></TR>
+<TR><TD>0x7da</TD><TD></TD></TR>
+<TR><TD>0x7db</TD><TD></TD></TR>
+<TR><TD>0x7dc</TD><TD></TD></TR>
+<TR><TD>0x7dd</TD><TD></TD></TR>
+<TR><TD>0x7de</TD><TD></TD></TR>
+<TR><TD>0x7df</TD><TD></TD></TR>
+</TABLE>
+
+<DL>
+<DT><B>Prefix State</B><DD>
+<TABLE BORDER>
+<TR><TD>00 = no prefix</TD></TR>
+<TR><TD>04 = WRITE (/ALPHA), MARK</TD></TR>
+<TR><TD>08 = Direct (incl 12 xx)</TD></TR>
+<TR><TD>12 = Search</TD></TR>
+</TABLE>
+<DT><B>0x7cf lower: Aux State</B><DD>
+<TABLE BORDER>
+<TR><TD>08 = Direct+100 (12 xx)</TD></TR>
+</TABLE>
+<DT><B>Number Entry State</B><DD>
+<TABLE BORDER>
+<TR><TD>00 = no entry</TD></TR>
+<TR><TD>01 = mantissa, leading zero</TD></TR>
+<TR><TD>02 = mantissa, non-zero</TD></TR>
+<TR><TD>03 = exponent</TD></TR>
+<TR><TD>04 = decimal, non-zero</TD></TR>
+<TR><TD>05 = decimal, leading zero</TD></TR>
+<TR><TD>06 = Set P.C.</TD></TR>
+</TABLE>
+</DL>
 
 <A NAME="display"><H3>Display</H3></A>
 
