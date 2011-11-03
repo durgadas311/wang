@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.15 2011/11/03 20:55:31 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.16 2011/11/03 23:47:15 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -610,9 +610,6 @@ actual register contents.
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
 
-<P><B>Note:</B> Assumtion at this point is that the Wang 700 cassette drive
-was operated identically to the Wang 600. The following is from the Wang 600:
-
 <P>Most cassette storage of the era used audio modulation, similar to the
 "musical tones" of a modem, and used standard audio cassette tapes.
 But the Wang 700 used magnetic saturation like mainframe computer tape drives.
@@ -631,42 +628,40 @@ detect errors.
 
 <P>The timing of each bit was precise, because the tape read code had to be
 able to stay synchronized without saving state information or doing much
-processing. Each unit of output was 198 cycles (data bit width 396),
-and each program (tape image) was preceded by a 211,220 cycle
-(approximately 0.5 second) blank gap
-(no magnetic field transitions).
+processing. Each unit of output was 385 cycles (data bit width 1550),
+and each program (tape image) was preceded by a 524,290 cycle
+(approximately 0.67 second) blank gap (no magnetic field transitions).
 
 <P>During read, the calculator waits for the "bit start" transition, then
-delays 272 cycles before sampling again. If the sample reveals that there
-was a second transition, then the bit is considered a "1", otherwise it is "0".
-From this stream, the calculator assembles nibbles and checks parity, loading
+delays 962 cycles before sampling again. If the sample reveals that there
+was a "1" pulse, then the bit is considered a "1", otherwise it is "0".
+From this stream, the calculator assembles bytes and checks parity, loading
 data into memory.
 
 <P>Here is an example of writing 09&nbsp;00 to tape and reading it back:
 
 <P><UL><IMG SRC="wang700tape.gif"></UL>
 
-<P>The code 09&nbsp;00 is broken into two nibbles, and each assigned an odd parity bit.
-Then each 5 bit datum is encoded into the tape stream by
-converting "1" into either "1 0" or "0 1",
-and "0" into either "1 1" or "0 0",
-depending on the previous data to ensure that
-there is always a transition at the beginning of each bit.
+<P>The code 09&nbsp;00 is encoded bit by bit, and an odd parity bit added after.
+Each bit is encoded into the tape stream by
+converting "1" into "1010" 
+and "0" into "1000".
+There is effectively a clock always present with optional data bit pulse
+between any two adjacent clock pulses.
 The resulting stream is fed to the record head and produces
 alternating segments of positive and negative magnetic fields on the tape.
 
 <P>During read, the changes between positive and negative magnetic fields show
-up as "blips" in the signal from the tape read head. These blips are fed
-into a "one-shot" flip-flop whose timing is set to about 97 cycles. This means
-that for 97 cycles after a transition there will be a "1" signal, and it will
-return to "0" after those 97 cycles.
+up as "blips" in the signal from the tape read head. The positive blips and negative
+blips are fed through a transister "one-shot" that effectively reproduces
+the original record head data stream.
 
 <P>The calculator monitors the signal from the one-shot. The first "1" it
-sees indicates the beginning of a bit. It then delays 272 cycles and
+sees indicates the beginning of a clock pulse. It then delays 962 cycles and
 checks the signal again. If it is still "1" (was actually re-triggered by
-a second transition) then the data bit is interpreted to be a "1".
+a second pulse) then the data bit is interpreted to be a "1".
 Otherwise, the data bit is interpreted to be "0". These bits are
-assembled into a 4-bit word and a parity bit, which is then checked for odd parity
+assembled into an 8-bit word and a parity bit, which is then checked for odd parity
 and, if correct, the data word is stored in memory.
 
 <P>A parity error will cause the calculator to turn on the Mach Error flag (ERR)
@@ -675,12 +670,12 @@ and stop processing the tape.
 <P>Other problems with the tape will generally cause the calculator to
 "hang" with a blank display. Pressing PRIME is usually required in order to recover.
 
-<P>The calculator reads/writes the tape at about 1000 bits/second. Assuming standard
-tape speed, this makes a tape density of about 533 bpi
+<P>The calculator reads/writes the tape at about 519 bits/second. Assuming standard
+tape speed, this makes a tape density of a little less than 300 bpi
 (compare to mainframe "9-track" tapes which were 800 or 1600 bpi, and later 6250 bpi).
 The smallest common audio cassette was 15 minutes (C15) which would hold an
-overwhelming 90,000 program steps (on both sides) or
-45 complete copies of the calculator memory (a program rarely consumed all of memory).
+overwhelming 50,000 program steps (on both sides) or
+26 complete copies of the calculator memory (a program rarely consumed all of memory).
 For this reason, Wang data cassettes were much shorter,
 typically only having a few minutes of tape.
 
