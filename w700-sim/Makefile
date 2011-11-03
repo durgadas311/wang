@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2011/10/30 23:55:47 drmiller Exp $
+# $Id: Makefile,v 1.6 2011/11/03 20:53:54 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -53,9 +53,9 @@ clobber: clean
 	rm -rf $(TMPDIR)
 
 rom.diff: ROM720C.txt
-	-cvs diff -r 1.1 ROM720C.txt >rom.diff
+	-cvs diff -u -r 1.1 ROM720C.txt >rom.diff
 
-tar: rom.diff
+tar: rom.diff wang700.jar
 	cd ..;\
 	tar -czvf w700-sim/w700-sim.tgz \
 		w700-sim/*.[ch] w700-sim/Makefile w700-sim/*.java \
@@ -73,7 +73,7 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
 wang700.jar: w700_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf $(SHIP_DOCS)
+	jar cfm $@ Manifest.txt *.class icons $(SHIP_DOCS)
 
 # INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang700.jar
