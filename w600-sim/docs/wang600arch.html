@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.45 2011/10/20 10:04:06 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.46 2011/11/03 23:34:13 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -1220,7 +1220,9 @@ a long period of blank tape. Instead, there is guaranteed to be a transition
 at the beginning of every bit, and a transition in the middle if the bit was
 a "1". This is known as "Biphase-Mark" encoding or BMC, a variation of
 Differential Manchester encoding.
-In addition, a parity bit was added every 4 data bits, to help
+This is also the same encoding that was known as "FM" and used
+for single-density floppy disks, as well as other magnetic media of the time.
+A parity bit was added every 4 data bits to help
 detect errors.
 
 <P>The timing of each bit was precise, because the tape read code had to be
