@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600-sim.c,v 1.11 2011/10/19 16:55:17 drmiller Exp $"
+#ident "$Id: w600-sim.c,v 1.12 2011/11/04 20:50:53 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "bc:e:gil:m:M:p:r:t:u:")) != EOF) {
+	while ((x = getopt(argc, argv, "bc:e:gil:m:M:p:r:t:u:w")) != EOF) {
 		switch(x) {
 		case 'b':
 			sys_ops |= SYS_BACK_END;
@@ -100,6 +100,10 @@ int main(int argc, char **argv) {
 			break;
 		case 'r':
 			rom = optarg;
+			break;
+		case 'w':
+			sys_ops |= SYS_WEB_BACKEND;
+			ucode = "/usr/local/bin/wang600.rom";
 			break;
 #ifdef TRACE
 		case 't':

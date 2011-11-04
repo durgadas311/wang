@@ -10,10 +10,11 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <poll.h>
+#include <sys/stat.h>
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.26 2011/10/19 16:55:17 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.27 2011/11/04 20:50:53 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -26,6 +27,17 @@ static inline void wait_key() {
 	fds.revents = 0;
 	/* int rc = */ poll(&fds, 1, -1);
 }
+
+#if 0
+static inline int test_kbd() {
+	struct pollfd fds;
+	fds.fd = __gui_kfd;
+	fds.events = POLLIN;
+	fds.revents = 0;
+	/* int rc = */ poll(&fds, 1, 0);
+	return (fds.revents & POLLIN) != 0;
+}
+#endif
 
 static int disp_good = 0;
 
@@ -132,6 +144,10 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 		b = extraneous;
 		extraneous = 0;
 	} else {
+#if 0
+		if (test_kbd()) {
+		}
+#endif
 		rc = read(__gui_kfd, &b, sizeof(b));
 		if (rc < 0 && errno != EAGAIN) {
 			perror("guikeyboard");

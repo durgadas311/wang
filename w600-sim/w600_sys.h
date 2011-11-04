@@ -3,7 +3,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.15 2011/10/19 16:55:17 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.16 2011/11/04 20:50:53 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -36,6 +36,8 @@ typedef struct w600_sys_s {
 
 #define SYS_START_GUI		1
 #define SYS_BACK_END		2
+#define SYS_WEB_BACKEND		4
+
 #define SYS_MODEL_SHIFT		12
 #define SYS_MODEL_NUM		16
 #define SYS_MODEL_MASK		((SYS_MODEL_NUM - 1) << SYS_MODEL_SHIFT)
