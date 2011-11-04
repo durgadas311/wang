@@ -2,33 +2,39 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w600_cpu.h,v 1.10 2011/10/09 15:11:26 drmiller Exp $"
+#ident "$Id: w600_cpu.h,v 1.11 2011/11/04 22:33:00 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
 
 typedef struct {
-	uint8_t ah;
-	uint8_t am;
-	uint8_t al;
-	uint8_t mr;
-	uint8_t ms;
-	uint8_t dh;
-	uint8_t dl;
-	uint8_t xh;
-	uint8_t xl;
-	uint8_t xs;
-	uint8_t xr;
-	// flags...
-	uint8_t z;
-	uint8_t i;
-	uint8_t c;
+	uint8_t s;
+	uint8_t t;
+	uint8_t u;
+	uint8_t v;
+	uint8_t ca;
+	uint8_t cb;
+	uint8_t ka;
+	uint8_t kb;
 
-	uint8_t pe;	// prog err
-	uint8_t kp;	// any key down
-	uint8_t me;	// mach err
-	uint8_t mode0;
-	uint8_t mode1;
+//	uint8_t l;
+//	uint8_t m;
+//	uint8_t n;
+//	uint8_t rb;
+	uint8_t gioa;
+	uint8_t giob;
+	uint8_t iob;
+
+	// flags...
+	uint8_t zo;
+	uint8_t cc;
+	uint8_t sc;
+
+	uint8_t ov;	// prog err
+	uint8_t kbd;	// any key down
+	uint8_t err;	// mach err
+	uint8_t d1;
+	uint8_t d2;
 
 	uint16_t next;
 	uint16_t pc;
@@ -41,12 +47,12 @@ typedef struct {
 	uint64_t cylimit;
 } w600_cpu_t;
 
-#define MODE0_FP	0x01
-#define MODE0_LST_L_P	0x02
-#define MODE0_LRN_L_P	0x04
-#define MODE0_STEP	0x08
+#define D10_FP		0x01
+#define D11_LST_L_P	0x02
+#define D12_LRN_L_P	0x04
+#define D13_STEP	0x08
 
-#define MODE1_DEGREES	0x01
-#define MODE1_PRT_ON	0x02
+#define D20_DEGREES	0x01
+#define D21_PRT_ON	0x02
 
 #endif // __w600_cpu_h__
