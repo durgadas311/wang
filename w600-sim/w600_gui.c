@@ -14,7 +14,7 @@
 
 #include "w600_gui.h"
 
-#ident "$Id: w600_gui.c,v 1.27 2011/11/04 20:50:53 drmiller Exp $"
+#ident "$Id: w600_gui.c,v 1.28 2011/11/05 00:51:32 drmiller Exp $"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
@@ -60,10 +60,10 @@ static void guidisplay(w600_sys_t *sys, int on) {
 	}
 
 	// piggy-back error lights in hi order bits...
-	if (sys->cpu.pe) {
+	if (sys->cpu.ov) {
 		b |= 0x100;
 	}
-	if (sys->cpu.me) {
+	if (sys->cpu.err) {
 		b |= 0x200;
 	}
 	if (last != b) {
@@ -71,8 +71,8 @@ static void guidisplay(w600_sys_t *sys, int on) {
 		++flush;
 	}
 
-	uint8_t ds = sys->cpu.al;
-	uint8_t dc = sys->cpu.mr;
+	uint8_t ds = sys->cpu.v;
+	uint8_t dc = sys->cpu.ca;
 	if (on == -2) {
 		// do not change any digits...
 		dc = buf[ds];
@@ -176,10 +176,10 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 		b &= 0x07;
 		sys->cpu.next = b;
 		if (b < 4) {
-			sys->cpu.pe = 0;
+			sys->cpu.ov = 0;
 		}
 		if (b == 0) {
-			sys->cpu.me = 0;
+			sys->cpu.err = 0;
 		}
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: %03x: Key Jam PC %03x\n",
@@ -188,12 +188,12 @@ static void guikeyboard(w600_sys_t *sys, uint16_t *kc, int ack) {
 		break;
 	case 2:	// mode0 switches changed
 		// FE gave us complete mode word... just update
-		sys->cpu.mode0 = b & 0x0f;
+		sys->cpu.d1 = b & 0x0f;
 		break;
 	case 3:	// mode1 switches changed
 		// DEG/RAD is inverted...
-		b ^= MODE1_DEGREES;
-		sys->cpu.mode1 = b & 0x0f;
+		b ^= D20_DEGREES;
+		sys->cpu.d2 = b & 0x0f;
 		break;
 	}
 }
@@ -212,12 +212,12 @@ static void guidevinput(w600_sys_t *sys, uint16_t *kc, uint16_t b) {
 		//}
 		// this is handled exactly like keyboard input...
 		// bit make sure XS has valid pattern?
-		if (sys->cpu.xs != (b >> 12)) {
+		if (sys->cpu.iob != (b >> 12)) {
 			// oops... just spit out an error for now...
-			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.xs);
+			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.iob);
 			return;
 		}
-//fprintf(stderr, "\tDEV< %02x %x\n", b & 0x0ff, sys->cpu.xs);
+//fprintf(stderr, "\tDEV< %02x %x\n", b & 0x0ff, sys->cpu.iob);
 		*kc = b; // must be non-zero to be seen
 		//if ((b & 0x0f00) == 0) { // not ACK
 		//	// ACK is sent when Wang takes "key"...
