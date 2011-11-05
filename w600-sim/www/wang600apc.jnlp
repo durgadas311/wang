@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="http://www.durgadas.com/" href="">
+    <information>
+        <title>Launch Wang 600 Programmable Calculator</title>
+        <vendor>Durgadas.com</vendor>
+        <offline-allowed/>
+    </information>
+    <security>
+        <all-permissions/>
+    </security>
+    <resources>
+        <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
+        <jar href="wang600.jar" main="true" />
+    </resources>
+    <application-desc
+         name="Wang 600 Programmable Calculator" main-class="w600_fe"
+         width="1024" height="640">
+		<argument>-w</argument> 
+    </application-desc>
+  <update check="background"/>
+</jnlp>
