@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.28 2011/11/06 01:04:12 drmiller Exp $
+# $Id: Makefile,v 1.29 2011/11/06 01:08:25 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -8,9 +8,9 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 
 COPTS =
 
-VPATH = common
+VPATH = ../common
 
-CFLAGS += -D__wang600__ -Icommon -I.
+CFLAGS += -D__wang600__ -I../common -I.
 
 OBJS = wang_sys.o wang_sim_cmd.o \
 	w600_decode.o wang_exec.o wang_gui.o
