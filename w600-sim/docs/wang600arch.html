@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.48 2011/11/06 14:19:08 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.49 2011/11/06 17:04:51 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -333,10 +333,11 @@ as follows (layout for Solid State ROM).
 	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S'&lt;1&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S'&lt;3&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = Z<SUB>o</SUB></TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = n.c.</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = SC'</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = OV *</TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = CC</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = KBD *</TD></TR>
 	<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
+	<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 	</TABLE>
 </TD>
 <TD ROWSPAN=2 VALIGN="TOP">
@@ -348,14 +349,13 @@ as follows (layout for Solid State ROM).
 	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S'&lt;0&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S'&lt;2&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = OV *</TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = CC</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KBD *</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = n.c.</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = SC'</TD></TR>
 	<TR><TD>111</TD><TD>Return:<BR>
 		CURRENT&lt;0&gt; = 1<BR>
 		CURRENT&lt;10:1&gt; = STACK1<BR>
 		STACK1 = STACK2</TD></TR>
-	<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 	</TABLE>
 <TD></TR>
 <TR><TD VALIGN="BOTTOM">

@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.20 2011/11/06 03:32:10 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.21 2011/11/06 17:04:51 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -111,7 +111,7 @@ for that key.
 </TR>
 </TABLE></UL>
 
-<P>Wang 700 support for S.M., INS, DEL, and B.S. was by forcing both the
+<P>The "shifted" functions S.M., INS, DEL, and B.S. were accessed by forcing both the
 Run and Learn buttons down together.
 
 <P>From tracing microcode, it seems that memory
@@ -125,7 +125,26 @@ size is hard-coded. So, for example, 720C microcode could not run with less than
 
 <A NAME="timing"><H3>Microcode Instruction Timing</H3></A>
 
-<P>T.B.D.
+<P>The system clock source is an 8 MHz oscillator.
+This clock is sent to an 11-stage ring counter, providing the eleven timing signals P0 thru P10 (both true and inverted).
+These signals orchestrate the operation of the calculator.
+The instruction time is then 1.375uS or a rate of about 727,272 instructions per second.
+
+<P>The following table outlines various calculator actions relative to timing signals.
+
+<P><UL><TABLE BORDER>
+<TR><TH>Phase</TH><TH>Actions</TH></TR>
+<TR><TD>P4</TD><TD>Latch L,M,N (MOP)</TD></TR>
+<TR><TD>P5</TD><TD>Perform Tape Functions (MOP)</TD></TR>
+<TR><TD>P5-P6</TD><TD>Latch Output Data (MOP)</TD></TR>
+<TR><TD ROWSPAN=3>P8</TD>	<TD>Latch Q (MOP)</TD></TR>
+<TR>				<TD>Latch next ucode address (JAD/JH/JL)</TD></TR>
+<TR>				<TD>Clear OFL (JH)</TD></TR>
+<TR><TD ROWSPAN=2>P9</TD>	<TD>Latch ALU Output (ZO)</TD></TR>
+<TR>				<TD>Latch SC (AOP)</TD></TR>
+<TR><TD ROWSPAN=2>P10</TD>	<TD>Latch S Data (ST)</TD></TR>
+<TR>				<TD>Read/Write memory (MOP)</TD></TR>
+</TABLE></UL>
 
 <A NAME="instrfmt"><H3>Microcode Instruction Format</H3></A>
 
@@ -224,10 +243,11 @@ as follows:
 	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S&lt;1&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S&lt;3&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = OFL *</TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = CC</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = KBD *</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = OFL *</TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = CC</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = KBD *</TD></TR>
 	<TR><TD>111</TD><TD>undefined</TD></TR>
+	<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -239,11 +259,10 @@ as follows:
 	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
 	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S&lt;0&gt;</TD></TR>
 	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S&lt;2&gt;</TD></TR>
-	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = ALU</TD></TR>
-	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = Q</TD></TR>
-	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = SC</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = ALU</TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = Q</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = SC</TD></TR>
 	<TR><TD>111</TD><TD>undefined</TD></TR>
-	<TR><TD COLSPAN=2>* condition is also reset</TD></TR>
 	</TABLE>
 <TD></TR>
 </TABLE></UL>
@@ -304,12 +323,13 @@ as follows:
 	<TR><TD>1111</TD><TD>undefined</TD></TR>
 	<TR><TD COLSPAN=2>* destructive read</TD></TR>
 	</TABLE>
-</TD>
-<TD VALIGN="TOP">
-	<TABLE BORDER>
+</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
 	<TR><TH COLSPAN=3>AOP<BR>
 	ALU Function</TH></TR>
-	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
+	<TR><TH>op</TH><TH>flags<BR>updated</TH><TH>Operation</TH></TR>
 	<TR><TD>000</TD><TD></TD><TD>Zbus = Abus + Bbus</TD></TR>
 	<TR><TD>001</TD><TD></TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 	<TR><TD>010</TD><TD>SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
@@ -317,18 +337,16 @@ as follows:
 	<TR><TD>100</TD><TD>SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
 	<TR><TD>101</TD><TD></TD><TD>Zbus = Abus & Bbus</TD></TR>
 	<TR><TD>110</TD><TD></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>111</TD><TD>SC</TD><TD>Zbus = SC|(Abus + Bbus) >> 1 *</TD></TR>
+	<TR><TD>111</TD><TD>SC</TD><TD>Zbus = (Abus + Bbus) >> 1 *</TD></TR>
 	<TR><TD COLSPAN=3>ALU is always updated.
 			CC is always updated, but based on sum.</TD><TR>
-	<TR><TD COLSPAN=3>*<UL>
+	<TR><TD COLSPAN=3>* Sum is rotated right thru SC:<UL>
 			Zbus<SUB>3</SUB> = SC<BR>
 			Zbus<SUB>2</SUB> = (Abus + Bbus)<SUB>3</SUB><BR>
 			Zbus<SUB>1</SUB> = (Abus + Bbus)<SUB>2</SUB><BR>
 			Zbus<SUB>0</SUB> = (Abus + Bbus)<SUB>1</SUB><BR>
 			SC = (Abus + Bbus)<SUB>0</SUB></UL>
 			</TD></TR>
-	</TABLE>
-</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE>
@@ -351,6 +369,7 @@ as follows:
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
 	<TR><TD>000</TD><TD>Bbus = undefined</TD></TR>
 	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
 	<TR><TD>010</TD><TD>Bbus = D *</TD></TR>
@@ -362,20 +381,11 @@ as follows:
 	<TR><TD COLSPAN=2>* resets STEP latch</TD></TR>
 	</TABLE>
 </TD>
-<TD VALIGN="TOP">
-	<TABLE BORDER>
-	<TR><TH COLSPAN=2>BC<BR>Bbus modifier</TH></TR>
-	<TR><TD>00</TD><TD>0000</TD></TR>
-	<TR><TD>01</TD><TD>no change</TD></TR>
-	<TR><TD>10</TD><TD>1111 or 1001 *</TD></TR>
-	<TR><TD>11</TD><TD>1's or 9's compliment *</TD></TR>
-	<TR><TD COLSPAN=2>* see Bd</TD></TR>
-	</TABLE>
-</TD>
 <TD ROWSPAN=2 VALIGN="TOP">
 	<TABLE BORDER>
 	<TR><TH COLSPAN=2>ZO<BR>Dest. for Z bus</TH></TR>
 	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
 	<TR><TD>000</TD><TD>S = Zbus</TD></TR>
 	<TR><TD>001</TD><TD>T = Zbus</TD></TR>
 	<TR><TD>010</TD><TD>U = Zbus</TD></TR>
@@ -384,6 +394,16 @@ as follows:
 	<TR><TD>101</TD><TD>KB = Zbus</TD></TR>
 	<TR><TD>110</TD><TD>CA = Zbus</TD></TR>
 	<TR><TD>111</TD><TD>CB = Zbus</TD></TR>
+	</TABLE>
+</TD>
+<TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>BC<BR>Bbus modifier</TH></TR>
+	<TR><TD>00</TD><TD>0000</TD></TR>
+	<TR><TD>01</TD><TD>no change</TD></TR>
+	<TR><TD>10</TD><TD>1111 or 1001 *</TD></TR>
+	<TR><TD>11</TD><TD>1's or 9's compliment *</TD></TR>
+	<TR><TD COLSPAN=2>* see Bd</TD></TR>
 	</TABLE>
 </TD></TR>
 <TR><TD VALIGN="BOTTOM">
