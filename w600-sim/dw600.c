@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.14 2011/11/04 22:28:36 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.15 2011/11/06 00:48:45 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -104,7 +104,7 @@ void diw600(char *buf, uint64_t *v) {
 	}
 
 	if (!u->ac) h = "0"; // "15"? "0"? ???
-	if (u->an) ops = "-----&^$";
+	if (u->bc) ops = "-----&^$";
 	if (u->aop == 7) {
 		sprintf(alu, "0");
 	} else {
@@ -196,3 +196,5 @@ void diw600(char *buf, uint64_t *v) {
 		s += sprintf(s, "; %s", stack);
 	}
 }
+
+void diwang(char *buf, uint64_t *v) __attribute__ ((alias ("diw600")));

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.26 2011/10/09 15:11:26 drmiller Exp $
+# $Id: Makefile,v 1.27 2011/11/06 00:48:45 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -8,8 +8,12 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 
 COPTS =
 
-OBJS = w600_sys.o w600_sim_cmd.o \
-	w600_decode.o w600_exec.o w600_gui.o
+VPATH = common
+
+CFLAGS += -D__wang600__ -Icommon -I.
+
+OBJS = wang_sys.o wang_sim_cmd.o \
+	w600_decode.o wang_exec.o wang_gui.o loaducode_txt.o
 
 TEST = $(shell echo -e this)
 ifeq ($(TEST),this)
@@ -33,10 +37,10 @@ all: w600-sim
 
 CFLAGS += -g -O3 $(COPTS)
 
-w600-dasm: w600-dasm.o $(DASM)
+w600-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
-w600-sim: w600-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
+w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
 w600_fe.class: w600_fe.java

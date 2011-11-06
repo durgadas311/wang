@@ -1,11 +1,11 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.46 2011/11/05 00:51:32 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.47 2011/11/06 00:48:45 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
 
-#include "w600_sys.h"
+#include "wang-sim.h"
 #include "w600_ucode.h"
 
 #ifdef TRACE
@@ -19,6 +19,8 @@ uint8_t cov[2048] = {0};
 
 uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
+
+uint16_t trc_adr = 0xff0;
 
 static uint8_t add3_i(w600_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
@@ -141,7 +143,7 @@ static int tape_read(w600_sys_t *sys) {
 		return 0;	// don't care...
 	}
 
-	if (sys->cpu.cycles < repc) {
+	if (sys->cpu.sys.cycles < repc) {
 reps:
 		return bit;
 	}
@@ -150,7 +152,7 @@ sigs:
 		--sigc;
 		bit = last & 1;
 		last >>= 1;
-		repc = sys->cpu.cycles + 97;	// very sensitive...
+		repc = sys->cpu.sys.cycles + 97;	// very sensitive...
 		goto reps;
 	}
 	if (bitc) {
@@ -168,7 +170,7 @@ bits:
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-		repc = sys->cpu.cycles + 700;	// expects at least 650?
+		repc = sys->cpu.sys.cycles + 700;	// expects at least 650?
 		bit = 0;
 		goto reps;
 	}
@@ -205,7 +207,7 @@ static void printer_status(w600_sys_t *sys) {
 	if ((sys->cpu.d2 & D21_PRT_ON) == 0) {
 		// only if running program doesn't get here...
 		// printer is off, tach will never pulse, so don't spin
-		if (sys->cpu.pc == 0x6db) {
+		if (sys->cpu.sys.pc == 0x6db) {
 			sys->keyboard(sys, NULL, 0); // sleep until key event
 		}
 		return;
@@ -255,7 +257,7 @@ static void rd_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 	} else {
 		b &= 0x0f;
 	}
-	sys->cpu.ca = b;
+	sys->cpu.rb = sys->cpu.ca = b;
 	b = sys->rom[adr >> 1];
 	if (adr & 1) {
 		b >>= 4;
@@ -286,7 +288,7 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 		a = sys->ram[0xff7 >> 1];
 		fprintf(stderr, "Code %02d %02d\n", (a >> 4) & 0x0f, b & 0x0f);
 	}
-	if (adr >= 0xff0) {
+	if ((adr & 0xff0) == trc_adr) {
 		if (__systrc[adr & 0x00f]) {
 			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, c);
 		}
@@ -296,7 +298,7 @@ static void wr_ram_i(w600_sys_t *sys, uint8_t ah, uint8_t am, uint8_t al) {
 static void instr_trace(w600_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
-	m = &sys->ucode[sys->cpu.pc];
+	m = &sys->ucode[sys->cpu.sys.pc];
 	diw600(buf, m);
 #ifdef TRACE_RAW_UCODE
 	w600_ucode_t *u = (w600_ucode_t *)(m);
@@ -308,8 +310,8 @@ static void instr_trace(w600_sys_t *sys) {
 		"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
 #endif // TRACE_RAW_UCODE
 		"%s\n",
-		sys->cpu.pc,
-		sys->cpu.next,
+		sys->cpu.sys.pc,
+		sys->cpu.sys.next,
 		sys->cpu.stk1,
 		sys->cpu.stk2,
 		sys->cpu.t,
@@ -321,35 +323,35 @@ static void instr_trace(w600_sys_t *sys) {
 		sys->cpu.ka,
 		sys->cpu.kb,
 #ifdef TRACE_RAW_UCODE
-		u->ai, u->bi, u->zo, u->aop, u->ac, u->an, u->mop, u->kk, u->st,
+		u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->mop, u->kk, u->st,
 		u->jc, u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 		buf);
 }
 
 static inline void display_check(w600_sys_t *sys) {
-if (sys->cpu.pc == 0x252) {
+if (sys->cpu.sys.pc == 0x252) {
 }
 	// 51c: begin display-refresh delay loop... short-cut to 51f...
-	if (sys->cpu.pc == 0x51c) {	// display refresh routine...
-		sys->cpu.next = 0x51f;	// update some regs too?
-		sys->cpu.cycles += 272;
+	if (sys->cpu.sys.pc == 0x51c) {	// display refresh routine...
+		sys->cpu.sys.next = 0x51f;	// update some regs too?
+		sys->cpu.sys.cycles += 272;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: 51c: Display Warp... %lld\n",
-									sys->cpu.cycles);
+									sys->cpu.sys.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
 	// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
-	} else if (sys->cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
-		sys->cpu.next = 0x5c3;
-		sys->cpu.cycles += 272;
+	} else if (sys->cpu.sys.pc == 0x5c0) {	// alpha-stop refresh routine...
+		sys->cpu.sys.next = 0x5c3;
+		sys->cpu.sys.cycles += 272;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: 5c0: Alpha-Stop Warp... %lld\n",
-									sys->cpu.cycles);
+									sys->cpu.sys.cycles);
 		}
 		sys->display(sys, -1);	// must not sleep!
-	} else if (sys->cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
-		if (sys->cpu.next == 0x27b) { // alpha-stop in running program...
+	} else if (sys->cpu.sys.pc == 0x5c6) {	// alpha-stop done... "return"...
+		if (sys->cpu.sys.next == 0x27b) { // alpha-stop in running program...
 			static struct timespec alpha_stop = {
 				0, 500000000L
 			};
@@ -362,7 +364,7 @@ if (sys->cpu.pc == 0x252) {
 }
 
 int instr_exec(w600_sys_t *sys) {
-	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[sys->cpu.pc];
+	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
 	static uint16_t key = 0;
@@ -382,12 +384,12 @@ int instr_exec(w600_sys_t *sys) {
 	// For conditional jump/call, these bits are latched early...
 	uint8_t br_acc = sys->cpu.s;
 	uint8_t br_c = sys->cpu.sc;
-	uint8_t m_ah = sys->cpu.t;
-	uint8_t m_am = sys->cpu.u;
-	uint8_t m_al = sys->cpu.v;
+	sys->cpu.l = sys->cpu.t;
+	sys->cpu.m = sys->cpu.u;
+	sys->cpu.n = sys->cpu.v;
 	uint8_t br_k = u->kk;
 #ifdef COVERAGE
-	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
+	if (cov[sys->cpu.sys.pc] < 255) ++cov[sys->cpu.sys.pc];
 #endif // COVERAGE
 	int opf7 = (u->jl == 7);
 	if (opf7) {
@@ -434,30 +436,30 @@ int instr_exec(w600_sys_t *sys) {
 	if (!u->ac) h = 0; // "15"? "0"? ???
 	switch (u->aop) {
 	case 0:
-		if (u->an) alu = sub3_i(sys, h, g, 0);
+		if (u->bc) alu = sub3_i(sys, h, g, 0);
 		else alu = add3_i(sys, h, g, 0);
 		break;
 	case 1:
-		if (u->an) alu = sub3_i(sys, h, g, 1);
+		if (u->bc) alu = sub3_i(sys, h, g, 1);
 		else alu = add3_i(sys, h, g, 1);
 		break;
 	case 2:
-		if (u->an) alu = sub3_c(sys, h, g, 0);
+		if (u->bc) alu = sub3_c(sys, h, g, 0);
 		else alu = add3_c(sys, h, g, 0);
 		break;
 	case 3:
-		if (u->an) alu = sub3_c(sys, h, g, sys->cpu.sc);
+		if (u->bc) alu = sub3_c(sys, h, g, sys->cpu.sc);
 		else alu = add3_c(sys, h, g, sys->cpu.sc);
 		break;
 	case 4:
-		if (u->an) alu = sub3_c(sys, h, g, 1);
+		if (u->bc) alu = sub3_c(sys, h, g, 1);
 		else alu = add3_c(sys, h, g, 1);
 		break;
 	case 5:
 		alu = and2(sys, h, g);
 		break;
 	case 6:
-		if (u->an) alu = xor2(sys, h, g);
+		if (u->bc) alu = xor2(sys, h, g);
 		else alu = or2(sys, h, g);
 		break;
 	case 7:
@@ -505,7 +507,7 @@ int instr_exec(w600_sys_t *sys) {
 		break;
 	case 9:
 		// T.B.D. reset 6184...
-//fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.pc, key);
+//fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.sys.pc, key);
 		sys->cpu.kbd = 0;
 		break;
 	case 10:
@@ -528,11 +530,11 @@ int instr_exec(w600_sys_t *sys) {
 	}
 
 	switch(u->mop) {
-	case 1:	wr_ram_i(sys, m_ah, m_am, m_al); break;
-	case 2:	wr_ram_i(sys, 15, br_k, m_al); break;
+	case 1:	wr_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n); break;
+	case 2:	wr_ram_i(sys, 15, br_k, sys->cpu.n); break;
 	case 3:	wr_ram_i(sys, 15, 15, br_k); break;
-	case 4:	rd_ram_i(sys, m_ah, m_am, m_al); break;
-	case 5:	rd_ram_i(sys, 15, br_k, m_al); break;
+	case 4:	rd_ram_i(sys, sys->cpu.l, sys->cpu.m, sys->cpu.n); break;
+	case 5:	rd_ram_i(sys, 15, br_k, sys->cpu.n); break;
 	case 6:	rd_ram_i(sys, 15, 15, br_k); break;
 	case 7:	printer_hammers(sys); break;
 	case 8:	printer_feed(sys); break;
@@ -566,7 +568,7 @@ int instr_exec(w600_sys_t *sys) {
 	if (!opf7) {
 		if (u->jc) {
 			sys->cpu.stk2 = sys->cpu.stk1;
-			sys->cpu.stk1 = sys->cpu.pc;
+			sys->cpu.stk1 = sys->cpu.sys.pc;
 		}
 		switch(u->jh) {
 		case 0: next |= (0 << 1); break;
@@ -575,14 +577,14 @@ int instr_exec(w600_sys_t *sys) {
 		case 3: next |= ((br_acc & 8) >> 2); break;
 		case 4:
 			next |= (sys->cpu.ov << 1);
-//fprintf(stderr,"%03x: chk pe\n", sys->cpu.pc);
+//fprintf(stderr,"%03x: chk pe\n", sys->cpu.sys.pc);
 			sys->cpu.ov = 0;
 			break;
 		case 5: next |= (sys->cpu.cc << 1); break;
 		case 6:
 			// todo: clean this up!
 			if (key) {
-//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
+//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 				sys->cpu.kbd = 1;
 				sys->cpu.ka = (key >> 4) & 0x0f;
@@ -609,8 +611,8 @@ int instr_exec(w600_sys_t *sys) {
 		}
 	}
 
-	++sys->cpu.cycles;
-	sys->cpu.next = next;
+	++sys->cpu.sys.cycles;
+	sys->cpu.sys.next = next;
 #ifdef TRACE
 	if (sys->trace) {
 		instr_trace(sys);
@@ -623,6 +625,6 @@ int instr_exec(w600_sys_t *sys) {
 
 	sys->keyboard(sys, &key, 0);
 
-	sys->cpu.pc = sys->cpu.next;
+	sys->cpu.sys.pc = sys->cpu.sys.next;
 	return rc;
 }

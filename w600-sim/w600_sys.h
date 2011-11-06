@@ -3,16 +3,10 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.16 2011/11/04 20:50:53 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.17 2011/11/06 00:48:45 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
-
-#define TRACE
-
-#ifdef TRACE
-#include <stdio.h>
-#endif // TRACE
 
 typedef struct w600_sys_s {
 	w600_cpu_t cpu;
@@ -33,28 +27,18 @@ typedef struct w600_sys_s {
 	FILE *trc_fp;
 #endif // TRACE
 } w600_sys_t;
-
-#define SYS_START_GUI		1
-#define SYS_BACK_END		2
-#define SYS_WEB_BACKEND		4
-
-#define SYS_MODEL_SHIFT		12
-#define SYS_MODEL_NUM		16
-#define SYS_MODEL_MASK		((SYS_MODEL_NUM - 1) << SYS_MODEL_SHIFT)
+typedef w600_sys_t wang_sys_t;
 
 #define SYS_MODEL600_2TP	0
 #define SYS_MODEL600_6TP	1
 #define SYS_MODEL600_14TP	2
 
-extern void sys_init(w600_sys_t *sys);
-extern void sys_start(w600_sys_t *sys, int ops);
-extern void sys_loaducode(w600_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
-extern void sys_loadpgm(w600_sys_t *sys, char *pgm);
-extern void sys_loadram(w600_sys_t *sys, char *ram);
-extern void sys_loadrom(w600_sys_t *sys, char *rom);
-extern void sys_loadcass(w600_sys_t *sys, char *cass);
-extern void sys_setcass(w600_sys_t *sys, char *cass);
-extern int sys_go(w600_sys_t *sys, uint16_t entry);
-extern void sys_stop(w600_sys_t *sys, int ops);
+#define WANG_SERIES	600
+#define WANG_SIM	"w600-sim"
+#define WANG_DEF_MODEL	"600-14TP"
+#define WANG_DEF_ROM	"wang600.rom"
+#define WANG_GUI_NAME	"w600_fe"
+
+#define WANG_END_PROG	0x9e
 
 #endif // __w600_sys_h__
