@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: wang600apc.jnlp,v 1.2 2011/11/06 15:12:02 drmiller Exp $ -->
+<!-- $Id: wang700apc.jnlp,v 1.1 2011/11/06 15:12:02 drmiller Exp $ -->
 <jnlp spec="1.0+" codebase="http://www.durgadas.com/" href="">
     <information>
-        <title>Launch Wang 600 Programmable Calculator</title>
+        <title>Launch Wang 700 Programmable Calculator</title>
         <vendor>Durgadas.com</vendor>
         <offline-allowed/>
     </information>
@@ -11,14 +11,14 @@
     </security>
     <resources>
         <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-        <jar href="wang600.jar" main="true" />
+        <jar href="wang700.jar" main="true" />
     </resources>
     <application-desc
-         name="Wang 600 Programmable Calculator" main-class="w600_fe"
-         width="1024" height="640">
+         name="Wang 700 Programmable Calculator" main-class="w700_fe"
+         width="1024" height="725">
 		<argument>-w</argument>
 		<argument>durgadas.com</argument>
-		<argument>10311</argument> 
+		<argument>20311</argument> 
     </application-desc>
   <update check="background"/>
 </jnlp>

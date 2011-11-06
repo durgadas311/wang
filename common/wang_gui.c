@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.2 2011/11/06 15:12:02 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -28,7 +28,6 @@ static inline void wait_key() {
 	/* int rc = */ poll(&fds, 1, -1);
 }
 
-#if 0
 static inline int test_kbd() {
 	struct pollfd fds;
 	fds.fd = __gui_kfd;
@@ -37,7 +36,6 @@ static inline int test_kbd() {
 	/* int rc = */ poll(&fds, 1, 0);
 	return (fds.revents & POLLIN) != 0;
 }
-#endif
 
 static int disp_good = 0;
 
@@ -214,11 +212,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	if (extraneous) {
 		b = extraneous;
 		extraneous = 0;
-	} else {
-#if 0
-		if (test_kbd()) {
-		}
-#endif
+	} else if (test_kbd()) {
 		rc = read(__gui_kfd, &b, sizeof(b));
 		if (rc < 0 && errno != EAGAIN) {
 			perror("guikeyboard");
@@ -227,8 +221,12 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 			return;
 		}
 		if (rc != sizeof(b)) {
+			// probably EOF, silently quit...
+			sys->run = 0;
 			return;
 		}
+	} else {
+		return;
 	}
 	// something came down the pipe...
 	// make sure display gets refreshed...
@@ -322,7 +320,6 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		b = (b & 0xf0ff) | 0x0100; // ACK
 		write(__gui_dfd, &b, sizeof(b));
 		do {
-			wait_key();
 			rc = read(__gui_kfd, &b, sizeof(b));
 			if (rc < 0 && errno != EAGAIN) {
 				perror("guikeyboard");
@@ -331,6 +328,8 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 				return;
 			}
 			if (rc != sizeof(b)) {
+				// probably EOF, silently quit...
+				sys->run = 0;
 				return;
 			}
 			if (x >= 0 && (b & 0xff00) == 0x8000) {
@@ -403,11 +402,15 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 				sys->run = 0;
 				return 0xff;	// EOF
 			}
-			wait_key(); // sleep until key event
 			rc = read(__gui_kfd, &b, sizeof(b));
 			if (rc < 0 && errno != EAGAIN) {
 				perror("guitape");
 				// silently quit...
+				sys->run = 0;
+				return 0xff;	// EOF
+			}
+			if (rc != sizeof(b)) {
+				// probably EOF on pipe, silently quit...
 				sys->run = 0;
 				return 0xff;	// EOF
 			}
@@ -510,9 +513,9 @@ static int spawn_fe(wang_sys_t *sys) {
 	}
 	close(fd[1]);
 	close(fe[0]);
-	long fl = fcntl(__gui_kfd, F_GETFL, 0);
-	fl |= O_NONBLOCK;
-	fcntl(__gui_kfd, F_SETFL, fl);
+	//long fl = fcntl(__gui_kfd, F_GETFL, 0);
+	//fl |= O_NONBLOCK;
+	//fcntl(__gui_kfd, F_SETFL, fl);
 	sys->keyboard = guikeyboard;
 	sys->display = guidisplay;
 #ifdef __wang600__
@@ -550,8 +553,8 @@ void setup_fe(wang_sys_t *sys, int ops) {
 		__gui_dfd = dup(1);	// stdout
 		dup2(2,1);
 		fclose(stdin);
-		long fl = fcntl(__gui_kfd, F_GETFL, 0);
-		fl |= O_NONBLOCK;
-		fcntl(__gui_kfd, F_SETFL, fl);
+		//long fl = fcntl(__gui_kfd, F_GETFL, 0);
+		//fl |= O_NONBLOCK;
+		//fcntl(__gui_kfd, F_SETFL, fl);
 	}
 }
