@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.48 2011/11/06 03:32:10 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.49 2011/11/06 22:25:05 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -352,8 +352,9 @@ if (sys->cpu.sys.pc == 0x252) {
 		sys->display(sys, -1);	// must not sleep!
 	} else if (sys->cpu.sys.pc == 0x5c6) {	// alpha-stop done... "return"...
 		if (sys->cpu.sys.next == 0x27b) { // alpha-stop in running program...
+			// observed 211975 cycles or about 0.53 second
 			static struct timespec alpha_stop = {
-				0, 500000000L
+				0, 529937500L
 			};
 			// todo: should not sleep if key pressed - e.g. PRIME
 			nanosleep(&alpha_stop, NULL);

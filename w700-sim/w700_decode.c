@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.13 2011/11/06 01:04:12 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.14 2011/11/06 22:25:05 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -348,9 +348,9 @@ static inline void display_check(w700_sys_t *sys) {
 	} else if (sys->cpu.sys.pc == 0x4af) {	// alpha-stop done...
 		if (sys->cpu.sys.next == 0x081) { // alpha-stop in running program...
 			// currently can't tell difference!
-			// observed 528385 cycles, or 0.66 second
+			// observed 528385 cycles, or about 0.73 second
 			static struct timespec alpha_stop = {
-				0, 666666666L
+				0, 726529375L
 			};
 			// todo: should not sleep if key pressed - e.g. PRIME
 			nanosleep(&alpha_stop, NULL);
