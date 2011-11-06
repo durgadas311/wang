@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -11,6 +11,7 @@
 #include "wang-sim.h"
 
 wang_sys_t sys;
+int sys_ops = 0;
 
 static void set_intr(void) {
 	struct sigaction sa;
@@ -59,7 +60,6 @@ int main(int argc, char **argv) {
 	char *pgm = NULL;
 	char *ucode = NULL;
 	int interact = 0;
-	int sys_ops = 0;
 	char *ram = NULL;
 	char *rom = NULL;
 	char *cass = NULL;
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 #endif // __wang700__
-	sys_start(&sys, sys_ops);
+	sys_start(&sys);
 	if (load == (uint16_t)-1) {
 		load = 0x0000;
 	}
@@ -201,6 +201,6 @@ int main(int argc, char **argv) {
 	sys.cmd = (interact ? 1 : 0);
 	sys.run = (interact ? 0 : 1);
 	sys_go(&sys, entry);
-	sys_stop(&sys, sys_ops);
+	sys_stop(&sys);
 	return 0;
 }

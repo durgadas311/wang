@@ -12,13 +12,15 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.2 2011/11/06 15:12:02 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.3 2011/11/06 21:59:08 drmiller Exp $"
 
 #include "wang-sim.h"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 int __gui_dfd = -1;
+
+extern int sys_ops;
 
 static inline void wait_key() {
 	struct pollfd fds;
@@ -526,7 +528,7 @@ static int spawn_fe(wang_sys_t *sys) {
 	return 0;
 }
 
-int start_fe(wang_sys_t *sys, int ops) {
+int start_fe(wang_sys_t *sys) {
 	extraneous = 0;
 	int rc = spawn_fe(sys);
 	return rc;
@@ -540,8 +542,8 @@ void stop_fe(wang_sys_t *sys) {
 	}
 }
 
-void setup_fe(wang_sys_t *sys, int ops) {
-	if (ops & SYS_BACK_END) {
+void setup_fe(wang_sys_t *sys) {
+	if (sys_ops & SYS_BACK_END) {
 		sys->keyboard = guikeyboard;
 		sys->display = guidisplay;
 #ifdef __wang600__

@@ -3,7 +3,7 @@
 #ifndef __wang_sim_h__
 #define __wang_sim_h__
 
-#ident "$Id: wang-sim.h,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang-sim.h,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
 
 #define TRACE
 
@@ -41,14 +41,14 @@ typedef struct {
 #endif // __wang700__
 
 extern void sys_init(wang_sys_t *sys);
-extern void sys_start(wang_sys_t *sys, int ops);
+extern void sys_start(wang_sys_t *sys);
 extern void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry);
 extern void sys_loadpgm(wang_sys_t *sys, char *pgm);
 extern void sys_loadram(wang_sys_t *sys, char *ram);
 extern void sys_loadcass(wang_sys_t *sys, char *cass);
 extern void sys_setcass(wang_sys_t *sys, char *cass);
 extern int sys_go(wang_sys_t *sys, uint16_t entry);
-extern void sys_stop(wang_sys_t *sys, int ops);
+extern void sys_stop(wang_sys_t *sys);
 
 char *get_mach_str(wang_sys_t *sys);
 char *get_psw_str(wang_sys_t *sys);

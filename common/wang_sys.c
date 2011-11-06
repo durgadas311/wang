@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,16 +10,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "wang-sim.h"
 
-extern int start_fe(wang_sys_t *sys, int ops);
+extern int start_fe(wang_sys_t *sys);
 extern void stop_fe(wang_sys_t *sys);
-extern void setup_fe(wang_sys_t *sys, int ops);
-
-static int _sys_ops = 0;
+extern void setup_fe(wang_sys_t *sys);
 
 uint16_t ram_mask = sizeof(((wang_sys_t *)0)->ram) - 1;
+extern int sys_ops;
 
 extern int diwang(char *buf, uint64_t *t);
 
@@ -27,6 +27,19 @@ extern int diwang(char *buf, uint64_t *t);
 uint8_t __keyb[32];
 int __klen;
 int __keyp;
+
+static char err_buf[1024];
+static void fatal_error(const char *s, const char *e) {
+	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
+		uint16_t b = 0xf000;
+		write(2, &b, sizeof(b));
+	}
+	if (e) {
+		fprintf(stderr, "%s: %s\n", s, e);
+	} else {
+		fprintf(stderr, "%s\n", s);
+	}
+}
 
 #ifdef __wang600__
 static char pr_ovfl[16] = { "....OVERFLOW...." };
@@ -454,8 +467,10 @@ static void segfault(void *v, uint16_t adr) {
 #endif
 
 static void sysfault(wang_sys_t *sys, const char *str) {
-	fprintf(stderr, "%s\n", str);
-	dump(sys);
+	fatal_error(str, NULL);
+	if ((sys_ops & SYS_WEB_BACKEND) == 0) {
+		dump(sys);
+	}
 	exit(1);
 }
 
@@ -499,22 +514,21 @@ for (x = 0; x < sizeof(sys->ram); ++x) {
 	// now install all devices and peripherals...
 }
 
-void sys_start(wang_sys_t *sys, int ops) {
-	_sys_ops = ops;
-	if (ops & SYS_START_GUI) {
-		int rc = start_fe(sys, ops);
+void sys_start(wang_sys_t *sys) {
+	if (sys_ops & SYS_START_GUI) {
+		int rc = start_fe(sys);
 		if (rc) {
 			fprintf(stderr, "GUI startup failed, reverting to stdio\n");
 		}
 	}
-	if (ops & SYS_BACK_END) {
-		setup_fe(sys, ops);
+	if (sys_ops & SYS_BACK_END) {
+		setup_fe(sys);
 	} else {
 		printf("Wang %d Programmable Calculator\n", WANG_SERIES);
 	}
 }
 
-void sys_stop(wang_sys_t *sys, int ops) {
+void sys_stop(wang_sys_t *sys) {
 	stop_fe(sys);
 }
 
@@ -544,12 +558,12 @@ static void __load_mem(uint8_t *mem, char *file) {
 
 	fd = open(file, O_RDONLY);
 	if (fd < 0) {
-		perror(file);
+		fatal_error(file, strerror(errno));
 		exit(1);
 	}
 	int rc = read(fd, mem, max);
 	if (rc < 0) {
-		perror(file);
+		fatal_error(file, strerror(errno));
 		exit(1);
 	}
 	close(fd);
@@ -603,7 +617,7 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 
 	fd = open(exe, O_RDONLY);
 	if (fd < 0) {
-		perror(exe);
+		fatal_error(exe, strerror(errno));
 		exit(1);
 	}
 	struct stat stb;
@@ -617,7 +631,7 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	} else {
 		rc = read(fd, m, len);
 		if (rc < 0) {
-			perror(exe);
+			fatal_error(exe, strerror(errno));
 			exit(1);
 		}
 	}
@@ -628,7 +642,7 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	 * but rather than searching table on every instruction
 	 * we just patch our local copy of the ucode now.
 	 */
-	int model = (_sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
+	int model = (sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
 	for (fd = 0; fd < NUM_UCODE_OVR; ++fd) {
 		sys->ucode[ucode_ovr[fd].adr] = ucode_ovr[fd].instr[model].word;
 	}
@@ -646,18 +660,20 @@ void sys_loadpgm(wang_sys_t *sys, char *pgm) {
 
 	fd = open(pgm, O_RDONLY);
 	if (fd < 0) {
-		perror(pgm);
+		fatal_error(pgm, strerror(errno));
 		exit(1);
 	}
 	fstat(fd, &stb);
 	buf = malloc(stb.st_size);
 	if (!buf) {
-		fprintf(stderr, "unable to malloc %ld bytes for \"%s\"\n", stb.st_size, pgm);
+		static char buf[1024];
+		sprintf(buf, "unable to malloc %ld bytes for \"%s\"\n", stb.st_size, pgm);
+		fatal_error(buf, strerror(errno));
 		exit(1);
 	}
 	int rc = read(fd, buf, stb.st_size);
 	if (rc < 0) {
-		perror(pgm);
+		fatal_error(pgm, strerror(errno));
 		exit(1);
 	}
 	close(fd);

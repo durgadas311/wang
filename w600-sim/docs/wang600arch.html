@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600arch.html,v 1.49 2011/11/06 17:04:51 drmiller Exp $ -->
+<!-- $Id: wang600arch.html,v 1.50 2011/11/06 21:59:08 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -48,6 +48,10 @@ depending on registers and access operations.
 <TR><TD CLASS="num">GIOA</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
 <TR><TD CLASS="num">GIOB</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
 <TR><TD CLASS="num">IOB</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">L</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Hi</TD></TR>
+<TR><TD CLASS="num">M</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Mid</TD></TR>
+<TR><TD CLASS="num">N</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Lo</TD></TR>
+<TR><TD CLASS="num">RB</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Data</TD></TR>
 <TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
 <TR><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">1</TD></SUB></TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
 <TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Carry Flag</TD></TR>
@@ -56,7 +60,7 @@ depending on registers and access operations.
 <TR><TD CLASS="num">OV</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
 <TR><TD CLASS="num">ERR</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
 <TR><TD CLASS="num">KBD</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Key Pressed (input ready)</TD></TR>
-<TR><TD CLASS="num">TMR</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Motor</TD></TR>
+<TR><TD CLASS="num">TMR</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Motor Relay</TD></TR>
 <TR><TD CLASS="num">DWT</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Write (record) Data</TD></TR>
 <TR><TD CLASS="num">MHG/MHO</TD><TD CLASS="num">1</TD><TD CLASS="num">R/O</TD><TD>Tape Read Data (one-shot)</TD></TR>
 <TR><TD CLASS="num">KBP</TD><TD CLASS="num">20</TD><TD CLASS="num">W/O</TD><TD>Print Hammers, shift register</TD></TR>

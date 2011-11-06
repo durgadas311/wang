@@ -1,4 +1,4 @@
-$Id: README.gui,v 1.2 2011/10/30 23:53:59 drmiller Exp $
+$Id: README.gui,v 1.3 2011/11/06 21:59:08 drmiller Exp $
 
 The GUI is java based. All the *.class files are required, and optional fonts
 are desirable. All fonts are *.ttf and in the "fonts" subdirectory.
@@ -26,3 +26,6 @@ using your native keyboard shift key. With either Run or Learn down,
 press Shift and click the other.  both will be down and the alternate functions
 of the special keys is available. Clicking, without Shift, on either button
 will release the other.
+
+To run on a remote server, use option "-w" followed by hostname and port,
+or use WANG700_HOST and WANG700_PORT environment variables.

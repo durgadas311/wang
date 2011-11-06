@@ -1,16 +1,33 @@
 #
-# wang600 - programmable calculator client
+# wang600/700 - programmable calculator client
 #
-# $Id: xinted.wang600,v 1.1 2011/11/06 15:12:02 drmiller Exp $
+# Don't forget to add entries to /etc/services!
+#
+# $Id: xinted.wang600,v 1.2 2011/11/06 21:59:08 drmiller Exp $
 service wang600
 {
 	disable		= no
+	port		= 10311
 	socket_type	= stream
 	protocol	= tcp
 	wait		= no
 	user		= nobody
-	server		= /usr/local/bin/w600-sim
+	server		= /usr/local/bin/wang/w600-sim
 	nice		= 19
-	server_args	= -b -w
+	server_args	= -b -w -u /usr/local/bin/wang/wang600.rom
+	flags		= ipv4
+}
+
+service wang700
+{
+	disable		= no
+	port		= 20311
+	socket_type	= stream
+	protocol	= tcp
+	wait		= no
+	user		= nobody
+	server		= /usr/local/bin/wang/w700-sim
+	nice		= 19
+	server_args	= -b -w -u /usr/local/bin/wang/ROM720C.txt
 	flags		= ipv4
 }

@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.9 2011/05/27 11:45:24 drmiller Exp $
+$Id: README.internals,v 1.10 2011/11/06 21:59:08 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -125,3 +125,7 @@ The simulator sends the following (binary) codes on it's output pipe:
 10000001xxxxxxxx
 	ACK for ROM download. 'x' is (should be) ignored. GUI may now
 	send bulk ROM image.
+
+1111000000000000
+	Fatal simulator error. Remaining output until newline is error message.
+	At least newline follows.
