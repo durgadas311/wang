@@ -2477,7 +2477,7 @@ StartChar: zero
 Encoding: 48 48 4
 Width: 1233
 GlyphClass: 2
-Flags: HW
+Flags: W
 LayerCount: 2
 Fore
 SplineSet
