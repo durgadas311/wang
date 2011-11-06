@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw700.c,v 1.8 2011/10/30 01:56:06 drmiller Exp $"
+#ident "$Id: dw700.c,v 1.9 2011/11/06 01:04:12 drmiller Exp $"
 
 #include <stdio.h>
 #include "w700_ucode.h"
@@ -199,3 +199,5 @@ void diw700(char *buf, uint64_t *v) {
 		s += sprintf(s, "; %s", stack);
 	}
 }
+
+void diwang(char *buf, uint64_t *v) __attribute__ ((alias ("diw700")));

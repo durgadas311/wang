@@ -1,11 +1,11 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.12 2011/10/30 23:53:59 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.13 2011/11/06 01:04:12 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
 
-#include "w700_sys.h"
+#include "wang-sim.h"
 #include "w700_ucode.h"
 
 #ifdef TRACE
@@ -210,7 +210,7 @@ static int tape_read(w700_sys_t *sys) {
 		return 0;	// don't care...
 	}
 
-	if (sys->cpu.cycles < repc) {
+	if (sys->cpu.sys.cycles < repc) {
 reps:
 		return bit;
 	}
@@ -219,7 +219,7 @@ sigs:
 		--sigc;
 		bit = last & 1;
 		last >>= 1;
-		repc = sys->cpu.cycles + 97;	// very sensitive...
+		repc = sys->cpu.sys.cycles + 97;	// very sensitive...
 		goto reps;
 	}
 	if (bitc) {
@@ -237,7 +237,7 @@ bits:
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-		repc = sys->cpu.cycles + 700;	// expects at least 650?
+		repc = sys->cpu.sys.cycles + 700;	// expects at least 650?
 		bit = 0;
 		goto reps;
 	}
@@ -259,7 +259,7 @@ static void tape_off(w700_sys_t *sys) {
 
 static void dev_out(w700_sys_t *sys) {
 	uint8_t c = (sys->cpu.gioa << 4) | sys->cpu.giob;
-//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
+fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 	sys->dev(sys, c, sys->cpu.iob);
 }
 
@@ -296,7 +296,7 @@ static void wr_ram_i(w700_sys_t *sys) {
 static void instr_trace(w700_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
-	m = &sys->ucode[sys->cpu.pc];
+	m = &sys->ucode[sys->cpu.sys.pc];
 	diw700(buf, m);
 #ifdef TRACE_RAW_UCODE
 	w700_ucode_t *u = (w700_ucode_t *)(m);
@@ -308,8 +308,8 @@ static void instr_trace(w700_sys_t *sys) {
 		"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
 #endif // TRACE_RAW_UCODE
 		"%s\n",
-		sys->cpu.pc,
-		sys->cpu.next,
+		sys->cpu.sys.pc,
+		sys->cpu.sys.next,
 		sys->cpu.t,
 		sys->cpu.u,
 		sys->cpu.v,
@@ -328,25 +328,25 @@ static void instr_trace(w700_sys_t *sys) {
 
 static inline void display_check(w700_sys_t *sys) {
 	// 034: begin display-refresh delay loop... short-cut to 472...
-	if ((sys->cpu.pc & 0xffe) == 0x034) {	// display refresh routine...
-		sys->cpu.next = 0x472;	// update some regs too?
-		sys->cpu.cycles += 431;
+	if ((sys->cpu.sys.pc & 0xffe) == 0x034) {	// display refresh routine...
+		sys->cpu.sys.next = 0x472;	// update some regs too?
+		sys->cpu.sys.cycles += 431;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: %03x: Display Warp... %lld\n",
-							sys->cpu.pc, sys->cpu.cycles);
+							sys->cpu.sys.pc, sys->cpu.sys.cycles);
 		}
 		sys->display(sys, 1);	// might sleep
 	// 5ed: begin alpha-stop display-refresh delay loop... short-cut to 4ae... 531cy
-	} else if (sys->cpu.pc == 0x5ed) {	// alpha-stop refresh routine...
-		sys->cpu.next = 0x4ae;
-		sys->cpu.cycles += 531;
+	} else if (sys->cpu.sys.pc == 0x5ed) {	// alpha-stop refresh routine...
+		sys->cpu.sys.next = 0x4ae;
+		sys->cpu.sys.cycles += 531;
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: %03x: Alpha-Stop Warp... %lld\n",
-							sys->cpu.pc, sys->cpu.cycles);
+							sys->cpu.sys.pc, sys->cpu.sys.cycles);
 		}
 		sys->display(sys, -1);	// must not sleep!
-	} else if (sys->cpu.pc == 0x4af) {	// alpha-stop done...
-		if (sys->cpu.next == 0x081) { // alpha-stop in running program...
+	} else if (sys->cpu.sys.pc == 0x4af) {	// alpha-stop done...
+		if (sys->cpu.sys.next == 0x081) { // alpha-stop in running program...
 			// currently can't tell difference!
 			// observed 528385 cycles, or 0.66 second
 			static struct timespec alpha_stop = {
@@ -361,7 +361,7 @@ static inline void display_check(w700_sys_t *sys) {
 }
 
 int instr_exec(w700_sys_t *sys) {
-	w700_ucode_t *u = (w700_ucode_t *)&sys->ucode[sys->cpu.pc];
+	w700_ucode_t *u = (w700_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
 	static uint16_t key = 0;
@@ -372,7 +372,7 @@ int instr_exec(w700_sys_t *sys) {
 	uint8_t br_q = sys->cpu.q;
 	uint8_t br_k = u->kk;
 #ifdef COVERAGE
-	if (cov[sys->cpu.pc] < 255) ++cov[sys->cpu.pc];
+	if (cov[sys->cpu.sys.pc] < 255) ++cov[sys->cpu.sys.pc];
 #endif // COVERAGE
 	next = u->jad << 2;
 
@@ -393,7 +393,7 @@ int instr_exec(w700_sys_t *sys) {
 	case 1: g = br_k; break;
 	case 2:
 		g = sys->cpu.d;
-		sys->cpu.d &= ~MODE0_STEP;
+		sys->cpu.d &= ~D13_STEP;
 		break;
 	case 3: g = 0; break;
 	case 4: g = sys->cpu.ka; break;
@@ -666,14 +666,14 @@ int instr_exec(w700_sys_t *sys) {
 	case 3: next |= ((br_s & 8) >> 2); break;
 	case 4:
 		next |= (sys->cpu.ofl << 1);
-//fprintf(stderr,"%03x: chk pe\n", sys->cpu.pc);
+//fprintf(stderr,"%03x: chk pe\n", sys->cpu.sys.pc);
 		sys->cpu.ofl = 0;
 		break;
 	case 5: next |= (sys->cpu.cc << 1); break;
 	case 6:
 		// todo: clean this up!
 		if (key) {
-//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.pc, key);
+//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 //if (1 || __keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 			sys->cpu.kbd = 1;
 			sys->cpu.ka = (key >> 4) & 0x0f;
@@ -698,9 +698,9 @@ int instr_exec(w700_sys_t *sys) {
 	case 6: next |= (br_sc << 0); break;
 	case 7: rc = 5; break;
 	}
-	sys->cpu.next = next;
+	sys->cpu.sys.next = next;
 
-	++sys->cpu.cycles;
+	++sys->cpu.sys.cycles;
 #ifdef TRACE
 	if (sys->trace) {
 		instr_trace(sys);
@@ -713,6 +713,6 @@ int instr_exec(w700_sys_t *sys) {
 
 	sys->keyboard(sys, &key, 0);
 
-	sys->cpu.pc = sys->cpu.next;
+	sys->cpu.sys.pc = sys->cpu.sys.next;
 	return rc;
 }

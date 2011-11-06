@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.27 2011/11/06 00:48:45 drmiller Exp $
+# $Id: Makefile,v 1.28 2011/11/06 01:04:12 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -13,7 +13,7 @@ VPATH = common
 CFLAGS += -D__wang600__ -Icommon -I.
 
 OBJS = wang_sys.o wang_sim_cmd.o \
-	w600_decode.o wang_exec.o wang_gui.o loaducode_txt.o
+	w600_decode.o wang_exec.o wang_gui.o
 
 TEST = $(shell echo -e this)
 ifeq ($(TEST),this)
@@ -31,7 +31,7 @@ endif
 
 XTRA = 
 
-DASM = dw600.o
+DASM = dw600.o loaducode_txt.o
 
 all: w600-sim
 

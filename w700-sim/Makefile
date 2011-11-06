@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2011/11/03 20:53:54 drmiller Exp $
+# $Id: Makefile,v 1.7 2011/11/06 01:04:12 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -8,8 +8,12 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 
 COPTS =
 
-OBJS = w700_sys.o w700_sim_cmd.o \
-	w700_decode.o w700_exec.o w700_gui.o
+VPATH = ../w600-sim/common
+
+CFLAGS += -D__wang700__ -I../w600-sim/common -I.
+
+OBJS = wang_sys.o wang_sim_cmd.o \
+	w700_decode.o wang_exec.o wang_gui.o
 
 TEST = $(shell echo -e this)
 ifeq ($(TEST),this)
@@ -33,10 +37,10 @@ all: w700-sim
 
 CFLAGS += -g -O3 $(COPTS)
 
-w700-dasm: w700-dasm.o $(DASM)
+w700-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
-w700-sim: w700-sim.o $(OBJS) $(XTRA) $(DASM) w700_fe w700_fe.class
+w700-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM) w700_fe w700_fe.class
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
 w700_fe.class: w700_fe.java

@@ -2,7 +2,7 @@
 #ifndef __w700_cpu_h__
 #define __w700_cpu_h__
 
-#ident "$Id: w700_cpu.h,v 1.3 2011/10/28 01:12:50 drmiller Exp $"
+#ident "$Id: w700_cpu.h,v 1.4 2011/11/06 01:04:12 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -25,6 +25,7 @@ typedef struct {
 	uint8_t giob;
 	uint8_t gioa;
 	uint8_t iob;
+
 	// flags...
 	uint8_t alu;
 	uint8_t cc;
@@ -34,19 +35,13 @@ typedef struct {
 	uint8_t ofl;	// prog err
 	uint8_t kbd;	// any key down
 	uint8_t err;	// mach err
-	uint8_t d;
+	uint8_t d;	// mode switch inputs
 
-	uint16_t next;
-	uint16_t pc;
-
-	// --------------------
-
-	uint64_t cycles;
-	uint64_t cylimit;
+	wang_cpu_t sys;	// common elements
 } w700_cpu_t;
 
-#define MODE0_LST_L_P	0x02
-#define MODE0_LRN_L_P	0x04
-#define MODE0_STEP	0x08
+#define D11_LST_L_P	0x02	// List or Learn+Print
+#define D12_LRN_L_P	0x04	// Learn or Learn+Print
+#define D13_STEP	0x08	// STEP key pressed
 
 #endif // __w700_cpu_h__
