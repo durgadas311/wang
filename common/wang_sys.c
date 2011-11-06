@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.3 2011/11/06 22:14:03 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -402,7 +402,7 @@ static char cn24_xlate[256] = {
 
 static void syscn24(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 	if (sts != 1) {
-		fprintf(stderr, "XH/XL = %02x [%d]\n", c, sts);
+		fprintf(stderr, "GIOA/GIOB = %02x [%d]\n", c, sts);
 		return;
 	}
 	char p = cn24_xlate[c];

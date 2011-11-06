@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.21 2011/11/06 17:04:51 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.22 2011/11/06 22:14:03 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -40,8 +40,6 @@ depending on registers and access operations.
 <TR><TD CLASS="num">T</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Hi *</TD></TR>
 <TR><TD CLASS="num">U</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Mid *</TD></TR>
 <TR><TD CLASS="num">V</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Lo *</TD></TR>
-<TR><TD CLASS="num">RA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM, Hi</TD></TR>
-<TR><TD CLASS="num">RB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM, Lo</TD></TR>
 <TR><TD CLASS="num">KA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Hi *</TD></TR>
 <TR><TD CLASS="num">KB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Lo *</TD></TR>
 <TR><TD CLASS="num">CA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>General Data, Hi *</TD></TR>
@@ -49,6 +47,11 @@ depending on registers and access operations.
 <TR><TD CLASS="num">GIOA</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
 <TR><TD CLASS="num">GIOB</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
 <TR><TD CLASS="num">IOB</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">L</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Hi</TD></TR>
+<TR><TD CLASS="num">M</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Mid</TD></TR>
+<TR><TD CLASS="num">N</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Lo</TD></TR>
+<TR><TD CLASS="num">RA</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Data to/from RAM, Hi</TD></TR>
+<TR><TD CLASS="num">RB</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Data to/from RAM, Lo</TD></TR>
 <TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag (not latched)</TD></TR>
 <TR><TD CLASS="num">ALU</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Zero Flag (not latched)</TD></TR>
 <TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved Carry Flag</TD></TR>
