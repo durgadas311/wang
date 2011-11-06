@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.47 2011/11/06 00:48:45 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.48 2011/11/06 03:32:10 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -384,9 +384,6 @@ int instr_exec(w600_sys_t *sys) {
 	// For conditional jump/call, these bits are latched early...
 	uint8_t br_acc = sys->cpu.s;
 	uint8_t br_c = sys->cpu.sc;
-	sys->cpu.l = sys->cpu.t;
-	sys->cpu.m = sys->cpu.u;
-	sys->cpu.n = sys->cpu.v;
 	uint8_t br_k = u->kk;
 #ifdef COVERAGE
 	if (cov[sys->cpu.sys.pc] < 255) ++cov[sys->cpu.sys.pc];
@@ -403,6 +400,12 @@ int instr_exec(w600_sys_t *sys) {
 		}
 	} else {
 		next = u->jad << 2;
+	}
+
+	if (u->mop >= 1 && u->mop <= 6) {
+		sys->cpu.l = sys->cpu.t;
+		sys->cpu.m = sys->cpu.u;
+		sys->cpu.n = sys->cpu.v;
 	}
 
 	uint8_t g = 0, h = 0;

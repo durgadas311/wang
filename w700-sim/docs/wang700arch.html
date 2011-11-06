@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.19 2011/11/04 01:03:20 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.20 2011/11/06 03:32:10 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -310,14 +310,16 @@ as follows:
 	<TR><TH COLSPAN=3>AOP<BR>
 	ALU Function</TH></TR>
 	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>ALU, CC</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>001</TD><TD>ALU, CC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>010</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
-	<TR><TD>011</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
-	<TR><TD>100</TD><TD>ALU, CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
-	<TR><TD>101</TD><TD>ALU</TD><TD>Zbus = Abus & Bbus</TD></TR>
-	<TR><TD>110</TD><TD>ALU</TD><TD>Zbus = Abus ^ Bbus</TD></TR>
-	<TR><TD>111</TD><TD>ALU, CC, SC</TD><TD>Zbus = SC|(Abus + Bbus) >> 1 *</TD></TR>
+	<TR><TD>000</TD><TD></TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>001</TD><TD></TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>010</TD><TD>SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>011</TD><TD>SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
+	<TR><TD>100</TD><TD>SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>101</TD><TD></TD><TD>Zbus = Abus & Bbus</TD></TR>
+	<TR><TD>110</TD><TD></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
+	<TR><TD>111</TD><TD>SC</TD><TD>Zbus = SC|(Abus + Bbus) >> 1 *</TD></TR>
+	<TR><TD COLSPAN=3>ALU is always updated.
+			CC is always updated, but based on sum.</TD><TR>
 	<TR><TD COLSPAN=3>*<UL>
 			Zbus<SUB>3</SUB> = SC<BR>
 			Zbus<SUB>2</SUB> = (Abus + Bbus)<SUB>3</SUB><BR>
