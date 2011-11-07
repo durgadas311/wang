@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.49 2011/11/06 22:25:05 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.50 2011/11/07 14:07:35 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -9,7 +9,7 @@
 #include "w600_ucode.h"
 
 #ifdef TRACE
-extern int diw600(char *buf, uint64_t *t);
+extern int diwang(char *buf, uint64_t *t);
 extern char *get_psw_str(w600_sys_t *sys);
 #endif // TRACE
 
@@ -299,7 +299,7 @@ static void instr_trace(w600_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
 	m = &sys->ucode[sys->cpu.sys.pc];
-	diw600(buf, m);
+	diwang(buf, m);
 #ifdef TRACE_RAW_UCODE
 	w600_ucode_t *u = (w600_ucode_t *)(m);
 #endif // TRACE_RAW_UCODE

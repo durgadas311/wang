@@ -1,11 +1,11 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.15 2011/11/06 00:48:45 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.16 2011/11/07 14:07:35 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
 
-void diw600(char *buf, uint64_t *v) {
+void diwang(char *buf, uint64_t *v) {
 	w600_ucode_t *u = (w600_ucode_t *)v;
 	char *s;
 
@@ -196,5 +196,3 @@ void diw600(char *buf, uint64_t *v) {
 		s += sprintf(s, "; %s", stack);
 	}
 }
-
-void diwang(char *buf, uint64_t *v) __attribute__ ((alias ("diw600")));
