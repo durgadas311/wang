@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.14 2011/11/06 22:25:05 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.15 2011/11/07 13:20:04 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -9,7 +9,7 @@
 #include "w700_ucode.h"
 
 #ifdef TRACE
-extern int diw700(char *buf, uint64_t *t);
+extern int diwang(char *buf, uint64_t *t);
 extern char *get_psw_str(w700_sys_t *sys);
 #endif // TRACE
 
@@ -297,7 +297,7 @@ static void instr_trace(w700_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
 	m = &sys->ucode[sys->cpu.sys.pc];
-	diw700(buf, m);
+	diwang(buf, m);
 #ifdef TRACE_RAW_UCODE
 	w700_ucode_t *u = (w700_ucode_t *)(m);
 #endif // TRACE_RAW_UCODE

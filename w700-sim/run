@@ -1,0 +1,5 @@
+#!/bin/sh
+# $Id: run,v 1.1 2011/11/07 13:20:04 drmiller Exp $
+
+cd ${0%/*}
+exec java -jar wang700.jar

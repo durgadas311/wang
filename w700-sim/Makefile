@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2011/11/06 01:08:26 drmiller Exp $
+# $Id: Makefile,v 1.9 2011/11/07 13:20:04 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -63,9 +63,10 @@ tar: rom.diff wang700.jar
 	cd ..;\
 	tar -czvf w700-sim/w700-sim.tgz \
 		w700-sim/*.[ch] w700-sim/Makefile w700-sim/*.java \
+		common/*.[ch] \
 		w700-sim/README*  w700-sim/LICENSE* \
 		w700-sim/rom.diff \
-		w700-sim/icons/*.gif \
+		w700-sim/icons/*.gif w700-sim/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
 ship: tar
@@ -77,17 +78,17 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
 wang700.jar: w700_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons $(SHIP_DOCS)
+	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf $(SHIP_DOCS)
 
 # INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar wang700.rom w700-sim run INSTALL $(TMPDEST)
+	cp wang700.jar w700-sim run INSTALL $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 	mkdir -p $(TMPDEST)/progs
-	cp progs/*.wng $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang700-*x*.png $(TMPDEST)/icons
+#	cp progs/*.wng $(TMPDEST)/progs
+#	cp icons/wang700-*x*.png $(TMPDEST)/icons
 
 package: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
