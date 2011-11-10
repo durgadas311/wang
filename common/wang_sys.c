@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.3 2011/11/06 22:14:03 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.4 2011/11/10 23:36:15 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <syslog.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #include "wang-sim.h"
 
@@ -20,6 +23,8 @@ extern void setup_fe(wang_sys_t *sys);
 
 uint16_t ram_mask = sizeof(((wang_sys_t *)0)->ram) - 1;
 extern int sys_ops;
+
+char peer[256] = {"unknown"};
 
 extern int diwang(char *buf, uint64_t *t);
 
@@ -521,6 +526,16 @@ void sys_start(wang_sys_t *sys) {
 			fprintf(stderr, "GUI startup failed, reverting to stdio\n");
 		}
 	}
+	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
+		openlog(WANG_SIM, LOG_PID, LOG_USER);
+
+		struct sockaddr addr;
+		socklen_t len = sizeof(addr);
+		getpeername(0, &addr, &len);
+		getnameinfo(&addr, len, peer, sizeof(peer), NULL, 0, NI_NUMERICHOST);
+
+		syslog(LOG_INFO, "starting simulation for %s\n", peer);
+	}
 	if (sys_ops & SYS_BACK_END) {
 		setup_fe(sys);
 	} else {
@@ -530,6 +545,11 @@ void sys_start(wang_sys_t *sys) {
 
 void sys_stop(wang_sys_t *sys) {
 	stop_fe(sys);
+	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
+		syslog(LOG_INFO, "ending simulation for %s\n", peer);
+
+		closelog();
+	}
 }
 
 static int sys_interact(wang_sys_t *sys) {
