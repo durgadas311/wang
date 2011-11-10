@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.30 2011/11/10 21:28:05 drmiller Exp $
+# $Id: Makefile,v 1.31 2011/11/10 23:48:44 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -30,18 +30,21 @@ XTRA =
 
 DASM = dw600.o loaducode_txt.o
 
-all: w600-sim
+all: w600-sim w600_fe.class
 
 CFLAGS += -g -O3 $(COPTS)
 
 w600-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
-w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
+w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
 w600_fe.class: w600_fe.java
 	javac w600_fe.java
+
+xinetd: w600-sim
+	@echo "Ready for: cp $(PWD)/$? /usr/local/bin/wang"
 
 clean:
 	rm -f *.o
