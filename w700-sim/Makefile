@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2011/11/07 13:20:04 drmiller Exp $
+# $Id: Makefile,v 1.10 2011/11/10 21:28:05 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -23,11 +23,7 @@ ECHOE = echo
 endif
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
-FONTDEST =
-
-ifneq ($(FONTDIR),)
-FONTDEST = $(FONTDIR)/Wang700Display.ttf
-endif
+FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 
 XTRA = 
 
@@ -46,9 +42,6 @@ w700-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM) w700_fe w700_fe.class
 w700_fe.class: w700_fe.java
 	javac w700_fe.java
 
-$(FONTDEST): fonts/Wang700Display.ttf
-	cp $? $@
-
 clean:
 	rm -f *.o
 
@@ -66,7 +59,7 @@ tar: rom.diff wang700.jar
 		common/*.[ch] \
 		w700-sim/README*  w700-sim/LICENSE* \
 		w700-sim/rom.diff \
-		w700-sim/icons/*.gif w700-sim/fonts/*.ttf \
+		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
 ship: tar
@@ -78,9 +71,9 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
 wang700.jar: w700_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf $(SHIP_DOCS)
+	jar cfm $@ Manifest.txt *.class icons $(SHIP_DOCS) \
+		$(addprefix -C ../common/fonts ,$(FONTS))
 
-# INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang700.jar
 	mkdir -p $(TMPDEST)
 	cp wang700.jar w700-sim run INSTALL $(TMPDEST)

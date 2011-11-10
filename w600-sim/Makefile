@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.29 2011/11/06 01:08:25 drmiller Exp $
+# $Id: Makefile,v 1.30 2011/11/10 21:28:05 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -24,10 +24,7 @@ endif
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
-
-ifneq ($(FONTDIR),)
-FONTDEST = $(FONTDIR)/Wang600Display.ttf
-endif
+FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 
 XTRA = 
 
@@ -46,9 +43,6 @@ w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM) w600_fe w600_fe.class
 w600_fe.class: w600_fe.java
 	javac w600_fe.java
 
-$(FONTDEST): fonts/Wang600Display.ttf
-	cp $? $@
-
 clean:
 	rm -f *.o
 
@@ -60,9 +54,10 @@ tar:
 	cd ..;\
 	tar -czvf w600-sim/w600-sim.tgz \
 		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
+		common/*.[ch] \
 		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
 		w600-sim/wang600.rom w600-sim/icons/*.gif \
-		w600-sim/icons/*.png w600-sim/fonts/*.ttf	\
+		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.wng w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar
@@ -74,9 +69,9 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons fonts/*.ttf $(SHIP_DOCS)
+	jar cfm $@ Manifest.txt *.class icons $(SHIP_DOCS) \
+		$(addprefix -C ../common/fonts ,$(FONTS))
 
-# INSTALL goes away, or becomes empty, once we figure out how to get ttf from jar
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
 	cp wang600.jar wang600.rom w600-sim run INSTALL $(TMPDEST)
