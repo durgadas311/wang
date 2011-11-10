@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+pdftk ${1} burst
