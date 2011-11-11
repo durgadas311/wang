@@ -1,0 +1,2048 @@
+000: U=1              bc:1 mop:7 kk:F st:!ZK    jmp:504
+001: U=#4             bc:0 mop:- kk:4 st:--     jmp:508
+002: U=0              bc:0 mop:- kk:0 st:--     jmp:508
+003: S=#4             bc:0 mop:8 kk:4 st:--     jmp:010
+004: KA=#5            bc:0 mop:- kk:5 st:S=0    jmp:003
+005: S=CB^#0          bc:1 mop:- kk:0 st:--     jmp:50E jl:Z0
+006: S=0              bc:0 mop:E kk:D st:--     jmp:67B
+007: T=0              bc:0 mop:6 kk:F st:S3=1   jmp:6A8
+008: --=D             bc:0 mop:6 kk:4 st:--     jmp:70C
+009: V=1              bc:1 mop:- kk:0 st:S=0    jmp:3A3
+00A: KA=S&#8          bc:0 mop:3 kk:8 st:--     jmp:41D
+00B: CB=U             bc:0 mop:3 kk:2 st:--     jmp:41E
+00C: S=0              bc:0 mop:6 kk:4 st:--     jmp:284
+00D: V=1              bc:1 mop:6 kk:4 st:--     jmp:57E
+00E: S=CA^#5          bc:1 mop:- kk:5 st:S1=1   jmp:2D2 jl:Z0
+00F: CA=KA            bc:0 mop:- kk:0 st:--     jmp:2F0
+010: V=V+1,sc         bc:0 mop:E kk:C st:--     jmp:678
+011: CA=0             bc:0 mop:- kk:0 st:--      
+012: CB=0             bc:0 mop:1 kk:0 st:S0=1   jmp:010
+013: CA=#4            bc:0 mop:- kk:4 st:--      
+014: V=#2             bc:0 mop:- kk:2 st:--      
+015: CB=V             bc:0 mop:2 kk:E st:--      
+016: V=1              bc:0 mop:3 kk:1 st:--      
+017: CA=CA+1          bc:1 mop:2 kk:E st:--      
+018: V=0              bc:0 mop:6 kk:1 st:--     jmp:679
+019: CA=0             bc:0 mop:- kk:0 st:S=0     
+01A: CB=1             bc:0 mop:3 kk:0 st:S2=1    
+01B: CB=S             bc:0 mop:2 kk:E st:--     jmp:000
+01C: V=V+1,sc         bc:1 mop:4 kk:0 st:--     jmp:505
+01D: CA=S             bc:0 mop:3 kk:5 st:--     jmp:506
+01E: CA=0             bc:0 mop:- kk:0 st:S=0     
+01F: CB=0             bc:0 mop:2 kk:D st:S3=1   jmp:2FA
+020: V=#3             bc:0 mop:- kk:3 st:--     jmp:022
+021: CB=KB            bc:0 mop:3 kk:6 st:!ZK    jmp:02C
+022: V=V+1,sc         bc:0 mop:1 kk:0 st:--     jmp:022 jl:CC
+023: U=U+sc,sc        bc:0 mop:- kk:0 st:--     jmp:020 jl:CC
+024: T=1              bc:0 mop:7 kk:F st:--     sub:6BB
+025: KB=T&D           bc:0 mop:- kk:0 st:--      
+026: --=KB+KB         bc:0 mop:- kk:0 st:--     sub:61E
+027: S=0              bc:0 mop:3 kk:5 st:--     jmp:5C0
+028: CA=S             bc:0 mop:8 kk:2 st:--     sub:658
+029: --=1             bc:1 mop:7 kk:F st:--      
+02A: CA=S             bc:0 mop:8 kk:2 st:--     sub:658
+02B: --=#15           bc:0 mop:7 kk:F st:--     jmp:028
+02C: T=D              bc:0 mop:- kk:0 st:--     sub:6D9
+02D: U=#3             bc:0 mop:- kk:3 st:--      
+02E: T=T&#12          bc:0 mop:- kk:C st:--     sub:6F2
+02F: KA=T+#4          bc:0 mop:6 kk:4 st:--     jmp:62A jl:Z0
+030: --=KA&#3         bc:0 mop:- kk:3 st:--     jmp:030 jh:S3 jl:S0
+031: S=CA&#1          bc:0 mop:- kk:1 st:--     jmp:038 jl:Z0
+032: CA=CA|#4         bc:0 mop:- kk:4 st:--     jmp:031
+033: CA=CA|#12        bc:0 mop:- kk:C st:--     jmp:031
+034: S=0              bc:0 mop:6 kk:5 st:S1=1    
+035: S=CA&#4          bc:0 mop:- kk:4 st:--      
+036: CB=#3            bc:0 mop:- kk:3 st:S=0    sub:6C9
+037: S=0              bc:0 mop:6 kk:4 st:--     jmp:03C
+038: V=#4             bc:1 mop:3 kk:4 st:S0=0   jmp:79C
+039: CB=0             bc:0 mop:3 kk:4 st:S=0     
+03A: CB=#15           bc:0 mop:- kk:F st:S3=1    
+03B: S=S&D            bc:0 mop:- kk:0 st:S2=1   jmp:7C8 jh:Z0
+03C: CB=0             bc:0 mop:3 kk:4 st:S3=1   sub:6DC
+03D: V=1              bc:1 mop:6 kk:7 st:--      
+03E: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+03F: --=CA            bc:0 mop:- kk:0 st:--     jmp:005
+040: U=#12            bc:0 mop:- kk:C st:S3=0   sub:6DC
+041: S=0              bc:0 mop:6 kk:4 st:--      
+042: S=0              bc:0 mop:- kk:0 st:--     jmp:56E
+043: CA=U&CA          bc:0 mop:3 kk:4 st:--     jmp:7C9
+044: S=CA|CB          bc:0 mop:6 kk:6 st:S=0    jmp:046 jl:Z0
+045: S=0              bc:0 mop:- kk:0 st:--     jmp:562
+046: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+047: S=CA&#2          bc:0 mop:- kk:2 st:S0=1   jmp:1E0 jl:Z0
+048: KB=1             bc:0 mop:6 kk:6 st:--     jmp:688
+049: S=0              bc:0 mop:- kk:0 st:--     jmp:568
+04A: S=0              bc:0 mop:6 kk:5 st:S=0    jmp:04E jl:S2
+04B: KB=#6+1          bc:0 mop:6 kk:6 st:S0=1    
+04C: S=S&CB           bc:0 mop:6 kk:7 st:S=0    jmp:56A jl:Z0
+04D: --=T             bc:0 mop:6 kk:E st:--     jmp:1AF
+04E: S=0              bc:0 mop:- kk:0 st:S=0    jmp:1F4
+04F: CB=CB&#14        bc:0 mop:- kk:E st:--     jmp:550
+050: S=CB^#8          bc:1 mop:- kk:8 st:--     jmp:056 jl:Z0
+051: V=1              bc:1 mop:- kk:0 st:--     jmp:054 jl:S2
+052: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+053: CA=#3            bc:0 mop:- kk:3 st:--     jmp:512 jl:S0
+054: S=0              bc:0 mop:5 kk:C st:--     jmp:058 jh:S3 jl:S0
+055: V=1              bc:1 mop:6 kk:6 st:--     jmp:05C jh:S3 jl:S0
+056: S=CB^#10         bc:1 mop:- kk:A st:--     jmp:060 jl:Z0
+057: U=#4             bc:0 mop:- kk:4 st:--     jmp:064 jh:S3 jl:S0
+058: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+059: S=0              bc:0 mop:6 kk:C st:--     jmp:689
+05A: CA=CA+1          bc:0 mop:2 kk:C st:--     jmp:04E
+05B: CA=0             bc:0 mop:2 kk:C st:S=0    jmp:56B
+05C: S=0              bc:0 mop:- kk:0 st:--     jmp:129
+05D: S=0              bc:0 mop:8 kk:2 st:--     jmp:02C
+05E: --=1             bc:0 mop:6 kk:5 st:--     jmp:04F
+05F: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:30C jl:Z0
+060: S=CB^#11         bc:1 mop:- kk:B st:--     jmp:062 jl:Z0
+061: CA=#2            bc:0 mop:- kk:2 st:--     jmp:06C jh:S3 jl:S0
+062: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+063: S=0              bc:0 mop:6 kk:D st:S=0    jmp:070 jh:S3 jl:S0
+064: S=U&CB           bc:0 mop:- kk:0 st:--     jmp:068 jl:Z0
+065: S=U&CB           bc:0 mop:6 kk:E st:--     jmp:06A jl:Z0
+066: S=0              bc:0 mop:- kk:0 st:S=0    jmp:55C
+067: S=0              bc:0 mop:6 kk:E st:--     jmp:06B
+068: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+069: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+06A: S=0              bc:0 mop:5 kk:E st:--     jmp:558
+06B: S=CA|CB          bc:0 mop:6 kk:7 st:--     jmp:208 jh:Z0
+06C: S=0              bc:0 mop:6 kk:E st:--     jmp:06B
+06D: S=0              bc:0 mop:- kk:0 st:--     jmp:1DC
+06E: CA=0             bc:0 mop:- kk:0 st:--     jmp:0A4
+06F: S=0              bc:0 mop:6 kk:6 st:--     jmp:201
+070: S=0              bc:0 mop:- kk:0 st:--     jmp:1D8
+071: S=0              bc:0 mop:- kk:0 st:--     jmp:1DC
+072: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:1B4 jh:Z0
+073: S=0              bc:0 mop:- kk:0 st:--     jmp:1C0
+074: CB=#6            bc:0 mop:- kk:6 st:S3=1   sub:6C7
+075: S=T+1            bc:1 mop:- kk:0 st:--     jmp:078 jh:CC
+076: CB=#4            bc:0 mop:- kk:4 st:S3=1   sub:6C6
+077: T=#1             bc:0 mop:- kk:1 st:--     jmp:074
+078: CB=#5            bc:0 mop:- kk:5 st:S3=1   sub:6C7
+079: S=T+1            bc:1 mop:- kk:0 st:--     jmp:088 jh:CC
+07A: CB=#13           bc:0 mop:- kk:D st:S3=1   sub:6C7
+07B: T=#1             bc:0 mop:- kk:1 st:--     jmp:07E
+07C: S=0              bc:0 mop:- kk:0 st:--     jmp:08C
+07D: S=0              bc:0 mop:- kk:0 st:--     jmp:086
+07E: CB=#5            bc:0 mop:- kk:5 st:S3=1   sub:6C5
+07F: S=T+1            bc:1 mop:- kk:0 st:--     jmp:084 jh:CC
+080: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6C5
+081: T=#1             bc:0 mop:- kk:1 st:--     jmp:07E
+082: CB=#15           bc:0 mop:- kk:F st:S3=1   sub:6C5
+083: T=0              bc:0 mop:- kk:0 st:--     jmp:078
+084: CB=#12           bc:0 mop:- kk:C st:S3=1   sub:6C6
+085: S=0              bc:0 mop:- kk:0 st:--     jmp:082
+086: CB=#1            bc:0 mop:- kk:1 st:S3=1   sub:6CD
+087: S=0              bc:0 mop:- kk:0 st:S3=0   jmp:6ED
+088: CB=#1            bc:0 mop:- kk:1 st:S3=1   sub:6C6
+089: S=0              bc:0 mop:- kk:0 st:--     jmp:080
+08A: CB=#6            bc:0 mop:- kk:6 st:S3=0   sub:6C5
+08B: S=0              bc:0 mop:- kk:0 st:--     jmp:3C4
+08C: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6C6
+08D: T=0              bc:0 mop:- kk:0 st:--     jmp:07E
+08E: CB=#12           bc:0 mop:- kk:C st:S3=1   sub:6C7
+08F: T=#1             bc:0 mop:- kk:1 st:--     jmp:092
+090: CB=#5            bc:0 mop:- kk:5 st:S3=1   sub:6C7
+091: S=0              bc:0 mop:- kk:0 st:--     jmp:08E
+092: CB=#7            bc:0 mop:- kk:7 st:S3=1   sub:6C7
+093: S=T+1            bc:1 mop:- kk:0 st:--     jmp:07C jl:Z0
+094: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6C7
+095: T=#0             bc:0 mop:- kk:0 st:--      
+096: CB=#12           bc:0 mop:- kk:C st:S3=1   sub:6C6
+097: S=T+1            bc:1 mop:- kk:0 st:--      
+098: CB=#1            bc:0 mop:- kk:1 st:S3=1   sub:6C5
+099: S=0              bc:0 mop:- kk:0 st:--     jmp:086
+09A: CB=#7            bc:0 mop:- kk:7 st:S3=1   sub:6C5
+09B: S=T+1            bc:1 mop:- kk:0 st:--     jmp:090 jh:Z0 jl:Z0
+09C: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6C7
+09D: S=0              bc:0 mop:- kk:0 st:--     jmp:0A6
+09E: CB=#5            bc:0 mop:- kk:5 st:S3=1   sub:6C7
+09F: S=0              bc:0 mop:- kk:0 st:--     jmp:514
+0A0: CB=#13           bc:0 mop:- kk:D st:S3=1   sub:6C6
+0A1: S=0              bc:0 mop:- kk:0 st:--      
+0A2: CB=#6            bc:0 mop:- kk:6 st:S3=1   sub:6C7
+0A3: CB=#0            bc:0 mop:- kk:0 st:S3=0   jmp:6CD
+0A4: CB=0             bc:0 mop:3 kk:4 st:S=0    sub:6EC
+0A5: T=0              bc:0 mop:- kk:0 st:--      
+0A6: S=0              bc:0 mop:7 kk:F st:--     sub:09E
+0A7: CA=0             bc:0 mop:- kk:0 st:--      
+0A8: CB=0             bc:0 mop:3 kk:A st:--     sub:3C4
+0A9: S=CA^#8          bc:1 mop:- kk:8 st:--      
+0AA: KB=CA+#11        bc:1 mop:- kk:B st:S=0    jmp:0AC jl:Z0
+0AB: S=CB^#6          bc:1 mop:- kk:6 st:--     jmp:0B0 jl:Z0
+0AC: S=CA^#2          bc:1 mop:- kk:2 st:--     jmp:0AE jl:Z0
+0AD: S=CB^#14         bc:1 mop:- kk:E st:S1=1   jmp:0B0 jh:Z0
+0AE: CA=CA            bc:0 mop:- kk:0 st:--     jmp:0B8 jh:Z0 jl:Z0
+0AF: S=CB^#6          bc:1 mop:- kk:6 st:S=0    jmp:0B4 jh:S1 jl:Z0
+0B0: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+0B1: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+0B2: CA=S             bc:0 mop:3 kk:3 st:--     jmp:0E4
+0B3: S=CB^#9          bc:1 mop:- kk:9 st:S0=0   jmp:0BC jh:S1 jl:Z0
+0B4: S=CB^#5          bc:1 mop:- kk:5 st:S=0    jmp:0B6 jl:Z0
+0B5: T=1              bc:0 mop:6 kk:6 st:S0=1   jmp:518
+0B6: V=CB^#14         bc:1 mop:- kk:E st:S0=1   jmp:7D0 jh:Z0 jl:Z0
+0B7: S=0              bc:0 mop:- kk:0 st:--     jmp:104
+0B8: T=#2             bc:0 mop:- kk:2 st:S3=1   sub:0D3
+0B9: T=#1             bc:0 mop:- kk:1 st:--     jmp:09C
+0BA: CA=1             bc:0 mop:3 kk:3 st:--     jmp:0E6
+0BB: S=CB^#14         bc:1 mop:- kk:E st:--     jmp:516 jl:Z0
+0BC: S=0              bc:0 mop:- kk:0 st:--     sub:3C4
+0BD: S=CA^#0          bc:1 mop:- kk:0 st:S3=1   jmp:0B0 jh:Z0 jl:Z0
+0BE: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+0BF: V=#12            bc:0 mop:- kk:C st:--     jmp:0C2
+0C0: S=0              bc:0 mop:- kk:0 st:--     sub:3C4
+0C1: S=CA|CB          bc:0 mop:- kk:0 st:S0=1   jmp:0BE jl:Z0
+0C2: CA=S             bc:0 mop:3 kk:3 st:--     sub:086
+0C3: V=#12            bc:0 mop:- kk:C st:--     jmp:114
+0C4: S=0              bc:0 mop:- kk:0 st:--     jmp:52E
+0C5: S=CA|CB          bc:0 mop:6 kk:B st:--     jmp:52A jl:Z0
+0C6: S=0              bc:0 mop:5 kk:C st:--     jmp:67D
+0C7: S=0              bc:0 mop:6 kk:B st:--     jmp:67C
+0C8: S=0              bc:0 mop:- kk:0 st:--     jmp:52E
+0C9: S=S^CA           bc:1 mop:6 kk:0 st:--     jmp:0C8 jh:Z0
+0CA: S=CA|CB          bc:0 mop:6 kk:B st:--     jmp:524 jl:Z0
+0CB: S=CB^#12         bc:1 mop:- kk:C st:S0=1   jmp:0C8 jl:Z0
+0CC: U=#8             bc:0 mop:- kk:8 st:--     sub:09E
+0CD: S=0              bc:0 mop:- kk:0 st:--      
+0CE: U=#0             bc:0 mop:- kk:0 st:--     sub:532
+0CF: S=0              bc:0 mop:- kk:0 st:S=0    jmp:51B
+0D0: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6CA
+0D1: T=T+1            bc:1 mop:- kk:0 st:--     jmp:0D0 jh:CC
+0D2: --=U             bc:0 mop:- kk:0 st:--     jmp:6ED
+0D3: U=S              bc:0 mop:- kk:0 st:--     jmp:0D0
+0D4: CB=#13           bc:0 mop:- kk:D st:--     jmp:534
+0D5: CB=#15           bc:0 mop:- kk:F st:--     jmp:534
+0D6: CB=#12           bc:0 mop:3 kk:C st:--     jmp:534
+0D7: CA=0             bc:0 mop:- kk:0 st:--      
+0D8: CB=#7            bc:0 mop:3 kk:7 st:S3=1   sub:6C7
+0D9: V=1              bc:1 mop:- kk:0 st:--      
+0DA: CB=#3            bc:0 mop:- kk:3 st:S3=1   sub:6C8
+0DB: T=#6             bc:0 mop:- kk:6 st:--     jmp:0E0
+0DC: CB=#3            bc:0 mop:- kk:3 st:S3=1   sub:6C7
+0DD: CA=#12           bc:0 mop:3 kk:C st:--      
+0DE: CB=#2            bc:0 mop:- kk:2 st:S3=1   sub:6CC
+0DF: T=T+1            bc:1 mop:6 kk:7 st:--      
+0E0: S=0              bc:0 mop:- kk:0 st:--     jmp:0DC
+0E1: CB=CB+1          bc:0 mop:2 kk:C st:--     jmp:52C
+0E2: CB=CB+1          bc:1 mop:3 kk:7 st:S3=1   sub:6ED
+0E3: V=1              bc:1 mop:6 kk:7 st:S=0    jmp:6CD
+0E4: S=0              bc:0 mop:- kk:0 st:--     sub:080
+0E5: KA=#10           bc:0 mop:- kk:A st:S1=1   jmp:0ED
+0E6: S=0              bc:0 mop:- kk:0 st:--     sub:076
+0E7: KA=#10           bc:0 mop:- kk:A st:S1=1   jmp:0ED
+0E8: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+0E9: S=CB^#0          bc:1 mop:- kk:0 st:--      
+0EA: S=CB^#1          bc:1 mop:- kk:1 st:S2=0   jmp:0EC jh:Z0
+0EB: T=#9             bc:0 mop:- kk:9 st:S2=0   jmp:0EE
+0EC: S=CB^#4          bc:1 mop:- kk:4 st:--     jmp:536 jl:Z0
+0ED: T=CA^#3          bc:1 mop:- kk:3 st:--     jmp:0E8 jl:Z0
+0EE: V=CA             bc:0 mop:6 kk:3 st:S2=1   jmp:0EE jl:S2
+0EF: S=0              bc:0 mop:6 kk:A st:--     jmp:0FF
+0F0: S=CB^#6          bc:1 mop:- kk:6 st:--     jmp:0F2 jl:Z0
+0F1: T=#5             bc:0 mop:- kk:5 st:S2=0   jmp:0EE
+0F2: S=CB^#9          bc:1 mop:- kk:9 st:--     jmp:0F4 jl:Z0
+0F3: T=#2             bc:0 mop:- kk:2 st:S2=0   jmp:0EE
+0F4: S=CB^#12         bc:1 mop:- kk:C st:--     jmp:0F6 jl:Z0
+0F5: T=#4             bc:0 mop:- kk:4 st:S2=0   jmp:0EE
+0F6: S=CB^#13         bc:1 mop:- kk:D st:--     jmp:0F8 jl:Z0
+0F7: T=#8             bc:0 mop:- kk:8 st:S2=0   jmp:0EE
+0F8: S=CB^#14         bc:1 mop:- kk:E st:--     jmp:0FA jl:Z0
+0F9: T=#7             bc:0 mop:- kk:7 st:S2=0   jmp:0EE
+0FA: S=CB^#15         bc:1 mop:- kk:F st:--     jmp:538 jl:Z0
+0FB: T=#3             bc:0 mop:- kk:3 st:S2=0   jmp:0EE
+0FC: CA=CA+sc,sc      bc:0 mop:- kk:0 st:--      
+0FD: S=CB+#2,sc       bc:1 mop:- kk:2 st:--     jmp:77B
+0FE: KA=KA+1          bc:1 mop:6 kk:A st:--     jmp:100 jh:CC
+0FF: CB=T+CB,sc       bc:0 mop:- kk:0 st:--     jmp:0FC jh:S3
+100: CB=T+CB,sc       bc:0 mop:- kk:0 st:--      
+101: CA=CA+sc,sc      bc:0 mop:3 kk:A st:--     jmp:0FE
+102: S=0              bc:0 mop:3 kk:A st:--     sub:3C4
+103: S=0              bc:0 mop:- kk:0 st:S=0    jmp:0ED
+104: T=0              bc:0 mop:- kk:0 st:--     sub:074
+105: S=CB^#5          bc:1 mop:- kk:5 st:S=0     
+106: S=CB^#1          bc:1 mop:- kk:1 st:S2=1   jmp:108 jl:Z0
+107: V=CA^#0          bc:1 mop:- kk:0 st:S2=1   jmp:10C jh:Z0
+108: S=CB^#12         bc:1 mop:- kk:C st:--     jmp:780 jl:Z0
+109: V=CA^#1          bc:1 mop:- kk:1 st:S0=1   jmp:108 jh:Z0
+10A: U=S              bc:0 mop:- kk:0 st:--     sub:092
+10B: V=0              bc:0 mop:- kk:0 st:--     jmp:10F
+10C: V=CA^#2          bc:1 mop:- kk:2 st:S1=1   jmp:110 jh:Z0
+10D: CB=CB&#8         bc:0 mop:- kk:8 st:--     jmp:111
+10E: U=#4             bc:0 mop:- kk:4 st:--     sub:094
+10F: S=0              bc:0 mop:5 kk:E st:--     jmp:10D
+110: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+111: CB=U|CB          bc:0 mop:2 kk:E st:--     jmp:02C
+112: U=S              bc:0 mop:- kk:0 st:--     sub:09A
+113: V=0              bc:0 mop:- kk:0 st:--     jmp:10F
+114: CA=V&D           bc:0 mop:3 kk:B st:--     sub:414
+115: S=CB&#2          bc:0 mop:- kk:2 st:S0=!Z0  
+116: CA=S|CA          bc:0 mop:3 kk:5 st:S=0    jmp:6BA
+117: S=CA             bc:0 mop:- kk:0 st:S=0     
+118: T=S&#0           bc:0 mop:D kk:0 st:--     jmp:5CD
+119: T=S&#1           bc:0 mop:D kk:1 st:--     jmp:5CD
+11A: S=0              bc:0 mop:- kk:0 st:--      
+11B: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+11C: CB=CA            bc:0 mop:3 kk:B st:S=0    sub:53F
+11D: V=1              bc:1 mop:6 kk:7 st:S1=1    
+11E: KA=S&CA          bc:0 mop:5 kk:E st:S0=!Z0  
+11F: CA=S+1           bc:1 mop:2 kk:E st:--     jmp:597
+120: S=0              bc:0 mop:- kk:0 st:--     jmp:6A7
+121: S=KB^#8          bc:1 mop:- kk:8 st:--     jmp:120 jh:Z0
+122: V=#14            bc:0 mop:5 kk:E st:S0=1   jmp:122 jl:S0
+123: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:5DC jl:Z0
+124: S=0              bc:0 mop:- kk:0 st:S=0    sub:6BD
+125: KA=KA+1          bc:1 mop:- kk:0 st:--     jmp:124 jh:Z0
+126: S=0              bc:0 mop:- kk:0 st:--     jmp:000
+127: S=0              bc:0 mop:- kk:0 st:--     jmp:006
+128: T=#2             bc:0 mop:- kk:2 st:S3=0   sub:0D3
+129: --=D             bc:0 mop:6 kk:4 st:--     jmp:1B7
+12A: S=S&CA           bc:0 mop:6 kk:C st:--     jmp:548 jl:Z0
+12B: S=0              bc:0 mop:3 kk:4 st:S2=0   jmp:12A
+12C: CA=S             bc:0 mop:8 kk:2 st:--     sub:658
+12D: S=0              bc:0 mop:7 kk:8 st:S3=1    
+12E: CA=S             bc:0 mop:8 kk:2 st:--     sub:658
+12F: S=#8             bc:0 mop:7 kk:8 st:S3=1   jmp:12C
+130: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:132 jl:Z0
+131: S=CA^#5          bc:1 mop:- kk:5 st:S=0    jmp:138 jl:Z0
+132: S=CB^#10         bc:1 mop:- kk:A st:--     jmp:134 jl:Z0
+133: S=CA+#3          bc:1 mop:- kk:3 st:--     jmp:13C jl:CC
+134: S=CB^#11         bc:1 mop:- kk:B st:--     jmp:136 jl:Z0
+135: S=CA+1           bc:1 mop:6 kk:E st:--     jmp:13C jh:Z0 jl:Z0
+136: S=CB^#8          bc:1 mop:- kk:8 st:S=0    jmp:146 jl:Z0
+137: S=CA             bc:0 mop:- kk:0 st:--     jmp:144 jl:Z0
+138: S=CA+#3          bc:1 mop:- kk:3 st:--     jmp:13A jl:CC
+139: S=0              bc:0 mop:6 kk:6 st:S=0    jmp:14B
+13A: S=0              bc:0 mop:- kk:0 st:--     jmp:128
+13B: S=0              bc:0 mop:- kk:0 st:--     jmp:140
+13C: S=0              bc:0 mop:- kk:0 st:--     jmp:128
+13D: S=CA^#1          bc:1 mop:- kk:1 st:--     jmp:140 jh:Z0
+13E: CA=S|CA          bc:0 mop:3 kk:6 st:S=0    jmp:140
+13F: S=CA|CB          bc:0 mop:6 kk:6 st:--     jmp:13C jh:Z0
+140: S=0              bc:0 mop:- kk:0 st:--     sub:4AC
+141: S=0              bc:0 mop:7 kk:F st:--     jmp:54C
+142: S=0              bc:0 mop:- kk:0 st:--     sub:4B4
+143: S=0              bc:0 mop:7 kk:F st:--     jmp:54C
+144: S=0              bc:0 mop:- kk:0 st:S3=1   jmp:135
+145: S=0              bc:0 mop:- kk:0 st:--     jmp:140
+146: CA=CA^#8         bc:1 mop:- kk:8 st:--     jmp:14A
+147: S=CA^#4          bc:1 mop:- kk:4 st:S=0     
+148: S=CA^#0          bc:1 mop:- kk:0 st:--     jmp:13C jl:Z0
+149: S=0              bc:0 mop:6 kk:6 st:S1=1   jmp:14B
+14A: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:14C jh:Z0
+14B: CB=CB&#13        bc:0 mop:- kk:D st:--     jmp:186
+14C: S=0              bc:0 mop:- kk:0 st:--     jmp:140
+14D: CA=#6            bc:0 mop:- kk:6 st:--     jmp:54E
+14E: S=0              bc:0 mop:- kk:0 st:--     sub:4C4
+14F: S=0              bc:0 mop:7 kk:F st:--     jmp:54C
+150: S=0              bc:0 mop:- kk:0 st:S=0    sub:48C
+151: S=0              bc:0 mop:6 kk:7 st:--     jmp:154 jh:S1
+152: CB=0             bc:0 mop:3 kk:E st:--     jmp:150
+153: CA=0             bc:0 mop:- kk:0 st:--     jmp:152
+154: CB=CB&#14        bc:0 mop:- kk:E st:--      
+155: CB=CB^#2         bc:1 mop:- kk:2 st:--      
+156: S=0              bc:0 mop:6 kk:E st:--     jmp:685
+157: S=0              bc:0 mop:- kk:0 st:--     jmp:150
+158: CB=CA+1          bc:1 mop:3 kk:8 st:S=0    sub:153
+159: CB=0             bc:0 mop:- kk:0 st:S1=1   jmp:15C jh:S1
+15A: CA=KA            bc:0 mop:3 kk:F st:S=0    sub:48C
+15B: V=1              bc:0 mop:3 kk:A st:S1=0   jmp:163
+15C: KA=CA            bc:0 mop:6 kk:F st:S0=1   jmp:15C jl:S0
+15D: KB=CB            bc:0 mop:6 kk:E st:--     jmp:15B
+15E: CB=S             bc:0 mop:3 kk:7 st:--     sub:6DF
+15F: CA=#6            bc:0 mop:- kk:6 st:--     jmp:158
+160: S=0              bc:0 mop:3 kk:F st:--     jmp:168
+161: S=0              bc:0 mop:3 kk:F st:--     jmp:02C
+162: S=S&D            bc:0 mop:6 kk:6 st:--     jmp:181
+163: V=V+1            bc:0 mop:6 kk:8 st:S0=0   jmp:160 jh:S1
+164: S=0              bc:0 mop:3 kk:E st:--     ret
+165: S=0              bc:0 mop:3 kk:8 st:--      
+166: S=0              bc:0 mop:6 kk:A st:--     sub:164
+167: CB=KB            bc:0 mop:- kk:0 st:--     jmp:15A
+168: S=0              bc:0 mop:3 kk:E st:--     sub:5FE
+169: S=0              bc:0 mop:6 kk:F st:--     jmp:165
+16A: S=0              bc:0 mop:6 kk:4 st:--      
+16B: KA=S&#1          bc:0 mop:- kk:1 st:--     jmp:7E8
+16C: CB=0             bc:0 mop:3 kk:F st:--     sub:009
+16D: KA=0             bc:0 mop:6 kk:6 st:--      
+16E: T=CA&#8          bc:0 mop:- kk:8 st:--     sub:153
+16F: KB=T+#10,sc      bc:0 mop:- kk:A st:--     jmp:14D
+170: S=0,sc           bc:0 mop:6 kk:A st:--     sub:490
+171: S=0              bc:0 mop:3 kk:A st:S=0     
+172: KB=CB            bc:0 mop:6 kk:7 st:S0=1   jmp:172 jl:S0
+173: KA=CA            bc:0 mop:6 kk:B st:--     jmp:178
+174: S=0              bc:0 mop:6 kk:7 st:S=0    sub:6EA
+175: S=0              bc:0 mop:6 kk:8 st:--      
+176: S=0              bc:0 mop:6 kk:E st:--     jmp:182
+177: S=0              bc:0 mop:3 kk:F st:S=0    jmp:172
+178: S=0,sc           bc:0 mop:3 kk:E st:--     sub:490
+179: S=0              bc:0 mop:6 kk:6 st:--     jmp:17C jh:S1
+17A: S=0              bc:0 mop:6 kk:E st:--     jmp:54F
+17B: CB=S+1           bc:0 mop:3 kk:F st:--     jmp:180
+17C: S=0              bc:0 mop:6 kk:7 st:--      
+17D: CB=CB^#3         bc:1 mop:- kk:3 st:--     jmp:795
+17E: CB=CB&#2         bc:0 mop:- kk:2 st:--     jmp:7F8 jh:Z0
+17F: CB=0             bc:0 mop:3 kk:E st:--     jmp:161
+180: S=0              bc:0 mop:3 kk:E st:--     sub:692
+181: CA=0             bc:0 mop:- kk:0 st:--     jmp:16C
+182: S=0              bc:0 mop:3 kk:F st:--     sub:692
+183: S=#2             bc:0 mop:7 kk:2 st:--      
+184: S=0              bc:0 mop:- kk:0 st:S3=0   sub:6ED
+185: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+186: CB=S|CB          bc:0 mop:3 kk:6 st:--     sub:414
+187: S=0              bc:0 mop:- kk:0 st:--     jmp:15F
+188: CA=0             bc:0 mop:3 kk:D st:--     sub:48C
+189: S=0              bc:0 mop:6 kk:7 st:--      
+18A: CB=CB^#10        bc:1 mop:- kk:A st:S=0     
+18B: S=CA|CB          bc:0 mop:6 kk:5 st:S0=1    
+18C: S=S&CB           bc:0 mop:6 kk:7 st:--     jmp:18E jl:Z0
+18D: S=#2             bc:0 mop:7 kk:2 st:--     jmp:197
+18E: CB=CB^#8         bc:1 mop:- kk:8 st:--     jmp:687
+18F: CA=CA^#1         bc:1 mop:- kk:1 st:--     jmp:686
+190: CB=0             bc:0 mop:3 kk:F st:--     sub:009
+191: CB=0             bc:0 mop:3 kk:E st:--     jmp:188
+192: T=#8             bc:0 mop:- kk:8 st:S0=0   jmp:194 jh:S3
+193: S=CA|CB          bc:0 mop:6 kk:C st:--     jmp:190 jh:Z0
+194: S=0              bc:0 mop:- kk:0 st:--     sub:48C
+195: S=0              bc:0 mop:6 kk:7 st:--     jmp:552 jl:S0
+196: CA=#12           bc:0 mop:3 kk:C st:S3=1   sub:628
+197: CA=0             bc:0 mop:3 kk:4 st:--     jmp:184
+198: S=0              bc:0 mop:- kk:0 st:--     sub:48C
+199: V=T              bc:0 mop:6 kk:7 st:--     jmp:1A1
+19A: V=#15            bc:0 mop:- kk:F st:--      
+19B: S=0              bc:0 mop:5 kk:C st:--     jmp:554
+19C: CB=#3            bc:0 mop:- kk:3 st:S3=1   sub:6C7
+19D: CA=#12           bc:0 mop:3 kk:C st:--      
+19E: CB=#2            bc:0 mop:- kk:2 st:S3=1   sub:6CC
+19F: T=T+1            bc:0 mop:- kk:0 st:--     jmp:198 jh:CC
+1A0: KB=CB            bc:0 mop:6 kk:C st:--     jmp:1A6 jl:S0
+1A1: S=0              bc:0 mop:2 kk:C st:--     jmp:19C
+1A2: CA=CA+sc,sc      bc:0 mop:3 kk:C st:--     sub:6EA
+1A3: S=0              bc:0 mop:- kk:0 st:--      
+1A4: CB=#2            bc:0 mop:- kk:2 st:S3=1   sub:6CB
+1A5: S=0              bc:0 mop:- kk:0 st:--     jmp:1A8
+1A6: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:1A2
+1A7: CA=#12           bc:0 mop:3 kk:C st:--     jmp:7CF
+1A8: CB=#3            bc:0 mop:- kk:3 st:S3=1   sub:6C5
+1A9: S=0              bc:0 mop:6 kk:C st:--      
+1AA: S=0              bc:0 mop:- kk:0 st:--     sub:4DC
+1AB: KA=CA            bc:0 mop:- kk:0 st:--     jmp:1A0
+1AC: T=1              bc:1 mop:6 kk:F st:--     sub:675
+1AD: CA=0             bc:0 mop:3 kk:4 st:--     jmp:1B0 jh:S3
+1AE: CB=0             bc:0 mop:3 kk:5 st:--     jmp:1AD
+1AF: S=CA|CB          bc:0 mop:6 kk:5 st:S1=Z0  jmp:1AC jh:S1 jl:S2
+1B0: S=0              bc:0 mop:- kk:0 st:S=0     
+1B1: V=1              bc:1 mop:6 kk:6 st:S0=1   jmp:7C4
+1B2: S=0              bc:0 mop:- kk:0 st:--     sub:5B0
+1B3: S=0              bc:0 mop:6 kk:E st:--     jmp:556
+1B4: S=0              bc:0 mop:- kk:0 st:--     sub:6E7
+1B5: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+1B6: S=0              bc:0 mop:- kk:0 st:--     jmp:55A
+1B7: CA=CA+CA         bc:0 mop:- kk:0 st:S1=0   jmp:7FD
+1B8: S=0              bc:0 mop:6 kk:7 st:--     jmp:55E
+1B9: S=0              bc:0 mop:6 kk:0 st:--     jmp:55E
+1BA: S=0              bc:0 mop:6 kk:1 st:--     jmp:55E
+1BB: S=V+1            bc:1 mop:5 kk:C st:--      
+1BC: T=V              bc:0 mop:3 kk:7 st:--     sub:6DF
+1BD: V=T+1            bc:0 mop:- kk:0 st:--     jmp:1BB
+1BE: CA=0             bc:0 mop:3 kk:4 st:--     sub:008
+1BF: S=0              bc:0 mop:- kk:0 st:--     jmp:205
+1C0: S=0              bc:0 mop:7 kk:B st:S=0    sub:6EC
+1C1: T=#1             bc:0 mop:- kk:1 st:--      
+1C2: CA=0             bc:0 mop:3 kk:4 st:--     sub:6DF
+1C3: T=T              bc:0 mop:- kk:0 st:--      
+1C4: T=0              bc:0 mop:- kk:0 st:--     sub:08A
+1C5: --=CA            bc:0 mop:- kk:0 st:--      
+1C6: S=0              bc:0 mop:- kk:0 st:--     jmp:1C8 jh:S3 jl:S0
+1C7: S=0              bc:0 mop:- kk:0 st:S=0    jmp:1CC
+1C8: S=CB^#5          bc:1 mop:- kk:5 st:--     jmp:560 jl:Z0
+1C9: S=CB^#1          bc:1 mop:- kk:1 st:--     jmp:560 jl:Z0
+1CA: S=CB^#13         bc:1 mop:- kk:D st:--     jmp:560 jl:Z0
+1CB: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+1CC: V=1              bc:0 mop:5 kk:0 st:S0=1   jmp:1CC jl:S0
+1CD: --=CA            bc:0 mop:6 kk:6 st:--     jmp:1D3
+1CE: CA=0             bc:0 mop:3 kk:E st:--     sub:008
+1CF: --=#4            bc:0 mop:- kk:4 st:--     jmp:32C
+1D0: T=T|#6           bc:0 mop:6 kk:6 st:S3=1   jmp:1D6
+1D1: T=T&#8           bc:0 mop:- kk:8 st:--     jmp:1D6
+1D2: CB=CB|#4         bc:0 mop:- kk:4 st:--     jmp:1D1
+1D3: CB=CB&#11        bc:0 mop:- kk:B st:--     jmp:1D0 jh:S3 jl:S0
+1D4: --=T             bc:0 mop:- kk:0 st:--     sub:447
+1D5: CB=#2            bc:0 mop:- kk:2 st:--     jmp:1CE
+1D6: S=0              bc:0 mop:3 kk:6 st:S3=1   sub:6EE
+1D7: S=T&#2           bc:0 mop:- kk:2 st:--     jmp:1D4 jl:Z0
+1D8: S=0              bc:0 mop:- kk:0 st:--     sub:6DF
+1D9: S=0              bc:0 mop:6 kk:C st:--      
+1DA: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+1DB: CA=CA+sc,sc      bc:0 mop:3 kk:C st:--     jmp:02C
+1DC: T=#8             bc:0 mop:- kk:8 st:S0=0   sub:6EC
+1DD: S=0              bc:0 mop:6 kk:6 st:--      
+1DE: CA=T|CA          bc:0 mop:3 kk:6 st:--     sub:6DF
+1DF: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+1E0: CA=S&CA          bc:0 mop:3 kk:6 st:S2=0   jmp:1E4
+1E1: V=CB+1,sc        bc:1 mop:6 kk:E st:S1=1   jmp:1E1 jh:S3
+1E2: CB=CB^#8         bc:1 mop:- kk:8 st:S2=1   jmp:1E6 jl:SC
+1E3: U=CA+sc,sc       bc:1 mop:4 kk:0 st:S0=0   jmp:1E2 jl:S0
+1E4: S=CB&#1          bc:0 mop:- kk:1 st:--     jmp:1E8 jl:Z0
+1E5: V=0              bc:0 mop:2 kk:E st:--     jmp:6EE
+1E6: S=CA|CB          bc:0 mop:6 kk:6 st:--     jmp:1E4 jh:Z0 jl:Z0
+1E7: S=0              bc:0 mop:3 kk:7 st:--      
+1E8: CB=#8            bc:0 mop:- kk:8 st:--     jmp:1EA
+1E9: S=0              bc:0 mop:6 kk:7 st:--      
+1EA: CA=0             bc:0 mop:3 kk:7 st:--     sub:6DF
+1EB: CA=#3            bc:0 mop:- kk:3 st:--     jmp:564 jl:S2
+1EC: S=CA|CB          bc:0 mop:- kk:0 st:--     sub:1EE jl:Z0
+1ED: S=0              bc:0 mop:- kk:0 st:--     jmp:1D9
+1EE: S=0              bc:0 mop:- kk:0 st:--     jmp:48C
+1EF: S=0              bc:0 mop:- kk:0 st:--     jmp:6DF
+1F0: T=CB             bc:0 mop:- kk:0 st:--     sub:6DF
+1F1: S=0              bc:0 mop:- kk:0 st:--      
+1F2: S=0              bc:0 mop:- kk:0 st:--     sub:4BA
+1F3: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+1F4: S=0              bc:0 mop:6 kk:C st:--     sub:4DC
+1F5: S=0              bc:0 mop:3 kk:C st:--      
+1F6: S=0              bc:0 mop:- kk:0 st:--     sub:6DF
+1F7: CA=0             bc:0 mop:- kk:0 st:--     jmp:68A
+1F8: CA=0             bc:0 mop:3 kk:6 st:S=0    sub:6A5
+1F9: KA=#12           bc:0 mop:- kk:C st:--     jmp:68B
+1FA: S=0              bc:0 mop:7 kk:2 st:--     sub:341
+1FB: S=0              bc:0 mop:- kk:0 st:S=0    jmp:02C
+1FC: CB=0             bc:0 mop:3 kk:C st:S=0    sub:454
+1FD: S=0              bc:0 mop:7 kk:8 st:--     jmp:1FA
+1FE: S=0              bc:0 mop:8 kk:2 st:--     jmp:1FC
+1FF: S=KA&D           bc:0 mop:- kk:0 st:--     jmp:1FC jh:Z0
+200: S=0              bc:0 mop:- kk:0 st:--     jmp:55A
+201: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:200 jh:Z0
+202: S=0              bc:0 mop:6 kk:7 st:--     sub:5FE
+203: S=CA^#7          bc:1 mop:- kk:7 st:--      
+204: CA=0             bc:0 mop:3 kk:4 st:--     sub:341
+205: CA=#12           bc:0 mop:3 kk:C st:--     jmp:63A
+206: S=0              bc:0 mop:- kk:0 st:--     sub:341
+207: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+208: S=0              bc:0 mop:3 kk:8 st:--      
+209: CA=#3            bc:0 mop:- kk:3 st:--     jmp:20C
+20A: S=0              bc:0 mop:3 kk:7 st:--     sub:6DF
+20B: CA=0             bc:0 mop:3 kk:4 st:S=0    jmp:56C
+20C: CB=CA+1          bc:1 mop:3 kk:7 st:--     sub:6DF
+20D: S=0              bc:0 mop:- kk:0 st:--      
+20E: S=0              bc:0 mop:- kk:0 st:--     sub:341
+20F: S=0              bc:0 mop:6 kk:8 st:--     jmp:20A
+210: KA=CA            bc:0 mop:3 kk:9 st:--     jmp:68C
+211: KB=CB            bc:0 mop:6 kk:7 st:S=0    jmp:68D
+212: S=0              bc:0 mop:- kk:0 st:--     sub:009
+213: S=0              bc:0 mop:- kk:0 st:--     jmp:56E
+214: CB=KB+1,sc       bc:0 mop:- kk:0 st:--     jmp:24D
+215: S=CB^#3          bc:1 mop:- kk:3 st:S2=0   jmp:21C jl:Z0
+216: KA=U+CA+sc,sc    bc:1 mop:6 kk:0 st:--     jmp:671 jh:CC
+217: S=CB^#3          bc:1 mop:- kk:3 st:S2=1   jmp:21C jl:Z0
+218: S=CB^#2          bc:1 mop:- kk:2 st:--     jmp:21A jl:Z0
+219: --=S|CA          bc:0 mop:- kk:0 st:--     jmp:218
+21A: S=0              bc:0 mop:- kk:0 st:--     jmp:215 jh:S1
+21B: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:226 jl:Z0
+21C: S=CB^#8          bc:1 mop:- kk:8 st:--     jmp:21E jl:Z0
+21D: CB=KB+1,sc       bc:0 mop:- kk:0 st:--     jmp:22C jh:S3 jl:S0
+21E: S=CB^#10         bc:1 mop:- kk:A st:--     jmp:220 jl:Z0
+21F: S=0              bc:0 mop:6 kk:4 st:--     jmp:230 jh:S3 jl:S0
+220: S=CB^#11         bc:1 mop:- kk:B st:--     jmp:222 jl:Z0
+221: S=0              bc:0 mop:6 kk:4 st:--     jmp:234 jh:S3 jl:S0
+222: CB=KB+1,sc       bc:0 mop:- kk:0 st:--     jmp:228
+223: CB=KB            bc:0 mop:- kk:0 st:S0=0   jmp:238 jh:S3 jl:S0
+224: CB=CB+1,sc       bc:0 mop:- kk:0 st:S2=1    
+225: CA=CA+sc,sc      bc:0 mop:3 kk:B st:--     jmp:214
+226: U=#9+1           bc:0 mop:6 kk:9 st:S=0    jmp:241 jh:S1
+227: CB=KB+1,sc       bc:0 mop:- kk:0 st:--      
+228: CA=KA+sc,sc      bc:0 mop:3 kk:9 st:--     jmp:23F
+229: CB=KB+1,sc       bc:1 mop:- kk:0 st:--     jmp:22D
+22A: CB=KB            bc:0 mop:- kk:0 st:--     jmp:23C
+22B: V=1              bc:1 mop:6 kk:4 st:--     jmp:7DB
+22C: CA=KA+sc,sc      bc:0 mop:- kk:0 st:--     jmp:23D
+22D: CA=KA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:23E jl:CC
+22E: S=0              bc:0 mop:- kk:0 st:--     jmp:22A
+22F: T=T+1            bc:0 mop:6 kk:4 st:S=0    jmp:24C jh:S1 jl:S2
+230: S=0              bc:0 mop:- kk:0 st:--     jmp:222
+231: CA=CA&#14        bc:0 mop:- kk:E st:--     jmp:233
+232: T=#14            bc:0 mop:- kk:E st:S0=1   jmp:239
+233: KA=D             bc:0 mop:- kk:0 st:S0=0   jmp:245 jh:S1
+234: CA=CA&#12        bc:0 mop:- kk:C st:--     jmp:246 jl:S2
+235: S=0              bc:0 mop:- kk:0 st:--     jmp:248 jh:S1 jl:S2
+236: S=0              bc:0 mop:- kk:0 st:--     jmp:239
+237: CA=CA&#2         bc:0 mop:- kk:2 st:S=0    jmp:24A jl:S2
+238: CA=KA            bc:0 mop:3 kk:9 st:--     jmp:23F
+239: T=#14            bc:0 mop:- kk:E st:--     jmp:244 jh:S1 jl:S2
+23A: S=0              bc:0 mop:- kk:0 st:--     jmp:572
+23B: S=S&#8           bc:0 mop:- kk:8 st:--     jmp:238 jh:Z0 jl:S2
+23C: CA=KA            bc:0 mop:- kk:0 st:S2=1   sub:4DC
+23D: S=T&#9           bc:0 mop:- kk:9 st:S0=!Z0 jmp:639 jh:S1
+23E: S=0              bc:0 mop:3 kk:9 st:--      
+23F: S=S&#8           bc:0 mop:- kk:8 st:--     jmp:30E jl:Z0
+240: S=0              bc:0 mop:3 kk:8 st:--     jmp:26C
+241: --=U             bc:0 mop:6 kk:4 st:--     jmp:262
+242: S=0              bc:0 mop:6 kk:9 st:--      
+243: U=CA             bc:0 mop:3 kk:9 st:S0=0   jmp:4F8 jh:S1 jl:S2
+244: KA=#8            bc:0 mop:- kk:8 st:--     jmp:252
+245: KA=KA&#8         bc:0 mop:3 kk:8 st:S0=0   jmp:7F0
+246: S=#2             bc:0 mop:7 kk:2 st:--     jmp:574
+247: S=0              bc:0 mop:6 kk:9 st:S2=0   jmp:243
+248: S=0              bc:0 mop:- kk:0 st:--     jmp:270
+249: S=CA+#12         bc:1 mop:5 kk:C st:--     jmp:268 jh:CC
+24A: S=CA             bc:0 mop:6 kk:5 st:S1=1   jmp:576 jl:Z0
+24B: S=0              bc:0 mop:6 kk:9 st:S2=0   jmp:243
+24C: CA=CA&#7         bc:0 mop:- kk:7 st:--     jmp:00E
+24D: CA=KA+sc,sc      bc:0 mop:3 kk:9 st:S3=0    
+24E: S=0              bc:0 mop:3 kk:8 st:--     jmp:00C
+24F: S=0              bc:0 mop:6 kk:9 st:--     jmp:243
+250: CB=S|CB          bc:0 mop:3 kk:5 st:S=0    jmp:188
+251: S=CB             bc:0 mop:6 kk:D st:--     jmp:7CC jh:Z0
+252: V=0              bc:0 mop:6 kk:4 st:--     sub:25F
+253: KA=KA^D          bc:1 mop:5 kk:E st:--     jmp:7EC jl:S0
+254: S=CA+CA,sc       bc:0 mop:5 kk:E st:S0=1   jmp:254 jl:S0
+255: KA=sc,sc         bc:0 mop:6 kk:E st:--     jmp:7F9
+256: U=#4             bc:0 mop:- kk:4 st:--     sub:5C0
+257: S=0              bc:0 mop:6 kk:F st:S=0    jmp:7D4
+258: CA=0             bc:0 mop:3 kk:4 st:--     sub:701
+259: S=0              bc:0 mop:3 kk:F st:--     jmp:33C
+25A: CA=#2+1          bc:0 mop:3 kk:2 st:--     sub:701
+25B: S=CA|CB          bc:0 mop:6 kk:2 st:--      
+25C: CB=CA            bc:0 mop:3 kk:7 st:--     sub:6DF
+25D: S=0              bc:0 mop:- kk:0 st:S=0    jmp:56F
+25E: S=0              bc:0 mop:6 kk:E st:--     ret
+25F: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:258 jh:Z0
+260: CA=CA&#12        bc:0 mop:- kk:C st:S=0     
+261: CA=S|CA          bc:0 mop:3 kk:5 st:S=0    jmp:7A0
+262: S=S&CA           bc:0 mop:6 kk:E st:S1=Z0   
+263: CB=CB+1,sc       bc:1 mop:- kk:0 st:--      
+264: CA=CA+sc,sc      bc:1 mop:3 kk:E st:--     sub:6E7
+265: S=0              bc:0 mop:6 kk:4 st:--     jmp:68E
+266: S=0              bc:0 mop:- kk:0 st:--     sub:692
+267: --=#0            bc:0 mop:- kk:0 st:--     jmp:32C
+268: S=0              bc:0 mop:- kk:0 st:S2=1   jmp:691
+269: CB=CA+1          bc:1 mop:3 kk:7 st:S2=1   jmp:330
+26A: S=0              bc:0 mop:- kk:0 st:--     sub:692
+26B: CA=#3            bc:0 mop:- kk:3 st:S=0    jmp:269
+26C: S=0              bc:0 mop:6 kk:C st:--      
+26D: S=CA|CB          bc:0 mop:- kk:0 st:--      
+26E: S=0              bc:0 mop:- kk:0 st:S=0    jmp:330
+26F: S=0              bc:0 mop:- kk:0 st:S=0    jmp:00D
+270: --=#4+1          bc:1 mop:6 kk:4 st:--     sub:25F
+271: S=0              bc:0 mop:6 kk:E st:--      
+272: CB=1             bc:0 mop:3 kk:E st:S=0    sub:4EC
+273: S=0              bc:0 mop:- kk:0 st:--     jmp:277
+274: T=#8,sc          bc:0 mop:- kk:8 st:--     jmp:278 jh:S3
+275: T=T+1            bc:1 mop:- kk:0 st:S=0    jmp:278 jh:Z0 jl:Z0
+276: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+277: S=S+#12,sc       bc:0 mop:- kk:C st:--     jmp:274 jh:CC
+278: KB=KB+KB+sc,sc   bc:0 mop:- kk:0 st:--      
+279: KA=KA+KA+sc,sc   bc:0 mop:- kk:0 st:--     jmp:275
+27A: S=0              bc:0 mop:- kk:0 st:--     jmp:27E
+27B: V=KB             bc:0 mop:- kk:0 st:--     jmp:57A
+27C: CB=#3            bc:0 mop:- kk:3 st:S3=1   sub:6C5
+27D: V=V+1,sc         bc:1 mop:- kk:0 st:S=0    jmp:57B
+27E: S=0              bc:0 mop:- kk:0 st:S2=1   sub:6EF
+27F: S=0              bc:0 mop:- kk:0 st:--      
+280: S=0              bc:0 mop:- kk:0 st:--     sub:6F1
+281: S=0              bc:0 mop:- kk:0 st:--      
+282: CA=#12           bc:0 mop:3 kk:C st:--     sub:628
+283: S=0              bc:0 mop:6 kk:E st:--     jmp:7D4
+284: CA=CA&#7         bc:0 mop:- kk:7 st:--      
+285: S=CA^#5          bc:1 mop:- kk:5 st:S=0    jmp:288 jh:Z0
+286: V=CB+1,sc        bc:1 mop:- kk:0 st:S=0    jmp:57C
+287: S=0              bc:0 mop:- kk:0 st:S=0    jmp:330
+288: S=0              bc:0 mop:6 kk:4 st:S3=1   jmp:2A1
+289: KA=#3            bc:0 mop:4 kk:3 st:--     jmp:293
+28A: S=0              bc:0 mop:- kk:0 st:S=0    sub:6FD
+28B: S=0              bc:0 mop:6 kk:E st:--      
+28C: S=S&#1           bc:0 mop:- kk:1 st:--     jmp:294 jh:Z0
+28D: V=CB             bc:0 mop:- kk:0 st:--     jmp:289
+28E: U=CA             bc:0 mop:- kk:0 st:--     sub:28D
+28F: CA=KA|KB         bc:0 mop:- kk:0 st:--      
+290: S=0              bc:0 mop:- kk:0 st:--     sub:6A4
+291: CA=0             bc:0 mop:- kk:0 st:--      
+292: CB=0             bc:0 mop:3 kk:7 st:S=0    jmp:288
+293: KB=KA            bc:0 mop:- kk:0 st:--     jmp:6EA
+294: S=0              bc:0 mop:- kk:0 st:S=0    sub:4EC
+295: S=S&#2           bc:0 mop:- kk:2 st:--     jmp:29A jl:Z0
+296: S=0              bc:0 mop:- kk:0 st:S=0    sub:4EC
+297: S=S&#2           bc:0 mop:- kk:2 st:--      
+298: CA=0             bc:0 mop:3 kk:4 st:--     sub:2CC
+299: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+29A: S=0              bc:0 mop:6 kk:E st:--     jmp:28E
+29B: S=0              bc:0 mop:6 kk:E st:S=0     
+29C: U=CA             bc:0 mop:- kk:0 st:S3=1   sub:28D
+29D: S=KA|KB          bc:0 mop:6 kk:4 st:S0=0    
+29E: S=S&CA           bc:0 mop:6 kk:E st:--     jmp:2A0 jh:Z0 jl:Z0
+29F: S=0              bc:0 mop:6 kk:E st:--     jmp:2A4
+2A0: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:2A2
+2A1: S=S&CA           bc:0 mop:6 kk:E st:--     jmp:286 jl:Z0
+2A2: CA=CA+sc,sc      bc:1 mop:3 kk:E st:S=0    sub:6E7
+2A3: S=0              bc:0 mop:- kk:0 st:--     jmp:56E
+2A4: S=0              bc:0 mop:- kk:0 st:S=0    sub:009
+2A5: S=0              bc:0 mop:6 kk:E st:S=0     
+2A6: CB=CB+1,sc       bc:0 mop:- kk:0 st:S2=1   sub:4ED
+2A7: CA=S^#12         bc:1 mop:- kk:C st:--      
+2A8: CA=0             bc:0 mop:- kk:0 st:--      
+2A9: CB=0             bc:0 mop:3 kk:7 st:--     jmp:288
+2AA: CB=CA            bc:0 mop:3 kk:7 st:--     sub:6E7
+2AB: S=0              bc:0 mop:- kk:0 st:--     jmp:00C
+2AC: S=0              bc:0 mop:- kk:0 st:--     jmp:330
+2AD: S=CA+CA          bc:0 mop:6 kk:C st:S=0    jmp:7E4 jh:CC
+2AE: CA=S             bc:0 mop:2 kk:E st:--     sub:6FD
+2AF: S=0              bc:0 mop:6 kk:E st:--     jmp:2C4
+2B0: S=0              bc:0 mop:- kk:0 st:--     jmp:2B6
+2B1: S=0              bc:0 mop:- kk:0 st:--     jmp:2B4
+2B2: CA=CA+sc,sc      bc:1 mop:3 kk:E st:S=0    sub:6A4
+2B3: S=0              bc:0 mop:- kk:0 st:--     jmp:56E
+2B4: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+2B5: S=S&#2           bc:0 mop:- kk:2 st:S0=1   jmp:2B8 jh:Z0 jl:Z0
+2B6: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+2B7: S=S&#2           bc:0 mop:- kk:2 st:S0=1   jmp:2B9 jh:Z0
+2B8: S=0              bc:0 mop:6 kk:E st:S=0    jmp:2BC
+2B9: S=0              bc:0 mop:6 kk:4 st:S0=1   jmp:2CA
+2BA: --=CA            bc:0 mop:- kk:0 st:--     jmp:330
+2BB: V=1              bc:1 mop:5 kk:E st:S0=0   jmp:2BA jl:S0
+2BC: V=CB+1,sc        bc:1 mop:- kk:0 st:--      
+2BD: S=V|CA           bc:0 mop:- kk:0 st:--     jmp:2C2 jl:Z0
+2BE: CB=CB^#3         bc:1 mop:- kk:3 st:--      
+2BF: S=CA|CB          bc:0 mop:4 kk:0 st:--     jmp:2C6 jl:Z0
+2C0: U=U+sc,sc        bc:1 mop:- kk:0 st:--      
+2C1: S=0              bc:0 mop:4 kk:0 st:--     jmp:2BE
+2C2: U=CA+sc,sc       bc:1 mop:- kk:0 st:--     jmp:2C7
+2C3: V=1              bc:1 mop:6 kk:4 st:--     jmp:2AD
+2C4: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:2B0 jh:S3 jl:S0
+2C5: CB=CB^#3         bc:1 mop:- kk:3 st:--     jmp:2C8
+2C6: CB=CB&#14        bc:0 mop:- kk:E st:--     jmp:2C5
+2C7: V=V+1,sc         bc:1 mop:- kk:0 st:--     jmp:2C0
+2C8: CA=CA^#3         bc:1 mop:- kk:3 st:S=0     
+2C9: S=CA|CB          bc:0 mop:6 kk:E st:S1=1   jmp:2C4 jh:Z0 jl:Z0
+2CA: CA=0             bc:0 mop:3 kk:4 st:--     sub:2CC
+2CB: S=0              bc:0 mop:- kk:0 st:--     jmp:331
+2CC: S=0              bc:0 mop:6 kk:6 st:--      
+2CD: CA=CA|#2         bc:0 mop:8 kk:2 st:--      
+2CE: S=0              bc:0 mop:3 kk:6 st:--      
+2CF: S=#8             bc:0 mop:7 kk:8 st:--     ret
+2D0: S=0              bc:0 mop:- kk:0 st:--     jmp:2D4
+2D1: S=CA|KB          bc:0 mop:- kk:0 st:--     jmp:2D0 jh:Z0
+2D2: S=0              bc:0 mop:6 kk:4 st:--     jmp:2E7
+2D3: KB=CB+1          bc:1 mop:6 kk:E st:S1=0   jmp:2D1 jh:S3
+2D4: S=0              bc:0 mop:- kk:0 st:--     sub:6FD
+2D5: --=1             bc:0 mop:6 kk:5 st:--     jmp:2D8 jh:S3 jl:S0
+2D6: S=0              bc:0 mop:- kk:0 st:S3=1   sub:6F9
+2D7: --=1             bc:0 mop:6 kk:5 st:--     jmp:2E4 jh:S3
+2D8: CB=S|CB          bc:0 mop:3 kk:5 st:S=0    jmp:2DC
+2D9: CB=CB&#14        bc:0 mop:- kk:E st:S=0    jmp:2D8
+2DA: S=0              bc:0 mop:6 kk:4 st:--     jmp:2E7
+2DB: S=0              bc:0 mop:- kk:0 st:--     jmp:2D6
+2DC: KA=CA            bc:0 mop:6 kk:E st:S1=1   jmp:2DC jh:S3
+2DD: CB=CA            bc:0 mop:3 kk:7 st:S1=1   jmp:330
+2DE: KB=CB            bc:0 mop:6 kk:F st:--     sub:6EA
+2DF: S=0              bc:0 mop:- kk:0 st:--      
+2E0: S=0              bc:0 mop:- kk:0 st:--     sub:009
+2E1: S=0              bc:0 mop:- kk:0 st:--      
+2E2: S=0              bc:0 mop:- kk:0 st:S2=1   sub:4EC
+2E3: S=S^#12          bc:1 mop:- kk:C st:--     jmp:2DA jl:Z0
+2E4: S=0              bc:0 mop:- kk:0 st:--     sub:5C2
+2E5: S=0              bc:0 mop:- kk:0 st:--     jmp:56E
+2E6: S=S&CB           bc:0 mop:6 kk:4 st:--     jmp:2E4 jh:Z0 jl:Z0
+2E7: S=CA&#8          bc:0 mop:- kk:8 st:--      
+2E8: S=0              bc:0 mop:- kk:0 st:--     sub:6FD
+2E9: S=S&#2           bc:0 mop:- kk:2 st:S=0    jmp:2EE jl:Z0
+2EA: S=0              bc:0 mop:- kk:0 st:--     sub:692
+2EB: --=1             bc:0 mop:6 kk:6 st:--      
+2EC: CA=S&CA          bc:0 mop:3 kk:6 st:S=0     
+2ED: CA=#3            bc:0 mop:- kk:3 st:S=0    jmp:2DD
+2EE: S=0              bc:0 mop:- kk:0 st:S1=1   jmp:691
+2EF: S=0              bc:0 mop:- kk:0 st:--     jmp:00F
+2F0: CB=KB            bc:0 mop:3 kk:8 st:--      
+2F1: CA=0             bc:0 mop:- kk:0 st:--      
+2F2: CB=0             bc:0 mop:3 kk:E st:--     sub:68F
+2F3: S=0              bc:0 mop:3 kk:D st:--      
+2F4: S=0              bc:0 mop:2 kk:E st:S=0    sub:4EC
+2F5: S=0              bc:0 mop:6 kk:B st:--     jmp:2F8 jh:S1 jl:S2
+2F6: S=0              bc:0 mop:2 kk:E st:S=0    sub:4F0
+2F7: S=0              bc:0 mop:6 kk:B st:--      
+2F8: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:690
+2F9: U=CA             bc:0 mop:- kk:0 st:--     jmp:2FB
+2FA: V=#3             bc:0 mop:- kk:3 st:--     jmp:4CE
+2FB: V=CB             bc:0 mop:- kk:0 st:--      
+2FC: KA=#2            bc:0 mop:4 kk:2 st:--     sub:68F
+2FD: CB=CB&#14        bc:0 mop:- kk:E st:--      
+2FE: KB=#2            bc:0 mop:- kk:2 st:--     sub:6EA
+2FF: S=0              bc:0 mop:5 kk:E st:--     jmp:302 jl:S0
+300: S=0              bc:0 mop:5 kk:E st:--      
+301: S=0              bc:0 mop:2 kk:E st:--     jmp:2F6
+302: S=0              bc:0 mop:6 kk:E st:--     jmp:301
+303: S=CA|CB          bc:0 mop:6 kk:B st:--     jmp:300 jl:Z0
+304: S=0              bc:0 mop:3 kk:B st:S2=1   sub:4F0
+305: V=S&#12          bc:0 mop:- kk:C st:S=0     
+306: S=0              bc:0 mop:5 kk:E st:--      
+307: S=V^#12          bc:1 mop:- kk:C st:S0=1   jmp:30A jl:Z0
+308: CB=#3            bc:0 mop:- kk:3 st:--      
+309: CA=0             bc:0 mop:3 kk:7 st:--     jmp:580
+30A: --=S+1           bc:0 mop:6 kk:E st:--     jmp:32A
+30B: S=CA|CB          bc:0 mop:3 kk:B st:S1=1   jmp:308 jh:Z0
+30C: S=0              bc:0 mop:8 kk:2 st:--     jmp:02C
+30D: S=0              bc:0 mop:- kk:0 st:--     jmp:202
+30E: T=T|#9           bc:0 mop:6 kk:9 st:S2=1   jmp:240 jh:S1 jl:S2
+30F: T=T|#9           bc:0 mop:6 kk:9 st:S3=1   jmp:240 jh:S1 jl:S2
+310: S=0              bc:0 mop:3 kk:A st:--     sub:6EF
+311: S=0              bc:0 mop:6 kk:E st:--      
+312: S=0              bc:0 mop:3 kk:F st:--     sub:6F1
+313: CA=0             bc:0 mop:- kk:0 st:--      
+314: CB=0             bc:0 mop:3 kk:E st:--     sub:628
+315: S=0              bc:0 mop:6 kk:A st:--      
+316: S=0              bc:0 mop:3 kk:F st:--     sub:692
+317: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+318: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+319: U=#14            bc:0 mop:6 kk:E st:--      
+31A: V=#12            bc:0 mop:- kk:C st:--     jmp:31E
+31B: CB=CB+1,sc       bc:1 mop:3 kk:E st:--     jmp:31D jh:CC
+31C: S=0              bc:0 mop:3 kk:B st:S2=1   jmp:319
+31D: S=0              bc:0 mop:- kk:0 st:--     jmp:318
+31E: S=0              bc:0 mop:4 kk:0 st:--     jmp:31C
+31F: S=0              bc:0 mop:6 kk:B st:--     jmp:321
+320: S=0              bc:0 mop:3 kk:E st:S=0    sub:6DF
+321: S=0              bc:0 mop:6 kk:8 st:--      
+322: CB=CB+1,sc       bc:1 mop:- kk:0 st:S=0     
+323: CA=CA+sc,sc      bc:1 mop:3 kk:8 st:S1=1    
+324: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+325: V=#11+1          bc:0 mop:6 kk:B st:--     jmp:582 jl:S2
+326: S=0              bc:0 mop:- kk:0 st:S=0    sub:4F0
+327: S=0              bc:0 mop:6 kk:B st:S0=0    
+328: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+329: CA=CA+sc,sc      bc:0 mop:3 kk:B st:S1=1    
+32A: S=0              bc:0 mop:3 kk:E st:S3=0   jmp:691
+32B: S=0              bc:0 mop:- kk:0 st:--     jmp:326
+32C: S=0              bc:0 mop:- kk:0 st:--     sub:6EF
+32D: S=0              bc:0 mop:- kk:0 st:--      
+32E: S=0              bc:0 mop:- kk:0 st:--     sub:6F1
+32F: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+330: S=0              bc:0 mop:- kk:0 st:--     sub:6EF
+331: S=0              bc:0 mop:6 kk:4 st:S=0    jmp:335
+332: S=0              bc:0 mop:6 kk:E st:--     jmp:33F
+333: S=S&CA           bc:0 mop:6 kk:8 st:--      
+334: S=0              bc:0 mop:3 kk:C st:--     jmp:56E
+335: S=CA&#2          bc:0 mop:- kk:2 st:S3=1   jmp:332 jl:Z0
+336: S=0              bc:0 mop:3 kk:C st:--     sub:6F1
+337: S=0              bc:0 mop:- kk:0 st:--     jmp:584
+338: CA=CA+sc,sc      bc:1 mop:3 kk:E st:--     sub:6E7
+339: S=0              bc:0 mop:- kk:0 st:--      
+33A: S=0              bc:0 mop:- kk:0 st:--     sub:6F1
+33B: S=0              bc:0 mop:- kk:0 st:--      
+33C: S=#1             bc:0 mop:8 kk:1 st:--     sub:6C2
+33D: S=0              bc:0 mop:8 kk:1 st:!ZK    jmp:02C
+33E: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+33F: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:338
+340: V=0              bc:0 mop:4 kk:0 st:S3=1   jmp:340 jh:S1
+341: U=0              bc:0 mop:- kk:0 st:S=0    jmp:340
+342: S=CA^#2          bc:1 mop:- kk:2 st:--     jmp:348 jh:Z0
+343: V=CB+1,sc        bc:1 mop:3 kk:E st:--     jmp:34B
+344: V=V+1,sc         bc:1 mop:4 kk:0 st:--     jmp:346
+345: S=CA|CB          bc:0 mop:4 kk:0 st:--     jmp:588 jl:Z0
+346: U=U+sc,sc        bc:1 mop:3 kk:2 st:--     jmp:345 jh:CC
+347: --=1             bc:0 mop:6 kk:6 st:--     jmp:349
+348: S=0              bc:0 mop:6 kk:E st:--     jmp:343
+349: S=S&CB           bc:0 mop:- kk:0 st:--     jmp:368 jl:Z0
+34A: S=S^CB           bc:1 mop:6 kk:6 st:S=0    jmp:348 jl:Z0
+34B: U=CA+sc,sc       bc:1 mop:- kk:0 st:--     jmp:344 jh:CC jl:CC
+34C: S=CB^#3          bc:1 mop:4 kk:3 st:--     jmp:34E jl:Z0
+34D: S=0              bc:0 mop:6 kk:E st:--     jmp:364
+34E: S=CB^#2          bc:1 mop:- kk:2 st:--     jmp:350 jl:Z0
+34F: V=V+1,sc         bc:0 mop:- kk:0 st:S=0    jmp:58A
+350: S=0              bc:0 mop:- kk:0 st:--     jmp:344
+351: V=V+1,sc         bc:0 mop:- kk:0 st:S=0    jmp:58A
+352: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:358 jl:Z0
+353: S=CA^#7          bc:1 mop:- kk:7 st:--      
+354: S=CA^#1          bc:1 mop:- kk:1 st:--      
+355: S=0              bc:0 mop:- kk:0 st:--     jmp:359
+356: S=0              bc:0 mop:- kk:0 st:--     jmp:344
+357: S=0              bc:0 mop:4 kk:0 st:--     jmp:35C
+358: S=0              bc:0 mop:- kk:0 st:--     jmp:344
+359: --=CA            bc:0 mop:4 kk:0 st:--     jmp:35D
+35A: CA=CA&#14        bc:0 mop:- kk:E st:--     jmp:361
+35B: CB=#8            bc:0 mop:1 kk:8 st:--     jmp:344
+35C: CA=CA|CB         bc:0 mop:- kk:0 st:--     jmp:358 jh:Z0 jl:Z0
+35D: KB=CB&#14        bc:0 mop:4 kk:E st:--     jmp:35C jh:S3 jl:S0
+35E: CB=KB^#2         bc:1 mop:- kk:2 st:--     jmp:35A
+35F: S=KB^#2          bc:1 mop:- kk:2 st:--      
+360: S=0              bc:0 mop:- kk:0 st:--     jmp:344
+361: S=CA|CB          bc:0 mop:4 kk:0 st:--      
+362: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:358 jh:Z0 jl:Z0
+363: S=0              bc:0 mop:6 kk:E st:--      
+364: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:694
+365: CB=V,sc          bc:0 mop:- kk:0 st:--      
+366: CA=U+sc,sc       bc:0 mop:3 kk:E st:--     sub:6E7
+367: S=0              bc:0 mop:6 kk:B st:--     jmp:343
+368: U=0              bc:0 mop:6 kk:E st:--     jmp:36A
+369: S=0              bc:0 mop:- kk:0 st:--     jmp:008
+36A: V=0              bc:0 mop:3 kk:B st:--     jmp:373
+36B: CB=V             bc:0 mop:3 kk:E st:--     jmp:7DA
+36C: KA=U             bc:0 mop:6 kk:B st:S=0    sub:6EA
+36D: V=V+1,sc         bc:0 mop:4 kk:0 st:--      
+36E: S=0              bc:0 mop:6 kk:B st:--     jmp:385
+36F: KA=#2            bc:0 mop:- kk:2 st:--      
+370: KB=KA            bc:0 mop:- kk:0 st:--     sub:6EA
+371: U=U+sc,sc        bc:0 mop:- kk:0 st:--      
+372: CA=U             bc:0 mop:- kk:0 st:--     jmp:36B
+373: KB=V             bc:0 mop:- kk:0 st:--     jmp:36C
+374: KA=U             bc:0 mop:6 kk:B st:S=0    sub:6EA
+375: KA=#2            bc:0 mop:4 kk:2 st:--      
+376: S=1,sc           bc:1 mop:6 kk:E st:--     jmp:7D9
+377: CB=CB&#14        bc:0 mop:- kk:E st:S=0     
+378: KB=#2            bc:0 mop:- kk:2 st:--     sub:6EA
+379: KA=1,sc          bc:0 mop:- kk:0 st:S2=1   jmp:37C jl:S0
+37A: CA=CA&#11        bc:0 mop:- kk:B st:--     sub:6EA
+37B: KA=#11           bc:0 mop:- kk:B st:--     jmp:37E jl:S0
+37C: S=CA^CB          bc:1 mop:6 kk:E st:--     jmp:7D8 jl:Z0
+37D: KB=#6            bc:0 mop:4 kk:6 st:S3=1   jmp:378 jh:S1
+37E: S=0,sc           bc:0 mop:6 kk:E st:--     jmp:7D9
+37F: S=0              bc:0 mop:- kk:0 st:S=0    jmp:58C jl:S2
+380: S=0              bc:0 mop:- kk:0 st:--     jmp:373
+381: CA=U+CA+sc,sc    bc:1 mop:3 kk:A st:--     jmp:380 jh:Z0 jl:Z0
+382: S=0              bc:0 mop:6 kk:B st:--     jmp:385
+383: CB=CB+1          bc:1 mop:3 kk:A st:--     jmp:388 jl:CC
+384: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:386
+385: S=0              bc:0 mop:3 kk:E st:--     jmp:008
+386: CA=CA+sc,sc      bc:0 mop:3 kk:B st:--     jmp:58E
+387: U=U+sc,sc        bc:0 mop:- kk:0 st:--     jmp:7DA
+388: CB=#2            bc:0 mop:- kk:2 st:--     jmp:38A
+389: S=0              bc:0 mop:- kk:0 st:--     jmp:373
+38A: CA=1             bc:0 mop:3 kk:7 st:S=0    sub:4AC
+38B: KB=#11+1         bc:1 mop:6 kk:B st:--     jmp:384 jl:S2
+38C: S=0              bc:0 mop:6 kk:5 st:--     jmp:695
+38D: S=0              bc:0 mop:- kk:0 st:--      
+38E: S=0              bc:0 mop:3 kk:5 st:S0=1   jmp:6BA
+38F: CA=CA|#1         bc:0 mop:- kk:1 st:--     jmp:38E
+390: V=#4             bc:0 mop:- kk:4 st:S2=0   sub:6BD
+391: S=KA+1           bc:1 mop:- kk:0 st:S=0     
+392: T=#1             bc:0 mop:- kk:1 st:--     jmp:5CD
+393: CA=#15           bc:0 mop:- kk:F st:--      
+394: CB=CA            bc:0 mop:3 kk:B st:--     sub:6BF
+395: V=V+1            bc:1 mop:6 kk:B st:--     jmp:394 jh:CC jl:CC
+396: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+397: CA=0             bc:0 mop:3 kk:A st:S1=1   jmp:542
+398: S=0              bc:0 mop:B kk:0 st:--     jmp:5A0
+399: V=#6             bc:0 mop:- kk:6 st:--     jmp:5A0
+39A: S=0              bc:0 mop:- kk:0 st:--     sub:6BB
+39B: V=#14            bc:0 mop:- kk:E st:--     jmp:5A2
+39C: CA=S             bc:0 mop:2 kk:E st:--     sub:414
+39D: S=CA&#2          bc:0 mop:- kk:2 st:S0=!Z0 jmp:5BE
+39E: --=#2            bc:0 mop:- kk:2 st:--     jmp:6BA
+39F: CA=U+#6+sc,sc    bc:0 mop:- kk:6 st:--     jmp:5AC
+3A0: S=0              bc:0 mop:- kk:0 st:--     sub:6A7
+3A1: S=0              bc:0 mop:5 kk:E st:--     jmp:3A4 jh:S1
+3A2: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+3A3: S=0              bc:0 mop:- kk:0 st:S1=1   jmp:39C jh:S3
+3A4: V=#14            bc:0 mop:- kk:E st:S=0    jmp:680
+3A5: V=#2             bc:0 mop:- kk:2 st:--     jmp:3A8
+3A6: CA=CA+1          bc:1 mop:2 kk:E st:--     jmp:3A5 jh:CC
+3A7: S=0              bc:0 mop:6 kk:F st:S=0    jmp:3AB
+3A8: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+3A9: V=V+1            bc:1 mop:- kk:0 st:--     jmp:3A8 jh:CC
+3AA: S=0              bc:0 mop:6 kk:5 st:--     jmp:6A0
+3AB: U=CA             bc:0 mop:- kk:0 st:S2=1   jmp:5AA
+3AC: CB=S|CB          bc:0 mop:3 kk:5 st:--     sub:6C2
+3AD: S=0              bc:0 mop:- kk:0 st:--      
+3AE: S=0              bc:0 mop:- kk:0 st:S=0    sub:5D3
+3AF: S=CA&#1          bc:0 mop:- kk:1 st:S=0    jmp:5B6 jl:Z0
+3B0: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+3B1: V=V+1            bc:1 mop:6 kk:5 st:S=0    jmp:3B0 jh:CC
+3B2: S=CA&#1          bc:0 mop:- kk:1 st:S1=1   jmp:5BC jl:Z0
+3B3: V=#5             bc:0 mop:- kk:5 st:--      
+3B4: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+3B5: V=V+1            bc:1 mop:- kk:0 st:S=0    jmp:3B4 jh:CC
+3B6: S=0              bc:0 mop:- kk:0 st:S=0    sub:5D3
+3B7: S=0              bc:0 mop:6 kk:5 st:--     jmp:717
+3B8: CA=CA+1          bc:0 mop:D kk:F st:--     jmp:6A2
+3B9: CA=CA+1          bc:0 mop:D kk:D st:--     jmp:6A2
+3BA: S=0              bc:0 mop:D kk:E st:--     jmp:6A2
+3BB: S=0              bc:0 mop:D kk:C st:--     jmp:6A2
+3BC: S=0              bc:0 mop:- kk:0 st:S2=0   sub:6BD
+3BD: S=KA+1           bc:1 mop:- kk:0 st:--     jmp:3BC jh:Z0
+3BE: S=0              bc:0 mop:- kk:0 st:--     sub:6BB
+3BF: T=#3             bc:0 mop:- kk:3 st:--     jmp:3C1
+3C0: S=0              bc:0 mop:- kk:0 st:--     sub:6C2
+3C1: T=T+1            bc:1 mop:- kk:0 st:--     jmp:3C0 jh:CC
+3C2: S=0              bc:0 mop:6 kk:B st:S=0    jmp:417
+3C3: U=U              bc:0 mop:- kk:0 st:--     jmp:3B8 jh:S3 jl:Z0
+3C4: CA=#12           bc:0 mop:3 kk:C st:--     sub:6D9
+3C5: S=0              bc:0 mop:- kk:0 st:--      
+3C6: S=0              bc:0 mop:- kk:0 st:--     sub:6DC
+3C7: S=0              bc:0 mop:6 kk:7 st:--      
+3C8: S=0              bc:0 mop:- kk:0 st:--     jmp:3C4
+3C9: CB=CB&#14        bc:0 mop:- kk:E st:--     jmp:6A3
+3CA: V=1              bc:1 mop:6 kk:7 st:--     ret
+3CB: S=CA^#3          bc:1 mop:- kk:3 st:--      
+3CC: CA=CA^#8         bc:1 mop:- kk:8 st:--      
+3CD: CA=CA+#15        bc:0 mop:- kk:F st:--      
+3CE: CA=0             bc:0 mop:3 kk:C st:S=0    sub:454
+3CF: CA=#12           bc:0 mop:3 kk:C st:S=0    jmp:3CA
+3D0: S=0              bc:0 mop:- kk:0 st:--     sub:6DF
+3D1: T=T+1            bc:1 mop:6 kk:C st:S0=0   jmp:3D0 jh:CC
+3D2: S=0              bc:0 mop:3 kk:8 st:--     jmp:3D5
+3D3: --=CA+CA         bc:0 mop:- kk:0 st:--     jmp:3D1
+3D4: S=0              bc:0 mop:- kk:0 st:--     sub:701
+3D5: --=S+#2          bc:1 mop:- kk:2 st:--     jmp:3D4 jh:CC
+3D6: CA=KA            bc:0 mop:- kk:0 st:--      
+3D7: CB=KB            bc:0 mop:3 kk:D st:--     ret
+3D8: CB=0             bc:0 mop:3 kk:D st:--     sub:5FE
+3D9: KB=#3            bc:0 mop:- kk:3 st:--      
+3DA: KA=#0            bc:0 mop:- kk:0 st:--     sub:48C
+3DB: S=0              bc:0 mop:- kk:0 st:S1=0    
+3DC: U=KB             bc:0 mop:6 kk:7 st:S0=0   sub:6EA
+3DD: KB=U             bc:0 mop:6 kk:E st:--     jmp:3E0 jh:S3 jl:S0
+3DE: S=0              bc:0 mop:- kk:0 st:--     ret
+3DF: S=0              bc:0 mop:- kk:0 st:--     jmp:701
+3E0: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:5CA
+3E1: KA=#2            bc:0 mop:- kk:2 st:S1=1   jmp:3DC
+3E2: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:5CA
+3E3: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:6A6
+3E4: S=0              bc:0 mop:- kk:0 st:S2=0   sub:6BD
+3E5: S=KA+1           bc:1 mop:- kk:0 st:--      
+3E6: V=V+1,sc         bc:1 mop:- kk:0 st:--     jmp:3EB
+3E7: --=T             bc:0 mop:- kk:0 st:--     jmp:5CC
+3E8: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+3E9: S=0              bc:0 mop:- kk:0 st:--     jmp:3E4
+3EA: --=T|#8          bc:0 mop:- kk:8 st:--     jmp:5CC
+3EB: U=U+sc,sc        bc:1 mop:- kk:0 st:--     jmp:3E8 jh:CC
+3EC: --=CA+CA         bc:0 mop:6 kk:B st:--     jmp:634 jh:S1
+3ED: V=1              bc:1 mop:- kk:0 st:--     jmp:393
+3EE: S=0              bc:0 mop:- kk:0 st:--     jmp:3A0 jh:S1
+3EF: S=0              bc:0 mop:- kk:0 st:--     jmp:3BC
+3F0: S=0              bc:0 mop:- kk:0 st:--     jmp:5D5
+3F1: CA=CA+sc,sc      bc:1 mop:3 kk:B st:--     jmp:650 jh:CC
+3F2: --=S|KB          bc:0 mop:6 kk:7 st:--     jmp:6AB
+3F3: CA=CA+sc,sc      bc:1 mop:3 kk:B st:--     jmp:650 jh:CC
+3F4: T=0              bc:0 mop:- kk:0 st:--     jmp:6A9
+3F5: CB=KB^#4         bc:1 mop:- kk:4 st:--     jmp:3F9
+3F6: KB=V+CB,sc       bc:1 mop:6 kk:F st:S0=1   jmp:3F4 jh:S1 jl:S0
+3F7: CA=U+CA+sc,sc    bc:1 mop:- kk:0 st:--     jmp:3F5
+3F8: CA=CA|#1         bc:0 mop:- kk:1 st:S3=0   jmp:6B1
+3F9: KA=CA^#6         bc:1 mop:- kk:6 st:--     jmp:6B3
+3FA: S=CA&#1          bc:0 mop:- kk:1 st:S=0    jmp:5D8 jl:Z0
+3FB: CA=CA|#1         bc:0 mop:- kk:1 st:S3=1   jmp:6B1
+3FC: KB=0             bc:0 mop:6 kk:5 st:S=0     
+3FD: S=CA&#1          bc:0 mop:C kk:1 st:--      
+3FE: KB=KB&#8         bc:0 mop:- kk:8 st:S1=Z0  jmp:400
+3FF: KB=KB&#4         bc:0 mop:- kk:4 st:S1=Z0  jmp:401
+400: V=0              bc:0 mop:E kk:1 st:--     jmp:402
+401: V=0              bc:0 mop:E kk:0 st:--      
+402: U=#3             bc:0 mop:- kk:3 st:--     jmp:404 jh:S3
+403: U=1              bc:0 mop:- kk:0 st:S=0    jmp:408 jh:S3 jl:S0
+404: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+405: V=V+1,sc         bc:1 mop:- kk:0 st:--     jmp:407
+406: --=T             bc:0 mop:6 kk:5 st:--     jmp:403
+407: U=U+sc,sc        bc:1 mop:- kk:0 st:--     jmp:404 jh:CC
+408: S=U&CA           bc:0 mop:6 kk:B st:S0=!Z0 jmp:117
+409: S=CA&#1          bc:0 mop:- kk:1 st:--     jmp:592 jl:Z0
+40A: S=CA&#1          bc:0 mop:- kk:1 st:S1=1   jmp:5A8 jl:Z0
+40B: S=CA&#1          bc:0 mop:- kk:1 st:S=0    jmp:5B4 jl:Z0
+40C: S=0              bc:0 mop:E kk:E st:--     jmp:6BC
+40D: S=0              bc:0 mop:E kk:C st:--     jmp:6BC
+40E: S=0              bc:0 mop:E kk:F st:--     jmp:6BC
+40F: S=0              bc:0 mop:E kk:D st:--     jmp:6BC
+410: S=0              bc:0 mop:E kk:2 st:--     jmp:6BC
+411: S=0              bc:0 mop:E kk:0 st:--     jmp:6BC
+412: S=0              bc:0 mop:E kk:3 st:--     jmp:6BC
+413: S=0              bc:0 mop:E kk:1 st:--     jmp:6BC
+414: S=#1             bc:0 mop:8 kk:1 st:--      
+415: S=0              bc:0 mop:6 kk:5 st:S=0     
+416: CA=CA&#14        bc:0 mop:- kk:E st:S2=1    
+417: CA=S|CA          bc:0 mop:3 kk:5 st:S=0    ret
+418: KA=0             bc:0 mop:- kk:0 st:--     jmp:6D9
+419: KA=0             bc:0 mop:- kk:0 st:--     jmp:6D9
+41A: KA=1             bc:0 mop:- kk:0 st:--     jmp:6D9
+41B: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+41C: CB=S+1           bc:0 mop:3 kk:8 st:S=0    jmp:424
+41D: CA=V             bc:0 mop:3 kk:2 st:--     jmp:00B
+41E: V=1              bc:1 mop:6 kk:8 st:--      
+41F: --=CA            bc:0 mop:- kk:0 st:--      
+420: S=CB^#2          bc:1 mop:- kk:2 st:--      
+421: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:42A jl:Z0
+422: S=0              bc:0 mop:5 kk:C st:--     jmp:428 jl:S0
+423: S=CA+#7          bc:1 mop:- kk:7 st:--      
+424: --=KA            bc:0 mop:6 kk:8 st:--     jmp:441
+425: S=0              bc:0 mop:- kk:0 st:S=0    ret
+426: CB=CB+1          bc:0 mop:3 kk:8 st:--     jmp:420 jh:S3
+427: CA=S&CA          bc:0 mop:3 kk:4 st:S=0    jmp:425
+428: CA=CA+1          bc:0 mop:2 kk:C st:--     jmp:424
+429: CA=0             bc:0 mop:2 kk:C st:--     jmp:424
+42A: S=CB^#11         bc:1 mop:- kk:B st:S3=1   jmp:42C jh:Z0 jl:Z0
+42B: S=0              bc:0 mop:- kk:0 st:--     jmp:424
+42C: S=CB^#10         bc:1 mop:- kk:A st:S3=1   jmp:42E jl:Z0
+42D: S=CA|CB          bc:0 mop:6 kk:8 st:--     jmp:16A jl:Z0
+42E: CB=CB^#8         bc:1 mop:- kk:8 st:--     jmp:5E8 jl:Z0
+42F: S=CA             bc:0 mop:6 kk:4 st:S2=1   jmp:425 jh:Z0
+430: S=KB^#3          bc:1 mop:- kk:3 st:--     jmp:5EC jl:Z0
+431: KA=#1            bc:0 mop:- kk:1 st:S0=0   jmp:6D2
+432: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:5F6 jl:Z0
+433: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:436 jl:Z0
+434: CA=CA&#7         bc:0 mop:- kk:7 st:S2=1   jmp:6D0
+435: --=#7            bc:0 mop:- kk:7 st:--     jmp:6D4
+436: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:434 jl:Z0
+437: S=0              bc:0 mop:- kk:0 st:--     jmp:43D
+438: KB=KB+sc,sc      bc:1 mop:3 kk:5 st:--      
+439: --=S+sc,sc       bc:1 mop:- kk:0 st:--      
+43A: KA=KA+1,sc       bc:1 mop:- kk:0 st:--     jmp:438
+43B: S=0              bc:0 mop:8 kk:1 st:S=0    jmp:43D
+43C: S=S^#3           bc:1 mop:- kk:3 st:--     jmp:7DC jl:Z0
+43D: S=0              bc:0 mop:3 kk:5 st:S0=1   jmp:43F
+43E: U=CB             bc:0 mop:6 kk:5 st:!ZK    ret
+43F: V=CA             bc:0 mop:6 kk:2 st:S=0    jmp:43E jl:S0
+440: V=#3             bc:0 mop:- kk:3 st:--     jmp:453
+441: S=CA^#3          bc:1 mop:- kk:3 st:S2=1   jmp:440 jh:Z0
+442: S=CB^CA          bc:1 mop:6 kk:5 st:S2=1   jmp:440 jh:Z0 jl:Z0
+443: S=0              bc:0 mop:- kk:0 st:S2=0   jmp:440
+444: CA=CA|#4         bc:0 mop:- kk:4 st:--     jmp:446
+445: S=#1             bc:0 mop:8 kk:1 st:--     jmp:44B
+446: KB=0             bc:0 mop:3 kk:5 st:--     jmp:44D
+447: V=#3             bc:0 mop:- kk:3 st:S0=1   jmp:45F
+448: V=V+sc,sc        bc:1 mop:- kk:0 st:--     jmp:44E
+449: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:444 jl:Z0
+44A: S=0              bc:0 mop:3 kk:C st:--     jmp:6D8
+44B: CA=#3            bc:0 mop:- kk:3 st:--      
+44C: CB=#10           bc:0 mop:- kk:A st:--     jmp:452
+44D: KA=#2            bc:0 mop:- kk:2 st:--     jmp:476
+44E: CB=CB+sc,sc      bc:1 mop:- kk:0 st:--      
+44F: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--      
+450: KA=KA&#4         bc:0 mop:- kk:4 st:--     jmp:452 jl:Z0
+451: S=0              bc:0 mop:6 kk:5 st:--     jmp:444
+452: KB=KB+1,sc       bc:1 mop:9 kk:1 st:--     jmp:448
+453: KA=0             bc:0 mop:6 kk:5 st:--     jmp:449
+454: V=#3             bc:0 mop:- kk:3 st:--      
+455: KB=0             bc:0 mop:5 kk:E st:--      
+456: S=0              bc:0 mop:C kk:E st:--      
+457: KB=KB&#1         bc:0 mop:- kk:1 st:--      
+458: CB=CB+KB+1,sc    bc:0 mop:- kk:0 st:--      
+459: CA=CA+sc,sc      bc:0 mop:2 kk:E st:--     jmp:46C jh:S3 jl:S0
+45A: S=CB&#4          bc:0 mop:- kk:4 st:--     jmp:470 jl:Z0
+45B: CB=CB+KB+1,sc    bc:1 mop:- kk:0 st:--     jmp:47C
+45C: KB=0             bc:0 mop:- kk:0 st:--     jmp:453
+45D: KA=CA            bc:0 mop:6 kk:D st:--     jmp:465
+45E: KA=CA            bc:0 mop:- kk:0 st:S0=1   jmp:4A7
+45F: KB=CB            bc:0 mop:5 kk:E st:S0=0   jmp:45E jl:S0
+460: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:478 jl:Z0
+461: KB=KA+1          bc:0 mop:6 kk:D st:--      
+462: KB=0             bc:0 mop:6 kk:5 st:S2=0   jmp:6D7
+463: S=#4             bc:0 mop:8 kk:4 st:S2=1   jmp:46B
+464: S=0              bc:0 mop:5 kk:C st:--     jmp:44A
+465: S=KB+KA          bc:1 mop:- kk:0 st:S2=1   jmp:468 jl:CC
+466: S=0              bc:0 mop:3 kk:D st:S1=0   jmp:453
+467: --=S|#3          bc:0 mop:- kk:3 st:--     jmp:462
+468: CB=KA            bc:0 mop:3 kk:D st:S1=0   jmp:46A jl:Z0
+469: KA=KB            bc:0 mop:- kk:0 st:--     jmp:468
+46A: V=CB+#7          bc:0 mop:- kk:7 st:--     jmp:464
+46B: CB=CB+1          bc:1 mop:- kk:0 st:S0=1   jmp:466 jl:CC
+46C: S=0              bc:0 mop:6 kk:6 st:S0=1   jmp:45A
+46D: S=0              bc:0 mop:- kk:0 st:--     jmp:471
+46E: V=1              bc:1 mop:5 kk:C st:S0=1   jmp:46E jl:S0
+46F: KB=CB            bc:0 mop:- kk:0 st:S0=0   jmp:45C jl:SC
+470: S=0              bc:0 mop:- kk:0 st:--     jmp:453
+471: V=1              bc:0 mop:5 kk:E st:--      
+472: KA=CA            bc:0 mop:- kk:0 st:--      
+473: KB=CB            bc:0 mop:5 kk:E st:--     jmp:45B
+474: V=#1             bc:0 mop:- kk:1 st:--     jmp:460 jl:S2
+475: KB=KB&KA         bc:0 mop:6 kk:C st:--     jmp:474 jh:Z0
+476: S=0              bc:0 mop:C kk:B st:--     jmp:475
+477: KB=#3            bc:0 mop:- kk:3 st:--     jmp:47A
+478: KA=#3            bc:0 mop:- kk:3 st:--     jmp:477
+479: KA=#8            bc:0 mop:- kk:8 st:--      
+47A: CA=0&#4          bc:0 mop:8 kk:4 st:--      
+47B: CB=0             bc:0 mop:3 kk:C st:--     jmp:454
+47C: S=CA+KA+sc,sc    bc:1 mop:- kk:0 st:--     jmp:4A6 jl:CC
+47D: CA=CA&#4         bc:0 mop:- kk:4 st:--     jmp:7AE jl:Z0
+47E: V=V+1            bc:0 mop:3 kk:F st:S0=0   jmp:7BC
+47F: --=S|CB          bc:0 mop:- kk:0 st:--     jmp:484
+480: S=1,sc           bc:1 mop:- kk:0 st:S0=0   jmp:46E
+481: CA=0             bc:0 mop:- kk:0 st:--     jmp:485
+482: V=V+1            bc:0 mop:5 kk:E st:--     jmp:488
+483: S=0              bc:0 mop:5 kk:E st:S0=0   jmp:7AE
+484: V=CB|#2          bc:0 mop:- kk:2 st:--     jmp:480 jh:S3 jl:S0
+485: CB=0             bc:0 mop:2 kk:E st:--      
+486: V=#4             bc:1 mop:6 kk:4 st:--      
+487: CA=V&CA          bc:0 mop:3 kk:4 st:--     jmp:480
+488: KB=KB+CB,sc      bc:1 mop:- kk:0 st:S0=0    
+489: KA=KA+CA+sc,sc   bc:1 mop:- kk:0 st:S1=1   jmp:488 jh:CC
+48A: CB=KB            bc:0 mop:- kk:0 st:S2=0    
+48B: CA=KA            bc:0 mop:2 kk:E st:--     jmp:453
+48C: S=0              bc:0 mop:6 kk:E st:--     jmp:48E
+48D: V=CB             bc:0 mop:4 kk:0 st:S3=1   jmp:48D jh:S1
+48E: S=CA^#6          bc:1 mop:- kk:6 st:--     jmp:490 jl:Z0
+48F: CB=CB&#14        bc:0 mop:- kk:E st:--     jmp:49B
+490: U=CA             bc:0 mop:3 kk:E st:--     jmp:493
+491: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:490 jh:Z0
+492: U=CA             bc:0 mop:- kk:0 st:S3=0   jmp:48D
+493: V=CB             bc:0 mop:6 kk:F st:--     jmp:49C
+494: S=CB^#10         bc:1 mop:- kk:A st:--     jmp:498 jl:Z0
+495: CA=CA^#7         bc:1 mop:- kk:7 st:--     jmp:494 jh:Z0 jl:Z0
+496: CA=CA^#3         bc:1 mop:- kk:3 st:--     jmp:495 jh:Z0
+497: S=0              bc:0 mop:6 kk:E st:--     jmp:490
+498: CB=#2            bc:0 mop:8 kk:2 st:--     jmp:4AB
+499: CA=CA^#3         bc:1 mop:- kk:3 st:--     jmp:498 jh:Z0
+49A: S=0              bc:0 mop:- kk:0 st:--     jmp:497
+49B: S=CB^#2          bc:1 mop:- kk:2 st:--     jmp:494 jh:Z0
+49C: S=V+CB,sc        bc:1 mop:- kk:0 st:--      
+49D: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:S3=1    
+49E: S=0              bc:0 mop:6 kk:E st:--     ret
+49F: CB=V+1,sc        bc:0 mop:- kk:0 st:S3=0    
+4A0: CA=U+sc,sc       bc:0 mop:3 kk:E st:--      
+4A1: S=0              bc:0 mop:6 kk:D st:--      
+4A2: CB=CB+1,sc       bc:1 mop:- kk:0 st:--      
+4A3: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--      
+4A4: S=0              bc:0 mop:3 kk:D st:--      
+4A5: S=0              bc:0 mop:4 kk:0 st:--     jmp:4AA
+4A6: S=1,sc           bc:1 mop:- kk:0 st:S0=0   jmp:46E
+4A7: V=0              bc:0 mop:- kk:0 st:S0=0   jmp:7AC
+4A8: S=0              bc:0 mop:6 kk:E st:--     jmp:5A5
+4A9: S=0              bc:0 mop:- kk:0 st:--     jmp:008
+4AA: S=0              bc:0 mop:3 kk:7 st:--     jmp:49E
+4AB: CA=#7            bc:0 mop:3 kk:7 st:S=0    jmp:5FE
+4AC: S=0              bc:0 mop:6 kk:E st:S0=0   jmp:6E0
+4AD: S=0              bc:0 mop:8 kk:2 st:--     jmp:55A
+4AE: U=U+sc,sc        bc:0 mop:6 kk:7 st:--      
+4AF: S=0              bc:0 mop:1 kk:0 st:--     ret
+4B0: S=0              bc:0 mop:3 kk:F st:--     jmp:4B2
+4B1: S=0              bc:0 mop:3 kk:D st:--     jmp:4B3
+4B2: S=0              bc:0 mop:6 kk:D st:S0=1   jmp:664
+4B3: S=0              bc:0 mop:6 kk:E st:--     ret
+4B4: S=0              bc:0 mop:6 kk:E st:S0=0    
+4B5: CB=CB+1,sc       bc:1 mop:- kk:0 st:--      
+4B6: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:4B8 jh:CC jl:S0
+4B7: V=CB             bc:0 mop:6 kk:D st:--     jmp:4BC
+4B8: U=CA             bc:0 mop:3 kk:E st:--     jmp:4B7
+4B9: S=0              bc:0 mop:3 kk:C st:--     ret
+4BA: S=0              bc:0 mop:6 kk:C st:S0=1   jmp:4B5
+4BB: S=0              bc:0 mop:8 kk:2 st:--     ret
+4BC: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+4BD: CA=CA+sc,sc      bc:0 mop:3 kk:D st:--      
+4BE: KA=CB&#14        bc:0 mop:4 kk:E st:S0=1   jmp:4BE jl:S0
+4BF: S=KA^#2          bc:1 mop:- kk:2 st:--      
+4C0: CB=CB^#11        bc:1 mop:- kk:B st:--     jmp:7F5
+4C1: S=CA^#1          bc:1 mop:- kk:1 st:--     jmp:4C0 jh:Z0 jl:Z0
+4C2: S=CA^#2          bc:1 mop:- kk:2 st:--     jmp:4C1 jh:Z0
+4C3: S=0              bc:0 mop:8 kk:2 st:--     jmp:4C0
+4C4: S=0              bc:0 mop:6 kk:E st:S=0     
+4C5: U=CA             bc:0 mop:- kk:0 st:--      
+4C6: V=CB             bc:0 mop:6 kk:D st:--      
+4C7: S=CA|CB          bc:0 mop:4 kk:0 st:--      
+4C8: S=CB^#2          bc:1 mop:- kk:2 st:--      
+4C9: S=CB^#3          bc:1 mop:- kk:3 st:--      
+4CA: S=CB^#10         bc:1 mop:- kk:A st:--     jmp:4CC jh:Z0 jl:Z0
+4CB: CA=0             bc:0 mop:- kk:0 st:S3=1   jmp:603
+4CC: S=CB^#11         bc:1 mop:- kk:B st:--      
+4CD: S=CB^#8          bc:1 mop:- kk:8 st:S2=1   jmp:602 jl:Z0
+4CE: S=0              bc:0 mop:2 kk:E st:--     jmp:503
+4CF: CA=0             bc:0 mop:- kk:0 st:S3=1   jmp:603
+4D0: S=0              bc:0 mop:- kk:0 st:--     ret
+4D1: S=CB+1           bc:0 mop:- kk:0 st:S=0    jmp:4D0 jh:CC
+4D2: S=CB+1           bc:0 mop:- kk:0 st:--     jmp:4D5 jh:CC
+4D3: CB=0             bc:0 mop:- kk:0 st:--     jmp:4D7
+4D4: --=#4            bc:0 mop:- kk:4 st:--     jmp:4D7
+4D5: CB=CA            bc:0 mop:- kk:0 st:--     jmp:6F0
+4D6: S=S              bc:0 mop:- kk:0 st:--     jmp:4D4 jh:Z0 jl:Z0
+4D7: CA=S             bc:0 mop:3 kk:3 st:--     jmp:4D0 jl:S0
+4D8: KA=CA            bc:0 mop:6 kk:4 st:S=0     
+4D9: S=CB+KA+1        bc:1 mop:- kk:0 st:S3=1    
+4DA: S=0              bc:0 mop:3 kk:4 st:--     ret
+4DB: CA=CA&#12        bc:0 mop:- kk:C st:S=0    jmp:4DA
+4DC: KB=CB            bc:0 mop:3 kk:A st:--      
+4DD: KA=CA            bc:0 mop:- kk:0 st:--      
+4DE: CB=V             bc:0 mop:- kk:0 st:--      
+4DF: CA=T             bc:0 mop:3 kk:2 st:S0=0    
+4E0: V=1              bc:1 mop:5 kk:C st:S0=1   jmp:4E0 jl:S0
+4E1: T=CB             bc:0 mop:- kk:0 st:--      
+4E2: V=#8             bc:0 mop:- kk:8 st:--     jmp:4E6
+4E3: V=CB             bc:0 mop:- kk:0 st:--     jmp:6F8
+4E4: V=V+1            bc:0 mop:- kk:0 st:--      
+4E5: S=KA+CA+sc,sc    bc:1 mop:- kk:0 st:--      
+4E6: S=0              bc:0 mop:5 kk:C st:--     jmp:4E8
+4E7: S=0              bc:0 mop:3 kk:A st:--     jmp:4EB
+4E8: CA=V+#8          bc:1 mop:- kk:8 st:--      
+4E9: CA=T+CA+1        bc:1 mop:5 kk:C st:S0=1    
+4EA: S=KB+CB,sc       bc:1 mop:- kk:0 st:S0=0   jmp:4E4
+4EB: S=0              bc:0 mop:6 kk:2 st:--     jmp:4E3
+4EC: S=0,sc           bc:0 mop:6 kk:E st:--      
+4ED: CA=CA+sc,sc      bc:0 mop:3 kk:B st:--      
+4EE: S=0              bc:0 mop:6 kk:C st:--      
+4EF: S=0              bc:0 mop:3 kk:9 st:--      
+4F0: T=S&#4           bc:0 mop:- kk:4 st:S0=0   jmp:4F2
+4F1: KB=V+CB+1,sc     bc:1 mop:- kk:0 st:--     jmp:216
+4F2: U=CA             bc:0 mop:6 kk:B st:S0=1   jmp:4F2 jl:S0
+4F3: V=CB             bc:0 mop:6 kk:9 st:S0=0    
+4F4: KA=CA            bc:0 mop:- kk:0 st:S1=0    
+4F5: KB=CB            bc:0 mop:4 kk:0 st:S3=1   jmp:68D
+4F6: S=0              bc:0 mop:6 kk:E st:S1=0   ret
+4F7: V=CB             bc:0 mop:6 kk:1 st:S1=0   jmp:4F1
+4F8: S=T^#4           bc:1 mop:- kk:4 st:--     jmp:4FA jl:Z0
+4F9: S=T&#11          bc:0 mop:- kk:B st:--      
+4FA: S=T&#4           bc:0 mop:- kk:4 st:S0=0   jmp:4F6 jl:Z0
+4FB: S=T&#4           bc:0 mop:- kk:4 st:--      
+4FC: --=S+#4          bc:1 mop:- kk:4 st:--     jmp:7DF
+4FD: S=0              bc:0 mop:6 kk:B st:--      
+4FE: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+4FF: CA=CA+sc,sc      bc:0 mop:3 kk:B st:S0=0   jmp:4F2
+500: S=0              bc:0 mop:6 kk:7 st:S3=1   sub:00A
+501: S=0              bc:0 mop:- kk:0 st:--     jmp:628
+502: S=0              bc:0 mop:- kk:0 st:--     ret
+503: KB=1             bc:0 mop:6 kk:6 st:--     jmp:01D
+504: V=1              bc:1 mop:- kk:0 st:--     sub:6BB
+505: U=U+sc,sc        bc:1 mop:5 kk:C st:--     jmp:01C jh:CC
+506: CB=1             bc:0 mop:3 kk:C st:S3=0   sub:6ED
+507: U=#13+1          bc:0 mop:- kk:D st:S=0    jmp:67A
+508: S=0              bc:0 mop:- kk:0 st:--     sub:024
+509: S=0              bc:0 mop:- kk:0 st:--     jmp:000
+50A: CA=U&CA          bc:0 mop:9 kk:0 st:S=0    jmp:030
+50B: CA=0             bc:0 mop:3 kk:4 st:--     jmp:034
+50C: S=0              bc:0 mop:6 kk:6 st:S1=1    
+50D: CB=S&CB          bc:0 mop:3 kk:6 st:--     jmp:034
+50E: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:510 jl:Z0
+50F: S=CA^#8          bc:1 mop:- kk:8 st:--     jmp:044 jl:Z0
+510: S=CB^#2          bc:1 mop:- kk:2 st:--     jmp:050 jh:S1 jl:Z0
+511: V=CB+1           bc:0 mop:- kk:0 st:S1=0   jmp:048 jh:S3 jl:S0
+512: CB=CA            bc:0 mop:3 kk:7 st:--     jmp:005
+513: S=0              bc:0 mop:8 kk:2 st:--     jmp:02C
+514: CB=#12           bc:0 mop:- kk:C st:S3=1   sub:6C6
+515: S=0              bc:0 mop:- kk:0 st:--     jmp:0A0
+516: CB=CB^#9         bc:1 mop:- kk:9 st:S=0    jmp:0B0 jh:Z0 jl:Z0
+517: S=0              bc:0 mop:- kk:0 st:--     jmp:51A
+518: CB=S|CB          bc:0 mop:3 kk:6 st:--     sub:096
+519: S=#8             bc:0 mop:7 kk:8 st:--     jmp:02C
+51A: U=0              bc:0 mop:- kk:0 st:--     sub:533
+51B: CA=0             bc:0 mop:- kk:0 st:--     jmp:702
+51C: V=1              bc:1 mop:3 kk:0 st:--     sub:3C4
+51D: S=CB^#2          bc:1 mop:- kk:2 st:S=0     
+51E: S=CB^#3          bc:1 mop:- kk:3 st:--     jmp:520 jl:Z0
+51F: S=CA^#9          bc:1 mop:- kk:9 st:--     jmp:0C4 jh:Z0
+520: S=CB^#1          bc:1 mop:- kk:1 st:--     jmp:522 jl:Z0
+521: CA=CA            bc:0 mop:6 kk:0 st:--     jmp:0C4 jl:Z0
+522: CA=CA&#3         bc:0 mop:- kk:3 st:--     jmp:0CB
+523: S=CA^#11         bc:1 mop:- kk:B st:--     jmp:0C4 jh:Z0 jl:Z0
+524: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:630
+525: CB=CB^#1         bc:1 mop:- kk:1 st:--     jmp:704
+526: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:632
+527: S=0              bc:0 mop:3 kk:0 st:--     jmp:524
+528: CA=#12           bc:0 mop:3 kk:C st:--     jmp:184
+529: CB=1             bc:0 mop:3 kk:0 st:--     jmp:528
+52A: S=0              bc:0 mop:- kk:0 st:--     jmp:52E
+52B: CB=CB+1,sc       bc:0 mop:- kk:0 st:--     jmp:630
+52C: CB=#7            bc:0 mop:- kk:7 st:S3=0   sub:6CC
+52D: S=0              bc:0 mop:6 kk:B st:--     jmp:524
+52E: T=#2             bc:0 mop:- kk:2 st:S3=1   sub:0D3
+52F: S=0              bc:0 mop:- kk:0 st:--      
+530: CB=#9            bc:0 mop:- kk:9 st:S3=1   sub:6C7
+531: S=0              bc:0 mop:- kk:0 st:--     jmp:0CC
+532: CB=#14           bc:0 mop:- kk:E st:S3=1   sub:6C5
+533: CB=#9            bc:0 mop:- kk:9 st:--      
+534: T=S              bc:0 mop:- kk:0 st:S3=1   sub:6C6
+535: --=T             bc:0 mop:- kk:0 st:--     jmp:67F
+536: S=CB^#5          bc:1 mop:- kk:5 st:--     jmp:0F0 jl:Z0
+537: T=#6             bc:0 mop:- kk:6 st:S2=0   jmp:0EE
+538: S=0              bc:0 mop:- kk:0 st:--     jmp:0E8
+539: T=#1             bc:0 mop:- kk:1 st:S2=0   jmp:0EE
+53A: KB=#5+1          bc:0 mop:6 kk:5 st:--     jmp:681
+53B: CA=1             bc:0 mop:2 kk:E st:--     jmp:3A7
+53C: CA=KB            bc:1 mop:D kk:1 st:--     jmp:11C
+53D: CA=KB            bc:1 mop:D kk:0 st:--     jmp:11C
+53E: V=#12            bc:0 mop:- kk:C st:--     jmp:77C
+53F: CB=0             bc:0 mop:3 kk:A st:--     ret
+540: --=#4            bc:0 mop:- kk:4 st:--     jmp:642
+541: CA=0             bc:0 mop:2 kk:E st:--     ret
+542: V=#15            bc:0 mop:- kk:F st:S1=1   sub:638
+543: KA=S&#2          bc:0 mop:- kk:2 st:S2=1   jmp:635 jh:Z0
+544: S=0              bc:0 mop:3 kk:E st:--     jmp:53A
+545: KB=0             bc:0 mop:6 kk:E st:S0=1   jmp:684
+546: S=0              bc:0 mop:6 kk:D st:--     jmp:544
+547: CA=CA+1,sc       bc:1 mop:2 kk:E st:--     jmp:69C
+548: S=#1             bc:0 mop:8 kk:1 st:--     jmp:12C
+549: S=CA|CB          bc:0 mop:3 kk:E st:--      
+54A: S=0              bc:0 mop:- kk:0 st:S3=0   sub:6ED
+54B: CB=0             bc:0 mop:3 kk:F st:--     jmp:7FC
+54C: S=#1             bc:0 mop:7 kk:1 st:--     sub:3C4
+54D: S=CB^#2          bc:1 mop:- kk:2 st:S=0    jmp:130 jl:Z0
+54E: CB=CA+1          bc:1 mop:3 kk:B st:S0=1   jmp:174 jl:SC
+54F: S=0              bc:0 mop:3 kk:B st:--     jmp:170
+550: CB=S|CB          bc:0 mop:3 kk:5 st:S0=1   sub:6EC
+551: CA=0             bc:0 mop:7 kk:F st:--     jmp:190
+552: S=0              bc:0 mop:3 kk:0 st:S0=1   jmp:194
+553: S=0              bc:0 mop:3 kk:1 st:--     jmp:198
+554: CA=0             bc:0 mop:2 kk:C st:S3=1   sub:6EE
+555: S=0              bc:0 mop:- kk:0 st:--     jmp:1A8
+556: KA=#4            bc:0 mop:- kk:4 st:S=0    sub:5A5
+557: S=0              bc:0 mop:- kk:0 st:--     jmp:33C
+558: T=T+CA           bc:0 mop:- kk:0 st:S3=0   sub:6EE
+559: S=T+#12          bc:0 mop:- kk:C st:--     jmp:1B2 jl:CC
+55A: CB=#3            bc:0 mop:- kk:3 st:S3=0   sub:6C6
+55B: S=0              bc:0 mop:8 kk:2 st:--     jmp:02C
+55C: S=0              bc:0 mop:7 kk:2 st:S=0    sub:6EC
+55D: V=#8             bc:0 mop:- kk:8 st:--     jmp:1B8 jh:S3 jl:S0
+55E: T=S+1            bc:0 mop:3 kk:7 st:--     sub:6DF
+55F: --=T             bc:0 mop:- kk:0 st:--     jmp:55D
+560: S=0              bc:0 mop:- kk:0 st:--     jmp:1CB
+561: S=0              bc:0 mop:- kk:0 st:--     jmp:1C2
+562: S=0              bc:0 mop:- kk:0 st:--     sub:4C4
+563: S=0              bc:0 mop:- kk:0 st:--     jmp:1D9
+564: CB=CA            bc:0 mop:3 kk:7 st:--     jmp:202
+565: S=0              bc:0 mop:- kk:0 st:--     jmp:1D9
+566: CB=CB+1          bc:1 mop:3 kk:7 st:--      
+567: S=0              bc:0 mop:6 kk:D st:--     jmp:1EC
+568: S=0              bc:0 mop:- kk:0 st:--     sub:4B4
+569: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+56A: CB=CA+1          bc:1 mop:3 kk:7 st:S=0    jmp:7C0
+56B: S=0              bc:0 mop:6 kk:6 st:--     jmp:7C3
+56C: V=1              bc:1 mop:5 kk:C st:S0=1   jmp:56C jl:S0
+56D: CA=0             bc:0 mop:2 kk:C st:--     jmp:1BE
+56E: S=0              bc:0 mop:- kk:0 st:--     sub:48C
+56F: V=1              bc:1 mop:6 kk:C st:--     jmp:210 jh:S1
+570: CA=CA&#7         bc:0 mop:- kk:7 st:--     jmp:219
+571: S=S              bc:0 mop:6 kk:B st:--     jmp:224 jl:Z0
+572: --=#4+1          bc:1 mop:6 kk:4 st:--     sub:25F
+573: CB=#14           bc:1 mop:3 kk:E st:S=0    jmp:1CC
+574: --=#4+1          bc:1 mop:6 kk:4 st:--     sub:25F
+575: CB=1             bc:0 mop:3 kk:E st:--     jmp:20B
+576: S=0              bc:0 mop:- kk:0 st:--     jmp:226
+577: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:260 jl:Z0
+578: S=0              bc:0 mop:5 kk:E st:--     jmp:7A3
+579: S=KB&#2          bc:0 mop:- kk:2 st:--     jmp:62C jl:Z0
+57A: U=KA             bc:0 mop:- kk:0 st:--     jmp:27D
+57B: U=U+sc,sc        bc:1 mop:- kk:0 st:--     jmp:27C jh:CC
+57C: U=CA+sc,sc       bc:1 mop:6 kk:7 st:S3=1    
+57D: CB=S             bc:0 mop:1 kk:0 st:--     jmp:287
+57E: CA=CA&#7         bc:0 mop:- kk:7 st:--      
+57F: S=CA^#5          bc:1 mop:- kk:5 st:--     jmp:2AC jh:Z0
+580: V=#3             bc:0 mop:- kk:3 st:--      
+581: S=0              bc:0 mop:5 kk:E st:--     jmp:31B
+582: S=0              bc:0 mop:5 kk:E st:--      
+583: S=0              bc:0 mop:3 kk:B st:--     jmp:320
+584: S=0              bc:0 mop:6 kk:7 st:--     sub:00A
+585: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+586: S=0              bc:0 mop:- kk:0 st:--     ret
+587: S=0              bc:0 mop:- kk:0 st:--     jmp:341
+588: S=0              bc:0 mop:6 kk:2 st:--     jmp:693
+589: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:34C jl:Z0
+58A: U=U+sc,sc        bc:0 mop:4 kk:0 st:S0=1   jmp:58A jl:S0
+58B: CB=#8            bc:0 mop:1 kk:8 st:--     jmp:344
+58C: V=V+1,sc         bc:0 mop:- kk:0 st:--     jmp:387
+58D: KB=#1            bc:0 mop:4 kk:1 st:--     jmp:37A
+58E: KA=#6            bc:0 mop:- kk:6 st:S=0    sub:6EA
+58F: S=0              bc:0 mop:6 kk:A st:--     jmp:382 jl:S0
+590: --=U&#2          bc:0 mop:- kk:2 st:--     sub:61E
+591: S=KA             bc:1 mop:5 kk:E st:S=0    jmp:696 jl:CC
+592: S=#1             bc:0 mop:D kk:1 st:--     jmp:390
+593: S=#0             bc:0 mop:D kk:0 st:--     jmp:390
+594: CA=#5            bc:0 mop:- kk:5 st:--     jmp:649
+595: V=V+1,sc         bc:0 mop:- kk:0 st:--     jmp:70D
+596: S=V+CB,sc        bc:1 mop:- kk:0 st:--     jmp:699
+597: --=KA            bc:0 mop:6 kk:B st:--     jmp:59A
+598: CB=KB            bc:0 mop:3 kk:A st:--     sub:6D9
+599: S=0              bc:0 mop:6 kk:A st:--     jmp:645
+59A: V=1              bc:1 mop:3 kk:7 st:S1=0   sub:6C3
+59B: U=1              bc:1 mop:5 kk:E st:--     jmp:712
+59C: T=#2             bc:0 mop:- kk:2 st:--     jmp:698
+59D: S=CA&#1          bc:0 mop:- kk:1 st:--      
+59E: S=#1             bc:0 mop:E kk:1 st:--     jmp:399
+59F: S=#0             bc:0 mop:E kk:0 st:--     jmp:399
+5A0: S=0              bc:0 mop:- kk:0 st:--     sub:6BF
+5A1: V=V+1,sc         bc:1 mop:- kk:0 st:--     jmp:398 jh:CC
+5A2: CA=0             bc:0 mop:2 kk:E st:S2=1   sub:6BD
+5A3: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:69D
+5A4: KA=#4            bc:0 mop:- kk:4 st:--     sub:6E7
+5A5: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:69D
+5A6: S=0              bc:0 mop:3 kk:F st:--      
+5A7: V=#13+1          bc:0 mop:3 kk:D st:--     jmp:541
+5A8: T=S              bc:0 mop:D kk:1 st:--     jmp:5CD
+5A9: T=S              bc:0 mop:D kk:0 st:--     jmp:5CD
+5AA: V=CB             bc:0 mop:- kk:0 st:S1=1    
+5AB: CB=V+#4,sc       bc:0 mop:- kk:4 st:--     jmp:39F
+5AC: S=V+CB+1,sc      bc:1 mop:3 kk:F st:--     jmp:69F
+5AD: CB=V+1,sc        bc:1 mop:- kk:0 st:--      
+5AE: CA=U+sc,sc       bc:1 mop:3 kk:F st:S2=1   sub:6BD
+5AF: CA=0             bc:0 mop:- kk:0 st:--     ret
+5B0: S=0              bc:0 mop:- kk:0 st:--     sub:414
+5B1: CB=CB&#7         bc:0 mop:- kk:7 st:--     jmp:6A1
+5B2: CA=CA|#1         bc:0 mop:- kk:1 st:--      
+5B3: S=0              bc:0 mop:3 kk:5 st:S0=1   jmp:6BA
+5B4: S=0              bc:0 mop:D kk:3 st:S2=1   jmp:3AC
+5B5: S=0              bc:0 mop:D kk:2 st:S2=1   jmp:3AC
+5B6: S=0              bc:0 mop:D kk:3 st:S2=1   jmp:5B8
+5B7: S=0              bc:0 mop:D kk:2 st:S2=1    
+5B8: CB=S|CB          bc:0 mop:3 kk:5 st:--     sub:6C2
+5B9: S=0              bc:0 mop:- kk:0 st:--      
+5BA: S=0              bc:0 mop:- kk:0 st:--     sub:6BB
+5BB: V=#5             bc:0 mop:- kk:5 st:--     jmp:3B0
+5BC: S=0              bc:0 mop:D kk:1 st:--     jmp:3B3
+5BD: S=0              bc:0 mop:D kk:0 st:--     jmp:3B3
+5BE: CA=S|CA          bc:0 mop:3 kk:5 st:--     jmp:39E
+5BF: V=#14            bc:0 mop:- kk:E st:--     jmp:683
+5C0: T=#3             bc:0 mop:- kk:3 st:--     sub:414
+5C1: S=CA&#2          bc:0 mop:- kk:2 st:S1=Z0  jmp:3C3
+5C2: S=0              bc:0 mop:- kk:0 st:--     sub:700
+5C3: S=CA|CB          bc:0 mop:- kk:0 st:--      
+5C4: CB=#3            bc:0 mop:- kk:3 st:--     jmp:5C6
+5C5: T=0              bc:0 mop:- kk:0 st:--     jmp:5C9
+5C6: CA=0             bc:0 mop:3 kk:7 st:--     sub:6E7
+5C7: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+5C8: CA=CA+sc,sc      bc:0 mop:3 kk:E st:S3=0   sub:6F9
+5C9: CA=T             bc:0 mop:- kk:0 st:--     jmp:3D3
+5CA: CA=CA+sc,sc      bc:1 mop:3 kk:E st:--     sub:6E7
+5CB: S=0              bc:0 mop:- kk:0 st:--     jmp:3D9
+5CC: U=0              bc:0 mop:6 kk:3 st:--     jmp:3EC jh:S3 jl:S0
+5CD: U=#10            bc:0 mop:- kk:A st:--     jmp:3E4
+5CE: CB=CB+CB,sc      bc:0 mop:- kk:0 st:--     jmp:5D0 jl:S0
+5CF: CB=CB+CB+1,sc    bc:0 mop:- kk:0 st:--      
+5D0: CA=CA+CA+sc,sc   bc:0 mop:1 kk:0 st:--     jmp:5D3
+5D1: CA=CA+CA+sc,sc   bc:0 mop:3 kk:7 st:--      
+5D2: S=0              bc:0 mop:- kk:0 st:--     jmp:6AD
+5D3: V=V+1,sc         bc:0 mop:6 kk:6 st:--     jmp:6AC
+5D4: CB=#3            bc:0 mop:- kk:3 st:--     jmp:5D6
+5D5: CA=0             bc:0 mop:- kk:0 st:--     jmp:723
+5D6: CB=CB+1          bc:1 mop:- kk:0 st:--     jmp:5D6 jl:Z0
+5D7: S=0              bc:0 mop:- kk:0 st:--     jmp:6A9
+5D8: S=0              bc:0 mop:6 kk:F st:--     jmp:6B9
+5D9: CA=#10           bc:0 mop:- kk:A st:S1=1   jmp:6B2
+5DA: V=CB             bc:0 mop:- kk:0 st:--     jmp:6B4
+5DB: S=0              bc:0 mop:6 kk:8 st:S=0    jmp:6A9
+5DC: S=0              bc:0 mop:- kk:0 st:S3=0   jmp:6C3
+5DD: S=0              bc:0 mop:- kk:0 st:--     jmp:6A7
+5DE: CA=#3            bc:0 mop:- kk:3 st:S1=1   jmp:6B6
+5DF: CA=#10           bc:0 mop:- kk:A st:--     jmp:731
+5E0: KA=CB&#11        bc:0 mop:C kk:B st:--     jmp:5E2
+5E1: KA=CB&#11        bc:0 mop:C kk:B st:--     jmp:5E3
+5E2: KB=KB&#8         bc:0 mop:- kk:8 st:S1=1   jmp:5E4 jl:Z0
+5E3: KB=KB&#4         bc:0 mop:- kk:4 st:S1=0    
+5E4: S=CB&#4          bc:0 mop:- kk:4 st:--     jmp:40C jh:S3 jl:Z0
+5E5: S=CB&#4          bc:0 mop:- kk:4 st:--     jmp:410 jh:S3 jl:Z0
+5E6: S=KB&#8          bc:0 mop:- kk:8 st:S1=Z0  jmp:418 jh:Z0 jl:S2
+5E7: S=KB&#4          bc:0 mop:- kk:4 st:S1=Z0  jmp:418 jh:Z0 jl:S2
+5E8: S=0              bc:0 mop:- kk:0 st:--     jmp:424
+5E9: S=0              bc:0 mop:3 kk:8 st:--     jmp:424
+5EA: KB=CB            bc:0 mop:6 kk:5 st:--     jmp:430 jh:S3 jl:S0
+5EB: KA=CA            bc:0 mop:C kk:B st:--     jmp:6CE
+5EC: S=KB^#2          bc:1 mop:- kk:2 st:--     jmp:5EE jl:Z0
+5ED: S=0              bc:0 mop:- kk:0 st:--     jmp:5EF
+5EE: CA=CA&#8         bc:0 mop:- kk:8 st:--     jmp:6CF
+5EF: --=S|#3          bc:0 mop:- kk:3 st:--     jmp:6D6
+5F0: S=CA&#8          bc:0 mop:- kk:8 st:S0=0   jmp:5F2 jl:Z0
+5F1: S=KA&#4          bc:0 mop:- kk:4 st:S1=Z0  jmp:6D5
+5F2: CA=CA&#7         bc:0 mop:- kk:7 st:S2=1   jmp:6D0
+5F3: CA=CA|#8         bc:0 mop:- kk:8 st:S2=0   jmp:6D0
+5F4: KA=#4            bc:0 mop:- kk:4 st:--     jmp:6D1
+5F5: KA=#5            bc:0 mop:- kk:5 st:--     jmp:6D1
+5F6: KA=0             bc:0 mop:- kk:0 st:S0=1   jmp:6D3
+5F7: CA=CA|#8         bc:0 mop:- kk:8 st:S2=0   jmp:6D0
+5F8: V=V+1,sc         bc:1 mop:4 kk:0 st:--     jmp:6DD
+5F9: CB=CB+1,sc       bc:1 mop:- kk:0 st:S2=0   jmp:65D jh:CC
+5FA: CA=CA^#12        bc:1 mop:- kk:C st:--     jmp:6E1
+5FB: S=S&#1           bc:0 mop:4 kk:1 st:S2=1   jmp:4AD jh:Z0
+5FC: CA=CA^#5         bc:1 mop:- kk:5 st:--     jmp:6E2
+5FD: S=0              bc:0 mop:- kk:0 st:--     jmp:5FB
+5FE: S=0              bc:0 mop:6 kk:D st:--     jmp:6E3
+5FF: S=0              bc:0 mop:8 kk:2 st:--     jmp:5FE
+600: S=0              bc:0 mop:3 kk:F st:--     jmp:6E5
+601: V=V+1,sc         bc:0 mop:3 kk:E st:--     jmp:4AE
+602: CA=S|CA          bc:0 mop:3 kk:7 st:--     jmp:4AC
+603: CB=0             bc:0 mop:- kk:0 st:--     jmp:602
+604: S=0              bc:0 mop:- kk:0 st:--     jmp:608 jl:S0
+605: S=CA|CB          bc:0 mop:- kk:0 st:--      
+606: S=0              bc:0 mop:- kk:0 st:--     jmp:608 jl:S0
+607: S=0              bc:0 mop:6 kk:4 st:--     ret
+608: CB=#3            bc:0 mop:- kk:3 st:S3=0   sub:6C6
+609: S=0              bc:0 mop:8 kk:2 st:--     jmp:02C
+60A: CA=CA&#12        bc:0 mop:- kk:C st:S3=0   jmp:665 jh:S1
+60B: --=D             bc:0 mop:3 kk:4 st:--     jmp:6F4
+60C: CB=#8            bc:0 mop:- kk:8 st:S=0    jmp:6F3
+60D: CB=S^#3          bc:1 mop:- kk:3 st:S=0    jmp:6F3
+60E: S=CB&#10         bc:0 mop:- kk:A st:--     jmp:610 jl:Z0
+60F: S=0              bc:0 mop:- kk:0 st:--     jmp:60B
+610: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:612 jl:Z0
+611: CA=CA&#12        bc:0 mop:- kk:C st:--     jmp:768
+612: S=0              bc:0 mop:- kk:0 st:--     jmp:611
+613: S=T^#8           bc:1 mop:- kk:8 st:--      
+614: S=0              bc:0 mop:- kk:0 st:--     jmp:60B
+615: S=0              bc:0 mop:- kk:0 st:--     jmp:611
+616: S=#8             bc:0 mop:7 kk:8 st:--     jmp:6F5
+617: S=0              bc:0 mop:7 kk:8 st:--     jmp:6F5
+618: S=0              bc:0 mop:7 kk:4 st:--      
+619: KA=1             bc:0 mop:6 kk:6 st:--     jmp:61C jl:S2
+61A: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:618 jl:Z0
+61B: --=S&#3          bc:0 mop:- kk:3 st:--     jmp:618
+61C: CB=CB&KA         bc:0 mop:- kk:0 st:--     jmp:7C6
+61D: CB=CB&KA         bc:0 mop:7 kk:1 st:--     jmp:7C6
+61E: CB=CB&#13        bc:0 mop:- kk:D st:--     jmp:6F7
+61F: CB=S|CB          bc:0 mop:3 kk:5 st:--     ret
+620: T=CA^#1          bc:1 mop:- kk:1 st:--     jmp:622 jl:Z0
+621: CB=V+1,sc        bc:0 mop:- kk:0 st:--     jmp:670 jh:S1
+622: T=CA^#9          bc:1 mop:- kk:9 st:S1=0   jmp:6FB
+623: CB=CB&#14        bc:0 mop:- kk:E st:S1=1   jmp:6FB
+624: CB=CB^#9         bc:1 mop:- kk:9 st:--     jmp:66D jh:S3
+625: T=#2             bc:0 mop:- kk:2 st:--     jmp:621
+626: KA=KA+sc,sc      bc:1 mop:- kk:0 st:S0=1   ret
+627: KA=KA+sc,sc      bc:1 mop:- kk:0 st:--     ret
+628: T=S              bc:0 mop:- kk:0 st:--     sub:48C
+629: KA=CA            bc:0 mop:- kk:0 st:--     jmp:500 jh:S1
+62A: S=T^#4           bc:1 mop:- kk:4 st:--     jmp:50A jl:Z0
+62B: KB=CA&CB         bc:0 mop:- kk:0 st:--     jmp:579
+62C: CB=0             bc:0 mop:8 kk:2 st:--     jmp:50B
+62D: T=0              bc:0 mop:- kk:0 st:--     jmp:62A
+62E: KB=KA+1          bc:1 mop:6 kk:4 st:--     jmp:7B8
+62F: KB=KB+CB,sc      bc:1 mop:- kk:0 st:--     jmp:788
+630: CA=CA+sc,sc      bc:0 mop:3 kk:B st:--     jmp:633
+631: V=V+1            bc:1 mop:6 kk:B st:--     jmp:67E
+632: CA=CA+sc,sc      bc:0 mop:3 kk:0 st:--     jmp:52D
+633: S=0              bc:0 mop:6 kk:0 st:--     jmp:51C
+634: S=0              bc:0 mop:- kk:0 st:--     jmp:124
+635: CB=0             bc:0 mop:3 kk:B st:S1=0   jmp:543
+636: S=#1             bc:0 mop:8 kk:1 st:--     jmp:006
+637: CA=S             bc:0 mop:2 kk:E st:S=0    jmp:545
+638: S=S&D            bc:0 mop:- kk:0 st:S1=Z0  ret
+639: --=1             bc:0 mop:3 kk:8 st:--     jmp:00D
+63A: T=#8             bc:0 mop:- kk:8 st:--     jmp:7BF
+63B: S=S&#1           bc:0 mop:- kk:1 st:S3=0   jmp:242 jl:Z0
+63C: S=0              bc:0 mop:6 kk:E st:--     jmp:5A5
+63D: CA=CA&#14        bc:0 mop:- kk:E st:S1=0   jmp:38C jh:S1 jl:S2
+63E: S=S&KA           bc:0 mop:6 kk:5 st:--     jmp:63C jl:Z0
+63F: U=S+1            bc:0 mop:- kk:0 st:--     jmp:590
+640: CA=#14           bc:1 mop:2 kk:E st:--     jmp:5B0
+641: S=0              bc:0 mop:6 kk:B st:--     jmp:69A
+642: CA=S             bc:0 mop:2 kk:E st:--     jmp:009
+643: S=0              bc:0 mop:4 kk:0 st:--     jmp:69A
+644: KB=KB^#1         bc:1 mop:- kk:1 st:S1=1   jmp:69B
+645: CA=CA+1          bc:1 mop:- kk:0 st:--     jmp:645 jh:CC
+646: KA=KA^#1         bc:1 mop:- kk:1 st:S1=1   jmp:69B
+647: CA=#8            bc:0 mop:- kk:8 st:--      
+648: CA=CA+1          bc:1 mop:- kk:0 st:--     jmp:648 jh:CC
+649: CA=CA+1          bc:1 mop:- kk:0 st:--     jmp:649 jh:CC
+64A: KB=CB            bc:0 mop:- kk:0 st:--     jmp:698
+64B: S=0              bc:0 mop:6 kk:7 st:--     jmp:69A
+64C: S=0              bc:0 mop:3 kk:E st:--     jmp:5A4
+64D: S=0              bc:0 mop:- kk:0 st:--     jmp:5AD
+64E: S=KA&D           bc:0 mop:6 kk:E st:--     jmp:5A6 jl:Z0
+64F: V=V+1,sc         bc:0 mop:4 kk:0 st:--     jmp:69E
+650: KA=KA+1,sc       bc:1 mop:6 kk:A st:--     jmp:6AF
+651: KB=0             bc:0 mop:6 kk:B st:--     jmp:6AA
+652: S=0              bc:0 mop:6 kk:6 st:--     jmp:6B0
+653: S=0              bc:0 mop:6 kk:6 st:--     jmp:3F8 jh:S1 jl:S2
+654: V=1              bc:1 mop:- kk:0 st:S3=0   jmp:6BB
+655: CA=CA+1,sc       bc:1 mop:- kk:0 st:--     jmp:6C0
+656: S=0              bc:0 mop:- kk:0 st:S2=1   jmp:007
+657: KA=0             bc:0 mop:- kk:0 st:--     jmp:6D9
+658: KB=KB+1,sc       bc:1 mop:- kk:0 st:--     jmp:6C4
+659: S=0              bc:0 mop:- kk:0 st:--     jmp:65C
+65A: KA=0,sc          bc:0 mop:6 kk:5 st:--     ret
+65B: CB=CB+1          bc:0 mop:- kk:0 st:!ZK     
+65C: V=S              bc:0 mop:2 kk:D st:--     jmp:6DA
+65D: V=1              bc:1 mop:- kk:0 st:S2=1   jmp:6DE
+65E: S=#1             bc:0 mop:8 kk:1 st:S=0    jmp:745
+65F: S=0              bc:0 mop:6 kk:7 st:--     ret
+660: S=0              bc:0 mop:3 kk:D st:--     jmp:663
+661: V=V+#2,sc        bc:1 mop:- kk:2 st:--     jmp:6E4
+662: S=0              bc:0 mop:6 kk:F st:S0=0   jmp:6E6
+663: S=0              bc:0 mop:6 kk:E st:S0=1   jmp:6E6
+664: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:6E9
+665: CA=CA|#1         bc:0 mop:- kk:1 st:S2=0   jmp:60C jl:S2
+666: V=V+1,sc         bc:1 mop:4 kk:0 st:--     jmp:6E8
+667: CA=CA|#3         bc:0 mop:- kk:3 st:S2=0   jmp:60C jl:S2
+668: KA=CB&#2         bc:0 mop:- kk:2 st:S0=0   jmp:6F6
+669: U=CA+sc,sc       bc:1 mop:- kk:0 st:--     jmp:66C jh:CC
+66A: --=#2            bc:0 mop:- kk:2 st:--     jmp:61E
+66B: U=CA+sc,sc       bc:1 mop:3 kk:B st:--      
+66C: T=0              bc:0 mop:4 kk:0 st:--     jmp:6FA
+66D: T=CA^#8          bc:1 mop:- kk:8 st:S1=1   jmp:6FC
+66E: T=#1             bc:0 mop:- kk:1 st:--     jmp:621
+66F: T=#1             bc:0 mop:- kk:1 st:--     jmp:621
+670: CA=U+sc,sc       bc:0 mop:3 kk:E st:--     ret
+671: KB=KB+1,sc       bc:1 mop:6 kk:4 st:S1=1   jmp:627
+672: S=0              bc:0 mop:6 kk:C st:--     jmp:76C
+673: S=V+CB,sc        bc:1 mop:- kk:0 st:--     jmp:6FE
+674: KB=KB+1,sc       bc:1 mop:6 kk:4 st:S0=1   jmp:6FF
+675: S=0              bc:0 mop:3 kk:E st:--     ret
+676: KB=KB+1,sc       bc:1 mop:6 kk:4 st:--     jmp:6FF
+677: S=0              bc:0 mop:- kk:0 st:--     ret
+678: U=U+sc,sc        bc:0 mop:E kk:D st:--     jmp:010 jh:CC jl:S0
+679: CB=CB+1          bc:1 mop:3 kk:1 st:--     jmp:019
+67A: S=D20            bc:0 mop:6 kk:6 st:--     jmp:7C5
+67B: S=0              bc:0 mop:E kk:C st:--     jmp:02B
+67C: S=0              bc:0 mop:3 kk:1 st:--     jmp:705
+67D: V=CB+#9          bc:0 mop:- kk:9 st:--     jmp:631 jh:CC
+67E: V=1              bc:1 mop:2 kk:C st:--     jmp:707
+67F: --=S+1           bc:0 mop:- kk:0 st:--     jmp:0D4 jh:S3 jl:S0
+680: S=0              bc:0 mop:5 kk:E st:--     jmp:708
+681: S=CA&#1          bc:0 mop:- kk:1 st:--     jmp:53C jl:Z0
+682: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:540 jl:Z0
+683: S=0              bc:0 mop:5 kk:E st:--     jmp:682
+684: V=#13            bc:0 mop:3 kk:D st:S2=1   jmp:709
+685: S=0              bc:0 mop:3 kk:A st:--     ret
+686: CB=CB^#11        bc:1 mop:- kk:B st:S1=1   jmp:193
+687: CA=CA^#2         bc:1 mop:- kk:2 st:S1=0   jmp:193
+688: CB=KB&CB         bc:0 mop:6 kk:7 st:--     jmp:566 jl:Z0
+689: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:1F0 jl:Z0
+68A: CB=0             bc:0 mop:3 kk:D st:--     jmp:02C
+68B: CA=0             bc:0 mop:3 kk:4 st:--     jmp:1FF
+68C: S=0              bc:0 mop:3 kk:8 st:--     jmp:211
+68D: S=CB|CA          bc:0 mop:7 kk:2 st:--     jmp:570 jl:Z0
+68E: --=CA&#2         bc:0 mop:- kk:2 st:--     jmp:32C jh:Z0 jl:Z0
+68F: V=#12            bc:0 mop:- kk:C st:--     ret
+690: CA=CA+sc,sc      bc:0 mop:3 kk:E st:--     jmp:304
+691: S=0              bc:0 mop:6 kk:F st:--     jmp:310
+692: S=0              bc:0 mop:6 kk:4 st:--     jmp:70B
+693: S=CB^#2          bc:1 mop:- kk:2 st:--     jmp:352 jl:Z0
+694: CA=CA+sc,sc      bc:1 mop:3 kk:B st:--     jmp:365
+695: V=#14            bc:0 mop:- kk:E st:--     jmp:63C jh:S1 jl:S2
+696: S=CA&#1          bc:0 mop:- kk:1 st:S2=1   jmp:640 jh:Z0
+697: S=0              bc:0 mop:- kk:0 st:--     jmp:548
+698: T=T+#2           bc:1 mop:- kk:2 st:--     jmp:594 jl:Z0
+699: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:--     jmp:641 jh:CC
+69A: CB=CB+CB,sc      bc:0 mop:- kk:0 st:S=0    jmp:711
+69B: CA=S             bc:0 mop:B kk:0 st:--     jmp:598
+69C: KA=S             bc:0 mop:6 kk:A st:--     jmp:713
+69D: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:64C jh:CC
+69E: U=U+sc,sc        bc:0 mop:- kk:0 st:--     jmp:714
+69F: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:--     jmp:64D jh:CC
+6A0: CB=CB|#8         bc:0 mop:- kk:8 st:S1=1   jmp:5B3
+6A1: S=CB&#2          bc:0 mop:- kk:2 st:S1=1   jmp:5B2 jl:Z0
+6A2: CB=U|CB          bc:0 mop:3 kk:5 st:S2=0   jmp:5CD
+6A3: CB=CB^#2         bc:1 mop:- kk:2 st:--     jmp:3CA jl:Z0
+6A4: CA=#3            bc:0 mop:- kk:3 st:S2=1   jmp:718
+6A5: CA=0             bc:0 mop:- kk:0 st:--     jmp:3D8
+6A6: CA=CA+sc,sc      bc:1 mop:3 kk:E st:--     jmp:3DE jl:S2
+6A7: CA=#10           bc:0 mop:- kk:A st:--     jmp:719
+6A8: U=CA             bc:0 mop:- kk:0 st:--     jmp:71B
+6A9: CA=#1            bc:0 mop:- kk:1 st:--     jmp:71E
+6AA: CB=CB+1,sc       bc:1 mop:A kk:3 st:S0=0   jmp:720
+6AB: T=T+#2,sc        bc:0 mop:- kk:2 st:S0=!Z0 jmp:5CE jl:S0
+6AC: CA=CA&#11        bc:0 mop:- kk:B st:--     jmp:721
+6AD: S=0              bc:0 mop:- kk:0 st:--     jmp:722
+6AE: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:5D4 jl:Z0
+6AF: CB=CB+sc,sc      bc:1 mop:3 kk:A st:--     jmp:727
+6B0: S=CA&#4          bc:0 mop:- kk:4 st:S0=0   jmp:3F4 jh:Z0
+6B1: S=0              bc:0 mop:3 kk:6 st:S0=0   jmp:798
+6B2: CB=S+CA+1        bc:0 mop:3 kk:9 st:S2=0   jmp:72A
+6B3: CB=KA|CB         bc:0 mop:- kk:0 st:--     jmp:72B
+6B4: U=CA             bc:0 mop:- kk:0 st:S0=1   jmp:72E
+6B5: S=T|CA           bc:0 mop:- kk:0 st:S0=0   jmp:120 jl:Z0
+6B6: CB=CA            bc:0 mop:- kk:0 st:S2=1   jmp:6B8
+6B7: T=U+1            bc:1 mop:- kk:0 st:--     jmp:641
+6B8: V=V+1,sc         bc:0 mop:1 kk:0 st:--     jmp:730
+6B9: U=CA             bc:0 mop:- kk:0 st:--     jmp:732
+6BA: T=S              bc:0 mop:- kk:0 st:--     jmp:3FC
+6BB: KB=0             bc:0 mop:6 kk:5 st:--     jmp:735
+6BC: CB=KA            bc:0 mop:3 kk:5 st:--     jmp:6C3
+6BD: KB=0,sc          bc:0 mop:6 kk:5 st:--     jmp:736
+6BE: S=S&#4           bc:0 mop:- kk:4 st:--     jmp:4A8 jl:Z0
+6BF: KA=#5            bc:0 mop:- kk:5 st:S=0    jmp:655
+6C0: --=S+sc,sc       bc:1 mop:- kk:0 st:--      
+6C1: KA=KA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:655 jh:CC
+6C2: CB=#10           bc:0 mop:- kk:A st:--     jmp:737
+6C3: CA=0             bc:0 mop:- kk:0 st:--     jmp:738
+6C4: KA=KA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:73B
+6C5: CA=#0            bc:0 mop:- kk:0 st:--     jmp:00A
+6C6: CA=#1            bc:0 mop:- kk:1 st:--     jmp:00A
+6C7: CA=#2            bc:0 mop:- kk:2 st:--     jmp:00A
+6C8: CA=#3            bc:0 mop:- kk:3 st:--     jmp:00A
+6C9: CA=#5            bc:0 mop:- kk:5 st:--     jmp:00A
+6CA: CA=#8            bc:0 mop:- kk:8 st:--     jmp:00A
+6CB: CA=#9            bc:0 mop:- kk:9 st:--     jmp:00A
+6CC: CA=#10           bc:0 mop:- kk:A st:--     jmp:00A
+6CD: CA=#11           bc:0 mop:- kk:B st:--     jmp:00A
+6CE: KB=KB&#2         bc:0 mop:- kk:2 st:--     jmp:5EA jl:Z0
+6CF: CB=KA&#8         bc:0 mop:- kk:8 st:--     jmp:73F
+6D0: S=0              bc:0 mop:3 kk:5 st:--     jmp:5F4 jl:S2
+6D1: KB=#3            bc:0 mop:- kk:3 st:S2=0   jmp:6D6
+6D2: KB=#3            bc:0 mop:- kk:3 st:S1=1   jmp:6D6
+6D3: KB=0             bc:0 mop:- kk:0 st:--     jmp:6D5
+6D4: CA=CA&#3         bc:0 mop:- kk:3 st:--     jmp:43A
+6D5: S=0              bc:0 mop:8 kk:4 st:--     jmp:6D7
+6D6: S=#4             bc:0 mop:8 kk:4 st:--      
+6D7: S=S^#11          bc:1 mop:- kk:B st:--     jmp:43C jl:Z0
+6D8: S=0              bc:0 mop:6 kk:D st:--     jmp:46B
+6D9: KB=0             bc:0 mop:- kk:0 st:--     jmp:740
+6DA: CA=KA            bc:0 mop:- kk:0 st:--     jmp:747
+6DB: KB=0             bc:0 mop:6 kk:9 st:--     jmp:748
+6DC: V=0              bc:0 mop:- kk:0 st:--     jmp:74A
+6DD: V=V+#2           bc:0 mop:1 kk:2 st:--     jmp:5F8 jl:Z0
+6DE: S=0              bc:0 mop:7 kk:4 st:S2=1   jmp:74C
+6DF: S=0              bc:0 mop:6 kk:E st:S0=1    
+6E0: CA=CA^#6         bc:1 mop:- kk:6 st:--     jmp:74D
+6E1: CB=CB^#7         bc:1 mop:- kk:7 st:--     jmp:74F
+6E2: CB=CB^#9         bc:1 mop:- kk:9 st:--     jmp:750
+6E3: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:751
+6E4: U=U+sc,sc        bc:1 mop:- kk:0 st:--      
+6E5: V=V+1,sc         bc:0 mop:4 kk:0 st:--     jmp:752
+6E6: V=CB+1,sc        bc:1 mop:- kk:0 st:--     jmp:757
+6E7: S=0              bc:0 mop:6 kk:E st:S0=0   jmp:75A
+6E8: U=U+sc,sc        bc:1 mop:- kk:0 st:--     jmp:75C
+6E9: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:4B0 jh:CC jl:S0
+6EA: KB=CB^KB         bc:1 mop:- kk:0 st:--     jmp:760
+6EB: S=0              bc:0 mop:6 kk:F st:--     jmp:762
+6EC: S=0              bc:0 mop:6 kk:C st:--     jmp:764
+6ED: CA=0             bc:0 mop:7 kk:8 st:--     jmp:765
+6EE: CB=#3            bc:0 mop:- kk:3 st:--     jmp:6C8
+6EF: S=S              bc:0 mop:6 kk:3 st:--     jmp:4D2 jl:Z0
+6F0: S=CB&#2          bc:0 mop:- kk:2 st:--     jmp:4D6 jl:Z0
+6F1: S=0              bc:0 mop:6 kk:3 st:--     jmp:4D8
+6F2: --=D20           bc:0 mop:6 kk:4 st:--     jmp:60A jl:Z0
+6F3: S=CA&#8          bc:0 mop:- kk:8 st:S3=1   jmp:60E jl:Z0
+6F4: S=#5             bc:0 mop:7 kk:5 st:--     jmp:618 jh:S1 jl:S2
+6F5: --=S&#9          bc:0 mop:- kk:9 st:--     jmp:769
+6F6: KA=S^KA          bc:1 mop:- kk:0 st:S2=0   jmp:61E jl:Z0
+6F7: CA=CA&#13        bc:0 mop:- kk:D st:--     jmp:76A
+6F8: T=CA             bc:0 mop:6 kk:A st:--     ret
+6F9: S=0              bc:0 mop:6 kk:E st:--     jmp:76B
+6FA: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:620 jl:Z0
+6FB: CB=CB^#6         bc:1 mop:- kk:6 st:--      
+6FC: S=T|CB           bc:0 mop:4 kk:0 st:--     jmp:624 jl:Z0
+6FD: S=0              bc:0 mop:6 kk:C st:--     jmp:76E
+6FE: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:--     jmp:674 jh:CC
+6FF: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:626 jl:Z0
+700: S=0              bc:0 mop:6 kk:D st:--     jmp:772
+701: S=0              bc:0 mop:6 kk:E st:--     jmp:776
+702: CB=1             bc:0 mop:3 kk:B st:--      
+703: CB=0             bc:0 mop:2 kk:C st:--     jmp:51C
+704: S=CA|CB          bc:0 mop:6 kk:B st:--     jmp:526 jl:Z0
+705: S=0              bc:0 mop:6 kk:0 st:--      
+706: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:528 jl:Z0
+707: S=0              bc:0 mop:5 kk:C st:--     jmp:0E1
+708: S=CA&#4          bc:0 mop:- kk:4 st:--     jmp:53A jl:Z0
+709: V=#11            bc:0 mop:6 kk:A st:--      
+70A: U=S              bc:0 mop:3 kk:E st:--     jmp:6B7
+70B: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:586 jl:Z0
+70C: KA=CA&#12        bc:0 mop:- kk:C st:S1=0   jmp:38C
+70D: U=U+sc,sc        bc:0 mop:- kk:0 st:--      
+70E: CA=U^#6          bc:1 mop:- kk:6 st:--      
+70F: CB=V^#4          bc:1 mop:- kk:4 st:--      
+710: S=CA|CB          bc:0 mop:6 kk:E st:--     jmp:596 jl:Z0
+711: CA=CA+CA+sc,sc   bc:0 mop:3 kk:7 st:S3=1   jmp:644 jh:CC
+712: KA=CA+#4         bc:1 mop:- kk:4 st:--     jmp:546 jl:CC
+713: KB=CB            bc:0 mop:6 kk:5 st:--     jmp:59C jl:SC
+714: CA=CA^#10        bc:1 mop:- kk:A st:--      
+715: CB=CB^#10        bc:1 mop:- kk:A st:--      
+716: S=CA|CB          bc:0 mop:6 kk:F st:--     jmp:5AC jl:Z0
+717: S=CB&#8          bc:0 mop:- kk:8 st:S=0    jmp:5BE jl:Z0
+718: CB=CA            bc:0 mop:3 kk:7 st:--     jmp:6A5
+719: CB=#13           bc:0 mop:- kk:D st:--      
+71A: KA=1             bc:0 mop:3 kk:9 st:S2=0   jmp:007
+71B: V=CB             bc:0 mop:6 kk:6 st:--      
+71C: CA=CA|#4         bc:0 mop:- kk:4 st:--      
+71D: S=0              bc:0 mop:3 kk:6 st:--     jmp:6A9
+71E: CB=#6            bc:0 mop:- kk:6 st:--      
+71F: KB=0             bc:0 mop:3 kk:B st:--     jmp:6AA
+720: KB=KB&#3         bc:0 mop:- kk:3 st:--     jmp:3F0 jh:S1 jl:Z0
+721: U=U+sc,sc        bc:0 mop:3 kk:6 st:--     jmp:6AE
+722: S=0              bc:0 mop:6 kk:6 st:--     jmp:6AE
+723: CB=0             bc:0 mop:3 kk:9 st:--      
+724: KA=1             bc:0 mop:6 kk:A st:--      
+725: KA=#4            bc:0 mop:- kk:4 st:--      
+726: CB=1             bc:1 mop:3 kk:A st:--     jmp:6A9
+727: S=0              bc:0 mop:6 kk:9 st:--      
+728: CB=CB+sc,sc      bc:1 mop:- kk:0 st:--      
+729: CA=CA+sc,sc      bc:1 mop:3 kk:9 st:--     jmp:651 jh:CC
+72A: T=0              bc:0 mop:- kk:0 st:S3=1   jmp:6AA
+72B: S=CA+#14         bc:0 mop:- kk:E st:--      
+72C: T=T&#8           bc:0 mop:- kk:8 st:S0=0   jmp:6B5
+72D: S=T|CB           bc:0 mop:6 kk:F st:--     jmp:5DA jl:Z0
+72E: CB=#10           bc:0 mop:- kk:A st:S1=0    
+72F: CA=#1            bc:0 mop:- kk:1 st:S2=0   jmp:6B8
+730: U=U+sc,sc        bc:0 mop:- kk:0 st:--     jmp:5DE jl:S2
+731: CB=CA            bc:0 mop:1 kk:0 st:--     jmp:654 jh:S3
+732: V=CB             bc:0 mop:- kk:0 st:--      
+733: CB=#10           bc:0 mop:- kk:A st:--      
+734: CA=0             bc:0 mop:1 kk:0 st:S2=1   jmp:6B8
+735: S=CA&#1          bc:0 mop:- kk:1 st:--     jmp:5E0 jl:Z0
+736: S=CA&#1          bc:0 mop:A kk:1 st:--     jmp:5E6 jl:Z0
+737: CA=1             bc:0 mop:- kk:0 st:--     jmp:658
+738: CB=0             bc:0 mop:- kk:0 st:--      
+739: KA=#8            bc:0 mop:- kk:8 st:--      
+73A: KB=#6            bc:0 mop:- kk:6 st:--     jmp:658
+73B: S=0              bc:0 mop:- kk:0 st:--      
+73C: S=0              bc:0 mop:- kk:0 st:--      
+73D: CB=CB+sc,sc      bc:1 mop:- kk:0 st:--      
+73E: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:658 jh:CC
+73F: S=CA^CB          bc:1 mop:6 kk:5 st:S0=1   jmp:5F0 jl:Z0
+740: CA=KA            bc:0 mop:- kk:0 st:--      
+741: CB=V             bc:0 mop:3 kk:9 st:--      
+742: V=1              bc:1 mop:- kk:0 st:--      
+743: KA=0             bc:0 mop:5 kk:D st:--      
+744: --=CB            bc:0 mop:- kk:0 st:--     jmp:659 jh:KBD
+745: S=0              bc:0 mop:6 kk:5 st:S2=1    
+746: CA=S|CA          bc:0 mop:3 kk:5 st:--     jmp:6DB
+747: CB=KB            bc:0 mop:2 kk:D st:--     jmp:6DB
+748: KA=CA            bc:0 mop:- kk:0 st:--      
+749: V=CB,sc          bc:0 mop:6 kk:E st:S=0    ret
+74A: U=#13            bc:0 mop:5 kk:D st:--      
+74B: V=V+1,sc         bc:0 mop:3 kk:7 st:--     jmp:5F8
+74C: S=0              bc:0 mop:1 kk:0 st:--     jmp:65F
+74D: CB=CB^#3         bc:1 mop:- kk:3 st:--      
+74E: S=CA|CB          bc:0 mop:6 kk:F st:--     jmp:5FA jl:Z0
+74F: S=CA|CB          bc:0 mop:6 kk:E st:--     jmp:5FC jl:Z0
+750: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:5FE jl:Z0
+751: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:660 jh:CC
+752: U=U+sc,sc        bc:0 mop:- kk:0 st:--      
+753: S=0              bc:0 mop:1 kk:0 st:--      
+754: S=0              bc:0 mop:6 kk:E st:--      
+755: S=V+CB+1,sc      bc:1 mop:- kk:0 st:--      
+756: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:--     jmp:661 jh:CC
+757: U=CA+sc,sc       bc:1 mop:- kk:0 st:--      
+758: CB=CB+1,sc       bc:0 mop:- kk:0 st:--      
+759: CA=CA+sc,sc      bc:0 mop:- kk:0 st:--     jmp:600 jl:S0
+75A: V=CB+1,sc        bc:0 mop:- kk:0 st:--      
+75B: U=CA+sc,sc       bc:0 mop:- kk:0 st:--     jmp:666
+75C: V=V+#2,sc        bc:0 mop:1 kk:2 st:--      
+75D: U=U+sc,sc        bc:0 mop:6 kk:F st:--      
+75E: S=V+CB+1,sc      bc:1 mop:- kk:0 st:--      
+75F: S=U+CA+sc,sc     bc:1 mop:- kk:0 st:--     jmp:664 jh:CC
+760: KA=CA^KA         bc:1 mop:- kk:0 st:--      
+761: S=KA|KB          bc:0 mop:- kk:0 st:S0=!Z0 ret
+762: KA=CA            bc:0 mop:- kk:0 st:--      
+763: KB=CB            bc:0 mop:6 kk:E st:--     jmp:6EA
+764: S=CA|CB          bc:0 mop:6 kk:F st:--     jmp:604 jl:Z0
+765: CB=0             bc:0 mop:3 kk:E st:--      
+766: S=0              bc:0 mop:3 kk:F st:--      
+767: V=#13+1          bc:0 mop:3 kk:D st:--     jmp:1E5
+768: CB=0             bc:0 mop:8 kk:2 st:--     jmp:60B
+769: --=S+1           bc:0 mop:6 kk:5 st:--     jmp:668 jh:S1
+76A: CA=S|CA          bc:0 mop:- kk:0 st:--     jmp:61F
+76B: V=CB+#2,sc       bc:1 mop:- kk:2 st:--     jmp:669 jh:S1
+76C: CB=T+CB,sc       bc:0 mop:- kk:0 st:--      
+76D: CA=CA+sc,sc      bc:0 mop:3 kk:9 st:S=0    jmp:4F0
+76E: S=0              bc:0 mop:3 kk:9 st:--      
+76F: T=0              bc:0 mop:6 kk:E st:--      
+770: CB=CB+#1,sc      bc:1 mop:- kk:1 st:--      
+771: CA=CA+sc,sc      bc:1 mop:3 kk:B st:S=0    jmp:24F
+772: KA=CA            bc:0 mop:- kk:0 st:--      
+773: KB=CB            bc:0 mop:- kk:0 st:--      
+774: CA=0             bc:0 mop:- kk:0 st:--      
+775: CB=0             bc:0 mop:3 kk:D st:--     jmp:701
+776: CB=CB+1,sc       bc:1 mop:- kk:0 st:--      
+777: CA=CA+sc,sc      bc:1 mop:- kk:0 st:--     jmp:675 jh:CC
+778: S=0              bc:0 mop:2 kk:E st:--     sub:086
+779: S=0              bc:0 mop:- kk:0 st:--     jmp:02C
+77A: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+77B: S=CA+sc,sc       bc:1 mop:- kk:0 st:--     jmp:778 jh:CC
+77C: S=CA&#2          bc:0 mop:- kk:2 st:--     jmp:77E jl:Z0
+77D: S=0              bc:0 mop:3 kk:5 st:S0=0   jmp:62E
+77E: CA=CA&#13        bc:0 mop:- kk:D st:--     jmp:77D
+77F: CA=CA|#2         bc:0 mop:- kk:2 st:--     jmp:77D
+780: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+781: S=CA^#11         bc:1 mop:- kk:B st:--     jmp:780 jh:Z0
+782: S=0              bc:0 mop:- kk:0 st:--     sub:3C4
+783: S=CA^#2          bc:1 mop:- kk:2 st:--     jmp:7B0 jl:Z0
+784: S=0              bc:0 mop:5 kk:E st:S0=1   jmp:784 jl:S0
+785: S=CA|CB          bc:0 mop:6 kk:5 st:S0=0    
+786: V=0              bc:0 mop:- kk:0 st:--     jmp:483
+787: KA=#6            bc:0 mop:- kk:6 st:--     jmp:77C
+788: KA=KA+CA+sc,sc   bc:1 mop:6 kk:F st:--      
+789: V=CB+1,sc        bc:1 mop:- kk:0 st:--      
+78A: U=CA+sc,sc       bc:1 mop:6 kk:E st:--      
+78B: S=V+CB,sc        bc:1 mop:- kk:0 st:--      
+78C: S=U+CA+sc,sc     bc:1 mop:6 kk:F st:--      
+78D: V=V+KB,sc        bc:0 mop:4 kk:0 st:--      
+78E: U=U+KA+sc,sc     bc:0 mop:- kk:0 st:--     jmp:790
+78F: CB=CB+KB,sc      bc:0 mop:- kk:0 st:--     jmp:792
+790: V=V+KB+1,sc      bc:1 mop:1 kk:0 st:--      
+791: U=U+KA+sc,sc     bc:1 mop:6 kk:F st:--     jmp:78D jh:CC
+792: V=#13            bc:0 mop:- kk:D st:--      
+793: CA=CA+KA+sc,sc   bc:0 mop:2 kk:E st:--      
+794: V=#14            bc:1 mop:6 kk:E st:--     jmp:47E
+795: S=CA|CB          bc:0 mop:- kk:0 st:S=0     
+796: S=0              bc:0 mop:6 kk:7 st:S=0    sub:6EA
+797: CA=#6            bc:0 mop:- kk:6 st:S1=1   jmp:17A jl:S0
+798: V=#14            bc:0 mop:5 kk:E st:S0=1   jmp:798 jl:S0
+799: S=CA&#4          bc:0 mop:- kk:4 st:--      
+79A: S=0              bc:0 mop:- kk:0 st:--     jmp:006
+79B: V=1              bc:1 mop:6 kk:6 st:--     jmp:6BB
+79C: V=V+1            bc:0 mop:5 kk:E st:S0=1   jmp:79C jl:S0
+79D: S=CA|CB          bc:0 mop:6 kk:4 st:--      
+79E: CA=CA&#3         bc:0 mop:- kk:3 st:--      
+79F: S=0              bc:0 mop:3 kk:4 st:--     jmp:040
+7A0: KB=#4+1          bc:0 mop:6 kk:4 st:S2=1    
+7A1: S=CA&#14         bc:0 mop:6 kk:E st:S1=1   jmp:7A6 jl:Z0
+7A2: V=#13            bc:0 mop:- kk:D st:--     jmp:578
+7A3: S=CA|CB          bc:0 mop:- kk:0 st:--      
+7A4: S=0              bc:0 mop:3 kk:F st:--     sub:6E7
+7A5: KB=KB+1,sc       bc:1 mop:- kk:0 st:--     jmp:7A9
+7A6: CA=0             bc:0 mop:- kk:0 st:--     jmp:7AA
+7A7: KB=KB+CB+1,sc    bc:1 mop:- kk:0 st:--      
+7A8: KA=S+CA+sc,sc    bc:1 mop:- kk:0 st:--     jmp:7A2
+7A9: KA=KA+sc,sc      bc:1 mop:6 kk:F st:--     jmp:7A4 jh:CC
+7AA: V=#13            bc:0 mop:- kk:D st:--      
+7AB: CB=0             bc:0 mop:2 kk:E st:--     jmp:226
+7AC: V=0              bc:0 mop:5 kk:E st:S0=1   jmp:7AC jl:S0
+7AD: CA=CB|D          bc:0 mop:- kk:0 st:S0=0   jmp:47D
+7AE: CB=CB&#3         bc:0 mop:- kk:3 st:S1=0   jmp:47F
+7AF: V=#13            bc:0 mop:- kk:D st:--     jmp:784
+7B0: S=CA^#1          bc:1 mop:- kk:1 st:--     jmp:7B4 jh:Z0
+7B1: S=CB^#5          bc:1 mop:- kk:5 st:--     jmp:7B4 jl:Z0
+7B2: S=0              bc:0 mop:6 kk:E st:--      
+7B3: S=0              bc:0 mop:3 kk:A st:--     jmp:7BB
+7B4: S=0              bc:0 mop:- kk:0 st:--     jmp:0B8
+7B5: --=#2            bc:0 mop:- kk:2 st:--     jmp:112
+7B6: S=CB^#1          bc:1 mop:- kk:1 st:--     jmp:7B4 jh:Z0 jl:Z0
+7B7: --=#1            bc:0 mop:- kk:1 st:--     jmp:10A
+7B8: S=CA&#8          bc:0 mop:- kk:8 st:--     jmp:7BA jl:Z0
+7B9: S=0              bc:0 mop:3 kk:F st:--     jmp:7B2
+7BA: S=0              bc:0 mop:6 kk:A st:--     jmp:7B9
+7BB: S=0              bc:0 mop:6 kk:E st:--     jmp:62F
+7BC: KB=CB            bc:0 mop:5 kk:E st:S0=1   jmp:7BC jl:S0
+7BD: KA=CA            bc:0 mop:- kk:0 st:--     jmp:786
+7BE: CA=0             bc:0 mop:2 kk:C st:--      
+7BF: V=#14            bc:0 mop:- kk:E st:--     jmp:06A
+7C0: V=1              bc:1 mop:5 kk:C st:S0=1   jmp:7C0 jl:S0
+7C1: CA=0             bc:0 mop:2 kk:C st:--      
+7C2: S=0              bc:0 mop:6 kk:6 st:--     jmp:1F8
+7C3: CB=CB&#14        bc:0 mop:- kk:E st:--     jmp:1F8
+7C4: S=S&CB           bc:0 mop:5 kk:C st:--     jmp:7BE jl:Z0
+7C5: KB=CB            bc:0 mop:5 kk:D st:--     jmp:020
+7C6: CA=CA&#2         bc:0 mop:- kk:2 st:--      
+7C7: S=CA|CB          bc:0 mop:- kk:0 st:--     jmp:616 jl:Z0
+7C8: CA=CA&#12        bc:0 mop:- kk:C st:--     jmp:7CA jl:Z0
+7C9: CB=0             bc:0 mop:3 kk:4 st:--     jmp:03D
+7CA: CA=CB            bc:0 mop:3 kk:3 st:--     jmp:50C
+7CB: CA=CB            bc:0 mop:3 kk:3 st:--     jmp:034
+7CC: CB=0             bc:0 mop:3 kk:D st:S3=1   sub:6EE
+7CD: S=0              bc:0 mop:6 kk:F st:--     jmp:7D4
+7CE: CB=0             bc:0 mop:3 kk:D st:--     jmp:197
+7CF: S=0              bc:0 mop:6 kk:4 st:--     jmp:251
+7D0: V=CB^#7          bc:1 mop:- kk:7 st:S3=1    
+7D1: V=CB^#12         bc:1 mop:- kk:C st:S3=1   jmp:7E0 jh:Z0 jl:Z0
+7D2: CB=S|KA          bc:0 mop:2 kk:E st:--     jmp:778
+7D3: KA=CB&KB         bc:0 mop:5 kk:E st:S0=0   jmp:7D2 jl:S0
+7D4: --=D             bc:0 mop:3 kk:E st:--     sub:6BE
+7D5: --=#4            bc:0 mop:- kk:4 st:--     jmp:32C
+7D6: S=0              bc:0 mop:6 kk:5 st:S0=1   jmp:250
+7D7: CB=CB+1,sc       bc:1 mop:- kk:0 st:--     jmp:7F3
+7D8: S=0              bc:0 mop:- kk:0 st:--     jmp:373
+7D9: CB=V+CB+sc,sc    bc:1 mop:- kk:0 st:--     jmp:381
+7DA: KB=V             bc:0 mop:- kk:0 st:--     jmp:374
+7DB: T=T+1            bc:0 mop:- kk:0 st:S=0    jmp:249 jh:S1
+7DC: KB=0             bc:0 mop:6 kk:8 st:--     jmp:5EB
+7DD: S=CA&#12         bc:0 mop:- kk:C st:--     jmp:7DC jh:Z0
+7DE: S=0              bc:0 mop:- kk:0 st:--     jmp:43D
+7DF: S=0              bc:0 mop:- kk:0 st:S2=1   jmp:4FA
+7E0: V=CB^#13         bc:1 mop:- kk:D st:S=0     
+7E1: S=CB^#9          bc:1 mop:- kk:9 st:--     jmp:0B8 jh:Z0
+7E2: CA=S|KA          bc:0 mop:2 kk:E st:--     jmp:778
+7E3: KA=CA&KB         bc:0 mop:5 kk:E st:S0=0   jmp:7E2 jl:S0
+7E4: S=CA|CB          bc:0 mop:5 kk:C st:--      
+7E5: S=CA             bc:0 mop:- kk:0 st:S1=Z0  jmp:2AC jh:Z0 jl:Z0
+7E6: S=0              bc:0 mop:- kk:0 st:--     jmp:2BB
+7E7: S=0              bc:0 mop:- kk:0 st:--     jmp:2B9
+7E8: CA=KA|CA         bc:0 mop:3 kk:4 st:S2=0   sub:25F
+7E9: V=0              bc:0 mop:6 kk:5 st:S0=0    
+7EA: CA=CA|#5         bc:0 mop:- kk:5 st:--     jmp:7F2
+7EB: CA=KB^CA         bc:1 mop:3 kk:5 st:S0=0   jmp:256
+7EC: S=KA+CA          bc:0 mop:6 kk:F st:--     jmp:7D4 jh:CC jl:CC
+7ED: S=CB+CB          bc:0 mop:6 kk:F st:S=0    jmp:7D4 jh:CC
+7EE: S=0              bc:0 mop:6 kk:5 st:S1=1    
+7EF: CA=S^CA          bc:1 mop:3 kk:5 st:S=0    jmp:149
+7F0: S=S|KA           bc:0 mop:6 kk:E st:S1=Z0   
+7F1: CB=CB+1          bc:1 mop:- kk:0 st:--     jmp:42D
+7F2: S=S              bc:0 mop:3 kk:B st:S=0    jmp:254 jh:Z0
+7F3: CA=CA+sc,sc      bc:1 mop:3 kk:F st:S=0    jmp:7EE
+7F4: S=0              bc:0 mop:- kk:0 st:--     jmp:4BA
+7F5: S=CB|CA          bc:0 mop:- kk:0 st:--     jmp:7F4 jh:Z0
+7F6: S=0              bc:0 mop:8 kk:2 st:--     jmp:4BA
+7F7: KB=KA+KA         bc:0 mop:6 kk:4 st:--     jmp:7E8
+7F8: CA=0             bc:0 mop:- kk:0 st:--     jmp:17F
+7F9: CB=1             bc:0 mop:3 kk:E st:--     jmp:7F7
+7FA: CA=0             bc:0 mop:3 kk:4 st:--     sub:5B0
+7FB: S=0              bc:0 mop:- kk:0 st:--     jmp:184
+7FC: CA=0             bc:0 mop:3 kk:F st:--     jmp:54C
+7FD: CA=CA|#2         bc:0 mop:- kk:2 st:S0=0   jmp:12A jl:S2
+7FE: S=0              bc:0 mop:- kk:0 st:--     jmp:000
+7FF: S=0              bc:0 mop:- kk:0 st:--     jmp:000

@@ -1,0 +1,68 @@
+' This is a very simple BASIC STAMP program to dump the mask ROMs from
+' my Wang 1220 word processor.  The pinout of the ROMs, as gathered from
+' the schematics, is as follows, along with the Stamp I/O pin which is
+' connected to the chip.
+'
+'  Pin  Function  I/O   Stamp
+'    1  +5v
+'    2  gnd
+'    3  read      in    B15
+'    4  A0        in    B0
+'    5  A1        in    B1
+'    6  A2        in    B2
+'    7  A3        in    B3
+'    8  A4        in    B4
+'    9  A5        in    B5
+'   10  A6        in    B6
+'   11  A7        in    B7
+'   12  A8        in    B8
+'   13  A9        in    B9
+'   14  A10       in    B10
+'   15  -13v
+'   16  out4      out   B14
+'   17  out3      out   B13
+'   18  out2      out   B12
+'   19  out1      out   B11
+'   20  cs4            (gnd)
+'   21  cs3            (gnd)
+'   22  cs2            (gnd)
+'   23  cs1            (gnd)
+'   24  Vdd            (gnd)
+'
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+addr  VAR Word  ' EPROM address
+dat   VAR Byte
+
+Setup:
+  DIRS = $87FF      ' pins 15, [10:0] are outputs
+
+Main:
+  FOR addr = 0 TO 2047
+
+    ' drive the address out
+    OUTS = addr
+
+    ' strobe the READ pin
+    OUT15 = 0
+    OUT15 = 1
+    OUT15 = 0
+
+    ' print address every so often
+    IF ((addr & 15) = 0) THEN
+      DEBUG HEX4 addr  ' address
+      DEBUG ":"        ' separator
+    ENDIF
+
+    ' read and print the data that comes back
+    dat = (IN14<<3) + (IN13<<2) + (IN12<<1) + IN11
+    DEBUG HEX1 dat
+
+    IF ((addr & 15) = 15) THEN
+      DEBUG CR
+    ENDIF
+
+  NEXT
+
+  END
