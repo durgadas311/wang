@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.31 2011/11/10 23:48:44 drmiller Exp $
+# $Id: Makefile,v 1.32 2011/11/11 00:20:35 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -62,6 +62,8 @@ tar:
 		w600-sim/wang600.rom w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.wng w600-sim/docs/*.html w600-sim/docs/*.gif
+
+jar: wang600.jar
 
 ship: tar
 	mv -v w600-sim.tgz /http/durgadas.com/sebhc

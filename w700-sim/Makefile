@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2011/11/10 23:48:44 drmiller Exp $
+# $Id: Makefile,v 1.12 2011/11/11 00:20:35 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -64,6 +64,8 @@ tar: rom.diff wang700.jar
 		w700-sim/rom.diff \
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
+
+jar: wang700.jar
 
 ship: tar
 	mv -v w700-sim.tgz /http/durgadas.com/sebhc
