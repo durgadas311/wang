@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.5 2011/11/11 00:13:24 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.6 2011/11/11 00:18:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #include <syslog.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -531,7 +532,7 @@ void sys_start(wang_sys_t *sys) {
 		}
 	}
 	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
-		peer_start = time();
+		peer_start = time(NULL);
 		openlog(WANG_SIM, LOG_PID, LOG_USER);
 
 		struct sockaddr addr;
@@ -553,7 +554,7 @@ void sys_stop(wang_sys_t *sys) {
 	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
 		struct rusage ru;
 		getrusage(RUSAGE_SELF, &ru);
-		time_t t = time() - peer_start;
+		time_t t = time(NULL) - peer_start;
 		int s = t % 60;
 		t /= 60;
 		int m = t % 60;
