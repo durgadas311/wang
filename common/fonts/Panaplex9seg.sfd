@@ -21,7 +21,7 @@ OS2Version: 0
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 1
 CreationTime: 1320863089
-ModificationTime: 1320869022
+ModificationTime: 1320969243
 OS2TypoAscent: 0
 OS2TypoAOffset: 1
 OS2TypoDescent: 0
@@ -35,6 +35,7 @@ HheadAscent: 0
 HheadAOffset: 1
 HheadDescent: 0
 HheadDOffset: 1
+OS2Vendor: 'PfEd'
 MarkAttachClasses: 1
 DEI: 91125
 Encoding: ISO8859-1
@@ -46,7 +47,7 @@ FitToEm: 1
 WinInfo: 0 24 9
 BeginPrivate: 0
 EndPrivate
-BeginChars: 256 20
+BeginChars: 256 22
 
 StartChar: asterisk
 Encoding: 42 42 0
@@ -667,6 +668,30 @@ SplineSet
  147.278 770.3 l 1
  267.278 770.726 l 1
  166.005 42.7256 l 1
+EndSplineSet
+EndChar
+
+StartChar: F
+Encoding: 70 70 20
+Width: 1450
+VWidth: 0
+Flags: HW
+LayerCount: 2
+EndChar
+
+StartChar: uni0007
+Encoding: 7 7 21
+Width: 0
+VWidth: 0
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+-382 -94 m 0
+ -382 -42.1123 -339.89 0 -288 0 c 0
+ -236.11 0 -194 -42.1123 -194 -94 c 0
+ -194 -145.888 -236.11 -188 -288 -188 c 0
+ -339.89 -188 -382 -145.888 -382 -94 c 0
 EndSplineSet
 EndChar
 EndChars
