@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.1 2011/11/12 00:27:28 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.2 2011/11/12 18:11:56 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -16,10 +16,7 @@ td.num { text-align: center; }
 <A HREF="#exec"><LI>Microcode Execution Sequence</LI></A>
 <A HREF="#timing"><LI>Microcode Instruction Timing</LI></A>
 <A HREF="#instrfmt"><LI>Microcode Instruction Format</LI></A>
-<A HREF="#display"><LI>Display</LI></A>
-<A HREF="#printer"><LI>Printer</LI></A>
 <A HREF="#tape"><LI>Cassette Tape</LI></A>
-<A HREF="#periph"><LI>Expansion (Peripheral) Ports</LI></A>
 </UL>
 
 <A NAME="block"><H3>Block Diagram</H3></A>
@@ -45,9 +42,8 @@ depending on registers and access operations.
 <TR><TD CLASS="num">KB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Lo *</TD></TR>
 <TR><TD CLASS="num">CA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM *</TD></TR>
 <TR><TD CLASS="num">CB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM</TD></TR>
-<TR><TD CLASS="num">GIOA</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
-<TR><TD CLASS="num">GIOB</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
-<TR><TD CLASS="num">IOB</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">TO</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
+<TR><TD CLASS="num">RO</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
 <TR><TD CLASS="num">M</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Mid</TD></TR>
 <TR><TD CLASS="num">N</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Lo</TD></TR>
 <TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
@@ -170,7 +166,7 @@ in the various phases:
 <TR>	<TD>CA = RAM *</TD></TR>
 <TR>	<TD>CB = ROM *</TD></TR>
 <TR>	<TD>CURRENT = next</TD></TR>
-<TR>	<TD>GIOA,GIOB = keyboard/peripheral *</TD></TR>
+<TR>	<TD>TO,RO = keyboard/peripheral *</TD></TR>
 <TR><TD COLSPAN=2>* Activities are dependent on<BR>
 selected microcode ops of instruction</TD></TR>
 </TABLE></UL>
@@ -212,17 +208,17 @@ as follows (layout for Solid State ROM).
 
 <P><UL><TABLE BORDER>
 <TR><TH>Loc</TH>
-	<TD CLASS="num" COLSPAN=4>L34</TD>
-	<TD CLASS="num" COLSPAN=4>L33</TD>
-	<TD CLASS="num" COLSPAN=4>L32</TD>
-	<TD CLASS="num" COLSPAN=4>L31</TD>
-	<TD CLASS="num" COLSPAN=4>L30</TD>
-	<TD CLASS="num" COLSPAN=4>L29</TD>
-	<TD CLASS="num" COLSPAN=4>L28</TD>
 	<TD CLASS="num" COLSPAN=4>L27</TD>
-	<TD CLASS="num" COLSPAN=4>L24</TD>
 	<TD CLASS="num" COLSPAN=4>L26</TD>
 	<TD CLASS="num" COLSPAN=4>L25</TD>
+	<TD CLASS="num" COLSPAN=4>L24</TD>
+	<TD CLASS="num" COLSPAN=4>L23</TD>
+	<TD CLASS="num" COLSPAN=4>L22</TD>
+	<TD CLASS="num" COLSPAN=4>L21</TD>
+	<TD CLASS="num" COLSPAN=4>L20</TD>
+	<TD CLASS="num" COLSPAN=4>L17</TD>
+	<TD CLASS="num" COLSPAN=4>L19</TD>
+	<TD CLASS="num" COLSPAN=4>L18</TD>
 </TR>
 <TR><TH>ROMs</TH>
 	<TD CLASS="num" COLSPAN=4>CM5910</TD>
@@ -231,7 +227,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=4>CM5940</TD>
 	<TD CLASS="num" COLSPAN=4>CM5950</TD>
 	<TD CLASS="num" COLSPAN=4>CM5960</TD>
-	<TD CLASS="num" COLSPAN=4>CM5370</TD>
+	<TD CLASS="num" COLSPAN=4>CM5970</TD>
 	<TD CLASS="num" COLSPAN=4>CM5980</TD>
 	<TD CLASS="num" COLSPAN=4>CM5990</TD>
 	<TD CLASS="num" COLSPAN=4>CM6000</TD>
@@ -299,6 +295,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=3>JL</TD>
 	<TD CLASS="num" COLSPAN=2>-</TD>
 </TR>
+<TR><TD COLSPAN=45>Locations shown for logiblock 6293</TD></TR>
 
 </TABLE></UL>
 
@@ -390,8 +387,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1110</TD><TD>ERR = 1</TD></TR>
 	<TR><TD>1111</TD><TD>(See ZO)</TD></TR>
 	<TR><TD COLSPAN=2>* Resets hardware,<BR>
-	including OV, KBD, and ERR<BR>
-	KA = KB = 0000</TD></TR>
+	including OV, KBD, and ERR</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -424,7 +420,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1110</TD><TD>LEFT=KK<SUB>0</SUB><BR>
 			RC = BI<SUB>0</SUB><BR>
 			TMR[LEFT]=0</TD></TR>
-	<TR><TD>1111</TD><TD>GIOA = KA<BR>GIOB = KB<BR>IOB = KK&lt;2:0&gt;</TD></TR>
+	<TR><TD>1111</TD><TD>TO = KA<BR>RO = KB</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -452,6 +448,14 @@ as follows (layout for Solid State ROM).
 </TD></TR>
 </TABLE></UL>
 
+<P><UL><TABLE BORDER>
+<TR><TH>MOP</TH><TH>KK</TH><TH>BI</TH><TH>function</TH></TR>
+<TR><TD ROWSPAN=2>1000</TD><TD ROWSPAN=2>x1xx</TD>
+				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0></TD></TR>
+<TR>				<TD>xxx1</TD><TD>Typewriter carriage function</TD></TR>
+<TR><TD>MOP</TD><TD>KK</TD><TD>BI</TD><TD>function</TD></TR>
+</TABLE></UL>
+
 <P><UL><TABLE>
 <TR><TD VALIGN="TOP">
 	<TABLE BORDER>
@@ -475,7 +479,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
 	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
 	<TR><TD>010</TD><TD>Bbus = D<SUB>1</SUB></TD></TR>
-	<TR><TD>011</TD><TD>Bbus = D<SUB>20</SUB></TD></TR>
+	<TR><TD>011</TD><TD>Bbus = D<SUB>2</SUB></TD></TR>
 	<TR><TD>100</TD><TD>Bbus = KA</TD></TR>
 	<TR><TD>101</TD><TD>Bbus = KB</TD></TR>
 	<TR><TD>110</TD><TD>Bbus = CA</TD></TR>
@@ -493,7 +497,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>100</TD><TD>KA = Zbus</TD></TR>
 	<TR><TD>101</TD><TD>KB = Zbus</TD></TR>
 	<TR><TD>110</TD><TD>CA = Zbus</TD></TR>
-	<TR><TD>111</TD><TD>no-op</TD></TR>
+	<TR><TD>111</TD><TD>CB = Zbus</TD></TR>
 	<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
 	</TABLE>
 </TD></TR>
@@ -513,33 +517,6 @@ as follows (layout for Solid State ROM).
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-	<TR><TH COLSPAN=4>D<SUB>1</SUB></TH>
-	<TH COLSPAN=4>D<SUB>2</SUB></TH></TR>
-	<TR>
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">0</TD>
-
-	<TD CLASS="num">3</TD>
-	<TD CLASS="num">2</TD>
-	<TD CLASS="num">1</TD>
-	<TD CLASS="num">0</TD>
-	</TR>
-	<TR>
-	<TD CLASS="num">STEP</TD>
-	<TD CLASS="num">Learn/<BR>Learn and Print</TD>
-	<TD CLASS="num">List/<BR>Learn and Print</TD>
-	<TD CLASS="num">Fl (!Sc)</TD>
-
-	<TD CLASS="num">n/a</TD>
-	<TD CLASS="num">n/a</TD>
-	<TD CLASS="num">Printer OFF</TD>
-	<TD CLASS="num">Rad (!Deg)</TD>
-	</TR>
-</TABLE></UL>
-
-<P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2 ROWSPAN=2>&nbsp;</TH>
 <TH COLSPAN=4>KA</TH>
 <TH COLSPAN=4>KB</TH></TR>
@@ -555,8 +532,7 @@ as follows (layout for Solid State ROM).
 </TR>
 <TR><TH>MOP == 0111</TH><TH>Out</TH>
 	<TD CLASS="num" COLSPAN=4>n/a</TD>
-	<TD CLASS="num" COLSPAN=3>n/a</TD>
-	<TD CLASS="num">PH<0></TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
 </TR>
 <TR><TH>MOP == 1010</TH><TH>In</TH>
 	<TD CLASS="num" COLSPAN=4>n/a</TD>
@@ -571,7 +547,7 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">WDT</TD>
 </TR>
 <TR><TH>MOP == 1100</TH><TH>In</TH>
-	<TD CLASS="num" COLSPAN=4>PC<SUB>0:3</SUB></TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
 	<TD CLASS="num">L/S</TD>
 	<TD CLASS="num">R/B</TD>
 	<TD CLASS="num">LHS</TD>
@@ -588,6 +564,37 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num" COLSPAN=4>Key/Periph Hi</TD>
 	<TD CLASS="num" COLSPAN=4>Key/Periph Lo</TD>
 </TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
+<TR>
+<TH COLSPAN=4>D<SUB>1</SUB></TH>
+<TH COLSPAN=4>D<SUB>2</SUB></TH></TR>
+<TR>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+</TR>
+<TR>
+	<TD CLASS="num">TRANS.</TD>
+	<TD CLASS="num">RECORD</TD>
+	<TD CLASS="num">DOUBLE</TD>
+	<TD CLASS="num">RIGHT</TD>
+
+	<TD CLASS="num">A|C|L</TD>
+	<TD CLASS="num">W|C</TD>
+	<TD CLASS="num">P|L|W|C</TD>
+	<TD CLASS="num">SKIP</TD>
+</TR>
+<TR><TD COLSPAN=8>!TRANS. & !RECORD = PLAY</TD></TR>
+<TR><TD COLSPAN=8>D<SUB>2</SUB> is cleared when read (BI=3)</TD></TR>
+<TR><TD COLSPAN=8>A=AUTO, C=CHAR, W=WORD, L=LINE, P=PARA</TD></TR>
 </TABLE></UL>
 
 <H4>Memory Usage</H4>
@@ -787,293 +794,5 @@ overwhelming 90,000 program steps (on both sides) or
 45 complete copies of the calculator memory (a program rarely consumed all of memory).
 For this reason, Wang data cassettes were much shorter,
 typically only having a few minutes of tape.
-
-<A NAME="periph"><H3>Expansion (Peripheral) Ports</H3></A>
-
-<H4>CN-24</H4>
-
-The CN-24 (Centronix 24-pin connector) is an output-only port, used primarily for
-printers and plotters. Only 6 bits of data output are provided. The pin-out is:
-
-<P><UL><TABLE BORDER>
-<TR><TD COLSPAN=4>GIOB<0:3></TD>
-    <TD COLSPAN=2>GIOA<0:1></TD>
-    <TD>ostb</TD>
-    <TD>RBS(i)</TD>
-    <TD COLSPAN=2>n/c</TD>
-    <TD>gnd</TD>
-    <TD>pwr</TD></TR>
-<TR><TH>1</TH>
-    <TH>2</TH>
-    <TH>3</TH>
-    <TH>4</TH>
-    <TH>5</TH>
-    <TH>6</TH>
-    <TH>7</TH>
-    <TH>8</TH>
-    <TH>9</TH>
-    <TH>10</TH>
-    <TH>11</TH>
-    <TH>12</TH></TR>
-<TR><TD COLSPAN=12 BGCOLOR="lightgray">&nbsp;</TD></TR>
-<TR><TH>13</TH>
-    <TH>14</TH>
-    <TH>15</TH>
-    <TH>16</TH>
-    <TH>17</TH>
-    <TH>18</TH>
-    <TH>19</TH>
-    <TH>20</TH>
-    <TH>21</TH>
-    <TH>22</TH>
-    <TH>23</TH>
-    <TH>24</TH></TR>
-<TR><TD COLSPAN=8>gnd</TD>
-    <TD COLSPAN=2>n/c</TD>
-    <TD>chass</TD>
-    <TD>gnd</TD></TR>
-</TABLE>
-
-<P>Signals with (i) are inputs to the calculator, all others are outputs.
-
-<DL>
-<DT><B>ostb (<span style="text-decoration: overline">TKWS</span>)</B>
-	<DD>Strobe for output to device
-<DT><B>RBS (<span style="text-decoration: overline">RBS</span>)</B>
-	<DD>Ack from device - output was processed
-</DL></UL>
-
-<H4>CN-36</H4>
-
-The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
-(daisy-chained). The pin-out is:
-
-<P><UL><TABLE BORDER>
-<TR><TD COLSPAN=4>KA<0:3>(i)</TD>
-    <TD COLSPAN=4>KB<0:3>(i)</TD>
-    <TD>istb(i)</TD>
-    <TD>PRIME(i)</TD>
-    <TD>Learn(i)</TD>
-    <TD COLSPAN=4>N<0:3></TD>
-    <TD COLSPAN=3>RB<0:2></TD></TR>
-<TR><TH>1</TH>
-    <TH>2</TH>
-    <TH>3</TH>
-    <TH>4</TH>
-    <TH>5</TH>
-    <TH>6</TH>
-    <TH>7</TH>
-    <TH>8</TH>
-    <TH>9</TH>
-    <TH>10</TH>
-    <TH>11</TH>
-    <TH>12</TH>
-    <TH>13</TH>
-    <TH>14</TH>
-    <TH>15</TH>
-    <TH>16</TH>
-    <TH>17</TH>
-    <TH>18</TH></TR>
-<TR><TD COLSPAN=18 BGCOLOR="lightgray">&nbsp;</TD></TR>
-<TR><TH>19</TH>
-    <TH>20</TH>
-    <TH>21</TH>
-    <TH>22</TH>
-    <TH>23</TH>
-    <TH>24</TH>
-    <TH>25</TH>
-    <TH>26</TH>
-    <TH>27</TH>
-    <TH>28</TH>
-    <TH>29</TH>
-    <TH>30</TH>
-    <TH>31</TH>
-    <TH>32</TH>
-    <TH>33</TH>
-    <TH>34</TH>
-    <TH>35</TH>
-    <TH>36</TH></TR>
-<TR><TD>RB<3></TD>
-    <TD COLSPAN=4>GIOB<0:3></TD>
-    <TD COLSPAN=4>GIOA<0:3></TD>
-    <TD COLSPAN=3>IOB<0:2></TD>
-    <TD>ostb</TD>
-    <TD>iack</TD>
-    <TD COLSPAN=3>gnd</TD>
-    <TD>chass</TD></TR>
-</TABLE>
-
-<P>Signals with (i) are inputs to the calculator, all others are outputs.
-
-<DL>
-<DT><B>istb (<span style="text-decoration: overline">GISN</span>)</B>
-	<DD>Strobe for input from device, sets KBD=1
-<DT><B>ostb (<span style="text-decoration: overline">GISO</span>)</B>
-	<DD>Strobe for output to device
-<DT><B>iack (<span style="text-decoration: overline">GKBD</span>)</B>
-	<DD>Ack from calculator - input was processed, reflects KBD=0
-</DL></UL>
-
-<P>The connector supplies the "always on" signals from N<0:3> and RB<0:3>,
-which are essentially display refresh data. This supports a device known as
-"Classroom Display" which was a large-digit remote copy of the main display.
-
-<P>The signals from IOB<0:2> are used to select devices on the daisy-chain.
-The following codes are used:
-
-<P><UL><TABLE BORDER>
-<TR><TH>IOB</TH><TH>Device</TH><TH>Command(s)</TH></TR>
-<TR><TD>000</TD><TD COLSPAN=2 BGCOLOR="lightgray">no device</TD></TR>
-<TR><TD>001</TD><TD BGCOLOR="lightgray">CN-24 (no device on CN-36)</TD>
-			<TD BGCOLOR="lightgray">ALPHA ... 02&nbsp;02<BR>
-					I/O 00&nbsp;xx thru 09&nbsp;xx<BR>
-					I/O 12&nbsp;xx</TD></TR>
-<TR><TD>01X</TD><TD>Model 630 Disk</TD><TD>I/O 13&nbsp;xx</TD></TR>
-<TR><TD>100</TD><TD ROWSPAN=2>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx</TD></TR>
-<TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx</TD></TR>
-<TR><TD>110</TD><TD COLSPAN=2 ROWSPAN=2>Future Expansion</TD></TR>
-<TR><TD>111</TD></TR>
-</TABLE></UL>
-
-<H5>Devices 100 and 101</H5>
-
-<P>The "Group I/O" peripherals were fairly limited. The devices generally
-responded to a byte code from the calculator, and then asserted Learn
-(and strobed PRIME as needed) and pushed program steps to the calculator.
-The devices and/or operators orchestrated the interaction.
-
-<P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
-
-<UL>
-<LI>The calculator outputs xx&nbsp;xx
-	with IOB=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) and suspends normal operation
-	(<B>ostb</B> activated)
-	<UL>
-	<LI>Device sees <B>ostb</B> and interprets byte
-	</UL>
-<LI>The device then typically asserts Learn
-<LI>The device sends program codes,
-	which the calculator handles "normally" via KBD
-	<UL>
-	<LI>Device waits for <B>iack</B> (KBD=0)
-	<LI>Device sends byte and activates <B>istb</B> (sets KBD=1)
-	<LI>Calculator sees KBD and processes input, which resets KBD and <B>iack</B>
-	</UL>
-<LI>The device de-asserts Learn if previously asserted
-<LI>The device sends GO
-	<UL>
-	<LI>(same protocol as above, for all bytes sent)
-	</UL>
-<LI>The calculator sets IOB=000 and resumes normal operation
-	<UL>
-	<LI>Data ignored by all devices, since IOB=000
-	</UL>
-</UL>
-
-Note: The calculator cannot tell the difference between codes sent by device and
-codes entered from keyboard.
-
-<H5>Device 01X</H5>
-
-<UL><TABLE BORDER>
-<TR><TD>X=0</TD><TD>Command mode (Calculator to Device)</TD></TR>
-<TR><TD>X=1</TD><TD>Data mode (direction depends on command)</TD></TR>
-</TABLE></UL>
-
-<P>The protocol is as follows (I/O 13&nbsp;xx command):
-
-<UL>
-<LI>The calculator sends the 3-byte address equivalent
-of the integer contents of register 00, most significant byte first, all with IOB=010
-(command mode)
-	<UL>
-	For each byte:
-	<LI>Device sees <B>ostb</B> and interprets byte
-	<LI>Device waits for <B>iack</B> (KBD=0)
-	<LI>Device activates <B>istb</B> (sets KBD=1)
-	<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
-	</UL>
-<LI>The calculator sends the size code, with IOB=010
-	<UL>
-	<LI>Device sees <B>ostb</B> and interprets byte
-	<LI>Device waits for <B>iack</B> (KBD=0)
-	<LI>Device activates <B>istb</B> (sets KBD=1)
-	<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
-	</UL>
-<LI>For Read operations:
-	<UL>
-	<LI>The calculator sets IOB=011 (data ignored by device)
-		<UL>
-		<LI>Device sees <B>ostb</B> and ignores byte
-		<LI>Device sees IOB=011 and switches to "data mode"
-		</UL>
-	<LI>The device sends N bytes
-		<UL>
-		<LI>Device waits for <B>iack</B> (KBD=0)
-		<LI>Device sends byte and activates <B>istb</B> (sets KBD=1)
-		<LI>Calculator sees KBD and processes data, resets KBD and <B>iack</B>
-		</UL>
-	<LI>The calculator stores N bytes,
-	starting at program step in register 01
-	</UL>
-<LI>For Write operations:
-	<UL>
-	<LI>The calculator sends N bytes,
-	starting from program step in register 01, with IOB=011
-		<UL>
-		<LI>Device sees IOB=011 and switches to "data mode"
-		<LI>Device sees <B>ostb</B> and processes byte
-		<LI>Device waits for <B>iack</B> (KBD=0)
-		<LI>Device activates <B>istb</B> (sets KBD=1)
-		<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
-		</UL>
-	<LI>The device stores N bytes at address
-	</UL>
-<LI>The device sends 00 (result)
-	<UL>
-	<LI>Device waits for <B>iack</B> (KBD=0)
-	<LI>Device sends result code and activates <B>istb</B> (sets KBD=1)
-	<LI>Calculator sees KBD and handles result, resets KBD and <B>iack</B>
-	</UL>
-<LI>The calculator sets IOB=000
-	<UL>
-	<LI>Data ignored by all devices, since IOB=000
-	</UL>
-</UL>
-
-<P>If the result code is not 00, the calculator sets OV (Prog Error).
-
-<P>Each byte sent from device is "seen" by the calculator as
-keyboard input, and is acknowledged by the act of reading that "keyboard code".
-
-<P>Each byte sent from the calculator is acknowledged by the device
-by sending a dummy "keyboard code".
-
-<P><UL><TABLE BORDER>
-<TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH><TD ROWSPAN=9>&nbsp;</TD>
-	<TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
-<TR><TD>00</TD><TD>0x01</TD><TD>Read 1 byte (step)</TD>
-	<TD>08</TD><TD>0x81</TD><TD>Write 1 byte (step)</TD></TR>
-<TR><TD>01</TD><TD>0x02</TD><TD>Read 8 bytes (steps)</TD>
-	<TD>09</TD><TD>0x82</TD><TD>Write 8 bytes (steps)</TD></TR>
-<TR><TD>02</TD><TD>0x04</TD><TD>Read 16 bytes (steps)</TD>
-	<TD>10</TD><TD>0x84</TD><TD>Write 16 bytes (steps)</TD></TR>
-<TR><TD>03</TD><TD>0x08</TD><TD>Read 32 bytes (steps)</TD>
-	<TD>11</TD><TD>0x88</TD><TD>Write 32 bytes (steps)</TD></TR>
-<TR><TD>04</TD><TD>0x10</TD><TD>Read 64 bytes (steps)</TD>
-	<TD>12</TD><TD>0x90</TD><TD>Write 64 bytes (steps)</TD></TR>
-<TR><TD>05</TD><TD>0x20</TD><TD>Read 128 bytes (steps)</TD>
-	<TD>13</TD><TD>0xa0</TD><TD>Write 128 bytes (steps)</TD></TR>
-<TR><TD>06</TD><TD>0x40</TD><TD>Read 256 bytes (steps)</TD>
-	<TD>14</TD><TD>0xc0</TD><TD>Write 256 bytes (steps)</TD></TR>
-<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD>
-	<TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
-</TABLE></UL>
-
-<P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
-Fixed/Removable Disk. The protocol is a block input/output of program steps,
-but could be used for (extended) register data as well. Sufficiently sophisticated
-code in ROM could allow all of RAM to be used for registers, and/or implement
-a simple "operating system" that demand-paged program and register data in RAM.
 
 </HTML>
