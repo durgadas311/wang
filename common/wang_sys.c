@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.6 2011/11/11 00:18:17 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.7 2011/11/12 18:11:12 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -621,6 +621,7 @@ void sys_setcass(wang_sys_t *sys, char *cass) {
 // The above addresses are NIBBLE addresses, as used by the
 // Wang. Byte offsets in file are >> 1.
 #ifdef __wang600__
+#if defined(__wang600__) || defined(__wang1200__)
 void sys_loadrom(wang_sys_t *sys, char *rom) {
 	uint8_t *mem = sys->rom;
 	__load_mem(mem, rom);
@@ -634,14 +635,41 @@ struct ucode_ovr_s {
 	} instr[SYS_MODEL_NUM];
 };
 static struct ucode_ovr_s ucode_ovr[] = {
+
+#ifdef __wang600__
 	{ 0x008, {
-[SYS_MODEL600_2TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  3 }},
-[SYS_MODEL600_6TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  7 }},
-[SYS_MODEL600_14TP] = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk = 15 }}
+[SYS_MODEL600_2TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  3, .ovr = 1 }},
+[SYS_MODEL600_6TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  7, .ovr = 1 }},
+[SYS_MODEL600_14TP] = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk = 15, .ovr = 1 }}
 	}}
+#endif // __wang600__
+
+#ifdef __wang1200__
+// 0 x x 0 1 0 1 1 1 1 0 = 01111010xx0 = 3d0, 3d2, 3d4, 3d6
+// 0000 0000 0000  0000  0000 0000 0011 0111 1111 0010 00xx
+// 000 000 000 000 0 0 0000 0000 0000 1 101111111 001 000
+// AI=0 BI=0 ZO=0 AOP=0 AC=0 BC=0 MOP=0 KK=0 ST=0 SUB=1 JAD=5fc JH=1 JL=0 (5fe)
+	{ 0x3d0, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+	}}
+	{ 0x3d2, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+	}}
+	{ 0x3d4, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+	}}
+	{ 0x3d6, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+	}}
+#endif // __wang1200__
+
 };
 #define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
-#endif // __wang600__
+#endif // __wang600__ || __wang1200__
 
 void sys_loadram(wang_sys_t *sys, char *ram) {
 	uint8_t *mem = sys->ram;
@@ -677,7 +705,7 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 		}
 	}
 	close(fd);
-#ifdef __wang600__
+#if defined(__wang600__) || defined(__wang1200__)
 	/*
 	 * overidden instructions were done as ucode was executed,
 	 * but rather than searching table on every instruction
@@ -685,8 +713,13 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	 */
 	int model = (sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
 	for (fd = 0; fd < NUM_UCODE_OVR; ++fd) {
-		sys->ucode[ucode_ovr[fd].adr] = ucode_ovr[fd].instr[model].word;
+		uint64_t u = ucode_ovr[fd].instr[model].word;
+		if (u >= 0x8000000000000000) {	// u.ovr == 1
+			sys->ucode[ucode_ovr[fd].adr] = u;
+		}
 	}
+#endif // __wang600__ || __wang1200__
+#ifdef __wang600__
 	/* now get RAM address mask... */
 	w600_ucode_t *u = (w600_ucode_t *)&sys->ucode[0x008];
 	ram_mask = (u->kk << 8) | 0x0ff;

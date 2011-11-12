@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_ucode.h,v 1.5 2011/11/06 00:48:45 drmiller Exp $"
+#ident "$Id: w600_ucode.h,v 1.6 2011/11/12 18:11:23 drmiller Exp $"
 
 #ifndef __w600_ucode_h__
 #define __w600_ucode_h__
@@ -22,7 +22,8 @@ typedef struct {
 	uint64_t zo:3;
 	uint64_t bi:3;
 	uint64_t ai:3;
-	uint64_t _unused: 20;
+	uint64_t _unused: 19;
+	uint64_t ovr:1; // used only for ucode override table
 } w600_ucode_t;
 
 #endif // __w600_ucode_h__
