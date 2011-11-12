@@ -1,0 +1,1079 @@
+<HTML>
+<HEAD>
+<!-- $Id: wang1200arch.html,v 1.1 2011/11/12 00:27:28 drmiller Exp $ -->
+<STYLE TYPE="text/css">
+td.key {width: 50; height: 50; text-align: center; font-size: 10; }
+td.num { text-align: center; }
+</STYLE>
+</HEAD>
+<BODY>
+
+<H2>Architecture of the Wang 1200</H2>
+
+<UL>
+<A HREF="#block"><LI>Block Diagram</LI></A>
+<A HREF="#hwreg"><LI>Hardware Registers</LI></A>
+<A HREF="#exec"><LI>Microcode Execution Sequence</LI></A>
+<A HREF="#timing"><LI>Microcode Instruction Timing</LI></A>
+<A HREF="#instrfmt"><LI>Microcode Instruction Format</LI></A>
+<A HREF="#display"><LI>Display</LI></A>
+<A HREF="#printer"><LI>Printer</LI></A>
+<A HREF="#tape"><LI>Cassette Tape</LI></A>
+<A HREF="#periph"><LI>Expansion (Peripheral) Ports</LI></A>
+</UL>
+
+<A NAME="block"><H3>Block Diagram</H3></A>
+
+<A HREF="wang1200-block-diag.gif"><IMG SRC="wang1200-block-diag.gif" WIDTH="100%"></A>
+
+<P>In the above diagram, fine lines represent single-bit (and serial) data paths,
+while thicker lines represent multiple bits of data in parallel (typically 4).
+Note, the hardware implements both parallel and serial paths,
+depending on registers and access operations.
+
+<A NAME="hwreg"><H3>Hardware Registers</H3></A>
+
+<P>The registers in the block diagram are explained here:
+
+<P><UL><TABLE BORDER>
+<TR><TH>Reg Name</TH><TH>Num Bits</TH><TH>Access</TH><TH>Meaning/Use</TH></TR>
+<TR><TD CLASS="num">S</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Machine State *</TD></TR>
+<TR><TD CLASS="num">T</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Hi *</TD></TR>
+<TR><TD CLASS="num">U</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Mid *</TD></TR>
+<TR><TD CLASS="num">V</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Memory Address, Lo *</TD></TR>
+<TR><TD CLASS="num">KA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Hi *</TD></TR>
+<TR><TD CLASS="num">KB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Input Data, Lo *</TD></TR>
+<TR><TD CLASS="num">CA</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM *</TD></TR>
+<TR><TD CLASS="num">CB</TD><TD CLASS="num">4</TD><TD CLASS="num">R/W</TD><TD>Data to/from RAM</TD></TR>
+<TR><TD CLASS="num">GIOA</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Hi</TD></TR>
+<TR><TD CLASS="num">GIOB</TD><TD CLASS="num">4</TD><TD CLASS="num">W/O</TD><TD>Expansion Output, Lo</TD></TR>
+<TR><TD CLASS="num">IOB</TD><TD CLASS="num">3</TD><TD CLASS="num">W/O</TD><TD>Expansion Select</TD></TR>
+<TR><TD CLASS="num">M</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Mid</TD></TR>
+<TR><TD CLASS="num">N</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Current Memory Address, Lo</TD></TR>
+<TR><TD CLASS="num">CC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Internal Carry Flag</TD></TR>
+<TR><TD CLASS="num">Z<SUB>o</SUB></TD><TD CLASS="num">1</TD></SUB></TD><TD CLASS="num">n/a</TD><TD>Zero Flag</TD></TR>
+<TR><TD CLASS="num">SC</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Carry Flag</TD></TR>
+<TR><TD CLASS="num">S'</TD><TD CLASS="num">4</TD><TD CLASS="num">n/a</TD><TD>Saved S</TD></TR>
+<TR><TD CLASS="num">SC'</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Saved SC</TD></TR>
+<TR><TD CLASS="num">OV</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Prog Error</TD></TR>
+<TR><TD CLASS="num">ERR</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Mach Error</TD></TR>
+<TR><TD CLASS="num">KBD</TD><TD CLASS="num">1</TD><TD CLASS="num">n/a</TD><TD>Key Pressed (input ready)</TD></TR>
+<TR><TD CLASS="num">TMR</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Motor Relay</TD></TR>
+<TR><TD CLASS="num">DWT</TD><TD CLASS="num">1</TD><TD CLASS="num">W/O</TD><TD>Tape Write (record) Data</TD></TR>
+<TR><TD CLASS="num">MHG/MHO</TD><TD CLASS="num">1</TD><TD CLASS="num">R/O</TD><TD>Tape Read Data (one-shot)</TD></TR>
+<TR><TD CLASS="num">RBS</TD><TD CLASS="num">1</TD><TD CLASS="num">R/O</TD><TD>CN-24 Ack (on device)</TD></TR>
+<TR><TD CLASS="num">CURRENT</TD><TD CLASS="num">11</TD><TD CLASS="num">n/a</TD><TD>Current Instruction Address</TD></TR>
+<TR><TD CLASS="num">STACK1</TD><TD CLASS="num">10</TD><TD CLASS="num">n/a</TD><TD>Top of Stack</TD></TR>
+<TR><TD CLASS="num">STACK2</TD><TD CLASS="num">10</TD><TD CLASS="num">n/a</TD><TD>2nd on Stack</TD></TR>
+<TR><TD COLSPAN=5>* Also used as general purpose registers, when non-conflicting</TD></TR>
+</TABLE></UL>
+
+<A NAME="exec"><H3>Microcode Execution Sequence</H3></A>
+
+<P>Microcode execution happens continuously, as long as the calculator has power.
+Each instruction contains the address of the next instruction, so there is
+no traditional "Instruction Counter" that increments.
+There is a "current instruction address"
+register, and two stack registers, used to control the flow of the microcode.
+In addition, certain keyboard conditions cause a hard-coded address to be forced
+into the current address register.
+
+<P>In normal operation, the current address is applied to the ROM and the resulting
+42-bit word is latched into the instruction register. For normal instructions,
+the "next address" field of the instruction is fed-back into the current address
+register, with the low-order 2 bits coming from a decoding of the condition
+address fields, JL and JH.
+
+<P>For "call" instructions, the previous value of the current address
+register is saved into the "STACK1" register, also saving the
+"STACK1" previous contents into "STACK2".
+
+<P>For "return" instructions, the contents of the "next address" field
+is ignored and the current address register is loaded from STACK1
+with the low-order bit forced to "1",
+and STACK1 is loaded form STACK2.
+
+<P>Note, a return instruction always
+returns to the odd address after the call-from address.
+This means that call instructions should always be at even addresses.
+
+<P>Microcode instruction execution sequence is terminated,
+and a new instruction address is forced,
+when certain keys are pressed.
+Because this is handled in hardware, these keys
+will immediately terminate any routine in progress
+and force the calculator to jump to the function programmed
+for that key.
+
+<P><UL><TABLE BORDER>
+<TR><TH>Key</TH>
+<TD CLASS="key">RESET *</TD>
+<TD CLASS="key">REWIND</TD>
+<TD CLASS="key">FORWARD</TD>
+<TD CLASS="key">CHAR/STOP</TD>
+<TD CLASS="key">(APR)</TD>
+</TR>
+<TR><TH>uCode<BR>Address</TH>
+<TD CLASS="num">000</TD>
+<TD CLASS="num">001</TD>
+<TD CLASS="num">002</TD>
+<TD CLASS="num">003</TD>
+<TD CLASS="num">004</TD>
+</TR>
+</TABLE></UL>
+
+<P>In addition, the microcode logic allows for hard-wired overriding
+of certain instructions. There are 12 locations reserved for overrides.
+
+<P>TBD what the overrides do.
+
+<A NAME="timing"><H3>Microcode Instruction Timing</H3></A>
+
+<P>The system clock starts with a 4MHz crystal that feeds a flip-flop
+(producing a 2MHz signal), and a 5-bit Johnson Counter
+producing a series of "phase" clocks which repeat at 400KHz.
+One microcode instruction is entirely executed within the
+Johnson Counter cycle.
+This establishes the microcode instruction time (a "cycle") of 2.5uS, or
+400,000 instructions per second.
+
+<P>The phase-clock signals, in combination with the 4MHz and 2MHz clocks,
+orchestrate the operation of the calculator.
+Early pulses are used to prepare hardware and save ("freeze") data,
+middle pulses are used to serially transfer data around the calculator
+registers, and late pulses are used to finish-up and finalize operations
+(such as accessing RAM or loading the next microcode instruction).
+
+Here are some key timing signals:
+
+<P><UL><IMG SRC="wang1200timing.gif"></UL>
+
+<P>The instruction cycle is divided into three main phases: Early Latching,
+Serial Data Transfer, and Late Latching. The following activities are performed
+in the various phases:
+
+<P><UL><TABLE BORDER>
+<TR><TD ROWSPAN=2>Early<BR>Latching</TD>
+	<TD>Machine State saved:<BR>
+	S' = S<BR>
+	SC' = SC</TD></TR>
+<TR>	<TD>T,U,V latched to memory<BR>
+	address decoders L,M,N *</TD></TR>
+<TR><TD ROWSPAN=3>Serial<BR>Data<BR>Transfer</TD>
+	<TD>Data shifted over A, B, and Z buses,<BR>
+	to/from selected registers<BR>
+	and through ALU *</TD></TR>
+<TR>	<TD>"return" pop stack *</TD></TR>
+<TR>	<TD>"call" push stack *</TD></TR>
+<TR><TD ROWSPAN=5>Late<BR>Latching</TD>
+	<TD>RAM = CA *</TD></TR>
+<TR>	<TD>CA = RAM *</TD></TR>
+<TR>	<TD>CB = ROM *</TD></TR>
+<TR>	<TD>CURRENT = next</TD></TR>
+<TR>	<TD>GIOA,GIOB = keyboard/peripheral *</TD></TR>
+<TR><TD COLSPAN=2>* Activities are dependent on<BR>
+selected microcode ops of instruction</TD></TR>
+</TABLE></UL>
+
+<P>Some notes on timing:
+
+<UL>
+<LI>Instructions that
+modify T, U, or V but also access memory will use the <U>old</U>
+value for T, U, or V for the memory address.
+<LI>Instructions that
+modify CA and write memory will store the <U>new</U> value for CA in memory.
+<LI>Instructions that access CA and also do memory read will get the <U>old</U>
+value from CA (the new value, loaded from memory,
+is not available until the next instruction).
+<LI>Conditional parts of the next address will use <U>old</U> S and SC values
+(S', SC'), while using <U>new</U> CC, Z<SUB>o</SUB>, KBD, and OV values.
+<LI>Instructions that access KA or KB and also test KBD (JL == 110) will
+use the <U>old</U> value of KA or KB, the input data (if KBD == 1)
+is not available until the next instruction.
+</UL>
+
+<P>In summary, interpreting (and writing) microcode instructions requires
+careful consideration of these timing anomalies.
+
+<P><B>Editor's Note:</B> While the schematics seem to imply that input data
+is forced into KA and KB on every instruction while KBD == 1,
+proper operation seems to dictate the KA and KB are latched only
+on instructions that use KBD in a conditional address (JL == 110).
+Also, unlike the schematics, KBD must be reset when JL == 110 and not
+exclusively by ST == 1001 (RESET).
+
+<P><A HREF="wang1200src.html">Here is some sample microcode</A>
+
+<A NAME="instrfmt"><H3>Microcode Instruction Format</H3></A>
+
+Each microcode instruction is 42 bits long. The instruction fields are
+as follows (layout for Solid State ROM).
+
+<P><UL><TABLE BORDER>
+<TR><TH>Loc</TH>
+	<TD CLASS="num" COLSPAN=4>L34</TD>
+	<TD CLASS="num" COLSPAN=4>L33</TD>
+	<TD CLASS="num" COLSPAN=4>L32</TD>
+	<TD CLASS="num" COLSPAN=4>L31</TD>
+	<TD CLASS="num" COLSPAN=4>L30</TD>
+	<TD CLASS="num" COLSPAN=4>L29</TD>
+	<TD CLASS="num" COLSPAN=4>L28</TD>
+	<TD CLASS="num" COLSPAN=4>L27</TD>
+	<TD CLASS="num" COLSPAN=4>L24</TD>
+	<TD CLASS="num" COLSPAN=4>L26</TD>
+	<TD CLASS="num" COLSPAN=4>L25</TD>
+</TR>
+<TR><TH>ROMs</TH>
+	<TD CLASS="num" COLSPAN=4>CM5910</TD>
+	<TD CLASS="num" COLSPAN=4>CM5920</TD>
+	<TD CLASS="num" COLSPAN=4>CM5930</TD>
+	<TD CLASS="num" COLSPAN=4>CM5940</TD>
+	<TD CLASS="num" COLSPAN=4>CM5950</TD>
+	<TD CLASS="num" COLSPAN=4>CM5960</TD>
+	<TD CLASS="num" COLSPAN=4>CM5370</TD>
+	<TD CLASS="num" COLSPAN=4>CM5980</TD>
+	<TD CLASS="num" COLSPAN=4>CM5990</TD>
+	<TD CLASS="num" COLSPAN=4>CM6000</TD>
+	<TD CLASS="num" COLSPAN=4>CM6010</TD>
+</TR>
+<TR><TH>Bits</TH>
+	<TD CLASS="num">41</TD>
+	<TD CLASS="num">40</TD>
+	<TD CLASS="num">39</TD>
+	<TD CLASS="num">38</TD>
+	<TD CLASS="num">37</TD>
+	<TD CLASS="num">36</TD>
+	<TD CLASS="num">35</TD>
+	<TD CLASS="num">34</TD>
+	<TD CLASS="num">33</TD>
+	<TD CLASS="num">32</TD>
+	<TD CLASS="num">31</TD>
+	<TD CLASS="num">30</TD>
+	<TD CLASS="num">29</TD>
+	<TD CLASS="num">28</TD>
+	<TD CLASS="num">27</TD>
+	<TD CLASS="num">26</TD>
+	<TD CLASS="num">25</TD>
+	<TD CLASS="num">24</TD>
+	<TD CLASS="num">23</TD>
+	<TD CLASS="num">22</TD>
+	<TD CLASS="num">21</TD>
+	<TD CLASS="num">20</TD>
+	<TD CLASS="num">19</TD>
+	<TD CLASS="num">18</TD>
+	<TD CLASS="num">17</TD>
+	<TD CLASS="num">16</TD>
+	<TD CLASS="num">15</TD>
+	<TD CLASS="num">14</TD>
+	<TD CLASS="num">13</TD>
+	<TD CLASS="num">12</TD>
+	<TD CLASS="num">11</TD>
+	<TD CLASS="num">10</TD>
+	<TD CLASS="num">9</TD>
+	<TD CLASS="num">8</TD>
+	<TD CLASS="num">7</TD>
+	<TD CLASS="num">6</TD>
+	<TD CLASS="num">5</TD>
+	<TD CLASS="num">4</TD>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+	<TD CLASS="num">-</TD>
+	<TD CLASS="num">-</TD>
+</TR>
+<TR><TH>Fields</TH>
+	<TD CLASS="num" COLSPAN=3>AI</TD>
+	<TD CLASS="num" COLSPAN=3>BI</TD>
+	<TD CLASS="num" COLSPAN=3>ZO</TD>
+	<TD CLASS="num" COLSPAN=3>AOP</TD>
+	<TD CLASS="num" COLSPAN=1>AC</TD>
+	<TD CLASS="num" COLSPAN=1>BC</TD>
+	<TD CLASS="num" COLSPAN=4>MOP</TD>
+	<TD CLASS="num" COLSPAN=4>KK</TD>
+	<TD CLASS="num" COLSPAN=4>ST</TD>
+	<TD CLASS="num" COLSPAN=1>SUB</TD>
+	<TD CLASS="num" COLSPAN=9>JAD</TD>
+	<TD CLASS="num" COLSPAN=3>JH</TD>
+	<TD CLASS="num" COLSPAN=3>JL</TD>
+	<TD CLASS="num" COLSPAN=2>-</TD>
+</TR>
+
+</TABLE></UL>
+
+<P>The instruction fields have the following effects on the hardware.
+
+<P>The notation REG&lt;n&gt; refers to Bit "n" of register "REG".
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=2>KK</TH></TR>
+<TR><TD>XXXX</TD><TD>Immediate operand</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE>
+<TR><TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>JAD<BR>
+	Fixed part of Next Address</TH></TR>
+	<TR><TD>XXXXXXXXX</TD><TD>Address&lt;10:2&gt;</TD></TR>
+	</TABLE>
+</TD>
+<TD ROWSPAN=2 VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>JH<BR>
+	MSB conditional part of<BR>Next Address</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>000</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
+	<TR><TD>001</TD><TD>CURRENT&lt;1&gt; = 1</TD></TR>
+	<TR><TD>010</TD><TD>CURRENT&lt;1&gt; = S'&lt;1&gt;</TD></TR>
+	<TR><TD>011</TD><TD>CURRENT&lt;1&gt; = S'&lt;3&gt;</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;1&gt; = 0</TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;1&gt; = CC</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;1&gt; = KBD *</TD></TR>
+	<TR><TD>111</TD><TD>CURRENT&lt;1&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD COLSPAN=2>* condition is also reset, KA,KB = data</TD></TR>
+	</TABLE>
+</TD>
+<TD ROWSPAN=2 VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>JL<BR>
+	LSB conditional part of<BR>Next Address</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>000</TD><TD>CURRENT&lt;0&gt; = 0</TD></TR>
+	<TR><TD>001</TD><TD>CURRENT&lt;0&gt; = 1</TD></TR>
+	<TR><TD>010</TD><TD>CURRENT&lt;0&gt; = S'&lt;0&gt;</TD></TR>
+	<TR><TD>011</TD><TD>CURRENT&lt;0&gt; = S'&lt;2&gt;</TD></TR>
+	<TR><TD>100</TD><TD>CURRENT&lt;0&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD>101</TD><TD>CURRENT&lt;0&gt; = CC</TD></TR>
+	<TR><TD>110</TD><TD>CURRENT&lt;0&gt; = SC'</TD></TR>
+	<TR><TD>111</TD><TD>Return:<BR>
+		CURRENT&lt;0&gt; = 1<BR>
+		CURRENT&lt;10:1&gt; = STACK1<BR>
+		STACK1 = STACK2</TD></TR>
+	</TABLE>
+<TD></TR>
+<TR><TD VALIGN="BOTTOM">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>SUB<BR>
+	Jump/Call<BR>
+	(no-op if JL == 111)</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>0</TD><TD>Jump (normal)<BR>CURRENT&lt;10:2&gt; = JAD</TD></TR>
+	<TR><TD>1</TD><TD>Call Subroutine<BR>
+		STACK2 = STACK1<BR>STACK1 = CURRENT<BR>
+		CURRENT&lt;10:2&gt; = JAD</TD></TR>
+	</TABLE>
+</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE>
+<TR><TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>ST<BR>
+	Machine Status Control</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>0000</TD><TD>no-op</TD></TR>
+	<TR><TD>0001</TD><TD>S&lt;0&gt; = 1</TD></TR>
+	<TR><TD>0010</TD><TD>S&lt;1&gt; = 1</TD></TR>
+	<TR><TD>0011</TD><TD>S&lt;2&gt; = 1</TD></TR>
+	<TR><TD>0100</TD><TD>S&lt;3&gt; = 1</TD></TR>
+	<TR><TD>0101</TD><TD>S&lt;0&gt; = 0</TD></TR>
+	<TR><TD>0110</TD><TD>S&lt;1&gt; = 0</TD></TR>
+	<TR><TD>0111</TD><TD>S&lt;2&gt; = 0</TD></TR>
+	<TR><TD>1000</TD><TD>S&lt;3&gt; = 0</TD></TR>
+	<TR><TD>1001</TD><TD>RESET *</TD></TR>
+	<TR><TD>1010</TD><TD>S&lt;0&gt; = ~Z<SUB>o</SUB></TD></TR>
+	<TR><TD>1011</TD><TD>S&lt;1&gt; = Z<SUB>o</SUB></TD></TR>
+	<TR><TD>1100</TD><TD>OV = 1</TD></TR>
+	<TR><TD>1101</TD><TD>S = 0000</TD></TR>
+	<TR><TD>1110</TD><TD>ERR = 1</TD></TR>
+	<TR><TD>1111</TD><TD>(See ZO)</TD></TR>
+	<TR><TD COLSPAN=2>* Resets hardware,<BR>
+	including OV, KBD, and ERR<BR>
+	KA = KB = 0000</TD></TR>
+	</TABLE>
+</TD>
+<TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>MOP<BR>
+	Memory/Peripheral Operations</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>0000</TD><TD>no-op</TD></TR>
+	<TR><TD>0001</TD><TD>ram(U,V) = CA,CB</TD></TR>
+	<TR><TD>0010</TD><TD>ram(KK,V) = CA,CB</TD></TR>
+	<TR><TD>0011</TD><TD>ram(15,KK) = CA,CB</TD></TR>
+	<TR><TD>0100</TD><TD>CA,CB = ram(U,V)</TD></TR>
+	<TR><TD>0101</TD><TD>CA,CB = ram(KK,V)</TD></TR>
+	<TR><TD>0110</TD><TD>CA,CB = ram(15,KK)</TD></TR>
+	<TR><TD>0111</TD><TD>Op based on KK</TD></TR>
+	<TR><TD>1000</TD><TD>Op based on KK</TD></TR>
+	<TR><TD>1001</TD><TD>? KA = SKA</TD></TR>
+	<TR><TD>1010</TD><TD>KB = tape/stat</TD></TR>
+	<TR><TD>1011</TD><TD>	D<SUB>IN1</SUB> = KA<SUB>0</SUB><BR>
+				D<SUB>IN0</SUB> = KB<SUB>0</SUB></TD></TR>
+	<TR><TD>1100</TD><TD>KB = tape/stat</TD></TR>
+	<TR><TD>1101</TD><TD>LEFT=KK<SUB>0</SUB><BR>
+			HI[LEFT]=KK<SUB>2</SUB><BR>
+			FF/RW=KK<SUB>1</SUB><BR>
+			FF/RW[LEFT]=KK<SUB>3</SUB><BR>
+			D<SUB>IN1</SUB> = 0<BR>
+			D<SUB>IN0</SUB> = 0<BR>
+			RC = BI<SUB>0</SUB><BR>
+			TMR[LEFT]=1</TD></TR>
+	<TR><TD>1110</TD><TD>LEFT=KK<SUB>0</SUB><BR>
+			RC = BI<SUB>0</SUB><BR>
+			TMR[LEFT]=0</TD></TR>
+	<TR><TD>1111</TD><TD>GIOA = KA<BR>GIOB = KB<BR>IOB = KK&lt;2:0&gt;</TD></TR>
+	</TABLE>
+</TD>
+<TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=3>BC,AOP<BR>
+	ALU Function</TH></TR>
+	<TR><TH>op</TH><TH>flags<BR>set</TH><TH>affect</TH></TR>
+	<TR><TD>0,000</TD><TD>CC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>0,001</TD><TD>CC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>0,010</TD><TD>CC, SC</TD><TD>Zbus = Abus + Bbus</TD></TR>
+	<TR><TD>0,011</TD><TD>CC, SC</TD><TD>Zbus = Abus + Bbus + SC</TD></TR>
+	<TR><TD>0,100</TD><TD>CC, SC</TD><TD>Zbus = Abus + Bbus + 1</TD></TR>
+	<TR><TD>0,101</TD><TD></TD><TD>Zbus = Abus & Bbus</TD></TR>
+	<TR><TD>0,110</TD><TD></TD><TD>Zbus = Abus | Bbus</TD></TR>
+	<TR><TD>1,000</TD><TD>CC</TD><TD>Zbus = Abus - Bbus</TD></TR>
+	<TR><TD>1,001</TD><TD>CC</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+	<TR><TD>1,010</TD><TD>CC, SC</TD><TD>Zbus = Abus - Bbus</TD></TR>
+	<TR><TD>1,011</TD><TD>CC, SC</TD><TD>Zbus = Abus - Bbus - SC</TD></TR>
+	<TR><TD>1,100</TD><TD>CC, SC</TD><TD>Zbus = Abus - Bbus - 1</TD></TR>
+	<TR><TD>1,101</TD><TD></TD><TD>Zbus = Abus & Bbus</TD></TR>
+	<TR><TD>1,110</TD><TD></TD><TD>Zbus = Abus ^ Bbus</TD></TR>
+	<TR><TD>X,111</TD><TD></TD><TD>Zbus = 0000</TD></TR>
+	<TR><TD COLSPAN=3>Z<SUB>o</SUB> is always updated</TD></TR>
+	</TABLE>
+</TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE>
+<TR><TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>AC,AI<BR>Source for A bus</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>0,XXX</TD><TD>Abus = 0000</TD></TR>
+	<TR><TD>1,000</TD><TD>Abus = S</TD></TR>
+	<TR><TD>1,001</TD><TD>Abus = T</TD></TR>
+	<TR><TD>1,010</TD><TD>Abus = U</TD></TR>
+	<TR><TD>1,011</TD><TD>Abus = V</TD></TR>
+	<TR><TD>1,100</TD><TD>Abus = KA</TD></TR>
+	<TR><TD>1,101</TD><TD>Abus = KB</TD></TR>
+	<TR><TD>1,110</TD><TD>Abus = CA</TD></TR>
+	<TR><TD>1,111</TD><TD>Abus = CB</TD></TR>
+	</TABLE>
+</TD>
+<TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
+	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
+	<TR><TD>010</TD><TD>Bbus = D<SUB>1</SUB></TD></TR>
+	<TR><TD>011</TD><TD>Bbus = D<SUB>20</SUB></TD></TR>
+	<TR><TD>100</TD><TD>Bbus = KA</TD></TR>
+	<TR><TD>101</TD><TD>Bbus = KB</TD></TR>
+	<TR><TD>110</TD><TD>Bbus = CA</TD></TR>
+	<TR><TD>111</TD><TD>Bbus = CB</TD></TR>
+	</TABLE></UL>
+</TD>
+<TD VALIGN="TOP">
+	<TABLE BORDER>
+	<TR><TH COLSPAN=2>ZO<BR>Dest. for Z bus</TH></TR>
+	<TR><TH>op</TH><TH>affect</TH></TR>
+	<TR><TD>000</TD><TD>S = Zbus *</TD></TR>
+	<TR><TD>001</TD><TD>T = Zbus</TD></TR>
+	<TR><TD>010</TD><TD>U = Zbus</TD></TR>
+	<TR><TD>011</TD><TD>V = Zbus</TD></TR>
+	<TR><TD>100</TD><TD>KA = Zbus</TD></TR>
+	<TR><TD>101</TD><TD>KB = Zbus</TD></TR>
+	<TR><TD>110</TD><TD>CA = Zbus</TD></TR>
+	<TR><TD>111</TD><TD>no-op</TD></TR>
+	<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
+	</TABLE>
+</TD></TR>
+</TABLE></UL>
+
+<H4>Bit Assignments for I/O Ops</H4>
+
+<P><UL><TABLE BORDER>
+	<TR><TD>MXA</TD><TD>TMR & LEFT </TD></TR>
+	<TR><TD>MXB</TD><TD></TD></TR>
+	<TR><TD>MXC</TD><TD></TD></TR>
+	<TR><TD>MXD</TD><TD></TD></TR>
+	<TR><TD>MXE</TD><TD>TMR & RIGHT</TD></TR>
+	<TR><TD>MXF</TD><TD></TD></TR>
+	<TR><TD>MXG</TD><TD></TD></TR>
+	<TR><TD>MXH</TD><TD></TD></TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
+	<TR><TH COLSPAN=4>D<SUB>1</SUB></TH>
+	<TH COLSPAN=4>D<SUB>2</SUB></TH></TR>
+	<TR>
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+
+	<TD CLASS="num">3</TD>
+	<TD CLASS="num">2</TD>
+	<TD CLASS="num">1</TD>
+	<TD CLASS="num">0</TD>
+	</TR>
+	<TR>
+	<TD CLASS="num">STEP</TD>
+	<TD CLASS="num">Learn/<BR>Learn and Print</TD>
+	<TD CLASS="num">List/<BR>Learn and Print</TD>
+	<TD CLASS="num">Fl (!Sc)</TD>
+
+	<TD CLASS="num">n/a</TD>
+	<TD CLASS="num">n/a</TD>
+	<TD CLASS="num">Printer OFF</TD>
+	<TD CLASS="num">Rad (!Deg)</TD>
+	</TR>
+</TABLE></UL>
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=2 ROWSPAN=2>&nbsp;</TH>
+<TH COLSPAN=4>KA</TH>
+<TH COLSPAN=4>KB</TH></TR>
+<TR>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+<TD CLASS="num">3</TD>
+<TD CLASS="num">2</TD>
+<TD CLASS="num">1</TD>
+<TD CLASS="num">0</TD>
+</TR>
+<TR><TH>MOP == 0111</TH><TH>Out</TH>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num" COLSPAN=3>n/a</TD>
+	<TD CLASS="num">PH<0></TD>
+</TR>
+<TR><TH>MOP == 1010</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num">SKB<SUB>0</SUB></TD>
+	<TD CLASS="num">PSKB<SUB>1</SUB></TD>
+	<TD CLASS="num">LOP</TD>
+	<TD CLASS="num">ROP</TD>
+</TR>
+<TR><TH>MOP == 1011</TH><TH>Out</TH>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num" COLSPAN=3>n/a</TD>
+	<TD CLASS="num">WDT</TD>
+</TR>
+<TR><TH>MOP == 1100</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>PC<SUB>0:3</SUB></TD>
+	<TD CLASS="num">L/S</TD>
+	<TD CLASS="num">R/B</TD>
+	<TD CLASS="num">LHS</TD>
+	<TD CLASS="num">RHS</TD>
+</TR>
+<TR><TH>MOP == 1001</TH><TH>In</TH>
+	<TD CLASS="num">n/a</TD>
+	<TD CLASS="num">KR/B</TD>
+	<TD CLASS="num">ORG</TD>
+	<TD CLASS="num">ADJ</TD>
+	<TD CLASS="num" COLSPAN=4>n/a</TD>
+</TR>
+<TR><TH>JL == 110</TH><TH>In</TH>
+	<TD CLASS="num" COLSPAN=4>Key/Periph Hi</TD>
+	<TD CLASS="num" COLSPAN=4>Key/Periph Lo</TD>
+</TR>
+</TABLE></UL>
+
+<H4>Memory Usage</H4>
+
+All memory in the calculator is organized as 4-bit words.
+Memory addresses are not byte-addresses, but 4-bit-word addresses.
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
+<TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Purpose</TH></TR>
+<TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD>System State</TD></TR>
+<TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD>Display Register</TD></TR>
+<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD>Sci Notation Display</TD></TR>
+<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD>Floating Point Display</TD></TR>
+<TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD>Learn Mode Display</TD></TR>
+<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD>Temp Register</TD></TR>
+<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD>Temp Register</TD></TR>
+<TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD>Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD>Prog Subr Stack</TD></TR>
+<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD>Steps 0000 - 0007</TD></TR>
+<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (245)</TD><TD>Steps 0008 - 0015</TD></TR>
+<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (244)</TD><TD>Steps 0016 - 0023</TD></TR>
+<TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
+<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD>Steps 1824 - 1831</TD></TR>
+<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD>Steps 1832 - 1839</TD></TR>
+<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD>Steps 1840 - 1847</TD></TR>
+<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD>GP Reg, Left</TD></TR>
+<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD>GP Reg, Right</TD></TR>
+<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12 (12)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11 (11)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10 (10)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09 (9)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08 (8)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07 (7)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06 (6)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05 (5)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04 (4)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03 (3)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02 (2)</TD><TD>GP Reg</TD></TR>
+<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01 (1)</TD><TD>GP Reg *</TD></TR>
+<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00 (0)</TD><TD>GP Reg *</TD></TR>
+<TR><TD COLSPAN=3>* Certain commands depend on values in registers 0 and 1.<BR>
+For example, plotting commands expect<BR>
+0 to contain the Y delta, and 1 the X delta</TD></TR>
+</TABLE></UL>
+
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=6>System State Memory Usage</TH></TR>
+<TR><TH>RAM<BR>Address</TH><TH>T,U,V</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR><TD>0xfff</TD><TD>15,15,15</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>Keyboard<BR>Trace</TD></TR>
+<TR><TD>0xffe</TD><TD>15,15,14</TD><TD COLSPAN=4>scratch</TD></TR>
+<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>-</TD><TD>-</TD><TD>Group<BR>I/O</TD><TD>Program<BR>Trace</TD></TR>
+<TR><TD>0xffc</TD><TD>15,15,12</TD><TD COLSPAN=4>unused?</TD></TR>
+<TR><TD>0xffb</TD><TD>15,15,11</TD><TD COLSPAN=4>Prog Subr Stack Level</TD></TR>
+<TR><TD>0xffa</TD><TD>15,15,10</TD><TD COLSPAN=4>Prefix State</TD></TR>
+<TR><TD>0xff9</TD><TD>15,15,9</TD><TD COLSPAN=4>unknown</TD></TR>
+<TR><TD>0xff8</TD><TD>15,15,8</TD><TD COLSPAN=4>KB Keyboard code</TD></TR>
+<TR><TD>0xff7</TD><TD>15,15,7</TD><TD COLSPAN=4>KA Keyboard code</TD></TR>
+<TR><TD>0xff6</TD><TD>15,15,6</TD><TD COLSPAN=4>Tape Bit</TD></TR>
+<TR><TD>0xff5</TD><TD>15,15,5</TD><TD COLSPAN=4>Tape Word</TD></TR>
+<TR><TD>0xff4</TD><TD>15,15,4</TD><TD COLSPAN=4>Number Entry State</TD></TR>
+<TR><TD>0xff3</TD><TD>15,15,3</TD><TD>Prefix</TD><TD>ROM</TD><TD>Stop</TD><TD>Run</TD></TR>
+<TR><TD>0xff2</TD><TD>15,15,2</TD><TD COLSPAN=4>P.C. Mem Addr, L</TD></TR>
+<TR><TD>0xff1</TD><TD>15,15,1</TD><TD COLSPAN=4>P.C. Mem Addr, M</TD></TR>
+<TR><TD>0xff0</TD><TD>15,15,0</TD><TD COLSPAN=4>P.C. Mem Addr, H</TD></TR>
+</TD></TR>
+</TABLE>
+
+<P><DL>
+	<DT><B>Keyboard Trace (15,15,15)<0>:</B>
+	<DD>	Tracing of keyboard commands is enabled
+	<DT><B>Group I/O (15,15,13)<1>:</B>
+	<DD>	A Group I/O sequence is running
+	<DT><B>Program Trace (15,15,13)<0>:</B>
+	<DD>	Tracing of program commands is enabled
+	<DT><B>Prefix State (15,15,10):</B>
+	<DD>	<TABLE BORDER>
+		<TR><TD>00 = SEARCH</TD>		<TD>08 = CALL</TD></TR>
+		<TR><TD>01 = RECALL</TD>		<TD>09 = MARK</TD></TR>
+		<TR><TD>02 = PRINT</TD>			<TD>10 = STORE</TD></TR>
+		<TR><TD>03 = I/O</TD>			<TD>11 = ALPHA</TD></TR>
+		<TR><TD>04 = SEARCH ROM (15 03)</TD>	<TD>12 = INDIR</TD></TR>
+		<TR><TD>05 = SEARCH ROM (15 04)</TD>	<TD>13 = CALL ROM</TD></TR>
+		<TR><TD>06 = SEARCH ROM (15 05)</TD>	<TD>14 = GROUP 1</TD></TR>
+		<TR><TD>07 = SEARCH ROM (15 06)</TD>	<TD>15 = GROUP 2</TD></TR>
+		</TABLE>
+	<DT><B>Number Entry State (15,15,4):</B>
+	<DD>	<TABLE BORDER>
+		<TR><TD>00 = Not currently entering number</TD></TR>
+		<TR><TD>01 = Mantissa, whole part</TD></TR>
+		<TR><TD>03 = Exponent</TD></TR>
+		<TR><TD>04 = Mantissa, fractional part</TD></TR>
+		<TR><TD>15 = Set P.C.</TD></TR>
+		</TABLE>
+	<DT><B>Prefix (15,15,3)<3>:</B>
+	<DD>	Next code is interpreted according to Prefix State.
+	<DT><B>ROM (15,15,3)<2>:</B>
+	<DD>	Program is running in ROM (codes taken from ROM instead of RAM)
+	<DT><B>Stop (15,15,3)<1>:</B>
+	<DD>	Program is running but stopped
+	<DT><B>Run (15,15,3)<0>:</B>
+	<DD>	Program is running
+</DL>
+</UL>
+
+<P><UL><TABLE BORDER>
+<TR><TH COLSPAN=4>Prog Subr Stack</TH></TR>
+<TR><TH>RAM<BR>Address</TH><TH>T,U,V</TH><TH COLSPAN=2>Use</TH></TR>
+<TR><TD>0xf8c - 0xf8f</TD><TD>15,8,12-15</TD><TD COLSPAN=2>Level 3</TD></TR>
+<TR><TD>0xf88 - 0xf8b</TD><TD>15,8,8-11</TD><TD COLSPAN=2>Level 2</TD></TR>
+<TR><TD>0xf84 - 0xf87</TD><TD>15,8,4-7</TD><TD COLSPAN=2>Level 1</TD></TR>
+<TR><TD>0xf83</TD><TD>15,8,3</TD><TD ROWSPAN=4>Level 0</TD><TD>P.C. Mem Addr, L</TD></TR>
+<TR><TD>0xf82</TD><TD>15,8,2</TD><TD>P.C. Mem Addr, M</TD></TR>
+<TR><TD>0xf81</TD><TD>15,8,1</TD><TD>P.C. Mem Addr, H</TD></TR>
+<TR><TD>0xf80</TD><TD>15,8,0</TD><TD>Mode (15,15,3)</TD></TR>
+<TR><TD>0xf7c - 0xf7f</TD><TD>15,7,12-15</TD><TD COLSPAN=2>Level 7</TD></TR>
+<TR><TD>0xf78 - 0xf7b</TD><TD>15,7,8-11</TD><TD COLSPAN=2>Level 6</TD></TR>
+<TR><TD>0xf74 - 0xf77</TD><TD>15,7,4-7</TD><TD COLSPAN=2>Level 5</TD></TR>
+<TR><TD>0xf70 - 0xf73</TD><TD>15,7,0-3</TD><TD COLSPAN=2>Level 4</TD></TR>
+<TR><TD COLSPAN=4>Note, P.C. Mem Addr points to the <U>calling</U> step,<BR>
+not the step to return to.</TD></TR>
+</TABLE></UL>
+
+<A NAME="tape"><H3>Cassette Tape</H3></A>
+
+Most cassette storage of the era used audio modulation, similar to the
+"musical tones" of a modem, and used standard audio cassette tapes.
+But the Wang 1200 used magnetic saturation like mainframe computer tape drives.
+It did work on audio cassettes, but Wang recommended high quality "metal"
+tape.
+
+<P>Because magnetic media only works when there are changes in magnetic fields,
+the encoding had to ensure that the magnetic field changed frequently.
+This means that, for example, a long string of zeroes must not result in
+a long period of blank tape. Instead, there is guaranteed to be a transition
+at the beginning of every bit, and a transition in the middle if the bit was
+a "1". This is known as "Biphase-Mark" encoding or BMC, a variation of
+Differential Manchester encoding.
+This is also the same encoding that was known as "FM" and used
+for single-density floppy disks, as well as other magnetic media of the time.
+A parity bit was added every 4 data bits to help
+detect errors.
+
+<P>The timing of each bit was precise, because the tape read code had to be
+able to stay synchronized without saving state information or doing much
+processing. Each unit of output was 198 cycles (data bit width 396),
+and each program (tape image) was preceded by a 211,220 cycle
+(approximately 0.5 second) blank gap
+(no magnetic field transitions).
+
+<P>During read, the calculator waits for the "bit start" transition, then
+delays 272 cycles before sampling again. If the sample reveals that there
+was a second transition, then the bit is considered a "1", otherwise it is "0".
+From this stream, the calculator assembles nibbles and checks parity, loading
+data into memory.
+
+<P>Here is an example of writing 09&nbsp;00 to tape and reading it back:
+
+<P><UL><IMG SRC="wang1200tape.gif"></UL>
+
+<P>The code 09&nbsp;00 is broken into two nibbles, and each assigned an odd parity bit.
+Then each 5 bit datum is encoded into the tape stream by
+converting "1" into either "1 0" or "0 1",
+and "0" into either "1 1" or "0 0",
+depending on the previous data to ensure that
+there is always a transition at the beginning of each bit.
+The resulting stream is fed to the record head and produces
+alternating segments of positive and negative magnetic fields on the tape.
+
+<P>During read, the changes between positive and negative magnetic fields show
+up as "blips" in the signal from the tape read head. These blips are fed
+into a "one-shot" flip-flop whose timing is set to about 97 cycles. This means
+that for 97 cycles after a transition there will be a "1" signal, and it will
+return to "0" after those 97 cycles.
+
+<P>The calculator monitors the signal from the one-shot. The first "1" it
+sees indicates the beginning of a bit. It then delays 272 cycles and
+checks the signal again. If it is still "1" (was actually re-triggered by
+a second transition) then the data bit is interpreted to be a "1".
+Otherwise, the data bit is interpreted to be "0". These bits are
+assembled into a 4-bit word and a parity bit, which is then checked for odd parity
+and, if correct, the data word is stored in memory.
+
+<P>A parity error will cause the calculator to turn on the Mach Error flag (ERR)
+and stop processing the tape.
+
+<P>Other problems with the tape will generally cause the calculator to
+"hang" with a blank display. Pressing PRIME is usually required in order to recover.
+
+<P>The calculator reads/writes the tape at about 1000 bits/second. Assuming standard
+tape speed, this makes a tape density of about 533 bpi
+(compare to mainframe "9-track" tapes which were 800 or 1600 bpi, and later 6250 bpi).
+The smallest common audio cassette was 15 minutes (C15) which would hold an
+overwhelming 90,000 program steps (on both sides) or
+45 complete copies of the calculator memory (a program rarely consumed all of memory).
+For this reason, Wang data cassettes were much shorter,
+typically only having a few minutes of tape.
+
+<A NAME="periph"><H3>Expansion (Peripheral) Ports</H3></A>
+
+<H4>CN-24</H4>
+
+The CN-24 (Centronix 24-pin connector) is an output-only port, used primarily for
+printers and plotters. Only 6 bits of data output are provided. The pin-out is:
+
+<P><UL><TABLE BORDER>
+<TR><TD COLSPAN=4>GIOB<0:3></TD>
+    <TD COLSPAN=2>GIOA<0:1></TD>
+    <TD>ostb</TD>
+    <TD>RBS(i)</TD>
+    <TD COLSPAN=2>n/c</TD>
+    <TD>gnd</TD>
+    <TD>pwr</TD></TR>
+<TR><TH>1</TH>
+    <TH>2</TH>
+    <TH>3</TH>
+    <TH>4</TH>
+    <TH>5</TH>
+    <TH>6</TH>
+    <TH>7</TH>
+    <TH>8</TH>
+    <TH>9</TH>
+    <TH>10</TH>
+    <TH>11</TH>
+    <TH>12</TH></TR>
+<TR><TD COLSPAN=12 BGCOLOR="lightgray">&nbsp;</TD></TR>
+<TR><TH>13</TH>
+    <TH>14</TH>
+    <TH>15</TH>
+    <TH>16</TH>
+    <TH>17</TH>
+    <TH>18</TH>
+    <TH>19</TH>
+    <TH>20</TH>
+    <TH>21</TH>
+    <TH>22</TH>
+    <TH>23</TH>
+    <TH>24</TH></TR>
+<TR><TD COLSPAN=8>gnd</TD>
+    <TD COLSPAN=2>n/c</TD>
+    <TD>chass</TD>
+    <TD>gnd</TD></TR>
+</TABLE>
+
+<P>Signals with (i) are inputs to the calculator, all others are outputs.
+
+<DL>
+<DT><B>ostb (<span style="text-decoration: overline">TKWS</span>)</B>
+	<DD>Strobe for output to device
+<DT><B>RBS (<span style="text-decoration: overline">RBS</span>)</B>
+	<DD>Ack from device - output was processed
+</DL></UL>
+
+<H4>CN-36</H4>
+
+The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
+(daisy-chained). The pin-out is:
+
+<P><UL><TABLE BORDER>
+<TR><TD COLSPAN=4>KA<0:3>(i)</TD>
+    <TD COLSPAN=4>KB<0:3>(i)</TD>
+    <TD>istb(i)</TD>
+    <TD>PRIME(i)</TD>
+    <TD>Learn(i)</TD>
+    <TD COLSPAN=4>N<0:3></TD>
+    <TD COLSPAN=3>RB<0:2></TD></TR>
+<TR><TH>1</TH>
+    <TH>2</TH>
+    <TH>3</TH>
+    <TH>4</TH>
+    <TH>5</TH>
+    <TH>6</TH>
+    <TH>7</TH>
+    <TH>8</TH>
+    <TH>9</TH>
+    <TH>10</TH>
+    <TH>11</TH>
+    <TH>12</TH>
+    <TH>13</TH>
+    <TH>14</TH>
+    <TH>15</TH>
+    <TH>16</TH>
+    <TH>17</TH>
+    <TH>18</TH></TR>
+<TR><TD COLSPAN=18 BGCOLOR="lightgray">&nbsp;</TD></TR>
+<TR><TH>19</TH>
+    <TH>20</TH>
+    <TH>21</TH>
+    <TH>22</TH>
+    <TH>23</TH>
+    <TH>24</TH>
+    <TH>25</TH>
+    <TH>26</TH>
+    <TH>27</TH>
+    <TH>28</TH>
+    <TH>29</TH>
+    <TH>30</TH>
+    <TH>31</TH>
+    <TH>32</TH>
+    <TH>33</TH>
+    <TH>34</TH>
+    <TH>35</TH>
+    <TH>36</TH></TR>
+<TR><TD>RB<3></TD>
+    <TD COLSPAN=4>GIOB<0:3></TD>
+    <TD COLSPAN=4>GIOA<0:3></TD>
+    <TD COLSPAN=3>IOB<0:2></TD>
+    <TD>ostb</TD>
+    <TD>iack</TD>
+    <TD COLSPAN=3>gnd</TD>
+    <TD>chass</TD></TR>
+</TABLE>
+
+<P>Signals with (i) are inputs to the calculator, all others are outputs.
+
+<DL>
+<DT><B>istb (<span style="text-decoration: overline">GISN</span>)</B>
+	<DD>Strobe for input from device, sets KBD=1
+<DT><B>ostb (<span style="text-decoration: overline">GISO</span>)</B>
+	<DD>Strobe for output to device
+<DT><B>iack (<span style="text-decoration: overline">GKBD</span>)</B>
+	<DD>Ack from calculator - input was processed, reflects KBD=0
+</DL></UL>
+
+<P>The connector supplies the "always on" signals from N<0:3> and RB<0:3>,
+which are essentially display refresh data. This supports a device known as
+"Classroom Display" which was a large-digit remote copy of the main display.
+
+<P>The signals from IOB<0:2> are used to select devices on the daisy-chain.
+The following codes are used:
+
+<P><UL><TABLE BORDER>
+<TR><TH>IOB</TH><TH>Device</TH><TH>Command(s)</TH></TR>
+<TR><TD>000</TD><TD COLSPAN=2 BGCOLOR="lightgray">no device</TD></TR>
+<TR><TD>001</TD><TD BGCOLOR="lightgray">CN-24 (no device on CN-36)</TD>
+			<TD BGCOLOR="lightgray">ALPHA ... 02&nbsp;02<BR>
+					I/O 00&nbsp;xx thru 09&nbsp;xx<BR>
+					I/O 12&nbsp;xx</TD></TR>
+<TR><TD>01X</TD><TD>Model 630 Disk</TD><TD>I/O 13&nbsp;xx</TD></TR>
+<TR><TD>100</TD><TD ROWSPAN=2>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx</TD></TR>
+<TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx</TD></TR>
+<TR><TD>110</TD><TD COLSPAN=2 ROWSPAN=2>Future Expansion</TD></TR>
+<TR><TD>111</TD></TR>
+</TABLE></UL>
+
+<H5>Devices 100 and 101</H5>
+
+<P>The "Group I/O" peripherals were fairly limited. The devices generally
+responded to a byte code from the calculator, and then asserted Learn
+(and strobed PRIME as needed) and pushed program steps to the calculator.
+The devices and/or operators orchestrated the interaction.
+
+<P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
+
+<UL>
+<LI>The calculator outputs xx&nbsp;xx
+	with IOB=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) and suspends normal operation
+	(<B>ostb</B> activated)
+	<UL>
+	<LI>Device sees <B>ostb</B> and interprets byte
+	</UL>
+<LI>The device then typically asserts Learn
+<LI>The device sends program codes,
+	which the calculator handles "normally" via KBD
+	<UL>
+	<LI>Device waits for <B>iack</B> (KBD=0)
+	<LI>Device sends byte and activates <B>istb</B> (sets KBD=1)
+	<LI>Calculator sees KBD and processes input, which resets KBD and <B>iack</B>
+	</UL>
+<LI>The device de-asserts Learn if previously asserted
+<LI>The device sends GO
+	<UL>
+	<LI>(same protocol as above, for all bytes sent)
+	</UL>
+<LI>The calculator sets IOB=000 and resumes normal operation
+	<UL>
+	<LI>Data ignored by all devices, since IOB=000
+	</UL>
+</UL>
+
+Note: The calculator cannot tell the difference between codes sent by device and
+codes entered from keyboard.
+
+<H5>Device 01X</H5>
+
+<UL><TABLE BORDER>
+<TR><TD>X=0</TD><TD>Command mode (Calculator to Device)</TD></TR>
+<TR><TD>X=1</TD><TD>Data mode (direction depends on command)</TD></TR>
+</TABLE></UL>
+
+<P>The protocol is as follows (I/O 13&nbsp;xx command):
+
+<UL>
+<LI>The calculator sends the 3-byte address equivalent
+of the integer contents of register 00, most significant byte first, all with IOB=010
+(command mode)
+	<UL>
+	For each byte:
+	<LI>Device sees <B>ostb</B> and interprets byte
+	<LI>Device waits for <B>iack</B> (KBD=0)
+	<LI>Device activates <B>istb</B> (sets KBD=1)
+	<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
+	</UL>
+<LI>The calculator sends the size code, with IOB=010
+	<UL>
+	<LI>Device sees <B>ostb</B> and interprets byte
+	<LI>Device waits for <B>iack</B> (KBD=0)
+	<LI>Device activates <B>istb</B> (sets KBD=1)
+	<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
+	</UL>
+<LI>For Read operations:
+	<UL>
+	<LI>The calculator sets IOB=011 (data ignored by device)
+		<UL>
+		<LI>Device sees <B>ostb</B> and ignores byte
+		<LI>Device sees IOB=011 and switches to "data mode"
+		</UL>
+	<LI>The device sends N bytes
+		<UL>
+		<LI>Device waits for <B>iack</B> (KBD=0)
+		<LI>Device sends byte and activates <B>istb</B> (sets KBD=1)
+		<LI>Calculator sees KBD and processes data, resets KBD and <B>iack</B>
+		</UL>
+	<LI>The calculator stores N bytes,
+	starting at program step in register 01
+	</UL>
+<LI>For Write operations:
+	<UL>
+	<LI>The calculator sends N bytes,
+	starting from program step in register 01, with IOB=011
+		<UL>
+		<LI>Device sees IOB=011 and switches to "data mode"
+		<LI>Device sees <B>ostb</B> and processes byte
+		<LI>Device waits for <B>iack</B> (KBD=0)
+		<LI>Device activates <B>istb</B> (sets KBD=1)
+		<LI>Calculator sees KBD and ignores data, resets KBD and <B>iack</B>
+		</UL>
+	<LI>The device stores N bytes at address
+	</UL>
+<LI>The device sends 00 (result)
+	<UL>
+	<LI>Device waits for <B>iack</B> (KBD=0)
+	<LI>Device sends result code and activates <B>istb</B> (sets KBD=1)
+	<LI>Calculator sees KBD and handles result, resets KBD and <B>iack</B>
+	</UL>
+<LI>The calculator sets IOB=000
+	<UL>
+	<LI>Data ignored by all devices, since IOB=000
+	</UL>
+</UL>
+
+<P>If the result code is not 00, the calculator sets OV (Prog Error).
+
+<P>Each byte sent from device is "seen" by the calculator as
+keyboard input, and is acknowledged by the act of reading that "keyboard code".
+
+<P>Each byte sent from the calculator is acknowledged by the device
+by sending a dummy "keyboard code".
+
+<P><UL><TABLE BORDER>
+<TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH><TD ROWSPAN=9>&nbsp;</TD>
+	<TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
+<TR><TD>00</TD><TD>0x01</TD><TD>Read 1 byte (step)</TD>
+	<TD>08</TD><TD>0x81</TD><TD>Write 1 byte (step)</TD></TR>
+<TR><TD>01</TD><TD>0x02</TD><TD>Read 8 bytes (steps)</TD>
+	<TD>09</TD><TD>0x82</TD><TD>Write 8 bytes (steps)</TD></TR>
+<TR><TD>02</TD><TD>0x04</TD><TD>Read 16 bytes (steps)</TD>
+	<TD>10</TD><TD>0x84</TD><TD>Write 16 bytes (steps)</TD></TR>
+<TR><TD>03</TD><TD>0x08</TD><TD>Read 32 bytes (steps)</TD>
+	<TD>11</TD><TD>0x88</TD><TD>Write 32 bytes (steps)</TD></TR>
+<TR><TD>04</TD><TD>0x10</TD><TD>Read 64 bytes (steps)</TD>
+	<TD>12</TD><TD>0x90</TD><TD>Write 64 bytes (steps)</TD></TR>
+<TR><TD>05</TD><TD>0x20</TD><TD>Read 128 bytes (steps)</TD>
+	<TD>13</TD><TD>0xa0</TD><TD>Write 128 bytes (steps)</TD></TR>
+<TR><TD>06</TD><TD>0x40</TD><TD>Read 256 bytes (steps)</TD>
+	<TD>14</TD><TD>0xc0</TD><TD>Write 256 bytes (steps)</TD></TR>
+<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD>
+	<TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
+</TABLE></UL>
+
+<P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
+Fixed/Removable Disk. The protocol is a block input/output of program steps,
+but could be used for (extended) register data as well. Sufficiently sophisticated
+code in ROM could allow all of RAM to be used for registers, and/or implement
+a simple "operating system" that demand-paged program and register data in RAM.
+
+</HTML>
