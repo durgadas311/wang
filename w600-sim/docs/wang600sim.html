@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.13 2011/11/12 18:10:40 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.14 2011/11/12 18:33:10 drmiller Exp $ -->
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -28,18 +28,18 @@ Wang 600 keyboard SHIFT, as visual feedback.
 <TR><TD>0-9</TD><TD>E0-E9</TD></TR>
 <TR><TD>.</TD><TD>E10 (decimal point)</TD></TR>
 <TR><TD>e E</TD><TD>E11 (SET EXP)</TD></TR>
-<TR><TD>-</TD><TD>E12 (CHANGE SIGN)</TD></TR>
+<TR><TD>&#8211;</TD><TD>E12 (CHANGE SIGN)</TD></TR>
 <TR><TD>Backspace</TD><TD>E15 (CLEAR DISP)</TD></TR>
 <TR><TD>t T</TD><TD>T xx</TD></TR>
 <TR><TD>s S</TD><TD>ST xx</TD></TR>
 <TR><TD>r R</TD><TD>RE xx</TD></TR>
 <TR><TD>x X</TD><TD>EX xx</TD></TR>
 <TR><TD>+</TD><TD>+ xx</TD></TR>
-<TR><TD>_ (underscore)</TD><TD>- xx</TD></TR>
+<TR><TD>_ (underscore)</TD><TD>&#8211; xx</TD></TR>
 <TR><TD>*</TD><TD>&#215; xx</TD></TR>
 <TR><TD>/</TD><TD>&divide; xx</TD></TR>
 <TR><TD>i I</TD><TD>INDIR</TD></TR>
-<TR><TD>&#8592;</TD><TD>default register (xx) -1</TD></TR>
+<TR><TD>&#8592;</TD><TD>default register (xx) &#8211;1</TD></TR>
 <TR><TD>&#8594;</TD><TD>default register (xx) +1</TD></TR>
 </TABLE></UL>
 
@@ -50,8 +50,8 @@ Initially, the default register is 15 (LEFT) and will not be highlighted.
 <H3>Display</H3>
 
 By default, the display uses a TrueType font designed from the Panaplex 9-segment display
-array used in the Wang 600. The font is named Panaplex9seg.ttf.
-An alternate font, NixieZM1336.ttf, is also present which is a
+array used in the Wang 600. The font is named "Panaplex9seg.ttf".
+An alternate font, "NixieZM1336.ttf", is also present which is a
 facsimily of the ZM1336 Nixie tubes used in the Wang 500 and
 Wang 700 Series. This font may be selected with the environment variable
 WANG600_FONT=NixieZM1336.ttf.
@@ -59,7 +59,7 @@ WANG600_FONT=NixieZM1336.ttf.
 <P>These fonts provide the characters '0' - '9' and 'A' - 'F' which
 authentically replicate
 the standard decoding of the 7445 (Panaplex) or 7442 (Nixie) TTL I.C.
-They also provide '+', '-', '.', and ' ' (space) which replicate
+They also provide '+', '&#8211;', '.', and '&nbsp;' (space) which replicate
 specific features of the displays used by Wang.
 
 <P>The Panaplex font also provides
@@ -83,7 +83,8 @@ and this string would consume only 2 columns on the display.
 <P>These fonts also provide an "optimized"
 decimal point at character location '\006',
 centered in the character cell above the baseline,
-which is not authentic but provides a better looking display.
+which is not authentic but provides a better looking display
+when an entire column is consumed for the decimal point.
 
 <H3>Files</H3>
 
