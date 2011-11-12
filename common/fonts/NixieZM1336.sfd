@@ -21,7 +21,7 @@ OS2Version: 0
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 1
 CreationTime: 1320697856
-ModificationTime: 1321060466
+ModificationTime: 1321061698
 OS2TypoAscent: 0
 OS2TypoAOffset: 1
 OS2TypoDescent: 0
@@ -35,6 +35,7 @@ HheadAscent: 0
 HheadAOffset: 1
 HheadDescent: 0
 HheadDOffset: 1
+OS2Vendor: 'PfEd'
 MarkAttachClasses: 1
 DEI: 91125
 LangName: 1033 
@@ -114,7 +115,7 @@ SplineSet
  1150 -180.2 1105.2 -225 1050 -225 c 4
  994.8 -225 950 -180.2 950 -125 c 4
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: zero
@@ -209,7 +210,7 @@ SplineSet
  1030.4 552.704 829.696 352 582.4 352 c 4
  335.104 352 134.4 552.704 134.4 800 c 4
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: semicolon
@@ -242,26 +243,24 @@ Flags: HW
 LayerCount: 2
 Fore
 SplineSet
-187.5 320.2 m 1
- 187.5 439.2 l 1
- 187.655 439.2 l 2
- 187.604 439.221 187.552 439.242 187.5 439.263 c 2
- 671 1556 l 1
- 789 1556 l 1
- 789 439.2 l 1
- 1049.5 439.2 l 1
- 1049.5 320.2 l 1
- 789 320.2 l 1
- 789 0 l 1
- 671 0 l 1
- 671 320.2 l 1
- 187.5 320.2 l 1
-671 439.2 m 1
- 671 1245.46 l 1
- 315.067 439.2 l 1
- 671 439.2 l 1
+188 326.2 m 1
+ 188 445.2 l 1
+ 190.121 445.2 l 1
+ 768 1556 l 1
+ 886 1556 l 1
+ 886 445.2 l 1
+ 1050 445.2 l 1
+ 1050 326.2 l 1
+ 886 326.2 l 1
+ 886 0 l 1
+ 768 0 l 1
+ 768 326.2 l 1
+ 188 326.2 l 1
+768 1300.32 m 1
+ 323.133 445.2 l 1
+ 768 445.2 l 1
+ 768 1300.32 l 1
 EndSplineSet
-Validated: 1
 EndChar
 
 StartChar: seven
@@ -426,7 +425,7 @@ SplineSet
  297 553 426 721 591.17 781.312 c 0
  787.956 853.167 929.565 923.653 933.761 1108.31 c 4
 EndSplineSet
-Validated: 524321
+Validated: 33
 EndChar
 
 StartChar: greater
@@ -465,7 +464,7 @@ SplineSet
  -70 -180.2 -114.8 -225 -170 -225 c 4
  -225.2 -225 -270 -180.2 -270 -125 c 4
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: A
