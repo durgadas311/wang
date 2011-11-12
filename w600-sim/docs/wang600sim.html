@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.12 2011/11/12 03:10:17 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.13 2011/11/12 18:10:40 drmiller Exp $ -->
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -46,6 +46,44 @@ Wang 600 keyboard SHIFT, as visual feedback.
 <P>When switching the default register, the current default register will be
 highlighted gray.
 Initially, the default register is 15 (LEFT) and will not be highlighted.
+
+<H3>Display</H3>
+
+By default, the display uses a TrueType font designed from the Panaplex 9-segment display
+array used in the Wang 600. The font is named Panaplex9seg.ttf.
+An alternate font, NixieZM1336.ttf, is also present which is a
+facsimily of the ZM1336 Nixie tubes used in the Wang 500 and
+Wang 700 Series. This font may be selected with the environment variable
+WANG600_FONT=NixieZM1336.ttf.
+
+<P>These fonts provide the characters '0' - '9' and 'A' - 'F' which
+authentically replicate
+the standard decoding of the 7445 (Panaplex) or 7442 (Nixie) TTL I.C.
+They also provide '+', '-', '.', and ' ' (space) which replicate
+specific features of the displays used by Wang.
+
+<P>The Panaplex font also provides
+a character at '\005' which represents the digit '1' using the 8th and 9th
+segment of the display, which is authentic to the Wang 600 hardware which overrides the
+7445 decoder in that case.
+
+<P>Both fonts also provide a "zero width" right-hand decimal point at '\007' that is
+not used by the Wang 600 but provided for compatability with the Wang 700
+(and other Nixie tube based devices).
+It is a way to turn on the decimal point of a digit without requiring a separate column
+position in the display.
+This decimal point is for the <U>previous</U>
+digit, i.e. it is placed to the left of,
+and outside the character cell of, the <U>next</U> digit.
+This is actually the expected behavior, for example if the the string "1.4" has the
+'.' replaced with '\007' then it would still display the number "1.4" but with the decimal
+point immediately to the right of, and inside the character cell of, the '1' digit
+and this string would consume only 2 columns on the display.
+
+<P>These fonts also provide an "optimized"
+decimal point at character location '\006',
+centered in the character cell above the baseline,
+which is not authentic but provides a better looking display.
 
 <H3>Files</H3>
 
