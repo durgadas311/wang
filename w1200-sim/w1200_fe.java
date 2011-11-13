@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $
+// $Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,18 +13,18 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 
-	static final Color orange1 = new Color(255, 210, 180, 255);
-	static final Color blue1 = new Color(190, 230, 255, 255);
-	static final Color green1 = new Color(230, 240, 220, 255);
-	static final Color pink1 = new Color(255, 220, 220, 255);
-	static final Color white1 = new Color(250, 250, 250, 255);
-	static final Color white2 = new Color(150, 150, 150, 255);
-	static final Color white3 = new Color(200, 200, 200, 255);
-	static final Color illum1 = new Color(255, 255, 100, 255);
-	static final Color red1 = new Color(255, 128, 128, 255);
-	static final Color red2 = new Color(190, 128, 128, 255);
+	static final Color orange1 = new Color(255, 210, 180);
+	static final Color blue1 = new Color(190, 230, 255);
+	static final Color green1 = new Color(230, 240, 220);
+	static final Color pink1 = new Color(255, 220, 220);
+	static final Color white1 = new Color(250, 250, 250);
+	static final Color white2 = new Color(150, 150, 150);
+	static final Color white3 = new Color(200, 200, 200);
+	static final Color illum1 = new Color(255, 100, 255);
+	static final Color red1 = new Color(255, 128, 128);
+	static final Color red2 = new Color(180, 150, 150);
 	static final Color neon = new Color(244,157,33);
 	static final Color neon2 = new Color(214,127,13);
 	static final Color empty = new Color(50,50,50);
@@ -125,7 +125,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -187,12 +187,13 @@ public class w1200_fe
 		//java.net.URL url = w1200_fe.class.getResource("icons/wang1200-48x48.png");
 		//Image img = Toolkit.getDefaultToolkit().getImage(url);
 		//front_end.setIconImage(img);
+		int row = 0, col = 0;
 
 		front_end.setLayout(gridbag);
 		GridBagConstraints s = new GridBagConstraints();
 		s.fill = GridBagConstraints.NONE;
-		s.gridx = 0;
-		s.gridy = 0;
+		s.gridx = col;
+		s.gridy = row;
 		s.weightx = 0;
 		s.weighty = 0;
 		s.gridwidth = 1;
@@ -200,47 +201,87 @@ public class w1200_fe
 		s.anchor = GridBagConstraints.NORTH;
 		JPanel pan;
 
-		Wang1200_Tape tapel = new Wang1200_Tape(fout);
-		s.gridx = 0;
-		s.gridy = 0;
+		java.net.URL url = w1200_fe.class.getResource("icons/logo-sm.gif");
+		ImageIcon ic = new ImageIcon(url);
+		JLabel lab = new JLabel(ic);
+		lab.setPreferredSize(new Dimension(150, 100));
+		lab.setOpaque(false);
+		s.gridx = col;
+		s.gridy = row;
 		s.gridheight = 1;
 		s.gridwidth = 1;
+		s.anchor = GridBagConstraints.SOUTH;
+		gridbag.setConstraints(lab, s);
+		front_end.add(lab);
+		++col;
+		s.anchor = GridBagConstraints.NORTH;
+
+		Wang1200_TapeEject ej = new Wang1200_TapeEject();
+		Wang1200_Tape tapel = new Wang1200_Tape(fout, ej, "Left");
+		s.gridx = col;
+		s.gridy = row;
+		s.gridheight = 1;
+		s.gridwidth = 2;
 		gridbag.setConstraints(tapel, s);
 //System.err.println("tapel "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		s.gridheight = 1;
 		front_end.add(tapel);
+		col += 2;
+		s.gridx = col;
+		s.gridy = row;
+		s.gridheight = 1;
+		s.gridwidth = 1;
+		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(ej, s);
+		front_end.add(ej);
+		++col;
+		s.anchor = GridBagConstraints.NORTH;
 
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 25));
+		pan.setPreferredSize(new Dimension(50, 25));
 		pan.setOpaque(false);
-		s.gridx = 1;
-		s.gridy = 0;
+		s.gridx = col;
+		s.gridy = row;
 		s.gridheight = 1;
 		s.gridwidth = 1;
 		gridbag.setConstraints(pan, s);
 //System.err.println("pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(pan);
+		++col;
 
-		Wang1200_Tape taper = new Wang1200_Tape(fout);
-		s.gridx = 2;
-		s.gridy = 0;
+		ej = new Wang1200_TapeEject();
+		Wang1200_Tape taper = new Wang1200_Tape(fout, ej, "Right");
+		s.gridx = col;
+		s.gridy = row;
 		s.gridheight = 1;
-		s.gridwidth = 1;
+		s.gridwidth = 2;
 		gridbag.setConstraints(taper, s);
 //System.err.println("taper "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(taper);
+		col += 2;
+		s.gridx = col;
+		s.gridy = row;
+		s.gridheight = 1;
+		s.gridwidth = 1;
+		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(ej, s);
+		front_end.add(ej);
+		++col;
+		s.anchor = GridBagConstraints.NORTH;
+		col = 0;
+		++row;
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(10, 25));
 		pan.setOpaque(false);
-		s.gridx = 0;
-		s.gridy = 1;
+		s.gridx = col;
+		s.gridy = row;
 		s.gridheight = 1;
-		s.gridwidth = 3;
+		s.gridwidth = 8;
 		gridbag.setConstraints(pan, s);
 //System.err.println("pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(pan);
-		s.gridwidth = 1;
+		++row;
 
 		Wang1200_Indicator tml = new Wang1200_Indicator("TAPE<BR>MOVING");
 		Wang1200_Indicator er = new Wang1200_Indicator("RECORD");
@@ -248,48 +289,66 @@ public class w1200_fe
 		Wang1200_Indicator na = new Wang1200_Indicator("NO<BR>ADJUST");
 		Wang1200_Indicator el = new Wang1200_Indicator("END OF<BR>DOCUMENT");
 
+		// This now creates a widget for insertion in main frame...
+		Wang1200_Model611 m611f = new Wang1200_Model611();
+
 		Wang1200_Keyboard kbd = new Wang1200_Keyboard(fout,
 				tml, er, tmr, na, el,
-				tapel, taper);
-		s.gridx = 0;
-		s.gridy = 2;
+				tapel, taper, m611f);
+		s.gridx = col;
+		s.gridy = row;
 		s.gridheight = 1;
-		s.gridwidth = 3;
+		s.gridwidth = 8;
 		gridbag.setConstraints(kbd, s);
 //System.err.println("kbd "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(kbd);
+		++row;
 		front_end.addKeyListener(kbd);
-
-		Wang1200_Model611 m611f = new Wang1200_Model611();
-		Wang1200_Model630 m630f = new Wang1200_Model630(kbd);
 
 		Wang1200_SimInput inp = new Wang1200_SimInput(fin,
 				tml, er, tmr, na, el,
-				tapel, taper, m611f, m630f);
+				tapel, taper, m611f);
 
 		JMenuBar mb = new JMenuBar();
 		JMenu mu;
-		mu = new JMenu("Devices");
+		mu = new JMenu("Paper");
 		mb.add(mu);
 		JMenuItem mi;
-		mi = new JMenuItem("601/602/611 OutputWriter", KeyEvent.VK_O);
-		mi.addActionListener(inp);
+		mi = new JMenuItem("Print", KeyEvent.VK_P);
+		mi.addActionListener(m611f);
 		mu.add(mi);
-		mi = new JMenuItem("630 Disk - not mounted", KeyEvent.VK_D);
-		mi.addActionListener(inp);
+		mi = new JMenuItem("Save", KeyEvent.VK_S);
+		mi.addActionListener(m611f);
+		mu.add(mi);
+		mi = new JMenuItem("Tear Off", KeyEvent.VK_T);
+		mi.addActionListener(m611f);
 		mu.add(mi);
 
 		front_end.setJMenuBar(mb);
+
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 5));
+		pan.setOpaque(false);
+		s.gridx = col;
+		s.gridy = row;
+		s.gridheight = 1;
+		s.gridwidth = 3;
+		gridbag.setConstraints(pan, s);
+		front_end.add(pan);
+
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		front_end.setSize(1024,640);
+
+		front_end.pack();	// set size according to content...
+
 		front_end.setVisible(true);
 	}
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -312,8 +371,9 @@ class Wang1200_Indicator extends JLabel {
 //		s.anchor = GridBagConstraints.CENTER;
 
 		setText("<HTML><CENTER>"+label+"</CENTER></HTML>");
-		setFont(new Font("Sans-serif", Font.PLAIN, 10));
-		setPreferredSize(new Dimension(50, 25));
+		setFont(new Font("Sans-serif", Font.PLAIN, 6));
+		setPreferredSize(new Dimension(40, 20));
+		setHorizontalAlignment(SwingConstants.CENTER);
 		setForeground(Color.black);
 		setBackground(_Key.gray);
 		setOpaque(true);
@@ -364,11 +424,10 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
-	Wang1200_Model630 _m630;
 	Wang1200_Indicator _tml;
 	Wang1200_Indicator _er;
 	Wang1200_Indicator _tmr;
@@ -384,11 +443,6 @@ class Wang1200_SimInput
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
 		if (m.getMnemonic() == KeyEvent.VK_O) {
-			_m611.onOff(!_m611.onOff());
-			return;
-		}
-		if (m.getMnemonic() == KeyEvent.VK_D) {
-			_m630.pickFile(m);
 			return;
 		}
 	}
@@ -401,8 +455,7 @@ class Wang1200_SimInput
 			Wang1200_Indicator el,
 			Wang1200_Tape tapel,
 			Wang1200_Tape taper,
-			Wang1200_Model611 cn24,
-			Wang1200_Model630 m630) {
+			Wang1200_Model611 cn24) {
 		_tml = tml;
 		_er = er;
 		_tmr = tmr;
@@ -411,8 +464,6 @@ class Wang1200_SimInput
 		_tapel = tapel;
 		_taper = taper;
 		_m611 = cn24;
-		_m611.getFrame().addWindowListener(this);
-		_m630 = m630;
 		_fin = f;
 		if (f != null) {
 			Thread t = new Thread(this);
@@ -455,12 +506,9 @@ class Wang1200_SimInput
 				_tapel.do_tape(b);
 			} else if ((b[1] & 0x0ff) == 0x7f) {
 				_m611.reset();
-				_m630.reset();
 				//etc...
 			} else if (b[1] == 0x10) {
 				_m611.do_cn24(b);
-			} else if ((b[1] & ~0x1f) == 0x20) {
-				_m630.do_dev(b);
 			} else {
 				System.err.format("Unexpected traffic (%d) %02x %02x\n", n, b[1], b[0]);
 			}
@@ -475,19 +523,59 @@ class Wang1200_SimInput
 	public void windowDeactivated(WindowEvent e) { }
 
 	public void windowClosing(WindowEvent e) {
-		if (e.getWindow() == _m611.getFrame()) {
-			_m611.onOff(false);
-			return;
-		}
+//		if (e.getWindow() == _m611.getFrame()) {
+//			_m611.onOff(false);
+//			return;
+//		}
+	}
+}
+
+class Wang1200_TapeEject extends Wang1200_Keyboards
+{
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
+	static final long serialVersionUID = 311057692031L;
+	static final int num_keys = 1;
+
+	public Wang1200_TapeEject() {
+		_buttons = new JButton[num_keys];
+		_keys = new _Key[num_keys];
+		_nkeys = 0;
+		_row = 0;
+		_col = 0;
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.fill = GridBagConstraints.NONE;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0;
+		c.weighty = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.anchor = GridBagConstraints.CENTER;
+
+		setLayout(gridbag);
+
+		addTapeButton(c, 1, 1, 0, 0,_Key.white2,
+			new _Key(_Key.white1, _Key.GROUP(7,_Key.TAPE_EJECT)));
+	}
+
+	public _Key getKey() {
+		return _keys[0];
+	}
+
+	public JButton getBtn() {
+		return _buttons[0];
 	}
 }
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
+	Wang1200_TapeEject _btn;
+	String _name;
 	byte[] bb = new byte[2];
 	byte[] b1 = new byte[1];
 	boolean _wr;
@@ -499,8 +587,14 @@ class Wang1200_Tape extends JComponent
 	JLabel _window;
 	File _file;
 
-	public Wang1200_Tape(OutputStream fout) {
+	public _Key ejectKey() {
+		return _btn.getKey();
+	}
+
+	public Wang1200_Tape(OutputStream fout, Wang1200_TapeEject btn, String name) {
 		_fout = fout;
+		_btn = btn;
+		_name = name;
 		Font font;
 		_file = null;
 		_index = 0;
@@ -577,7 +671,7 @@ class Wang1200_Tape extends JComponent
 
 	private void pick_file() {
 		tape_close();
-		SuffFileChooser ch = new SuffFileChooser("Mount",
+		SuffFileChooser ch = new SuffFileChooser("Mount " + _name + " Tape",
 						"wng", "Wang program files");
 		int rv = ch.showOpenDialog(this);
 		if (rv == JFileChooser.APPROVE_OPTION) {
@@ -662,21 +756,10 @@ class Wang1200_Tape extends JComponent
 	public boolean do_button(_Key btn) {
 		// this kills any in-progress operations...
 		_tape_on = false;
-		if (btn.code == _Key.TAPE_READY) {
-			if (_file == null) {
-				_ready = false;
-				return true;
-			}
-			_ready = btn.state;
-			return false;
-		}
 		_ready = false;
-		if (btn.code == _Key.TAPE_REW) {
-			tape_position(_index - 1);
-		} else if (btn.code == _Key.TAPE_FF) {
-			tape_position(_index + 1);
-		} else if (btn.code == _Key.TAPE_EJECT) {
+		if (btn.code == _Key.TAPE_EJECT) {
 			pick_file();
+			tape_position(0);
 		}
 		update_tape();
 		return true;	// reset button OFF - i.e. momentary only
@@ -795,162 +878,6 @@ class Wang1200_Tape extends JComponent
 	}
 }
 
-class Wang1200_Model630 {
-	private int _cmd;
-	private int _adr;
-	private boolean _wr;
-	private int _len;
-	private int _idx;
-	private Wang1200_Keyboard _kbd;
-	java.io.RandomAccessFile _f;
-	File _file;
-	byte[] _buf;
-
-	public Wang1200_Model630(Wang1200_Keyboard kbd) {
-		reset();
-		_kbd = kbd;
-		_buf = new byte[256]; // largest transfer
-	}
-
-	private void disk_close() {
-		if (_f != null) {
-			try {
-				_f.close();
-			} catch (IOException ee) {
-			}
-			_f = null;
-		}
-	}
-
-	private void disk_open() {
-		if (_file == null) {
-			return;
-		}
-		try {
-			_f = new RandomAccessFile(_file.getAbsolutePath(), "rw");
-		} catch (FileNotFoundException ee) {
-			// can't happen?
-			return;
-		}
-	}
-
-	private int disk_read(int len) {
-		int n = 0;
-		try {
-			_f.read(_buf, 0, len);
-		} catch (IOException ee) {
-			n = 1;
-		}
-		return n;
-	}
-
-	private int disk_write(int len) {
-		int n = 0;
-		try {
-			_f.write(_buf, 0, len);
-		} catch (IOException ee) {
-			n = 1;
-		}
-		return n;
-	}
-
-	public void pickFile(JMenuItem m) {
-		disk_close();
-
-		SuffFileChooser ch = new SuffFileChooser("Mount",
-						"wng", "Wang program files");
-		int rv = ch.showOpenDialog(_kbd);
-		if (rv == JFileChooser.APPROVE_OPTION) {
-			_file = ch.getSelectedFile();
-			m.setText("630 Disk - " + _file.getName());
-		} else {
-			_file = null;
-			m.setText("630 Disk - not mounted");
-		}
-
-		disk_open();
-	}
-
-	public void do_dev(byte[] b) {
-		int res;
-		if (_cmd == 0 && (b[1] & 0x0f) == 1) { // ACK when no command
-			return;
-		}
-		++_cmd;
-//System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-		boolean dat = ((b[1] & 0x10) != 0);
-		if (_cmd <= 4 && dat || _cmd > 4 && !dat) {
-System.err.println("sync error");
-			return;
-		}
-		int bb;
-//try{
-// Thread.currentThread().sleep(50);
-//}
-//catch(InterruptedException ie){
-//}
-		// unless we know otherwise, just ACK with a "0"...
-		bb = ((b[1] & 0xf0) << 8) | (_cmd & 0x0ff); // temp! debug
-		if (_cmd < 4) {
-			_adr <<= 8;
-			_adr |= (b[0] & 0x00ff);
-			bb |= 0x0100;
-		} else if (_cmd == 4) {
-			_wr = ((b[0] & 0x80) != 0);
-			_len = (b[0] & 0x7f);
-			bb |= 0x0100;
-			if (_len == 0) {
-				_len = 64;
-			} else if (_len > 1) {
-				_len <<= 2;
-			}
-//System.err.println("command "+_adr+" "+_wr+" "+_len);
-			try {
-				_f.seek(_adr);
-			} catch (IOException ee) {
-//System.err.println("seek "+_adr+" failed");
-			}
-			_idx = 0;
-			if (!_wr) {
-				res = disk_read(_len);
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
-//System.err.println("rd result "+res+" ("+_len+")");
-			}
-		} else {
-			if (_idx < _len) {
-				if (_wr) {
-					bb |= 0x0100;
-					_buf[_idx] = b[0];
-				} else {
-					bb = (bb & 0xff00) | (_buf[_idx] & 0x00ff);
-				}
-			} else {
-				if (_wr) {
-					bb |= 0x0100;
-					res = disk_write(_len);
-				} else {
-					res = 0; // something else?
-				}
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
-				_cmd = 0;
-//System.err.println("result "+res+" ("+_idx+")");
-			}
-			++_idx;
-		}
-//System.err.printf("got %02x%02x put %04x\n", b[1], b[0], bb);
-		_kbd.do_keycode(bb);
-	}
-
-	public void reset() {
-//System.err.println("clear ("+_len+")");
-		_cmd = 0;
-		_adr = 0;
-		_len = 0;
-		_wr = false;
-		// cancel anything...
-	}
-}
-
 class SuffFileFilter extends javax.swing.filechooser.FileFilter {
 	private String _sfx;
 	private String _dsc;
@@ -1010,9 +937,11 @@ class SuffFileChooser extends JFileChooser {
 }
 
 class Wang1200_Model611
+	extends JComponent
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	static final long serialVersionUID = 31140769203L;
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1149,12 +1078,10 @@ class Wang1200_Model611
 		cn24_spcl[0x02] = "\u00BC";
 		cn24_spcl[0x03] = "\u00A2";
 	}
-	private JFrame _frame;
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
 
 	private int _xoff, _yoff, _eop;
-	private boolean _onoff;
 	boolean _hasGraphic;
 	int _fx, _fy, _fa;
 	double _gx, _gy;
@@ -1175,10 +1102,7 @@ class Wang1200_Model611
 	public Wang1200_Model611() {
 		setup_xlate();
 
-		_onoff = false;
-
-		_frame = new JFrame("Wang 611 Output Writer");
-		_frame.setLayout(new FlowLayout());
+		setLayout(new FlowLayout());
 		_text = new PlotTextArea();
 		_text.setFont(new Font("Monospaced", Font.PLAIN, 10));
 
@@ -1200,32 +1124,24 @@ class Wang1200_Model611
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scroll.setPreferredSize(new Dimension(96 * _fx, 32 * _fy));
-		_frame.add(_scroll);
+		add(_scroll);
 
-		JMenuBar mb = new JMenuBar();
-		JMenu mu;
-		mu = new JMenu("File");
-		mb.add(mu);
-		JMenuItem mi;
-		mi = new JMenuItem("Print", KeyEvent.VK_P);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Save", KeyEvent.VK_S);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Tear Off", KeyEvent.VK_T);
-		mi.addActionListener(this);
-		mu.add(mi);
+		//parent.pack();	// set size according to content...
 
-		_frame.setJMenuBar(mb);
-		_frame.pack();	// set size according to content...
-
-		Dimension fdim = _frame.getSize();
+		Dimension fdim = getSize();
 		Dimension sdim = _scroll.getSize();
 		_xoff = fdim.width - sdim.width;
 		_yoff = fdim.height - sdim.height;
-		
-		_frame.addComponentListener(this);
+
+		addComponentListener(this);
+
+		// test mode only...
+		String s = "It was a dark and stormy night.\n"+
+			"The quick brown fox jumped over the lazy sleeping dog.\n"+
+			"Mary had a little lamb,\n";
+		_text.append(s);
+		_eop += s.length();
+		_text.setCaretPosition(_eop);
 	}
 
 	private void save611(File file) {
@@ -1278,7 +1194,7 @@ class Wang1200_Model611
 				dsc = "Text files";
 			}
 			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc);
-			int rv = ch.showOpenDialog(_frame);
+			int rv = ch.showOpenDialog(this);
 			if (rv == JFileChooser.APPROVE_OPTION) {
 				save611(ch.getSelectedFile());
 			}
@@ -1308,19 +1224,17 @@ class Wang1200_Model611
 						" not implemented yet");
 	}
 
-	public JFrame getFrame() { return _frame; }
-
 	public void componentHidden(ComponentEvent e) { }
 	public void componentMoved(ComponentEvent e) { }
 	public void componentShown(ComponentEvent e) { }
 
 	public void componentResized(ComponentEvent e) {
-		if (e.getComponent() == _frame) {
-			Dimension fdim = _frame.getSize(); 
+		if (e.getComponent() == this) {
+			Dimension fdim = getSize(); 
 			_scroll.setSize(fdim.width - _xoff, fdim.height - _yoff);
 			_scroll.setPreferredSize(_scroll.getSize());
-			_frame.setSize(fdim.width, fdim.height); // redundant?
-			_frame.setPreferredSize(_frame.getSize());
+			setSize(fdim.width, fdim.height); // redundant?
+			setPreferredSize(getSize());
 		}
 	}
 
@@ -1581,25 +1495,13 @@ class Wang1200_Model611
 			_eop += s.length();
 			_text.setCaretPosition(_eop);
 		}
-		// "auto raise"...
-		onOff(true);
-	}
-
-	public boolean onOff() {
-		return _onoff;
-	}
-
-	public void onOff(boolean on) {
-		if (_onoff == on) return;
-		_onoff = on;
-		_frame.setVisible(_onoff);
 	}
 }
 
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1617,6 +1519,7 @@ class Wang1200_Keyboard extends JComponent
 	OutputStream _fout;
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
+	Wang1200_Model611 _m611;
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -1693,9 +1596,15 @@ class Wang1200_Keyboard extends JComponent
 		}
 		int type = _kbds[y]._keys[x].getType();
 		int g = _kbds[y]._keys[x].getGroup();
-		if (_kbds[y]._keys[x].isTAPE()) {
-			set_group(g, y, x);
+		if (_kbds[y]._keys[x] == _tapel.ejectKey()) {
 			boolean st = _tapel.do_button(_kbds[y]._keys[x]);
+			if (st) {
+				setToggle(!_kbds[y]._keys[x].state,
+					_kbds[y]._keys[x], _kbds[y]._buttons[x]);
+			}
+			return;
+		} else if (_kbds[y]._keys[x] == _taper.ejectKey()) {
+			boolean st = _taper.do_button(_kbds[y]._keys[x]);
 			if (st) {
 				setToggle(!_kbds[y]._keys[x].state,
 					_kbds[y]._keys[x], _kbds[y]._buttons[x]);
@@ -1735,10 +1644,12 @@ class Wang1200_Keyboard extends JComponent
 				Wang1200_Indicator na,
 				Wang1200_Indicator el,
 				Wang1200_Tape tapel,
-				Wang1200_Tape taper) {
+				Wang1200_Tape taper,
+				Wang1200_Model611 m611f) {
 		int x;
 		_tapel = tapel;
 		_taper = taper;
+		_m611 = m611f;
 		_kbds = new Wang1200_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
@@ -1747,7 +1658,7 @@ class Wang1200_Keyboard extends JComponent
 		_fout = fo;
 
 		GridBagConstraints s = new GridBagConstraints();
-		JPanel pan;
+//		JPanel pan;
 		Wang1200_Keyboards kbd;
 
 		s.fill = GridBagConstraints.NONE;
@@ -1780,12 +1691,14 @@ class Wang1200_Keyboard extends JComponent
 
 		s.gridx = _col;
 		s.gridy = _row;
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(400, 25));
-		pan.setOpaque(false);
-		gridbag.setConstraints(pan, s);
+//		pan = new JPanel();
+//		pan.setPreferredSize(new Dimension(400, 25));
+//		pan.setOpaque(false);
+//		gridbag.setConstraints(pan, s);
 //System.err.println("  kbd.pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
-		add(pan);
+//		add(pan);
+		gridbag.setConstraints(_m611, s);
+		add(_m611);
 		++_col;
 
 		kbd = new Wang1200_Keyboard_right(na, el);
@@ -1930,7 +1843,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2038,8 +1951,8 @@ if (url != null) {
 	}
 
 	void addTapeButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, Color alt, _Key key) {
-		final Dimension dim = new Dimension(60, 30);
+				Color alt, _Key key) {
+		final Dimension dim = new Dimension(20, 20);
 		JButton butt;
 		if (alt != null) {
 			key.altcolor = alt;
@@ -2061,22 +1974,8 @@ if (url != null) {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.CENTER;
 
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 12));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
 		c.gridx = _col + px;
-		c.gridy = _row + 1;
+		c.gridy = _row + 0;
 		c.insets.left = lx;
 		c.insets.right = lx;
 		gridbag.setConstraints(butt, c);
@@ -2090,7 +1989,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2166,7 +2065,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 15;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(10, 40));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 //System.err.println("left.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
@@ -2189,9 +2088,9 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		add(pan);
 		++_col;
 
-		addButton(c,1, 1, 0, 0, 6, 1,"REWIND",
+		addButton(c,1, 1, 0, 0, 6, 1,"<FONT SIZE=-1>REWIND</FONT>",
 			new _Key(_Key.green1, _Key.PROG_CODE(0,0)));
-		addButton(c,1, 1, 0, 1, 6, 1, "FORWARD",
+		addButton(c,1, 1, 0, 1, 6, 1, "<FONT SIZE=-2>FORWARD</FONT>",
 			new _Key(_Key.orange1,_Key.PROG_CODE(8,9)));
 		addButton(c,1, 1, 0, 2, 6, 1, "RESET",
 			new _Key(_Key.pink1, _Key.PROG_CODE(8,9)));
@@ -2235,7 +2134,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.1 2011/11/12 00:27:28 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.2 2011/11/13 16:12:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -2272,7 +2171,6 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 //System.err.println("right.el "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(el);
 		_col += 5;
-		c.gridwidth = 1;
 
 		c.gridx = _col;
 		c.gridy = _row;
@@ -2284,7 +2182,6 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		gridbag.setConstraints(pan, c);
 //System.err.println("right.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
-		c.gridheight = 1;
 		++_col;
 
 		addPushButton(c, 5, 3, 0, 0,"SAME",_Key.white2, true,
@@ -2297,6 +2194,20 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 
 		_col = 0;
 		_row += 2;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 15;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 5));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+		++_col;
+
+		_col = 0;
+		_row += 1;
 
 		c.gridx = _col;
 		c.gridy = _row;
@@ -2336,7 +2247,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 			new _Key(_Key.green1, _Key.PROG_CODE(0,0)));
 		addButton(c,1, 1, 0, 1, 6, 1, "MEMO<BR>(OUT)",
 			new _Key(_Key.white1, _Key.PROG_CODE(0,0)));
-		addButton(c,1, 1, 0, 2, 6, 1, "SEARCH",
+		addButton(c,1, 1, 0, 2, 6, 1, "<FONT SIZE=-1>SEARCH</FONT>",
 			new _Key(_Key.blue1, _Key.PROG_CODE(0,0)));
 		addButton(c,1, 1, 0, 3, 6, 1, "SKIP",
 			new _Key(_Key.orange1, _Key.PROG_CODE(0,0)));
