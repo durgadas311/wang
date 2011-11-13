@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.7 2011/11/12 18:11:12 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.8 2011/11/13 04:10:34 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -620,7 +620,6 @@ void sys_setcass(wang_sys_t *sys, char *cass) {
 // F6F is hi nibble of byte, F6E is lo nibble of byte.
 // The above addresses are NIBBLE addresses, as used by the
 // Wang. Byte offsets in file are >> 1.
-#ifdef __wang600__
 #if defined(__wang600__) || defined(__wang1200__)
 void sys_loadrom(wang_sys_t *sys, char *rom) {
 	uint8_t *mem = sys->rom;
