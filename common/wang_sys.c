@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.8 2011/11/13 04:10:34 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.9 2011/11/13 14:19:05 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +38,6 @@ uint8_t __keyb[32];
 int __klen;
 int __keyp;
 
-static char err_buf[1024];
 static void fatal_error(const char *s, const char *e) {
 	if ((sys_ops & SYS_WEB_BACKEND) != 0) {
 		uint16_t b = 0xf000;
@@ -713,7 +712,7 @@ void sys_loaducode(wang_sys_t *sys, char *exe, uint16_t adr, uint16_t entry) {
 	int model = (sys_ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
 	for (fd = 0; fd < NUM_UCODE_OVR; ++fd) {
 		uint64_t u = ucode_ovr[fd].instr[model].word;
-		if (u >= 0x8000000000000000) {	// u.ovr == 1
+		if (u >= (1ULL << 63)) {	// u.ovr == 1
 			sys->ucode[ucode_ovr[fd].adr] = u;
 		}
 	}
