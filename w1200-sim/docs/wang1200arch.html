@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.2 2011/11/12 18:11:56 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.3 2011/11/13 01:40:25 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -587,14 +587,18 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">DOUBLE</TD>
 	<TD CLASS="num">RIGHT</TD>
 
-	<TD CLASS="num">A|C|L</TD>
-	<TD CLASS="num">W|C</TD>
-	<TD CLASS="num">P|L|W|C</TD>
+	<TD CLASS="num" COLSPAN=3>*</TD>
 	<TD CLASS="num">SKIP</TD>
 </TR>
-<TR><TD COLSPAN=8>!TRANS. & !RECORD = PLAY</TD></TR>
+<TR><TD COLSPAN=4>!TRANS. & !RECORD = PLAY</TD>
+<TD COLSPAN=4>* <TABLE ALIGN="RIGHT"><TR><TD>AUTO</TD><TD>=</TD><TD>100x</TD></TR>
+	<TR><TD>PARA</TD><TD>=</TD><TD>001x</TD></TR>
+	<TR><TD>LINE</TD><TD>=</TD><TD>101x</TD></TR>
+	<TR><TD>WORD</TD><TD>=</TD><TD>011x</TD></TR>
+	<TR><TD>CHAR</TD><TD>=</TD><TD>111x</TD></TR>
+	</TABLE>
+</TD></TR>
 <TR><TD COLSPAN=8>D<SUB>2</SUB> is cleared when read (BI=3)</TD></TR>
-<TR><TD COLSPAN=8>A=AUTO, C=CHAR, W=WORD, L=LINE, P=PARA</TD></TR>
 </TABLE></UL>
 
 <H4>Memory Usage</H4>
