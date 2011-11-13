@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $
+// $Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color blue1 = new Color(190, 230, 255);
@@ -125,7 +125,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -348,7 +348,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -424,7 +424,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -532,7 +532,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -570,7 +570,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -949,7 +949,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1515,7 +1515,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1753,6 +1753,15 @@ System.err.println("action");
 		if (_fout == null) {
 			_m611.do_cn24_direct(c);
 		}
+		if (c == ' ') {
+			c = 0x03;
+		} else if (c == '\b') {
+			c = 0x13;
+		} else if (c == '\t') {
+			c = 0x23;
+		} else if (c == '\n') {
+			c = 0x33;
+		}
 		do_keycode(c);
 	}
 
@@ -1869,7 +1878,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2015,7 +2024,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2044,14 +2053,16 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		addPushButton(c, 5, 3, 0, 0,"LEFT",_Key.white2, true,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(1,0))));
 		addPushButton(c, 5, 3, 3, 0,"RIGHT",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(1,4))));
+			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(1,1))));
 		addPushButton(c, 5, 3, 6, 0,"TRANS.",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(2,4))));
+			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE0_CHG(12,8))));
 		addPushButton(c, 5, 3, 9, 0,"PLAY",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(2,_Key.MODE1_CHG(2,0))));
+			new _Key(_Key.white1, _Key.GROUP(2,_Key.MODE0_CHG(12,0))));
 		addPushButton(c, 5, 3, 12, 0,"RECORD",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(2,2))));
+			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE0_CHG(12,4))));
 		_col += 15;
+
+		// don't bother with SINGLE/DOUBLE ?
 
 		_col = 0;
 		_row += 2;
@@ -2135,7 +2146,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "BACK<BR>LINE",
-			new _Key(_Key.blue1, _Key.PROG_CODE(8,6)));
+			new _Key(_Key.blue1, _Key.PROG_CODE(7,3)));
 		addButton(c,1, 2, 0, 1, 6, 1, "CODE",
 			new _Key(_Key.white1, _Key.SHIFT));
 		_col += 6;
@@ -2160,7 +2171,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.3 2011/11/13 17:07:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.4 2011/11/13 18:50:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -2248,13 +2259,13 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "PARA",
-			new _Key(_Key.white1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.white1, _Key.MODE1_CHG(14,2)));
 		addButton(c,1, 1, 0, 1, 6, 1, "LINE",
-			new _Key(_Key.white1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.white1, _Key.MODE1_CHG(14,10)));
 		addButton(c,1, 1, 0, 2, 6, 1, "WORD",
-			new _Key(_Key.white1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.white1, _Key.MODE1_CHG(14,6)));
 		addButton(c,1, 1, 0, 3, 6, 1, "CHAR/<BR>STOP",
-			new _Key(_Key.pink1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.pink1, _Key.MODE1_CHG(14,14)));
 		_col += 6;
 
 		c.gridx = _col;
@@ -2270,13 +2281,13 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "AUTO<BR>START",
-			new _Key(_Key.green1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.green1, _Key.MODE1_CHG(14,8)));
 		addButton(c,1, 1, 0, 1, 6, 1, "MEMO<BR>(OUT)",
-			new _Key(_Key.white1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.white1, _Key.PROG_CODE(6,3)));
 		addButton(c,1, 1, 0, 2, 6, 1, "<FONT SIZE=-1>SEARCH</FONT>",
-			new _Key(_Key.blue1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.blue1, _Key.PROG_CODE(4,2)));	// toggle!
 		addButton(c,1, 1, 0, 3, 6, 1, "SKIP",
-			new _Key(_Key.orange1, _Key.PROG_CODE(0,0)));
+			new _Key(_Key.orange1, _Key.MODE1_CHG(1,1)));
 		_col += 6;
 
 		c.gridx = _col;

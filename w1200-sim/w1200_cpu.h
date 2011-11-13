@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.1 2011/11/12 00:27:28 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.2 2011/11/13 18:50:23 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -19,14 +19,15 @@ typedef struct {
 
 	uint8_t m;
 	uint8_t n;
-	uint8_t gioa;
-	uint8_t giob;
-	uint8_t iob;
+	uint8_t to;
+	uint8_t ro;
 
 	// flags...
 	uint8_t zo;
 	uint8_t cc;
 	uint8_t sc;
+
+	uint8_t function;	// MOP=8 etc
 
 	uint8_t er	:1;	// RECORD lamp
 	uint8_t tmr	:1;	// TAPE MOVING (right) lamp

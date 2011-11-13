@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.1 2011/11/12 00:27:28 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.2 2011/11/13 18:50:23 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -191,9 +191,9 @@ static void tape_off(w1200_sys_t *sys) {
 }
 
 static void dev_out(w1200_sys_t *sys) {
-	uint8_t c = (sys->cpu.ka << 4) | sys->cpu.kb;
-//fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
-	sys->dev(sys, c, sys->cpu.iob);
+	uint8_t c = (sys->cpu.to << 4) | sys->cpu.ro;
+//fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
+	sys->dev(sys, c, 1);
 }
 
 extern uint16_t ram_mask;
@@ -423,6 +423,12 @@ int instr_exec(w1200_sys_t *sys) {
 	case 7:
 		break;
 	case 8:
+		if (br_k & 4) {
+			sys->cpu.to = sys->cpu.ka;
+			sys->cpu.ro = sys->cpu.kb;
+			sys->cpu.function = (u->bi & 1);
+			dev_out(sys);
+		}
 		break;
 	case 9:	rc = 2; break;
 	case 10:
@@ -431,7 +437,7 @@ int instr_exec(w1200_sys_t *sys) {
 	case 11:
 		sys->cpu.din0 = (sys->cpu.kb & 1);
 		sys->cpu.din1 = (sys->cpu.ka & 1);
-		tape_write(sys);
+		//tape_write(sys);
 		break;
 	case 12:
 		sys->cpu.kb = 0; // L/S, R/B, LHS, RHS
@@ -450,9 +456,8 @@ int instr_exec(w1200_sys_t *sys) {
 		tape_off(sys);
 		break;
 	case 15:
-		sys->cpu.gioa = sys->cpu.ka;	// sys->cpu.gioa = g;
-		sys->cpu.giob = sys->cpu.kb;	// sys->cpu.giob = h;
-		sys->cpu.iob = br_k & 0x07;
+		sys->cpu.to = sys->cpu.ka;	// sys->cpu.gioa = g;
+		sys->cpu.ro = sys->cpu.kb;	// sys->cpu.giob = h;
 		dev_out(sys);
 		break;
 	}
