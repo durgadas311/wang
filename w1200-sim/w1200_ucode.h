@@ -1,9 +1,9 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_ucode.h,v 1.2 2011/11/12 18:11:56 drmiller Exp $"
+#ident "$Id: w1200_ucode.h,v 1.3 2011/11/14 23:18:32 drmiller Exp $"
 
-#ifndef __w600_ucode_h__
-#define __w600_ucode_h__
+#ifndef __w1200_ucode_h__
+#define __w1200_ucode_h__
 
 #include <stdint.h>
 
@@ -24,6 +24,6 @@ typedef struct {
 	uint64_t ai:3;
 	uint64_t _unused: 19;
 	uint64_t ovr:1;	// used only for ucode override table
-} w600_ucode_t;
+} w1200_ucode_t;
 
-#endif // __w600_ucode_h__
+#endif // __w1200_ucode_h__

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.4 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.5 2011/11/14 23:18:32 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -23,6 +23,8 @@ uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
 
 uint16_t trc_adr = 0x0f0;
+
+static uint16_t key = 0;
 
 static char *get_mach_str(wang_sys_t *sys) { 
 	static char buf[32];
@@ -68,7 +70,7 @@ struct ucode_ovr_s {
 	uint16_t adr;
 	union ucode_ovr_u {
 		uint64_t word;
-		w600_ucode_t flds;
+		w1200_ucode_t flds;
 	} instr[SYS_MODEL_NUM];
 };      
 static struct ucode_ovr_s ucode_ovr[] = {
@@ -79,19 +81,19 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x3d0, {
 [SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-        }}
+        }},
         { 0x3d2, {
 [SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-        }}
+        }},
         { 0x3d4, {
 [SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-        }}
+        }},
         { 0x3d6, {
 [SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-        }}
+        }},
 };
 #define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
 
@@ -118,7 +120,26 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 		sys->cpu.d1 = b & 0x0f;
 		break;
 	case 3: // mode1 switches changed
-		sys->cpu.d2 = b & 0x0f;
+		sys->cpu.d2 = (sys->cpu.d2 & 0x01) | (b & 0x0e);
+		break;
+	case 4: // special alt keys - all update lamps...
+		switch(b & 0x0ff) {
+		case 1:	// SKIP
+			sys->cpu.ind.ind.skl ^= 1;
+			sys->cpu.d2 = (sys->cpu.d2 & 0x0e) | sys->cpu.ind.ind.skl;
+			break;
+		case 2:	// SEARCH
+			sys->cpu.ind.ind.shl ^= 1;
+			key = 0x100 | (sys->cpu.ind.ind.shl ? 0x52 : 0x42);
+			break;
+		case 3:	// CODE
+			sys->cpu.ind.ind.cdl ^= 1;
+			break;
+		default:
+			return -1;
+			break;
+		}
+		sys->display(sys, -2);
 		break;
 	default:
 		return -1;
@@ -137,45 +158,45 @@ void w1200_init(wang_sys_t *sys) {
 	sys->special_key = special_key;
 }
 
-static uint8_t add3_i(w1200_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t add3_i(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
 	sys->cpu.zo = ((s & 0x0f) == 0);
 	sys->cpu.cc = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
-static uint8_t sub3_i(w1200_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t sub3_i(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a - b - c;
 	sys->cpu.zo = ((s & 0x0f) == 0);
 	sys->cpu.cc = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
-static uint8_t and2(w1200_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t and2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a & b;
 	sys->cpu.zo = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t or2(w1200_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t or2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a | b;
 	sys->cpu.zo = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t xor2(w1200_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t xor2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	uint8_t s = a ^ b;
 	sys->cpu.zo = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t add3_c(w1200_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t add3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = add3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
 	return s;
 }
 
-static uint8_t sub3_c(w1200_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t sub3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = sub3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
 	return s;
@@ -200,12 +221,13 @@ static uint8_t odd_parity[16] = {
 [0xf] = 1,
 };
 
-static void tape_write(w1200_sys_t *sys, int dat) {
+static void tape_write(wang_sys_t *sys) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
 	static int sigc = 0;
 
+#if 0
 	last <<= 1;
 	last |= dat;
 	sigc ^= 1;
@@ -224,9 +246,12 @@ static void tape_write(w1200_sys_t *sys, int dat) {
 		data <<= 1;
 		data |= bit;
 	}
+#else
+fprintf(stderr, "tape %d %d\n", sys->cpu.din0, sys->cpu.din1);
+#endif
 }
 
-static int tape_read(w1200_sys_t *sys) {
+static int tape_read(wang_sys_t *sys) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
@@ -235,6 +260,7 @@ static int tape_read(w1200_sys_t *sys) {
 	static uint8_t bit = 0;
 	uint8_t nib;
 
+#if 0
 	// wait for TD 0->1
 	// delay 56 cycles
 	// wait 220 cycles (sample TD for end of loop)
@@ -292,26 +318,43 @@ bits:
 	data = (nib << 1) | odd_parity[nib];
 	bitc = 5;
 	goto bits;
+#else
+	sys->cpu.din0 ^= 1;
+	sys->cpu.din1 ^= 1;
+#endif
 }
 
-static void tape_on(w1200_sys_t *sys, int wr) {
+static void tape_on(wang_sys_t *sys, int right, int fr, int hi, int mv, int rc) {
+#if 0
 	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
 	if (!wr) {
 		tape_read(NULL);
 	}
+#else
+fprintf(stderr, "tape on %s fr=%d hi=%d mv=%d %s\n",
+	right ? "R" : "L",
+	fr, hi, mv,
+	rc ? "W" : "R");
+#endif
 }
 
-static void tape_off(w1200_sys_t *sys) {
+static void tape_off(wang_sys_t *sys, int right, int rc) {
+#if 0
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
+#else
+fprintf(stderr, "tape off %s %s\n",
+	right ? "R" : "L",
+	rc ? "W" : "R");
+#endif
 }
 
-static void dev_out(w1200_sys_t *sys) {
+static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.to << 4) | sys->cpu.ro;
 //fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
 	sys->dev(sys, c, 1);
 }
 
-static void rd_ram_i(w1200_sys_t *sys, uint8_t am, uint8_t al) {
+static void rd_ram_i(wang_sys_t *sys, uint8_t am, uint8_t al) {
 	uint16_t adr = (am << 4) | al;
 	adr &= ram_mask;
 	uint8_t b = sys->ram[adr];
@@ -319,20 +362,21 @@ static void rd_ram_i(w1200_sys_t *sys, uint8_t am, uint8_t al) {
 	sys->cpu.cb = b & 0x0f;
 }
 
-static void wr_ram_i(w1200_sys_t *sys, uint8_t am, uint8_t al) {
+static void wr_ram_i(wang_sys_t *sys, uint8_t am, uint8_t al) {
 	uint16_t adr = (am << 4) | al;
 	adr &= ram_mask;
 	uint8_t a = sys->cpu.ca;
 	uint8_t b = sys->cpu.cb;
+	uint8_t d = sys->ram[adr];
 	sys->ram[adr] = b | (a << 4);
 	if ((adr & 0xff0) == trc_adr) {
 		if (__systrc[adr & 0x00f]) {
-			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, c);
+			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, b | (a << 4));
 		}
 	}
 }
 
-static void instr_trace(w1200_sys_t *sys) {
+static void instr_trace(wang_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
 	m = &sys->ucode[sys->cpu.sys.pc];
@@ -367,11 +411,10 @@ static void instr_trace(w1200_sys_t *sys) {
 		buf);
 }
 
-int instr_exec(w1200_sys_t *sys) {
+int instr_exec(wang_sys_t *sys) {
 	w1200_ucode_t *u = (w1200_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
-	static uint16_t key = 0;
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
@@ -479,6 +522,7 @@ int instr_exec(w1200_sys_t *sys) {
 	case 4:	sys->cpu.ka = alu; break;
 	case 5:	sys->cpu.kb = alu; break;
 	case 6:	sys->cpu.ca = alu; break;
+	case 7:	sys->cpu.cb = alu; break;
 	}
 
 	switch(u->st) {
@@ -513,7 +557,7 @@ int instr_exec(w1200_sys_t *sys) {
 		// T.B.D. reset 6184...
 //fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.sys.pc, key);
 		sys->cpu.kbd = 0;
-		sys->cpu.cdl = 0;
+		sys->cpu.ind.ind.cdl = 0;
 		break;
 	case 10:
 		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.zo ^ 1);
@@ -539,21 +583,22 @@ int instr_exec(w1200_sys_t *sys) {
 	case 6:	rd_ram_i(sys, 15, br_k); break;
 	case 7:
 		if (br_k & 1) {
-			sys->cpu.csl = (u->bi & 1);
+			sys->cpu.ind.ind.csl = (u->bi & 1);
 		}
 		if (br_k & 2) {
-			sys->cpu.eln = (u->bi & 1);
+			sys->cpu.ind.ind.eln = (u->bi & 1);
 		}
 		if (br_k & 4) {
-			sys->cpu.ern = (u->bi & 1);
+			sys->cpu.ind.ind.ern = (u->bi & 1);
 		}
 		if (br_k & 8) {
-			sys->cpu.nan = (u->bi & 1);
+			sys->cpu.ind.ind.nan = (u->bi & 1);
 		}
+		sys->display(sys, -2);
 		break;
 	case 8:
 		if (br_k & 2) {
-			// sound alarm/bell...
+			// sound alarm/bell... TBD
 		}
 		if (br_k & 4) {
 			sys->cpu.to = sys->cpu.ka;
@@ -562,35 +607,55 @@ int instr_exec(w1200_sys_t *sys) {
 			dev_out(sys);
 		}
 		break;
-	case 9:	rc = 2; break;
+	case 9:
+		switch(br_k & 0x07) {
+		case 0:
+			sys->cpu.ka = sys->cpu.d2;
+			break;
+		case 4:
+			sys->cpu.ka = 0; // TRE, SHC, PRINT, ATTN...
+			break;
+		}
+		break;
 	case 10:
-		sys->cpu.kb = 0; // SKB0, PSKB1, LOP, ROP
+		tape_read(sys);
+		// Dout<0>, Dout<1>, LeftProt, RightProt
+		sys->cpu.kb = (sys->cpu.din0 << 3) |
+				(sys->cpu.din1 << 2) |
+				0;
 		break;
 	case 11:
 		sys->cpu.din0 = (sys->cpu.kb & 1);
 		sys->cpu.din1 = (sys->cpu.ka & 1);
-		//tape_write(sys);
+		tape_write(sys);
 		break;
 	case 12:
 		sys->cpu.kb = 0; // L/S, R/B, LHS, RHS
+				// Lock Shift? Ready/Busy? Left Head Select? Right... ?
 		break;
 	case 13:
-		sys->cpu.right = br_k & 1;
-		sys->cpu.fr[sys->cpu.right] = (br_k >> 1) & 1;
-		sys->cpu.hi[sys->cpu.right] = (br_k >> 2) & 1;
-		sys->cpu.mv[sys->cpu.fr[sys->cpu.right]][sys->cpu.right] = (br_k >> 3) & 1;
-		sys->cpu.rc = (u->bi & 1);
-		tape_on(sys);
+		{
+			uint8_t right = br_k & 1;
+			uint8_t fr = (br_k >> 1) & 1;
+			uint8_t hi = (br_k >> 2) & 1;
+			uint8_t mv = (br_k >> 3) & 1;
+			uint8_t rc = (u->bi & 1);
+			tape_on(sys, right, fr, hi, mv, rc);
+		}
 		break;
 	case 14:
-		sys->cpu.right = br_k & 1;
-		sys->cpu.rc = (u->bi & 1);
-		tape_off(sys);
+		{
+			uint8_t right = br_k & 1;
+			uint8_t rc = (u->bi & 1);
+			tape_off(sys, right, rc);
+		}
 		break;
 	case 15:
-		sys->cpu.to = sys->cpu.ka;	// sys->cpu.gioa = g;
-		sys->cpu.ro = sys->cpu.kb;	// sys->cpu.giob = h;
-		dev_out(sys);
+		switch(br_k & 0x07) {
+		case 0:
+			// all UART functions?
+			break;
+		}
 		break;
 	}
 
@@ -651,11 +716,11 @@ int instr_exec(w1200_sys_t *sys) {
 		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff; 
 		sys->cpu.sys.jam = 0;
 		if (sys->cpu.sys.next == 0) { // RESET
-			sys->cpu.cdl = 0;
-			sys->cpu.skl = 0;
-			sys->cpu.shl = 0;
+			sys->cpu.ind.ind.cdl = 0;
+			sys->cpu.ind.ind.skl = 0;
+			sys->cpu.ind.ind.shl = 0;
+			sys->display(sys, -2);
 		}
-		sys->display(sys, -2);
 	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;

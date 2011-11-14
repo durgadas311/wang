@@ -3,20 +3,20 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "w600_ucode.h"
+#include "w1200_ucode.h"
 
 int loaducode_txt(int fd, uint64_t *m, int len) {
 	static char junk[4096];
 	int x, n;
 	union {
 		uint64_t word;
-		w600_ucode_t flds;
+		w1200_ucode_t flds;
 	} u;
 
 	FILE *fp = fdopen(fd, "r");
 	if (fp == NULL) return -1;
 	int _jad, _jh, _jl;
-	int jc, jad, jh, jl;
+	int sub, jad, jh, jl;
 	int ai, bi, zo, ac, bc;
 	int aop, mop, kk, st;
 
@@ -34,7 +34,7 @@ int loaducode_txt(int fd, uint64_t *m, int len) {
 			&mop,
 			&kk,
 			&st,
-			&jc,
+			&sub,
 			&jh,
 			&jl,
 			&jad);
@@ -55,7 +55,7 @@ int loaducode_txt(int fd, uint64_t *m, int len) {
 		u.flds.mop = mop;
 		u.flds.kk = kk;
 		u.flds.st = st;
-		u.flds.jc = jc;
+		u.flds.sub = sub;
 		u.flds.jh = jh;
 		u.flds.jl = jl;
 		u.flds.jad = jad;
@@ -70,7 +70,7 @@ if (0) fprintf(stderr, "got[%d] %x %x %x %x %x %x %x %x %x %x %x %x %x\n", n,
 		u.flds.mop,
 		u.flds.kk,
 		u.flds.st,
-		u.flds.jc,
+		u.flds.sub,
 		u.flds.jh,
 		u.flds.jl,
 		u.flds.jad

@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.8 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.9 2011/11/14 23:18:32 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -65,6 +65,7 @@ static void guidisplay(wang_sys_t *sys, int on) {
 		// error lights changed - only
 		bx = (sys->cpu.ind.word & 0x03ff) | 0x0400;
 		flush = 1;
+#ifndef __wang1200__
 	} else if (on == 0) {
 		// blank display(s)
 		disp_good = 0;
@@ -153,6 +154,7 @@ static void guidisplay(wang_sys_t *sys, int on) {
 				wait_key(); // sleep until key event
 			}
 		}
+#endif // ! __wang1200__
 	}
 }
 
@@ -238,6 +240,7 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		write(__gui_dfd, &b, sizeof(b));
 		return;
 	}
+#ifndef __wang1200__
 	if ((b & 0xe000) == 0x2000) {
 		//if ((b & 0x0f00) == 1) { // ACK
 		//	handle just like input...
@@ -289,6 +292,7 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		return;
 	}
 #endif // WANG_HAS_ROM
+#endif // ! __wang1200__
 	// uh, this is embarassing...
 	// presumably this is tape data, we've lost it and can't continue?
 	fprintf(stderr, "gag me! %04x\n", b);

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.10 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.11 2011/11/14 23:18:32 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -365,55 +365,13 @@ static void __load_mem(wang_sys_t *sys, uint8_t *mem, char *file) {
 // F6F is hi nibble of byte, F6E is lo nibble of byte.
 // The above addresses are NIBBLE addresses, as used by the
 // Wang. Byte offsets in file are >> 1.
-#if defined(__wang600__) || defined(__wang1200__)
+#if defined(__wang600__)
 void sys_loadrom(wang_sys_t *sys, char *rom) {
 	uint8_t *mem = sys->rom;
 	__load_mem(sys, mem, rom);
 }
 
-struct ucode_ovr_s {
-	uint16_t adr;
-	union {
-		uint64_t word;
-		w600_ucode_t flds;
-	} instr[SYS_MODEL_NUM];
-};
-static struct ucode_ovr_s ucode_ovr[] = {
-
-#ifdef __wang600__
-	{ 0x008, {
-[SYS_MODEL600_2TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  3, .ovr = 1 }},
-[SYS_MODEL600_6TP]  = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk =  7, .ovr = 1 }},
-[SYS_MODEL600_14TP] = { .flds = {.bi = 1, .zo = 6, .jl = 7, .kk = 15, .ovr = 1 }}
-	}}
 #endif // __wang600__
-
-#ifdef __wang1200__
-// 0 x x 0 1 0 1 1 1 1 0 = 01111010xx0 = 3d0, 3d2, 3d4, 3d6
-// 0000 0000 0000  0000  0000 0000 0011 0111 1111 0010 00xx
-// 000 000 000 000 0 0 0000 0000 0000 1 101111111 001 000
-// AI=0 BI=0 ZO=0 AOP=0 AC=0 BC=0 MOP=0 KK=0 ST=0 SUB=1 JAD=5fc JH=1 JL=0 (5fe)
-	{ 0x3d0, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-	}}
-	{ 0x3d2, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-	}}
-	{ 0x3d4, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-	}}
-	{ 0x3d6, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
-	}}
-#endif // __wang1200__
-
-};
-#define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
-#endif // __wang600__ || __wang1200__
 
 void sys_loadram(wang_sys_t *sys, char *ram) {
 	uint8_t *mem = sys->ram;

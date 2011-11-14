@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.4 2011/11/14 04:24:47 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.5 2011/11/14 23:18:32 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -404,7 +404,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>0110</TD><TD>CA,CB = ram(15,KK)</TD></TR>
 	<TR><TD>0111</TD><TD>Op based on KK</TD></TR>
 	<TR><TD>1000</TD><TD>Op based on KK</TD></TR>
-	<TR><TD>1001</TD><TD>? KA = SKA</TD></TR>
+	<TR><TD>1001</TD><TD>Op based on KK</TD></TR>
 	<TR><TD>1010</TD><TD>KB = tape/stat</TD></TR>
 	<TR><TD>1011</TD><TD>	D<SUB>IN1</SUB> = KA<SUB>0</SUB><BR>
 				D<SUB>IN0</SUB> = KB<SUB>0</SUB></TD></TR>
@@ -420,7 +420,7 @@ as follows (layout for Solid State ROM).
 	<TR><TD>1110</TD><TD>LEFT=KK<SUB>0</SUB><BR>
 			RC = BI<SUB>0</SUB><BR>
 			TMR[LEFT]=0</TD></TR>
-	<TR><TD>1111</TD><TD>TO = KA<BR>RO = KB</TD></TR>
+	<TR><TD>1111</TD><TD>Op based on KK</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -457,6 +457,24 @@ as follows (layout for Solid State ROM).
 <TR><TD ROWSPAN=2>1000</TD><TD ROWSPAN=2>x1xx</TD>
 				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0> *</TD></TR>
 <TR>				<TD>xxx1</TD><TD>Typewriter carriage function *</TD></TR>
+<TR><TD ROWSPAN=8>1001</TD>
+	<TD>x000</TD><TD COLSPAN=2>KA = x ; x ; ORG ; ADJ</TD></TR>
+<TR>	<TD>x001</TD><TD COLSPAN=2>KA = Lo nibble serial data in</TD></TR>
+<TR>	<TD>x010</TD><TD COLSPAN=2>KA = Hi nibble serial data in</TD></TR>
+<TR>	<TD>x011</TD><TD COLSPAN=2>KA = LCB/LCA ; PE ; DR ; (timing)</TD></TR>
+<TR>	<TD>x100</TD><TD COLSPAN=2>KA = TRE ; SHC ; PRINT ; ATTN</TD></TR>
+<TR>	<TD>x101</TD><TD COLSPAN=2>n/a</TD></TR>
+<TR>	<TD>x110</TD><TD COLSPAN=2>n/a</TD></TR>
+<TR>	<TD>x111</TD><TD COLSPAN=2>n/a</TD></TR>
+<TR><TD ROWSPAN=8>1111</TD>
+	<TD>x000</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x001</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x010</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x011</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x100</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x101</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x110</TD><TD COLSPAN=2>UART function</TD></TR>
+<TR>	<TD>x111</TD><TD COLSPAN=2>UART function</TD></TR>
 <TR><TD COLSPAN=4>* TO,RO = KA,KB</TD></TR>
 </TABLE></UL>
 

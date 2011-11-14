@@ -1,11 +1,11 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ifndef __w600_decode_h__
-#define __w600_decode_h__
+#ifndef __w1200_decode_h__
+#define __w1200_decode_h__
 
-#ident "$Id: w1200_decode.h,v 1.1 2011/11/12 00:27:28 drmiller Exp $"
-#include "w600_sys.h"
+#ident "$Id: w1200_decode.h,v 1.2 2011/11/14 23:18:32 drmiller Exp $"
+#include "w1200_sys.h"
 
-extern int instr_exec(w600_sys_t *sys);
+extern int instr_exec(wang_sys_t *sys);
 
-#endif // __w600_decode_h__
+#endif // __w1200_decode_h__

@@ -3,7 +3,7 @@
 #ifndef __w1200_sys_h__
 #define __w1200_sys_h__
 
-#ident "$Id: w1200_sys.h,v 1.3 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w1200_sys.h,v 1.4 2011/11/14 23:18:32 drmiller Exp $"
 
 #include "w1200_ucode.h"
 #include "w1200_cpu.h"
@@ -13,6 +13,7 @@ typedef w1200_cpu_t wang_cpu_t;
 #define WANG_UCODE_SIZE	2048
 #define WANG_RAM_SIZE	256
 #define WANG_HAS_TAPE
+#define WANG_HAS_DEV
 #define WANG_SYS_INIT	w1200_init
 
 #define SYS_MODEL1200	0

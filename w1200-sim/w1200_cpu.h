@@ -1,11 +1,26 @@
 // Copyright (c) 2011 Douglas Miller
-#ifndef __w600_cpu_h__
-#define __w600_cpu_h__
+#ifndef __w1200_cpu_h__
+#define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.4 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.5 2011/11/14 23:18:32 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
+
+typedef union {
+	struct {
+		uint16_t ern	:1;	// RECORD lamp
+		uint16_t tmr	:1;	// TAPE MOVING (right) lamp
+		uint16_t tml	:1;	// TAPE MOVING (left) lamp
+		uint16_t eln	:1;	// END OF DOCUMENT lamp
+		uint16_t nan	:1;	// NO ADJUST lamp
+		uint16_t csl	:1;	// CHAR / STOP lamp
+		uint16_t shl	:1;	// SEARCH lamp
+		uint16_t skl	:1;	// SKIP lamp
+		uint16_t cdl	:1;	// CODE lamp/status *
+	} ind;
+	uint16_t word;
+} w1200_ind_t;
 
 typedef struct {
 	uint8_t s;
@@ -17,6 +32,7 @@ typedef struct {
 	uint8_t ka;
 	uint8_t kb;
 
+	uint8_t l; // for compat - never used
 	uint8_t m;
 	uint8_t n;
 	uint8_t to;
@@ -29,25 +45,19 @@ typedef struct {
 
 	uint8_t function;	// MOP=8 etc
 
-	uint16_t ern	:1;	// RECORD lamp
-	uint16_t tmr	:1;	// TAPE MOVING (right) lamp
-	uint16_t tml	:1;	// TAPE MOVING (left) lamp
-	uint16_t eln	:1;	// END OF DOCUMENT lamp
-	uint16_t nan	:1;	// NO ADJUST lamp
-	uint16_t csl	:1;	// CHAR / STOP lamp
-	uint16_t shl	:1;	// SEARCH lamp
-	uint16_t skl	:1;	// SKIP lamp
-	uint16_t cdl	:1;	// CODE lamp/status *
+	w1200_ind_t ind;
 
 	uint8_t kbd;	// any key down
 	uint8_t d1;	// mode switch inputs 1
 	uint8_t d2;	// mode switch inputs 2
+	uint8_t din0;
+	uint8_t din1;
 
 	uint16_t stk1;
 	uint16_t stk2;
 
 	wang_sys_cpu_t sys;	// common elements
-} w600_cpu_t;
+} w1200_cpu_t;
 
 #define D10_RIGHT	0x01	// Right Tape selected
 #define D11_DOUBLE	0x02	// Double (!Single)
@@ -56,4 +66,4 @@ typedef struct {
 
 #define D20_UNK		0x01	// TBD
 
-#endif // __w600_cpu_h__
+#endif // __w1200_cpu_h__

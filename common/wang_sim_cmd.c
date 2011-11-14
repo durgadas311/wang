@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.2 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.3 2011/11/14 23:18:32 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -229,6 +229,7 @@ static int _set(wang_sys_t *sys, char *line) {
 			r = &sys->cpu.ka;
 		} else if (strcasecmp(s, "kb") == 0) {
 			r = &sys->cpu.kb;
+#if defined(__wang600__) || defined(__wang700__)
 		} else if (strcasecmp(s, "gioa") == 0) {
 			r = &sys->cpu.gioa;
 		} else if (strcasecmp(s, "giob") == 0) {
@@ -236,6 +237,7 @@ static int _set(wang_sys_t *sys, char *line) {
 		} else if (strcasecmp(s, "iob") == 0) {
 			z = 3;
 			r = &sys->cpu.iob;
+#endif // __wang600__ || __wang700__
 #ifdef __wang600__
 		} else if (strcasecmp(s, "d1") == 0) {
 			r = &sys->cpu.d1;
@@ -252,9 +254,11 @@ static int _set(wang_sys_t *sys, char *line) {
 			z = 0;
 			sys->cpu.ind.ind.ofl = (v != 0);
 #endif // __wang700__
+#if defined(__wang600__) || defined(__wang700__)
 		} else if (strcasecmp(s, "err") == 0) {
 			z = 0;
 			sys->cpu.ind.ind.err = (v != 0);
+#endif // __wang600__ || __wang700__
 		} else if (strcasecmp(s, "kbd") == 0) {
 			z = 1;
 			r = &sys->cpu.kbd;

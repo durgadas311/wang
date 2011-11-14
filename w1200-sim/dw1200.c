@@ -1,12 +1,12 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.1 2011/11/12 00:27:28 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.2 2011/11/14 23:18:32 drmiller Exp $"
 
 #include <stdio.h>
-#include "w600_ucode.h"
+#include "w1200_ucode.h"
 
 void diwang(char *buf, uint64_t *v) {
-	w600_ucode_t *u = (w600_ucode_t *)v;
+	w1200_ucode_t *u = (w1200_ucode_t *)v;
 	char *s;
 
 	char *g = NULL;
@@ -53,7 +53,7 @@ void diwang(char *buf, uint64_t *v) {
 	if (u->jl == 7) {
 		s += sprintf(s, "return");
 	} else {
-		if (u->jc) {
+		if (u->sub) {
 			s += sprintf(s, "call");
 		} else {
 			s += sprintf(s, "jump");
@@ -64,16 +64,17 @@ void diwang(char *buf, uint64_t *v) {
 			switch(u->jh) {
 			case 2: s += sprintf(s, "S<1>"); break;
 			case 3: s += sprintf(s, "S<3>"); break;
-			case 4: s += sprintf(s, "OV"); break;
+			case 4: s += sprintf(s, "0?"); break;
 			case 5: s += sprintf(s, "CC"); break;
 			case 6: s += sprintf(s, "KBD"); break;
+			case 7: s += sprintf(s, "Zo"); break;
 			}
 			s += sprintf(s, ":");
 			switch(u->jl) {
 			case 2: s += sprintf(s, "S<0>"); break;
 			case 3: s += sprintf(s, "S<2>"); break;
 			case 4: s += sprintf(s, "Zo"); break;
-			case 5: s += sprintf(s, "Q?"); break;
+			case 5: s += sprintf(s, "CC"); break;
 			case 6: s += sprintf(s, "SC"); break;
 			case 7: s += sprintf(s, "1?"); break;
 			}
@@ -141,9 +142,9 @@ void diwang(char *buf, uint64_t *v) {
 		case 9: sprintf(mach, "RESET"); break;
 		case 10: sprintf(acc, "S<0>=!Z"); break;
 		case 11: sprintf(acc, "S<1>=Z"); break;
-		case 12: sprintf(mach, "OV=1"); break;
+		case 12: sprintf(mach, "st12?"); break;
 		case 13: sprintf(acc, "S=0"); break;
-		case 14: sprintf(mach, "ERR=1"); break;
+		case 14: sprintf(mach, "st14?"); break;
 		}
 	}
 	if (targ[0] && u->zo != 7) {
@@ -157,27 +158,28 @@ void diwang(char *buf, uint64_t *v) {
 	case 4:	t += sprintf(t, "KA"); break;
 	case 5:	t += sprintf(t, "KB"); break;
 	case 6:	t += sprintf(t, "CA"); break;
+	case 7:	t += sprintf(t, "CB"); break;
 	}
 	if (targ[0]) {
 		t += sprintf(t, " = ");
 	}
 
 	switch(u->mop) {
-	case 1:	sprintf(opA, "mem(T,U,V) = CA"); break;
-	case 2:	sprintf(opA, "mem(15,%s,V) = CA", k); break;
-	case 3:	sprintf(opA, "mem(15,15,%s) = CA", k); break;
-	case 4:	sprintf(opA, "CA = mem(T,U,V), CB = rom(T,U,V)"); break;
-	case 5:	sprintf(opA, "CA = mem(15,%s,V), CB = rom(15,%s,V)", k, k); break;
-	case 6:	sprintf(opA, "CA = mem(15,15,%s), CB = rom(15,15,%s)", k, k); break;
-	case 7:	sprintf(opA, "KBP <<+ KB<0>"); break;
-	case 8:	sprintf(opA, "PPF=1"); break;
-	case 9:	sprintf(opA, "<A9>"); break;
-	case 10:	sprintf(opA, "KB<0> = MHG/MHO"); break;
-	case 11:	sprintf(opA, "WDT = KB<0>"); break;
-	case 12:	sprintf(opA, "KA=PC0-3, KB<3>=PC4, KB<1>=RBS"); break;
+	case 1:	sprintf(opA, "mem(U,V) = CA"); break;
+	case 2:	sprintf(opA, "mem(%s,V) = CA", k); break;
+	case 3:	sprintf(opA, "mem(15,%s) = CA", k); break;
+	case 4:	sprintf(opA, "CA = mem(U,V), CB = rom(T,U,V)"); break;
+	case 5:	sprintf(opA, "CA = mem(%s,V), CB = rom(15,%s,V)", k, k); break;
+	case 6:	sprintf(opA, "CA = mem(15,%s), CB = rom(15,15,%s)", k, k); break;
+	case 7:	sprintf(opA, "indicators"); break;
+	case 8:	sprintf(opA, "print out"); break;
+	case 9:	sprintf(opA, "get status"); break;
+	case 10:	sprintf(opA, "tape read"); break;
+	case 11:	sprintf(opA, "tape write"); break;
+	case 12:	sprintf(opA, "tape status"); break;
 	case 13:	sprintf(opA, "TMR=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
-	case 14:	sprintf(opA, "TMR=0%s", u->bi & 1 ? "(noreset)" : ""); break;
-	case 15:	sprintf(opA, "GIOA=KA, GIOB=KB, IOB=%s", k); break;
+	case 14:	sprintf(opA, "TMR=0(%s)", u->bi & 1 ? "WR" : "RD"); break;
+	case 15:	sprintf(opA, "UART status"); break;
 	}
 
 	s = buf;
