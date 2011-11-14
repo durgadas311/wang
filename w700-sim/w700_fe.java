@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $
+// $Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -126,7 +126,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -336,7 +336,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -418,7 +418,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -480,6 +480,7 @@ class Wang700_SimInput
 				//System.err.println("simulator shutdown");
 				System.exit(1);
 			}
+if (n > 2) System.err.println("too much? "+n);
 			if ((b[1] & 0x00ff) == 0xf0) {
 				// fatal error, message follows...
 				byte[] m = new byte[1024];
@@ -490,14 +491,27 @@ class Wang700_SimInput
 				} catch (IOException ee) {
 				}
 				System.exit(1);
-			} else if ((b[1] & 0xc0) == 0x80) {
-				if ((b[1] & 0x20) != 0) {
-					_dspy.do_display(b);
-				} else {
-					_dspx.do_display(b);
+			} else if ((b[1] & 0xfc) == 0x00) {
+				// there will be 16 total sent...
+				// and they are in order: 0-15...
+				byte[] m = new byte[32];
+				try {
+					n = _fin.read(m);
+				} catch (IOException ee) {
 				}
+if (n != 32) System.err.println("too little? "+n);
+				if ((b[1] & 0x02) != 0) {
+					_dspy.do_display(m);
+				} else {
+					_dspx.do_display(m);
+				}
+			} else if ((b[1] & 0xfe) == 0x04) {
+				_dspx.do_indicators(b);
+			} else if ((b[1] & 0xfe) == 0x06) {
+				_dspx.do_blanking();
+				_dspy.do_blanking();
 			} else if ((b[1] & ~1) == 0x08) {
-				System.err.println("invalid printer outout");
+				System.err.println("invalid printer output");
 			} else if ((b[1]  & ~3) == 0x0c) {
 				_tape.do_tape(b);
 			} else if ((b[1] & 0x0ff) == 0x7f) {
@@ -531,7 +545,7 @@ class Wang700_SimInput
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1063,7 +1077,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1653,15 +1667,15 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
 
 	byte[] disp_a;
 	JLabel disp;
-	int _dp;
 	byte _dpc;
+	byte _gap;
 
 	Wang700_ProgErr pe;
 	Wang700_ProgErr me;
@@ -1725,6 +1739,7 @@ class Wang700_Display extends JComponent
 			font = font.deriveFont(40f);
 			// special decimal point, zero-width...
 			if (font.canDisplay('\007')) _dpc = '\007';
+			_gap = ' ';
 		}
 		if (font == null) {
 			System.err.println("Missing font \"" +
@@ -1732,6 +1747,7 @@ class Wang700_Display extends JComponent
 			//font = new Font("Sans-serif", Font.PLAIN, 40);
 			font = new Font("Monospaced", Font.PLAIN, 40);
 			_dpc = '.';
+			_gap = ' ';
 		}
 		disp.setPreferredSize(new Dimension(560, 75));
 		disp.setFont(font);
@@ -1765,73 +1781,85 @@ class Wang700_Display extends JComponent
 			flasher();
 		}
 	}
+	public void do_indicators(byte[] b) {
+		// assert(ismain)
+		if ((b[0] & 0x2) != 0) {
+			me.setOn(true);
+			setFlashing(true);
+		} else {
+			me.setOn(false);
+		}
+		if ((b[0] & 0x1) != 0) {
+			pe.setOn(true);
+			setFlashing(true);
+		} else {
+			pe.setOn(false);
+		}
+		if ((b[0] & 0x3) == 0) {
+			setFlashing(false);
+		}
+	}
+
+	public void do_blanking() {
+		// blank-out display while Wang is not refreshing...
+		String s = new String("                  ");
+//System.err.println("blanking ("+ismain+")");
+		disp.setText(" "+s);
+		repaint();
+	}
 
 	// this really should be set aside in a neutral class, which is given
 	// access to display, tape, printer, etc...
-	public void do_display(byte[] b) {
+	public void do_display(byte[] m) {
 		int ds;
 		int dc;
-		byte c;
+		int dp;
+		byte dx;
 
-//System.err.format("disp %02x %02x\n", b[1], b[0]);
-		if (ismain) {
-			if ((b[1] & 0x2) != 0) {
-				me.setOn(true);
-				setFlashing(true);
-			} else {
-				me.setOn(false);
-			}
-			if ((b[1] & 0x1) != 0) {
-				pe.setOn(true);
-				setFlashing(true);
-			} else {
-				pe.setOn(false);
-			}
-			if ((b[1] & 0x3) == 0) {
-				setFlashing(false);
-			}
-		}
+//if (!ismain) System.err.println("refreshed Y");
+		// m[] is columns 0-15...
 		String s;
-		if ((b[1] & 0x4) != 0) {
-			// blank-out display while Wang is not refreshing...
-			s = new String("                  ");
-//System.err.println("blank "+((b[1] >> 4) & 0x0f)+" "+((b[0] >> 4) & 0x0f)+" "+(b[0] & 0x0f));
-		} else {
-			ds = (b[0] >> 4) & 0x0f;
-			dc = b[0] & 0x0f;
-			if (ds == 15) {
-				disp_a[16] = ' ';
-				disp_a[17] = ' ';
-				if ((b[1] & 0x10) == 0) {
-					if (dc == 15) {
-						_dp = 18;
-					} else {
-						_dp = 0;
-						disp_a[_dp + 1] = _dpc;
-					}
-				} else {
-					if (dc == 15) {
-						_dp = 18;
-					} else {
-						_dp = dc;
-						disp_a[_dp + 1] = _dpc;
-					}
-					dc = 15;
-				}
-				c = disp_chr[dc];
-			} else if (ds == 0 || ds == 13) {
-				if ((b[1] & 0x10) != 0 && ds >= 13) dc = 15;
-				c = sign_chr[dc];
-			} else {
-				if ((b[1] & 0x10) != 0 && ds >= 13) dc = 15;
-				c = disp_chr[dc];
-			}
-			if (ds > _dp) ++ds;
-			if (ds > 12+1) ++ds;
-			disp_a[ds] = c;
-			s = new String(disp_a);
-//System.err.println("disp \""+s+"\" "+((b[1] >> 4) & 0x0f)+" "+((b[0] >> 4) & 0x0f)+" "+(b[0] & 0x0f));
+		// first check FXD/FLD...
+		dc = m[30] & 0x0f;
+		boolean fxd = ((m[31] & 0x01) == 0);
+		if (dc == 15) {
+			dp = 18; // infinity
+		} else if (fxd) { // FXD
+			dp = 0;
+		} else { // FLD
+			dp = dc;
 		}
+		ds = 0;
+		dx = 0;
+		// sign always goes straight into place...
+		disp_a[ds] = sign_chr[m[dx * 2 + 0] & 0x0f];
+		++dx;
+		do {
+			if (ds == dp) {
+				++ds;
+				disp_a[ds] = _dpc;
+			}
+			++ds;
+			dc = m[dx * 2 + 0] & 0x0f;
+			disp_a[ds] = disp_chr[dc];
+			++dx;
+		} while (dx < 13);
+		++ds;
+		disp_a[ds] = _gap;
+		if (fxd) {
+			++ds;
+			disp_a[ds] = sign_chr[m[26] & 0x0f];
+			++ds;
+			disp_a[ds] = disp_chr[m[28] & 0x0f];
+			++ds;
+			disp_a[ds] = disp_chr[m[30] & 0x0f];
+		} else {
+			while (ds < 17) {
+				++ds;
+				disp_a[ds] = ' ';
+			}
+		}
+		s = new String(disp_a);
 		disp.setText(" "+s);
 		repaint();
 	}
@@ -1840,7 +1868,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2264,7 +2292,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2426,7 +2454,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2651,7 +2679,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2780,7 +2808,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.23 2011/11/13 01:33:31 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.24 2011/11/14 00:45:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

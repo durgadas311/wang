@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.4 2011/11/13 18:50:23 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.5 2011/11/14 00:45:44 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -46,12 +46,11 @@ static int disp_good = 0;
 // 'on' = -2: refresh only error lights - DO NOT SLEEP!
 // 'on' = 0: blank display (reset everything)
 static void guidisplay(wang_sys_t *sys, int on) {
-	static char bufx[16] = { "xxxxxxxxxxxxxxxx" };
+	static uint16_t bufx[16];
 	static uint16_t lastx = 0;
 	uint16_t bx = 0;
 #ifdef __wang700__
-	static char bufy[16] = { "yyyyyyyyyyyyyyyy" };
-	static uint16_t lasty = 0;
+	static uint16_t bufy[16];
 	uint16_t by = 0;
 #endif // __wang700__
 	int rc;
@@ -64,99 +63,69 @@ static void guidisplay(wang_sys_t *sys, int on) {
 		return;
 	}
 
-#ifdef __wang700__
-	bx |= 0x8000;
-	by |= 0xa000;
-#endif // __wang700__
-	// piggy-back error lights in hi order bits...
-#ifdef __wang600__
-	if (sys->cpu.ov) {
-		bx |= 0x0100;
-	}
-#endif // __wang600__
-#ifdef __wang700__
-	if (sys->cpu.ofl) {
-		bx |= 0x0100;
-	}
-#endif // __wang700__
-	if (sys->cpu.err) {
-		bx |= 0x0200;
-	}
-#ifdef __wang700__
-	if (sys->cpu.s & 1) {
-		by |= 0x1000;
-	}
-	if (sys->cpu.s & 2) {
-		bx |= 0x1000;
-	}
-#endif // __wang700__
-	if (lastx != bx) {
-		// harsh?
-		memset(bufx, 'x', sizeof(bufx));
-		lastx = bx;
-		++flush;
-	}
-#ifdef __wang700__
-	if (lasty != by) {
-		// harsh?
-		memset(bufy, 'y', sizeof(bufy));
-		lasty = by;
-		++flush;
-	}
-#endif // __wang700__
-
-	uint8_t ds = sys->cpu.n;
-	uint8_t dcx = sys->cpu.rb;
 	if (on == -2) {
-		// do not change any digits...
-		dcx = bufx[ds];
-	}
-#ifdef __wang700__
-	uint8_t dcy = sys->cpu.ra;
-	if (on == -2) {
-		// do not change any digits...
-		dcy = bufy[ds];
-	}
-#endif // __wang700__
-	if (on == 0) {
+		// error lights changed - only
+		bx = 0x0400 | (sys->cpu_overflow << 0) | (sys->cpu.err << 1);
+		flush = 1;
+	} else if (on == 0) {
+		// blank display(s)
+		disp_good = 0;
+		lastx = 0;
 //fprintf(stderr, "blank all \"%.*s\" \"%.*s\"\n", 16, bufx, 16, bufy);
 		// signal to blank display
-		memset(bufx, 'x', sizeof(bufx));
-		lastx = 0;
-		bx |= 0x0400;
+		bx = 0x0600;
+		memset(bufx, -1, sizeof(bufx));
 #ifdef __wang700__
-		memset(bufy, 'y', sizeof(bufy));
-		lasty = 0;
-		by |= 0x0400;
+		memset(bufy, -1, sizeof(bufy));
 #endif // __wang700__
-		++flush;
+		flush = 1;
 	} else {
-		if (bufx[ds] != dcx) {
+		uint8_t ds = sys->cpu.n;
+		bx |= (ds << 4) | sys->cpu.rb;
+#ifdef __wang700__
+		bx |= (sys->cpu.s & 2) << 7;	// FXDX
+		//bx ^= 0x0100;
+#endif // __wang700__
+		if (bufx[ds] != bx) {
 			disp_good = 0;
-			bufx[ds] = dcx;
-			++flush;
+			bufx[ds] = bx;
 		}
 		// these fields are always interpretted,
 		// so send valid data...
-		bx |= (ds << 4) | dcx;
 #ifdef __wang700__
-		if (bufy[ds] != dcy) {
+		by |= (sys->cpu.s & 1) << 8;	// FXDY
+		by ^= 0x0100;
+		by |= (ds << 4) | sys->cpu.ra;
+		if (bufy[ds] != by) {
 			disp_good = 0;
-			bufy[ds] = dcy;
-			++flush;
+			bufy[ds] = by;
 		}
-		bx |= (sys->cpu.s & 2) << 11;	// FXDX
-		//bx ^= 0x1000;
-
-		by |= (ds << 4) | dcy;
-		by |= (sys->cpu.s & 1) << 12;	// FXDY
-		by ^= 0x1000;
 #endif // __wang700__
+		if (++lastx >= 16) {
+			flush = 16;
+			lastx = 0;
+		}
 	}
 
-	if (flush) {
+	if (flush == 1) {
 		disp_good = 0;
 		rc = write(__gui_dfd, &bx, sizeof(bx));
+		if (rc < 0) {
+			perror("guidisplay");
+			// silently quit...
+			sys->run = 0;
+			return;
+		}
+	} else if (flush > 1) {	// must be 16
+		++disp_good;
+		rc = write(__gui_dfd, &bx, sizeof(bx));
+		if (rc < 0) {
+			perror("guidisplay");
+			// silently quit...
+			sys->run = 0;
+			return;
+		}
+		rc = write(__gui_dfd, bufx, sizeof(bufx));
 		if (rc < 0) {
 			perror("guidisplay");
 			// silently quit...
@@ -172,11 +141,17 @@ static void guidisplay(wang_sys_t *sys, int on) {
 				sys->run = 0;
 				return;
 			}
+			rc = write(__gui_dfd, bufy, sizeof(bufy));
+			if (rc < 0) {
+				perror("guidisplay");
+				// silently quit...
+				sys->run = 0;
+				return;
+			}
 		}
 #endif // __wang700__
 	} else {
-		++disp_good;
-		if (disp_good > 64) {
+		if (disp_good > 4) {
 			if (on > 0) {
 				wait_key(); // sleep until key event
 			}
@@ -246,14 +221,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		// jam new PC...
 		b &= 0x07;
 		sys->cpu.sys.next = b;
-		if (b < 4) {
-#ifdef __wang700__
-			sys->cpu.ofl = 0;
-#endif // __wang700__
-#ifdef __wang600__
-			sys->cpu.ov = 0;
-#endif // __wang600__
-		}
+		sys->cpu_overflow = 0;
 		if (b == 0) {
 			sys->cpu.err = 0;
 		}
@@ -261,6 +229,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 			fprintf(sys->trc_fp, "TRACE: %03x: Key Jam PC %03x\n",
 				sys->cpu.sys.pc, sys->cpu.sys.next);
 		}
+		sys->display(sys, -2);
 		break;
 #ifdef __wang700__
 	case 2:	// mode0 switches changed

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_exec.c,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang_exec.c,v 1.2 2011/11/14 00:45:44 drmiller Exp $"
 
 #include <stdlib.h>
 
@@ -15,12 +15,11 @@ char *get_mach_str(wang_sys_t *sys) {
 #ifdef __wang600__
 	s += sprintf(s, "mode0=%01x", sys->cpu.d1);
 	s += sprintf(s, "|mode1=%01x", sys->cpu.d2);
-	if (sys->cpu.ov) s += sprintf(s, "|Prog Err");
 #endif // __wang600__
 #ifdef __wang700__
 	s += sprintf(s, "mode0=%01x", sys->cpu.d);
-	if (sys->cpu.ofl) s += sprintf(s, "|Prog Err");
 #endif // __wang700__
+	if (sys->cpu_overflow) s += sprintf(s, "|Prog Err");
 	if (sys->cpu.err) s += sprintf(s, "|Mach Err");
 	if (sys->cpu.kbd) s += sprintf(s, "|Key Pressed");
 

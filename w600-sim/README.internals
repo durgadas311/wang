@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.10 2011/11/06 21:59:08 drmiller Exp $
+$Id: README.internals,v 1.11 2011/11/14 00:45:44 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -71,15 +71,19 @@ it's input pipe:
 
 The simulator sends the following (binary) codes on it's output pipe:
 
-00000eeessssgggg
+00000000ssssgggg
 	Display refresh data. 's' is digit select, 'g' is digit code,
-	'e' is error/blanking code, bits 0-2.
 	Note, traffic is "optimized" such that once a couple copies have
 	been sent, the simulator stops sending until a key is pressed.
-	Bits 0 and 1 of 'e' indicate the current state of the Mach Err and
-	Prog Err lights, respectively. Either one of those results in
-	a flickering display. Bit 2 of 'e' indicates display is blanked,
-	causing 's' and 'g' to be ignored.
+
+00000100000000ii
+	Update indicator lights.
+	Bits 0 and 1 of 'i' indicate the current state of the Prog Err and
+	Mach Err lights, respectively. Either one of those results in
+	a flickering display.
+
+0000011000000000
+	Blank display.
 
 0000100sssssgggg
 	Printer data, 's' is column (overflows into lo bit of '8'),

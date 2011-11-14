@@ -3,7 +3,7 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.17 2011/11/06 00:48:45 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.18 2011/11/14 00:45:44 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
@@ -28,6 +28,8 @@ typedef struct w600_sys_s {
 #endif // TRACE
 } w600_sys_t;
 typedef w600_sys_t wang_sys_t;
+
+#define cpu_overflow  cpu.ov
 
 #define SYS_MODEL600_2TP	0
 #define SYS_MODEL600_6TP	1

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.15 2011/11/07 13:20:04 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.16 2011/11/14 00:45:44 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -352,6 +352,11 @@ static inline void display_check(w700_sys_t *sys) {
 			static struct timespec alpha_stop = {
 				0, 726529375L
 			};
+			if (sys->trace) {
+				fprintf(sys->trc_fp, "TRACE: %03x: "
+						"Alpha-Stop Sleep... %lld\n",
+						sys->cpu.sys.pc, sys->cpu.sys.cycles);
+			}
 			// todo: should not sleep if key pressed - e.g. PRIME
 			nanosleep(&alpha_stop, NULL);
 			// sleep(1);
@@ -668,6 +673,7 @@ int instr_exec(w700_sys_t *sys) {
 		next |= (sys->cpu.ofl << 1);
 //fprintf(stderr,"%03x: chk pe\n", sys->cpu.sys.pc);
 		sys->cpu.ofl = 0;
+		sys->display(sys, -2);
 		break;
 	case 5: next |= (sys->cpu.cc << 1); break;
 	case 6:

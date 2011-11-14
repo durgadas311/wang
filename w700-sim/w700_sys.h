@@ -3,7 +3,7 @@
 #ifndef __w700_sys_h__
 #define __w700_sys_h__
 
-#ident "$Id: w700_sys.h,v 1.3 2011/11/06 01:04:12 drmiller Exp $"
+#ident "$Id: w700_sys.h,v 1.4 2011/11/14 00:45:44 drmiller Exp $"
 
 #include "w700_ucode.h"
 #include "w700_cpu.h"
@@ -26,6 +26,8 @@ typedef struct w700_sys_s {
 #endif // TRACE
 } w700_sys_t;
 typedef w700_sys_t wang_sys_t;
+
+#define cpu_overflow	cpu.ofl
 
 #define SYS_MODEL700A	0
 #define SYS_MODEL700B	1
