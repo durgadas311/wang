@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.3 2011/11/14 04:24:47 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.4 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -46,7 +46,7 @@ typedef struct {
 	uint16_t stk1;
 	uint16_t stk2;
 
-	wang_cpu_t sys;	// common elements
+	wang_sys_cpu_t sys;	// common elements
 } w600_cpu_t;
 
 #define D10_RIGHT	0x01	// Right Tape selected

@@ -2,10 +2,20 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w600_cpu.h,v 1.12 2011/11/06 00:48:45 drmiller Exp $"
+#ident "$Id: w600_cpu.h,v 1.13 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
+
+typedef union {
+	struct {
+		uint16_t ov:1;	// prog err
+		uint16_t err:1;	// mach err
+		uint16_t _unused:14;
+	} ind;
+	uint16_t word;
+} w600_ind_t;
+		
 
 typedef struct {
 	uint8_t s;
@@ -30,16 +40,15 @@ typedef struct {
 	uint8_t cc;
 	uint8_t sc;
 
-	uint8_t ov;	// prog err
+	w600_ind_t ind;
 	uint8_t kbd;	// any key down
-	uint8_t err;	// mach err
 	uint8_t d1;	// mode switch inputs 1
 	uint8_t d2;	// mode switch inputs 2
 
 	uint16_t stk1;
 	uint16_t stk2;
 
-	wang_cpu_t sys;	// common elements
+	wang_sys_cpu_t sys;	// common elements
 } w600_cpu_t;
 
 #define D10_FP		0x01	// Floating Point (!Sci)

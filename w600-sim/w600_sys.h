@@ -3,33 +3,23 @@
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.18 2011/11/14 00:45:44 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.19 2011/11/14 17:18:10 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
 
-typedef struct w600_sys_s {
-	w600_cpu_t cpu;
-	uint64_t ucode[2048];
-	uint8_t ram[2048]; // 4096x4
-	uint8_t rom[2048]; // 4096x4
-	void (*fault)(struct w600_sys_s *sys, const char *str);
-	int (*intr)(struct w600_sys_s *sys, int sig);	// return != 0 if signal not handled
-	void (*display)(struct w600_sys_s *sys, int on);
-	void (*keyboard)(struct w600_sys_s *sys, uint16_t *kc, int ack);
-	void (*printer)(struct w600_sys_s *sys, int col, int drum);
-	uint8_t (*tape)(struct w600_sys_s *sys, int wr, uint8_t nibble);
-	void (*dev)(struct w600_sys_s *sys, uint8_t chr, uint8_t sts);
-	int run;
-	int cmd;	// is command mode allowed?
-#ifdef TRACE
-	int trace;
-	FILE *trc_fp;
-#endif // TRACE
-} w600_sys_t;
-typedef w600_sys_t wang_sys_t;
+typedef w600_cpu_t wang_cpu_t;
 
 #define cpu_overflow  cpu.ov
+
+#define WANG_UCODE_SIZE	2048
+#define WANG_RAM_SIZE	(4096>>1)
+#define WANG_ROM_SIZE	(4096>>1)
+#define WANG_HAS_DISPLAY
+#define WANG_HAS_PRINTER
+#define WANG_HAS_TAPE
+#define WANG_HAS_DEV
+#define WANG_SYS_INIT	w600_init
 
 #define SYS_MODEL600_2TP	0
 #define SYS_MODEL600_6TP	1

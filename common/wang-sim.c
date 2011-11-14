@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.3 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -11,7 +11,6 @@
 #include "wang-sim.h"
 
 wang_sys_t sys;
-int sys_ops = 0;
 
 static void set_intr(void) {
 	struct sigaction sa;
@@ -40,7 +39,6 @@ static void usage() {
 		"\t-b\tBack-end mode (for GUI FE)\n"
 		"\t-g\tSpawn GUI (normally GUI spawns %s)\n"
 		"\t-i\tInteractive mode enable\n"
-		"\t-c file\tUse file as a cassette tape\n"
 		"\t-p file\tLoad initial contents of Program Space (conflicts with -m)\n"
 		"\t-m file\tLoad initial contents of RAM. 2048 bytes, Lo nibble in [0]\n"
 		"\t-r file\tLoad initial contents of ROM. 2048 bytes, Lo nibble in [0]\n"
@@ -62,26 +60,22 @@ int main(int argc, char **argv) {
 	int interact = 0;
 	char *ram = NULL;
 	char *rom = NULL;
-	char *cass = NULL;
 	char *model = NULL;
 
 	extern char *optarg;
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "bc:e:gil:m:M:p:r:t:u:w")) != EOF) {
+	while ((x = getopt(argc, argv, "be:gil:m:M:p:r:t:u:w")) != EOF) {
 		switch(x) {
 		case 'b':
-			sys_ops |= SYS_BACK_END;
-			break;
-		case 'c':
-			cass = optarg;
+			sys.ops |= SYS_BACK_END;
 			break;
 		case 'e':
 			entry = strtoul(optarg, NULL, 0);
 			break;
 		case 'g':
-			sys_ops |= SYS_START_GUI;
+			sys.ops |= SYS_START_GUI;
 			break;
 		case 'i':
 			interact = 1;
@@ -102,7 +96,7 @@ int main(int argc, char **argv) {
 			rom = optarg;
 			break;
 		case 'w':
-			sys_ops |= SYS_WEB_BACKEND;
+			sys.ops |= SYS_WEB_BACKEND;
 			ucode = "/usr/local/bin/wang600.rom";
 			break;
 #ifdef TRACE
@@ -136,13 +130,13 @@ int main(int argc, char **argv) {
 	x = strtoul(s, NULL, 10);
 	switch(x) {
 	case 14:
-		sys_ops |= (SYS_MODEL600_14TP << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL600_14TP << SYS_MODEL_SHIFT);
 		break;
 	case 6:
-		sys_ops |= (SYS_MODEL600_6TP << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL600_6TP << SYS_MODEL_SHIFT);
 		break;
 	case 2:
-		sys_ops |= (SYS_MODEL600_2TP << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL600_2TP << SYS_MODEL_SHIFT);
 		break;
 	default:
 		fprintf(stderr, "unknown model \"%s\"\n", model);
@@ -156,13 +150,13 @@ int main(int argc, char **argv) {
 	if (strncmp(s, "720", 3) == 0) s += 3;
 	switch(toupper(*s)) {
 	case 'A':
-		sys_ops |= (SYS_MODEL700A << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL700A << SYS_MODEL_SHIFT);
 		break;
 	case 'B':
-		sys_ops |= (SYS_MODEL700B << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL700B << SYS_MODEL_SHIFT);
 		break;
 	case 'C':
-		sys_ops |= (SYS_MODEL700C << SYS_MODEL_SHIFT);
+		sys.ops |= (SYS_MODEL700C << SYS_MODEL_SHIFT);
 		break;
 	default:
 		fprintf(stderr, "unknown model \"%s\"\n", model);
@@ -193,9 +187,6 @@ int main(int argc, char **argv) {
 	}
 	if (pgm) {
 		sys_loadpgm(&sys, pgm);
-	}
-	if (cass) {
-		sys_setcass(&sys, cass);
 	}
 
 	sys.cmd = (interact ? 1 : 0);

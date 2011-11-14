@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.1 2011/11/13 18:50:23 drmiller Exp $
+$Id: README.internals,v 1.2 2011/11/14 17:18:10 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -13,30 +13,34 @@ it's input pipe:
 0000000100000kkk
 	"Special" key: PRIME, SET P.C., VERIFY PROG, RECORD PROG, and SHIFT
 	variations. 'k' is the microcode address to jump to:
-	0 = PRIME
-	1 = VERIFY PROG
-	2 = SET P.C.
-	3 = RECORD PROG
-	4 = S.M.
-	5 = B.S.
-	6 = INS
-	7 = DEL
+	0 = RESET
+	1 = REWIND
+	2 = FORWARD
+	3 = (STOP ?)
+	4 = (APR ?)
+	5 = n/a
+	6 = n/a
+	7 = n/a
 
 000000100000mmmm
 	Mode register 0 changed, new value is 'mm'.
 	Bit meanings, 1/(0):
-	b0 = Sc/(Fl)
-	b1 = List or Learn-and-Print
-	b2 = Learn or Learn-and-Print
-	b3 = Step (implied pulse)
+	b0 =
+	b1 =
+	b2 =
+	b3 =
 
 000000110000mmmm
 	Mode register 1 changed, new value is 'mm'.
 	Bit meanings, 1/(0):
-	b0 = Rad/(Deg)
-	b1 = Printer On/(Off)
-	b2 = n.c.
-	b3 = n.c.
+	b0 = 
+	b1 =
+	b2 =
+	b3 =
+
+00000100cccccccc
+	Special key code, does not generate input directly.
+	SKIP, SEARCH, CODE, (etc)
 
 00001100tttttttt
 	Tape read data, byte 'tt'.
@@ -46,9 +50,10 @@ it's input pipe:
 
 The simulator sends the following (binary) codes on it's output pipe:
 
-00000000iiiiiiii
+000001iiiiiiiiii
 	Update indicator lamps and illuminated keys.
-	Bits are: 0=...
+	Bits are: 0=Record, 1=TapeMovR, 2=TapeMovL, 3=EndDoc, 4=NoAdj,
+	5=CharStop, 6=Search, 7=Skip, 8=Code
 
 00001100tttttttt
 	Tape "record" data, byte 'tt'.
@@ -65,17 +70,13 @@ The simulator sends the following (binary) codes on it's output pipe:
 	Print data for "Device 1", Model 601/602/611 "Output Writer".
 	'r' is a 6-bit (2+4) "tilt/rotate" code for the typewriter.
 
-000110000000cccc
+000110cccccccccc
 	Control command for "Device 1", Model 601/602/611 "Output Writer".
 	Codes:	0=Space, 1=BkSpc, 2=Tab, 3=CR/LF, 4=ShiftUp, 5=ShiftDn,
 		8=Index, 9=SetTab, 10=ClrTab.
 
 01111111xxxxxxxx
 	Reset I/O. 'x' is (should be) ignored.
-
-10000001xxxxxxxx
-	ACK for ROM download. 'x' is (should be) ignored. GUI may now
-	send bulk ROM image.
 
 1111000000000000
 	Fatal simulator error. Remaining output until newline is error message.

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.1 2011/11/06 01:08:25 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.2 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,18 +25,9 @@ static int _dump(wang_sys_t *sys, char *line) {
 	uint64_t *pc = &sys->ucode[sys->cpu.sys.pc];
 	diwang(buf, pc);
 	fprintf(stderr, "PC = %03x %s\n", sys->cpu.sys.pc, buf);
-#ifdef __wang600__
-	fprintf(stderr, "STK1 = %03x STK2 = %03x\n",
-			sys->cpu.stk1, sys->cpu.stk2);
-#endif // __wang600__
-
-	fprintf(stderr, "S  = %01x [ %s ]\n", sys->cpu.s, get_psw_str(sys));
-	fprintf(stderr, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
-		sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
-	fprintf(stderr, "KA = %01x KB = %01x GIOA = %01x GIOB = %01x\n",
-		sys->cpu.ka, sys->cpu.kb, sys->cpu.gioa, sys->cpu.giob);
-
-	fprintf(stderr, "[%s]\n", get_mach_str(sys));
+	sys->get_reg_str(sys, buf);
+	fprintf(stderr, "%s", buf);
+	fprintf(stderr, "[%s]\n", sys->get_mach_str(sys));
 
 	return 0;
 }
@@ -209,6 +200,7 @@ static int _set(wang_sys_t *sys, char *line) {
 			return 0;
 		}
 		*t++ = '\0';
+		v = strtoul(t, NULL, 16);
 		z = 4;
 		if (strcasecmp(s, "pc") == 0) {
 			z = 11;
@@ -250,19 +242,19 @@ static int _set(wang_sys_t *sys, char *line) {
 		} else if (strcasecmp(s, "d2") == 0) {
 			r = &sys->cpu.d2;
 		} else if (strcasecmp(s, "ov") == 0) {
-			z = 1;
-			r = &sys->cpu.ov;
+			z = 0;
+			sys->cpu.ind.ind.ov = (v != 0);
 #endif // __wang600__
 #ifdef __wang700__
 		} else if (strcasecmp(s, "d") == 0) {
 			r = &sys->cpu.d;
 		} else if (strcasecmp(s, "ofl") == 0) {
-			z = 1;
-			r = &sys->cpu.ofl;
+			z = 0;
+			sys->cpu.ind.ind.ofl = (v != 0);
 #endif // __wang700__
 		} else if (strcasecmp(s, "err") == 0) {
-			z = 1;
-			r = &sys->cpu.err;
+			z = 0;
+			sys->cpu.ind.ind.err = (v != 0);
 		} else if (strcasecmp(s, "kbd") == 0) {
 			z = 1;
 			r = &sys->cpu.kbd;
@@ -270,11 +262,10 @@ static int _set(wang_sys_t *sys, char *line) {
 			printf("Unknown register name\n");
 			return 0;
 		}
-		v = strtoul(t, NULL, 16);
 		v &= ((1 << z) - 1);
 		if (z > 8) {
 			*((uint16_t *)r) = v;
-		} else {
+		} else if (z) {
 			*r = v;
 		}
 		printf("%s = %x\n", s, v);

@@ -1,17 +1,19 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.3 2011/11/14 04:24:47 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.4 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 #include "wang-sim.h"
 #include "w1200_ucode.h"
 
 #ifdef TRACE
 extern int diwang(char *buf, uint64_t *t);
-extern char *get_psw_str(w1200_sys_t *sys);
 #endif // TRACE
+
+extern uint16_t ram_mask;
 
 #ifdef COVERAGE
 uint8_t cov[2048] = {0};
@@ -21,6 +23,119 @@ uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
 
 uint16_t trc_adr = 0x0f0;
+
+static char *get_mach_str(wang_sys_t *sys) { 
+	static char buf[32];
+	char *s = buf;
+
+	s += sprintf(s, "mode0=%01x", sys->cpu.d1);
+	s += sprintf(s, "|mode1=%01x", sys->cpu.d2);
+	// more... ?
+	if (sys->cpu.kbd) s += sprintf(s, "|Key Pressed");
+
+	*s = '\0'; 
+	return buf;
+}
+
+static char *get_psw_str(wang_sys_t *sys) { 
+	static char buf[32];
+	char *s = buf;
+
+	if (sys->cpu.zo) *s++ = 'Z';
+	else *s++ = 'z';
+	if (sys->cpu.cc) *s++ = 'I';
+	else *s++ = 'i';
+	if (sys->cpu.sc) *s++ = 'C';
+	else *s++ = 'c';
+
+	*s = '\0'; 
+	return buf;
+}
+
+static void get_reg_str(wang_sys_t *sys, char *buf) {
+	char *s = buf;
+	s += sprintf(s, "STK1 = %03x STK2 = %03x\n", sys->cpu.stk1, sys->cpu.stk2);
+	s += sprintf(s, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
+			sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
+	s += sprintf(s, "S = %01x Zo = %d CC = %d SC = %d\n",
+			sys->cpu.s, sys->cpu.zo, sys->cpu.cc, sys->cpu.sc);
+	s += sprintf(s, "KA = %01x KB = %01x TO = %01x RO = %01x\n",
+			sys->cpu.ka, sys->cpu.kb, sys->cpu.to, sys->cpu.ro);
+
+}
+
+struct ucode_ovr_s {
+	uint16_t adr;
+	union ucode_ovr_u {
+		uint64_t word;
+		w600_ucode_t flds;
+	} instr[SYS_MODEL_NUM];
+};      
+static struct ucode_ovr_s ucode_ovr[] = {
+// 0 x x 0 1 0 1 1 1 1 0 = 01111010xx0 = 3d0, 3d2, 3d4, 3d6
+// 0000 0000 0000  0000  0000 0000 0011 0111 1111 0010 00xx
+// 000 000 000 000 0 0 0000 0000 0000 1 101111111 001 000
+// AI=0 BI=0 ZO=0 AOP=0 AC=0 BC=0 MOP=0 KK=0 ST=0 SUB=1 JAD=5fc JH=1 JL=0 (5fe)
+        { 0x3d0, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+        }}
+        { 0x3d2, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+        }}
+        { 0x3d4, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+        }}
+        { 0x3d6, {
+[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+        }}
+};
+#define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
+
+static void ucode_override(wang_sys_t *sys) {
+	int x;
+	/*
+	 * overidden instructions were done as ucode was executed,
+	 * but rather than searching table on every instruction
+	 * we just patch our local copy of the ucode now.
+	 */     
+	int model = (sys->ops & SYS_MODEL_MASK) >> SYS_MODEL_SHIFT;
+	for (x = 0; x < NUM_UCODE_OVR; ++x) {
+		union ucode_ovr_u u;
+		u.word = ucode_ovr[x].instr[model].word;
+		if (u.flds.ovr != 0) {
+			sys->ucode[ucode_ovr[x].adr] = u.word;
+		}
+	}
+}
+
+static int special_key(wang_sys_t *sys, uint16_t b) {
+	switch(b >> 8) {
+	case 2: // mode0 switches changed
+		sys->cpu.d1 = b & 0x0f;
+		break;
+	case 3: // mode1 switches changed
+		sys->cpu.d2 = b & 0x0f;
+		break;
+	default:
+		return -1;
+		break;
+	}
+	return 0;
+}
+
+void w1200_init(wang_sys_t *sys) {
+	sys->cpu.d1 = 0; // default?
+	sys->cpu.d2 = 0; // default?
+	sys->get_psw_str = get_psw_str;
+	sys->get_mach_str = get_mach_str;
+	sys->get_reg_str = get_reg_str;
+	sys->ucode_override = ucode_override;
+	sys->special_key = special_key;
+}
 
 static uint8_t add3_i(w1200_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
@@ -195,8 +310,6 @@ static void dev_out(w1200_sys_t *sys) {
 //fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
 	sys->dev(sys, c, 1);
 }
-
-extern uint16_t ram_mask;
 
 static void rd_ram_i(w1200_sys_t *sys, uint8_t am, uint8_t al) {
 	uint16_t adr = (am << 4) | al;
@@ -542,6 +655,7 @@ int instr_exec(w1200_sys_t *sys) {
 			sys->cpu.skl = 0;
 			sys->cpu.shl = 0;
 		}
+		sys->display(sys, -2);
 	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;

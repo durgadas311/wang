@@ -12,15 +12,13 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.7 2011/11/14 04:24:47 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.8 2011/11/14 17:18:10 drmiller Exp $"
 
 #include "wang-sim.h"
 
 pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 int __gui_dfd = -1;
-
-extern int sys_ops;
 
 static inline void wait_key() {
 	struct pollfd fds;
@@ -65,13 +63,12 @@ static void guidisplay(wang_sys_t *sys, int on) {
 
 	if (on == -2) {
 		// error lights changed - only
-		bx = 0x0400 | (sys->cpu_overflow << 0) | (sys->cpu.err << 1);
+		bx = (sys->cpu.ind.word & 0x03ff) | 0x0400;
 		flush = 1;
 	} else if (on == 0) {
 		// blank display(s)
 		disp_good = 0;
 		lastx = 0;
-//fprintf(stderr, "blank all \"%.*s\" \"%.*s\"\n", 16, bufx, 16, bufy);
 		// signal to blank display
 		bx = 0x0600;
 		memset(bufx, -1, sizeof(bufx));
@@ -227,31 +224,9 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		}
 		sys->display(sys, -2);
 		break;
-#ifdef __wang700__
-	case 2:	// mode0 switches changed
-		// FE gave us complete mode word... just update
-		sys->cpu.d = b & 0x0f;
-		break;
-#endif // __wang700__
-#ifdef __wang600__
-	case 2:	// mode0 switches changed
-		// FE gave us complete mode word... just update
-		sys->cpu.d1 = b & 0x0f;
-		break;
-	case 3:	// mode1 switches changed
-		// DEG/RAD is inverted...
-		b ^= D20_DEGREES;
-		sys->cpu.d2 = b & 0x0f;
-		break;
-#endif // __wang600__
-#ifdef __wang1200__
-	case 2:	// mode0 switches changed
-		sys->cpu.d1 = b & 0x0f;
-		break;
-	case 3:	// mode1 switches changed
-		sys->cpu.d2 = b & 0x0f;
-		break;
-#endif // __wang1200__
+	default:
+		// error returned?
+		sys->special_key(sys, b);
 	}
 }
 
@@ -289,7 +264,7 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		// TBD
 		return;
 	}
-#ifdef __wang600__
+#ifdef WANG_HAS_ROM
 	if ((b & 0xf000) == 0x8000) { // ROM download
 		int x = 0x0fff >> 1;
 		b = (b & 0xf0ff) | 0x0100; // ACK
@@ -313,13 +288,14 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		} while ((b & 0xff00) == 0x8000);
 		return;
 	}
-#endif // __wang600__
+#endif // WANG_HAS_ROM
 	// uh, this is embarassing...
 	// presumably this is tape data, we've lost it and can't continue?
 	fprintf(stderr, "gag me! %04x\n", b);
 	sys->run = 0;
 }
 
+#ifdef WANG_HAS_PRINTER
 static void guiprinter(wang_sys_t *sys, int col, int drum) {
 	uint16_t b;
 	int rc;
@@ -333,7 +309,9 @@ static void guiprinter(wang_sys_t *sys, int col, int drum) {
 		return;
 	}
 }
+#endif // WANG_HAS_PRINTER
 
+#ifdef WANG_HAS_TAPE
 static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 	static uint8_t byte;
 	static int bc = 0;
@@ -419,7 +397,9 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 	}
 	return 0;
 }
+#endif // WANG_HAS_TAPE
 
+#ifdef WANG_HAS_DEV
 static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 	uint16_t b;
 	int rc;
@@ -431,7 +411,7 @@ static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 	} else if (sts == 1) {
 #ifdef __wang1200__
 		if (sys->cpu.function) {
-			b |= (1 << 11);
+			b |= (3 << 11);
 			c = (c >> 4) & 0x0f;
 		} else {
 			c &= 0x3f;
@@ -449,6 +429,25 @@ static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 		sys->run = 0;
 		return;
 	}
+}
+#endif // WANG_HAS_DEV
+
+static void setup_devices(wang_sys_t *sys) {
+	// "keyboard" is actually all input from GUI...
+	sys->keyboard = guikeyboard;
+
+	// "display" is actually all output to GUI...
+	sys->display = guidisplay;
+
+#ifdef WANG_HAS_PRINTER
+	sys->printer = guiprinter;
+#endif
+#ifdef WANG_HAS_TAPE
+	sys->tape = guitape;
+#endif
+#ifdef WANG_HAS_DEV
+	sys->dev = guidev;
+#endif
 }
 
 // spawn the GUI as a back-end to us...
@@ -500,13 +499,7 @@ static int spawn_fe(wang_sys_t *sys) {
 	//long fl = fcntl(__gui_kfd, F_GETFL, 0);
 	//fl |= O_NONBLOCK;
 	//fcntl(__gui_kfd, F_SETFL, fl);
-	sys->keyboard = guikeyboard;
-	sys->display = guidisplay;
-#ifdef __wang600__
-	sys->printer = guiprinter;
-#endif // __wang600__
-	sys->tape = guitape;
-	sys->dev = guidev;
+	setup_devices(sys);
 	return 0;
 }
 
@@ -525,14 +518,8 @@ void stop_fe(wang_sys_t *sys) {
 }
 
 void setup_fe(wang_sys_t *sys) {
-	if (sys_ops & SYS_BACK_END) {
-		sys->keyboard = guikeyboard;
-		sys->display = guidisplay;
-#ifdef __wang600__
-		sys->printer = guiprinter;
-#endif // __wang600__
-		sys->tape = guitape;
-		sys->dev = guidev;
+	if (sys->ops & SYS_BACK_END) {
+		setup_devices(sys);
 		__gui_kfd = dup(0);	// stdin
 		__gui_dfd = dup(1);	// stdout
 		dup2(2,1);

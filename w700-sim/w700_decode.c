@@ -1,17 +1,19 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.17 2011/11/14 04:24:47 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.18 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 #include "wang-sim.h"
 #include "w700_ucode.h"
 
 #ifdef TRACE
 extern int diwang(char *buf, uint64_t *t);
-extern char *get_psw_str(w700_sys_t *sys);
 #endif // TRACE
+
+extern uint16_t ram_mask;
 
 #ifdef COVERAGE
 uint8_t cov[2048] = {0};
@@ -19,6 +21,70 @@ uint8_t cov[2048] = {0};
 
 uint8_t __keytrc = 0;
 uint8_t __systrc[16] = {0};
+
+static char *get_mach_str(wang_sys_t *sys) { 
+	static char buf[32];
+	char *s = buf;
+
+	s += sprintf(s, "mode0=%01x", sys->cpu.d);
+	if (sys->cpu.ind.ind.ofl) s += sprintf(s, "|Prog Err");
+	if (sys->cpu.ind.ind.err) s += sprintf(s, "|Mach Err");
+	if (sys->cpu.kbd) s += sprintf(s, "|Key Pressed");
+
+	*s = '\0'; 
+	return buf;
+}
+
+static char *get_psw_str(wang_sys_t *sys) { 
+	static char buf[32];
+	char *s = buf;
+
+	if (sys->cpu.alu) *s++ = 'Z';
+	else *s++ = 'z';
+	if (sys->cpu.cc) *s++ = 'I';
+	else *s++ = 'i';
+	if (sys->cpu.sc) *s++ = 'C';
+	else *s++ = 'c';
+	if (sys->cpu.q) *s++ = 'Q';
+	else *s++ = 'q';
+
+	*s = '\0'; 
+	return buf;
+}
+
+static void get_reg_str(wang_sys_t *sys, char *buf) {
+	char *s = buf;
+
+	s += sprintf(s, "T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
+			sys->cpu.t, sys->cpu.u, sys->cpu.v, sys->cpu.ca, sys->cpu.cb);
+	s += sprintf(s, "S = %01x ALU = %d CC = %d SC = %d Q = %d\n",
+			sys->cpu.s, sys->cpu.alu, sys->cpu.cc, sys->cpu.sc, sys->cpu.q);
+	s += sprintf(s, "KA = %01x KB = %01x GIOA = %01x GIOB = %01x IOB = %01x\n",
+			sys->cpu.ka, sys->cpu.kb, sys->cpu.gioa, sys->cpu.giob, sys->cpu.iob);
+
+}
+
+static int special_key(wang_sys_t *sys, uint16_t b) {
+	switch(b >> 8) {
+	case 2: // mode0 switches changed
+		// FE gave us complete mode word... just update
+		sys->cpu.d = b & 0x0f;
+		break;
+	default:
+		return -1;
+		break;
+	}
+	return 0;
+}
+
+void w700_init(wang_sys_t *sys) {
+	sys->cpu.d = 0; // default?
+	sys->get_psw_str = get_psw_str;
+	sys->get_mach_str = get_mach_str;
+	sys->get_reg_str = get_reg_str;
+	// sys->ucode_override = ucode_override; // not for wire-weave ROM...
+	sys->special_key = special_key;
+}
 
 #if 0 // NO!!!
 static uint8_t bcd_logic[32] = {
@@ -57,14 +123,14 @@ static uint8_t bcd_logic[32] = {
 };
 #endif
 
-static uint8_t bin_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bin_add3_i(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
 	sys->cpu.alu = ((s & 0x0f) == 0);
 	sys->cpu.cc = ((s & 0x10) != 0);
 	return s & 0x0f;
 }
 
-static uint8_t bcd_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bcd_add3_i(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = a + b + c;
 	uint8_t cc = 0;
 	//s = bcd_logic[s & 0x1f];
@@ -77,19 +143,19 @@ static uint8_t bcd_add3_i(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	return s & 0x0f;
 }
 
-static uint8_t bin_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bin_add3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bin_add3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
 	return s & 0x0f;
 }
 
-static uint8_t bcd_add3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bcd_add3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bcd_add3_i(sys, a, b, c);
 	sys->cpu.sc = sys->cpu.cc;
 	return s & 0x0f;
 }
 
-static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bin_shift3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bin_add3_i(sys, a, b, 0);
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
@@ -97,7 +163,7 @@ static uint8_t bin_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	return s & 0x0f;
 }
 
-static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
+static uint8_t bcd_shift3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	uint8_t s = bcd_add3_i(sys, a, b, 0);
 	s |= (c << 4);
 	sys->cpu.sc = (s & 1);
@@ -105,28 +171,28 @@ static uint8_t bcd_shift3_c(w700_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	return s & 0x0f;
 }
 
-static uint8_t bin_and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bin_and2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	(void)bin_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a & b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t bcd_and2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bcd_and2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	(void)bcd_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a & b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t bin_xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bin_xor2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	(void)bin_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a ^ b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
 	return s & 0x0f;
 }
 
-static uint8_t bcd_xor2(w700_sys_t *sys, uint8_t a, uint8_t b) {
+static uint8_t bcd_xor2(wang_sys_t *sys, uint8_t a, uint8_t b) {
 	(void)bcd_add3_i(sys, a, b, 0);	// set CC
 	uint8_t s = a ^ b;
 	sys->cpu.alu = ((s & 0x0f) == 0);
@@ -152,7 +218,7 @@ static uint8_t odd_parity[16] = {
 [0xf] = 1,
 };
 
-static void tape_write(w700_sys_t *sys, int dat) {
+static void tape_write(wang_sys_t *sys, int dat) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
@@ -178,7 +244,7 @@ static void tape_write(w700_sys_t *sys, int dat) {
 	}
 }
 
-static int tape_read(w700_sys_t *sys) {
+static int tape_read(wang_sys_t *sys) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
@@ -246,27 +312,26 @@ bits:
 	goto bits;
 }
 
-static void tape_on(w700_sys_t *sys, int wr) {
+static void tape_on(wang_sys_t *sys, int wr) {
 	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
 	if (!wr) {
 		tape_read(NULL);
 	}
 }
 
-static void tape_off(w700_sys_t *sys) {
+static void tape_off(wang_sys_t *sys) {
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 }
 
-static void dev_out(w700_sys_t *sys) {
+static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.gioa << 4) | sys->cpu.giob;
 fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 	sys->dev(sys, c, sys->cpu.iob);
 }
 
-extern uint16_t ram_mask;
 uint16_t trc_adr = 0xfd0;
 
-static void rd_ram_i(w700_sys_t *sys) {
+static void rd_ram_i(wang_sys_t *sys) {
 	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	adr &= ram_mask;
 	uint8_t b = sys->ram[adr];
@@ -275,7 +340,7 @@ static void rd_ram_i(w700_sys_t *sys) {
 	sys->cpu.rb = b & 0x0f;
 }
 
-static void wr_ram_i(w700_sys_t *sys) {
+static void wr_ram_i(wang_sys_t *sys) {
 	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
 	uint16_t madr = adr & ram_mask;
 	uint8_t a = sys->ram[madr];
@@ -293,7 +358,7 @@ static void wr_ram_i(w700_sys_t *sys) {
 	}
 }
 
-static void instr_trace(w700_sys_t *sys) {
+static void instr_trace(wang_sys_t *sys) {
 	uint64_t *m;
 	char buf[128];
 	m = &sys->ucode[sys->cpu.sys.pc];
@@ -326,7 +391,7 @@ static void instr_trace(w700_sys_t *sys) {
 		buf);
 }
 
-static inline void display_check(w700_sys_t *sys) {
+static inline void display_check(wang_sys_t *sys) {
 	// 034: begin display-refresh delay loop... short-cut to 472...
 	if ((sys->cpu.sys.pc & 0xffe) == 0x034) {	// display refresh routine...
 		sys->cpu.sys.next = 0x472;	// update some regs too?
@@ -365,7 +430,7 @@ static inline void display_check(w700_sys_t *sys) {
 	}
 }
 
-int instr_exec(w700_sys_t *sys) {
+int instr_exec(wang_sys_t *sys) {
 	w700_ucode_t *u = (w700_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
@@ -579,7 +644,7 @@ int instr_exec(w700_sys_t *sys) {
 		sys->cpu.s = (sys->cpu.s & 0x0d) | (sys->cpu.alu << 1);
 		break;
 	case 12:
-		sys->cpu.ofl = 1;
+		sys->cpu.ind.ind.ofl = 1;
 		sys->display(sys, -2);
 		break;
 	case 13:
@@ -587,7 +652,7 @@ int instr_exec(w700_sys_t *sys) {
 		sys->cpu.s = 0;
 		break;
 	case 14:
-		sys->cpu.err = 1;
+		sys->cpu.ind.ind.err = 1;
 		sys->display(sys, -2);
 		break;
 	case 15:
@@ -670,9 +735,9 @@ int instr_exec(w700_sys_t *sys) {
 	case 2: next |= ((br_s & 2) >> 0); break;
 	case 3: next |= ((br_s & 8) >> 2); break;
 	case 4:
-		next |= (sys->cpu.ofl << 1);
+		next |= (sys->cpu.ind.ind.ofl << 1);
 //fprintf(stderr,"%03x: chk pe\n", sys->cpu.sys.pc);
-		sys->cpu.ofl = 0;
+		sys->cpu.ind.ind.ofl = 0;
 		sys->display(sys, -2);
 		break;
 	case 5: next |= (sys->cpu.cc << 1); break;
@@ -722,10 +787,11 @@ int instr_exec(w700_sys_t *sys) {
 	if (sys->cpu.sys.jam) {
 		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff;
 		sys->cpu.sys.jam = 0;
-		sys->cpu.ofl = 0;
+		sys->cpu.ind.ind.ofl = 0;
 		if (sys->cpu.sys.next == 0) { // PRIME
-			sys->cpu.err = 0;
+			sys->cpu.ind.ind.err = 0;
 		}
+		sys->display(sys, -2);
 	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;

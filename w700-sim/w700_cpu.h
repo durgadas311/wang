@@ -2,10 +2,19 @@
 #ifndef __w700_cpu_h__
 #define __w700_cpu_h__
 
-#ident "$Id: w700_cpu.h,v 1.4 2011/11/06 01:04:12 drmiller Exp $"
+#ident "$Id: w700_cpu.h,v 1.5 2011/11/14 17:18:10 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
+
+typedef union {
+	struct {
+		uint16_t ofl:1;	// prog err
+		uint16_t err:1;	// mach err
+		uint16_t _unused:14;
+	} ind;
+	uint16_t word;
+} w700_ind_t;
 
 typedef struct {
 	uint8_t s;
@@ -32,12 +41,11 @@ typedef struct {
 	uint8_t sc;
 	uint8_t q;
 
-	uint8_t ofl;	// prog err
+	w700_ind_t ind;
 	uint8_t kbd;	// any key down
-	uint8_t err;	// mach err
 	uint8_t d;	// mode switch inputs
 
-	wang_cpu_t sys;	// common elements
+	wang_sys_cpu_t sys;	// common elements
 } w700_cpu_t;
 
 #define D11_LST_L_P	0x02	// List or Learn+Print
