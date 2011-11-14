@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.5 2011/11/14 00:45:44 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.6 2011/11/14 01:27:56 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -93,9 +93,9 @@ static void guidisplay(wang_sys_t *sys, int on) {
 		// these fields are always interpretted,
 		// so send valid data...
 #ifdef __wang700__
+		by |= 0x0200 | (ds << 4) | sys->cpu.ra;
 		by |= (sys->cpu.s & 1) << 8;	// FXDY
 		by ^= 0x0100;
-		by |= (ds << 4) | sys->cpu.ra;
 		if (bufy[ds] != by) {
 			disp_good = 0;
 			bufy[ds] = by;
