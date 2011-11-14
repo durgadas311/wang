@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.51 2011/11/14 00:45:44 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.52 2011/11/14 04:24:47 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -634,6 +634,15 @@ int instr_exec(w600_sys_t *sys) {
 	display_check(sys);	// this might sleep until UI event...
 
 	sys->keyboard(sys, &key, 0);
+
+	if (sys->cpu.sys.jam) {
+		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff;
+		sys->cpu.sys.jam = 0;
+		sys->cpu.ov = 0;
+		if (sys->cpu.sys.next == 0) { // PRIME
+			sys->cpu.err = 0;
+		}
+	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;
 	return rc;

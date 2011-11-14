@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.2 2011/11/13 18:50:23 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.3 2011/11/14 04:24:47 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -29,14 +29,15 @@ typedef struct {
 
 	uint8_t function;	// MOP=8 etc
 
-	uint8_t er	:1;	// RECORD lamp
-	uint8_t tmr	:1;	// TAPE MOVING (right) lamp
-	uint8_t tml	:1;	// TAPE MOVING (left) lamp
-	uint8_t el	:1;	// END OF DOCUMENT lamp
-	uint8_t na	:1;	// NO ADJUST lamp
-	uint8_t cs	:1;	// CHAR / STOP lamp
-	uint8_t sh	:1;	// SEARCH lamp
-	uint8_t sk	:1;	// SKIP lamp
+	uint16_t ern	:1;	// RECORD lamp
+	uint16_t tmr	:1;	// TAPE MOVING (right) lamp
+	uint16_t tml	:1;	// TAPE MOVING (left) lamp
+	uint16_t eln	:1;	// END OF DOCUMENT lamp
+	uint16_t nan	:1;	// NO ADJUST lamp
+	uint16_t csl	:1;	// CHAR / STOP lamp
+	uint16_t shl	:1;	// SEARCH lamp
+	uint16_t skl	:1;	// SKIP lamp
+	uint16_t cdl	:1;	// CODE lamp/status *
 
 	uint8_t kbd;	// any key down
 	uint8_t d1;	// mode switch inputs 1

@@ -3,7 +3,7 @@
 #ifndef __wang_sim_h__
 #define __wang_sim_h__
 
-#ident "$Id: wang-sim.h,v 1.2 2011/11/06 21:59:08 drmiller Exp $"
+#ident "$Id: wang-sim.h,v 1.3 2011/11/14 04:24:47 drmiller Exp $"
 
 #define TRACE
 
@@ -22,6 +22,7 @@
 
 // common to all CPUs
 typedef struct {
+	uint16_t jam;
 	uint16_t next;
 	uint16_t pc;
 	uint64_t cycles;

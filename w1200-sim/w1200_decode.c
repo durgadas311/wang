@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.2 2011/11/13 18:50:23 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.3 2011/11/14 04:24:47 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -312,7 +312,10 @@ int instr_exec(w1200_sys_t *sys) {
 	case 0: g = 0; break;
 	case 1: g = br_k; break;
 	case 2: g = sys->cpu.d1; break;
-	case 3: g = sys->cpu.d2; break;
+	case 3:
+		g = sys->cpu.d2;
+		sys->cpu.d2 = 0;
+		break;
 	case 4: g = sys->cpu.ka; break;
 	case 5: g = sys->cpu.kb; break;
 	case 6: g = sys->cpu.ca; break;
@@ -397,6 +400,7 @@ int instr_exec(w1200_sys_t *sys) {
 		// T.B.D. reset 6184...
 //fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.sys.pc, key);
 		sys->cpu.kbd = 0;
+		sys->cpu.cdl = 0;
 		break;
 	case 10:
 		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.zo ^ 1);
@@ -421,8 +425,23 @@ int instr_exec(w1200_sys_t *sys) {
 	case 5:	rd_ram_i(sys, br_k, sys->cpu.n); break;
 	case 6:	rd_ram_i(sys, 15, br_k); break;
 	case 7:
+		if (br_k & 1) {
+			sys->cpu.csl = (u->bi & 1);
+		}
+		if (br_k & 2) {
+			sys->cpu.eln = (u->bi & 1);
+		}
+		if (br_k & 4) {
+			sys->cpu.ern = (u->bi & 1);
+		}
+		if (br_k & 8) {
+			sys->cpu.nan = (u->bi & 1);
+		}
 		break;
 	case 8:
+		if (br_k & 2) {
+			// sound alarm/bell...
+		}
 		if (br_k & 4) {
 			sys->cpu.to = sys->cpu.ka;
 			sys->cpu.ro = sys->cpu.kb;
@@ -514,6 +533,16 @@ int instr_exec(w1200_sys_t *sys) {
 #endif // TRACE
 
 	sys->keyboard(sys, &key, 0);
+
+	if (sys->cpu.sys.jam) {
+		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff; 
+		sys->cpu.sys.jam = 0;
+		if (sys->cpu.sys.next == 0) { // RESET
+			sys->cpu.cdl = 0;
+			sys->cpu.skl = 0;
+			sys->cpu.shl = 0;
+		}
+	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;
 	return rc;

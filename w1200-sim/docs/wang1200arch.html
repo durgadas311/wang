@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.3 2011/11/13 01:40:25 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.4 2011/11/14 04:24:47 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -106,7 +106,7 @@ for that key.
 <TD CLASS="key">RESET *</TD>
 <TD CLASS="key">REWIND</TD>
 <TD CLASS="key">FORWARD</TD>
-<TD CLASS="key">CHAR/STOP</TD>
+<TD CLASS="key">(STOP)</TD>
 <TD CLASS="key">(APR)</TD>
 </TR>
 <TR><TH>uCode<BR>Address</TH>
@@ -450,10 +450,14 @@ as follows (layout for Solid State ROM).
 
 <P><UL><TABLE BORDER>
 <TR><TH>MOP</TH><TH>KK</TH><TH>BI</TH><TH>function</TH></TR>
+<TR><TD ROWSPAN=4>0111</TD><TD>xxx1</TD><TD COLSPAN=2>CSL = BI&lt;0&gt;</TD></TR>
+<TR>			<TD>xx1x</TD><TD COLSPAN=2>ELN = BI&lt;0&gt;</TD></TR>
+<TR>			<TD>x1xx</TD><TD COLSPAN=2>ERN = BI&lt;0&gt;</TD></TR>
+<TR>			<TD>1xxx</TD><TD COLSPAN=2>NAN = BI&lt;0&gt;</TD></TR>
 <TR><TD ROWSPAN=2>1000</TD><TD ROWSPAN=2>x1xx</TD>
-				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0></TD></TR>
-<TR>				<TD>xxx1</TD><TD>Typewriter carriage function</TD></TR>
-<TR><TD>MOP</TD><TD>KK</TD><TD>BI</TD><TD>function</TD></TR>
+				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0> *</TD></TR>
+<TR>				<TD>xxx1</TD><TD>Typewriter carriage function *</TD></TR>
+<TR><TD COLSPAN=4>* TO,RO = KA,KB</TD></TR>
 </TABLE></UL>
 
 <P><UL><TABLE>

@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.6 2011/11/14 01:27:56 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.7 2011/11/14 04:24:47 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -220,14 +220,10 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	case 1:	// special key - force new microcode PC
 		// jam new PC...
 		b &= 0x07;
-		sys->cpu.sys.next = b;
-		sys->cpu_overflow = 0;
-		if (b == 0) {
-			sys->cpu.err = 0;
-		}
+		sys->cpu.sys.jam = b | 0x8000; // force non-zero
 		if (sys->trace) {
 			fprintf(sys->trc_fp, "TRACE: %03x: Key Jam PC %03x\n",
-				sys->cpu.sys.pc, sys->cpu.sys.next);
+				sys->cpu.sys.pc, sys->cpu.sys.jam & 0x0fff);
 		}
 		sys->display(sys, -2);
 		break;
@@ -248,6 +244,14 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		sys->cpu.d2 = b & 0x0f;
 		break;
 #endif // __wang600__
+#ifdef __wang1200__
+	case 2:	// mode0 switches changed
+		sys->cpu.d1 = b & 0x0f;
+		break;
+	case 3:	// mode1 switches changed
+		sys->cpu.d2 = b & 0x0f;
+		break;
+#endif // __wang1200__
 	}
 }
 
