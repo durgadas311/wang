@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.3 2011/11/15 18:12:14 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.4 2011/11/15 22:16:49 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"
@@ -171,12 +171,33 @@ void diwang(char *buf, uint64_t *v) {
 	case 4:	sprintf(opA, "CA,CB = mem(U,V)"); break;
 	case 5:	sprintf(opA, "CA,CB = mem(%s,V)", k, k); break;
 	case 6:	sprintf(opA, "CA,CB = mem(15,%s)", k, k); break;
-	case 7:	sprintf(opA, "indicators"); break;
+	case 7:	sprintf(opA, "indicators(%x,%d)", u->kk, u->bi & 1); break;
 	case 8:	sprintf(opA, "print out"); break;
-	case 9:	sprintf(opA, "get status"); break;
+	case 9:
+		switch(u->kk & 0x07) {
+		case 0:
+			sprintf(opA, "KA = x:x:ORG:ADJ");
+			break;
+		case 1:
+			sprintf(opA, "KA = SerDat<3:0>");
+			break;
+		case 2:
+			sprintf(opA, "KA = SerDat<7:4>");
+			break;
+		case 3:
+			sprintf(opA, "KA = LCA/B:PE:DR:(t)");
+			break;
+		case 4:
+			sprintf(opA, "KA = TRE:SHC:PRINT:ATTN");
+			break;
+		default:
+			sprintf(opA, "get status %x", u->kk & 0x07);
+			break;
+		}
+		break;
 	case 10:	sprintf(opA, "tape read"); break;
 	case 11:	sprintf(opA, "tape write"); break;
-	case 12:	sprintf(opA, "tape status"); break;
+	case 12:	sprintf(opA, "KB=RHS:LHS:R/B:L/S"); break;
 	case 13:	sprintf(opA, "TMR=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
 	case 14:	sprintf(opA, "TMR=0(%s)", u->bi & 1 ? "WR" : "RD"); break;
 	case 15:	sprintf(opA, "UART status"); break;

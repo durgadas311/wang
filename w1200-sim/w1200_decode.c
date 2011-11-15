@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.6 2011/11/15 17:36:02 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.7 2011/11/15 22:16:49 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -138,6 +138,9 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 		}
 		sys->display(sys, -2);
 		break;
+	case 5: // mode2
+		sys->cpu.d3 = b & 0x0f;
+		break;
 	default:
 		return -1;
 		break;
@@ -148,6 +151,7 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 void w1200_init(wang_sys_t *sys) {
 	sys->cpu.d1 = 0; // default?
 	sys->cpu.d2 = 0; // default?
+	sys->cpu.d3 = 2; // default?
 	sys->get_psw_str = get_psw_str;
 	sys->get_mach_str = get_mach_str;
 	sys->get_reg_str = get_reg_str;
@@ -606,7 +610,7 @@ int instr_exec(wang_sys_t *sys) {
 	case 9:
 		switch(br_k & 0x07) {
 		case 0:
-			sys->cpu.ka = sys->cpu.d2;
+			sys->cpu.ka = sys->cpu.d3;
 			break;
 		case 4:
 			sys->cpu.ka = 0; // TRE, SHC, PRINT, ATTN...
@@ -626,7 +630,7 @@ int instr_exec(wang_sys_t *sys) {
 		tape_write(sys);
 		break;
 	case 12:
-		sys->cpu.kb = 0; // L/S, R/B, LHS, RHS
+		sys->cpu.kb = 0x02; // RHS : LHS : R/B : L/S
 				// Lock Shift? Ready/Busy? Left Head Select? Right... ?
 		break;
 	case 13:
@@ -671,7 +675,7 @@ int instr_exec(wang_sys_t *sys) {
 		case 6:
 			// todo: clean this up!
 			if (key) {
-//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
+fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 				sys->cpu.kbd = 1;
 				sys->cpu.ka = (key >> 4) & 0x0f;

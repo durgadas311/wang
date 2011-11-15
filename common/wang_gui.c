@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.9 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.10 2011/11/15 22:16:49 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -106,6 +106,7 @@ static void guidisplay(wang_sys_t *sys, int on) {
 	}
 
 	if (flush == 1) {
+#endif // ! __wang1200__
 		disp_good = 0;
 		rc = write(__gui_dfd, &bx, sizeof(bx));
 		if (rc < 0) {
@@ -114,6 +115,7 @@ static void guidisplay(wang_sys_t *sys, int on) {
 			sys->run = 0;
 			return;
 		}
+#ifndef __wang1200__
 	} else if (flush > 1) {	// must be 16
 		++disp_good;
 		rc = write(__gui_dfd, &bx, sizeof(bx));
@@ -207,7 +209,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	// something came down the pipe...
 	// make sure display gets refreshed...
 	guidisplay(sys, 0);
-	if ((b & 0xfc00) != 0) {
+	if ((b & 0xf800) != 0) {
 		guidevinput(sys, kc, b);
 		return;
 	}
