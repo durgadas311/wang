@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.3 2011/11/14 23:18:32 drmiller Exp $
+$Id: README.internals,v 1.4 2011/11/15 17:36:02 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -41,10 +41,16 @@ it's input pipe:
 
 00000100cccccccc
 	Special key code, does not generate input directly.
-	SKIP, SEARCH, CODE, (etc)
-	SKIP toggles skl, sets mode1 bit 0 = skl.
-	CODE toggles indicator/status cdl
-	SEARCH toggles indicator/status shl and generates key codes.
+	SKIP, SEARCH, (etc)
+	1 = SKIP toggles skl, sets mode1 bit 0 = skl.
+	2 = SEARCH toggles indicator/status shl and generates key codes.
+
+000001010000mmmm
+	Mode register 2 changed.
+	b0 = !ADJUST
+	b1 = !SAME (ORG)
+	b2 = n.c.
+	b3 = n.c.
 
 00001100tttttttt
 	Tape read data, byte 'tt'.

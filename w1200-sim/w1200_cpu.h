@@ -2,7 +2,7 @@
 #ifndef __w1200_cpu_h__
 #define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.5 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.6 2011/11/15 17:36:02 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -17,7 +17,6 @@ typedef union {
 		uint16_t csl	:1;	// CHAR / STOP lamp
 		uint16_t shl	:1;	// SEARCH lamp
 		uint16_t skl	:1;	// SKIP lamp
-		uint16_t cdl	:1;	// CODE lamp/status *
 	} ind;
 	uint16_t word;
 } w1200_ind_t;

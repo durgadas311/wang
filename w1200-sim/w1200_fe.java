@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $
+// $Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,12 +13,15 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
+	static final Color orange2 = new Color(255, 255, 180);	// illuminated
 	static final Color blue1 = new Color(190, 230, 255);
+	static final Color blue2 = new Color(240, 240, 255);	// illuminated
 	static final Color green1 = new Color(230, 240, 220);
 	static final Color pink1 = new Color(255, 220, 220);
+	static final Color pink2 = new Color(255, 255, 220);	// illuminated
 	static final Color white1 = new Color(250, 250, 250);
 	static final Color white2 = new Color(150, 150, 150);
 	static final Color white3 = new Color(200, 200, 200);
@@ -33,13 +36,22 @@ class _Key {
 	static final Color beige = new Color(230,230,230);
 	static final Color aqua = new Color(143,219,195);
 
+	static final int SPCL  = 0x0100;
 	static final int MODE0 = 0x0200;
 	static final int MODE1 = 0x0300;
-	static final int MODE2 = 0x0400;
+	static final int ALT   = 0x0400;
+	static final int MODE2 = 0x0500;
 
 	public _Key(Color sl, int c) {
 		this.color = sl;
 		this.altcolor = sl;
+		this.code = c;
+		this.state = false;
+	}
+
+	public _Key(Color sl, Color xl, int c) {
+		this.color = sl;
+		this.altcolor = xl;
 		this.code = c;
 		this.state = false;
 	}
@@ -63,6 +75,12 @@ class _Key {
 	}
 	static final int MODE2_CHG(int a, int b) {
 		return (MODE2 | (a << 4) | b);
+	}
+	static final int SPCL_KEY(int b) {
+		return (SPCL | b);
+	}
+	static final int ALT_KEY(int b) {
+		return (ALT | b);
 	}
 	// group is never sent.
 	// group=-1 is toggle (no group)
@@ -93,11 +111,20 @@ class _Key {
 	public boolean isTAPE() {
 		return (code <= TAPE_EJECT);
 	}
+	public void setOn(boolean on) {
+		state = on;
+		if (on) {
+			button.setBackground(altcolor);
+		} else {
+			button.setBackground(color);
+		}
+	}
 
 	Color color;
 	Color altcolor;
 	int code;
 	boolean state;
+	JButton button;
 }
 
 // (red) CLEAR button is 00 14...
@@ -125,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -223,7 +250,6 @@ public class w1200_fe
 		s.gridheight = 1;
 		s.gridwidth = 2;
 		gridbag.setConstraints(tapel, s);
-//System.err.println("tapel "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		s.gridheight = 1;
 		front_end.add(tapel);
 		col += 2;
@@ -231,11 +257,19 @@ public class w1200_fe
 		s.gridy = row;
 		s.gridheight = 1;
 		s.gridwidth = 1;
-		s.anchor = GridBagConstraints.WEST;
+		s.insets.top = 0;
+		s.insets.bottom = 50;
+		s.insets.left = 5;
+		s.insets.right = 5;
+		s.anchor = GridBagConstraints.SOUTHWEST;
 		gridbag.setConstraints(ej, s);
 		front_end.add(ej);
 		++col;
 		s.anchor = GridBagConstraints.NORTH;
+		s.insets.top = 0;
+		s.insets.bottom = 0;
+		s.insets.left = 0;
+		s.insets.right = 0;
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(50, 25));
@@ -245,7 +279,6 @@ public class w1200_fe
 		s.gridheight = 1;
 		s.gridwidth = 1;
 		gridbag.setConstraints(pan, s);
-//System.err.println("pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(pan);
 		++col;
 
@@ -256,18 +289,25 @@ public class w1200_fe
 		s.gridheight = 1;
 		s.gridwidth = 2;
 		gridbag.setConstraints(taper, s);
-//System.err.println("taper "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(taper);
 		col += 2;
 		s.gridx = col;
 		s.gridy = row;
 		s.gridheight = 1;
 		s.gridwidth = 1;
-		s.anchor = GridBagConstraints.WEST;
+		s.insets.top = 0;
+		s.insets.bottom = 50;
+		s.insets.left = 5;
+		s.insets.right = 5;
+		s.anchor = GridBagConstraints.SOUTHWEST;
 		gridbag.setConstraints(ej, s);
 		front_end.add(ej);
 		++col;
 		s.anchor = GridBagConstraints.NORTH;
+		s.insets.top = 0;
+		s.insets.bottom = 0;
+		s.insets.left = 0;
+		s.insets.right = 0;
 		col = 0;
 		++row;
 
@@ -279,7 +319,6 @@ public class w1200_fe
 		s.gridheight = 1;
 		s.gridwidth = 8;
 		gridbag.setConstraints(pan, s);
-//System.err.println("pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(pan);
 		++row;
 
@@ -300,13 +339,18 @@ public class w1200_fe
 		s.gridheight = 1;
 		s.gridwidth = 8;
 		gridbag.setConstraints(kbd, s);
-//System.err.println("kbd "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		front_end.add(kbd);
 		++row;
 		front_end.addKeyListener(kbd);
 
+		_Key cdl = kbd.locateKey(_Key.ALT, 3);
+		_Key skl = kbd.locateKey(_Key.ALT, 1);
+		_Key shl = kbd.locateKey(_Key.ALT, 2);
+		_Key csl = kbd.locateKey(_Key.MODE1, 14);
+
 		Wang1200_SimInput inp = new Wang1200_SimInput(fin,
 				tml, er, tmr, na, el,
+				cdl, skl, shl, csl,
 				tapel, taper, m611f);
 
 		JMenuBar mb = new JMenuBar();
@@ -348,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -424,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -433,6 +477,10 @@ class Wang1200_SimInput
 	Wang1200_Indicator _tmr;
 	Wang1200_Indicator _na;
 	Wang1200_Indicator _el;
+	_Key _cdl;
+	_Key _skl;
+	_Key _shl;
+	_Key _csl;
 
 	InputStream _fin;
 
@@ -453,6 +501,10 @@ class Wang1200_SimInput
 			Wang1200_Indicator tmr,
 			Wang1200_Indicator na,
 			Wang1200_Indicator el,
+			_Key cdl,
+			_Key skl,
+			_Key shl,
+			_Key csl,
 			Wang1200_Tape tapel,
 			Wang1200_Tape taper,
 			Wang1200_Model611 cn24) {
@@ -461,6 +513,10 @@ class Wang1200_SimInput
 		_tmr = tmr;
 		_na = na;
 		_el = el;
+		_cdl = cdl;
+		_skl = skl;
+		_shl = shl;
+		_csl = csl;
 		_tapel = tapel;
 		_taper = taper;
 		_m611 = cn24;
@@ -509,31 +565,35 @@ class Wang1200_SimInput
 				_tml.setOn((b[0] & 0x04) != 0);	// TAPE MOVE, L
 				_el.setOn((b[0] & 0x08) != 0);	// END DOC
 				_na.setOn((b[0] & 0x10) != 0);	// NO ADJ
-//				???.setOn((b[0] & 0x20) != 0);	// CHAR/STOP
-//				???.setOn((b[0] & 0x40) != 0);	// SEARCH
-//				???.setOn((b[0] & 0x80) != 0);	// SKIP
-//				???.setOn((b[1] & 0x01) != 0);	// CODE
+				_csl.setOn((b[0] & 0x20) != 0);	// CHAR/STOP
+				_shl.setOn((b[0] & 0x40) != 0);	// SEARCH
+				_skl.setOn((b[0] & 0x80) != 0);	// SKIP
+				_cdl.setOn((b[1] & 0x01) != 0);	// CODE
 			} else if ((b[1]  & 0xfc) == 0x18) {
 				// carriage control commands
 				if ((b[0] & 0x01) != 0) {
-					_m611.do_cn24(0x02);	// space
+					b[0] = 0x02;	// space
 				} else if ((b[0] & 0x02) != 0) {
-					_m611.do_cn24(0x03);	// back space
+					b[0] = 0x03;	// back space
 				} else if ((b[0] & 0x04) != 0) {
-					_m611.do_cn24(0x08);	// ?? tab
+					_m611.do_tab();	// tab
+					continue;
 				} else if ((b[0] & 0x08) != 0) {
-					_m611.do_cn24(0x18);	// cr-lf
+					b[0] = 0x18;	// cr-lf
 				} else if ((b[0] & 0x10) != 0) {
-					_m611.do_cn24(0x13);	// shift up
+					b[0] = 0x13;	// shift up
 				} else if ((b[0] & 0x20) != 0) {
-					_m611.do_cn24(0x12);	// shift dn
+					b[0] = 0x12;	// shift dn
 				} else if ((b[1] & 0x01) != 0) {
-					_m611.do_cn24(0x1a);	// index
+					b[0] = 0x1a;	// index
 				} else if ((b[1] & 0x02) != 0) {
-					_m611.do_cn24(0x0a);	// ?? set tab
+					_m611.do_settab();	// set tab
+					continue;
 				} else if ((b[1] & 0x04) != 0) {
-					_m611.do_cn24(0x0b);	// ?? clear tab
+					_m611.do_clrtab();	// clear tab
+					continue;
 				}
+				_m611.do_cn24(b);
 			} else if ((b[1]  & ~3) == 0x0c) {
 				_tapel.do_tape(b);
 			} else if ((b[1] & 0x0ff) == 0x7f) {
@@ -564,7 +624,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -602,7 +662,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -981,12 +1041,29 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	private byte[] cn24_xlate;
+	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
 
 	public void reset() {
 		// anything?
+	}
+
+	public byte ascii2roti(char c) {
+		byte cc;
+		cc = cn24_revxlate[c];
+		// cleanup needed? ctl codes...
+		if ((cc & 0x40) != 0) {
+			// TBD: handle shift!
+		}
+		cc &= 0x3f;
+		return cc;
+	}
+	public byte roti2ascii(byte c) {
+		byte cc = cn24_xlate[c];
+		// cleanup needed? ctl codes...
+		return cc;
 	}
 
 	private void setup_xlate() {
@@ -1117,6 +1194,130 @@ class Wang1200_Model611
 		cn24_spcl[0x01] = "\u00BD";
 		cn24_spcl[0x02] = "\u00BC";
 		cn24_spcl[0x03] = "\u00A2";
+
+		cn24_revxlate = new byte[256];
+		cn24_revxlate['-'] = 0x00;
+		cn24_revxlate['y'] = 0x01;
+		cn24_revxlate[' '] = 0x02;
+		cn24_revxlate['\b'] = 0x13;
+		cn24_revxlate['q'] = 0x04;
+		cn24_revxlate['p'] = 0x05;
+		cn24_revxlate['='] = 0x06;
+		cn24_revxlate['j'] = 0x07;
+		cn24_revxlate[' '] = 0x03;
+		cn24_revxlate['/'] = 0x09;
+		//cn24_revxlate[' '] = 0x0a;	// no op
+		//cn24_revxlate[' '] = 0x0b;	// no op
+		cn24_revxlate[','] = 0x0c;
+		cn24_revxlate[';'] = 0x0d;
+		cn24_revxlate['f'] = 0x0e;
+		cn24_revxlate['g'] = 0x0f;
+
+		cn24_revxlate['w'] = 0x10;
+		cn24_revxlate['s'] = 0x11;
+		//cn24_revxlate[''] = 0x12;	// shift dn
+		//cn24_revxlate[''] = 0x13;	// shift up
+		cn24_revxlate['i'] = 0x14;
+		cn24_revxlate['\''] = 0x15;
+		cn24_revxlate['.'] = 0x16;
+		//cn24_revxlate['\001'] = 0x17;	// 1/2...
+		cn24_revxlate['\n'] = 0x18;
+		cn24_revxlate['o'] = 0x19;
+		cn24_revxlate['\n'] = 0x33;
+		cn24_revxlate['\t'] = 0x23;
+		//cn24_revxlate['\n'] = 0x1b;	// rev index
+		cn24_revxlate['a'] = 0x1c;
+		cn24_revxlate['r'] = 0x1d;
+		cn24_revxlate['v'] = 0x1e;
+		cn24_revxlate['m'] = 0x1f;
+
+		cn24_revxlate['b'] = 0x20;
+		cn24_revxlate['h'] = 0x21;
+		//cn24_revxlate['+'] = 0x22;	// step x+
+		//cn24_revxlate['+'] = 0x23;	// step x-
+		cn24_revxlate['k'] = 0x24;
+		cn24_revxlate['e'] = 0x25;
+		cn24_revxlate['n'] = 0x26;
+		cn24_revxlate['t'] = 0x27;
+		//cn24_revxlate[''] = 0x28;	// print mode
+		cn24_revxlate['1'] = 0x29;
+		//cn24_revxlate['+'] = 0x2a;	// step y+
+		//cn24_revxlate['+'] = 0x2b;	// step y-
+		cn24_revxlate['c'] = 0x2c;
+		cn24_revxlate['d'] = 0x2d;
+		cn24_revxlate['u'] = 0x2e;
+		cn24_revxlate['x'] = 0x2f;
+
+		cn24_revxlate['9'] = 0x30;
+		cn24_revxlate['0'] = 0x31;
+		//cn24_revxlate[''] = 0x32;	// step x+y+
+		//cn24_revxlate[''] = 0x33;	// step x-y+
+		cn24_revxlate['6'] = 0x34;
+		cn24_revxlate['5'] = 0x35;
+		cn24_revxlate['2'] = 0x36;
+		cn24_revxlate['z'] = 0x37;
+		//cn24_revxlate[''] = 0x38;	// plot mode
+		cn24_revxlate['4'] = 0x39;
+		//cn24_revxlate[''] = 0x3a;	// step x+y-
+		//cn24_revxlate[''] = 0x3b;	// step x-y-
+		cn24_revxlate['8'] = 0x3c;
+		cn24_revxlate['7'] = 0x3d;
+		cn24_revxlate['3'] = 0x3e;
+		cn24_revxlate['l'] = 0x3f;
+
+		// shifted versions...
+		cn24_revxlate['_'] = 0x40;
+		cn24_revxlate['Y'] = 0x41;
+		//cn24_revxlate[' '] = 0x42;
+		//cn24_revxlate['\b'] = 0x43;
+		cn24_revxlate['Q'] = 0x44;
+		cn24_revxlate['P'] = 0x45;
+		cn24_revxlate['+'] = 0x46;
+		cn24_revxlate['J'] = 0x47;
+		cn24_revxlate['?'] = 0x49;
+		cn24_revxlate[','] = 0x4c;
+		cn24_revxlate[':'] = 0x4d;
+		cn24_revxlate['F'] = 0x4e;
+		cn24_revxlate['G'] = 0x4f;
+
+		cn24_revxlate['W'] = 0x50;
+		cn24_revxlate['S'] = 0x51;
+		cn24_revxlate['I'] = 0x54;
+		cn24_revxlate['"'] = 0x55;
+		cn24_revxlate['.'] = 0x56;
+		//cn24_revxlate['\002'] = 0x57;	// 1/4
+		//cn24_revxlate['\n'] = 0x58;
+		cn24_revxlate['O'] = 0x59;
+		//cn24_revxlate['\n'] = 0x5a;
+		//cn24_revxlate['\n'] = 0x5b;	// rev index
+		cn24_revxlate['A'] = 0x5c;
+		cn24_revxlate['R'] = 0x5d;
+		cn24_revxlate['V'] = 0x5e;
+		cn24_revxlate['M'] = 0x5f;
+
+		cn24_revxlate['B'] = 0x60;
+		cn24_revxlate['H'] = 0x61;
+		cn24_revxlate['K'] = 0x64;
+		cn24_revxlate['E'] = 0x65;
+		cn24_revxlate['N'] = 0x66;
+		cn24_revxlate['T'] = 0x67;
+		cn24_revxlate['!'] = 0x69;
+		cn24_revxlate['C'] = 0x6c;
+		cn24_revxlate['D'] = 0x6d;
+		cn24_revxlate['U'] = 0x6e;
+		cn24_revxlate['X'] = 0x6f;
+
+		cn24_revxlate['('] = 0x70;
+		cn24_revxlate[')'] = 0x71;
+		//cn24_revxlate['\003'] = 0x74;	// cent
+		cn24_revxlate['%'] = 0x75;
+		cn24_revxlate['@'] = 0x76;
+		cn24_revxlate['Z'] = 0x77;
+		cn24_revxlate['$'] = 0x79;
+		cn24_revxlate['*'] = 0x7c;
+		cn24_revxlate['&'] = 0x7d;
+		cn24_revxlate['#'] = 0x7e;
+		cn24_revxlate['L'] = 0x7f;
 	}
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
@@ -1138,6 +1339,15 @@ class Wang1200_Model611
 	}
 
 	String _footer;
+
+	public void do_tab() {
+	}
+
+	public void do_settab() {
+	}
+
+	public void do_clrtab() {
+	}
 
 	public Wang1200_Model611() {
 		setup_xlate();
@@ -1547,7 +1757,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1562,10 +1772,25 @@ class Wang1200_Keyboard extends JComponent
 	int _mode0;
 	int _mode1;
 	int _mode2;
+	byte[] code_xlate;
 	OutputStream _fout;
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
+
+	public _Key locateKey(int type, int code) {
+		int x, y;
+		for (y = 0; y < _nkbds; ++y) {
+			for (x = 0; x < _kbds[y]._keys.length; ++x) {
+				if (_kbds[y]._keys[x].getType() == type &&
+						_kbds[y]._keys[x].getCode() == code) {
+					return _kbds[y]._keys[x];
+				}
+			}
+		}
+		// fatal error?
+		return null;
+	}
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -1614,7 +1839,13 @@ class Wang1200_Keyboard extends JComponent
 		setToggle(!_kbds[y]._keys[x].state, _kbds[y]._keys[x], _kbds[y]._buttons[x]);
 	}
 
-	public void do_keycode(int code) {
+	public void do_keycode(boolean shifted, int code) {
+		if ((code & ~0x0ff) == 0 && _shift) {
+			int ix = code & 0x00f;
+			code &= ~0x00f;
+			code |= code_xlate[ix];
+		}
+		if (!shifted) setShift(false);
 		if (_fout == null) {
 			int t = code >> 8;
 			int h = (code >> 4) & 0x0f;
@@ -1660,7 +1891,7 @@ class Wang1200_Keyboard extends JComponent
 		if (g != 0) {
 			set_group(g, y, x);
 		}
-		// _mode0, _mode1, _meta were already updated above...
+		// _mode0, _mode1, _mode2 were already updated above...
 		if (type == _Key.MODE0) {
 			code = _Key.MODE0 | _mode0;
 			if (g == 0) {
@@ -1670,17 +1901,23 @@ class Wang1200_Keyboard extends JComponent
 			}
 		}
 		if (type == _Key.MODE1) {
+			// was not handled above!
+			// these bits should not really be static...
+			_mode1 &= ~_kbds[y]._keys[x].getMask();
+			_mode1 |= _kbds[y]._keys[x].getMode();
 			code = _Key.MODE1 | _mode1;
 		}
 		if (type == _Key.MODE2) {
 			code = _Key.MODE2 | _mode2;
 		}
-		if (type == 0 && _shift && (code & 0x0f0) == 0x080) {
-			code |= 0x010;
+		if (type == _Key.SPCL) {
+			code |= _Key.SPCL;
 		}
-		if (!shifted) setShift(false);
+		if (type == _Key.ALT) {
+			code |= _Key.ALT;
+		}
 
-		do_keycode(code);
+		do_keycode(shifted, code);
 	}
 
 	public Wang1200_Keyboard(OutputStream fo,
@@ -1702,6 +1939,25 @@ class Wang1200_Keyboard extends JComponent
 		_col = 0;
 		_shift = false;
 		_fout = fo;
+		_mode2 = 1;	// initial value... we just know it...
+
+		code_xlate = new byte[16];
+		code_xlate[0] = 8;
+		code_xlate[1] = 1;
+		code_xlate[2] = 2;
+		code_xlate[3] = 2;
+		code_xlate[4] = 4;
+		code_xlate[5] = 5;
+		code_xlate[6] = 6;
+		code_xlate[7] = 7;
+		code_xlate[8] = 8;
+		code_xlate[9] = 10;
+		code_xlate[10] = 10;
+		code_xlate[11] = 11;
+		code_xlate[12] = 12;
+		code_xlate[13] = 13;
+		code_xlate[14] = 14;
+		code_xlate[15] = 11;
 
 		GridBagConstraints s = new GridBagConstraints();
 //		JPanel pan;
@@ -1729,7 +1985,6 @@ class Wang1200_Keyboard extends JComponent
 		s.gridx = _col;
 		s.gridy = _row;
 		gridbag.setConstraints(kbd, s);
-//System.err.println("  kbd.left "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		add(kbd);
 		_kbds[_nkbds] = kbd;
 		++_nkbds;
@@ -1741,7 +1996,6 @@ class Wang1200_Keyboard extends JComponent
 //		pan.setPreferredSize(new Dimension(400, 25));
 //		pan.setOpaque(false);
 //		gridbag.setConstraints(pan, s);
-//System.err.println("  kbd.pan "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 //		add(pan);
 		gridbag.setConstraints(_m611, s);
 		add(_m611);
@@ -1755,7 +2009,6 @@ class Wang1200_Keyboard extends JComponent
 		s.gridx = _col;
 		s.gridy = _row;
 		gridbag.setConstraints(kbd, s);
-//System.err.println("  kbd.right "+s.gridx+","+s.gridy+" "+s.gridwidth+"x"+s.gridheight);
 		add(kbd);
 		_kbds[_nkbds] = kbd;
 		++_nkbds;
@@ -1785,16 +2038,9 @@ System.err.println("action");
 		if (_fout == null) {
 			_m611.do_cn24_direct(c);
 		}
-		if (c == ' ') {
-			c = 0x03;
-		} else if (c == '\b') {
-			c = 0x13;
-		} else if (c == '\t') {
-			c = 0x23;
-		} else if (c == '\n') {
-			c = 0x33;
-		}
-		do_keycode(c);
+		int i = _m611.ascii2roti(c);
+		boolean shifted = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
+		do_keycode(shifted, i);
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -1910,7 +2156,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -1952,7 +2198,6 @@ if (url != null) {
 		c.gridx = _col + px;
 		c.gridy = _row + py;
 		gridbag.setConstraints(butt, c);
-//System.err.println("butt."+icon+" "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 
 		add(butt);
 		_buttons[_nkeys] = butt;
@@ -1995,7 +2240,6 @@ if (url != null) {
 		c.insets.left = lx;
 		c.insets.right = lx;
 		gridbag.setConstraints(butt, c);
-//System.err.println("pb."+botlab+" "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(butt);
 
 		if (botlab.length() > 0) {
@@ -2008,10 +2252,10 @@ if (url != null) {
 			c.gridx = _col + px;
 			c.gridy = _row + 1;
 			gridbag.setConstraints(lab, c);
-//System.err.println("pb."+botlab+".lab "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 			add(lab);
 		}
 
+		key.button = butt;
 		_buttons[_nkeys] = butt;
 		_keys[_nkeys] = key;
 		++_nkeys;
@@ -2056,7 +2300,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2104,7 +2348,6 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 5;
 		c.gridheight = 1;
 		gridbag.setConstraints(tml, c);
-//System.err.println("left.tml "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(tml);
 		_col += 5;
 
@@ -2113,7 +2356,6 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 5;
 		c.gridheight = 1;
 		gridbag.setConstraints(er, c);
-//System.err.println("left.er "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(er);
 		_col += 5;
 
@@ -2122,7 +2364,6 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 5;
 		c.gridheight = 1;
 		gridbag.setConstraints(tmr, c);
-//System.err.println("left.tmr "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(tmr);
 		_col += 5;
 
@@ -2137,7 +2378,6 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 40));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("left.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		c.gridwidth = 1;
 		++_col;
@@ -2153,7 +2393,6 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("left.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
@@ -2173,14 +2412,13 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("left.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "BACK<BR>LINE",
 			new _Key(_Key.blue1, _Key.PROG_CODE(7,3)));
 		addButton(c,1, 2, 0, 1, 6, 1, "CODE",
-			new _Key(_Key.white1, _Key.ALT_KEY(3)));
+			new _Key(_Key.white1, _Key.illum1, _Key.SHIFT));
 		_col += 6;
 
 		c.gridx = _col;
@@ -2191,19 +2429,17 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("left.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
 		_row += 3;
-//System.err.println("left finished "+_col+"x"+_row);
 		_col = 0;
 	}
 }
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.6 2011/11/14 23:18:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.7 2011/11/15 17:36:02 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -2232,12 +2468,10 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridy = _row;
 		c.gridwidth = 5;
 		gridbag.setConstraints(na, c);
-//System.err.println("right.na "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(na);
 		c.gridx = _col;
 		c.gridy = _row + 1;
 		gridbag.setConstraints(el, c);
-//System.err.println("right.el "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(el);
 		_col += 5;
 
@@ -2249,16 +2483,15 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 30));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("right.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
 		addPushButton(c, 5, 3, 0, 0,"SAME",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,0))));
+			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,1))));
 		addPushButton(c, 5, 3, 3, 0,"ADJUST",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,4))));
+			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,2))));
 		addPushButton(c, 5, 3, 6, 0,"JUSTIFY",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(3,_Key.MODE2_CHG(3,6))));
+			new _Key(_Key.red1, _Key.GROUP(3,_Key.MODE2_CHG(3,3))));
 		_col += 9;
 
 		_col = 0;
@@ -2286,7 +2519,6 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10,10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("right.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
@@ -2297,7 +2529,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		addButton(c,1, 1, 0, 2, 6, 1, "WORD",
 			new _Key(_Key.white1, _Key.MODE1_CHG(14,6)));
 		addButton(c,1, 1, 0, 3, 6, 1, "CHAR/<BR>STOP",
-			new _Key(_Key.pink1, _Key.MODE1_CHG(14,14)));
+			new _Key(_Key.pink1, _Key.pink2, _Key.MODE1_CHG(14,14)));
 		_col += 6;
 
 		c.gridx = _col;
@@ -2308,7 +2540,6 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("right.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
@@ -2317,9 +2548,9 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		addButton(c,1, 1, 0, 1, 6, 1, "MEMO<BR>(OUT)",
 			new _Key(_Key.white1, _Key.PROG_CODE(6,3)));
 		addButton(c,1, 1, 0, 2, 6, 1, "<FONT SIZE=-1>SEARCH</FONT>",
-			new _Key(_Key.blue1, _Key.ALT_KEY(2)));	// toggle!
+			new _Key(_Key.blue1, _Key.blue2, _Key.ALT_KEY(2)));
 		addButton(c,1, 1, 0, 3, 6, 1, "SKIP",
-			new _Key(_Key.orange1, _Key.ALT_KEY(1)));
+			new _Key(_Key.orange1, _Key.orange2, _Key.ALT_KEY(1)));
 		_col += 6;
 
 		c.gridx = _col;
@@ -2330,12 +2561,10 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		pan.setPreferredSize(new Dimension(10, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
-//System.err.println("right.pan "+c.gridx+","+c.gridy+" "+c.gridwidth+"x"+c.gridheight);
 		add(pan);
 		++_col;
 
 		_row += 4;
-//System.err.println("right finished "+_col+"x"+_row);
 		_col = 0;
 
 	}

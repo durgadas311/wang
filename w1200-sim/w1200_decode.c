@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.5 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.6 2011/11/15 17:36:02 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -131,9 +131,6 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 		case 2:	// SEARCH
 			sys->cpu.ind.ind.shl ^= 1;
 			key = 0x100 | (sys->cpu.ind.ind.shl ? 0x52 : 0x42);
-			break;
-		case 3:	// CODE
-			sys->cpu.ind.ind.cdl ^= 1;
 			break;
 		default:
 			return -1;
@@ -557,7 +554,6 @@ int instr_exec(wang_sys_t *sys) {
 		// T.B.D. reset 6184...
 //fprintf(stderr, "%03x: res (%04x)\n", sys->cpu.sys.pc, key);
 		sys->cpu.kbd = 0;
-		sys->cpu.ind.ind.cdl = 0;
 		break;
 	case 10:
 		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.zo ^ 1);
@@ -716,7 +712,6 @@ int instr_exec(wang_sys_t *sys) {
 		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff; 
 		sys->cpu.sys.jam = 0;
 		if (sys->cpu.sys.next == 0) { // RESET
-			sys->cpu.ind.ind.cdl = 0;
 			sys->cpu.ind.ind.skl = 0;
 			sys->cpu.ind.ind.shl = 0;
 			sys->display(sys, -2);
