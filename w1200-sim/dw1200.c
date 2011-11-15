@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.2 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.3 2011/11/15 18:12:14 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"
@@ -165,12 +165,12 @@ void diwang(char *buf, uint64_t *v) {
 	}
 
 	switch(u->mop) {
-	case 1:	sprintf(opA, "mem(U,V) = CA"); break;
-	case 2:	sprintf(opA, "mem(%s,V) = CA", k); break;
-	case 3:	sprintf(opA, "mem(15,%s) = CA", k); break;
-	case 4:	sprintf(opA, "CA = mem(U,V), CB = rom(T,U,V)"); break;
-	case 5:	sprintf(opA, "CA = mem(%s,V), CB = rom(15,%s,V)", k, k); break;
-	case 6:	sprintf(opA, "CA = mem(15,%s), CB = rom(15,15,%s)", k, k); break;
+	case 1:	sprintf(opA, "mem(U,V) = CA,CB"); break;
+	case 2:	sprintf(opA, "mem(%s,V) = CA,CB", k); break;
+	case 3:	sprintf(opA, "mem(15,%s) = CA,CB", k); break;
+	case 4:	sprintf(opA, "CA,CB = mem(U,V)"); break;
+	case 5:	sprintf(opA, "CA,CB = mem(%s,V)", k, k); break;
+	case 6:	sprintf(opA, "CA,CB = mem(15,%s)", k, k); break;
 	case 7:	sprintf(opA, "indicators"); break;
 	case 8:	sprintf(opA, "print out"); break;
 	case 9:	sprintf(opA, "get status"); break;
