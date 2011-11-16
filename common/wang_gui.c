@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.10 2011/11/15 22:16:49 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.11 2011/11/16 15:45:30 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -20,12 +20,12 @@ pid_t __gui_pid = 0;
 int __gui_kfd = -1;
 int __gui_dfd = -1;
 
-static inline void wait_key() {
+static inline void wait_key(int timeout) {
 	struct pollfd fds;
 	fds.fd = __gui_kfd;
 	fds.events = POLLIN;
 	fds.revents = 0;
-	/* int rc = */ poll(&fds, 1, -1);
+	/* int rc = */ poll(&fds, 1, timeout);
 }
 
 static inline int test_kbd() {
@@ -153,7 +153,7 @@ static void guidisplay(wang_sys_t *sys, int on) {
 	} else {
 		if (disp_good > 4) {
 			if (on > 0) {
-				wait_key(); // sleep until key event
+				wait_key(-1); // sleep until key event
 			}
 		}
 #endif // ! __wang1200__
@@ -175,7 +175,8 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		return;
 	}
 	if (kc == NULL) {
-		wait_key();
+		// ack is timeout, usec, 0=infinite
+		wait_key(ack);
 		return;
 	}
 	if (ack) {
@@ -376,7 +377,7 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 			if ((b >> 8) == 0x0e) {	// EOF
 #if 0 // can't do this! wang must detect EOT! maybe use some counter to detect "too long"?
 				// nothing good will happen now... until a key is pressed...
-				wait_key(); // sleep until key event
+				wait_key(-1); // sleep until key event
 #endif
 				return 0xff;
 			}

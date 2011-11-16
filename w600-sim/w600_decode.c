@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.53 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.54 2011/11/16 15:45:30 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -537,7 +537,7 @@ static void printer_status(wang_sys_t *sys) {
 		// only if running program doesn't get here...
 		// printer is off, tach will never pulse, so don't spin
 		if (sys->cpu.sys.pc == 0x6db) {
-			sys->keyboard(sys, NULL, 0); // sleep until key event
+			sys->keyboard(sys, NULL, -1); // sleep until key event
 		}
 		return;
 	}
@@ -680,17 +680,12 @@ if (sys->cpu.sys.pc == 0x252) {
 	} else if (sys->cpu.sys.pc == 0x5c6) {	// alpha-stop done... "return"...
 		if (sys->cpu.sys.next == 0x27b) { // alpha-stop in running program...
 			// observed 211975 cycles or about 0.53 second
-			static struct timespec alpha_stop = {
-				0, 529937500L
-			};
 			if (sys->trace) {
 				fprintf(sys->trc_fp, "TRACE: %03x: "
 						"Alpha-Stop Sleep... %lld\n",
 						sys->cpu.sys.pc, sys->cpu.sys.cycles);
 			}
-			// todo: should not sleep if key pressed - e.g. PRIME
-			nanosleep(&alpha_stop, NULL);
-			// sleep(1);
+			sys->keyboard(sys, NULL, 530);
 		}
 		sys->display(sys, 0);
 	}
