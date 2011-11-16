@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.3 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.4 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@ static int _disas(wang_sys_t *sys, char *line) {
 	char *s;
 	uint16_t adr = sys->cpu.sys.pc;
 	int len = 16;
-	uint16_t max = 2 * 1024;	// sizeof(sys->ucode) / sizeof(sys->ucode[0])
+	uint16_t max = sizeof(sys->ucode) / sizeof(sys->ucode[0]);
 
 	s = strtok(NULL, " \t");
 	if (s) {
@@ -63,6 +63,43 @@ static int _disas(wang_sys_t *sys, char *line) {
 	return 0;
 }
 
+static int _break(wang_sys_t *sys, char *line) {
+	char buf[1024];
+	char *s;
+	uint16_t adr;
+	uint16_t max = sizeof(sys->ucode) / sizeof(sys->ucode[0]);
+	int n = 0;
+	wang_ucode_t *u;
+
+	s = strtok(NULL, " \t");
+	while (s) {
+		adr = strtoul(s, NULL, 16);
+		++n;
+		if (adr < max) {
+			u = (wang_ucode_t *)&sys->ucode[adr];
+			u->brkpt ^= 1;
+			printf("%03x: breakpoint %s\n", adr, u->brkpt ? "on" : "off");
+		} else {
+			printf("%03x: no ucode\n", adr);
+		}
+		s = strtok(NULL, " \t");
+	}
+	if (n == 0) {
+		for (adr = 0; adr < max; ++adr) {
+			u = (wang_ucode_t *)&sys->ucode[adr];
+			if (u->brkpt) {
+				if (n == 0) printf("Breakpoints at:");
+				printf(" %03x", adr);
+				++n;
+			}
+		}
+		if (n == 0) printf("no breakpoints");
+		printf("\n");
+	}
+
+	return 0;
+}
+
 static int _exam(wang_sys_t *sys, char *line) {
 	char *s;
 	uint16_t adr = (sys->cpu.l << 8) | (sys->cpu.m << 4) | sys->cpu.n;
@@ -77,11 +114,15 @@ static int _exam(wang_sys_t *sys, char *line) {
 			len = strtoul(s, NULL, 0);
 		}
 	}
-#ifdef __wang600__
+#if defined(__wang600__)
 	adr >>= 1;
 	len = (len + 1) & ~1;
 	int x, y;
 	for (x = 0; x < len;) {
+		if (adr >= sizeof(sys->ram)) {
+			printf(" no memory\n");
+			break;
+		}
 		printf("%03x:", adr << 1);
 		for (y = 0; x + y < len && y < 16; y += 2) {
 			uint8_t b = sys->ram[adr];
@@ -92,6 +133,23 @@ static int _exam(wang_sys_t *sys, char *line) {
 		x += y;
 	}
 #endif // __wang600__
+#if defined(__wang1200__)
+	int x, y;
+	for (x = 0; x < len;) {
+		if (adr >= sizeof(sys->ram)) {
+			printf(" no memory\n");
+			break;
+		}
+		printf("%03x:", adr << 1);
+		for (y = 0; x + y < len && y < 16; y += 2) {
+			uint8_t b = sys->ram[adr];
+			printf(" %02x", b);
+			++adr;
+		}
+		printf("\n");
+		x += y;
+	}
+#endif // __wang1200__
 #ifdef __wang700__
 	len = (len + 1) & ~1;
 	int x, y, i;
@@ -478,6 +536,7 @@ struct {
 #ifdef __wang600__
 	{ "dup", _dup,		"", "Copy program space into ROM" },
 #endif // __wang600__
+	{ "break", _break,	"[addr ...]", "Set/Clear/Show one-shot breakpoint(s)" },
 	{ "go", _go,		"[+cycles]", "Resume program at current PC [break after <cycles>]" },
 	{ "systrc", _systrc,	"[[off] pattern]", "Enable tracing of sys mem bytes" },
 	{ "keytrc", _keytrc,	"on/off", "Enable tracing of key presses" },

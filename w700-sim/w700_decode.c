@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.19 2011/11/16 15:45:30 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.20 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -430,6 +430,13 @@ int instr_exec(wang_sys_t *sys) {
 	uint16_t next;
 	int rc = 0;
 	static uint16_t key = 0;
+
+	if (u->brkpt) {
+		// 'u' points into ucode[], so updates are stored there...
+		u->brkpt = 0; // one-shot breakpoint turned off...
+		sys->run = 0;
+		return 0;
+	}
 
 	// For conditional jump, these bits are latched early...
 	uint8_t br_s = sys->cpu.s;

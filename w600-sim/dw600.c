@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.16 2011/11/07 14:07:35 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.17 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"
@@ -53,7 +53,7 @@ void diwang(char *buf, uint64_t *v) {
 	if (u->jl == 7) {
 		s += sprintf(s, "return");
 	} else {
-		if (u->jc) {
+		if (u->sub) {
 			s += sprintf(s, "call");
 		} else {
 			s += sprintf(s, "jump");

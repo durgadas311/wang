@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.11 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.12 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -334,6 +334,7 @@ static int sys_interact(wang_sys_t *sys) {
 	temp_intr.sa_flags = SA_RESTART;
 	sigaction(SIGINT, &temp_intr, &save_intr);
 
+	// PC has NOT been executed...
 	printf("break at %03x\n", sys->cpu.sys.pc);
 	do {
 		rc = sys_command(sys);
@@ -457,6 +458,7 @@ static int run_some(wang_sys_t *sys, uint16_t entry) {
 		}
 		sys_exec(sys); // single-step
 		if (sys->cpu.sys.cycles >= sys->cpu.sys.cylimit) {
+			// PC has NOT been executed...
 			sys->cpu.sys.cylimit = (uint64_t)-1;
 			sys->run = 0;
 		}

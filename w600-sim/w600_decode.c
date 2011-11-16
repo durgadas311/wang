@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.54 2011/11/16 15:45:30 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.55 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -342,6 +342,7 @@ void w600_init(wang_sys_t *sys) {
 	sys->cpu.d2 = D20_DEGREES;      // keyboard default... ?
 	sys->get_psw_str = get_psw_str;
 	sys->get_mach_str = get_mach_str;
+	sys->get_reg_str = get_reg_str;
 	sys->ucode_override = ucode_override;
 	sys->special_key = special_key;
 
@@ -651,7 +652,7 @@ static void instr_trace(wang_sys_t *sys) {
 		sys->cpu.kb,
 #ifdef TRACE_RAW_UCODE
 		u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->mop, u->kk, u->st,
-		u->jc, u->jad << 2, u->jh, u->jl,
+		u->sub, u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 		buf);
 }
@@ -697,6 +698,13 @@ int instr_exec(wang_sys_t *sys) {
 	int rc = 0;
 	static uint16_t key = 0;
 
+	if (u->brkpt) {
+		// 'u' points into ucode[], so updates are stored there...
+		u->brkpt = 0; // one-shot breakpoint turned off...
+		sys->run = 0;
+		return 0;
+	}
+
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
 	//
@@ -719,7 +727,7 @@ int instr_exec(wang_sys_t *sys) {
 	int opf7 = (u->jl == 7);
 	if (opf7) {
 		next = sys->cpu.stk1 | 1;
-		if (u->jc) {
+		if (u->sub) {
 			sys->cpu.stk1 = sys->cpu.stk2;
 		} else {
 			sys->cpu.stk1 = sys->cpu.stk2; // bugfix?
@@ -897,7 +905,7 @@ int instr_exec(wang_sys_t *sys) {
 
 	// This is done "late" to ensure we use most recent flags for I and Z
 	if (!opf7) {
-		if (u->jc) {
+		if (u->sub) {
 			sys->cpu.stk2 = sys->cpu.stk1;
 			sys->cpu.stk1 = sys->cpu.sys.pc;
 		}

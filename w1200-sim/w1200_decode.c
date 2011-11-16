@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.7 2011/11/15 22:16:49 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.8 2011/11/16 21:49:15 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -416,6 +416,13 @@ int instr_exec(wang_sys_t *sys) {
 	w1200_ucode_t *u = (w1200_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
+
+	if (u->brkpt) {
+		// 'u' points into ucode[], so updates are stored there...
+		u->brkpt = 0; // one-shot breakpoint turned off...
+		sys->run = 0;
+		return 0;
+	}
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1

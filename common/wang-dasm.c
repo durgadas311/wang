@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ident "$Id: wang-dasm.c,v 1.2 2011/11/15 18:09:21 drmiller Exp $"
+#ident "$Id: wang-dasm.c,v 1.3 2011/11/16 21:49:15 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 
@@ -70,23 +70,13 @@ int main(int argc, char **argv) {
 		int h = 2, l = 2;
 		int a,b;
 		uint64_t *m = ucode + x;
-#if defined(__wang600__)
-		w600_ucode_t *u = (w600_ucode_t *)(m);
-		if (u->jl == 7) continue; // return... no address to count
-		if (u->jc) {	// call, implies there will be a return...
-			if (++calls[x|1] == 0) calls[x|1] = 255;
-		}
-#endif // __wang600__
-#if defined(__wang1200__)
-		w1200_ucode_t *u = (w1200_ucode_t *)(m);
+		wang_ucode_t *u = (wang_ucode_t *)(m);
+#if defined(__wang600__) || defined(__wang1200__)
 		if (u->jl == 7) continue; // return... no address to count
 		if (u->sub) {	// call, implies there will be a return...
 			if (++calls[x|1] == 0) calls[x|1] = 255;
 		}
-#endif // __wang1200__
-#ifdef __wang700__
-		w700_ucode_t *u = (w700_ucode_t *)(m);
-#endif // __wang700__
+#endif // __wang600__ || __wang1200__
 		uint16_t t = u->jad << 2;
 		if (u->jl < 2) {
 			t |= u->jl;
@@ -109,9 +99,8 @@ int main(int argc, char **argv) {
 		uint64_t *m = ucode + x;
 		diwang(buf, m);
 
-#ifdef __wang600__
 #ifdef TRACE_RAW_UCODE
-		w600_ucode_t *u = (w600_ucode_t *)(m);
+		wang_ucode_t *u = (wang_ucode_t *)(m);
 #endif // TRACE_RAW_UCODE
 		printf("%03x: "
 #ifdef CALL_COUNT
@@ -125,57 +114,17 @@ int main(int argc, char **argv) {
 			calls[x],
 #endif
 #ifdef TRACE_RAW_UCODE
-			u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->mop, u->kk, u->st,
-			u->jc, u->jad << 2, u->jh, u->jl,
-#endif // TRACE_RAW_UCODE
-			buf);
-#endif // __wang600__
-
-#ifdef __wang1200__
-#ifdef TRACE_RAW_UCODE
-		w1200_ucode_t *u = (w1200_ucode_t *)(m);
-#endif // TRACE_RAW_UCODE
-		printf("%03x: "
-#ifdef CALL_COUNT
-			"(%d) "
-#endif
-#ifdef TRACE_RAW_UCODE
-			"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
-#endif // TRACE_RAW_UCODE
-			"%s\n", x,
-#ifdef CALL_COUNT
-			calls[x],
-#endif
-#ifdef TRACE_RAW_UCODE
+#if defined(__wang600__) || defined(__wang1200__)
 			u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->mop, u->kk, u->st,
 			u->sub, u->jad << 2, u->jh, u->jl,
-#endif // TRACE_RAW_UCODE
-			buf);
-#endif // __wang1200__
-
+#endif // __wang600__ || __wang1200__
 #ifdef __wang700__
-#ifdef TRACE_RAW_UCODE
-		w700_ucode_t *u = (w700_ucode_t *)(m);
-#endif // TRACE_RAW_UCODE
-		printf("%03x: "
-#ifdef CALL_COUNT
-			"(%d) "
-#endif
-#ifdef TRACE_RAW_UCODE
-			"[%x%x%x%x%x%x%x%x%x%x%03x%x%x] "
-#endif // TRACE_RAW_UCODE
-			"%s\n", x,
-#ifdef CALL_COUNT
-			calls[x],
-#endif
-#ifdef TRACE_RAW_UCODE
 			u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->bd,
 			u->mop, u->kk, u->st,
 			u->jad << 2, u->jh, u->jl,
+#endif // __wang700__
 #endif // TRACE_RAW_UCODE
 			buf);
-#endif // __wang700__
-
 	}
 	return 0;
 }
