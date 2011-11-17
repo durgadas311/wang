@@ -1,9 +1,10 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.7 2011/11/16 23:09:39 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.8 2011/11/17 01:54:22 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
+td.sym {width: 40; height: 40; text-align: center; }
 </STYLE>
 </HEAD>
 <BODY>
@@ -640,7 +641,7 @@ as follows (layout for Solid State ROM).
 
 <P>
 <TABLE BORDER>
-<TR><TH COLSPAN=17>Print Character Codes</TH></TR>
+<TR><TH COLSPAN=17>Print (Output) Character Codes</TH></TR>
 <TR><TH><SUB>KA</SUB>\<SUP>KB</SUP></TH>
 <TH>00</TH>
 <TH>01</TH>
@@ -807,7 +808,7 @@ as follows (layout for Solid State ROM).
 
 <P>
 <TABLE BORDER>
-<TR><TH COLSPAN=17>Keyboard Character Codes</TH></TR>
+<TR><TH COLSPAN=17>Keyboard (Input) Character Codes</TH></TR>
 <TR><TH><SUB>KA</SUB>\<SUP>KB</SUP></TH>
 <TH>00</TH>
 <TH>01</TH>
@@ -829,16 +830,16 @@ as follows (layout for Solid State ROM).
 <TR><TH>00</TH>
 <TD CLASS="sym">- _</TD>
 <TD CLASS="sym">y Y</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE sp</TD>
 <TD CLASS="sym">sp</TD>
 <TD CLASS="sym">q Q</TD>
 <TD CLASS="sym">p P</TD>
 <TD CLASS="sym">= +</TD>
 <TD CLASS="sym">j J</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE -</TD>
 <TD CLASS="sym">/ ?</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE /</TD>
+<TD CLASS="sym">CODE g</TD>
 <TD CLASS="sym">, ,</TD>
 <TD CLASS="sym">; :</TD>
 <TD CLASS="sym">f F</TD>
@@ -847,16 +848,16 @@ as follows (layout for Solid State ROM).
 <TR><TH>01</TH>
 <TD CLASS="sym">w W</TD>
 <TD CLASS="sym">s S</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE bksp</TD>
 <TD CLASS="sym">bksp</TD>
 <TD CLASS="sym">i I</TD>
 <TD CLASS="sym">' "</TD>
 <TD CLASS="sym">. .</TD>
 <TD CLASS="sym">&#189; &#188;</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE w</TD>
 <TD CLASS="sym">o O</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE o</TD>
+<TD CLASS="sym">CODE m</TD>
 <TD CLASS="sym">a A</TD>
 <TD CLASS="sym">r R</TD>
 <TD CLASS="sym">v V</TD>
@@ -865,16 +866,16 @@ as follows (layout for Solid State ROM).
 <TR><TH>02</TH>
 <TD CLASS="sym">b B</TD>
 <TD CLASS="sym">h H</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE tab</TD>
 <TD CLASS="sym">tab</TD>
 <TD CLASS="sym">k K</TD>
 <TD CLASS="sym">e E</TD>
 <TD CLASS="sym">n N</TD>
 <TD CLASS="sym">t T</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE b</TD>
 <TD CLASS="sym">1 !</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE 1</TD>
+<TD CLASS="sym">CODE x</TD>
 <TD CLASS="sym">c C</TD>
 <TD CLASS="sym">d D</TD>
 <TD CLASS="sym">u U</TD>
@@ -883,16 +884,16 @@ as follows (layout for Solid State ROM).
 <TR><TH>03</TH>
 <TD CLASS="sym">9 (</TD>
 <TD CLASS="sym">0 )</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE cr/lf</TD>
 <TD CLASS="sym">cr/lf</TD>
 <TD CLASS="sym">6 &#162;</TD>
 <TD CLASS="sym">5 %</TD>
 <TD CLASS="sym">2 @</TD>
 <TD CLASS="sym">z Z</TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE 9</TD>
 <TD CLASS="sym">4 $</TD>
-<TD CLASS="sym"></TD>
-<TD CLASS="sym"></TD>
+<TD CLASS="sym">CODE 4</TD>
+<TD CLASS="sym">CODE l</TD>
 <TD CLASS="sym">8 *</TD>
 <TD CLASS="sym">7 &amp;</TD>
 <TD CLASS="sym">3 #</TD>
