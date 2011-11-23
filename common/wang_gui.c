@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.11 2011/11/16 15:45:30 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.12 2011/11/23 17:12:27 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -236,7 +236,6 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 }
 
 static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
-	int rc;
 	if (kc == NULL) {	// ACK
 		if ((b & 0x0f00) != 0) return; // don't ACK ACK's
 		b = (b & 0xf0ff) | 0x0100;
@@ -270,7 +269,8 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		// TBD
 		return;
 	}
-#ifdef WANG_HAS_ROM
+#ifdef WANG_ROM_SIZE
+	int rc;
 	if ((b & 0xf000) == 0x8000) { // ROM download
 		int x = 0x0fff >> 1;
 		b = (b & 0xf0ff) | 0x0100; // ACK
@@ -294,7 +294,7 @@ static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
 		} while ((b & 0xff00) == 0x8000);
 		return;
 	}
-#endif // WANG_HAS_ROM
+#endif // WANG_ROM_SIZE
 #endif // ! __wang1200__
 	// uh, this is embarassing...
 	// presumably this is tape data, we've lost it and can't continue?

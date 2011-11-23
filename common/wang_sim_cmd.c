@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.4 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.5 2011/11/23 17:12:27 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,7 +64,6 @@ static int _disas(wang_sys_t *sys, char *line) {
 }
 
 static int _break(wang_sys_t *sys, char *line) {
-	char buf[1024];
 	char *s;
 	uint16_t adr;
 	uint16_t max = sizeof(sys->ucode) / sizeof(sys->ucode[0]);

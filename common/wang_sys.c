@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.12 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.13 2011/11/23 17:12:27 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -248,6 +248,7 @@ static void sysfault(wang_sys_t *sys, const char *str) {
 }
 
 void sys_init(wang_sys_t *sys) {
+	extern void WANG_SYS_INIT(wang_sys_t *sys);
 	memset(sys, 0, sizeof(*sys));
 	sys->fault = sysfault;
 	sys->keyboard = syskeyboard;

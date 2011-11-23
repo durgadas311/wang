@@ -1,12 +1,13 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.3 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.4 2011/11/23 17:12:27 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "wang-sim.h"
 
@@ -41,11 +42,15 @@ static void usage() {
 		"\t-i\tInteractive mode enable\n"
 		"\t-p file\tLoad initial contents of Program Space (conflicts with -m)\n"
 		"\t-m file\tLoad initial contents of RAM. 2048 bytes, Lo nibble in [0]\n"
+#ifdef WANG_ROM_SIZE
 		"\t-r file\tLoad initial contents of ROM. 2048 bytes, Lo nibble in [0]\n"
 		"\t\tNOTE: RAM/ROM contents are reverse order for program steps.\n"
 		"\t\tROM addr FFF is program step 0000 (RAM F6F is step 0000)\n"
+#else // !WANG_ROM_SIZE
+		"\t\tNOTE: RAM contents are reverse order for program steps.\n"
+#endif // !WANG_ROM_SIZE
 		"\t-t file\tTurn on TRACE to file, '-' for stderr (huge file alert!)\n"
-		"\t-p file\tUse microcode image in 'file', default '%s'\n"
+		"\t-u file\tUse microcode image in 'file', default '%s'\n"
 		"\t-l addr\tLoad microcode into 'addr', default 000\n"
 		"\t-e addr\tStart running at 'addr', default 000\n"
 		,argv0, WANG_DEF_MODEL, WANG_SIM, WANG_DEF_ROM);

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w700_decode.c,v 1.20 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: w700_decode.c,v 1.21 2011/11/23 17:12:27 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -218,6 +218,12 @@ static uint8_t odd_parity[16] = {
 [0xf] = 1,
 };
 
+static uint8_t even_parity8(uint8_t byte) {
+	uint8_t p = odd_parity[byte & 0x0f];
+	p ^= odd_parity[(byte >> 4) & 0x0f];
+	return p;
+}
+
 static void tape_write(wang_sys_t *sys, int dat) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
@@ -226,16 +232,18 @@ static void tape_write(wang_sys_t *sys, int dat) {
 
 	last <<= 1;
 	last |= dat;
-	sigc ^= 1;
-	if (sigc) return;
+	++sigc;
+	if (sigc & 0x03) return;
 	uint8_t bit = 0; 
-	uint8_t h = (last & 0x03);
-	if (h == 0x02 || h == 0x01) bit = 1;
-	if (++bitc == 5) {
-		(void)sys->tape(sys, 1, data);
-		if (odd_parity[data] != bit) {
+	uint8_t h = (last & 0x0f);
+	if (h == 0x05) bit = 1;
+	if (++bitc == 9) {
+		if (even_parity8(data) != bit) {
 			fprintf(stderr, "parity error in tape write %x %d [%02x]\n", data, bit, last);
 		}
+		// interface is nibbles, so kludge it
+		(void)sys->tape(sys, 1, (data >> 4) & 0x0f);
+		(void)sys->tape(sys, 1, data & 0x0f);
 		data = 0;
 		bitc = 0;
 	} else {
@@ -246,7 +254,7 @@ static void tape_write(wang_sys_t *sys, int dat) {
 
 static int tape_read(wang_sys_t *sys) {
 	static uint8_t last = 0;
-	static uint8_t data = 0;
+	static uint16_t data = 0;	// need space for 9 bits...
 	static int bitc = 0;
 	static int sigc = 0;
 	static uint64_t repc = 0;
@@ -292,7 +300,7 @@ sigs:
 bits:
 		--bitc;
 		data <<= 1;
-		if (data & 0x20) {
+		if (data & 0x200) {
 			last = 0x05;	// lsb first out...
 		} else {
 			last = 0x01;	// lsb first out...
@@ -307,8 +315,17 @@ bits:
 		bit = 0;
 		goto reps;
 	}
-	data = (nib << 1) | odd_parity[nib];
-	bitc = 5;
+	// need full byte for parity...
+	data = nib << 4;
+	nib = sys->tape(sys, 0, 0);
+	if (nib == 0xff) { // EOF
+		repc = sys->cpu.sys.cycles + 700;	// expects at least 650?
+		bit = 0;
+		goto reps;
+	}
+	data |= nib;
+	data = (data << 1) | even_parity8(data);
+	bitc = 9;
 	goto bits;
 }
 
@@ -325,7 +342,7 @@ static void tape_off(wang_sys_t *sys) {
 
 static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.gioa << 4) | sys->cpu.giob;
-fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
+if (sys->cpu.iob > 1) fprintf(stderr, "DEV> %02x %x\n", c, sys->cpu.iob);
 	sys->dev(sys, c, sys->cpu.iob);
 }
 
