@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $
+// $Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -126,7 +126,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -336,7 +336,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -418,7 +418,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -545,7 +545,7 @@ if (n != 32) System.err.println("too little? "+n);
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1077,7 +1077,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1216,6 +1216,7 @@ class Wang700_Model711
 	}
 	private JFrame _frame;
 	private PlotTextArea _text;
+	private PlotListArea _list;
 	private JScrollPane _scroll;
 
 	private int _xoff, _yoff, _eop;
@@ -1249,6 +1250,10 @@ class Wang700_Model711
 		_frame.setLayout(new FlowLayout());
 		_text = new PlotTextArea();
 		_text.setFont(new Font("Monospaced", Font.PLAIN, 10));
+
+		_list = new PlotListArea();
+		_list.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		_list.setLineWrap(false);
 
 		// setting this messes up horiz scrollbar...
 		//_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
@@ -1375,27 +1380,27 @@ class Wang700_Model711
 			}
 			return;
 		}
-// This requires a different print() routine...
-//		if (m.getMnemonic() == KeyEvent.VK_L) {
-//			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//			aset.add(OrientationRequested.LANDSCAPE);
-//			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
-//				(float)0.25, (float)0.25, (float)8.0, (float)10.5, MediaPrintableArea.INCH));
-//			PrinterJob pj = PrinterJob.getPrinterJob();
-//			pj.setPrintable(_text);
-//			boolean print = pj.printDialog(aset);
-//			if (print) {
-//				java.util.Date dt = new java.util.Date();
-//				_footer = new String("Wang 700 Program Listing - " +
-//					w700_fe._timestamp.format(dt));
-//				try {
-//					pj.print(aset);
-//				} catch (PrinterException ee) {
-//					System.out.println("print failed");
-//				}
-//			}
-//			return;
-//		}
+		if (m.getMnemonic() == KeyEvent.VK_L) {
+			_list.setText(_text.getText());
+			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+			aset.add(OrientationRequested.LANDSCAPE);
+			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
+				(float)0.25, (float)0.25, (float)8.0, (float)10.5, MediaPrintableArea.INCH));
+			PrinterJob pj = PrinterJob.getPrinterJob();
+			pj.setPrintable(_list);
+			boolean print = pj.printDialog(aset);
+			if (print) {
+				java.util.Date dt = new java.util.Date();
+				_footer = new String("Wang 700 Program Listing - " +
+					w700_fe._timestamp.format(dt));
+				try {
+					pj.print(aset);
+				} catch (PrinterException ee) {
+					System.out.println("print failed");
+				}
+			}
+			return;
+		}
 
 		System.err.println("711 menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -1421,6 +1426,75 @@ class Wang700_Model711
 	private boolean _plot;
 	private int _x, _y;
 	private int _dx, _dy;
+
+	class PlotListArea extends JTextArea
+			implements Printable {
+		static final long serialVersionUID = 311857692040L;
+
+		public PlotListArea() {
+			super();
+		}
+
+		public int print(Graphics g, PageFormat pf, int pageIndex) {
+			double x0 = pf.getImageableX();
+			double y0 = pf.getImageableY();
+			double w0 = pf.getImageableWidth();
+			double h0 = pf.getImageableHeight();
+			int pg = 0;
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.translate(x0, y0);
+			g2d.setFont(_text.getFont());
+
+			int did = 0;
+			int y = 0;
+			int x = 0;
+			int off = 0;
+			String s;
+			g2d.setColor(Color.white);
+			g2d.fillRect(0, 0, (int)w0, (int)h0);
+			g2d.setColor(Color.black);
+			int l = g2d.getFont().getSize();
+			while (pg <= pageIndex) {
+				if (off != 0) {
+					off += 1; // skip nl, we hope...
+				}
+				try {
+					s = getText(off, 15);
+				} catch(javax.swing.text.BadLocationException ee) {
+//System.err.println("BadLocationException "+off);
+					break;
+				}
+				if (!s.startsWith("\n")) { // not blank line...
+					if (pg == pageIndex) {
+						++did;
+						g2d.drawString(s, y * 188, x * l + (int)y0 + 36);
+//} else {
+//System.err.println("not my page? " + pg + " ? " + pageIndex);
+					}
+					off += 15;
+				}
+				++x;
+				if (x >= 40) {
+					x = 0;
+					++y;
+					if (y >= 4) {
+						y = 0;
+						++pg;
+					}
+				}
+			}
+			if (did > 0) {
+				pg = pageIndex + 1; // 1-based
+				s = new String("Page " + pg +
+					" - " + _footer);
+				g2d.drawString(s, 0, (41 + 1) * l + (int)y0 + 36);
+				return Printable.PAGE_EXISTS;
+			} else {
+//System.err.println("NO_SUCH_PAGE "+pg);
+				return Printable.NO_SUCH_PAGE;
+			}
+		}
+	}
 
 	class PlotTextArea extends JTextArea
 			implements Printable {
@@ -1692,7 +1766,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -1892,7 +1966,7 @@ class Wang700_Display extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2316,7 +2390,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2478,7 +2552,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -2703,7 +2777,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -2832,7 +2906,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.26 2011/11/23 17:12:27 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.27 2011/11/23 21:26:17 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
