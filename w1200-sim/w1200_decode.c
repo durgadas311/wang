@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.8 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.9 2011/11/24 02:34:17 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -114,6 +114,8 @@ static void ucode_override(wang_sys_t *sys) {
 	}
 }
 
+static int _indicators = 0;
+
 static int special_key(wang_sys_t *sys, uint16_t b) {
 	switch(b >> 8) {
 	case 2: // mode0 switches changed
@@ -136,6 +138,7 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 			return -1;
 			break;
 		}
+		_indicators = 0;
 		sys->display(sys, -2);
 		break;
 	case 5: // mode2
@@ -335,8 +338,16 @@ static void tape_on(wang_sys_t *sys, int right, int fr, int hi, int mv, int rc) 
 fprintf(stderr, "tape on %s fr=%d hi=%d mv=%d %s\n",
 	right ? "R" : "L",
 	fr, hi, mv,
-	rc ? "W" : "R");
+	rc ? "wr" : "rd");
 #endif
+	if (right) {
+		sys->cpu.rhs = hi;
+		sys->cpu.ind.ind.tmr = mv;
+	} else {
+		sys->cpu.lhs = hi;
+		sys->cpu.ind.ind.tml = mv;
+	}
+	++_indicators;
 }
 
 static void tape_off(wang_sys_t *sys, int right, int rc) {
@@ -345,34 +356,42 @@ static void tape_off(wang_sys_t *sys, int right, int rc) {
 #else
 fprintf(stderr, "tape off %s %s\n",
 	right ? "R" : "L",
-	rc ? "W" : "R");
+	rc ? "wr" : "rd");
 #endif
+	if (right) {
+		sys->cpu.rhs = 0;
+		sys->cpu.ind.ind.tmr = 0;
+	} else {
+		sys->cpu.lhs = 0;
+		sys->cpu.ind.ind.tml = 0;
+	}
+	++_indicators;
 }
 
 static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.to << 4) | sys->cpu.ro;
-//fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
+fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
 	sys->dev(sys, c, 1);
 }
 
-static void rd_ram_i(wang_sys_t *sys, uint8_t am, uint8_t al) {
-	uint16_t adr = (am << 4) | al;
+static void rd_ram_i(wang_sys_t *sys) {
+	uint16_t adr = (sys->cpu.m << 4) | sys->cpu.n;
 	adr &= ram_mask;
 	uint8_t b = sys->ram[adr];
 	sys->cpu.ca = (b >> 4) & 0x0f;
 	sys->cpu.cb = b & 0x0f;
 }
 
-static void wr_ram_i(wang_sys_t *sys, uint8_t am, uint8_t al) {
-	uint16_t adr = (am << 4) | al;
+static void wr_ram_i(wang_sys_t *sys) {
+	uint16_t adr = (sys->cpu.m << 4) | sys->cpu.n;
 	adr &= ram_mask;
-	uint8_t a = sys->cpu.ca;
-	uint8_t b = sys->cpu.cb;
+	uint8_t b = sys->cpu.cb | (sys->cpu.ca << 4);
 	uint8_t d = sys->ram[adr];
-	sys->ram[adr] = b | (a << 4);
+	sys->ram[adr] = b;
+//fprintf(stderr, "[%03x] %02x -> %02x\n", adr, d, b);
 	if ((adr & 0xff0) == trc_adr) {
 		if (__systrc[adr & 0x00f]) {
-			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, b | (a << 4));
+			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, b);
 		}
 	}
 }
@@ -410,6 +429,9 @@ static void instr_trace(wang_sys_t *sys) {
 		u->sub, u->jad << 2, u->jh, u->jl,
 #endif // TRACE_RAW_UCODE
 		buf);
+}
+
+static inline void display_check(wang_sys_t *sys) {
 }
 
 int instr_exec(wang_sys_t *sys) {
@@ -457,8 +479,24 @@ int instr_exec(wang_sys_t *sys) {
 		next = u->jad << 2;
 	}
 
-	sys->cpu.m = sys->cpu.u;
-	sys->cpu.n = sys->cpu.v;
+	switch(u->mop) {
+	case 1:
+	case 4:
+	default:
+		sys->cpu.m = sys->cpu.u;
+		sys->cpu.n = sys->cpu.v;
+		break;
+	case 2:
+	case 5:
+		sys->cpu.m = br_k;
+		sys->cpu.n = sys->cpu.v;
+		break;
+	case 3:
+	case 6:
+		sys->cpu.m = 15;
+		sys->cpu.n = br_k;
+		break;
+	}
 
 	uint8_t g = 0, h = 0;
 	switch(u->ai) {
@@ -582,12 +620,12 @@ int instr_exec(wang_sys_t *sys) {
 	}
 
 	switch(u->mop) {
-	case 1:	wr_ram_i(sys, sys->cpu.m, sys->cpu.n); break;
-	case 2:	wr_ram_i(sys, br_k, sys->cpu.n); break;
-	case 3:	wr_ram_i(sys, 15, br_k); break;
-	case 4:	rd_ram_i(sys, sys->cpu.m, sys->cpu.n); break;
-	case 5:	rd_ram_i(sys, br_k, sys->cpu.n); break;
-	case 6:	rd_ram_i(sys, 15, br_k); break;
+	case 1:	wr_ram_i(sys); break;
+	case 2:	wr_ram_i(sys); break;
+	case 3:	wr_ram_i(sys); break;
+	case 4:	rd_ram_i(sys); break;
+	case 5:	rd_ram_i(sys); break;
+	case 6:	rd_ram_i(sys); break;
 	case 7:
 		if (br_k & 1) {
 			sys->cpu.ind.ind.csl = (u->bi & 1);
@@ -601,7 +639,7 @@ int instr_exec(wang_sys_t *sys) {
 		if (br_k & 8) {
 			sys->cpu.ind.ind.nan = (u->bi & 1);
 		}
-		sys->display(sys, -2);
+		++_indicators;
 		break;
 	case 8:
 		if (br_k & 2) {
@@ -637,7 +675,9 @@ int instr_exec(wang_sys_t *sys) {
 		tape_write(sys);
 		break;
 	case 12:
-		sys->cpu.kb = 0x02; // RHS : LHS : R/B : L/S
+		sys->cpu.kb = (sys->cpu.rhs << 3) |
+			(sys->cpu.lhs << 2) |
+			0x02; // RHS : LHS : R/B : L/S
 				// Lock Shift? Ready/Busy? Left Head Select? Right... ?
 		break;
 	case 13:
@@ -687,12 +727,16 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 				sys->cpu.kbd = 1;
 				sys->cpu.ka = (key >> 4) & 0x0f;
 				sys->cpu.kb = key & 0x0f;
-				sys->keyboard(sys, &key, 1);
+				sys->keyboard(sys, &key, 1); // ack only, maybe
 			}
 			next |= (sys->cpu.kbd << 1);
 			if (sys->cpu.kbd) {
 				sys->cpu.kbd = 0;
 				sys->display(sys, 0);
+			}
+			if (_indicators) {
+				_indicators = 0;
+				sys->display(sys, -2);
 			}
 			break;
 		case 7: next |= (sys->cpu.zo << 1); break;
@@ -717,7 +761,9 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 	}
 #endif // TRACE
 
-	sys->keyboard(sys, &key, 0);
+	display_check(sys);	// this might sleep until UI event...
+
+	sys->keyboard(sys, &key, 0); // this actually gets a key...
 
 	if (sys->cpu.sys.jam) {
 		sys->cpu.sys.next = sys->cpu.sys.jam & 0x0fff; 
@@ -725,7 +771,7 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 		if (sys->cpu.sys.next == 0) { // RESET
 			sys->cpu.ind.ind.skl = 0;
 			sys->cpu.ind.ind.shl = 0;
-			sys->display(sys, -2);
+			++_indicators;
 		}
 	}
 

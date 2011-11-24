@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.5 2011/11/23 17:12:27 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.6 2011/11/24 02:34:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -139,8 +139,8 @@ static int _exam(wang_sys_t *sys, char *line) {
 			printf(" no memory\n");
 			break;
 		}
-		printf("%03x:", adr << 1);
-		for (y = 0; x + y < len && y < 16; y += 2) {
+		printf("%03x:", adr);
+		for (y = 0; x + y < len && y < 16; ++y) {
 			uint8_t b = sys->ram[adr];
 			printf(" %02x", b);
 			++adr;
@@ -150,24 +150,24 @@ static int _exam(wang_sys_t *sys, char *line) {
 	}
 #endif // __wang1200__
 #ifdef __wang700__
-	len = (len + 1) & ~1;
-	int x, y, i;
+	int x, y;
 	for (x = 0; x < len;) {
 		if (adr >= sizeof(sys->ram)) {
 			printf(" no memory\n");
 			break;
 		}
-		for (i = 0; i < 2; ++i) {
-			if (!i) printf("%03x:", adr);
-			else    printf("    ");
-			for (y = 0; x + y < len && y < 16; ++y) {
-				uint8_t b = sys->ram[adr + y];
-				if (!i) b = (b >> 4);
-				else    b = (b & 0x0f);
-				printf(" %01x", b);
-			}
-			printf("\n");
+		printf("%03x:", adr);
+		for (y = 0; x + y < len && y < 16; ++y) {
+			uint8_t b = (sys->ram[adr + y] >> 4) & 0x0f;
+			printf(" %01x", b);
 		}
+		printf("\n");
+		printf("    ");
+		for (y = 0; x + y < len && y < 16; ++y) {
+			uint8_t b = sys->ram[adr + y] & 0x0f;
+			printf(" %01x", b);
+		}
+		printf("\n");
 		adr += y;
 		x += y;
 	}

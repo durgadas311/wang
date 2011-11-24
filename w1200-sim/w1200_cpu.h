@@ -2,7 +2,7 @@
 #ifndef __w1200_cpu_h__
 #define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.7 2011/11/15 22:16:49 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.8 2011/11/24 02:34:17 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -52,6 +52,8 @@ typedef struct {
 	uint8_t d3;	// mode2 switch inputs 3
 	uint8_t din0;
 	uint8_t din1;
+	uint8_t lhs;	// tape head select, left
+	uint8_t rhs;	// tape head select, right
 
 	uint16_t stk1;
 	uint16_t stk2;
