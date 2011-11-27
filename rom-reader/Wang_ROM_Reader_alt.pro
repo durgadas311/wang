@@ -1,5 +1,5 @@
-update=27/11/2011-21:03:27
-last_client=kicad
+update=27/11/2011-21:08:26
+last_client=eeschema
 [eeschema]
 version=1
 LibDir=
@@ -62,7 +62,3 @@ LibName25=cypress
 LibName26=siliconi
 LibName27=contrib
 LibName28=valves
-[general]
-version=1
-RootSch=
-BoardNm=
