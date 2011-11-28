@@ -3,7 +3,7 @@
 #ifndef __w1200_sys_h__
 #define __w1200_sys_h__
 
-#ident "$Id: w1200_sys.h,v 1.4 2011/11/14 23:18:32 drmiller Exp $"
+#ident "$Id: w1200_sys.h,v 1.5 2011/11/28 01:29:43 drmiller Exp $"
 
 #include "w1200_ucode.h"
 #include "w1200_cpu.h"
@@ -16,13 +16,13 @@ typedef w1200_cpu_t wang_cpu_t;
 #define WANG_HAS_DEV
 #define WANG_SYS_INIT	w1200_init
 
-#define SYS_MODEL1200	0
 #define SYS_MODEL1220	1
 #define SYS_MODEL1222	2
+#define SYS_MODEL1222I	3
 
 #define WANG_SERIES	1200
 #define WANG_SIM	"w1200-sim"
-#define WANG_DEF_MODEL	"1200"
+#define WANG_DEF_MODEL	"1220"
 #define WANG_DEF_ROM	"wang1200.rom"
 #define WANG_GUI_NAME	"w1200_fe"
 

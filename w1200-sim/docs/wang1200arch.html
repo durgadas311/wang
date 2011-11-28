@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.10 2011/11/25 19:01:56 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.11 2011/11/28 01:29:43 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -609,11 +609,34 @@ as follows (layout for Solid State ROM).
 <TR>	<TD>x101</TD><TD COLSPAN=2>n/a</TD></TR>
 <TR>	<TD>x110</TD><TD COLSPAN=2>n/a</TD></TR>
 <TR>	<TD>x111</TD><TD COLSPAN=2>n/a</TD></TR>
+<TR><TD ROWSPAN=1>1011</TD>
+	<TD COLSPAN=3>	
+			D<SUB>IN1</SUB>=KA&lt;0&gt;<BR>
+			D<SUB>IN0</SUB>=KB&lt;0&gt;<BR>
+	</TD></TR>
+<TR><TD ROWSPAN=1>1101</TD>
+	<TD COLSPAN=3>	RIGHT=KK&lt;0&gt;<BR>
+			RC=BI&lt;0&gt;<BR>
+			D<SUB>IN1</SUB>=0<BR>
+			D<SUB>IN0</SUB>=0<BR>
+			HI[RIGHT]=KK&lt;2&gt;<BR>
+			TM=1<BR>
+			H+L=KK&lt;3&gt;<BR>
+			FWD=KK&lt;1&gt;<BR>
+	</TD></TR>
+<TR><TD ROWSPAN=1>1110</TD>
+	<TD COLSPAN=3>	RIGHT=KK&lt;0&gt;<BR>
+			RC=BI&lt;0&gt;<BR>
+			HI[RIGHT]=KK&lt;2&gt;<BR>
+			TM=0<BR>
+			H+L=KK&lt;3&gt;<BR>
+			FWD=KK&lt;1&gt;<BR>
+	</TD></TR>
 <TR><TD ROWSPAN=8>1111</TD>
-	<TD>x000</TD><TD COLSPAN=2>UART MR</TD></TR>
+	<TD>x000</TD><TD COLSPAN=2>UART RESET</TD></TR>
 <TR>	<TD>x001</TD><TD COLSPAN=2>TBRL</TD></TR>
 <TR>	<TD>x010</TD><TD COLSPAN=2>BREAK</TD></TR>
-<TR>	<TD>x011</TD><TD COLSPAN=2>UDA,UDB=KA,KB</TD></TR>
+<TR>	<TD>x011</TD><TD COLSPAN=2>UDA,UDB=KA,KB (Zbus)</TD></TR>
 <TR>	<TD>x100</TD><TD COLSPAN=2>DTR=0</TD></TR>
 <TR>	<TD>x101</TD><TD COLSPAN=2>RTS=0</TD></TR>
 <TR>	<TD>x110</TD><TD COLSPAN=2>RTS=1</TD></TR>

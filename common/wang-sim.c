@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.4 2011/11/23 17:12:27 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.5 2011/11/28 01:29:43 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -168,6 +168,18 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 #endif // __wang700__
+#ifdef __wang1200__
+	if (model == NULL) model = WANG_DEF_MODEL;
+	char *s = model;
+	if (strcmp(s, "1220") == 0) {
+		sys.ops |= (SYS_MODEL1220 << SYS_MODEL_SHIFT);
+	} else if (strcmp(s, "1222") == 0) {
+		sys.ops |= (SYS_MODEL1222 << SYS_MODEL_SHIFT);
+	} else {
+		fprintf(stderr, "unknown model \"%s\"\n", model);
+		exit(1);
+	}
+#endif // __wang1200__
 	sys_start(&sys);
 	if (load == (uint16_t)-1) {
 		load = 0x0000;

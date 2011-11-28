@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.9 2011/11/24 02:34:17 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.10 2011/11/28 01:29:43 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -79,20 +79,51 @@ static struct ucode_ovr_s ucode_ovr[] = {
 // 000 000 000 000 0 0 0000 0000 0000 1 101111111 001 000
 // AI=0 BI=0 ZO=0 AOP=0 AC=0 BC=0 MOP=0 KK=0 ST=0 SUB=1 JAD=5fc JH=1 JL=0 (5fe)
         { 0x3d0, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
         { 0x3d2, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
         { 0x3d4, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
         { 0x3d6, {
-[SYS_MODEL1200] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+        }},
+
+        { 0x052, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x423, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x42f, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x506, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x558, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x5ec, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x6ee, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x7fe, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x44f, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x33c, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+        }},
+        { 0x33d, {
+[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
         }},
 };
 #define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
