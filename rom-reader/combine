@@ -1,0 +1,9 @@
+#!/bin/bash
+# $Id: combine,v 1.1 2011/12/02 18:28:47 drmiller Exp $
+
+psfiles=(Wang_ROM_Reader.ps
+	Wang_ROM_Reader_2.ps
+	Wang_ROM_Reader_3.ps
+	Wang_ROM_Reader_4.ps)
+
+cat ${psfiles[*]} | ps2pdf - Wang_ROM_Reader.pdf
