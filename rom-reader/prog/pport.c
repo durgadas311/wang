@@ -1,4 +1,4 @@
-#ident "$Id: pport.c,v 1.1 2011/12/03 15:18:44 drmiller Exp $"
+#ident "$Id: pport.c,v 1.2 2011/12/03 20:31:35 drmiller Exp $"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -11,14 +11,14 @@
 
 static int dev = -1;
 
-static int ppdev_setup(char *dev) {
+int ppdev_setup(char *path) {
 	int x, ppfd;
 	int ppmode;
 	uint8_t pps;
 
-	ppfd = open(dev, O_RDWR);
+	ppfd = open(path, O_RDWR);
 	if (ppfd < 0) {
-		perror(dev);
+		perror(path);
 		return -1;
 	}
 	x = ioctl(ppfd, PPCLAIM, 0);
@@ -65,7 +65,7 @@ int send_byte(uint8_t byte) {
 	int x;
 
 #if 0
-	x = ioctl(ssifd, PPRSTATUS, &pps);
+	x = ioctl(dev, PPRSTATUS, &pps);
 	if (x < 0) {
 		perror("PPRSTATUS");
 		return -1;
@@ -73,20 +73,20 @@ int send_byte(uint8_t byte) {
 	ret = ((pps & SSI_ST_DO) != 0);
 #endif
 	pps = byte;
-	x = ioctl(ssifd, PPWDATA, &pps);
+	x = ioctl(dev, PPWDATA, &pps);
 	if (x < 0) {
 		perror("PPWDATA");
 		return -1;
 	}
 #if 0
 	pps |= STROBE;
-	x = ioctl(ssifd, PPWDATA, &pps);
+	x = ioctl(dev, PPWDATA, &pps);
 	if (x < 0) {
 		perror("PPWDATA");
 		return -1;
 	}
 	pps &= ~STROBE;
-	x = ioctl(ssifd, PPWDATA, &pps);
+	x = ioctl(dev, PPWDATA, &pps);
 	if (x < 0) {
 		perror("PPWDATA");
 		return -1;
@@ -99,7 +99,7 @@ int recv_byte(uint8_t *byte) {
 	uint8_t pps;
 	int ret, x;
 
-	x = ioctl(ssifd, PPRDATA, &pps);
+	x = ioctl(dev, PPRDATA, &pps);
 	if (x < 0) {
 		perror("PPRDATA");
 		return -1;
