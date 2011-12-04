@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700bycode.html,v 1.4 2011/11/03 23:47:15 drmiller Exp $ -->
+<!-- $Id: wang700bycode.html,v 1.5 2011/12/04 03:18:04 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -329,9 +329,20 @@ td.tag {text-align: center;}
 * Two-step codes
 
 <P><TABLE BORDER>
+<TR><TH>DIRECT prefixes (incl. STORE/RECALL Y)</TH></TR>
+<TR><TD>The second step is a register number, aa&nbsp;bb,
+	where bb = 10..15 overlaps with aa+1&nbsp;00..05
+	(i.e. normal range for bb is 00..09).
+	Use of the "DIRECT + 100"
+	commands is required to access registers above 09&nbsp;09.
+	Any code may be used, however END&nbsp;PROG (05&nbsp;12) should be avoided.<BR>
+	</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
 <TR><TH>SEARCH and MARK prefixes</TH></TR>
 <TR><TD>The second step is a "label", used to implement goto and call.
-	Any code may be used.<BR>
+	Any code may be used, however END&nbsp;PROG should be avoided.<BR>
 	</TD></TR>
 </TABLE>
 
