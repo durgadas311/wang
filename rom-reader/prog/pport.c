@@ -1,4 +1,4 @@
-#ident "$Id: pport.c,v 1.2 2011/12/03 20:31:35 drmiller Exp $"
+#ident "$Id: pport.c,v 1.3 2011/12/04 03:06:35 drmiller Exp $"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -60,7 +60,7 @@ void ppdev_close() {
 		close(dev);
 }
 
-int send_byte(uint8_t byte) {
+int pport_send_byte(uint8_t byte) {
 	uint8_t pps;
 	int x;
 
@@ -95,7 +95,7 @@ int send_byte(uint8_t byte) {
 	return 0;
 }
 
-int recv_byte(uint8_t *byte) {
+int pport_recv_byte(uint8_t *byte) {
 	uint8_t pps;
 	int ret, x;
 

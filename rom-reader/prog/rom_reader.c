@@ -1,9 +1,9 @@
-#ident "$Id: rom_reader.c,v 1.1 2011/12/04 02:56:33 drmiller Exp $"
+#ident "$Id: rom_reader.c,v 1.2 2011/12/04 03:06:35 drmiller Exp $"
 
 #include "pport.h"
 
 int rom_cmd(uint8_t c, uint8_t d) {
-	return send_byte((c << 4) | (d & 0x0f));
+	return pport_send_byte((c << 4) | (d & 0x0f));
 }
 
 int rom_setaddr(uint16_t adr) {
@@ -45,7 +45,7 @@ int rom_read_700(uint16_t adr, uint64_t *rom) {
 		if (x < 0) return x;
 		x = rom_strobe();
 		if (x < 0) return x;
-		x = recv_byte(&byte);
+		x = pport_recv_byte(&byte);
 		if (x < 0) return x;
 		u = (u << 8) | byte;
 	}
