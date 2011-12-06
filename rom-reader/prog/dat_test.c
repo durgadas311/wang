@@ -11,7 +11,6 @@ int main(int argc, char **argv) {
 	while (1) {
 		++x;
 		//if ((x & 0x0ff) == 0) putchar('.');
-		//pport_send_byte((7 << 4) | (x & 0x01));
 		pport_send_byte(x & 0x0ff);
 	}
 	ppdev_close();
