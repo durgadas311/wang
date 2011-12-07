@@ -1,4 +1,4 @@
-#ident "$Id: pport.c,v 1.4 2011/12/07 00:11:50 drmiller Exp $"
+#ident "$Id: pport.c,v 1.5 2011/12/07 16:28:54 drmiller Exp $"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -21,14 +21,19 @@ int ppdev_setup(char *path) {
 		perror(path);
 		return -1;
 	}
+	x = ioctl(ppfd, PPEXCL, 0);
+	if (x < 0) {
+		perror("PPEXCL");
+		close(ppfd);
+		return -1;
+	}
 	x = ioctl(ppfd, PPCLAIM, 0);
 	if (x < 0) {
 		perror("PPCLAIM");
 		close(ppfd);
 		return -1;
 	}
-	//ppmode = IEEE1284_MODE_EPP;
-	ppmode = PARPORT_MODE_EPP;
+	ppmode = IEEE1284_MODE_EPP;
 	x = ioctl(ppfd, PPSETMODE, &ppmode);
 	if (x < 0) {
 		perror("PPSETMODE IEEE1284_MODE_EPP");
@@ -57,8 +62,14 @@ int ppdev_stat() {
 }
 
 void ppdev_close() {
-	if (dev >= 0)
+	int x;
+	if (dev >= 0) {
+		x = ioctl(dev, PPRELEASE, 0);
+		if (x < 0) {
+			perror("PPRELEASE");
+		}
 		close(dev);
+	}
 }
 
 int pport_send_byte(uint8_t byte) {

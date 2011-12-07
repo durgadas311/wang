@@ -1,4 +1,4 @@
-#ident "$Id: rom_reader.c,v 1.2 2011/12/04 03:06:35 drmiller Exp $"
+#ident "$Id: rom_reader.c,v 1.3 2011/12/07 16:28:54 drmiller Exp $"
 
 #include "pport.h"
 
@@ -31,6 +31,12 @@ int rom_strobe() {
 	return x;
 }
 
+int rom_rdlat(uint8_t *byte) {
+	int x;
+	x = pport_recv_byte(byte);
+	return x;
+}
+
 // always reads 44 bits, only 43 have microcode data
 int rom_read_700(uint16_t adr, uint64_t *rom) {
 	int x, y;
@@ -45,7 +51,7 @@ int rom_read_700(uint16_t adr, uint64_t *rom) {
 		if (x < 0) return x;
 		x = rom_strobe();
 		if (x < 0) return x;
-		x = pport_recv_byte(&byte);
+		x = rom_rdlat(&byte);
 		if (x < 0) return x;
 		u = (u << 8) | byte;
 	}

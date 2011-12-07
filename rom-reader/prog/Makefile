@@ -1,9 +1,13 @@
+TESTS = cpr_test dat_test
+
+ROMTESTS = loopback
+
 all:
 
-tests: cpr_test dat_test
+tests: $(TESTS) $(ROMTESTS)
 
-cpr_test: cpr_test.c pport.o
-	$(CC) $(CFLAGS) -o $@ cpr_test.c pport.o
+$(TESTS): %: %.c pport.o
+	$(CC) $(CFLAGS) -o $@ $^
 
-dat_test: dat_test.c pport.o
-	$(CC) $(CFLAGS) -o $@ dat_test.c pport.o
+$(ROMTESTS): %: %.c pport.o rom_reader.o
+	$(CC) $(CFLAGS) -o $@ $^
