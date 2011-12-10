@@ -13,6 +13,68 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
+Connection ~ 6700 4850
+Wire Wire Line
+	6700 5450 6700 2800
+Wire Wire Line
+	7300 5450 6700 5450
+Wire Wire Line
+	4600 6000 4200 6000
+Wire Wire Line
+	4200 6000 4200 5850
+Wire Wire Line
+	4200 5850 4000 5850
+Wire Notes Line
+	5550 7250 5600 7250
+Wire Notes Line
+	6550 7250 6250 7250
+Wire Notes Line
+	6250 7250 6250 7350
+Wire Notes Line
+	6550 6950 5750 6950
+Wire Notes Line
+	5750 6950 5750 7050
+Wire Notes Line
+	5750 7050 5700 7050
+Wire Notes Line
+	5700 7050 5700 6950
+Wire Notes Line
+	5700 6950 5550 6950
+Wire Bus Line
+	9500 7500 9500 5650
+Connection ~ 2250 6100
+Wire Wire Line
+	2400 6100 2250 6100
+Connection ~ 7050 5550
+Wire Wire Line
+	7300 5550 7050 5550
+Wire Wire Line
+	2400 6000 2050 6000
+Wire Wire Line
+	2050 6000 2050 4850
+Wire Wire Line
+	2050 4850 6700 4850
+Wire Wire Line
+	7300 6550 7300 6400
+Wire Wire Line
+	7300 4950 7300 4750
+Wire Wire Line
+	5700 5550 5700 5500
+Wire Wire Line
+	5100 5500 5300 5500
+Wire Wire Line
+	3450 5550 3450 5500
+Wire Wire Line
+	2900 5500 3050 5500
+Wire Wire Line
+	8400 5000 8400 4950
+Wire Wire Line
+	8400 4950 8350 4950
+Wire Wire Line
+	7950 4950 7800 4950
+Connection ~ 7850 6550
+Wire Wire Line
+	7850 6600 7850 6550
 Connection ~ 5100 1700
 Connection ~ 5100 1600
 Connection ~ 5100 1500
@@ -21,14 +83,6 @@ Connection ~ 5100 1250
 Connection ~ 5100 1150
 Connection ~ 5100 1050
 Connection ~ 5100 950 
-Text Label 5250 3950 0    60   ~
-Data Bus
-Text Label 6900 4900 0    60   ~
-ROM Bus
-Text Label 7650 3800 0    60   ~
-Ctl Bus
-Wire Wire Line
-	4550 5400 4550 5600
 Wire Bus Line
 	5100 800  5100 3950
 Wire Bus Line
@@ -36,30 +90,20 @@ Wire Bus Line
 Wire Wire Line
 	3800 4150 3800 4550
 Wire Bus Line
-	7350 4900 6600 4900
-Wire Bus Line
-	6600 4900 6600 6750
+	9500 5650 10250 5650
 Wire Wire Line
 	5100 1150 4350 1150
 Wire Wire Line
 	5100 950  4350 950 
 Wire Wire Line
-	4400 6550 4100 6550
+	7300 7300 7000 7300
 Wire Wire Line
-	4100 6550 4100 6250
+	7000 7300 7000 7000
 Wire Wire Line
-	4400 6300 4300 6300
+	7300 7050 7200 7050
 Wire Wire Line
-	5450 5600 5450 5850
-Wire Wire Line
-	5050 5600 5050 5750
-Wire Wire Line
-	5050 5750 4950 5750
-Wire Wire Line
-	4950 5750 4950 5850
-Wire Wire Line
-	4400 6400 4100 6400
-Connection ~ 4100 6400
+	7300 7150 7000 7150
+Connection ~ 7000 7150
 Wire Wire Line
 	4350 1400 5100 1400
 Wire Wire Line
@@ -83,7 +127,7 @@ Wire Wire Line
 Wire Wire Line
 	6800 3100 5250 3100
 Wire Wire Line
-	6550 2800 6700 2800
+	6700 2800 6550 2800
 Wire Wire Line
 	6550 2600 7400 2600
 Wire Wire Line
@@ -280,8 +324,6 @@ Wire Wire Line
 Wire Wire Line
 	4350 1500 5100 1500
 Wire Wire Line
-	6700 2800 6700 4400
-Wire Wire Line
 	5100 1050 4350 1050
 Wire Wire Line
 	5100 1250 4350 1250
@@ -291,73 +333,301 @@ Connection ~ 6650 2400
 Wire Wire Line
 	6650 1550 7400 1550
 Wire Wire Line
-	6600 6550 6000 6550
+	9500 7300 8900 7300
 Wire Wire Line
-	4300 6300 4300 4400
+	8350 6600 8350 6550
 Wire Wire Line
-	4300 4400 6700 4400
+	7950 6550 7800 6550
+Wire Wire Line
+	7850 5000 7850 4950
+Connection ~ 7850 4950
+Wire Wire Line
+	2400 5500 2400 5300
+Wire Wire Line
+	2950 5550 2950 5500
+Connection ~ 2950 5500
+Wire Wire Line
+	4600 5500 4600 5350
+Wire Wire Line
+	5150 5550 5150 5500
+Connection ~ 5150 5500
+Wire Wire Line
+	6200 6250 9500 6250
+Wire Wire Line
+	4000 6250 4000 6600
+Wire Wire Line
+	4000 6600 6700 6600
+Wire Wire Line
+	6700 6600 6700 5950
+Wire Wire Line
+	6700 5950 9500 5950
+Wire Wire Line
+	7300 5700 7050 5700
+Wire Wire Line
+	7050 5700 7050 5250
+Wire Wire Line
+	4600 6250 4400 6250
+Wire Wire Line
+	4400 6250 4400 5850
+Wire Wire Line
+	2400 6250 2250 6250
+Wire Wire Line
+	2250 6250 2250 5850
+Wire Notes Line
+	5550 6800 5600 6800
+Wire Notes Line
+	5600 6800 5600 6900
+Wire Notes Line
+	5600 6900 5700 6900
+Wire Notes Line
+	5700 6900 5700 6800
+Wire Notes Line
+	5700 6800 6550 6800
+Wire Notes Line
+	5550 7100 5750 7100
+Wire Notes Line
+	5750 7100 5750 7200
+Wire Notes Line
+	5750 7200 5900 7200
+Wire Notes Line
+	5900 7200 5900 7100
+Wire Notes Line
+	5900 7100 6550 7100
+Wire Notes Line
+	6250 7350 5600 7350
+Wire Notes Line
+	5600 7350 5600 7250
+Wire Wire Line
+	4600 6100 4400 6100
+Connection ~ 4400 6100
+Wire Wire Line
+	6200 5850 7200 5850
+Wire Wire Line
+	7200 5850 7200 7050
+$Comp
+L GND #PWR?
+U 1 1 4EE37B3D
+P 2100 6400
+F 0 "#PWR?" H 2100 6400 30  0001 C C
+F 1 "GND" H 2100 6330 30  0001 C C
+	1    2100 6400
+	1    0    0    -1  
+$EndComp
+Text Notes 4700 7350 0    60   ~
+HOLD (1375nS)
+Text Notes 4500 7200 0    60   ~
+CPR/nCUP (375nS)
+Text Notes 4800 7050 0    60   ~
+nST (125nS)
+Text Notes 4800 6900 0    60   ~
+nCL (250nS)
+$Comp
+L +5V #PWR?
+U 1 1 4EE37731
+P 7050 5250
+F 0 "#PWR?" H 7050 5340 20  0001 C C
+F 1 "+5V" H 7050 5340 30  0000 C C
+	1    7050 5250
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 4EE37727
+P 4400 5850
+F 0 "#PWR?" H 4400 5940 20  0001 C C
+F 1 "+5V" H 4400 5940 30  0000 C C
+	1    4400 5850
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 4EE3771A
+P 2250 5850
+F 0 "#PWR?" H 2250 5940 20  0001 C C
+F 1 "+5V" H 2250 5940 30  0000 C C
+	1    2250 5850
+	1    0    0    -1  
+$EndComp
+Text Label 8950 5950 0    60   ~
+nCL
+Text Label 9000 6250 0    60   ~
+nST
+$Comp
+L +5V #PWR?
+U 1 1 4EE3754E
+P 2400 5300
+F 0 "#PWR?" H 2400 5390 20  0001 C C
+F 1 "+5V" H 2400 5390 30  0000 C C
+	1    2400 5300
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 4EE37548
+P 4600 5350
+F 0 "#PWR?" H 4600 5440 20  0001 C C
+F 1 "+5V" H 4600 5440 30  0000 C C
+	1    4600 5350
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 4EE37540
+P 7300 4750
+F 0 "#PWR?" H 7300 4840 20  0001 C C
+F 1 "+5V" H 7300 4840 30  0000 C C
+	1    7300 4750
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R2
+U 1 1 4EE373E9
+P 7550 4950
+F 0 "R2" V 7630 4950 50  0000 C C
+F 1 "3.0K" V 7550 4950 50  0000 C C
+	1    7550 4950
+	0    1    1    0   
+$EndComp
+$Comp
+L R R3
+U 1 1 4EE373E5
+P 4850 5500
+F 0 "R3" V 4930 5500 50  0000 C C
+F 1 "3.0K" V 4850 5500 50  0000 C C
+	1    4850 5500
+	0    1    1    0   
+$EndComp
+$Comp
+L R R4
+U 1 1 4EE373E1
+P 2650 5500
+F 0 "R4" V 2730 5500 50  0000 C C
+F 1 "3.0K" V 2650 5500 50  0000 C C
+	1    2650 5500
+	0    1    1    0   
+$EndComp
+$Comp
+L C C2
+U 1 1 4EE373D5
+P 8150 4950
+F 0 "C2" H 8200 5050 50  0000 L C
+F 1 "680pF" H 8200 4850 50  0000 L C
+	1    8150 4950
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C3
+U 1 1 4EE373D1
+P 5500 5500
+F 0 "C3" H 5550 5600 50  0000 L C
+F 1 "68pF" H 5550 5400 50  0000 L C
+	1    5500 5500
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C4
+U 1 1 4EE373CD
+P 3250 5500
+F 0 "C4" H 3300 5600 50  0000 L C
+F 1 "120pF" H 3300 5400 50  0000 L C
+	1    3250 5500
+	0    -1   -1   0   
+$EndComp
+$Comp
+L 74LS221 U5
+U 1 1 4EE373B7
+P 3200 6050
+F 0 "U5" H 3250 5950 60  0000 C C
+F 1 "74LS221" H 3250 5850 60  0000 C C
+	1    3200 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74LS221 U5
+U 2 1 4EE373B0
+P 5400 6050
+F 0 "U5" H 5450 5950 60  0000 C C
+F 1 "74LS221" H 5450 5850 60  0000 C C
+	2    5400 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74LS221 U4
+U 2 1 4EE373A3
+P 8100 5500
+F 0 "U4" H 8150 5400 60  0000 C C
+F 1 "74LS221" H 8150 5300 60  0000 C C
+	2    8100 5500
+	1    0    0    -1  
+$EndComp
+Text Label 5250 3950 0    60   ~
+Data Bus
+Text Label 9800 5650 0    60   ~
+ROM Bus
+Text Label 7650 3800 0    60   ~
+Ctl Bus
 Text Label 7050 1550 0    60   ~
 nCL
 $Sheet
-S 7300 5600 2650 1050
+S 2650 7600 2050 150 
 F0 "ROM Connection and Power" 60
 F1 "Wang_ROM_Reader_4.sch" 60
 $EndSheet
 $Sheet
-S 7650 900  2250 1100
+S 650  7100 2750 200 
 F0 "ROM Address and Multiplexer Control" 60
 F1 "Wang_ROM_Reader_3.sch" 60
 $EndSheet
 $Sheet
-S 1200 5650 2050 950 
+S 650  7600 1800 150 
 F0 "ROM Data Multiplex" 60
 F1 "Wang_ROM_Reader_2.sch" 60
 $EndSheet
-Text Label 6200 6550 0    60   ~
-CPR
+Text Label 8950 7300 0    60   ~
+CPR/nCUP
 $Comp
 L +5V #PWR01
 U 1 1 4ED67CBA
-P 4100 6250
-F 0 "#PWR01" H 4100 6340 20  0001 C C
-F 1 "+5V" H 4100 6340 30  0000 C C
-	1    4100 6250
+P 7000 7000
+F 0 "#PWR01" H 7000 7090 20  0001 C C
+F 1 "+5V" H 7000 7090 30  0000 C C
+	1    7000 7000
 	1    0    0    -1  
 $EndComp
 $Comp
 L 74LS221 U4
 U 1 1 4ED67CB9
-P 5200 6350
-F 0 "U4" H 5250 6250 60  0000 C C
-F 1 "74LS221" H 5250 6150 60  0000 C C
-	1    5200 6350
+P 8100 7100
+F 0 "U4" H 8150 7000 60  0000 C C
+F 1 "74LS221" H 8150 6900 60  0000 C C
+	1    8100 7100
 	1    0    0    -1  
 $EndComp
 $Comp
 L +5V #PWR02
 U 1 1 4ED67CB8
-P 4550 5400
-F 0 "#PWR02" H 4550 5490 20  0001 C C
-F 1 "+5V" H 4550 5490 30  0000 C C
-	1    4550 5400
+P 7300 6400
+F 0 "#PWR02" H 7300 6490 20  0001 C C
+F 1 "+5V" H 7300 6490 30  0000 C C
+	1    7300 6400
 	1    0    0    -1  
 $EndComp
 $Comp
 L R R1
 U 1 1 4ED67CB7
-P 4800 5600
-F 0 "R1" V 4880 5600 50  0000 C C
-F 1 "10K" V 4800 5600 50  0000 C C
-	1    4800 5600
+P 7550 6550
+F 0 "R1" V 7630 6550 50  0000 C C
+F 1 "3.0K" V 7550 6550 50  0000 C C
+	1    7550 6550
 	0    -1   -1   0   
 $EndComp
 $Comp
 L C C1
 U 1 1 4ED67CB6
-P 5250 5600
-F 0 "C1" H 5300 5700 50  0000 L C
-F 1 "50pF" H 5300 5500 50  0000 L C
-	1    5250 5600
+P 8150 6550
+F 0 "C1" H 8200 6650 50  0000 L C
+F 1 "180pF" H 8200 6450 50  0000 L C
+	1    8150 6550
 	0    -1   -1   0   
 $EndComp
 Text Label 4700 3650 0    60   ~
