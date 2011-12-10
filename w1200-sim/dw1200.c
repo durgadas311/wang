@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.5 2011/11/28 01:29:43 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.6 2011/12/10 23:13:15 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"
@@ -76,7 +76,7 @@ void diwang(char *buf, uint64_t *v) {
 			case 4: s += sprintf(s, "Zo"); break;
 			case 5: s += sprintf(s, "CC"); break;
 			case 6: s += sprintf(s, "SC"); break;
-			case 7: s += sprintf(s, "1?"); break;
+			case 7: s += sprintf(s, "1?"); break;	// return - not reached
 			}
 			s += sprintf(s, "]");
 		}
@@ -164,31 +164,53 @@ void diwang(char *buf, uint64_t *v) {
 		t += sprintf(t, " = ");
 	}
 
+	s = opA;
 	switch(u->mop) {
 	case 1:	sprintf(opA, "mem(U,V) = CA,CB"); break;
 	case 2:	sprintf(opA, "mem(%s,V) = CA,CB", k); break;
 	case 3:	sprintf(opA, "mem(15,%s) = CA,CB", k); break;
 	case 4:	sprintf(opA, "CA,CB = mem(U,V)"); break;
-	case 5:	sprintf(opA, "CA,CB = mem(%s,V)", k, k); break;
-	case 6:	sprintf(opA, "CA,CB = mem(15,%s)", k, k); break;
-	case 7:	sprintf(opA, "indicators(%x,%d)", u->kk, u->bi & 1); break;
-	case 8:
+	case 5:	sprintf(opA, "CA,CB = mem(%s,V)", k); break;
+	case 6:	sprintf(opA, "CA,CB = mem(15,%s)", k); break;
+	case 7:
+		if (u->kk & 1) {
+			s += sprintf(s, "CSL=");
+		}
+		if (u->kk & 2) {
+			s += sprintf(s, "ELN=");
+		}
 		if (u->kk & 4) {
-			sprintf(opA, "print %s", u->bi & 1 ? "func" : "char");
-		} else {
-			sprintf(opA, "mop8(%x,%d)", u->kk, u->bi & 1);
+			s += sprintf(s, "ERN=");
+		}
+		if (u->kk & 8) {
+			s += sprintf(s, "NAN=");
+		}
+		s += sprintf(s, "%d", u->bi & 1);
+		break;
+	case 8:
+		if (u->kk & 1) {
+			s += sprintf(s, "KBLK=%d;", u->bi & 1);
+		}
+		if (u->kk & 2) {
+			s += sprintf(s, "BELL;");
+		}
+		if (u->kk & 4) {
+			s += sprintf(s, "print(KA,KB,%s);", u->bi & 1 ? "func" : "char");
+		}
+		if (u->kk & 8) {
+			s += sprintf(s, "mop8(8,%d);", u->bi & 1);
 		}
 		break;
 	case 9:
 		switch(u->kk & 0x07) {
 		case 0:
-			sprintf(opA, "KA=x:x:ORG:ADJ");
+			sprintf(opA, "KA=D3");
 			break;
 		case 1:
-			sprintf(opA, "KA=SerDat<3:0>");
+			sprintf(opA, "KA=UART<3:0>");
 			break;
 		case 2:
-			sprintf(opA, "KA=SerDat<7:4>");
+			sprintf(opA, "KA=UART<7:4>");
 			break;
 		case 3:
 			sprintf(opA, "KA=LCA/B:PE:DR:(t)");
@@ -201,22 +223,18 @@ void diwang(char *buf, uint64_t *v) {
 			break;
 		}
 		break;
-	case 10:	sprintf(opA, "tape read"); break;
-	case 11:	sprintf(opA, "tape write"); break;
+	case 10:	sprintf(opA, "KB=TCK:DK:LOP:ROP"); break;
+	case 11:	sprintf(opA, "DIN<1:0>=KA<0>,KB<0>"); break;
 	case 12:	sprintf(opA, "KB=RHS:LHS:R/B:L/S"); break;
 	case 13:
-		sprintf(opA, "TM%s=1(%s,%s,%s,%s,%s)",
-			u->kk & 1 ? "R" : "L",
-			u->bi & 1 ? "wr" : "rd",
-			u->kk & 4 ? "hi" : "ho",
-			u->kk & 2 ? "fw" : "re",
-			u->kk & 8 ? "fw" : "re",
-			u->bi & 1 ? "rc" : "--");
-		break;
 	case 14:
-		sprintf(opA, "TM%s=0(%s)",
-			u->kk & 1 ? "R" : "L",
-			u->bi & 1 ? "wr" : "rd");
+		sprintf(opA, "TM%s=%d(%s,%s,%s,%s)",
+			u->kk & 1 ? "R" : "L", u->mop & 1,
+			u->bi & 1 ? "wr" : "rd",
+			u->kk & 2 ? "fw" : "rv",
+			u->kk & 4 ? "hi" : "ho",
+			u->kk & 8 ? "mv" : "-"	// T.B.D.
+			);
 		break;
 	case 15:	sprintf(opA, "UART(%x)", u->kk); break;
 	}

@@ -2,7 +2,7 @@
 #ifndef __w1200_cpu_h__
 #define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.8 2011/11/24 02:34:17 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.9 2011/12/10 23:13:15 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -50,10 +50,21 @@ typedef struct {
 	uint8_t d1;	// mode0 switch inputs 1
 	uint8_t d2;	// mode1 switch inputs 2
 	uint8_t d3;	// mode2 switch inputs 3
-	uint8_t din0;
-	uint8_t din1;
-	uint8_t lhs;	// tape head select, left
-	uint8_t rhs;	// tape head select, right
+
+	// tape control
+	uint8_t right;	// tape device select
+	uint8_t tm;	// tape motor control
+	uint8_t fw;	// tape movement direction
+	uint8_t rc;	// tape record
+	uint8_t hl;	// tape seek control?
+	uint8_t din0;	// left/right tape write clock bit
+	uint8_t din1;	// left/right tape write data bit
+	uint8_t tck;	// left/right tape read clock bit
+	uint8_t dk;	// left/right tape read data bit
+	uint8_t lhs;	// tape head engage, left
+	uint8_t rhs;	// tape head engage, right
+	uint8_t lop;	// tape protected, left (from GUI)
+	uint8_t rop;	// tape protected, right (from GUI)
 
 	uint16_t stk1;
 	uint16_t stk2;

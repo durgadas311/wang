@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.10 2011/11/28 01:29:43 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.11 2011/12/10 23:13:15 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -359,44 +359,47 @@ bits:
 #endif
 }
 
-static void tape_on(wang_sys_t *sys, int right, int fr, int hi, int mv, int rc) {
+static void tape_on(wang_sys_t *sys) {
+	uint8_t hi;
+	if (sys->cpu.right) {
+		sys->cpu.ind.ind.tmr = sys->cpu.tm;
+		hi = sys->cpu.rhs;
+	} else {
+		sys->cpu.ind.ind.tml = sys->cpu.tm;
+		hi = sys->cpu.lhs;
+	}
+	++_indicators;
 #if 0
 	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
 	if (!wr) {
 		tape_read(NULL);
 	}
 #else
-fprintf(stderr, "tape on %s fr=%d hi=%d mv=%d %s\n",
-	right ? "R" : "L",
-	fr, hi, mv,
-	rc ? "wr" : "rd");
+fprintf(stderr, "tape on %s fw=%d hi=%d hl=%d %s\n",
+	sys->cpu.right ? "R" : "L",
+	sys->cpu.fw, hi, sys->cpu.hl,
+	sys->cpu.rc ? "wr" : "rd");
 #endif
-	if (right) {
-		sys->cpu.rhs = hi;
-		sys->cpu.ind.ind.tmr = mv;
-	} else {
-		sys->cpu.lhs = hi;
-		sys->cpu.ind.ind.tml = mv;
-	}
-	++_indicators;
 }
 
-static void tape_off(wang_sys_t *sys, int right, int rc) {
+static void tape_off(wang_sys_t *sys) {
+	uint8_t hi;
+	if (sys->cpu.right) {
+		sys->cpu.ind.ind.tmr = sys->cpu.tm;
+		hi = sys->cpu.rhs;
+	} else {
+		sys->cpu.ind.ind.tml = sys->cpu.tm;
+		hi = sys->cpu.lhs;
+	}
+	++_indicators;
 #if 0
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 #else
-fprintf(stderr, "tape off %s %s\n",
-	right ? "R" : "L",
-	rc ? "wr" : "rd");
+fprintf(stderr, "tape off %s fw=%d hi=%d hl=%d %s\n",
+	sys->cpu.right ? "R" : "L",
+	sys->cpu.fw, hi, sys->cpu.hl,
+	sys->cpu.rc ? "wr" : "rd");
 #endif
-	if (right) {
-		sys->cpu.rhs = 0;
-		sys->cpu.ind.ind.tmr = 0;
-	} else {
-		sys->cpu.lhs = 0;
-		sys->cpu.ind.ind.tml = 0;
-	}
-	++_indicators;
 }
 
 static void dev_out(wang_sys_t *sys) {
@@ -636,10 +639,10 @@ int instr_exec(wang_sys_t *sys) {
 		sys->cpu.kbd = 0;
 		break;
 	case 10:
-		sys->cpu.s = (sys->cpu.s & 0x0e) | (sys->cpu.zo ^ 1);
+		sys->cpu.s = (sys->cpu.s & ~1) | (sys->cpu.zo ^ 1);
 		break;
 	case 11:
-		sys->cpu.s = (sys->cpu.s & 0x0d) | (sys->cpu.zo << 1);
+		sys->cpu.s = (sys->cpu.s & ~2) | (sys->cpu.zo << 1);
 		break;
 	case 12:
 		break;
@@ -694,11 +697,12 @@ int instr_exec(wang_sys_t *sys) {
 		}
 		break;
 	case 10:
-		tape_read(sys);
+		tape_read(sys);	// must not block, if no data being read...
 		// Dout<0>, Dout<1>, LeftProt, RightProt
-		sys->cpu.kb = (sys->cpu.din0 << 3) |
-				(sys->cpu.din1 << 2) |
-				0;
+		sys->cpu.kb =	(sys->cpu.tck << 3) |
+				(sys->cpu.dk  << 2) |
+				(sys->cpu.lop << 1) |
+				(sys->cpu.rop << 0);
 		break;
 	case 11:
 		sys->cpu.din0 = (sys->cpu.kb & 1);
@@ -706,27 +710,36 @@ int instr_exec(wang_sys_t *sys) {
 		tape_write(sys);
 		break;
 	case 12:
-		sys->cpu.kb = (sys->cpu.rhs << 3) |
-			(sys->cpu.lhs << 2) |
-			0x02; // RHS : LHS : R/B : L/S
-				// Lock Shift? Ready/Busy? Left Head Select? Right... ?
+		sys->cpu.kb =	(sys->cpu.rhs << 3) |
+				(sys->cpu.lhs << 2) |
+				0x02; // RHS : LHS : R/B : L/S
+				// Lock Shift? Ready/Busy? 
 		break;
 	case 13:
-		{
-			uint8_t right = br_k & 1;
-			uint8_t fr = (br_k >> 1) & 1;
-			uint8_t hi = (br_k >> 2) & 1;
-			uint8_t mv = (br_k >> 3) & 1;
-			uint8_t rc = (u->bi & 1);
-			tape_on(sys, right, fr, hi, mv, rc);
+		sys->cpu.right = (br_k >> 0) & 1;
+		if (sys->cpu.right) {
+			sys->cpu.rhs = (br_k >> 2) & 1;
+		} else {
+			sys->cpu.lhs = (br_k >> 2) & 1;
 		}
+		sys->cpu.rc = (u->bi & 1);
+		sys->cpu.hl = (br_k >> 3) & 1;	// tape direction set/enable?
+		sys->cpu.fw = (br_k >> 1) & 1;	// tape motor must be off to set direction!
+		sys->cpu.tm = 1;
+		tape_on(sys);
 		break;
 	case 14:
-		{
-			uint8_t right = br_k & 1;
-			uint8_t rc = (u->bi & 1);
-			tape_off(sys, right, rc);
+		sys->cpu.right = (br_k >> 0) & 1;
+		if (sys->cpu.right) {
+			sys->cpu.rhs = (br_k >> 2) & 1;
+		} else {
+			sys->cpu.lhs = (br_k >> 2) & 1;
 		}
+		sys->cpu.rc = (u->bi & 1);
+		sys->cpu.hl = (br_k >> 3) & 1;	// tape direction set/enable?
+		sys->cpu.fw = (br_k >> 1) & 1;	// tape motor must be off to set direction!
+		sys->cpu.tm = 0;
+		tape_off(sys);
 		break;
 	case 15:
 		switch(br_k & 0x07) {
