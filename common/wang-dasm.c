@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ident "$Id: wang-dasm.c,v 1.3 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: wang-dasm.c,v 1.4 2011/12/12 22:47:32 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 
@@ -90,6 +90,9 @@ int main(int argc, char **argv) {
 		for (a = 0; a < h; ++a) {
 		for (b = 0; b < l; ++b) {
 			uint16_t g = t | (a << 1)|b;
+#ifdef COUNT_1XLOOPS
+			if (g == x) calls[g] = 255;
+#endif // COUNT_1XLOOPS
 			if (++calls[g] == 0) calls[g] = 255;
 		}}
 	}
