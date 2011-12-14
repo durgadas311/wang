@@ -64,8 +64,6 @@ Wire Wire Line
 Wire Wire Line
 	3450 6100 4800 6100
 Wire Wire Line
-	3450 4600 6450 4600
-Wire Wire Line
 	3450 3250 4800 3250
 Wire Bus Line
 	3450 6400 3450 1050
@@ -122,15 +120,11 @@ Wire Wire Line
 Wire Wire Line
 	6350 3450 6450 3450
 Wire Wire Line
-	6450 4600 6450 3550
-Wire Wire Line
 	6350 3950 6200 3950
 Wire Wire Line
 	3450 2150 4800 2150
 Wire Wire Line
 	3450 4350 4800 4350
-Wire Wire Line
-	3450 4950 7550 4950
 Wire Bus Line
 	8350 1100 8350 3950
 Wire Bus Line
@@ -145,8 +139,6 @@ Wire Wire Line
 	8350 3150 7550 3150
 Wire Wire Line
 	8350 3350 7550 3350
-Wire Wire Line
-	7550 4950 7550 3550
 Wire Wire Line
 	4800 1350 4200 1350
 Wire Wire Line
@@ -209,10 +201,6 @@ Text Label 3650 3250 0    60   ~
 nDS1
 Text Label 3650 2150 0    60   ~
 nDS0
-Text Label 3650 4950 0    60   ~
-nWAIT
-Text Label 3650 4600 0    60   ~
-nSTB
 Text Label 8000 3450 0    60   ~
 njad8
 Text Label 8000 3350 0    60   ~
