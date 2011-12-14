@@ -1,6 +1,6 @@
-TESTS = cpr_test dat_test
+TESTS = cpr_test dat_test wr_test rd_test
 
-ROMTESTS = loopback
+ROMTESTS = loopback adr_test
 
 all:
 
