@@ -1,0 +1,23 @@
+#!/bin/bash
+# $Id: catscope,v 1.1 2011/12/15 23:28:17 drmiller Exp $
+
+if [[ ${#} -lt 2 ]]; then
+	echo "Usage: $0 <main> <second> [<third>...]" >&2
+	echo "Crops ch2 waveforms and appends to main" >&2
+	exit 1
+fi
+
+main=${1}
+shift
+
+out="${main}.pnm"
+in="${main}.$$"
+bmptopnm ${main} >${in}
+if [[ $? -ne 0 ]]; then exit 1; fi
+
+for i in "${@}"; do
+	bmptopnm ${i} | pnmcut -top 120 | pnmcat -topbottom -jleft ${in} - >${out}
+	if [[ $? -ne 0 ]]; then exit 1; fi
+	mv ${out} ${in}
+	if [[ $? -ne 0 ]]; then exit 1; fi
+done
