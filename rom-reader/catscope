@@ -1,23 +1,49 @@
 #!/bin/bash
-# $Id: catscope,v 1.1 2011/12/15 23:28:17 drmiller Exp $
+# $Id: catscope,v 1.2 2011/12/16 01:23:35 drmiller Exp $
+
+unset out
+cut=114
+while getopts "o:c:" op; do
+	case ${op} in
+	o)	out=${OPTARG};;
+	c)	cut=${OPTARG};;
+	esac
+done
+shift $((OPTIND-1))
 
 if [[ ${#} -lt 2 ]]; then
-	echo "Usage: $0 <main> <second> [<third>...]" >&2
-	echo "Crops ch2 waveforms and appends to main" >&2
+	echo "Usage: $0 [-o basename] [-c cutrow] <main> <second> [<third>...]" >&2
+	echo "Crops ch2 BMP waveforms and appends to main." >&2
+	echo "Assumes all waveforms have same settings." >&2
+	echo "Outputs a PNG format image." >&2
 	exit 1
 fi
 
 main=${1}
 shift
 
-out="${main}.pnm"
-in="${main}.$$"
-bmptopnm ${main} >${in}
+if [[ -z ${out} ]]; then
+	out="${main%.*}"
+fi
+in="${out}.$$"
+bmptopnm ${main} | pnmcut -bottom 213 >${in}
 if [[ $? -ne 0 ]]; then exit 1; fi
 
-for i in "${@}"; do
-	bmptopnm ${i} | pnmcut -top 120 | pnmcat -topbottom -jleft ${in} - >${out}
+j=("${@}")
+n=${#j[*]}
+x=0
+while [[ ${x} -lt ${n} ]]; do
+	i=${j[x]}
+	((x+=1))
+	if [[ ${x} -eq ${n} ]]; then b=233
+	else b=213; fi
+	bmptopnm ${i} | pnmcut -top ${cut} -bottom ${b} | \
+		pnmcat -topbottom -jleft ${in} - >${out}.pnm
 	if [[ $? -ne 0 ]]; then exit 1; fi
-	mv ${out} ${in}
+	mv ${out}.pnm ${in}
 	if [[ $? -ne 0 ]]; then exit 1; fi
 done
+
+pnmtopng ${in} >${out}.png
+if [[ $? -ne 0 ]]; then exit 1; fi
+rm -f ${in}
