@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: catscope,v 1.3 2011/12/16 14:21:37 drmiller Exp $
+# $Id: catscope,v 1.4 2011/12/16 14:27:39 drmiller Exp $
 
 rows=(90 100)
 
@@ -7,7 +7,7 @@ bmptopnm_f() {
 	local file=${1}
 	shift
 	if [[ ${#txt[*]} -gt 0 ]]; then
-		bmptopnm ${file} | pnmcut ${*} | pnmpad -left 100
+		bmptopnm ${file} | pnmcut ${*} | pnmpad -left ${pad}
 	else
 		bmptopnm ${file} | pnmcut ${*}
 	fi
@@ -16,21 +16,29 @@ bmptopnm_f() {
 
 unset out txt
 cut=114
-while getopts "o:c:t:r:" op; do
+pad=100
+while getopts "o:c:p:t:r:" op; do
 	case ${op} in
 	o)	out=${OPTARG};;
 	c)	cut=${OPTARG};;
 	t)	txt=(${OPTARG});;
 	r)	rows=(${OPTARG});;
+	p)	pad=${OPTARG};;
 	esac
 done
 shift $((OPTIND-1))
 
 if [[ ${#} -lt 2 ]]; then
-	echo "Usage: $0 [-o basename] [-c cutrow] <main> <second> [<third>...]" >&2
+	echo "Usage: $0 [options] <main> <second> [<third>...]" >&2
 	echo "Crops ch2 BMP waveforms and appends to main." >&2
 	echo "Assumes all waveforms have same settings." >&2
 	echo "Outputs a PNG format image." >&2
+	echo "Options:" >&2
+	echo "-o basename : basename of output file" >&2
+	echo "-c cutrow   : pixel row to start waves" >&2
+	echo "-t \"words\"  : labels for each wave" >&2
+	echo "-r \"rows\"   : relative pixel rows for each wave zero-point" >&2
+	echo "-p pad      : pixel width of padding for labels" >&2
 	exit 1
 fi
 
