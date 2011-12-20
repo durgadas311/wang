@@ -1,6 +1,8 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.11 2011/12/10 23:13:15 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.12 2011/12/20 23:02:00 drmiller Exp $"
+
+#define DOUGS_PATCHES
 
 #include <unistd.h>
 #include <time.h>
@@ -91,6 +93,30 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x3d6, {
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
+#ifdef DOUGS_PATCHES
+        { 0x6dd, {
+[SYS_MODEL1220] = { .flds = {
+//		6dd: [01301012005f804] V = S + 2 ->[Zo,CC]; mem(U,V) = CA,CB; jump 5f8[:Zo]
+//		.ai=0, .bi=1, .zo=3, .aop=0, .ac=1, .bc=0,
+
+//		6dd: [31301012005f804] V = V + 2 ->[Zo,CC]; mem(U,V) = CA,CB; jump 5f8[:Zo]
+		.ai=3, .bi=1, .zo=3, .aop=0, .ac=1, .bc=0,
+		.mop=1, .kk=2, .st=0,
+		.sub=0, .jad=0x5f8>>2, .jh=0, .jl=4,
+		.ovr = 1
+		}},
+        }},
+        { 0x4ae, {
+[SYS_MODEL1220] = { .flds = {
+//		4ae: [00231067004ac11] U = S + 0 + SC ->[Zo,CC,SC]; CA,CB = mem(15,7); jump 4af
+//		4ae: [20231067004ac11] U = U + 0 + SC ->[Zo,CC,SC]; CA,CB = mem(15,7); jump 4af
+		.ai=2, .bi=0, .zo=2, .aop=3, .ac=1, .bc=0,
+		.mop=6, .kk=7, .st=0,
+		.sub=0, .jad=0x4ac>>2, .jh=1, .jl=1,
+		.ovr = 1
+		}},
+        }},
+#endif // DOUGS_PATCHES
 
         { 0x052, {
 [SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
