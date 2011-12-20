@@ -13,10 +13,13 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Label 7350 2100 0    60   ~
-ALT-1G
-Text Label 7350 2000 0    60   ~
-ALT-2G
+Connection ~ 7000 5950
+Wire Wire Line
+	7000 5950 7000 6650
+Wire Wire Line
+	7200 6250 7200 5850
+Wire Notes Line
+	6550 7100 5850 7100
 Connection ~ 6500 4150
 Wire Wire Line
 	6500 4150 6500 2100
@@ -43,9 +46,8 @@ Wire Wire Line
 Connection ~ 1600 950 
 Wire Wire Line
 	1600 700  1600 1500
-Connection ~ 7200 6250
 Wire Wire Line
-	9500 6250 7200 6250
+	7200 6250 9500 6250
 Wire Wire Line
 	7150 5050 7150 2250
 Wire Wire Line
@@ -105,22 +107,16 @@ Wire Wire Line
 Wire Wire Line
 	4100 6250 4000 6250
 Wire Wire Line
-	7200 5850 7200 7050
-Wire Wire Line
 	7200 5850 6200 5850
 Connection ~ 4400 6100
 Wire Wire Line
 	4600 6100 4400 6100
 Wire Notes Line
-	6550 7100 5900 7100
+	5850 7100 5850 7200
 Wire Notes Line
-	5900 7100 5900 7200
+	5850 7200 5700 7200
 Wire Notes Line
-	5900 7200 5750 7200
-Wire Notes Line
-	5750 7200 5750 7100
-Wire Notes Line
-	5750 7100 5550 7100
+	5700 7200 5700 7100
 Wire Notes Line
 	6550 6800 5700 6800
 Wire Notes Line
@@ -339,7 +335,7 @@ Connection ~ 7000 7150
 Wire Wire Line
 	7300 7150 7000 7150
 Wire Wire Line
-	7200 7050 7300 7050
+	7300 7050 7200 7050
 Wire Wire Line
 	7000 7000 7000 7300
 Wire Wire Line
@@ -475,6 +471,16 @@ Wire Wire Line
 Connection ~ 1600 2900
 Wire Wire Line
 	7150 2250 7850 2250
+Wire Notes Line
+	5700 7100 5550 7100
+Wire Wire Line
+	7200 7050 7200 6650
+Wire Wire Line
+	7200 6650 7000 6650
+Text Label 7350 2100 0    60   ~
+ALT-1G
+Text Label 7350 2000 0    60   ~
+ALT-2G
 Text Label 1500 2900 0    60   ~
 DP7
 Text Label 1500 2700 0    60   ~
