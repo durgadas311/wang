@@ -1,8 +1,8 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.12 2011/12/20 23:02:00 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.13 2011/12/21 19:00:31 drmiller Exp $"
 
-#define DOUGS_PATCHES
+#undef DOUGS_PATCHES
 
 #include <unistd.h>
 #include <time.h>
