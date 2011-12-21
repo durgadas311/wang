@@ -26,12 +26,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	uint16_t adr = 0;
+	uint32_t adr = 0;
 	uint64_t stripe[11];
 	while (adr < 2048) {
 		
 		for (x = 0; x < 11; ++x) {
-			uint16_t a;
+			uint32_t a;
 			y = fscanf(ifps[x], "%x:%llx\n", &a, &stripe[x]);
 			if (y != 2) {
 				fprintf(stderr, "yikes! %d\n", y);
