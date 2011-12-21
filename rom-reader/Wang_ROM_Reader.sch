@@ -561,16 +561,6 @@ Wire Wire Line
 	1650 2700 1350 2700
 Wire Wire Line
 	4500 4150 4500 2200
-Wire Wire Line
-	4500 2200 4500 2000
-Wire Wire Line
-	4500 2000 7750 2000
-Connection ~ 4500 2200
-Wire Wire Line
-	7750 2100 6500 2100
-Wire Wire Line
-	6500 2100 6500 4150
-Connection ~ 6500 4150
 Wire Notes Line
 	5850 7100 6550 7100
 Wire Wire Line
@@ -632,10 +622,6 @@ Entry Wire Line
 Entry Wire Line
 	7750 2250 7850 2350
 Entry Wire Line
-	7750 2100 7850 2200
-Entry Wire Line
-	7750 2000 7850 2100
-Entry Wire Line
 	7750 1750 7850 1850
 Entry Wire Line
 	7750 1650 7850 1750
@@ -655,10 +641,6 @@ Entry Wire Line
 	9400 6250 9500 6350
 Entry Wire Line
 	9400 5950 9500 6050
-Text Label 7350 2100 0    60   ~
-ALT-1G
-Text Label 7350 2000 0    60   ~
-ALT-2G
 $Comp
 L 74LS04 U6
 U 4 1 4EE933C6
