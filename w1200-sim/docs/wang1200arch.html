@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.11 2011/11/28 01:29:43 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.12 2011/12/22 23:22:33 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -527,10 +527,10 @@ as follows (layout for Solid State ROM).
 </TR>
 <TR><TH>MOP == 1010</TH><TH>In</TH>
 	<TD CLASS="num" COLSPAN=4>n/a</TD>
+	<TD CLASS="num">ROP</TD>
+	<TD CLASS="num">LOP</TD>
 	<TD CLASS="num">L/RDK</SUB></TD>
 	<TD CLASS="num">L/RTCK</SUB></TD>
-	<TD CLASS="num">LOP</TD>
-	<TD CLASS="num">ROP</TD>
 </TR>
 <TR><TH>MOP == 1011</TH><TH>Out</TH>
 	<TD CLASS="num" COLSPAN=3>n/a</TD>
@@ -1052,71 +1052,36 @@ But the Wang 1200 used magnetic saturation like mainframe computer tape drives.
 It did work on audio cassettes, but Wang recommended high quality "metal"
 tape.
 
-<P>Because magnetic media only works when there are changes in magnetic fields,
-the encoding had to ensure that the magnetic field changed frequently.
-This means that, for example, a long string of zeroes must not result in
-a long period of blank tape. Instead, there is guaranteed to be a transition
-at the beginning of every bit, and a transition in the middle if the bit was
-a "1". This is known as "Biphase-Mark" encoding or BMC, a variation of
-Differential Manchester encoding.
-This is also the same encoding that was known as "FM" and used
-for single-density floppy disks, as well as other magnetic media of the time.
-A parity bit was added every 4 data bits to help
-detect errors.
+<P>The Wang 1200 Series used a dual-channel recording system, consuming
+both "sides" of a cassette in a single pass. This means that each cassette
+had, in affect, only one "side". This also means the Wang 1200's had
+special tape drives (heads) such that both "front" and "back" sides
+could be recorded at once - these were called "two head" drives, not to
+be confused with Stereo cassette drives that had two heads (channels)
+on <U>each</U> side of the tape.
 
-<P>The timing of each bit was precise, because the tape read code had to be
-able to stay synchronized without saving state information or doing much
-processing. Each unit of output was 198 cycles (data bit width 396),
-and each program (tape image) was preceded by a 211,220 cycle
-(approximately 0.5 second) blank gap
-(no magnetic field transitions).
+<P>The two channels were used to record "0" and "1" bits separately,
+i.e. one channel recorded only "0" bits while the other recorded only
+"1" bits. A transition on a given channel indicates a bit of that
+channel's type ("0" or "1"). It appears that there were never transitions
+on both channels at the same time. For at least this reason, that it
+would be impossible to determine which bit belonged in what order in the
+re-assembled data.
 
-<P>During read, the calculator waits for the "bit start" transition, then
-delays 272 cycles before sampling again. If the sample reveals that there
-was a second transition, then the bit is considered a "1", otherwise it is "0".
-From this stream, the calculator assembles nibbles and checks parity, loading
-data into memory.
-
-<P>Here is an example of writing 09&nbsp;00 to tape and reading it back:
+<P>Here is an example of writing "now" to tape:
 
 <P><UL><IMG SRC="wang1200tape.gif"></UL>
 
-<P>The code 09&nbsp;00 is broken into two nibbles, and each assigned an odd parity bit.
-Then each 5 bit datum is encoded into the tape stream by
-converting "1" into either "1 0" or "0 1",
-and "0" into either "1 1" or "0 0",
-depending on the previous data to ensure that
-there is always a transition at the beginning of each bit.
-The resulting stream is fed to the record head and produces
-alternating segments of positive and negative magnetic fields on the tape.
-
-<P>During read, the changes between positive and negative magnetic fields show
-up as "blips" in the signal from the tape read head. These blips are fed
-into a "one-shot" flip-flop whose timing is set to about 97 cycles. This means
-that for 97 cycles after a transition there will be a "1" signal, and it will
-return to "0" after those 97 cycles.
-
-<P>The calculator monitors the signal from the one-shot. The first "1" it
-sees indicates the beginning of a bit. It then delays 272 cycles and
-checks the signal again. If it is still "1" (was actually re-triggered by
-a second transition) then the data bit is interpreted to be a "1".
-Otherwise, the data bit is interpreted to be "0". These bits are
-assembled into a 4-bit word and a parity bit, which is then checked for odd parity
-and, if correct, the data word is stored in memory.
-
-<P>A parity error will cause the calculator to turn on the Mach Error flag (ERR)
-and stop processing the tape.
-
-<P>Other problems with the tape will generally cause the calculator to
-"hang" with a blank display. Pressing PRIME is usually required in order to recover.
-
-<P>The calculator reads/writes the tape at about 1000 bits/second. Assuming standard
-tape speed, this makes a tape density of about 533 bpi
+<P>The unit of time for transitions was 50 cycles.
+In other words, there could/would be a transition (bit) every 50 cycles.
+This results in a data rate of 4000 bits per second.
+Assuming standard tape speed, this makes a tape density of about 2133 bpi
 (compare to mainframe "9-track" tapes which were 800 or 1600 bpi, and later 6250 bpi).
-The smallest common audio cassette was 15 minutes (C15) which would hold an
-overwhelming 90,000 program steps (on both sides) or
-45 complete copies of the calculator memory (a program rarely consumed all of memory).
-For this reason, Wang data cassettes were much shorter,
-typically only having a few minutes of tape.
+The smallest common audio cassette was 15 minutes (C15, 7.5 minutes per side)
+which would hold about 225,000 bytes, not counting overhead for line-buffer formatting.
+
+<P>There was no parity or other error detection or correction encoded, so
+the only way to gain reliability was to "double record" each line for
+redundancy (consuming twice as much tape).
 
 </HTML>

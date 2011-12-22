@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.14 2011/12/22 02:40:04 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.15 2011/12/22 23:22:33 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -308,7 +308,7 @@ static void tape_write(wang_sys_t *sys) {
 		data |= bit;
 	}
 #else
-fprintf(stderr, "tape %d %d\n", sys->cpu.din0, sys->cpu.din1);
+fprintf(stderr, "tape %d %d %lld\n", sys->cpu.din0, sys->cpu.din1, sys->cpu.sys.cycles);
 #endif
 }
 
@@ -401,10 +401,11 @@ static void tape_on(wang_sys_t *sys) {
 		tape_read(NULL);
 	}
 #else
-fprintf(stderr, "tape on %s fw=%d hi=%d hl=%d %s\n",
+fprintf(stderr, "tape on %s fw=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
 	sys->cpu.fw, hi, sys->cpu.hl,
-	sys->cpu.rc ? "wr" : "rd");
+	sys->cpu.rc ? "wr" : "rd",
+	sys->cpu.sys.cycles);
 #endif
 }
 
@@ -421,10 +422,11 @@ static void tape_off(wang_sys_t *sys) {
 #if 0
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 #else
-fprintf(stderr, "tape off %s fw=%d hi=%d hl=%d %s\n",
+fprintf(stderr, "tape off %s fw=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
 	sys->cpu.fw, hi, sys->cpu.hl,
-	sys->cpu.rc ? "wr" : "rd");
+	sys->cpu.rc ? "wr" : "rd",
+	sys->cpu.sys.cycles);
 #endif
 }
 
@@ -728,10 +730,11 @@ int instr_exec(wang_sys_t *sys) {
 	case 10:
 		tape_read(sys);	// must not block, if no data being read...
 		// Dout<0>, Dout<1>, LeftProt, RightProt
-		sys->cpu.kb =	(sys->cpu.tck << 3) |
-				(sys->cpu.dk  << 2) |
-				(sys->cpu.lop << 1) |
-				(sys->cpu.rop << 0);
+		sys->cpu.kb =	(sys->cpu.tck << 0) |
+				(sys->cpu.dk  << 1) |
+				(sys->cpu.lop << 2) |
+				(sys->cpu.rop << 3);
+sys->cpu.kb |= 0x0c; // force ROP,LOP
 		break;
 	case 11:
 		sys->cpu.din0 = (sys->cpu.kb & 1);
@@ -833,6 +836,10 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 		instr_trace(sys);
 	}
 #endif // TRACE
+if ((sys->cpu.sys.cycles & 0x07) == 0 && _indicators) {
+	_indicators = 0;
+	sys->display(sys, -2);
+}
 
 	display_check(sys);	// this might sleep until UI event...
 
