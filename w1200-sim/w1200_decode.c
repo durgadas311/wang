@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.13 2011/12/21 19:00:31 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.14 2011/12/22 02:40:04 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -716,6 +716,9 @@ int instr_exec(wang_sys_t *sys) {
 		switch(br_k & 0x07) {
 		case 0:
 			sys->cpu.ka = sys->cpu.d3;
+			break;
+		case 1:
+			sys->cpu.ka = 4; // temp workaround for real UART sim
 			break;
 		case 4:
 			sys->cpu.ka = 0; // TRE, SHC, PRINT, ATTN...
