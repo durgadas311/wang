@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $
+// $Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 180);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -169,6 +169,7 @@ public class w1200_fe
 		if (dir == null) {
 			dir = System.getProperty("user.home") + "/Wang1200Files";
 		}
+		_dir = new File(dir);
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
 		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
@@ -209,7 +210,7 @@ public class w1200_fe
 				System.exit(1);
 			}
 		}
-		//_dir.mkdir();
+		_dir.mkdir();
 		JFrame front_end = new JFrame("Wang 1200 Word Processing System");
 		//java.net.URL url = w1200_fe.class.getResource("icons/wang1200-48x48.png");
 		//Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -391,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -467,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -589,8 +590,18 @@ class Wang1200_SimInput
 					continue;
 				}
 				_m611.do_cn24(b);
-			} else if ((b[1]  & ~3) == 0x0c) {
-				_tapel.do_tape(b);
+			} else if ((b[1]  & ~1) == 0x0c) {
+				if ((b[1] & 1) == 0) {
+					_tapel.do_tape(b);
+				} else {
+					_taper.do_tape(b);
+				}
+			} else if ((b[1]  & ~1) == 0x0e) {
+				if ((b[0] & 1) == 0) {
+					_tapel.do_tape(b);
+				} else {
+					_taper.do_tape(b);
+				}
 			} else if ((b[1] & 0x0ff) == 0x7f) {
 				_m611.reset();
 				//etc...
@@ -619,7 +630,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -657,7 +668,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -758,7 +769,7 @@ class Wang1200_Tape extends JComponent
 		String txt = new String("<HTML><B>Tape Source/Dest</B><BR>" +
 				"<B>Name:</B><BR>" +
 				fn + "<BR>" +
-				"<B>File #</B> " + _index + eot +
+				"<B>Block #</B> " + _index + eot +
 				"</HTML>");
 		_window.setText(txt);
 		repaint();
@@ -797,6 +808,7 @@ class Wang1200_Tape extends JComponent
 		}
 		_eot = false;
 		_index = 0;
+		_ready = true;
 	}
 
 	private int tape_skipone() {
@@ -874,6 +886,7 @@ class Wang1200_Tape extends JComponent
 				_tf.close();
 			} catch (IOException ee) {
 			}
+			_ready = false;
 			_end = false;
 			_tf = null;
 		}
@@ -912,63 +925,41 @@ class Wang1200_Tape extends JComponent
 	}
 
 	public void do_tape(byte[] b) {
-		if (b[1] == 0x0d) {		// tape on - read
-			if (b[0] == 0) { // tape-on
-				if (_ready) _tape_on = true;
+		if (b[1] == 0x0e) {	// tape on/off/req
+			b[0] &= ~1;	// discard drive - could assert?
+			if (b[0] == 0xc0) { // tape-off
+				if (_wr && !_end && _ready) {
+					++_index;
+				}
+				_tape_on = false;
+				_wr = false;
 				_end = false;
-				_wr = false; // redundant
-			} else { // request for next byte
+				_ready = false;
+				update_tape();
+				//if (_ready) _tf.flush(); // not needed anyway?
+			} else if (b[0] == 0x40) { // request data
 				tape_read();
-				if ((bb[0] & 0x00ff) == 0x9e) { // END PROG
-					// there is always one more byte..
-					tape_read();
-					// might be old image... treat EOF same...
-					if ((bb[1] & 0x00ff) == 0x0e) {	// saw EOF
-						bb[0] = (byte)0x9e;
-						bb[1] = 0x0c;
-					}
-					if ((bb[0] & 0x00ff) != 0x9e) {
-						bb[0] = 0;
-						bb[1] = 0x0e;
-					}
+				if (false) {
 					++_index; // display updated later...
-					_end = true;
 				}
 				send_word();
+			} else { // tape on - read/write
+				if (_ready) _tape_on = true;
+				_wr = ((b[0] & 0x80) != 0);
+				_ready = true;
+				_end = false;
 			}
 			return;
-		} else if (b[1] == 0x0f) {	// tape on - write
-			if (_ready) _tape_on = true;
-			_wr = true;
-			_end = false;
-		} else if (b[1] == 0x0e) {	// tape off
-			if (_wr && !_end && _ready) {
-				// did not just write END PROG, so need
-				// to mark end of tape "file".
-				// use 0x9e 0xff to mean "invisible" END PROG
-				b[1] = 0x0c;
-				b[0] = (byte)0x9e;
-				tape_write(b);
-				b[0] = (byte)0xff;
-				tape_write(b);
-				++_index;
-			}
-			_tape_on = false;
-			_wr = false;
-			_end = false;
-			update_tape();
-			//if (_ready) _tf.flush(); // not needed anyway?
-		} else if (b[1] == 0x0c) {	// tape write
+		} else if ((b[1] & ~1) == 0x0c) {	// tape write
 			if (!_ready) return;
 			tape_write(b);
 			// only if last byte before tape-off is END PROG...
-			_end = ((b[0] & 0x00ff) == 0x9e); // END PROG
+			//_end = ((b[0] & 0x00ff) == 0x9e); // END PROG
 			if (_end) {
-				tape_write(b); // write 0x9e 0x9e - true END PROG
 				++_index; // display updated later..
 			}
 		} else {
-			System.err.println("invalid tape command");
+			System.err.format("invalid tape command (%04x)\n", (b[1] << 8) | b[0]);
 		}
 	}
 }
@@ -1036,7 +1027,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
@@ -1326,9 +1317,9 @@ class Wang1200_Model611
 		_text.setText("");
 		_eop = 0;
 		_text.setCaretPosition(_eop);
-		_plot = false;
+//		_plot = false;
 		_shifted = false;
-		_x = _y = 0;
+//		_x = _y = 0;
 		_text.clear();
 		_hasGraphic = false;
 	}
@@ -1344,6 +1335,18 @@ class Wang1200_Model611
 	public void do_clrtab() {
 	}
 
+	private void clrCursor() {
+		//String s = " ";
+		//_text.append(s);
+		//_text.setCaretPosition(_eop);
+	}
+
+	private void setCursor() {
+		//String s = "\u2588";
+		//_text.append(s);
+		//_text.setCaretPosition(_eop);
+	}
+
 	public Wang1200_Model611() {
 		setup_xlate();
 
@@ -1355,6 +1358,7 @@ class Wang1200_Model611
 		//_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
+		_text.setFocusable(false);
 
 		clear();
 
@@ -1386,7 +1390,9 @@ class Wang1200_Model611
 			"Mary had a little lamb,\n";
 		_text.append(s);
 		_eop += s.length();
-		_text.setCaretPosition(_eop);
+		setCursor();
+		s = "\u2588";
+		_text.append(s);
 	}
 
 	private void save611(File file) {
@@ -1484,59 +1490,59 @@ class Wang1200_Model611
 	}
 
 	private boolean _shifted;
-	private boolean _plot;
-	private int _x, _y;
-	private int _dx, _dy;
+//	private boolean _plot;
+//	private int _x, _y;
+//	private int _dx, _dy;
 
 	class PlotTextArea extends JTextArea
 			implements Printable {
 		static final long serialVersionUID = 311457692040L;
-		class plot {
-			plot(String s_, int x_, int y_) {
-				s = s_;
-				x = x_;
-				y = y_;
-			}
-			public String s;
-			public int x;
-			public int y;
-		}
+//		class plot {
+//			plot(String s_, int x_, int y_) {
+//				s = s_;
+//				x = x_;
+//				y = y_;
+//			}
+//			public String s;
+//			public int x;
+//			public int y;
+//		}
 
 		public void clear() {
-			_nplots = 0;
-			_xplots = 0;
-			//_plotArray.dispose();
-			_plotArray = null;
-			_x = _y = 0;
+//			_nplots = 0;
+//			_xplots = 0;
+//			//_plotArray.dispose();
+//			_plotArray = null;
+//			_x = _y = 0;
 		}
 
-		private plot[] _plotArray;
-		private int _nplots;
-		private int _xplots;
+//		private plot[] _plotArray;
+//		private int _nplots;
+//		private int _xplots;
 
-		private void addPlot(String s, int x, int y) {
-			int n = _xplots++;
-			if (_xplots > _nplots) {
-				int o = _nplots;
-				_nplots += 256;
-				plot[] p = new plot[_nplots];
-				if (o > 0) {
-					System.arraycopy(_plotArray, 0, p, 0, o);
-				}
-				_plotArray = p;
-			}
-			_plotArray[n] = new plot(s, x, y);
-		}
+//		private void addPlot(String s, int x, int y) {
+//			int n = _xplots++;
+//			if (_xplots > _nplots) {
+//				int o = _nplots;
+//				_nplots += 256;
+//				plot[] p = new plot[_nplots];
+//				if (o > 0) {
+//					System.arraycopy(_plotArray, 0, p, 0, o);
+//				}
+//				_plotArray = p;
+//			}
+//			_plotArray[n] = new plot(s, x, y);
+//		}
 
 		public void paint(Graphics g) {
 			super.paint(g);
-			int x;
-			for (x = 0; x < _xplots; ++x) {
-				double xx, yy;
-				xx = (_plotArray[x].x * _gx) + 0.5;
-				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
-				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
-			}
+//			int x;
+//			for (x = 0; x < _xplots; ++x) {
+//				double xx, yy;
+//				xx = (_plotArray[x].x * _gx) + 0.5;
+//				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
+//				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
+//			}
 		}
 
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
@@ -1560,11 +1566,11 @@ class Wang1200_Model611
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
 			int l = g2d.getFont().getSize();
-			double gx = (w0 / 1300.0);
-			double gy = (l / (100.0 / 6.0));
+//			double gx = (w0 / 1300.0);
+//			double gy = (l / (100.0 / 6.0));
 			int lpp = 60; // (int)(h0 / l);
 			int max = getLineCount();
-			int i = 0;
+//			int i = 0;
 			while (pg <= pageIndex) {
 				int ln;
 				for (ln = 0; ln < lpp; ++ln) {
@@ -1585,19 +1591,19 @@ class Wang1200_Model611
 					}
 				}
 				if (pg == pageIndex) {
-					int ps = (int)(h0 * pg);
-					int pe = (int)(ps + h0);
-					for (i = 0; i < _xplots; ++i) {
-						double xx, yy;
-						// convert 1/100ths to points...
-						xx = (_plotArray[i].x * gx) + 0.5;
-						yy = (_plotArray[i].y * gy) + 0.5;
-						if (yy >= ps && yy < pe) {
-							++did;
-							g2d.drawString(_plotArray[i].s,
-								(int)xx, (int)yy - ps + l);
-						}
-					}
+//					int ps = (int)(h0 * pg);
+//					int pe = (int)(ps + h0);
+//					for (i = 0; i < _xplots; ++i) {
+//						double xx, yy;
+//						// convert 1/100ths to points...
+//						xx = (_plotArray[i].x * gx) + 0.5;
+//						yy = (_plotArray[i].y * gy) + 0.5;
+//						if (yy >= ps && yy < pe) {
+//							++did;
+//							g2d.drawString(_plotArray[i].s,
+//								(int)xx, (int)yy - ps + l);
+//						}
+//					}
 				}
 				++pg;
 			}
@@ -1612,100 +1618,108 @@ class Wang1200_Model611
 		}
 	}
 
-	private void index() {
-		_y += 14;
-	}
-
-	private void revindex() {
-		_y -= 14;
-		if (_y < 0) _y = 0;
-	}
-
-	private void space() {
-		_x += 10;
-		if (_x >= 1300) _x = 1299;
-	}
-
-	private void bkspace() {
-		_x -= 10;
-		if (_x < 0) _x = 0;
-	}
+//	private void index() {
+//		_y += 14;
+//	}
+//
+//	private void revindex() {
+//		_y -= 14;
+//		if (_y < 0) _y = 0;
+//	}
+//
+//	private void space() {
+//		_x += 10;
+//		if (_x >= 1300) _x = 1299;
+//	}
+//
+//	private void bkspace() {
+//		_x -= 10;
+//		if (_x < 0) _x = 0;
+//	}
 
 	public void do_cn24(byte[] b) {
-		if ((b[0] & 0x0f) == 0x08) { // control characters...
-			switch((b[0] & 0x30) >> 4) {
-			case 0: // nothing
-				break;
-			case 1:	// return+index handled below...
-				_x = 0;
-				if (_plot) return;
-				index();
-				break;
-			case 2:	// print mode
-				_plot = false;	// cleanup?
-				return;
-			case 3:	// plot mode
-				_plot = true;
-				_dx = _dy = 0;
-				return;
-			}
-		} else if ((b[0] & 0x06) == 0x02) {
-			switch((b[0] & 0x30) >> 4) {
-			case 0: // space/bspace or nothing
-				if (_plot) return;
-				if ((b[0] & 1) == 0) {
-					space();
-				} else {
-					bkspace();
-				}
-				break;
-			case 1:	// index/rev or shift...
-				if ((b[0] & 0x0e) == 0x02) {
-					_shifted = ((b[0] & 1) != 0);
-					return;
-				}
-				if (_plot) return;
-				if ((b[0] & 1) == 0) {
-					index();
-				} else {
-					revindex();
-				}
-				break;
-			case 2:	// stepping
-			case 3:	// stepping
-				if (!_plot) return;
-				switch(b[0] & 0x19) {
-				case 0x00:
-					_dx += 1;
-					break;
-				case 0x01:
-					_dx -= 1;
-					break;
-				case 0x08:
-					_dy += 1;
-					break;
-				case 0x09:
-					_dy -= 1;
-					break;
-				case 0x10:
-					_dx += 1;
-					_dy += 1;
-					break;
-				case 0x11:
-					_dx -= 1;
-					_dy += 1;
-					break;
-				case 0x18:
-					_dx += 1;
-					_dy -= 1;
-					break;
-				case 0x19:
-					_dx -= 1;
-					_dy -= 1;
-					break;
-				}
-				return;
-			}
+//		if ((b[0] & 0x0f) == 0x08) { // control characters...
+//			switch((b[0] & 0x30) >> 4) {
+//			case 0: // nothing
+//				break;
+//			case 1:	// return+index handled below...
+//				_x = 0;
+//				if (_plot) return;
+//				index();
+//				break;
+//			case 2:	// print mode
+//				_plot = false;	// cleanup?
+//				return;
+//			case 3:	// plot mode
+//				_plot = true;
+//				_dx = _dy = 0;
+//				return;
+//			}
+//		} else if ((b[0] & 0x06) == 0x02) {
+//			switch((b[0] & 0x30) >> 4) {
+//			case 0: // space/bspace or nothing
+//				if (_plot) return;
+//				if ((b[0] & 1) == 0) {
+//					space();
+//				} else {
+//					bkspace();
+//				}
+//				break;
+//			case 1:	// index/rev or shift...
+//				if ((b[0] & 0x0e) == 0x02) {
+//					_shifted = ((b[0] & 1) != 0);
+//					return;
+//				}
+//				if (_plot) return;
+//				if ((b[0] & 1) == 0) {
+//					index();
+//				} else {
+//					revindex();
+//				}
+//				break;
+//			case 2:	// stepping
+//			case 3:	// stepping
+//				if (!_plot) return;
+//				switch(b[0] & 0x19) {
+//				case 0x00:
+//					_dx += 1;
+//					break;
+//				case 0x01:
+//					_dx -= 1;
+//					break;
+//				case 0x08:
+//					_dy += 1;
+//					break;
+//				case 0x09:
+//					_dy -= 1;
+//					break;
+//				case 0x10:
+//					_dx += 1;
+//					_dy += 1;
+//					break;
+//				case 0x11:
+//					_dx -= 1;
+//					_dy += 1;
+//					break;
+//				case 0x18:
+//					_dx += 1;
+//					_dy -= 1;
+//					break;
+//				case 0x19:
+//					_dx -= 1;
+//					_dy -= 1;
+//					break;
+//				}
+//				return;
+//			}
+//		}
+		if (b[0] == 0x12) {	// shift dn
+			_shifted = false;
+			return;
+		}
+		if (b[0] == 0x13) {	// shift up
+			_shifted = true;
+			return;
 		}
 		byte p;
 		if (_shifted) {
@@ -1724,35 +1738,47 @@ class Wang1200_Model611
 			bb[0] = p;
 			s = new String(bb);
 		}
-		if (_plot) {
-			_x += _dx;
-			if (_x < 0) _x = 0;
-			if (_x >= 1300) _x = 1299; // 13 in. platten
-			_y += _dy;
-			if (_y < 0) _y = 0;
-			_hasGraphic = true;
-			_text.addPlot(s, _x, _y);
-			_text.repaint();
-			//_text.setCaretPosition(_eop); // to what?
-			// todo: need to get JScrollPane to update...
-		} else {
-			_text.append(s);
+//		if (_plot) {
+//			_x += _dx;
+//			if (_x < 0) _x = 0;
+//			if (_x >= 1300) _x = 1299; // 13 in. platten
+//			_y += _dy;
+//			if (_y < 0) _y = 0;
+//			_hasGraphic = true;
+//			_text.addPlot(s, _x, _y);
+//			_text.repaint();
+//			//_text.setCaretPosition(_eop); // to what?
+//			// todo: need to get JScrollPane to update...
+//		} else {
+			clrCursor();
+			_text.insert(s,_eop);
 			_eop += s.length();
-			_text.setCaretPosition(_eop);
-		}
+			setCursor();
+//		}
 	}
 	public void do_cn24_direct(char c) {
-		String s = Character.toString(c);
-		_text.append(s);
-		_eop += s.length();
-		_text.setCaretPosition(_eop);
+		clrCursor();
+		//if (c >= ' ') {
+			String s = Character.toString(c);
+			_text.insert(s,_eop);
+			_eop += s.length();
+		//} else switch (c) {
+			//case '\n':
+			//case '\r':
+				//index();
+				//break;
+			//case '\b':
+				//bkspace();
+				//break;
+		//}
+		setCursor();
 	}
 }
 
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2029,9 +2055,8 @@ if (e.isActionKey()) {
 System.err.println("action");
 }
 		char c = e.getKeyChar();
-		if (_fout == null) {
-			_m611.do_cn24_direct(c);
-		}
+		// every key gets printed...
+		_m611.do_cn24_direct(c);
 		int i = _m611.ascii2roti(c);
 		boolean shifted = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
 		do_keycode(shifted, i);
@@ -2150,7 +2175,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2296,7 +2321,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2435,7 +2460,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.8 2011/11/15 22:16:49 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.12 2011/11/23 17:12:27 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.13 2011/12/23 23:34:31 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -329,10 +329,16 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 		b = 0x0e00;
 		bc = 0;
 		byte = 0;
+#ifdef __wang1200__
+		b = 0x0ec0 | (sys->cpu.right << 0);
+#endif // __wang1200__
 	} else if (nibble & 0x40) { // tape on
 		b = 0x0d00 | ((wr & 1) << 9);
 		bc = 0;
 		byte = 0;
+#ifdef __wang1200__
+		b = 0x0e00 | ((wr & 1) << 8) | (sys->cpu.right << 0);
+#endif // __wang1200__
 	} else if (wr) {
 		bc ^= 1;
 		if (bc) {
@@ -342,6 +348,9 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 			byte = (byte & 0xf0) | nibble;
 		}
 		b = 0x0c00 | byte;
+#ifdef __wang1200__
+		b |= (sys->cpu.right << 8);
+#endif // __wang1200__
 	} else {
 		if (!bc) {
 			// not needed? will GUI take care of it?
@@ -355,6 +364,9 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 				return 0xff;	// EOF
 			}
 			b = 0x0d01;	// request a byte...
+#ifdef __wang1200__
+			b = 0x0e40 | (sys->cpu.right << 0);
+#endif // __wang1200__
 			rc = write(__gui_dfd, &b, sizeof(b));
 			if (rc != sizeof(b)) {
 				perror("guitape");
@@ -381,7 +393,12 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 #endif
 				return 0xff;
 			}
+#ifdef __wang1200__
+			// assert drive?
+			if (((b >> 8) & ~1) != 0x0c) {
+#else // ! __wang1200__
 			if ((b >> 8) != 0x0c) {
+#endif // ! __wang1200__
 				// oops...
 				// now we've really done it...
 				extraneous = b;
@@ -420,6 +437,9 @@ static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 		if (sys->cpu.function) {
 			b |= (3 << 11);
 			c = (c >> 4) & 0x0f;
+			// yuk
+			b |= (1 << c);
+			c = 0;
 		} else {
 			c &= 0x3f;
 		}

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.16 2011/12/23 17:16:30 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.17 2011/12/23 23:34:31 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -304,8 +304,10 @@ static void tape_write(wang_sys_t *sys) {
 		data <<= 1;
 		data |= chg;
 		if (++bitc >= 8) {
-			// (void)sys->tape(sys, 1, data);
-fprintf(stderr, "tape write 0x%02x\n", data);
+//fprintf(stderr, "tape write 0x%02x\n", data);
+			// interface requires nibbles, not bytes...
+			(void)sys->tape(sys, 1, (data >> 4) & 0x0f);
+			(void)sys->tape(sys, 1, data & 0x0f);
 			data = 0;
 			bitc = 0;
 		}
@@ -399,12 +401,13 @@ static void tape_on(wang_sys_t *sys) {
 	}
 	_indicators = 8;
 	tape_write(NULL);
-#if 0
-	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
-	if (!wr) {
+#if 1
+	(void)sys->tape(sys, sys->cpu.rc, 0x40); // i.e. open file...
+	if (!sys->cpu.rc) {
 		tape_read(NULL);
 	}
-#else
+#endif
+#if 1
 fprintf(stderr, "tape on %s fw=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
 	sys->cpu.fw, hi, sys->cpu.hl,
@@ -424,9 +427,10 @@ static void tape_off(wang_sys_t *sys) {
 	}
 	_indicators = 8;
 	tape_write(NULL);
-#if 0
+#if 1
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
-#else
+#endif
+#if 1
 fprintf(stderr, "tape off %s fw=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
 	sys->cpu.fw, hi, sys->cpu.hl,

@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.4 2011/11/15 17:36:02 drmiller Exp $
+$Id: README.internals,v 1.5 2011/12/23 23:34:31 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -52,10 +52,10 @@ it's input pipe:
 	b2 = n.c.
 	b3 = n.c.
 
-00001100tttttttt
-	Tape read data, byte 'tt'.
-0000111000000000
-	Tape read EOF. (END PROG)
+0000110dtttttttt
+	Tape read data, byte 'tt'. Drive 'd' (1=right).
+000011100000000d
+	Tape read EOF. Drive 'd' (1=right).
 
 
 The simulator sends the following (binary) codes on it's output pipe:
@@ -65,16 +65,16 @@ The simulator sends the following (binary) codes on it's output pipe:
 	Bits are: 0=Record, 1=TapeMovR, 2=TapeMovL, 3=EndDoc, 4=NoAdj,
 	5=CharStop, 6=Search, 7=Skip, 8=Code
 
-00001100tttttttt
-	Tape "record" data, byte 'tt'.
-0000110100000000
-	Tape On for read.
-0000110100000001
-	Request front-end to send 1 byte from tape.
-0000111100000000
-	Tape On for write
-0000111000000000
-	Tape Off (FE should stop sending, if read).
+0000110dtttttttt
+	Tape "record" data, byte 'tt'. Drive 'd' (1=right).
+000011100000000d
+	Tape On for read. Drive 'd' (1=right).
+000011100100000d
+	Request front-end to send 1 byte from tape. Drive 'd' (1=right).
+000011101000000d
+	Tape On for write. Drive 'd' (1=right).
+000011101100000d
+	Tape Off (FE should stop sending, if read). Drive 'd' (1=right).
 
 0001000000rrrrrr
 	Print data for "Device 1", Model 601/602/611 "Output Writer".
