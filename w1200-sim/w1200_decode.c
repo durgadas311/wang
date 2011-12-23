@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.15 2011/12/22 23:22:33 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.16 2011/12/23 17:16:30 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -286,26 +286,29 @@ static void tape_write(wang_sys_t *sys) {
 	static uint8_t last = 0;
 	static uint8_t data = 0;
 	static int bitc = 0;
-	static int sigc = 0;
 
-#if 0
-	last <<= 1;
-	last |= dat;
-	sigc ^= 1;
-	if (sigc) return;
-	uint8_t bit = 0; 
-	uint8_t h = (last & 0x03);
-	if (h == 0x02 || h == 0x01) bit = 1;
-	if (++bitc == 5) {
-		(void)sys->tape(sys, 1, data);
-		if (odd_parity[data] != bit) {
-			fprintf(stderr, "parity error in tape write %x %d [%02x]\n", data, bit, last);
-		}
+#if 1
+	if (sys == NULL) {
+		if (bitc) fprintf(stderr, "tape residual (%d) 0x%02x\n",
+					bitc, data << (8 - bitc));
+		last = 0;
 		data = 0;
 		bitc = 0;
-	} else {
+		return;
+	}
+	uint8_t curr = (sys->cpu.din1 << 1) | sys->cpu.din0;
+	uint8_t chg = (curr ^ last);
+	last = curr;
+	if (chg) {
+		chg -= 1;
 		data <<= 1;
-		data |= bit;
+		data |= chg;
+		if (++bitc >= 8) {
+			// (void)sys->tape(sys, 1, data);
+fprintf(stderr, "tape write 0x%02x\n", data);
+			data = 0;
+			bitc = 0;
+		}
 	}
 #else
 fprintf(stderr, "tape %d %d %lld\n", sys->cpu.din0, sys->cpu.din1, sys->cpu.sys.cycles);
@@ -394,7 +397,8 @@ static void tape_on(wang_sys_t *sys) {
 		sys->cpu.ind.ind.tml = sys->cpu.tm;
 		hi = sys->cpu.lhs;
 	}
-	++_indicators;
+	_indicators = 8;
+	tape_write(NULL);
 #if 0
 	(void)sys->tape(sys, wr, 0x40); // i.e. open file...
 	if (!wr) {
@@ -418,7 +422,8 @@ static void tape_off(wang_sys_t *sys) {
 		sys->cpu.ind.ind.tml = sys->cpu.tm;
 		hi = sys->cpu.lhs;
 	}
-	++_indicators;
+	_indicators = 8;
+	tape_write(NULL);
 #if 0
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 #else
@@ -701,7 +706,7 @@ int instr_exec(wang_sys_t *sys) {
 		if (br_k & 8) {
 			sys->cpu.ind.ind.nan = (u->bi & 1);
 		}
-		++_indicators;
+		_indicators = 8;
 		break;
 	case 8:
 		if (br_k & 2) {
@@ -810,6 +815,7 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 				sys->cpu.kbd = 0;
 				sys->display(sys, 0);
 			}
+			// do this before any possible sleep!
 			if (_indicators) {
 				_indicators = 0;
 				sys->display(sys, -2);
@@ -836,10 +842,12 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 		instr_trace(sys);
 	}
 #endif // TRACE
-if ((sys->cpu.sys.cycles & 0x07) == 0 && _indicators) {
-	_indicators = 0;
-	sys->display(sys, -2);
-}
+	// some indicators are set/reset quickly, not intended to be seen.
+	// so only update indicators after 8 cycles from last change.
+	if (_indicators && --_indicators == 0) {
+		//_indicators = 0;
+		sys->display(sys, -2);
+	}
 
 	display_check(sys);	// this might sleep until UI event...
 

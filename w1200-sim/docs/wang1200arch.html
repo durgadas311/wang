@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.12 2011/12/22 23:22:33 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.13 2011/12/23 17:16:30 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -923,125 +923,33 @@ as follows (layout for Solid State ROM).
 
 <H4>Memory Usage</H4>
 
-All memory in the calculator is organized as 4-bit words.
-Memory addresses are not byte-addresses, but 4-bit-word addresses.
+All memory in the memory is organized as 8-bit words (bytes).
+Memory addresses are byte-addresses.
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=3>Memory Usage (Model 600-14)</TH></TR>
-<TR><TH>RAM Address</TH><TH>Reg #</TH><TH>Purpose</TH></TR>
-<TR><TD CLASS="num">0xfff - 0xff0</TD><TD CLASS="num">15 15</TD><TD>System State</TD></TR>
-<TR><TD CLASS="num">0xfef - 0xfe0</TD><TD CLASS="num">15 14</TD><TD>Display Register</TD></TR>
-<TR><TD CLASS="num">0xfdf - 0xfd0</TD><TD CLASS="num">15 13</TD><TD>Sci Notation Display</TD></TR>
-<TR><TD CLASS="num">0xfcf - 0xfc0</TD><TD CLASS="num">15 12</TD><TD>Floating Point Display</TD></TR>
-<TR><TD CLASS="num">0xfbf - 0xfb0</TD><TD CLASS="num">15 11</TD><TD>Learn Mode Display</TD></TR>
-<TR><TD CLASS="num">0xfaf - 0xfa0</TD><TD CLASS="num">15 10</TD><TD>Temp Register</TD></TR>
-<TR><TD CLASS="num">0xf9f - 0xf90</TD><TD CLASS="num">15 09</TD><TD>Temp Register</TD></TR>
-<TR><TD CLASS="num">0xf8f - 0xf80</TD><TD CLASS="num">15 08</TD><TD>Prog Subr Stack</TD></TR>
-<TR><TD CLASS="num">0xf7f - 0xf70</TD><TD CLASS="num">15 07</TD><TD>Prog Subr Stack</TD></TR>
-<TR><TD CLASS="num">0xf6f - 0xf60</TD><TD CLASS="num">15 06 (246)</TD><TD>Steps 0000 - 0007</TD></TR>
-<TR><TD CLASS="num">0xf5f - 0xf60</TD><TD CLASS="num">15 05 (245)</TD><TD>Steps 0008 - 0015</TD></TR>
-<TR><TD CLASS="num">0xf4f - 0xf60</TD><TD CLASS="num">15 04 (244)</TD><TD>Steps 0016 - 0023</TD></TR>
+<TR><TH COLSPAN=3>Memory Usage</TH></TR>
+<TR><TH>RAM Address</TH><TH></TH><TH>Purpose</TH></TR>
+<TR><TD CLASS="num">0xff</TD><TD CLASS="num">15 15</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfe</TD><TD CLASS="num">15 14</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfd</TD><TD CLASS="num">15 13</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfc</TD><TD CLASS="num">15 12</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfb</TD><TD CLASS="num">15 11</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfa</TD><TD CLASS="num">15 10</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf9</TD><TD CLASS="num">15 09</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf8</TD><TD CLASS="num">15 08</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf7</TD><TD CLASS="num"></TD><TD>Current key</TD></TR>
+<TR><TD CLASS="num">0xf6</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf5</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf4</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf3</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf2</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf1</TD><TD CLASS="num"></TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf0</TD><TD CLASS="num"></TD><TD></TD></TR>
 <TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0x12f - 0x120</TD><TD CLASS="num">01 02 (18)</TD><TD>Steps 1824 - 1831</TD></TR>
-<TR><TD CLASS="num">0x11f - 0x110</TD><TD CLASS="num">01 01 (17)</TD><TD>Steps 1832 - 1839</TD></TR>
-<TR><TD CLASS="num">0x10f - 0x100</TD><TD CLASS="num">01 00 (16)</TD><TD>Steps 1840 - 1847</TD></TR>
-<TR><TD CLASS="num">0x0ff - 0x0f0</TD><TD CLASS="num">00 15 (15)</TD><TD>GP Reg, Left</TD></TR>
-<TR><TD CLASS="num">0x0ef - 0x0e0</TD><TD CLASS="num">00 14 (14)</TD><TD>GP Reg, Right</TD></TR>
-<TR><TD CLASS="num">0x0df - 0x0d0</TD><TD CLASS="num">00 13 (13)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0cf - 0x0c0</TD><TD CLASS="num">00 12 (12)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0bf - 0x0b0</TD><TD CLASS="num">00 11 (11)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x0af - 0x0a0</TD><TD CLASS="num">00 10 (10)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x09f - 0x090</TD><TD CLASS="num">00 09 (9)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x08f - 0x080</TD><TD CLASS="num">00 08 (8)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x07f - 0x070</TD><TD CLASS="num">00 07 (7)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x06f - 0x060</TD><TD CLASS="num">00 06 (6)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x05f - 0x050</TD><TD CLASS="num">00 05 (5)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x04f - 0x040</TD><TD CLASS="num">00 04 (4)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x03f - 0x030</TD><TD CLASS="num">00 03 (3)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x02f - 0x020</TD><TD CLASS="num">00 02 (2)</TD><TD>GP Reg</TD></TR>
-<TR><TD CLASS="num">0x01f - 0x010</TD><TD CLASS="num">00 01 (1)</TD><TD>GP Reg *</TD></TR>
-<TR><TD CLASS="num">0x00f - 0x000</TD><TD CLASS="num">00 00 (0)</TD><TD>GP Reg *</TD></TR>
-<TR><TD COLSPAN=3>* Certain commands depend on values in registers 0 and 1.<BR>
-For example, plotting commands expect<BR>
-0 to contain the Y delta, and 1 the X delta</TD></TR>
-</TABLE></UL>
-
-
-<P><UL><TABLE BORDER>
-<TR><TH COLSPAN=6>System State Memory Usage</TH></TR>
-<TR><TH>RAM<BR>Address</TH><TH>T,U,V</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
-<TR><TD>0xfff</TD><TD>15,15,15</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>Keyboard<BR>Trace</TD></TR>
-<TR><TD>0xffe</TD><TD>15,15,14</TD><TD COLSPAN=4>scratch</TD></TR>
-<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>-</TD><TD>-</TD><TD>Group<BR>I/O</TD><TD>Program<BR>Trace</TD></TR>
-<TR><TD>0xffc</TD><TD>15,15,12</TD><TD COLSPAN=4>unused?</TD></TR>
-<TR><TD>0xffb</TD><TD>15,15,11</TD><TD COLSPAN=4>Prog Subr Stack Level</TD></TR>
-<TR><TD>0xffa</TD><TD>15,15,10</TD><TD COLSPAN=4>Prefix State</TD></TR>
-<TR><TD>0xff9</TD><TD>15,15,9</TD><TD COLSPAN=4>unknown</TD></TR>
-<TR><TD>0xff8</TD><TD>15,15,8</TD><TD COLSPAN=4>KB Keyboard code</TD></TR>
-<TR><TD>0xff7</TD><TD>15,15,7</TD><TD COLSPAN=4>KA Keyboard code</TD></TR>
-<TR><TD>0xff6</TD><TD>15,15,6</TD><TD COLSPAN=4>Tape Bit</TD></TR>
-<TR><TD>0xff5</TD><TD>15,15,5</TD><TD COLSPAN=4>Tape Word</TD></TR>
-<TR><TD>0xff4</TD><TD>15,15,4</TD><TD COLSPAN=4>Number Entry State</TD></TR>
-<TR><TD>0xff3</TD><TD>15,15,3</TD><TD>Prefix</TD><TD>ROM</TD><TD>Stop</TD><TD>Run</TD></TR>
-<TR><TD>0xff2</TD><TD>15,15,2</TD><TD COLSPAN=4>P.C. Mem Addr, L</TD></TR>
-<TR><TD>0xff1</TD><TD>15,15,1</TD><TD COLSPAN=4>P.C. Mem Addr, M</TD></TR>
-<TR><TD>0xff0</TD><TD>15,15,0</TD><TD COLSPAN=4>P.C. Mem Addr, H</TD></TR>
-</TD></TR>
-</TABLE>
-
-<P><DL>
-	<DT><B>Keyboard Trace (15,15,15)<0>:</B>
-	<DD>	Tracing of keyboard commands is enabled
-	<DT><B>Group I/O (15,15,13)<1>:</B>
-	<DD>	A Group I/O sequence is running
-	<DT><B>Program Trace (15,15,13)<0>:</B>
-	<DD>	Tracing of program commands is enabled
-	<DT><B>Prefix State (15,15,10):</B>
-	<DD>	<TABLE BORDER>
-		<TR><TD>00 = SEARCH</TD>		<TD>08 = CALL</TD></TR>
-		<TR><TD>01 = RECALL</TD>		<TD>09 = MARK</TD></TR>
-		<TR><TD>02 = PRINT</TD>			<TD>10 = STORE</TD></TR>
-		<TR><TD>03 = I/O</TD>			<TD>11 = ALPHA</TD></TR>
-		<TR><TD>04 = SEARCH ROM (15 03)</TD>	<TD>12 = INDIR</TD></TR>
-		<TR><TD>05 = SEARCH ROM (15 04)</TD>	<TD>13 = CALL ROM</TD></TR>
-		<TR><TD>06 = SEARCH ROM (15 05)</TD>	<TD>14 = GROUP 1</TD></TR>
-		<TR><TD>07 = SEARCH ROM (15 06)</TD>	<TD>15 = GROUP 2</TD></TR>
-		</TABLE>
-	<DT><B>Number Entry State (15,15,4):</B>
-	<DD>	<TABLE BORDER>
-		<TR><TD>00 = Not currently entering number</TD></TR>
-		<TR><TD>01 = Mantissa, whole part</TD></TR>
-		<TR><TD>03 = Exponent</TD></TR>
-		<TR><TD>04 = Mantissa, fractional part</TD></TR>
-		<TR><TD>15 = Set P.C.</TD></TR>
-		</TABLE>
-	<DT><B>Prefix (15,15,3)<3>:</B>
-	<DD>	Next code is interpreted according to Prefix State.
-	<DT><B>ROM (15,15,3)<2>:</B>
-	<DD>	Program is running in ROM (codes taken from ROM instead of RAM)
-	<DT><B>Stop (15,15,3)<1>:</B>
-	<DD>	Program is running but stopped
-	<DT><B>Run (15,15,3)<0>:</B>
-	<DD>	Program is running
-</DL>
-</UL>
-
-<P><UL><TABLE BORDER>
-<TR><TH COLSPAN=4>Prog Subr Stack</TH></TR>
-<TR><TH>RAM<BR>Address</TH><TH>T,U,V</TH><TH COLSPAN=2>Use</TH></TR>
-<TR><TD>0xf8c - 0xf8f</TD><TD>15,8,12-15</TD><TD COLSPAN=2>Level 3</TD></TR>
-<TR><TD>0xf88 - 0xf8b</TD><TD>15,8,8-11</TD><TD COLSPAN=2>Level 2</TD></TR>
-<TR><TD>0xf84 - 0xf87</TD><TD>15,8,4-7</TD><TD COLSPAN=2>Level 1</TD></TR>
-<TR><TD>0xf83</TD><TD>15,8,3</TD><TD ROWSPAN=4>Level 0</TD><TD>P.C. Mem Addr, L</TD></TR>
-<TR><TD>0xf82</TD><TD>15,8,2</TD><TD>P.C. Mem Addr, M</TD></TR>
-<TR><TD>0xf81</TD><TD>15,8,1</TD><TD>P.C. Mem Addr, H</TD></TR>
-<TR><TD>0xf80</TD><TD>15,8,0</TD><TD>Mode (15,15,3)</TD></TR>
-<TR><TD>0xf7c - 0xf7f</TD><TD>15,7,12-15</TD><TD COLSPAN=2>Level 7</TD></TR>
-<TR><TD>0xf78 - 0xf7b</TD><TD>15,7,8-11</TD><TD COLSPAN=2>Level 6</TD></TR>
-<TR><TD>0xf74 - 0xf77</TD><TD>15,7,4-7</TD><TD COLSPAN=2>Level 5</TD></TR>
-<TR><TD>0xf70 - 0xf73</TD><TD>15,7,0-3</TD><TD COLSPAN=2>Level 4</TD></TR>
-<TR><TD COLSPAN=4>Note, P.C. Mem Addr points to the <U>calling</U> step,<BR>
-not the step to return to.</TD></TR>
+<TR><TD CLASS="num">0xdf</TD><TD CLASS="num"></TD><TD>FIFO tail count</TD></TR>
+<TR><TD CLASS="num">0xd0 - 0xde</TD><TD CLASS="num"></TD><TD>Key FIFO</TD></TR>
+<TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
+<TR><TD CLASS="num">0x00 - 0x6f</TD><TD CLASS="num"></TD><TD>Line buffer</TD></TR>
 </TABLE></UL>
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
@@ -1083,5 +991,18 @@ which would hold about 225,000 bytes, not counting overhead for line-buffer form
 <P>There was no parity or other error detection or correction encoded, so
 the only way to gain reliability was to "double record" each line for
 redundancy (consuming twice as much tape).
+
+<P>Each "block" written to tape has the following format:
+
+<OL>
+<LI>19,562-cycle gap
+<LI>66-bit header (?)
+<LI>1708-cycle gap (?)
+<LI>100-byte line, filled with 0xaa
+<LI>27,928-cycle gap (867+27061) (?)
+</OL>
+
+<P>Each line takes 92,498 cycles on tape, or about 0.46 second.
+This equates to about 978 lines per C15 tape.
 
 </HTML>
