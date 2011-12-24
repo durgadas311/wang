@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.7 2011/12/22 23:22:33 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.8 2011/12/24 18:20:24 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"
@@ -223,7 +223,7 @@ void diwang(char *buf, uint64_t *v) {
 			break;
 		}
 		break;
-	case 10:	sprintf(opA, "KB=ROP:LOP:DK:TCK"); break;
+	case 10:	sprintf(opA, "KB=ROP:LOP:TCK:DK"); break;
 	case 11:	sprintf(opA, "DIN<1:0>=KA<0>,KB<0>"); break;
 	case 12:	sprintf(opA, "KB=RHS:LHS:R/B:L/S"); break;
 	case 13:

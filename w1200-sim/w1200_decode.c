@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.17 2011/12/23 23:34:31 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.18 2011/12/24 18:20:24 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -318,75 +318,71 @@ fprintf(stderr, "tape %d %d %lld\n", sys->cpu.din0, sys->cpu.din1, sys->cpu.sys.
 }
 
 static int tape_read(wang_sys_t *sys) {
-	static uint8_t last = 0;
+	static uint8_t lastc = 0;
+	static uint8_t lastd = 0;
 	static uint8_t data = 0;
-	static int bitc = 0;
 	static int sigc = 0;
+	static int bitc = 0;
+	static int init = 0;
 	static uint64_t repc = 0;
-	static uint8_t bit = 0;
 	uint8_t nib;
 
-#if 0
-	// wait for TD 0->1
-	// delay 56 cycles
-	// wait 220 cycles (sample TD for end of loop)
-	// [15,15,6] ^= DL	; compute parity?
-	// CY = 0 - DL		; CY = bit0
-	// [15,15,5] <<= 1	; make space
-	// [15,15,5] += CY	; insert new bit
-	// ACC += 1		; count bits
-	// wait up to 256 cycles for TD 0->1
-	//         __    __
-	// "1" = _|  |__|  |_
-	//         __
-	// "0" = _|  |_______
-	//
+#if 1
 	if (sys == NULL) {
-		bit = 0;
-		last = 0;
+		lastc = 0;
+		lastd = 0;
 		sigc = 0;
 		bitc = 0;
-		repc = 0;
+		init = 0;
 		return 0;	// don't care...
+	}
+
+	if (!init) {
+		repc = sys->cpu.sys.cycles + 900;	// 19,562cy... ?
+		init = 1;
 	}
 
 	if (sys->cpu.sys.cycles < repc) {
 reps:
-		return bit;
+		return 0;
 	}
 	if (sigc) {
 sigs:
 		--sigc;
-		bit = last & 1;
-		last >>= 1;
-		repc = sys->cpu.sys.cycles + 97;	// very sensitive...
+		sys->cpu.tck = lastc & 1;
+		sys->cpu.dk = lastd & 1;
+		lastc >>= 1;
+		lastd >>= 1;
+		repc = sys->cpu.sys.cycles + 10;	// sensitive?
 		goto reps;
 	}
 	if (bitc) {
 bits:
 		--bitc;
 		data <<= 1;
-		if (data & 0x20) {
-			last = 0x05;	// lsb first out...
+		if (data & 0x10) {
+			lastc = 0x00;
+			lastd = 0x01;
 		} else {
-			last = 0x01;	// lsb first out...
+			lastc = 0x01;
+			lastd = 0x00;
 		}
-		sigc = 4;
+		sigc = 5;
 		goto sigs;
 
 	}
 	nib = sys->tape(sys, 0, 0);
 	if (nib == 0xff) { // EOF
-		repc = sys->cpu.sys.cycles + 700;	// expects at least 650?
-		bit = 0;
+		repc = sys->cpu.sys.cycles + 900;	// 27,928cy... ?
 		goto reps;
 	}
-	data = (nib << 1) | odd_parity[nib];
-	bitc = 5;
+fprintf(stderr, "re-encoding %02x\n", nib);
+	data = nib;
+	bitc = 4;
 	goto bits;
 #else
-	sys->cpu.din0 ^= 1;
-	sys->cpu.din1 ^= 1;
+	sys->cpu.tck ^= 1;
+	sys->cpu.dk ^= 1;
 #endif
 }
 
@@ -400,6 +396,10 @@ static void tape_on(wang_sys_t *sys) {
 		hi = sys->cpu.lhs;
 	}
 	_indicators = 8;
+	sys->cpu.tck = 0;
+	sys->cpu.dk = 0;
+	sys->cpu.din0 = 0;
+	sys->cpu.din1 = 0;
 	tape_write(NULL);
 #if 1
 	(void)sys->tape(sys, sys->cpu.rc, 0x40); // i.e. open file...
@@ -426,6 +426,10 @@ static void tape_off(wang_sys_t *sys) {
 		hi = sys->cpu.lhs;
 	}
 	_indicators = 8;
+	sys->cpu.tck = 0;
+	sys->cpu.dk = 0;
+	sys->cpu.din0 = 0;
+	sys->cpu.din1 = 0;
 	tape_write(NULL);
 #if 1
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
@@ -739,8 +743,8 @@ int instr_exec(wang_sys_t *sys) {
 	case 10:
 		tape_read(sys);	// must not block, if no data being read...
 		// Dout<0>, Dout<1>, LeftProt, RightProt
-		sys->cpu.kb =	(sys->cpu.tck << 0) |
-				(sys->cpu.dk  << 1) |
+		sys->cpu.kb =	(sys->cpu.tck << 1) |
+				(sys->cpu.dk  << 0) |
 				(sys->cpu.lop << 2) |
 				(sys->cpu.rop << 3);
 sys->cpu.kb |= 0x0c; // force ROP,LOP
