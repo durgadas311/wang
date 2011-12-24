@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.13 2011/12/23 23:34:31 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.14 2011/12/24 04:26:35 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -337,7 +337,7 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 		bc = 0;
 		byte = 0;
 #ifdef __wang1200__
-		b = 0x0e00 | ((wr & 1) << 8) | (sys->cpu.right << 0);
+		b = 0x0e00 | ((wr & 1) << 7) | (sys->cpu.right << 0);
 #endif // __wang1200__
 	} else if (wr) {
 		bc ^= 1;
