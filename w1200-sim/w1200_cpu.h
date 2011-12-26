@@ -2,7 +2,7 @@
 #ifndef __w1200_cpu_h__
 #define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.9 2011/12/10 23:13:15 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.10 2011/12/26 02:42:55 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -54,7 +54,7 @@ typedef struct {
 	// tape control
 	uint8_t right;	// tape device select
 	uint8_t tm;	// tape motor control
-	uint8_t fw;	// tape movement direction
+	uint8_t rv;	// tape movement direction (reverse, forward)
 	uint8_t rc;	// tape record
 	uint8_t hl;	// tape seek control?
 	uint8_t din0;	// left/right tape write clock bit

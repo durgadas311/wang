@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.8 2011/12/24 18:20:24 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.9 2011/12/26 02:42:55 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"
@@ -231,8 +231,8 @@ void diwang(char *buf, uint64_t *v) {
 		sprintf(opA, "TM%s=%d(%s,%s,%s,%s)",
 			u->kk & 1 ? "R" : "L", u->mop & 1,
 			u->bi & 1 ? "wr" : "rd",
-			u->kk & 2 ? "fw" : "rv",
-			u->kk & 4 ? "hi" : "ho",
+			u->kk & 2 ? "rv" : "fw",
+			u->kk & 4 ? "ho" : "hi",
 			u->kk & 8 ? "mv" : "-"	// T.B.D.
 			);
 		break;

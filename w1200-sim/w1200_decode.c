@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.18 2011/12/24 18:20:24 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.19 2011/12/26 02:42:55 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -408,9 +408,9 @@ static void tape_on(wang_sys_t *sys) {
 	}
 #endif
 #if 1
-fprintf(stderr, "tape on %s fw=%d hi=%d hl=%d %s %lld\n",
+fprintf(stderr, "tape on %s rv=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
-	sys->cpu.fw, hi, sys->cpu.hl,
+	sys->cpu.rv, hi, sys->cpu.hl,
 	sys->cpu.rc ? "wr" : "rd",
 	sys->cpu.sys.cycles);
 #endif
@@ -435,9 +435,9 @@ static void tape_off(wang_sys_t *sys) {
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 #endif
 #if 1
-fprintf(stderr, "tape off %s fw=%d hi=%d hl=%d %s %lld\n",
+fprintf(stderr, "tape off %s rv=%d hi=%d hl=%d %s %lld\n",
 	sys->cpu.right ? "R" : "L",
-	sys->cpu.fw, hi, sys->cpu.hl,
+	sys->cpu.rv, hi, sys->cpu.hl,
 	sys->cpu.rc ? "wr" : "rd",
 	sys->cpu.sys.cycles);
 #endif
@@ -761,30 +761,22 @@ sys->cpu.kb |= 0x0c; // force ROP,LOP
 				// Lock Shift? Ready/Busy? 
 		break;
 	case 13:
-		sys->cpu.right = (br_k >> 0) & 1;
-		if (sys->cpu.right) {
-			sys->cpu.rhs = (br_k >> 2) & 1;
-		} else {
-			sys->cpu.lhs = (br_k >> 2) & 1;
-		}
-		sys->cpu.rc = (u->bi & 1);
-		sys->cpu.hl = (br_k >> 3) & 1;	// tape direction set/enable?
-		sys->cpu.fw = (br_k >> 1) & 1;	// tape motor must be off to set direction!
-		sys->cpu.tm = 1;
-		tape_on(sys);
-		break;
 	case 14:
 		sys->cpu.right = (br_k >> 0) & 1;
 		if (sys->cpu.right) {
-			sys->cpu.rhs = (br_k >> 2) & 1;
+			sys->cpu.rhs = ((br_k >> 2) & 1) ^ 1;
 		} else {
-			sys->cpu.lhs = (br_k >> 2) & 1;
+			sys->cpu.lhs = ((br_k >> 2) & 1) ^ 1;
 		}
 		sys->cpu.rc = (u->bi & 1);
 		sys->cpu.hl = (br_k >> 3) & 1;	// tape direction set/enable?
-		sys->cpu.fw = (br_k >> 1) & 1;	// tape motor must be off to set direction!
-		sys->cpu.tm = 0;
-		tape_off(sys);
+		sys->cpu.rv = (br_k >> 1) & 1;	// tape motor must be off to set direction!
+		sys->cpu.tm = (u->mop == 13);
+		if (sys->cpu.tm) {
+			tape_on(sys);
+		} else {
+			tape_off(sys);
+		}
 		break;
 	case 15:
 		switch(br_k & 0x07) {
