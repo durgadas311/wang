@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.6 2011/11/24 02:34:17 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.7 2011/12/29 23:04:00 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -234,10 +234,10 @@ static int _store(wang_sys_t *sys, char *line) {
 		}
 		sys->ram[adr >> 1] = b | v;
 #endif // __wang600__
-#ifdef __wang700__
+#if defined(__wang700__) || defined(__wang1200__)
 		b = sys->ram[adr];
 		sys->ram[adr] = v;
-#endif // __wang700__
+#endif // __wang700__ || __wang1200__
 		++adr;
 		s = strtok(NULL, " \t");
 	}
@@ -262,14 +262,14 @@ static int _set(wang_sys_t *sys, char *line) {
 		if (strcasecmp(s, "pc") == 0) {
 			z = 11;
 			r = (uint8_t *)&sys->cpu.sys.pc;	// casted back later
-#ifdef __wang600__
+#if defined(__wang600__) || defined(__wang1200__)
 		} else if (strcasecmp(s, "stk1") == 0) {
 			z = 11;
 			r = (uint8_t *)&sys->cpu.stk1;	// casted back later
 		} else if (strcasecmp(s, "stk2") == 0) {
 			z = 11;
 			r = (uint8_t *)&sys->cpu.stk2;	// casted back later
-#endif // __wang600__
+#endif // __wang600__ || __wang1200__
 		} else if (strcasecmp(s, "t") == 0) {
 			r = &sys->cpu.t;
 		} else if (strcasecmp(s, "u") == 0) {
@@ -295,11 +295,17 @@ static int _set(wang_sys_t *sys, char *line) {
 			z = 3;
 			r = &sys->cpu.iob;
 #endif // __wang600__ || __wang700__
-#ifdef __wang600__
+#if defined(__wang600__) || defined(__wang1200__)
 		} else if (strcasecmp(s, "d1") == 0) {
 			r = &sys->cpu.d1;
 		} else if (strcasecmp(s, "d2") == 0) {
 			r = &sys->cpu.d2;
+#endif // __wang600__ || __wang1200__
+#if defined(__wang1200__)
+		} else if (strcasecmp(s, "d3") == 0) {
+			r = &sys->cpu.d3;
+#endif // __wang1200__
+#ifdef __wang600__
 		} else if (strcasecmp(s, "ov") == 0) {
 			z = 0;
 			sys->cpu.ind.ind.ov = (v != 0);
