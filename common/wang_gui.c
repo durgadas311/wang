@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.14 2011/12/24 04:26:35 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.15 2011/12/29 16:25:10 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -162,8 +162,6 @@ static void guidisplay(wang_sys_t *sys, int on) {
 
 static uint16_t extraneous = 0;
 
-static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b);
-
 static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	uint16_t b;
 
@@ -183,7 +181,10 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		b = *kc;
 		*kc = 0;
 		if ((b & 0xfc00) != 0) {
-			guidevinput(sys, NULL, b); // maybe ACK...
+			if ((b & 0x0f00) != 0) return; // don't ACK ACK's
+			b = (b & 0xf0ff) | 0x0100;
+			write(__gui_dfd, &b, sizeof(b));
+			return;
 		}
 		// don't ACK simple keyboard traffic
 		return;
@@ -210,10 +211,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	// something came down the pipe...
 	// make sure display gets refreshed...
 	guidisplay(sys, 0);
-	if ((b & 0xf800) != 0) {
-		guidevinput(sys, kc, b);
-		return;
-	}
+
 	switch(b >> 8) {
 	case 0:	// simple key pressed
 		// can't really avoid overrun... ?
@@ -230,76 +228,71 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		sys->display(sys, -2);
 		break;
 	default:
-		// error returned?
-		sys->special_key(sys, b);
-	}
-}
 
-static void guidevinput(wang_sys_t *sys, uint16_t *kc, uint16_t b) {
-	if (kc == NULL) {	// ACK
-		if ((b & 0x0f00) != 0) return; // don't ACK ACK's
-		b = (b & 0xf0ff) | 0x0100;
-		write(__gui_dfd, &b, sizeof(b));
-		return;
-	}
 #ifndef __wang1200__
-	if ((b & 0xe000) == 0x2000) {
-		//if ((b & 0x0f00) == 1) { // ACK
-		//	handle just like input...
-		//}
-		// this is handled exactly like keyboard input...
-		// bit make sure XS has valid pattern?
-		if (sys->cpu.iob != (b >> 12)) {
-			// oops... just spit out an error for now...
-			fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.iob);
+		if ((b & 0xe000) == 0x2000) {
+			//if ((b & 0x0f00) == 1) { // ACK
+			//	handle just like input...
+			//}
+			// this is handled exactly like keyboard input...
+			// bit make sure XS has valid pattern?
+			if (sys->cpu.iob != (b >> 12)) {
+				// oops... just spit out an error for now...
+				fprintf(stderr, "Unexpected Input %04x [%d]\n", b, sys->cpu.iob);
+				return;
+			}
+//fprintf(stderr, "\tDEV< %02x %x\n", b & 0x0ff, sys->cpu.iob);
+			*kc = b; // must be non-zero to be seen
+			//if ((b & 0x0f00) == 0) { // not ACK
+			//	// ACK is sent when Wang takes "key"...
+			//}
 			return;
 		}
-//fprintf(stderr, "\tDEV< %02x %x\n", b & 0x0ff, sys->cpu.iob);
-		*kc = b; // must be non-zero to be seen
-		//if ((b & 0x0f00) == 0) { // not ACK
-		//	// ACK is sent when Wang takes "key"...
-		//}
-		return;
-	}
-	if ((b & 0xf000) == 0x4000) {
-		// TBD
-		return;
-	}
-	if ((b & 0xf000) == 0x5000) {
-		// TBD
-		return;
-	}
+		if ((b & 0xf000) == 0x4000) {
+			// TBD
+			return;
+		}
+		if ((b & 0xf000) == 0x5000) {
+			// TBD
+			return;
+		}
 #ifdef WANG_ROM_SIZE
-	int rc;
-	if ((b & 0xf000) == 0x8000) { // ROM download
-		int x = 0x0fff >> 1;
-		b = (b & 0xf0ff) | 0x0100; // ACK
-		write(__gui_dfd, &b, sizeof(b));
-		do {
-			rc = read(__gui_kfd, &b, sizeof(b));
-			if (rc < 0 && errno != EAGAIN) {
-				perror("guikeyboard");
-				// silently quit...
-				sys->run = 0;
-				return;
-			}
-			if (rc != sizeof(b)) {
-				// probably EOF, silently quit...
-				sys->run = 0;
-				return;
-			}
-			if (x >= 0 && (b & 0xff00) == 0x8000) {
-				sys->rom[x--] = (b & 0x00ff);
-			}
-		} while ((b & 0xff00) == 0x8000);
-		return;
-	}
+		if ((b & 0xf000) == 0x8000) { // ROM download
+			int rc;
+			int x = 0x0fff >> 1;
+			b = (b & 0xf0ff) | 0x0100; // ACK
+			write(__gui_dfd, &b, sizeof(b));
+			do {
+				rc = read(__gui_kfd, &b, sizeof(b));
+				if (rc < 0 && errno != EAGAIN) {
+					perror("guikeyboard");
+					// silently quit...
+					sys->run = 0;
+					return;
+				}
+				if (rc != sizeof(b)) {
+					// probably EOF, silently quit...
+					sys->run = 0;
+					return;
+				}
+				if (x >= 0 && (b & 0xff00) == 0x8000) {
+					sys->rom[x--] = (b & 0x00ff);
+				}
+			} while ((b & 0xff00) == 0x8000);
+			return;
+		}
 #endif // WANG_ROM_SIZE
 #endif // ! __wang1200__
-	// uh, this is embarassing...
-	// presumably this is tape data, we've lost it and can't continue?
-	fprintf(stderr, "gag me! %04x\n", b);
-	sys->run = 0;
+
+		// last resort... platform-specific codes...
+		if (sys->special_key(sys, b) == -1) {
+			// uh, this is embarassing...
+			// presumably this is tape data, we've lost it and can't continue?
+			fprintf(stderr, "gag me! %04x\n", b);
+			sys->run = 0;
+			return;
+		}
+	}
 }
 
 #ifdef WANG_HAS_PRINTER
@@ -330,14 +323,24 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 		bc = 0;
 		byte = 0;
 #ifdef __wang1200__
-		b = 0x0ec0 | (sys->cpu.right << 0);
+		b = 0x0ec0 |
+			(sys->cpu.rc << 5) |
+			(sys->cpu.rv << 4) |
+			((sys->cpu.lhs | sys->cpu.rhs) << 3) |
+			(sys->cpu.hl << 2) |
+			(sys->cpu.right << 0);
 #endif // __wang1200__
 	} else if (nibble & 0x40) { // tape on
 		b = 0x0d00 | ((wr & 1) << 9);
 		bc = 0;
 		byte = 0;
 #ifdef __wang1200__
-		b = 0x0e00 | ((wr & 1) << 7) | (sys->cpu.right << 0);
+		b = 0x0e00 |
+			(sys->cpu.rc << 5) |
+			(sys->cpu.rv << 4) |
+			((sys->cpu.lhs | sys->cpu.rhs) << 3) |
+			(sys->cpu.hl << 2) |
+			(sys->cpu.right << 0);
 #endif // __wang1200__
 	} else if (wr) {
 		bc ^= 1;
