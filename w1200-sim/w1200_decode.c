@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.21 2011/12/29 17:08:07 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.22 2011/12/29 23:04:52 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -496,7 +496,7 @@ static void wr_ram_i(wang_sys_t *sys) {
 	uint8_t b = sys->cpu.cb | (sys->cpu.ca << 4);
 	uint8_t d = sys->ram[adr];
 	sys->ram[adr] = b;
-//fprintf(stderr, "[%03x] %02x -> %02x\n", adr, d, b);
+//if ((adr == 0x0ed || adr == 0xf5) && d != b) fprintf(stderr, "[%03x] %02x -> %02x from %03x\n", adr, d, b, sys->cpu.sys.pc);
 	if ((adr & 0xff0) == trc_adr) {
 		if (__systrc[adr & 0x00f]) {
 			fprintf(stderr, "[%03x] %x -> %x\n", adr, d, b);
