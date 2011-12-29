@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $
+// $Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 180);	// illuminated
@@ -37,10 +37,10 @@ class _Key {
 	static final Color aqua = new Color(143,219,195);
 
 	static final int SPCL  = 0x0100;
-	static final int MODE0 = 0x0200;
-	static final int MODE1 = 0x0300;
+	static final int MODE1 = 0x0200;
+	static final int MODE2 = 0x0300;
 	static final int ALT   = 0x0400;
-	static final int MODE2 = 0x0500;
+	static final int MODE3 = 0x0500;
 
 	public _Key(Color sl, int c) {
 		this.color = sl;
@@ -67,14 +67,14 @@ class _Key {
 		return ((a << 4) | b);
 	}
 	// 'a' is mask of bits that change
-	static final int MODE0_CHG(int a, int b) {
-		return (MODE0 | (a << 4) | b);
-	}
 	static final int MODE1_CHG(int a, int b) {
 		return (MODE1 | (a << 4) | b);
 	}
 	static final int MODE2_CHG(int a, int b) {
 		return (MODE2 | (a << 4) | b);
+	}
+	static final int MODE3_CHG(int a, int b) {
+		return (MODE3 | (a << 4) | b);
 	}
 	static final int SPCL_KEY(int b) {
 		return (SPCL | b);
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -346,7 +346,7 @@ public class w1200_fe
 
 		_Key skl = kbd.locateKey(_Key.ALT_KEY(1));
 		_Key shl = kbd.locateKey(_Key.ALT_KEY(2));
-		_Key csl = kbd.locateKey(_Key.MODE1_CHG(14, 14));
+		_Key csl = kbd.locateKey(_Key.MODE2_CHG(7, 7));
 
 		Wang1200_SimInput inp = new Wang1200_SimInput(fin,
 				tml, er, tmr, na, el,
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -630,7 +630,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -668,7 +668,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -681,6 +681,7 @@ class Wang1200_Tape extends JComponent
 	boolean _ready;
 	boolean _tape_on;
 	boolean _eot;
+	byte _op;
 	int _index;
 	JLabel _window;
 	File _file;
@@ -709,6 +710,7 @@ class Wang1200_Tape extends JComponent
 		_ready = false;
 		_tape_on = false;
 		_eot = false;
+		_op = 0;
 		_tf = null;
 		tape_open();
 
@@ -845,9 +847,7 @@ class Wang1200_Tape extends JComponent
 	private void tape_position(int newidx) {
 		if (_file == null) return;
 		if (newidx < 0) return;
-		if (newidx == _index) return;	// should not happen
-		// TBD: change position of file I/O
-		if (newidx < _index) {
+		if (newidx == 0) {	// rewind
 			try {
 				_tf.seek(0);
 			} catch (IOException ee) {
@@ -856,7 +856,8 @@ class Wang1200_Tape extends JComponent
 			_index = 0;
 			_eot = false;
 		}
-		while (_index < newidx && tape_skipone() == 1);
+		if (newidx == _index) return;	// should not happen?
+		while (_index == newidx && tape_skipone() == 1); // re-enable when ready
 		// assert: _index == newidx
 	}
 
@@ -926,28 +927,43 @@ class Wang1200_Tape extends JComponent
 
 	public void do_tape(byte[] b) {
 		if (b[1] == 0x0e) {	// tape on/off/req
-			b[0] &= ~1;	// discard drive - could assert?
-			if (b[0] == 0xc0) { // tape-off
-				if (_wr && !_end && _ready) {
-					++_index;
-				}
-				_tape_on = false;
-				_wr = false;
-				_end = false;
-				_ready = false;
-				update_tape();
-				//if (_ready) _tf.flush(); // not needed anyway?
-			} else if (b[0] == 0x40) { // request data
+			if ((b[0] & 0x0c0) == 0x40) { // request data
 				tape_read();
 				if (false) {
 					++_index; // display updated later...
 				}
 				send_word();
-			} else { // tape on - read/write
-				if (_ready) _tape_on = true;
-				_wr = ((b[0] & 0x80) != 0);
-				_ready = true;
+			} else { // tape on/off - read/write, etc...
+				if (_wr && !_end && _ready) {
+					++_index;
+				}
+				_tape_on = _ready && ((b[0] & 0x0c0) == 0);
+				_wr = ((b[0] & 0x20) != 0);
+				boolean rv = ((b[0] & 0x10) != 0);
+				boolean hi = ((b[0] & 0x08) != 0);
+				boolean hl = ((b[0] & 0x04) != 0);
+				if (hl) {
+					// fast-forward or rewind...
+					if (_tape_on || !_ready) {
+						_op = 0;
+					} else {
+						_op = 1;
+					}
+					// now change file position...
+					tape_position(rv ? 0 : -1);
+				} else if (hi) {
+					// ready for record/play...
+					// test RO file...
+					if (_ready) _op = 1;
+					else _op = 0;
+				}
 				_end = false;
+				update_tape();
+				bb[1] = 0x0f;
+				bb[0] = b[0];	// how stupid is java?!?!
+				bb[0] &= 1;	//
+				bb[0] |= (_op << 1);//
+				send_word();
 			}
 			return;
 		} else if ((b[1] & ~1) == 0x0c) {	// tape write
@@ -1027,7 +1043,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
@@ -1384,12 +1400,13 @@ class Wang1200_Model611
 
 		addComponentListener(this);
 
-		// test mode only...
-		String s = "It was a dark and stormy night.\n"+
-			"The quick brown fox jumped over the lazy sleeping dog.\n"+
-			"Mary had a little lamb,\n";
-		_text.append(s);
-		_eop += s.length();
+		String s;
+//		// test mode only...
+//		s =	"It was a dark and stormy night.\n"+
+//			"The quick brown fox jumped over the lazy sleeping dog.\n"+
+//			"Mary had a little lamb,\n";
+//		_text.append(s);
+//		_eop += s.length();
 		setCursor();
 		s = "\u2588";
 		_text.append(s);
@@ -1778,7 +1795,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1790,9 +1807,9 @@ class Wang1200_Keyboard extends JComponent
 	boolean _shift;
 	int _shift_kbd;
 	int _shift_btn;
-	int _mode0;
 	int _mode1;
 	int _mode2;
+	int _mode3;
 	byte[] code_xlate;
 	OutputStream _fout;
 	Wang1200_Tape _tapel;
@@ -1823,21 +1840,21 @@ class Wang1200_Keyboard extends JComponent
 
 	private void setToggle(boolean on, _Key key, JButton btn) {
 		if (key.state == on) return;
-		if (key.getType() == _Key.MODE0) {
-			_mode0 &= ~key.getMask();
-		} else if (key.getType() == _Key.MODE1) {
+		if (key.getType() == _Key.MODE1) {
 			_mode1 &= ~key.getMask();
 		} else if (key.getType() == _Key.MODE2) {
 			_mode2 &= ~key.getMask();
+		} else if (key.getType() == _Key.MODE3) {
+			_mode3 &= ~key.getMask();
 		}
 		if (on) {
 			btn.setBackground(key.altcolor);
-			if (key.getType() == _Key.MODE0) {
-				_mode0 |= key.getMode();
-			} else if (key.getType() == _Key.MODE1) {
+			if (key.getType() == _Key.MODE1) {
 				_mode1 |= key.getMode();
 			} else if (key.getType() == _Key.MODE2) {
 				_mode2 |= key.getMode();
+			} else if (key.getType() == _Key.MODE3) {
+				_mode3 |= key.getMode();
 			}
 		} else {
 			btn.setBackground(key.color);
@@ -1911,24 +1928,24 @@ class Wang1200_Keyboard extends JComponent
 		if (g != 0) {
 			set_group(g, y, x);
 		}
-		// _mode0, _mode1, _mode2 were already updated above...
-		if (type == _Key.MODE0) {
-			code = _Key.MODE0 | _mode0;
+		// _mode1, _mode2, _mode3 were already updated above...
+		if (type == _Key.MODE1) {
+			code = _Key.MODE1 | _mode1;
 			if (g == 0) {
 				// did not previously update things...
 				// not a toggle...
 				code |= _kbds[y]._keys[x].getMode();
 			}
 		}
-		if (type == _Key.MODE1) {
+		if (type == _Key.MODE2) {
 			// was not handled above!
 			// these bits should not really be static...
-			_mode1 &= ~_kbds[y]._keys[x].getMask();
-			_mode1 |= _kbds[y]._keys[x].getMode();
-			code = _Key.MODE1 | _mode1;
-		}
-		if (type == _Key.MODE2) {
+			_mode2 &= ~_kbds[y]._keys[x].getMask();
+			_mode2 |= _kbds[y]._keys[x].getMode();
 			code = _Key.MODE2 | _mode2;
+		}
+		if (type == _Key.MODE3) {
+			code = _Key.MODE3 | _mode3;
 		}
 		if (type == _Key.SPCL) {
 			code |= _Key.SPCL;
@@ -1959,7 +1976,7 @@ class Wang1200_Keyboard extends JComponent
 		_col = 0;
 		_shift = false;
 		_fout = fo;
-		_mode2 = 1;	// initial value... we just know it...
+		_mode3 = 1;	// initial value... we just know it...
 
 		code_xlate = new byte[16];
 		code_xlate[0] = 8;
@@ -2175,7 +2192,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2321,7 +2338,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2348,15 +2365,15 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		setLayout(gridbag);
 
 		addPushButton(c, 5, 3, 0, 0,"LEFT",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(1,0))));
+			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE1_CHG(1,0))));
 		addPushButton(c, 5, 3, 3, 0,"RIGHT",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(1,1))));
+			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE1_CHG(1,1))));
 		addPushButton(c, 5, 3, 6, 0,"TRANS.",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE0_CHG(12,8))));
+			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(12,8))));
 		addPushButton(c, 5, 3, 9, 0,"PLAY",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(2,_Key.MODE0_CHG(12,0))));
+			new _Key(_Key.white1, _Key.GROUP(2,_Key.MODE1_CHG(12,0))));
 		addPushButton(c, 5, 3, 12, 0,"RECORD",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE0_CHG(12,4))));
+			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(12,4))));
 		_col += 15;
 
 		// don't bother with SINGLE/DOUBLE ?
@@ -2460,7 +2477,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.9 2011/12/23 23:34:31 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.10 2011/12/29 16:25:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -2508,11 +2525,11 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		++_col;
 
 		addPushButton(c, 5, 3, 0, 0,"SAME",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,1))));
+			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE3_CHG(3,1))));
 		addPushButton(c, 5, 3, 3, 0,"ADJUST",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE2_CHG(3,2))));
+			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE3_CHG(3,2))));
 		addPushButton(c, 5, 3, 6, 0,"JUSTIFY",_Key.red2, false,
-			new _Key(_Key.red1, _Key.GROUP(3,_Key.MODE2_CHG(3,3))));
+			new _Key(_Key.red1, _Key.GROUP(3,_Key.MODE3_CHG(3,3))));
 		_col += 9;
 
 		_col = 0;
@@ -2544,13 +2561,13 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "PARA",
-			new _Key(_Key.white1, _Key.MODE1_CHG(14,2)));
+			new _Key(_Key.white1, _Key.MODE2_CHG(7,4)));
 		addButton(c,1, 1, 0, 1, 6, 1, "LINE",
-			new _Key(_Key.white1, _Key.MODE1_CHG(14,10)));
+			new _Key(_Key.white1, _Key.MODE2_CHG(7,5)));
 		addButton(c,1, 1, 0, 2, 6, 1, "WORD",
-			new _Key(_Key.white1, _Key.MODE1_CHG(14,6)));
+			new _Key(_Key.white1, _Key.MODE2_CHG(7,6)));
 		addButton(c,1, 1, 0, 3, 6, 1, "CHAR/<BR>STOP",
-			new _Key(_Key.pink1, _Key.pink2, _Key.MODE1_CHG(14,14)));
+			new _Key(_Key.pink1, _Key.pink2, _Key.MODE2_CHG(7,7)));
 		_col += 6;
 
 		c.gridx = _col;
@@ -2565,7 +2582,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, 6, 1, "AUTO<BR>START",
-			new _Key(_Key.green1, _Key.MODE1_CHG(14,8)));
+			new _Key(_Key.green1, _Key.MODE2_CHG(7,1)));
 		addButton(c,1, 1, 0, 1, 6, 1, "MEMO<BR>(OUT)",
 			new _Key(_Key.white1, _Key.PROG_CODE(6,3)));
 		addButton(c,1, 1, 0, 2, 6, 1, "<FONT SIZE=-1>SEARCH</FONT>",

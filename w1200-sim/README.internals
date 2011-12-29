@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.5 2011/12/23 23:34:31 drmiller Exp $
+$Id: README.internals,v 1.6 2011/12/29 16:25:40 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -56,7 +56,10 @@ it's input pipe:
 	Tape read data, byte 'tt'. Drive 'd' (1=right).
 000011100000000d
 	Tape read EOF. Drive 'd' (1=right).
-
+00001111000000pd
+	Tape status update. Drive 'd' (1=right).
+	'p' ROP/LOP = not leader and (read or not write-protect)...
+	Typically only sent after Tape On/Off processed.
 
 The simulator sends the following (binary) codes on it's output pipe:
 
@@ -67,14 +70,14 @@ The simulator sends the following (binary) codes on it's output pipe:
 
 0000110dtttttttt
 	Tape "record" data, byte 'tt'. Drive 'd' (1=right).
-000011100000000d
-	Tape On for read. Drive 'd' (1=right).
 000011100100000d
 	Request front-end to send 1 byte from tape. Drive 'd' (1=right).
-000011101000000d
-	Tape On for write. Drive 'd' (1=right).
-000011101100000d
+0000111000wvhm0d
+	Tape On. Drive 'd' (1=right).
+	'w' = write, 'v' = reverse, 'h' = head-in, 'm' = tape transport motors
+0000111011wvhm0d
 	Tape Off (FE should stop sending, if read). Drive 'd' (1=right).
+	'w' = write, 'v' = reverse, 'h' = head-in, 'm' = tape transport motors
 
 0001000000rrrrrr
 	Print data for "Device 1", Model 601/602/611 "Output Writer".

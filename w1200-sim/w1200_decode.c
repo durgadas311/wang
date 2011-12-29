@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.19 2011/12/26 02:42:55 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.20 2011/12/29 16:25:40 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -32,8 +32,9 @@ static char *get_mach_str(wang_sys_t *sys) {
 	static char buf[32];
 	char *s = buf;
 
-	s += sprintf(s, "mode0=%01x", sys->cpu.d1);
-	s += sprintf(s, "|mode1=%01x", sys->cpu.d2);
+	s += sprintf(s, "mode1=%01x", sys->cpu.d1);
+	s += sprintf(s, "|mode2=%01x", sys->cpu.d2);
+	s += sprintf(s, "|mode3=%01x", sys->cpu.d3);
 	// more... ?
 	if (sys->cpu.kbd) s += sprintf(s, "|Key Pressed");
 
@@ -179,13 +180,13 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 		sys->cpu.d1 = b & 0x0f;
 		break;
 	case 3: // mode1 switches changed
-		sys->cpu.d2 = (sys->cpu.d2 & 0x01) | (b & 0x0e);
+		sys->cpu.d2 = (sys->cpu.d2 & 0x08) | (b & 0x07);
 		break;
 	case 4: // special alt keys - all update lamps...
 		switch(b & 0x0ff) {
 		case 1:	// SKIP
 			sys->cpu.ind.ind.skl ^= 1;
-			sys->cpu.d2 = (sys->cpu.d2 & 0x0e) | sys->cpu.ind.ind.skl;
+			sys->cpu.d2 = (sys->cpu.d2 & 0x07) | (sys->cpu.ind.ind.skl << 3);
 			break;
 		case 2:	// SEARCH
 			sys->cpu.ind.ind.shl ^= 1;
@@ -201,6 +202,14 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 	case 5: // mode2
 		sys->cpu.d3 = b & 0x0f;
 		break;
+	case 0x0f: // tape status change
+fprintf(stderr, "tape status %02x\n", b & 0x0ff);
+		if ((b & 1) != 0) {	// RIGHT
+			sys->cpu.rop = (b & 2) >> 1;
+		} else {		// LEFT
+			sys->cpu.lop = (b & 2) >> 1;
+		}
+		break;
 	default:
 		return -1;
 		break;
@@ -211,7 +220,7 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 void w1200_init(wang_sys_t *sys) {
 	sys->cpu.d1 = 0; // default?
 	sys->cpu.d2 = 0; // default?
-	sys->cpu.d3 = 2; // default?
+	sys->cpu.d3 = 1; // default?
 	sys->get_psw_str = get_psw_str;
 	sys->get_mach_str = get_mach_str;
 	sys->get_reg_str = get_reg_str;
@@ -304,7 +313,7 @@ static void tape_write(wang_sys_t *sys) {
 		data <<= 1;
 		data |= chg;
 		if (++bitc >= 8) {
-//fprintf(stderr, "tape write 0x%02x\n", data);
+fprintf(stderr, "tape write 0x%02x %lld\n", data, sys->cpu.sys.cycles);
 			// interface requires nibbles, not bytes...
 			(void)sys->tape(sys, 1, (data >> 4) & 0x0f);
 			(void)sys->tape(sys, 1, data & 0x0f);
@@ -322,6 +331,7 @@ static int tape_read(wang_sys_t *sys) {
 	static uint8_t lastd = 0;
 	static uint8_t data = 0;
 	static int sigc = 0;
+	static int bytc = 0;
 	static int bitc = 0;
 	static int init = 0;
 	static uint64_t repc = 0;
@@ -333,6 +343,7 @@ static int tape_read(wang_sys_t *sys) {
 		lastd = 0;
 		sigc = 0;
 		bitc = 0;
+		bytc = 0;
 		init = 0;
 		return 0;	// don't care...
 	}
@@ -340,6 +351,13 @@ static int tape_read(wang_sys_t *sys) {
 	if (!init) {
 		repc = sys->cpu.sys.cycles + 900;	// 19,562cy... ?
 		init = 1;
+	}
+
+	if (sys->cpu.right && sys->cpu.rhs == 0) {
+		return 0;	// do not read tape unless read-head is engaged...
+	}
+	if (!sys->cpu.right && sys->cpu.lhs == 0) {
+		return 0;	// do not read tape unless read-head is engaged...
 	}
 
 	if (sys->cpu.sys.cycles < repc) {
@@ -354,6 +372,16 @@ sigs:
 		lastc >>= 1;
 		lastd >>= 1;
 		repc = sys->cpu.sys.cycles + 10;	// sensitive?
+		if (bytc == 16 && bitc == 0 && sigc == 0) {
+//fprintf(stderr, "inserting gap %lld\n", sys->cpu.sys.cycles);
+			++bytc;
+			repc += 1600;
+		}
+		if (bytc == 217 && bitc == 0 && sigc == 0) {
+//fprintf(stderr, "inserting big gap %lld\n", sys->cpu.sys.cycles);
+			++bytc;
+			repc += 16000;
+		}
 		goto reps;
 	}
 	if (bitc) {
@@ -376,9 +404,14 @@ bits:
 		repc = sys->cpu.sys.cycles + 900;	// 27,928cy... ?
 		goto reps;
 	}
-fprintf(stderr, "re-encoding %02x\n", nib);
+	++bytc;
 	data = nib;
 	bitc = 4;
+if (bytc == 16) {
+bitc += 2;
+//data <<= 2;	// must be all zero...
+}
+//fprintf(stderr, "re-encoding %01x (%d)\n", data, bitc);
 	goto bits;
 #else
 	sys->cpu.tck ^= 1;
@@ -445,7 +478,7 @@ fprintf(stderr, "tape off %s rv=%d hi=%d hl=%d %s %lld\n",
 
 static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.to << 4) | sys->cpu.ro;
-fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
+//fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
 	sys->dev(sys, c, 1);
 }
 
@@ -513,13 +546,6 @@ int instr_exec(wang_sys_t *sys) {
 	w1200_ucode_t *u = (w1200_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
 	uint16_t next;
 	int rc = 0;
-
-	if (u->brkpt) {
-		// 'u' points into ucode[], so updates are stored there...
-		u->brkpt = 0; // one-shot breakpoint turned off...
-		sys->run = 0;
-		return 0;
-	}
 
 	// F==7 && J==0:
 	//	PC <= STK1, STK1 <= PC, STK2 <= STK1
@@ -747,7 +773,6 @@ int instr_exec(wang_sys_t *sys) {
 				(sys->cpu.dk  << 0) |
 				(sys->cpu.lop << 2) |
 				(sys->cpu.rop << 3);
-sys->cpu.kb |= 0x0c; // force ROP,LOP
 		break;
 	case 11:
 		sys->cpu.din0 = (sys->cpu.kb & 1);
@@ -864,5 +889,13 @@ fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 	}
 
 	sys->cpu.sys.pc = sys->cpu.sys.next;
+
+	u = (w1200_ucode_t *)&sys->ucode[sys->cpu.sys.pc];
+	if (!rc && u->brkpt) {
+		// 'u' points into ucode[], so updates are stored there...
+		u->brkpt = 0; // one-shot breakpoint turned off...
+		sys->run = 0;
+		return 0;
+	}
 	return rc;
 }
