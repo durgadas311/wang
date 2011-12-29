@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.15 2011/12/29 16:25:10 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.16 2011/12/29 16:56:57 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -377,36 +377,42 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 				sys->run = 0;
 				return 0xff;	// EOF
 			}
-			rc = read(__gui_kfd, &b, sizeof(b));
-			if (rc < 0 && errno != EAGAIN) {
-				perror("guitape");
-				// silently quit...
-				sys->run = 0;
-				return 0xff;	// EOF
-			}
-			if (rc != sizeof(b)) {
-				// probably EOF on pipe, silently quit...
-				sys->run = 0;
-				return 0xff;	// EOF
-			}
-			if ((b >> 8) == 0x0e) {	// EOF
+			// might get async keyboard code... need to cope...
+			int tape;
+			do {
+				rc = read(__gui_kfd, &b, sizeof(b));
+				if (rc < 0 && errno != EAGAIN) {
+					perror("guitape");
+					// silently quit...
+					sys->run = 0;
+					return 0xff;	// EOF
+				}
+				if (rc != sizeof(b)) {
+					// probably EOF on pipe, silently quit...
+					sys->run = 0;
+					return 0xff;	// EOF
+				}
+				if ((b >> 8) == 0x0e) {	// EOF
 #if 0 // can't do this! wang must detect EOT! maybe use some counter to detect "too long"?
-				// nothing good will happen now... until a key is pressed...
-				wait_key(-1); // sleep until key event
+					// nothing good will happen now... until a key is pressed...
+					wait_key(-1); // sleep until key event
 #endif
-				return 0xff;
-			}
+					return 0xff;
+				}
 #ifdef __wang1200__
-			// assert drive?
-			if (((b >> 8) & ~1) != 0x0c) {
+				// assert drive?
+				tape = (((b >> 8) & ~1) == 0x0c);
 #else // ! __wang1200__
-			if ((b >> 8) != 0x0c) {
+				tape = ((b >> 8) == 0x0c);
 #endif // ! __wang1200__
-				// oops...
-				// now we've really done it...
-				extraneous = b;
-				return 0xff;	// EOF
-			}
+				if (!tape) {
+					// oops...
+					// now we've really done it...
+if (extraneous) fprintf(stderr, "double extraneous %04x -> %04x\n", extraneous, b);
+					extraneous = b;
+					//return 0xff;	// EOF
+				}
+			} while (!tape);
 			bc ^= 1;
 			byte = (b & 0x0ff);
 			return (byte >> 4);
