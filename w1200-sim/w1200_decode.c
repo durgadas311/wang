@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.20 2011/12/29 16:25:40 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.21 2011/12/29 17:08:07 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -313,7 +313,7 @@ static void tape_write(wang_sys_t *sys) {
 		data <<= 1;
 		data |= chg;
 		if (++bitc >= 8) {
-fprintf(stderr, "tape write 0x%02x %lld\n", data, sys->cpu.sys.cycles);
+//fprintf(stderr, "tape write 0x%02x %lld\n", data, sys->cpu.sys.cycles);
 			// interface requires nibbles, not bytes...
 			(void)sys->tape(sys, 1, (data >> 4) & 0x0f);
 			(void)sys->tape(sys, 1, data & 0x0f);
