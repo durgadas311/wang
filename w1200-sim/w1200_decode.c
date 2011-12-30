@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.22 2011/12/29 23:04:52 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.23 2011/12/30 17:55:34 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -326,15 +326,25 @@ fprintf(stderr, "tape %d %d %lld\n", sys->cpu.din0, sys->cpu.din1, sys->cpu.sys.
 #endif
 }
 
+//
+// Tape format:
+// +-------------+------------+------------+--------------+--------------+
+// | >=900cy gap | 66-bit hdr | 1600cy gap | 800-bit data | 16,000cy gap |
+// +-------------+------------+------------+--------------+--------------+
+//
+// ">=900cy" and "16,000cy" gaps are same - each are the gaps for the next/previous block.
+//
 static int tape_read(wang_sys_t *sys) {
 	static uint8_t lastc = 0;
 	static uint8_t lastd = 0;
 	static uint8_t data = 0;
 	static int sigc = 0;
-	static int bytc = 0;
 	static int bitc = 0;
 	static int init = 0;
 	static uint64_t repc = 0;
+	static int chunks[5];
+	static int chunk;
+	static int curr;
 	uint8_t nib;
 
 #if 1
@@ -343,13 +353,26 @@ static int tape_read(wang_sys_t *sys) {
 		lastd = 0;
 		sigc = 0;
 		bitc = 0;
-		bytc = 0;
 		init = 0;
 		return 0;	// don't care...
 	}
 
 	if (!init) {
-		repc = sys->cpu.sys.cycles + 900;	// 19,562cy... ?
+		if (sys->cpu.rv) { // no data just fake signals in reverse...
+			chunks[0] = -900;	// gap
+			chunks[1] = 800;	// bits of data
+			chunks[2] = -1600;	// gap
+			chunks[3] = 66;		// bits of header
+			chunks[4] = -16000;	// gap
+		} else {
+			chunks[0] = -900;	// gap
+			chunks[1] = 66;		// bits of header
+			chunks[2] = -1600;	// gap
+			chunks[3] = 800;	// bits of data
+			chunks[4] = -16000;	// gap
+		}
+		chunk = 0;
+		curr = 0;
 		init = 1;
 	}
 
@@ -372,16 +395,6 @@ sigs:
 		lastc >>= 1;
 		lastd >>= 1;
 		repc = sys->cpu.sys.cycles + 10;	// sensitive?
-		if (bytc == 16 && bitc == 0 && sigc == 0) {
-//fprintf(stderr, "inserting gap %lld\n", sys->cpu.sys.cycles);
-			++bytc;
-			repc += 1600;
-		}
-		if (bytc == 217 && bitc == 0 && sigc == 0) {
-//fprintf(stderr, "inserting big gap %lld\n", sys->cpu.sys.cycles);
-			++bytc;
-			repc += 16000;
-		}
 		goto reps;
 	}
 	if (bitc) {
@@ -399,20 +412,39 @@ bits:
 		goto sigs;
 
 	}
-	nib = sys->tape(sys, 0, 0);
-	if (nib == 0xff) { // EOF
-		repc = sys->cpu.sys.cycles + 900;	// 27,928cy... ?
-		goto reps;
-	}
-	++bytc;
-	data = nib;
-	bitc = 4;
-if (bytc == 16) {
-bitc += 2;
-//data <<= 2;	// must be all zero...
-}
+	if (curr) {
+nibs:
+		if (sys->cpu.rv) { // no data just fake signals in reverse...
+			nib = 0;
+		} else {
+			nib = sys->tape(sys, 0, 0);
+		}
+		if (nib == 0xff) { // EOF
+			repc = sys->cpu.sys.cycles + 900;	// 27,928cy... ?
+			goto reps;
+		}
+		data = nib;
+		bitc = 4;
+		curr -= bitc;
+		if (curr < 4) {
+			// hack for 66-bits in 8-bytes storage...
+			bitc += curr;
+			curr = 0;
+		}
 //fprintf(stderr, "re-encoding %01x (%d)\n", data, bitc);
-	goto bits;
+		goto bits;
+	}
+	curr = chunks[chunk];
+	if (++chunk > 4) chunk = 0;	// nothing else?
+	if (curr < 0) { // gap
+		// leave signal unchanged...
+		repc = sys->cpu.sys.cycles + -(curr);
+		curr = 0;
+		goto reps;
+	} else {
+		// curr: num bits to play back...
+		goto nibs;
+	}
 #else
 	sys->cpu.tck ^= 1;
 	sys->cpu.dk ^= 1;

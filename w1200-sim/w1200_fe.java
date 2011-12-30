@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $
+// $Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 180);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -630,7 +630,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -668,7 +668,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -683,6 +683,7 @@ class Wang1200_Tape extends JComponent
 	boolean _eot;
 	byte _op;
 	int _index;
+	int _bytc;
 	JLabel _window;
 	File _file;
 
@@ -705,6 +706,7 @@ class Wang1200_Tape extends JComponent
 		Font font;
 		_file = null;
 		_index = 0;
+		_bytc = 0;
 		_end = false;
 		_wr = false;
 		_ready = false;
@@ -813,38 +815,8 @@ class Wang1200_Tape extends JComponent
 		_ready = true;
 	}
 
-	private int tape_skipone() {
-		int nb = 0;
-		int n = 1;
-		b1[0] = 0;
-		while (n == 1 && (b1[0] & 0x00ff) != 0x9e) {
-			try {
-				n = _tf.read(b1);
-//System.err.println(_index + ": at " + _tf.getFilePointer() + " got " + b1[0]);
-			} catch (IOException ee) {
-				// close? _tf = null?
-				n = 0;
-			}
-			if (n == 1) {
-				++nb;
-			}
-		}
-		if (n == 1) { // must have seen END PROG...
-			// gobble next byte, don't care what it was (for now).
-			try {
-				n = _tf.read(b1);
-			} catch (IOException ee) {
-			}
-		}
-		if (nb > 0) {
-			++_index;
-			return 1;
-		}
-		_eot = true;
-		return 0;
-	}
-
 	private void tape_position(int newidx) {
+System.err.println("Tape Position: "+_index+" -> "+newidx);
 		if (_file == null) return;
 		if (newidx < 0) return;
 		if (newidx == 0) {	// rewind
@@ -855,9 +827,16 @@ class Wang1200_Tape extends JComponent
 			}
 			_index = 0;
 			_eot = false;
+			return;
 		}
 		if (newidx == _index) return;	// should not happen?
-		while (_index == newidx && tape_skipone() == 1); // re-enable when ready
+		try {
+			// each block is 108 bytes (currently)
+			_tf.seek(newidx * 108);
+		} catch (IOException ee) {
+			// can't happen?
+		}
+		_index = newidx;
 		// assert: _index == newidx
 	}
 
@@ -914,6 +893,12 @@ class Wang1200_Tape extends JComponent
 		} else {
 			bb[0] = b1[0];
 			bb[1] = 0x0c;
+			++_bytc;
+			if (_bytc >= 108) {
+				_bytc = 0;
+				++_index;
+				update_tape();
+			}
 		}
 	}
 
@@ -922,6 +907,12 @@ class Wang1200_Tape extends JComponent
 			_tf.write(b[0]);
 		} catch (IOException ee) {
 			// can't happen?
+		}
+		++_bytc;
+		if (_bytc >= 108) {
+			_bytc = 0;
+			++_index;
+			update_tape();
 		}
 	}
 
@@ -934,9 +925,9 @@ class Wang1200_Tape extends JComponent
 				}
 				send_word();
 			} else { // tape on/off - read/write, etc...
-				if (_wr && !_end && _ready) {
-					++_index;
-				}
+//				if (_wr && !_end && _ready) {
+//					++_index;
+//				}
 				_tape_on = _ready && ((b[0] & 0x0c0) == 0);
 				_wr = ((b[0] & 0x20) != 0);
 				boolean rv = ((b[0] & 0x10) != 0);
@@ -950,13 +941,19 @@ class Wang1200_Tape extends JComponent
 						_op = 1;
 					}
 					// now change file position...
+					// TBD: what to do for FORWARD
 					tape_position(rv ? 0 : -1);
 				} else if (hi) {
 					// ready for record/play...
-					// test RO file...
+					// TBD: test RO file...
 					if (_ready) _op = 1;
 					else _op = 0;
+					// for reverse, just update position...
+					if (_tape_on && rv) {
+						tape_position(_index - 1);
+					}
 				}
+				if (!_tape_on) _bytc = 0;
 				_end = false;
 				update_tape();
 				bb[1] = 0x0f;
@@ -971,9 +968,9 @@ class Wang1200_Tape extends JComponent
 			tape_write(b);
 			// only if last byte before tape-off is END PROG...
 			//_end = ((b[0] & 0x00ff) == 0x9e); // END PROG
-			if (_end) {
-				++_index; // display updated later..
-			}
+			//if (_end) {
+			//	++_index; // display updated later..
+			//}
 		} else {
 			System.err.format("invalid tape command (%04x)\n", (b[1] << 8) | b[0]);
 		}
@@ -1043,7 +1040,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
@@ -1795,7 +1792,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2192,7 +2189,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2338,7 +2335,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2477,7 +2474,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.11 2011/12/29 17:08:07 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
