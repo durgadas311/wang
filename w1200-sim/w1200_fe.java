@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $
+// $Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -630,7 +630,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -668,7 +668,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1040,7 +1040,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
@@ -1053,10 +1053,6 @@ class Wang1200_Model611
 		byte cc;
 		cc = cn24_revxlate[c];
 		// cleanup needed? ctl codes...
-		if ((cc & 0x40) != 0) {
-			// TBD: handle shift!
-		}
-		cc &= 0x3f;
 		return cc;
 	}
 	public byte roti2ascii(byte c) {
@@ -1265,58 +1261,58 @@ class Wang1200_Model611
 		cn24_revxlate['1'] = 0x3f;
 
 		// shifted versions...
-		cn24_revxlate['_'] = 0x40;
-		cn24_revxlate['Y'] = 0x41;
-		//cn24_revxlate[' '] = 0x42;
-		//cn24_revxlate['\b'] = 0x43;
-		cn24_revxlate['Q'] = 0x44;
-		cn24_revxlate['P'] = 0x45;
-		cn24_revxlate['+'] = 0x46;
-		cn24_revxlate['J'] = 0x47;
-		cn24_revxlate['?'] = 0x49;
-		cn24_revxlate[','] = 0x4c;
-		cn24_revxlate[':'] = 0x4d;
-		cn24_revxlate['F'] = 0x4e;
-		cn24_revxlate['G'] = 0x4f;
+		cn24_revxlate['_'] = (byte)0x80;
+		cn24_revxlate['Y'] = (byte)0x81;
+		//cn24_revxlate[' '] = (byte)0x82;
+		//cn24_revxlate['\b'] = (byte)0x83;
+		cn24_revxlate['Q'] = (byte)0x84;
+		cn24_revxlate['P'] = (byte)0x85;
+		cn24_revxlate['+'] = (byte)0x86;
+		cn24_revxlate['J'] = (byte)0x87;
+		cn24_revxlate['?'] = (byte)0x89;
+		cn24_revxlate[','] = (byte)0x8c;
+		cn24_revxlate[':'] = (byte)0x8d;
+		cn24_revxlate['F'] = (byte)0x8e;
+		cn24_revxlate['G'] = (byte)0x8f;
 
-		cn24_revxlate['W'] = 0x50;
-		cn24_revxlate['S'] = 0x51;
-		cn24_revxlate['I'] = 0x54;
-		cn24_revxlate['"'] = 0x55;
-		cn24_revxlate['.'] = 0x56;
-		//cn24_revxlate['\002'] = 0x57;	// 1/4
-		//cn24_revxlate['\n'] = 0x58;
-		cn24_revxlate['O'] = 0x59;
-		//cn24_revxlate['\n'] = 0x5a;
-		//cn24_revxlate['\n'] = 0x5b;	// rev index
-		cn24_revxlate['A'] = 0x5c;
-		cn24_revxlate['R'] = 0x5d;
-		cn24_revxlate['V'] = 0x5e;
-		cn24_revxlate['M'] = 0x5f;
+		cn24_revxlate['W'] = (byte)0x90;
+		cn24_revxlate['S'] = (byte)0x91;
+		cn24_revxlate['I'] = (byte)0x94;
+		cn24_revxlate['"'] = (byte)0x95;
+		cn24_revxlate['.'] = (byte)0x96;
+		//cn24_revxlate['\002'] = (byte)0x97;	// 1/4
+		//cn24_revxlate['\n'] = (byte)0x98;
+		cn24_revxlate['O'] = (byte)0x99;
+		//cn24_revxlate['\n'] = (byte)0x9a;
+		//cn24_revxlate['\n'] = (byte)0x9b;	// rev index
+		cn24_revxlate['A'] = (byte)0x9c;
+		cn24_revxlate['R'] = (byte)0x9d;
+		cn24_revxlate['V'] = (byte)0x9e;
+		cn24_revxlate['M'] = (byte)0x9f;
 
-		cn24_revxlate['B'] = 0x60;
-		cn24_revxlate['H'] = 0x61;
-		cn24_revxlate['K'] = 0x64;
-		cn24_revxlate['E'] = 0x65;
-		cn24_revxlate['N'] = 0x66;
-		cn24_revxlate['T'] = 0x67;
-		cn24_revxlate['L'] = 0x69;
-		cn24_revxlate['C'] = 0x6c;
-		cn24_revxlate['D'] = 0x6d;
-		cn24_revxlate['U'] = 0x6e;
-		cn24_revxlate['X'] = 0x6f;
+		cn24_revxlate['B'] = (byte)0xa0;
+		cn24_revxlate['H'] = (byte)0xa1;
+		cn24_revxlate['K'] = (byte)0xa4;
+		cn24_revxlate['E'] = (byte)0xa5;
+		cn24_revxlate['N'] = (byte)0xa6;
+		cn24_revxlate['T'] = (byte)0xa7;
+		cn24_revxlate['L'] = (byte)0xa9;
+		cn24_revxlate['C'] = (byte)0xac;
+		cn24_revxlate['D'] = (byte)0xad;
+		cn24_revxlate['U'] = (byte)0xae;
+		cn24_revxlate['X'] = (byte)0xaf;
 
-		cn24_revxlate['('] = 0x70;
-		cn24_revxlate[')'] = 0x71;
-		//cn24_revxlate['\003'] = 0x74;	// cent
-		cn24_revxlate['%'] = 0x75;
-		cn24_revxlate['@'] = 0x76;
-		cn24_revxlate['Z'] = 0x77;
-		cn24_revxlate['$'] = 0x79;
-		cn24_revxlate['*'] = 0x7c;
-		cn24_revxlate['&'] = 0x7d;
-		cn24_revxlate['#'] = 0x7e;
-		cn24_revxlate['!'] = 0x7f;
+		cn24_revxlate['('] = (byte)0xb0;
+		cn24_revxlate[')'] = (byte)0xb1;
+		//cn24_revxlate['\003'] = (byte)0xb4;	// cent
+		cn24_revxlate['%'] = (byte)0xb5;
+		cn24_revxlate['@'] = (byte)0xb6;
+		cn24_revxlate['Z'] = (byte)0xb7;
+		cn24_revxlate['$'] = (byte)0xb9;
+		cn24_revxlate['*'] = (byte)0xbc;
+		cn24_revxlate['&'] = (byte)0xbd;
+		cn24_revxlate['#'] = (byte)0xbe;
+		cn24_revxlate['!'] = (byte)0xbf;
 	}
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
@@ -1792,7 +1788,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1801,9 +1797,9 @@ class Wang1200_Keyboard extends JComponent
 	Wang1200_Keyboards[] _kbds;
 	int _row;
 	int _col;
-	boolean _shift;
-	int _shift_kbd;
-	int _shift_btn;
+	boolean _code;
+	int _code_kbd;
+	int _code_btn;
 	int _mode1;
 	int _mode2;
 	int _mode3;
@@ -1826,12 +1822,12 @@ class Wang1200_Keyboard extends JComponent
 		return null;
 	}
 
-	private void setShift(boolean _new) {
-		_shift = _new;
-		if (_shift) {
-			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_Key.illum1);
+	private void setCode(boolean _new) {
+		_code = _new;
+		if (_code) {
+			_kbds[_code_kbd]._buttons[_code_btn].setBackground(_Key.illum1);
 		} else {
-			_kbds[_shift_kbd]._buttons[_shift_btn].setBackground(_kbds[_shift_kbd]._keys[_shift_btn].color);
+			_kbds[_code_kbd]._buttons[_code_btn].setBackground(_kbds[_code_kbd]._keys[_code_btn].color);
 		}
 	}
 
@@ -1873,13 +1869,13 @@ class Wang1200_Keyboard extends JComponent
 		setToggle(!_kbds[y]._keys[x].state, _kbds[y]._keys[x], _kbds[y]._buttons[x]);
 	}
 
-	public void do_keycode(boolean shifted, int code) {
-		if ((code & ~0x0ff) == 0 && _shift) {
+	public void do_keycode(boolean coded, int code) {
+		if ((code & ~0x0ff) == 0 && _code) {
 			int ix = code & 0x00f;
 			code &= ~0x00f;
 			code |= code_xlate[ix];
 		}
-		if (!shifted) setShift(false);
+		if (!coded) setCode(false);
 		if (_fout == null) {
 			int t = code >> 8;
 			int h = (code >> 4) & 0x0f;
@@ -1899,10 +1895,10 @@ class Wang1200_Keyboard extends JComponent
 		}
 	}
 
-	private void do_button(boolean shifted, int y, int x) {
+	private void do_button(boolean coded, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
 		if (_kbds[y]._keys[x].isSHIFT()) {
-			if (!shifted) setShift(!_shift);
+			if (!coded) setCode(!_code);
 			return;
 		}
 		int type = _kbds[y]._keys[x].getType();
@@ -1951,7 +1947,7 @@ class Wang1200_Keyboard extends JComponent
 			code |= _Key.ALT;
 		}
 
-		do_keycode(shifted, code);
+		do_keycode(coded, code);
 	}
 
 	public Wang1200_Keyboard(OutputStream fo,
@@ -1971,7 +1967,7 @@ class Wang1200_Keyboard extends JComponent
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
-		_shift = false;
+		_code = false;
 		_fout = fo;
 		_mode3 = 1;	// initial value... we just know it...
 
@@ -2010,8 +2006,8 @@ class Wang1200_Keyboard extends JComponent
 		kbd = new Wang1200_Keyboard_left(tml, er, tmr);
 		for (x = 0; x < kbd._nkeys; ++x) {
 			if (kbd._keys[x].code == _Key.SHIFT) {
-				_shift_kbd = _nkbds;
-				_shift_btn = x;
+				_code_kbd = _nkbds;
+				_code_btn = x;
 			}
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
@@ -2071,20 +2067,20 @@ System.err.println("action");
 		char c = e.getKeyChar();
 		// every key gets printed...
 		_m611.do_cn24_direct(c);
-		int i = _m611.ascii2roti(c);
-		boolean shifted = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
-		do_keycode(shifted, i);
+		int i = _m611.ascii2roti(c) & 0x0ff;
+		boolean coded = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
+		do_keycode(coded, i);
 	}
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ALT) {
-			setShift(true);
+			setCode(true);
 		}
 	}
 
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ALT) {
-			setShift(false);
+			setCode(false);
 		}
 	}
 
@@ -2144,8 +2140,8 @@ if (false) System.err.println("stupid warnings "+url);
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					boolean shifted = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
-					do_button(shifted, y, x);
+					boolean coded = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
+					do_button(coded, y, x);
 					return;
 				}
 			}
@@ -2189,7 +2185,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2335,7 +2331,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2474,7 +2470,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.14 2011/12/30 23:49:19 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

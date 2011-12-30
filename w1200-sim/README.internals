@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.7 2011/12/30 21:28:27 drmiller Exp $
+$Id: README.internals,v 1.8 2011/12/30 23:49:19 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -7,8 +7,7 @@ The simulator reads and interprets the following (binary) codes on
 it's input pipe:
 
 00000000kkkkkkkk
-	Keyboard code 'k' was entered. E.g. the user presses "Search" and
-	the code 0x0080 is sent to the simulator on the pipe.
+	Keyboard code 'k' was entered. 0x80 or'ed for SHIFTed keys.
 
 0000000100000kkk
 	"Special" key: PRIME, SET P.C., VERIFY PROG, RECORD PROG, and SHIFT

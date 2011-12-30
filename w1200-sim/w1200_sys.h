@@ -3,7 +3,7 @@
 #ifndef __w1200_sys_h__
 #define __w1200_sys_h__
 
-#ident "$Id: w1200_sys.h,v 1.5 2011/11/28 01:29:43 drmiller Exp $"
+#ident "$Id: w1200_sys.h,v 1.6 2011/12/30 23:49:19 drmiller Exp $"
 
 #include "w1200_ucode.h"
 #include "w1200_cpu.h"
@@ -26,6 +26,6 @@ typedef w1200_cpu_t wang_cpu_t;
 #define WANG_DEF_ROM	"wang1200.rom"
 #define WANG_GUI_NAME	"w1200_fe"
 
-#define WANG_END_PROG	0x9e
+#define WANG_END_PROG	0xff	// actually, nothing equates
 
 #endif // __w1200_sys_h__
