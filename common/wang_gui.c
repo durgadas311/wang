@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.16 2011/12/29 16:56:57 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.17 2011/12/30 23:47:14 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -44,8 +44,10 @@ static int disp_good = 0;
 // 'on' = -2: refresh only error lights - DO NOT SLEEP!
 // 'on' = 0: blank display (reset everything)
 static void guidisplay(wang_sys_t *sys, int on) {
+#ifndef __wang1200__
 	static uint16_t bufx[16];
 	static uint16_t lastx = 0;
+#endif // ! __wang1200__
 	uint16_t bx = 0;
 #ifdef __wang700__
 	static uint16_t bufy[16];
