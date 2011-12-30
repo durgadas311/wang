@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $
+// $Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,15 +13,15 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
-	static final Color orange2 = new Color(255, 255, 180);	// illuminated
+	static final Color orange2 = new Color(255, 255, 100);	// illuminated
 	static final Color blue1 = new Color(190, 230, 255);
-	static final Color blue2 = new Color(240, 240, 255);	// illuminated
+	static final Color blue2 = new Color(255, 255, 100);	// illuminated
 	static final Color green1 = new Color(230, 240, 220);
 	static final Color pink1 = new Color(255, 220, 220);
-	static final Color pink2 = new Color(255, 255, 220);	// illuminated
+	static final Color pink2 = new Color(255, 255, 100);	// illuminated
 	static final Color white1 = new Color(250, 250, 250);
 	static final Color white2 = new Color(150, 150, 150);
 	static final Color white3 = new Color(200, 200, 200);
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -565,7 +565,7 @@ class Wang1200_SimInput
 				_csl.setOn((b[0] & 0x20) != 0);	// CHAR/STOP
 				_shl.setOn((b[0] & 0x40) != 0);	// SEARCH
 				_skl.setOn((b[0] & 0x80) != 0);	// SKIP
-			} else if ((b[1]  & 0xfc) == 0x18) {
+			} else if ((b[1]  & 0xf8) == 0x18) {
 				// carriage control commands
 				if ((b[0] & 0x01) != 0) {
 					b[0] = 0x02;	// space
@@ -630,7 +630,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -668,7 +668,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1040,7 +1040,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
@@ -1110,7 +1110,7 @@ class Wang1200_Model611
 		cn24_xlate[0x26] = 'n';
 		cn24_xlate[0x27] = 't';
 		//cn24_xlate[0x28] = '';	// print mode
-		cn24_xlate[0x29] = '1';
+		cn24_xlate[0x29] = 'l';
 		//cn24_xlate[0x2a] = '+';	// step y+
 		//cn24_xlate[0x2b] = '+';	// step y-
 		cn24_xlate[0x2c] = 'c';
@@ -1133,7 +1133,7 @@ class Wang1200_Model611
 		cn24_xlate[0x3c] = '8';
 		cn24_xlate[0x3d] = '7';
 		cn24_xlate[0x3e] = '3';
-		cn24_xlate[0x3f] = 'l';
+		cn24_xlate[0x3f] = '1';
 
 		// shifted versions...
 		cn24_xlate[0x40] = '_';
@@ -1171,7 +1171,7 @@ class Wang1200_Model611
 		cn24_xlate[0x65] = 'E';
 		cn24_xlate[0x66] = 'N';
 		cn24_xlate[0x67] = 'T';
-		cn24_xlate[0x69] = '!';
+		cn24_xlate[0x69] = 'L';
 		cn24_xlate[0x6c] = 'C';
 		cn24_xlate[0x6d] = 'D';
 		cn24_xlate[0x6e] = 'U';
@@ -1187,7 +1187,7 @@ class Wang1200_Model611
 		cn24_xlate[0x7c] = '*';
 		cn24_xlate[0x7d] = '&';
 		cn24_xlate[0x7e] = '#';
-		cn24_xlate[0x7f] = 'L';
+		cn24_xlate[0x7f] = '!';
 
 		cn24_spcl = new String[32];
 		cn24_spcl[0x01] = "\u00BD";
@@ -1239,7 +1239,7 @@ class Wang1200_Model611
 		cn24_revxlate['n'] = 0x26;
 		cn24_revxlate['t'] = 0x27;
 		//cn24_revxlate[''] = 0x28;	// print mode
-		cn24_revxlate['1'] = 0x29;
+		cn24_revxlate['l'] = 0x29;
 		//cn24_revxlate['+'] = 0x2a;	// step y+
 		//cn24_revxlate['+'] = 0x2b;	// step y-
 		cn24_revxlate['c'] = 0x2c;
@@ -1262,7 +1262,7 @@ class Wang1200_Model611
 		cn24_revxlate['8'] = 0x3c;
 		cn24_revxlate['7'] = 0x3d;
 		cn24_revxlate['3'] = 0x3e;
-		cn24_revxlate['l'] = 0x3f;
+		cn24_revxlate['1'] = 0x3f;
 
 		// shifted versions...
 		cn24_revxlate['_'] = 0x40;
@@ -1300,7 +1300,7 @@ class Wang1200_Model611
 		cn24_revxlate['E'] = 0x65;
 		cn24_revxlate['N'] = 0x66;
 		cn24_revxlate['T'] = 0x67;
-		cn24_revxlate['!'] = 0x69;
+		cn24_revxlate['L'] = 0x69;
 		cn24_revxlate['C'] = 0x6c;
 		cn24_revxlate['D'] = 0x6d;
 		cn24_revxlate['U'] = 0x6e;
@@ -1316,7 +1316,7 @@ class Wang1200_Model611
 		cn24_revxlate['*'] = 0x7c;
 		cn24_revxlate['&'] = 0x7d;
 		cn24_revxlate['#'] = 0x7e;
-		cn24_revxlate['L'] = 0x7f;
+		cn24_revxlate['!'] = 0x7f;
 	}
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
@@ -1792,7 +1792,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2189,7 +2189,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2335,7 +2335,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2474,7 +2474,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.12 2011/12/30 17:55:34 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.13 2011/12/30 21:28:27 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

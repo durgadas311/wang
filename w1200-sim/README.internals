@@ -1,4 +1,4 @@
-$Id: README.internals,v 1.6 2011/12/29 16:25:40 drmiller Exp $
+$Id: README.internals,v 1.7 2011/12/30 21:28:27 drmiller Exp $
 
 Communication between the Front End and the simulator is via two pipes,
 one for each direction. All communication is in units of uint16_t.
@@ -83,7 +83,7 @@ The simulator sends the following (binary) codes on it's output pipe:
 	Print data for "Device 1", Model 601/602/611 "Output Writer".
 	'r' is a 6-bit (2+4) "tilt/rotate" code for the typewriter.
 
-000110cccccccccc
+00011ccccccccccc
 	Control command for "Device 1", Model 601/602/611 "Output Writer".
 	Codes:	0=Space, 1=BkSpc, 2=Tab, 3=CR/LF, 4=ShiftUp, 5=ShiftDn,
 		8=Index, 9=SetTab, 10=ClrTab.
