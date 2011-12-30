@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.23 2011/12/30 17:55:34 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.24 2011/12/30 23:48:53 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -271,25 +271,6 @@ static uint8_t sub3_c(wang_sys_t *sys, uint8_t a, uint8_t b, uint8_t c) {
 	sys->cpu.sc = sys->cpu.cc;
 	return s;
 }
-
-static uint8_t odd_parity[16] = {
-[0x0] = 1,
-[0x1] = 0,
-[0x2] = 0,
-[0x3] = 1,
-[0x4] = 0,
-[0x5] = 1,
-[0x6] = 1,
-[0x7] = 0,
-[0x8] = 0,
-[0x9] = 1,
-[0xa] = 1,
-[0xb] = 0,
-[0xc] = 1,
-[0xd] = 0,
-[0xe] = 0,
-[0xf] = 1,
-};
 
 static void tape_write(wang_sys_t *sys) {
 	static uint8_t last = 0;
@@ -794,7 +775,8 @@ int instr_exec(wang_sys_t *sys) {
 			sys->cpu.ka = 4; // temp workaround for real UART sim
 			break;
 		case 4:
-			sys->cpu.ka = 0; // TRE, SHC, PRINT, ATTN...
+			sys->cpu.ka = // TRE, SHC, PRINT, ATTN...
+				(sys->cpu.ls << 2);
 			break;
 		}
 		break;
@@ -812,10 +794,11 @@ int instr_exec(wang_sys_t *sys) {
 		tape_write(sys);
 		break;
 	case 12:
+		// RHS : LHS : R/B : L/S
 		sys->cpu.kb =	(sys->cpu.rhs << 3) |
 				(sys->cpu.lhs << 2) |
-				0x02; // RHS : LHS : R/B : L/S
-				// Lock Shift? Ready/Busy? 
+				(1 << 1) |		// R/B
+				(sys->cpu.ls << 0);	// L/S
 		break;
 	case 13:
 	case 14:
@@ -863,6 +846,8 @@ int instr_exec(wang_sys_t *sys) {
 fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 				sys->cpu.kbd = 1;
+				// is this bit ever set for other reasons?
+				//sys->cpu.ls = ((key & 0x0080) != 0);
 				sys->cpu.ka = (key >> 4) & 0x0f;
 				sys->cpu.kb = key & 0x0f;
 				sys->keyboard(sys, &key, 1); // ack only, maybe

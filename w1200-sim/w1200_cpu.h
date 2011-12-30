@@ -2,7 +2,7 @@
 #ifndef __w1200_cpu_h__
 #define __w1200_cpu_h__
 
-#ident "$Id: w1200_cpu.h,v 1.10 2011/12/26 02:42:55 drmiller Exp $"
+#ident "$Id: w1200_cpu.h,v 1.11 2011/12/30 23:48:53 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -43,6 +43,7 @@ typedef struct {
 	uint8_t sc;
 
 	uint8_t function;	// MOP=8 etc
+	uint8_t ls;		// L/S - Lock/Shift on keyboard...
 
 	w1200_ind_t ind;
 
