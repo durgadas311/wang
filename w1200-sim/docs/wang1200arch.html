@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.16 2011/12/30 21:28:27 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.17 2011/12/31 17:16:04 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -867,82 +867,226 @@ as follows (layout for Solid State ROM).
 <TH>15</TH></TR>
 
 <TR><TH>00</TH>
-<TD CLASS="sym">- _</TD>
-<TD CLASS="sym">y Y</TD>
+<TD CLASS="sym">-</TD>
+<TD CLASS="sym">y</TD>
 <TD CLASS="sym">CODE sp</TD>
 <TD CLASS="sym">sp</TD>
-<TD CLASS="sym">q Q</TD>
-<TD CLASS="sym">p P</TD>
-<TD CLASS="sym">= +</TD>
-<TD CLASS="sym">j J</TD>
+<TD CLASS="sym">q</TD>
+<TD CLASS="sym">p</TD>
+<TD CLASS="sym">=</TD>
+<TD CLASS="sym">j</TD>
 <TD CLASS="sym">CODE -</TD>
-<TD CLASS="sym">/ ?</TD>
+<TD CLASS="sym">/</TD>
 <TD CLASS="sym">CODE /</TD>
 <TD CLASS="sym">CODE g</TD>
-<TD CLASS="sym">, ,</TD>
-<TD CLASS="sym">; :</TD>
-<TD CLASS="sym">f F</TD>
-<TD CLASS="sym">g G</TD></TR>
+<TD CLASS="sym">,</TD>
+<TD CLASS="sym">;</TD>
+<TD CLASS="sym">f</TD>
+<TD CLASS="sym">g</TD></TR>
 
 <TR><TH>01</TH>
-<TD CLASS="sym">w W</TD>
-<TD CLASS="sym">s S</TD>
+<TD CLASS="sym">w</TD>
+<TD CLASS="sym">s</TD>
 <TD CLASS="sym">CODE bksp</TD>
 <TD CLASS="sym">bksp</TD>
-<TD CLASS="sym">i I</TD>
-<TD CLASS="sym">' "</TD>
-<TD CLASS="sym">. .</TD>
-<TD CLASS="sym">&#189; &#188;</TD>
+<TD CLASS="sym">i</TD>
+<TD CLASS="sym">'</TD>
+<TD CLASS="sym">.</TD>
+<TD CLASS="sym">&#189;</TD>
 <TD CLASS="sym">CODE w</TD>
-<TD CLASS="sym">o O</TD>
+<TD CLASS="sym">o</TD>
 <TD CLASS="sym">CODE o</TD>
 <TD CLASS="sym">CODE m</TD>
-<TD CLASS="sym">a A</TD>
-<TD CLASS="sym">r R</TD>
-<TD CLASS="sym">v V</TD>
-<TD CLASS="sym">m M</TD></TR>
+<TD CLASS="sym">a</TD>
+<TD CLASS="sym">r</TD>
+<TD CLASS="sym">v</TD>
+<TD CLASS="sym">m</TD></TR>
 
 <TR><TH>02</TH>
-<TD CLASS="sym">b B</TD>
-<TD CLASS="sym">h H</TD>
+<TD CLASS="sym">b</TD>
+<TD CLASS="sym">h</TD>
 <TD CLASS="sym">CODE tab</TD>
 <TD CLASS="sym">tab</TD>
-<TD CLASS="sym">k K</TD>
-<TD CLASS="sym">e E</TD>
-<TD CLASS="sym">n N</TD>
-<TD CLASS="sym">t T</TD>
+<TD CLASS="sym">k</TD>
+<TD CLASS="sym">e</TD>
+<TD CLASS="sym">n</TD>
+<TD CLASS="sym">t</TD>
 <TD CLASS="sym">CODE b</TD>
-<TD CLASS="sym">l L</TD>
+<TD CLASS="sym">l</TD>
 <TD CLASS="sym">CODE l</TD>
 <TD CLASS="sym">CODE x</TD>
-<TD CLASS="sym">c C</TD>
-<TD CLASS="sym">d D</TD>
-<TD CLASS="sym">u U</TD>
-<TD CLASS="sym">x X</TD></TR>
+<TD CLASS="sym">c</TD>
+<TD CLASS="sym">d</TD>
+<TD CLASS="sym">u</TD>
+<TD CLASS="sym">x</TD></TR>
 
 <TR><TH>03</TH>
-<TD CLASS="sym">9 (</TD>
-<TD CLASS="sym">0 )</TD>
+<TD CLASS="sym">9</TD>
+<TD CLASS="sym">0</TD>
 <TD CLASS="sym">CODE cr/lf</TD>
 <TD CLASS="sym">cr/lf</TD>
-<TD CLASS="sym">6 &#162;</TD>
-<TD CLASS="sym">5 %</TD>
-<TD CLASS="sym">2 @</TD>
-<TD CLASS="sym">z Z</TD>
+<TD CLASS="sym">6</TD>
+<TD CLASS="sym">5</TD>
+<TD CLASS="sym">2</TD>
+<TD CLASS="sym">z</TD>
 <TD CLASS="sym">CODE 9</TD>
-<TD CLASS="sym">4 $</TD>
+<TD CLASS="sym">4</TD>
 <TD CLASS="sym">CODE 4</TD>
 <TD CLASS="sym">CODE 1</TD>
-<TD CLASS="sym">8 *</TD>
-<TD CLASS="sym">7 &amp;</TD>
-<TD CLASS="sym">3 #</TD>
-<TD CLASS="sym">1 !</TD></TR>
+<TD CLASS="sym">8</TD>
+<TD CLASS="sym">7</TD>
+<TD CLASS="sym">3</TD>
+<TD CLASS="sym">1</TD></TR>
+
+<TR><TH>08</TH>
+<TD CLASS="sym">_</TD>
+<TD CLASS="sym">Y</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">Q</TD>
+<TD CLASS="sym">P</TD>
+<TD CLASS="sym">+</TD>
+<TD CLASS="sym">J</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">?</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">:</TD>
+<TD CLASS="sym">F</TD>
+<TD CLASS="sym">G</TD></TR>
+
+<TR><TH>09</TH>
+<TD CLASS="sym">W</TD>
+<TD CLASS="sym">S</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">I</TD>
+<TD CLASS="sym">"</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">&#188;</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">O</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">A</TD>
+<TD CLASS="sym">R</TD>
+<TD CLASS="sym">V</TD>
+<TD CLASS="sym">M</TD></TR>
+
+<TR><TH>10</TH>
+<TD CLASS="sym">B</TD>
+<TD CLASS="sym">H</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">K</TD>
+<TD CLASS="sym">E</TD>
+<TD CLASS="sym">N</TD>
+<TD CLASS="sym">T</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">L</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">C</TD>
+<TD CLASS="sym">D</TD>
+<TD CLASS="sym">U</TD>
+<TD CLASS="sym">X</TD></TR>
+
+<TR><TH>11</TH>
+<TD CLASS="sym">(</TD>
+<TD CLASS="sym">)</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">&#162;</TD>
+<TD CLASS="sym">%</TD>
+<TD CLASS="sym">@</TD>
+<TD CLASS="sym">Z</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">$</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">*</TD>
+<TD CLASS="sym">&amp;</TD>
+<TD CLASS="sym">#</TD>
+<TD CLASS="sym">!</TD></TR>
+
+<TR><TH>04</TH>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">SEARCH (OFF)</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD></TR>
+
+<TR><TH>05</TH>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">SEARCH (ON)</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD></TR>
+
+<TR><TH>06</TH>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">MEMO (OUT)</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD></TR>
+
+<TR><TH>07</TH>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym">BACK LINE</TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD>
+<TD CLASS="sym"></TD></TR>
 
 </TABLE>
 
 <H4>Memory Usage</H4>
 
-All memory in the memory is organized as 8-bit words (bytes).
+All memory is organized as 8-bit words (bytes).
 Memory addresses are byte-addresses.
 
 <P><UL><TABLE BORDER>
