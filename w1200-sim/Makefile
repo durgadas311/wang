@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2011/11/13 01:46:05 drmiller Exp $
+# $Id: Makefile,v 1.4 2011/12/31 14:23:20 drmiller Exp $
 
 INSNAME = wang1200apc
 INSDIR = ~
@@ -58,10 +58,11 @@ tar:
 	tar -czvf w1200-sim/w1200-sim.tgz \
 		w1200-sim/*.[ch] w1200-sim/Makefile w1200-sim/*.java \
 		common/*.[ch] \
-		w1200-sim/wang1200-block-diag.pdf w1200-sim/README*  w1200-sim/LICENSE* \
+		w1200-sim/README* \
 		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
-		w1200-sim/icons/*.png common/fonts/*.ttf	\
-		w1200-sim/progs/*.wng w1200-sim/docs/*.html w1200-sim/docs/*.gif
+		w1200-sim/docs/*.html w1200-sim/docs/*.gif
+#
+# todo: w1200-sim/LICENSE*  w1200-sim/progs/*.wng w1200-sim/icons/*.png
 
 jar: wang1200.jar
 
