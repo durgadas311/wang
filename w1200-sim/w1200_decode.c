@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.24 2011/12/30 23:48:53 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.25 2011/12/31 21:14:53 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -190,7 +190,7 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 			break;
 		case 2:	// SEARCH
 			sys->cpu.ind.ind.shl ^= 1;
-			key = 0x100 | (sys->cpu.ind.ind.shl ? 0x52 : 0x42);
+			key = 0x100 | (sys->cpu.ind.ind.shl ? 0x42 : 0x52);
 			break;
 		default:
 			return -1;
