@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.19 2011/12/31 22:30:23 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.20 2012/01/02 17:58:49 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -587,7 +587,13 @@ as follows (layout for Solid State ROM).
 	<TD CLASS="num">ADJ</TD>
 
 </TR>
-<TR><TD COLSPAN=4>!TRANS. & !RECORD = PLAY</TD>
+<TR><TD COLSPAN=4>
+<TABLE ALIGN="RIGHT">	<TR><TD>PLAY</TD><TD>=</TD><TD>00xx</TD></TR>
+			<TR><TD>RECORD</TD><TD>=</TD><TD>01xx</TD></TR>
+			<TR><TD>TRANSFER</TD><TD>=</TD><TD>10xx</TD></TR>
+			<TR><TD>EDIT<BR>(PLAY+RECORD)</TD><TD>=</TD><TD>11xx</TD></TR>
+	</TABLE>
+</TD>
 <TD COLSPAN=4>* <TABLE ALIGN="RIGHT"><TR><TD>AUTO</TD><TD>=</TD><TD>x001</TD></TR>
 	<TR><TD>PARA</TD><TD>=</TD><TD>x100</TD></TR>
 	<TR><TD>LINE</TD><TD>=</TD><TD>x101</TD></TR>
@@ -1088,30 +1094,62 @@ All memory is organized as 8-bit words (bytes).
 Memory addresses are byte-addresses.
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=3>Memory Usage</TH></TR>
-<TR><TH>RAM Address</TH><TH></TH><TH>Purpose</TH></TR>
-<TR><TD CLASS="num">0xff</TD><TD CLASS="num">15 15</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfe</TD><TD CLASS="num">15 14</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfd</TD><TD CLASS="num">15 13</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfc</TD><TD CLASS="num">15 12</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfb</TD><TD CLASS="num">15 11</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfa</TD><TD CLASS="num">15 10</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf9</TD><TD CLASS="num">15 09</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf8</TD><TD CLASS="num">15 08</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf7</TD><TD CLASS="num"></TD><TD>Current key</TD></TR>
-<TR><TD CLASS="num">0xf6</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf5</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf4</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf3</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf2</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf1</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf0</TD><TD CLASS="num"></TD><TD></TD></TR>
-<TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0xdf</TD><TD CLASS="num"></TD><TD>FIFO tail count</TD></TR>
-<TR><TD CLASS="num">0xd0 - 0xde</TD><TD CLASS="num"></TD><TD>Key FIFO</TD></TR>
-<TR><TD COLSPAN=3 CLASS="num">... etc ...</TD></TR>
-<TR><TD CLASS="num">0x00 - 0x6f</TD><TD CLASS="num"></TD><TD>Line buffer</TD></TR>
+<TR><TH COLSPAN=2>Memory Usage</TH></TR>
+<TR><TH>RAM Address</TH><TH>Purpose</TH></TR>
+<TR><TD CLASS="num">0xff (15,15)</TD><TD>index</TD></TR>
+<TR><TD CLASS="num">0xfe (15,14)</TD><TD>index</TD></TR>
+<TR><TD CLASS="num">0xfd (15,13)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfc (15,12)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfb (15,11)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfa (15,10)</TD><TD>index</TD></TR>
+<TR><TD CLASS="num">0xf9 (15,09)</TD><TD>saved registers</TD></TR>
+<TR><TD CLASS="num">0xf8 (15,08)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf7 (15,07)</TD><TD>Current char</TD></TR>
+<TR><TD CLASS="num">0xf6 (15,06)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf5 (15,05)</TD><TD>state</TD></TR>
+<TR><TD CLASS="num">0xf4 (15,04)</TD><TD>mode</TD></TR>
+<TR><TD CLASS="num">0xf3 (15,03)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf2 (15,02)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf1 (15,01)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf0 (15,00)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xef (14,15)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xee (14,14)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xed (14,13)</TD><TD>index?</TD></TR>
+<TR><TD CLASS="num">0xec (14,12)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xeb (14,11)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xea (14,10)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe9 (14,09)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe8 (14,08)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe7 (14,07)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe6 (14,06)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe5 (14,05)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe4 (14,04)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe3 (14,03)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe2 (14,02)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe1 (14,01)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe0 (14,00)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xdf (13,15)</TD><TD>FIFO tail count</TD></TR>
+<TR><TD CLASS="num">0xd0 - 0xde (13,00 - 13,14)</TD><TD>Keyboard FIFO</TD></TR>
+<TR><TD CLASS="num">0xc9 - 0xcf (12,09)</TD><TD>unknown</TD></TR>
+<TR><TD CLASS="num">0x65 - 0xc8 (06,05 - 12,08)</TD><TD>Aux Line/Tape buffer</TD></TR>
+<TR><TD CLASS="num">0x64 (06,04)</TD><TD>unknown</TD></TR>
+<TR><TD CLASS="num">0x00 - 0x63 (00,00 - 06,03)</TD><TD>Line/Tape buffer</TD></TR>
 </TABLE></UL>
+
+<P><B>Line/Tape buffer</B> is used to place text during RECORD mode,
+and holds lines read from tape during PLAY mode.
+
+<P><B>Aux Line/Tape buffer</B> is used to hold SEARCH text, and
+additional/previous text during ADJUST and JUSTIFY.
+
+<P><B>Keyboard FIFO</B> appears to be intended to simulate
+interrupt-driven keyboard input. The microcode frequently
+calls a "keyboard poll" routine that takes a keyboard code
+(if ready) and appends it to the FIFO by indexing with
+<B>FIFO tail count</B> and incrementing that tail count.
+Other routines "pop" the first keyboard code off the FIFO
+using a shift-left method. The FIFO tail count occupies
+only the low-order nibble of 0xdf.
 
 <A NAME="tape"><H3>Cassette Tape</H3></A>
 
