@@ -3,7 +3,7 @@
 #ifndef __w700_sys_h__
 #define __w700_sys_h__
 
-#ident "$Id: w700_sys.h,v 1.5 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w700_sys.h,v 1.6 2012/01/04 15:24:45 drmiller Exp $"
 
 #include "w700_ucode.h"
 #include "w700_cpu.h"
@@ -27,6 +27,7 @@ typedef w700_cpu_t wang_cpu_t;
 #define SYS_MODEL720C	5
 
 #define WANG_SERIES	700
+#define WANG_TYPE	"Programmable Calculator"
 #define WANG_SIM	"w700-sim"
 #define WANG_DEF_MODEL	"720C"
 #define WANG_DEF_ROM	"ROM720C.txt"

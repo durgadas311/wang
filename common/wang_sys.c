@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.13 2011/11/23 17:12:27 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.14 2012/01/04 15:24:45 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -295,7 +295,7 @@ void sys_start(wang_sys_t *sys) {
 	if (sys->ops & SYS_BACK_END) {
 		setup_fe(sys);
 	} else {
-		printf("Wang %d Programmable Calculator\n", WANG_SERIES);
+		printf("Wang %d %s\n", WANG_SERIES, WANG_TYPE);
 	}
 }
 
