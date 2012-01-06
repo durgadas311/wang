@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.22 2012/01/06 14:18:18 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.23 2012/01/06 16:12:19 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -455,7 +455,7 @@ as follows (layout for Solid State ROM).
 
 <TR>	<TD>0</TD><TD>XXX</TD><TD>Abus = 0000</TD>
 	<TD ROWSPAN=2 VALIGN=TOP>000</TD><TD ROWSPAN=2 VALIGN=TOP>Bbus = 0000</TD>
-	<TD>000</TD><TD>0000*</TD><TD>No-Op</TD>
+	<TD>000</TD><TD>0000*</TD><TD>no-op</TD>
 </TR>
 
 <TR>	<TD>1</TD><TD>000</TD><TD>Abus = S</TD>
@@ -492,7 +492,7 @@ as follows (layout for Solid State ROM).
 	<TD>111</TD><TD>Bbus = CB</TD>
 	<TD>111</TD><TD>XXXX</TD><TD>CB = Zbus</TD>
 </TR>
-<TR>	<TD COLSPAN=10>* ST != 1111</TD></TR>
+<TR>	<TD COLSPAN=10>* ST != 1111: no-op but ALU flags updated normally</TD></TR>
 </TABLE></UL>
 
 <H4>Bit Assignments for I/O Ops</H4>
