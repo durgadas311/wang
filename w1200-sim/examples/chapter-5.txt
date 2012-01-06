@@ -1,0 +1,37 @@
+[m]THANK YOU LETTER
+Dear Customer:
+
+Congratulations on purchasing a Wang System 1200
+Dual Cassette Typewriter.  We are sure our system
+will help you streamline your typing tasks.  If
+you have any questions, feel free to contact your
+Sales Representative.
+
+Sincerely,
+
+Wang Laboratories, Inc.
+[/]
+[m]LETTER TO NEW EMPLOYEES
+Dear New Employee:
+
+We at Wang Laboratories are pleased to
+welcome you aboard, and look forward to
+seeing you Monday.
+
+Sincerely,
+
+Wang Laboratories, Inc.
+[/]
+[m]FORM LETTER
+Dear Customer:
+
+We appreciate your interest in our product.
+Enclosed is literature describing its features
+in detail.  Our Sales Representative will call
+on you in the near future.
+
+Sincerely,
+
+Wang Laboratories, Inc.
+[/]
+[m]FREE
