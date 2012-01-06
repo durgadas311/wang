@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.21 2012/01/04 15:24:24 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.22 2012/01/06 14:18:18 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -405,25 +405,15 @@ as follows (layout for Solid State ROM).
 	<TR><TD>0100</TD><TD>CA,CB = ram(U,V)</TD></TR>
 	<TR><TD>0101</TD><TD>CA,CB = ram(KK,V)</TD></TR>
 	<TR><TD>0110</TD><TD>CA,CB = ram(15,KK)</TD></TR>
-	<TR><TD>0111</TD><TD>Op based on KK</TD></TR>
-	<TR><TD>1000</TD><TD>Op based on KK</TD></TR>
-	<TR><TD>1001</TD><TD>Op based on KK</TD></TR>
-	<TR><TD>1010</TD><TD>KB = tape/stat</TD></TR>
-	<TR><TD>1011</TD><TD>	D<SUB>IN1</SUB> = KA<SUB>0</SUB><BR>
-				D<SUB>IN0</SUB> = KB<SUB>0</SUB></TD></TR>
-	<TR><TD>1100</TD><TD>KB = tape/stat</TD></TR>
-	<TR><TD>1101</TD><TD>LEFT=KK<SUB>0</SUB><BR>
-			HI[LEFT]=KK<SUB>2</SUB><BR>
-			FF/RW=KK<SUB>1</SUB><BR>
-			FF/RW[LEFT]=KK<SUB>3</SUB><BR>
-			D<SUB>IN1</SUB> = 0<BR>
-			D<SUB>IN0</SUB> = 0<BR>
-			RC = BI<SUB>0</SUB><BR>
-			TMR[LEFT]=1</TD></TR>
-	<TR><TD>1110</TD><TD>LEFT=KK<SUB>0</SUB><BR>
-			RC = BI<SUB>0</SUB><BR>
-			TMR[LEFT]=0</TD></TR>
-	<TR><TD>1111</TD><TD>Op based on KK</TD></TR>
+	<TR><TD>0111</TD><TD ROWSPAN=9>See "MOPs for I/O"</TD></TR>
+	<TR><TD>1000</TD></TR>
+	<TR><TD>1001</TD></TR>
+	<TR><TD>1010</TD></TR>
+	<TR><TD>1011</TD></TR>
+	<TR><TD>1100</TD></TR>
+	<TR><TD>1101</TD></TR>
+	<TR><TD>1110</TD></TR>
+	<TR><TD>1111</TD></TR>
 	</TABLE>
 </TD>
 <TD VALIGN="TOP">
@@ -451,65 +441,61 @@ as follows (layout for Solid State ROM).
 </TD></TR>
 </TABLE></UL>
 
-<P><UL><TABLE>
-<TR><TD VALIGN="TOP">
-	<TABLE BORDER>
-	<TR><TH COLSPAN=2>AC,AI<BR>Source for A bus</TH></TR>
-	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>0,XXX</TD><TD>Abus = 0000</TD></TR>
-	<TR><TD>1,000</TD><TD>Abus = S</TD></TR>
-	<TR><TD>1,001</TD><TD>Abus = T</TD></TR>
-	<TR><TD>1,010</TD><TD>Abus = U</TD></TR>
-	<TR><TD>1,011</TD><TD>Abus = V</TD></TR>
-	<TR><TD>1,100</TD><TD>Abus = KA</TD></TR>
-	<TR><TD>1,101</TD><TD>Abus = KB</TD></TR>
-	<TR><TD>1,110</TD><TD>Abus = CA</TD></TR>
-	<TR><TD>1,111</TD><TD>Abus = CB</TD></TR>
-	</TABLE>
-</TD>
-<TD VALIGN="TOP">
-	<TABLE BORDER>
-	<TR><TH COLSPAN=2>BI<BR>Source for B bus</TH></TR>
-	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>Bbus = 0000</TD></TR>
-	<TR><TD>001</TD><TD>Bbus = KK</TD></TR>
-	<TR><TD>010</TD><TD>Bbus = D<SUB>1</SUB></TD></TR>
-	<TR><TD>011</TD><TD>Bbus = D<SUB>2</SUB></TD></TR>
-	<TR><TD>100</TD><TD>Bbus = KA</TD></TR>
-	<TR><TD>101</TD><TD>Bbus = KB</TD></TR>
-	<TR><TD>110</TD><TD>Bbus = CA</TD></TR>
-	<TR><TD>111</TD><TD>Bbus = CB</TD></TR>
-	</TABLE></UL>
-</TD>
-<TD VALIGN="TOP">
-	<TABLE BORDER>
-	<TR><TH COLSPAN=2>ZO<BR>Dest. for Z bus</TH></TR>
-	<TR><TH>op</TH><TH>affect</TH></TR>
-	<TR><TD>000</TD><TD>S = Zbus *</TD></TR>
-	<TR><TD>001</TD><TD>T = Zbus</TD></TR>
-	<TR><TD>010</TD><TD>U = Zbus</TD></TR>
-	<TR><TD>011</TD><TD>V = Zbus</TD></TR>
-	<TR><TD>100</TD><TD>KA = Zbus</TD></TR>
-	<TR><TD>101</TD><TD>KB = Zbus</TD></TR>
-	<TR><TD>110</TD><TD>CA = Zbus</TD></TR>
-	<TR><TD>111</TD><TD>CB = Zbus</TD></TR>
-	<TR><TD COLSPAN=2>* only if ST == 1111</TD></TR>
-	</TABLE>
-</TD></TR>
+<P><UL><TABLE BORDER>
+
+<TR>	<TH COLSPAN=3>Source for A bus</TH><TH ROWSPAN=11>&nbsp;</TH>
+	<TH COLSPAN=2>Source for B bus</TH><TH ROWSPAN=11>&nbsp;</TH>
+	<TH COLSPAN=3>Dest. for Z bus</TH>
+</TR>
+
+<TR>	<TH>AC</TH><TH>AI</TH><TH>affect</TH>
+	<TH>BI</TH><TH>affect</TH>
+	<TH>ZO</TH><TH>ST</TH><TH>affect</TH>
+</TR>
+
+<TR>	<TD>0</TD><TD>XXX</TD><TD>Abus = 0000</TD>
+	<TD ROWSPAN=2 VALIGN=TOP>000</TD><TD ROWSPAN=2 VALIGN=TOP>Bbus = 0000</TD>
+	<TD>000</TD><TD>0000*</TD><TD>No-Op</TD>
+</TR>
+
+<TR>	<TD>1</TD><TD>000</TD><TD>Abus = S</TD>
+	<TD>000</TD><TD>1111</TD><TD>S = Zbus</TD>
+</TR>
+
+<TR>	<TD>1</TD><TD>001</TD><TD>Abus = T</TD>
+	<TD>001</TD><TD>Bbus = KK</TD>
+	<TD>001</TD><TD>XXXX</TD><TD>T = Zbus</TD>
+</TR>
+
+<TR>	<TD>1</TD><TD>010</TD><TD>Abus = U</TD>
+	<TD>010</TD><TD>Bbus = D<SUB>1</SUB></TD>
+	<TD>010</TD><TD>XXXX</TD><TD>U = Zbus</TD>
+</TR>
+<TR>	<TD>1</TD><TD>011</TD><TD>Abus = V</TD>
+	<TD>011</TD><TD>Bbus = D<SUB>2</SUB></TD>
+	<TD>011</TD><TD>XXXX</TD><TD>V = Zbus</TD>
+</TR>
+
+<TR>	<TD>1</TD><TD>100</TD><TD>Abus = KA</TD>
+	<TD>100</TD><TD>Bbus = KA</TD>
+	<TD>100</TD><TD>XXXX</TD><TD>KA = Zbus</TD>
+</TR>
+<TR>	<TD>1</TD><TD>101</TD><TD>Abus = KB</TD>
+	<TD>101</TD><TD>Bbus = KB</TD>
+	<TD>101</TD><TD>XXXX</TD><TD>KB = Zbus</TD>
+</TR>
+<TR>	<TD>1</TD><TD>110</TD><TD>Abus = CA</TD>
+	<TD>110</TD><TD>Bbus = CA</TD>
+	<TD>110</TD><TD>XXXX</TD><TD>CA = Zbus</TD>
+</TR>
+<TR>	<TD>1</TD><TD>111</TD><TD>Abus = CB</TD>
+	<TD>111</TD><TD>Bbus = CB</TD>
+	<TD>111</TD><TD>XXXX</TD><TD>CB = Zbus</TD>
+</TR>
+<TR>	<TD COLSPAN=10>* ST != 1111</TD></TR>
 </TABLE></UL>
 
 <H4>Bit Assignments for I/O Ops</H4>
-
-<P><UL><TABLE BORDER>
-	<TR><TD>MXA</TD><TD>TMR & LEFT </TD></TR>
-	<TR><TD>MXB</TD><TD></TD></TR>
-	<TR><TD>MXC</TD><TD></TD></TR>
-	<TR><TD>MXD</TD><TD></TD></TR>
-	<TR><TD>MXE</TD><TD>TMR & RIGHT</TD></TR>
-	<TR><TD>MXF</TD><TD></TD></TR>
-	<TR><TD>MXG</TD><TD></TD></TR>
-	<TR><TD>MXH</TD><TD></TD></TR>
-</TABLE></UL>
 
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2 ROWSPAN=2>&nbsp;</TH>
@@ -588,7 +574,7 @@ as follows (layout for Solid State ROM).
 
 </TR>
 <TR><TD COLSPAN=4>
-<TABLE ALIGN="RIGHT">	<TR><TD>PLAY</TD><TD>=</TD><TD>00xx</TD></TR>
+<TABLE ALIGN="LEFT">	<TR><TD>PLAY</TD><TD>=</TD><TD>00xx</TD></TR>
 			<TR><TD>RECORD</TD><TD>=</TD><TD>01xx</TD></TR>
 			<TR><TD>TRANSFER</TD><TD>=</TD><TD>10xx</TD></TR>
 			<TR><TD>EDIT<BR>(PLAY+RECORD)</TD><TD>=</TD><TD>11xx</TD></TR>
@@ -612,7 +598,7 @@ as follows (layout for Solid State ROM).
 </TABLE></UL>
 
 <P><UL><TABLE BORDER>
-<TR><TH COLSPAN=4>MOPs based on KK</TH></TR>
+<TR><TH COLSPAN=4>MOPs for I/O</TH></TR>
 <TR><TH>MOP</TH><TH>KK</TH><TH>BI</TH><TH>function</TH></TR>
 <TR><TD ROWSPAN=4>0111</TD><TD>xxx1</TD><TD COLSPAN=2>CSL = BI&lt;0&gt;</TD></TR>
 <TR>			<TD>xx1x</TD><TD COLSPAN=2>ELN = BI&lt;0&gt;</TD></TR>
@@ -621,10 +607,10 @@ as follows (layout for Solid State ROM).
 <TR><TD ROWSPAN=4>1000</TD>
 			<TD>xxx1</TD>
 				<TD COLSPAN=2>KBLO/KBLK = BI&lt;0&gt;</TD></TR>
-<TR>			<TD>xx1x</TD><TD COLSPAN=2>Bell</TD></TR>
+<TR>			<TD>xx1x</TD><TD COLSPAN=2>Bell/Beep</TD></TR>
 <TR>			<TD ROWSPAN=2>x1xx</TD>
-				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0> *</TD></TR>
-<TR>				<TD>xxx1</TD><TD>Typewriter carriage function *</TD></TR>
+				<TD>xxx0</TD><TD>Print TO<1:0>,RO<3:0> <SUP>(1)</SUP></TD></TR>
+<TR>				<TD>xxx1</TD><TD>Typewriter carriage function <SUP>(1)</SUP></TD></TR>
 <TR><TD ROWSPAN=8>1001</TD>
 	<TD>x000</TD><TD COLSPAN=2>KA = D3</TD></TR>
 <TR>	<TD>x001</TD><TD COLSPAN=2>KA = Lo nibble UART decoder</TD></TR>
@@ -634,10 +620,13 @@ as follows (layout for Solid State ROM).
 <TR>	<TD>x101</TD><TD COLSPAN=2>n/a</TD></TR>
 <TR>	<TD>x110</TD><TD COLSPAN=2>n/a</TD></TR>
 <TR>	<TD>x111</TD><TD COLSPAN=2>n/a</TD></TR>
+<TR><TD ROWSPAN=1>1010</TD>
+	<TD COLSPAN=3>KB = ROP ; LOP ; TCK ; DK <SUP>(2)</SUP>
+	</TD></TR>
 <TR><TD ROWSPAN=1>1011</TD>
 	<TD COLSPAN=3>	
 			D<SUB>IN1</SUB>=KA&lt;0&gt;<BR>
-			D<SUB>IN0</SUB>=KB&lt;0&gt;<BR>
+			D<SUB>IN0</SUB>=KB&lt;0&gt; <SUP>(2)</SUP><BR>
 	</TD></TR>
 <TR><TD ROWSPAN=1>1101</TD>
 	<TD COLSPAN=3>	RIGHT=KK&lt;0&gt;<BR>
@@ -648,6 +637,9 @@ as follows (layout for Solid State ROM).
 			TM=1<BR>
 			H+L=KK&lt;3&gt;<BR>
 			FWD=KK&lt;1&gt;<BR>
+	</TD></TR>
+<TR><TD ROWSPAN=1>1100</TD>
+	<TD COLSPAN=3>KB = RHS ; LHS ; R/B ; L/S
 	</TD></TR>
 <TR><TD ROWSPAN=1>1110</TD>
 	<TD COLSPAN=3>	RIGHT=KK&lt;0&gt;<BR>
@@ -663,11 +655,13 @@ as follows (layout for Solid State ROM).
 <TR>	<TD>x010</TD><TD COLSPAN=2>BREAK</TD></TR>
 <TR>	<TD>x011</TD><TD COLSPAN=2>UDA,UDB=KA,KB (Zbus)</TD></TR>
 <TR>	<TD>x100</TD><TD COLSPAN=2>DTR=0</TD></TR>
-<TR>	<TD>x101</TD><TD COLSPAN=2>RTS=0</TD></TR>
-<TR>	<TD>x110</TD><TD COLSPAN=2>RTS=1</TD></TR>
+<TR>	<TD>x101</TD><TD COLSPAN=2>RTS=0 <SUP>(3)</SUP></TD></TR>
+<TR>	<TD>x110</TD><TD COLSPAN=2>RTS=1 <SUP>(3)</SUP></TD></TR>
 <TR>	<TD>x111</TD><TD COLSPAN=2>DTR=1</TD></TR>
-<TR><TD COLSPAN=4>* TO,RO = KA,KB</TD></TR>
-<TR><TD COLSPAN=4>RTS drives UART Decoder input, 0: RR&lt;5:0&gt;, 1: UD&lt;6:0&gt;</TD></TR>
+<TR><TD COLSPAN=4>Note 1: TO,RO = KA,KB</TD></TR>
+<TR><TD COLSPAN=4>Note 2: Selects left or right data stream<BR>based on previous RIGHT/LEFT setting.</TD></TR>
+<TR><TD COLSPAN=4>Note 3: RTS drives UART Decoder input:<BR>0: RR&lt;5:0&gt; (recv), 1: UD&lt;6:0&gt; (xmit)<BR>
+Decoder converts between tilt-rotate and ACSII</TD></TR>
 </TABLE></UL>
 
 <P><TABLE BORDER>
