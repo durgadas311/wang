@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.23 2012/01/06 16:12:19 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.24 2012/01/07 18:09:19 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -1090,10 +1090,10 @@ Memory addresses are byte-addresses.
 <P><UL><TABLE BORDER>
 <TR><TH COLSPAN=2>Memory Usage</TH></TR>
 <TR><TH>RAM Address</TH><TH>Purpose</TH></TR>
-<TR><TD CLASS="num">0xff (15,15)</TD><TD>index</TD></TR>
+<TR><TD CLASS="num">0xff (15,15)</TD><TD>chars in buffer</TD></TR>
 <TR><TD CLASS="num">0xfe (15,14)</TD><TD>index</TD></TR>
-<TR><TD CLASS="num">0xfd (15,13)</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xfc (15,12)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xfd (15,13)</TD><TD>chars after carriage</TD></TR>
+<TR><TD CLASS="num">0xfc (15,12)</TD><TD>carriage position</TD></TR>
 <TR><TD CLASS="num">0xfb (15,11)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xfa (15,10)</TD><TD>index</TD></TR>
 <TR><TD CLASS="num">0xf9 (15,09)</TD><TD>saved registers</TD></TR>
@@ -1104,8 +1104,8 @@ Memory addresses are byte-addresses.
 <TR><TD CLASS="num">0xf4 (15,04)</TD><TD>mode</TD></TR>
 <TR><TD CLASS="num">0xf3 (15,03)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xf2 (15,02)</TD><TD>saved registers</TD></TR>
-<TR><TD CLASS="num">0xf1 (15,01)</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xf0 (15,00)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xf1 (15,01)</TD><TD>right margin</TD></TR>
+<TR><TD CLASS="num">0xf0 (15,00)</TD><TD>adjust margin</TD></TR>
 <TR><TD CLASS="num">0xef (14,15)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xee (14,14)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xed (14,13)</TD><TD>index?</TD></TR>
@@ -1124,9 +1124,9 @@ Memory addresses are byte-addresses.
 <TR><TD CLASS="num">0xe0 (14,00)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xdf (13,15)</TD><TD>FIFO tail count</TD></TR>
 <TR><TD CLASS="num">0xd0 - 0xde (13,00 - 13,14)</TD><TD>Keyboard FIFO</TD></TR>
-<TR><TD CLASS="num">0xc9 - 0xcf (12,09)</TD><TD>unknown</TD></TR>
-<TR><TD CLASS="num">0x65 - 0xc8 (06,05 - 12,08)</TD><TD>Aux Line/Tape buffer</TD></TR>
-<TR><TD CLASS="num">0x64 (06,04)</TD><TD>unknown</TD></TR>
+<TR><TD CLASS="num">0xcf (12,15)</TD><TD>Num Tab Stops</TD></TR>
+<TR><TD CLASS="num">0xc8 - 0xce (12,08 - 12,14)</TD><TD>Tab Stops</TD></TR>
+<TR><TD CLASS="num">0x64 - 0xc7 (06,04 - 12,07)</TD><TD>Aux Line/Tape buffer</TD></TR>
 <TR><TD CLASS="num">0x00 - 0x63 (00,00 - 06,03)</TD><TD>Line/Tape buffer</TD></TR>
 </TABLE></UL>
 
