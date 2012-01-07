@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.25 2011/12/31 21:14:53 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.26 2012/01/07 23:36:16 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -85,14 +85,15 @@ static struct ucode_ovr_s ucode_ovr[] = {
 [SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
 [SYS_MODEL1222] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
+// is logibloc 5293 wrong?
         { 0x3d2, {
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 0 }},
         }},
         { 0x3d4, {
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 0 }},
         }},
         { 0x3d6, {
-[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1220] = { .flds = {.sub = 1, .jad = 0x5fc >> 2, .jh = 1, .jl = 0, .ovr = 0 }},
         }},
 #ifdef DOUGS_PATCHES
         { 0x6dd, {
@@ -120,37 +121,90 @@ static struct ucode_ovr_s ucode_ovr[] = {
 #endif // DOUGS_PATCHES
 
         { 0x052, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.sub = 0, .jad = 0x058 >> 2, .jh = 0, .jl = 3, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.sub = 0, .jad = 0x058 >> 2, .jh = 0, .jl = 3, .ovr = 1 }},
         }},
         { 0x423, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 6, .bi = 1, .ac = 1, .bc = 1, .kk = 11,
+			.sub = 0, .jad = 0x424 >> 2, .jh = 5, .jl = 4, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 6, .bi = 1, .ac = 1, .bc = 1, .kk = 11,
+			.sub = 0, .jad = 0x424 >> 2, .jh = 5, .jl = 4, .ovr = 1 }},
         }},
         { 0x42f, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 6, .ac = 1, .mop = 6, .kk = 4, .st = 3,
+			.sub = 0, .jad = 0x424 >> 2, .jh = 7, .jl = 4, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 6, .ac = 1, .mop = 6, .kk = 4, .st = 3,
+			.sub = 0, .jad = 0x424 >> 2, .jh = 7, .jl = 4, .ovr = 1 }},
         }},
         { 0x506, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.zo = 7, .aop = 1, .mop = 3, .kk = 12, .st = 13,
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.zo = 7, .aop = 1, .mop = 3, .kk = 12, .st = 13,
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
         { 0x558, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 1, .bi = 6, .zo = 1, .ac = 1, .st = 13,
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 1, .bi = 6, .zo = 1, .ac = 1, .st = 13,
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
         }},
         { 0x5ec, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 5, .bi = 1, .aop = 6, .ac = 1, .bc = 1, .kk = 11,
+			.sub = 0, .jad = 0x5ec >> 2, .jh = 1, .jl = 4, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 5, .bi = 1, .aop = 6, .ac = 1, .bc = 1, .kk = 11,
+			.sub = 0, .jad = 0x5ec >> 2, .jh = 1, .jl = 4, .ovr = 1 }},
         }},
         { 0x6ee, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.bi = 1, .zo = 7, .kk = 2,
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.bi = 1, .zo = 7, .kk = 2,
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
         }},
         { 0x7fe, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.bi = 1, .zo = 7, .aop = 6, .ac = 1, .kk = 3,
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.bi = 1, .zo = 7, .aop = 6, .ac = 1, .kk = 3,
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
         }},
         { 0x44f, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 6, .zo = 6, .aop = 3, .ac = 1, .bc = 1,
+			.sub = 0, .jad = 0x450 >> 2, .jh = 0, .jl = 1, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 6, .zo = 6, .aop = 3, .ac = 1, .bc = 1,
+			.sub = 0, .jad = 0x450 >> 2, .jh = 0, .jl = 1, .ovr = 1 }},
         }},
         { 0x33c, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
+			.sub = 1, .jad = 0x414 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
+			.sub = 1, .jad = 0x414 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
         }},
         { 0x33d, {
-[SYS_MODEL1222] = { .flds = {.sub = 0, .jad = 0x000 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
+[SYS_MODEL1220] = { .flds = {
+			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
+			.sub = 0, .jad = 0x034 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+[SYS_MODEL1222] = { .flds = {
+			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
+			.sub = 0, .jad = 0x034 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
         }},
 };
 #define NUM_UCODE_OVR (sizeof(ucode_ovr) / sizeof(ucode_ovr[0]))
@@ -843,7 +897,7 @@ int instr_exec(wang_sys_t *sys) {
 		case 6:
 			// todo: clean this up!
 			if (key) {
-fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
+//fprintf(stderr,"%03x: pop %04x\n", sys->cpu.sys.pc, key);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 				sys->cpu.kbd = 1;
 				// is this bit ever set for other reasons?
