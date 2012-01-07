@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $
+// $Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -568,20 +568,26 @@ class Wang1200_SimInput
 			} else if ((b[1]  & 0xf8) == 0x18) {
 				// carriage control commands
 				if ((b[0] & 0x01) != 0) {
-					b[0] = 0x02;	// space
+					_m611.do_space();
+					continue;
 				} else if ((b[0] & 0x02) != 0) {
-					b[0] = 0x03;	// back space
+					_m611.do_backspace();
+					continue;
 				} else if ((b[0] & 0x04) != 0) {
 					_m611.do_tab();	// tab
 					continue;
 				} else if ((b[0] & 0x08) != 0) {
-					b[0] = 0x18;	// cr-lf
+					_m611.do_crlf();
+					continue;
 				} else if ((b[0] & 0x10) != 0) {
-					b[0] = 0x13;	// shift up
+					_m611.do_shift_up();
+					continue;
 				} else if ((b[0] & 0x20) != 0) {
-					b[0] = 0x12;	// shift dn
+					_m611.do_shift_dn();
+					continue;
 				} else if ((b[1] & 0x01) != 0) {
-					b[0] = 0x1a;	// index
+					_m611.do_index();
+					continue;
 				} else if ((b[1] & 0x02) != 0) {
 					_m611.do_settab();	// set tab
 					continue;
@@ -630,7 +636,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -668,7 +674,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1043,10 +1049,10 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
-	private String[] cn24_spcl;
+	private char[] cn24_spcl;
 
 	public void reset() {
 		// anything?
@@ -1188,10 +1194,10 @@ class Wang1200_Model611
 		cn24_xlate[0x7e] = '#';
 		cn24_xlate[0x7f] = '!';
 
-		cn24_spcl = new String[32];
-		cn24_spcl[0x01] = "\u00BD";
-		cn24_spcl[0x02] = "\u00BC";
-		cn24_spcl[0x03] = "\u00A2";
+		cn24_spcl = new char[32];
+		cn24_spcl[0x01] = '\u00BD';
+		cn24_spcl[0x02] = '\u00BC';
+		cn24_spcl[0x03] = '\u00A2';
 
 		cn24_revxlate = new byte[256];
 		cn24_revxlate['-'] = 0x00;
@@ -1204,8 +1210,6 @@ class Wang1200_Model611
 		cn24_revxlate['j'] = 0x07;
 		cn24_revxlate[' '] = 0x03;
 		cn24_revxlate['/'] = 0x09;
-		//cn24_revxlate[' '] = 0x0a;	// no op
-		//cn24_revxlate[' '] = 0x0b;	// no op
 		cn24_revxlate[','] = 0x0c;
 		cn24_revxlate[';'] = 0x0d;
 		cn24_revxlate['f'] = 0x0e;
@@ -1213,8 +1217,6 @@ class Wang1200_Model611
 
 		cn24_revxlate['w'] = 0x10;
 		cn24_revxlate['s'] = 0x11;
-		//cn24_revxlate[''] = 0x12;	// shift dn
-		//cn24_revxlate[''] = 0x13;	// shift up
 		cn24_revxlate['i'] = 0x14;
 		cn24_revxlate['\''] = 0x15;
 		cn24_revxlate['.'] = 0x16;
@@ -1223,7 +1225,6 @@ class Wang1200_Model611
 		cn24_revxlate['o'] = 0x19;
 		cn24_revxlate['\n'] = 0x33;
 		cn24_revxlate['\t'] = 0x23;
-		//cn24_revxlate['\n'] = 0x1b;	// rev index
 		cn24_revxlate['a'] = 0x1c;
 		cn24_revxlate['r'] = 0x1d;
 		cn24_revxlate['v'] = 0x1e;
@@ -1231,16 +1232,11 @@ class Wang1200_Model611
 
 		cn24_revxlate['b'] = 0x20;
 		cn24_revxlate['h'] = 0x21;
-		//cn24_revxlate['+'] = 0x22;	// step x+
-		//cn24_revxlate['+'] = 0x23;	// step x-
 		cn24_revxlate['k'] = 0x24;
 		cn24_revxlate['e'] = 0x25;
 		cn24_revxlate['n'] = 0x26;
 		cn24_revxlate['t'] = 0x27;
-		//cn24_revxlate[''] = 0x28;	// print mode
 		cn24_revxlate['l'] = 0x29;
-		//cn24_revxlate['+'] = 0x2a;	// step y+
-		//cn24_revxlate['+'] = 0x2b;	// step y-
 		cn24_revxlate['c'] = 0x2c;
 		cn24_revxlate['d'] = 0x2d;
 		cn24_revxlate['u'] = 0x2e;
@@ -1248,16 +1244,11 @@ class Wang1200_Model611
 
 		cn24_revxlate['9'] = 0x30;
 		cn24_revxlate['0'] = 0x31;
-		//cn24_revxlate[''] = 0x32;	// step x+y+
-		//cn24_revxlate[''] = 0x33;	// step x-y+
 		cn24_revxlate['6'] = 0x34;
 		cn24_revxlate['5'] = 0x35;
 		cn24_revxlate['2'] = 0x36;
 		cn24_revxlate['z'] = 0x37;
-		//cn24_revxlate[''] = 0x38;	// plot mode
 		cn24_revxlate['4'] = 0x39;
-		//cn24_revxlate[''] = 0x3a;	// step x+y-
-		//cn24_revxlate[''] = 0x3b;	// step x-y-
 		cn24_revxlate['8'] = 0x3c;
 		cn24_revxlate['7'] = 0x3d;
 		cn24_revxlate['3'] = 0x3e;
@@ -1266,8 +1257,6 @@ class Wang1200_Model611
 		// shifted versions...
 		cn24_revxlate['_'] = (byte)0x80;
 		cn24_revxlate['Y'] = (byte)0x81;
-		//cn24_revxlate[' '] = (byte)0x82;
-		//cn24_revxlate['\b'] = (byte)0x83;
 		cn24_revxlate['Q'] = (byte)0x84;
 		cn24_revxlate['P'] = (byte)0x85;
 		cn24_revxlate['+'] = (byte)0x86;
@@ -1280,14 +1269,12 @@ class Wang1200_Model611
 
 		cn24_revxlate['W'] = (byte)0x90;
 		cn24_revxlate['S'] = (byte)0x91;
+		cn24_revxlate['|'] = (byte)0x92;	// Set Tab
 		cn24_revxlate['I'] = (byte)0x94;
 		cn24_revxlate['"'] = (byte)0x95;
 		cn24_revxlate['.'] = (byte)0x96;
 		cn24_revxlate['{'] = (byte)0x97;	// 1/4
-		//cn24_revxlate['\n'] = (byte)0x98;
 		cn24_revxlate['O'] = (byte)0x99;
-		//cn24_revxlate['\n'] = (byte)0x9a;
-		//cn24_revxlate['\n'] = (byte)0x9b;	// rev index
 		cn24_revxlate['A'] = (byte)0x9c;
 		cn24_revxlate['R'] = (byte)0x9d;
 		cn24_revxlate['V'] = (byte)0x9e;
@@ -1320,26 +1307,116 @@ class Wang1200_Model611
 	private PlotTextArea _text;
 	private JScrollPane _scroll;
 
-	private int _xoff, _yoff, _eop;
-	boolean _hasGraphic;
+	private int _xoff, _yoff;
+	private int _eop;	// position of user character
+	private int _eoc;	// position of internal cursor
+	private int _eol;	// position of internal newline
+	//
+	// Typewriter emulation of carriage and non-destructive space/backspace:
+	//            +--- "_eop"
+	//            |               +-- "_eol"
+	//            v               v
+	// user typed characters here.\n
+	// -----------@
+	//            ^
+	//            +--- "_eoc"
+	//
+	// Where '-' is black spaces, '@' is the cursor character (\u25b2),
+	// and '\n' is the internally-maintain newline - not part of user characters.
+	//
+	// Actions:
+	//
+	// SP:   ++_eop;
+	//       _text.insert(" ",_eoc); ++_eoc;
+	//
+	// BS:   --_eop;
+	//       --_eoc; _text.replaceRange(null, _eoc, _eoc + 1);
+	//
+	// CR:   _text.replaceRange(null, _eop, _eoc); _text.insert("\n", _eop); _eol = _eop + 1; _eoc = _eol + 1;
+	//
+	// char: if (_eop < _eol) { _text.replaceRange(char, _eop, _eop + 1); }
+	//       else { _text.insert(char, _eol); ++_eol; }
+	//       ++_eop;
+	//       _text.insert(" ",_eoc); ++_eoc;
+	//
+	// CLEAR: _text.setText(""); _eop = _eol = _eoc = 0; call(CR);
+	//
+	//
 	int _fx, _fy, _fa;
 	double _gx, _gy;
 
 	private void clear() {
-		_text.setText("");
-		_eop = 0;
-		_text.setCaretPosition(_eop);
-//		_plot = false;
+		_text.setText("\n\u25b2");
+		_eop = _eol = 0;
+		_eoc = 1;
 		_shifted = false;
-//		_x = _y = 0;
 		_text.clear();
-		_hasGraphic = false;
-		// draw cursor - hope no one erases it!
-		//s = "\u2588";
-		_text.append("\u2588");
+		_text.setCaretPosition(_eoc);
 	}
 
 	String _footer;
+
+	public boolean cursor_left() {
+		if (_eoc - 1 <= _eol) {
+			return false;
+		}
+		--_eoc;
+		_text.replaceRange(null, _eoc, _eoc + 1);
+		_text.setCaretPosition(_eoc);
+		return true;
+	}
+
+	public boolean cursor_right() {
+		_text.insert(" ", _eoc);
+		++_eoc;
+		_text.setCaretPosition(_eoc);
+		return true;
+	}
+
+	public void do_crlf() {
+		_text.replaceRange(null, _eol + 1, _eoc);	// this leaves cursor in buffer...
+		_text.replaceRange(null, _eop, _eol);		// this leaves \n in buffer...
+		_text.insert("\n", _eop);
+		++_eop;
+		_eol = _eop;
+		_eoc = _eol + 1;
+		_text.setCaretPosition(_eoc);
+	}
+
+	public void do_index() {
+		do_crlf(); // should it be different?
+	}
+
+	public void do_space() {
+		if (_eop >= _eol) {
+			_text.insert(" ", _eol);
+			++_eol;
+			++_eoc;
+		}
+		++_eop;
+		cursor_right();
+	}
+
+	public void do_backspace() {
+		if (cursor_left()) {
+			--_eop;
+		}
+	}
+
+	public void do_char(char c) {
+		byte[] b = new byte[1];
+		b[0] = (byte)c;
+		String s = new String(b);
+		if (_eop < _eol) {
+			_text.replaceRange(s, _eop, _eop + 1);
+		} else {
+			_text.insert(s, _eol);
+			++_eol;
+			++_eoc;
+		}
+		++_eop;
+		cursor_right();
+	}
 
 	public void do_tab() {
 	}
@@ -1350,16 +1427,12 @@ class Wang1200_Model611
 	public void do_clrtab() {
 	}
 
-	private void clrCursor() {
-		//String s = " ";
-		//_text.append(s);
-		_text.setCaretPosition(_eop);
+	public void do_shift_dn() {
+		_shifted = false;
 	}
 
-	private void setCursor() {
-		//String s = "\u2588";
-		//_text.append(s);
-		_text.setCaretPosition(_eop);
+	public void do_shift_up() {
+		_shifted = true;
 	}
 
 	public Wang1200_Model611() {
@@ -1398,48 +1471,22 @@ class Wang1200_Model611
 		_yoff = fdim.height - sdim.height;
 
 		addComponentListener(this);
-
-//		String s;
-//		// test mode only...
-//		s =	"It was a dark and stormy night.\n"+
-//			"The quick brown fox jumped over the lazy sleeping dog.\n"+
-//			"Mary had a little lamb,\n";
-//		_text.append(s);
-//		_eop += s.length();
-		// all this done by clear()...
-//		setCursor();
-//		// draw cursor - hope no one erases it!
-//		s = "\u2588";
-//		_text.append(s);
 	}
 
 	private void save611(File file) {
-		if (_hasGraphic) {
-			java.awt.image.BufferedImage i =
-				new java.awt.image.BufferedImage(_text.getWidth(),
-								_text.getHeight(),
-					java.awt.image.BufferedImage.TYPE_BYTE_BINARY);
-			_text.paint(i.getGraphics());
-			try {
-				javax.imageio.ImageIO.write(i, "png", file);
-			} catch (IOException ee) {
-				System.err.println("error writing 611 PNG");
-			}
-		} else {
-			FileOutputStream fo;
-			try {
-				fo = new FileOutputStream(file);
-			} catch (FileNotFoundException ee) {
-				System.err.println("chosen 611 file not found?");
-				return;
-			}
-			try {
-				fo.write(_text.getText().getBytes());
-				fo.write('\n');
-				fo.close();
-			} catch (IOException ee) {
-				System.err.println("error writing 611 TXT");
-			}
+		FileOutputStream fo;
+		try {
+			fo = new FileOutputStream(file);
+		} catch (FileNotFoundException ee) {
+			System.err.println("chosen 611 file not found?");
+			return;
+		}
+		try {
+			fo.write(_text.getText().getBytes());
+			fo.write('\n');
+			fo.close();
+		} catch (IOException ee) {
+			System.err.println("error writing 611 TXT");
 		}
 	}
 
@@ -1455,13 +1502,8 @@ class Wang1200_Model611
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
 			String sfx, dsc;
-			if (_hasGraphic) {
-				sfx = "png";
-				dsc = "PNG image files";
-			} else {
-				sfx = "txt";
-				dsc = "Text files";
-			}
+			sfx = "txt";
+			dsc = "Text files";
 			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc);
 			int rv = ch.showOpenDialog(this);
 			if (rv == JFileChooser.APPROVE_OPTION) {
@@ -1508,59 +1550,16 @@ class Wang1200_Model611
 	}
 
 	private boolean _shifted;
-//	private boolean _plot;
-//	private int _x, _y;
-//	private int _dx, _dy;
 
 	class PlotTextArea extends JTextArea
 			implements Printable {
 		static final long serialVersionUID = 311457692040L;
-//		class plot {
-//			plot(String s_, int x_, int y_) {
-//				s = s_;
-//				x = x_;
-//				y = y_;
-//			}
-//			public String s;
-//			public int x;
-//			public int y;
-//		}
 
 		public void clear() {
-//			_nplots = 0;
-//			_xplots = 0;
-//			//_plotArray.dispose();
-//			_plotArray = null;
-//			_x = _y = 0;
 		}
-
-//		private plot[] _plotArray;
-//		private int _nplots;
-//		private int _xplots;
-
-//		private void addPlot(String s, int x, int y) {
-//			int n = _xplots++;
-//			if (_xplots > _nplots) {
-//				int o = _nplots;
-//				_nplots += 256;
-//				plot[] p = new plot[_nplots];
-//				if (o > 0) {
-//					System.arraycopy(_plotArray, 0, p, 0, o);
-//				}
-//				_plotArray = p;
-//			}
-//			_plotArray[n] = new plot(s, x, y);
-//		}
 
 		public void paint(Graphics g) {
 			super.paint(g);
-//			int x;
-//			for (x = 0; x < _xplots; ++x) {
-//				double xx, yy;
-//				xx = (_plotArray[x].x * _gx) + 0.5;
-//				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
-//				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
-//			}
 		}
 
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
@@ -1584,11 +1583,8 @@ class Wang1200_Model611
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
 			int l = g2d.getFont().getSize();
-//			double gx = (w0 / 1300.0);
-//			double gy = (l / (100.0 / 6.0));
 			int lpp = 60; // (int)(h0 / l);
 			int max = getLineCount();
-//			int i = 0;
 			while (pg <= pageIndex) {
 				int ln;
 				for (ln = 0; ln < lpp; ++ln) {
@@ -1609,19 +1605,6 @@ class Wang1200_Model611
 					}
 				}
 				if (pg == pageIndex) {
-//					int ps = (int)(h0 * pg);
-//					int pe = (int)(ps + h0);
-//					for (i = 0; i < _xplots; ++i) {
-//						double xx, yy;
-//						// convert 1/100ths to points...
-//						xx = (_plotArray[i].x * gx) + 0.5;
-//						yy = (_plotArray[i].y * gy) + 0.5;
-//						if (yy >= ps && yy < pe) {
-//							++did;
-//							g2d.drawString(_plotArray[i].s,
-//								(int)xx, (int)yy - ps + l);
-//						}
-//					}
 				}
 				++pg;
 			}
@@ -1636,171 +1619,45 @@ class Wang1200_Model611
 		}
 	}
 
-//	private void index() {
-//		_y += 14;
-//	}
-//
-//	private void revindex() {
-//		_y -= 14;
-//		if (_y < 0) _y = 0;
-//	}
-//
-//	private void space() {
-//		_x += 10;
-//		if (_x >= 1300) _x = 1299;
-//	}
-//
-//	private void bkspace() {
-//		_x -= 10;
-//		if (_x < 0) _x = 0;
-//	}
-
 	public void do_cn24(byte[] b) {
-//		if ((b[0] & 0x0f) == 0x08) { // control characters...
-//			switch((b[0] & 0x30) >> 4) {
-//			case 0: // nothing
-//				break;
-//			case 1:	// return+index handled below...
-//				_x = 0;
-//				if (_plot) return;
-//				index();
-//				break;
-//			case 2:	// print mode
-//				_plot = false;	// cleanup?
-//				return;
-//			case 3:	// plot mode
-//				_plot = true;
-//				_dx = _dy = 0;
-//				return;
-//			}
-//		} else if ((b[0] & 0x06) == 0x02) {
-//			switch((b[0] & 0x30) >> 4) {
-//			case 0: // space/bspace or nothing
-//				if (_plot) return;
-//				if ((b[0] & 1) == 0) {
-//					space();
-//				} else {
-//					bkspace();
-//				}
-//				break;
-//			case 1:	// index/rev or shift...
-//				if ((b[0] & 0x0e) == 0x02) {
-//					_shifted = ((b[0] & 1) != 0);
-//					return;
-//				}
-//				if (_plot) return;
-//				if ((b[0] & 1) == 0) {
-//					index();
-//				} else {
-//					revindex();
-//				}
-//				break;
-//			case 2:	// stepping
-//			case 3:	// stepping
-//				if (!_plot) return;
-//				switch(b[0] & 0x19) {
-//				case 0x00:
-//					_dx += 1;
-//					break;
-//				case 0x01:
-//					_dx -= 1;
-//					break;
-//				case 0x08:
-//					_dy += 1;
-//					break;
-//				case 0x09:
-//					_dy -= 1;
-//					break;
-//				case 0x10:
-//					_dx += 1;
-//					_dy += 1;
-//					break;
-//				case 0x11:
-//					_dx -= 1;
-//					_dy += 1;
-//					break;
-//				case 0x18:
-//					_dx += 1;
-//					_dy -= 1;
-//					break;
-//				case 0x19:
-//					_dx -= 1;
-//					_dy -= 1;
-//					break;
-//				}
-//				return;
-//			}
-//		}
-		if (b[0] == 0x12) {	// shift dn
-			_shifted = false;
-			return;
-		}
-		if (b[0] == 0x13) {	// shift up
-			_shifted = true;
-			return;
-		}
 		byte p;
 		if (_shifted) {
 			p = cn24_xlate[b[0] + 0x40];
 		} else {
 			p = cn24_xlate[b[0]];
 		}
-		byte[] bb;
-		String s;
+		char c;
 		if (p == 0) {
-			s = new String("<"+b[0]+">");
+			c = '\u2588';
 		} else if (p < 0x07) {
-			s = cn24_spcl[p];
+			c = cn24_spcl[p];
 		} else {
-			bb = new byte[1];
-			bb[0] = p;
-			s = new String(bb);
+			c = (char)p;
 		}
-//		if (_plot) {
-//			_x += _dx;
-//			if (_x < 0) _x = 0;
-//			if (_x >= 1300) _x = 1299; // 13 in. platten
-//			_y += _dy;
-//			if (_y < 0) _y = 0;
-//			_hasGraphic = true;
-//			_text.addPlot(s, _x, _y);
-//			_text.repaint();
-//			//_text.setCaretPosition(_eop); // to what?
-//			// todo: need to get JScrollPane to update...
-//		} else {
-			clrCursor();
-			_text.insert(s,_eop);
-			_eop += s.length();
-			setCursor();
-//		}
+		do_char(c);
 	}
 	public void do_cn24_direct(char c) {
-		clrCursor();
 		// ugh... beats going through cn24_xlate/cn24_revxlate...
 		if (c == '^') c = '\u00A2';
 		else if (c == '[') c = '\u00BD';
 		else if (c == '{') c = '\u00BC';
-		//if (c >= ' ') {
-			String s = Character.toString(c);
-			_text.insert(s,_eop);
-			_eop += s.length();
-		//} else switch (c) {
-			//case '\n':
-			//case '\r':
-				//index();
-				//break;
-			//case '\b':
-				//bkspace();
-				//break;
-		//}
-		setCursor();
+		else if (c == '|') c = '\0';
+		if (c == '\b') {
+			do_backspace();
+		} else if (c == '\n') {
+			do_crlf();
+		} else if (c == ' ') {
+			do_space();
+		} else if (c != '\0') {
+			do_char(c);
+		}
 	}
 }
 
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2077,6 +1934,9 @@ if (e.isActionKey()) {
 System.err.println("action");
 }
 		char c = e.getKeyChar();
+		if (c == '\t' && (e.getModifiers() & InputEvent.CTRL_MASK) != 0) {
+			c = '|'; // non-existent on Selectrics?
+		}
 		// every key gets printed...
 		_m611.do_cn24_direct(c);
 		int i = _m611.ascii2roti(c) & 0x0ff;
@@ -2197,7 +2057,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2343,7 +2203,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2482,7 +2342,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.16 2011/12/31 22:13:27 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.17 2012/01/07 18:09:48 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
