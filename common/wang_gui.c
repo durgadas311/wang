@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011, 2012 Douglas Miller
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.17 2011/12/30 23:47:14 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.18 2012/01/08 15:32:23 drmiller Exp $"
 
 #include "wang-sim.h"
 

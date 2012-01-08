@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.5 2011/11/28 01:29:43 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.6 2012/01/08 15:32:23 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>

@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang_sim_cmd.c,v 1.7 2011/12/29 23:04:00 drmiller Exp $"
+#ident "$Id: wang_sim_cmd.c,v 1.8 2012/01/08 15:32:23 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>

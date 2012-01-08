@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011, 2012 Douglas Miller
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ident "$Id: wang-dasm.c,v 1.4 2011/12/12 22:47:32 drmiller Exp $"
+#ident "$Id: wang-dasm.c,v 1.5 2012/01/08 15:32:23 drmiller Exp $"
 
 #define TRACE_RAW_UCODE
 

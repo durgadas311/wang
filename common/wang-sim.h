@@ -1,9 +1,9 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011, 2012 Douglas Miller
 
 #ifndef __wang_sim_h__
 #define __wang_sim_h__
 
-#ident "$Id: wang-sim.h,v 1.4 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: wang-sim.h,v 1.5 2012/01/08 15:32:23 drmiller Exp $"
 
 #define TRACE
 
