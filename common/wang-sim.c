@@ -1,6 +1,6 @@
 // Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.7 2012/01/13 02:37:52 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.8 2012/01/13 22:03:02 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -40,6 +40,7 @@ static void usage() {
 		"\t-b\tBack-end mode (for GUI FE)\n"
 		"\t-g\tSpawn GUI (normally GUI spawns %s)\n"
 		"\t-i\tInteractive mode enable\n"
+		"\t-I\tInteractive mode enable, Enter command mode before running simulation\n"
 		"\t-p file\tLoad initial contents of Program Space (conflicts with -m)\n"
 		"\t-m file\tLoad initial contents of RAM. 2048 bytes, Lo nibble in [0]\n"
 #ifdef WANG_ROM_SIZE
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
 	extern int optind, opterr, optopt;
 
 	argv0 = argv[0];
-	while ((x = getopt(argc, argv, "be:gil:m:M:p:r:t:u:w")) != EOF) {
+	while ((x = getopt(argc, argv, "be:giIl:m:M:p:r:t:u:w")) != EOF) {
 		switch(x) {
 		case 'b':
 			sys.ops |= SYS_BACK_END;
@@ -84,6 +85,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'i':
 			interact = 1;
+			break;
+		case 'I':
+			interact = 2;
 			break;
 		case 'l':
 			load = strtoul(optarg, NULL, 0);
@@ -210,7 +214,7 @@ int main(int argc, char **argv) {
 	}
 
 	sys.cmd = (interact ? 1 : 0);
-	sys.run = (interact ? 0 : 1);
+	sys.run = (interact > 1 ? 0 : 1);
 	sys_go(&sys, entry);
 	sys_stop(&sys);
 	return 0;

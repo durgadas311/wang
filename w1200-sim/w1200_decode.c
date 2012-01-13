@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.28 2012/01/13 17:11:40 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.29 2012/01/13 22:03:02 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -333,8 +333,8 @@ static void tape_write(wang_sys_t *sys) {
 
 #if 1
 	if (sys == NULL) {
-		if (bitc) fprintf(stderr, "tape residual (%d) 0x%02x\n",
-					bitc, data << (8 - bitc));
+//		if (bitc) fprintf(stderr, "tape residual (%d) 0x%02x\n",
+//					bitc, data << (8 - bitc));
 		last = 0;
 		data = 0;
 		bitc = 0;
