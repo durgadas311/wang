@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.27 2012/01/13 02:37:52 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.28 2012/01/13 17:11:40 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -543,10 +543,13 @@ static void tape_off(wang_sys_t *sys) {
 #endif
 }
 
+static void dev_spc(wang_sys_t *sys, int c) {
+	sys->dev(sys, c, 1);
+}
+
 static void dev_out(wang_sys_t *sys) {
 	uint8_t c = (sys->cpu.to << 4) | sys->cpu.ro;
-//fprintf(stderr, "DEV> %02x (%d)\n", c, sys->cpu.function);
-	sys->dev(sys, c, 1);
+	dev_spc(sys, c);
 }
 
 static void rd_ram_i(wang_sys_t *sys) {
@@ -810,8 +813,15 @@ int instr_exec(wang_sys_t *sys) {
 		_indicators = 8;
 		break;
 	case 8:
+		if (br_k & 1) {
+			// lock/unlock keyboard
+			sys->cpu.function = 1;
+			dev_spc(sys, 0xd0 + ((u->bi & 1) << 4));
+		}
 		if (br_k & 2) {
-			// sound alarm/bell... TBD
+			// sound alarm/bell
+			sys->cpu.function = 1;
+			dev_spc(sys, 0xf0);
 		}
 		if (br_k & 4) {
 			sys->cpu.to = sys->cpu.ka;

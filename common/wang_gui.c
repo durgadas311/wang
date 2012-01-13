@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.19 2012/01/13 02:37:52 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.20 2012/01/13 17:11:40 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -448,9 +448,6 @@ static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 		if (sys->cpu.function) {
 			b |= (3 << 11);
 			c = (c >> 4) & 0x0f;
-			// yuk
-			b |= (1 << c);
-			c = 0;
 		} else {
 			c &= 0x3f;
 		}
