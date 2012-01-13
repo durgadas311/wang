@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang1200arch.html,v 1.25 2012/01/13 02:37:52 drmiller Exp $ -->
+<!-- $Id: wang1200arch.html,v 1.26 2012/01/13 17:11:24 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -1104,8 +1104,8 @@ Memory addresses are byte-addresses.
 <TR><TD CLASS="num">0xf4 (15,04)</TD><TD>mode</TD></TR>
 <TR><TD CLASS="num">0xf3 (15,03)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xf2 (15,02)</TD><TD>saved registers</TD></TR>
-<TR><TD CLASS="num">0xf1 (15,01)</TD><TD>right margin</TD></TR>
-<TR><TD CLASS="num">0xf0 (15,00)</TD><TD>adjust margin</TD></TR>
+<TR><TD CLASS="num">0xf1 (15,01)</TD><TD>right margin <SUP>1</SUP></TD></TR>
+<TR><TD CLASS="num">0xf0 (15,00)</TD><TD>adjust margin <SUP>1</SUP></TD></TR>
 <TR><TD CLASS="num">0xef (14,15)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xee (14,14)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xed (14,13)</TD><TD>index?</TD></TR>
@@ -1119,15 +1119,17 @@ Memory addresses are byte-addresses.
 <TR><TD CLASS="num">0xe5 (14,05)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xe4 (14,04)</TD><TD></TD></TR>
 <TR><TD CLASS="num">0xe3 (14,03)</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xe2 (14,02)</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xe1 (14,01)</TD><TD></TD></TR>
-<TR><TD CLASS="num">0xe0 (14,00)</TD><TD></TD></TR>
+<TR><TD CLASS="num">0xe2 (14,02)</TD><TD>#/page</TD></TR>
+<TR><TD CLASS="num">0xe1 (14,01)</TD><TD>lines/page</TD></TR>
+<TR><TD CLASS="num">0xe0 (14,00)</TD><TD>page modes</TD></TR>
 <TR><TD CLASS="num">0xdf (13,15)</TD><TD>FIFO tail count</TD></TR>
 <TR><TD CLASS="num">0xd0 - 0xde (13,00 - 13,14)</TD><TD>Keyboard FIFO</TD></TR>
-<TR><TD CLASS="num">0xcf (12,15)</TD><TD>Num Tab Stops</TD></TR>
-<TR><TD CLASS="num">0xc8 - 0xce (12,08 - 12,14)</TD><TD>Tab Stops</TD></TR>
+<TR><TD CLASS="num">0xcf (12,15)</TD><TD>Num Tab Stops <SUP>1</SUP></TD></TR>
+<TR><TD CLASS="num">0xc8 - 0xce (12,08 - 12,14)</TD><TD>Tab Stops <SUP>1</SUP></TD></TR>
 <TR><TD CLASS="num">0x64 - 0xc7 (06,04 - 12,07)</TD><TD>Aux Line/Tape buffer</TD></TR>
 <TR><TD CLASS="num">0x00 - 0x63 (00,00 - 06,03)</TD><TD>Line/Tape buffer</TD></TR>
+<TR><TD COLSPAN=2 >Note 1: These fields are recorded in a CODE b tape block,<BR>
+in the order (15,00) (15,01) (12,08 - 12,14) (12,15)</TD></TR>
 </TABLE></UL>
 
 <P><B>Line/Tape buffer</B> is used to place text during RECORD mode,
@@ -1145,15 +1147,17 @@ Other routines "pop" the first keyboard code off the FIFO
 using a shift-left method. The FIFO tail count occupies
 only the low-order nibble of 0xdf.
 
-<TABLE BORDER>
+<P><TABLE BORDER>
 <TR><TH ROWSPAN=3>Location</TH><TH COLSPAN=8>Bits</TH></TR>
 <TR>                           <TH COLSPAN=4>CA</TH><TH COLSPAN=4>CB</TH></TR>
 <TR>                           <TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
-<TR><TD>15,6</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD></TR>
+<TR><TD>15,6</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>naj</TD></TR>
 <TR><TD>15,5</TD><TD>-</TD><TD>UART</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD></TR>
 <TR><TD>15,4</TD><TD>JUSTIFY</TD><TD>ADJUST</TD><TD>SKIP</TD><TD>key</TD><TD>AUTO</TD><TD>-</TD><TD>PARA+LINE</TD><TD>PARA+WORD</TD></TR>
 <TR><TD>15,3</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD></TR>
+<TR><TD>14,0</TD><TD>learn(c)</TD><TD>-</TD><TD>learn(d)</TD><TD>-</TD><TD>-</TD><TD COLSPAN=3>endpage</TD></TR>
 <TR><TD>15,x</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>-</TD></TR>
+<TR><TD COLSPAN=9>endpage=4:play, 5:stop, 6:eject, 0:*play, 1:*stop, 2:*eject</TD></TR>
 </TABLE>
 
 
