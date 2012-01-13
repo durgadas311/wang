@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.18 2012/01/08 15:32:23 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.19 2012/01/13 02:37:52 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -410,7 +410,7 @@ static uint8_t guitape(wang_sys_t *sys, int wr, uint8_t nibble) {
 				if (!tape) {
 					// oops...
 					// now we've really done it...
-if (extraneous) fprintf(stderr, "double extraneous %04x -> %04x\n", extraneous, b);
+if (extraneous && extraneous != b) fprintf(stderr, "double extraneous %04x -> %04x\n", extraneous, b);
 					extraneous = b;
 					//return 0xff;	// EOF
 				}

@@ -1,6 +1,6 @@
 // Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.6 2012/01/08 15:32:23 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.7 2012/01/13 02:37:52 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -186,6 +186,9 @@ int main(int argc, char **argv) {
 	}
 	if (entry == (uint16_t)-1) {
 		entry = load;
+#ifdef __wang1200__
+		entry += 0x004;	// APR is the power-on "reset"
+#endif // __wang1200__
 	}
 	if (ucode == NULL) {
 		ucode = WANG_DEF_ROM;

@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.26 2012/01/07 23:36:16 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.27 2012/01/13 02:37:52 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -257,7 +257,7 @@ static int special_key(wang_sys_t *sys, uint16_t b) {
 		sys->cpu.d3 = b & 0x0f;
 		break;
 	case 0x0f: // tape status change
-fprintf(stderr, "tape status %02x\n", b & 0x0ff);
+//fprintf(stderr, "tape status %02x\n", b & 0x0ff);
 		if ((b & 1) != 0) {	// RIGHT
 			sys->cpu.rop = (b & 2) >> 1;
 		} else {		// LEFT
@@ -508,11 +508,11 @@ static void tape_on(wang_sys_t *sys) {
 	}
 #endif
 #if 1
-fprintf(stderr, "tape on %s rv=%d hi=%d hl=%d %s %lld\n",
-	sys->cpu.right ? "R" : "L",
-	sys->cpu.rv, hi, sys->cpu.hl,
-	sys->cpu.rc ? "wr" : "rd",
-	sys->cpu.sys.cycles);
+//fprintf(stderr, "tape on %s rv=%d hi=%d hl=%d %s %lld\n",
+//	sys->cpu.right ? "R" : "L",
+//	sys->cpu.rv, hi, sys->cpu.hl,
+//	sys->cpu.rc ? "wr" : "rd",
+//	sys->cpu.sys.cycles);
 #endif
 }
 
@@ -535,11 +535,11 @@ static void tape_off(wang_sys_t *sys) {
 	(void)sys->tape(sys, 0, 0x80); // i.e. close file...
 #endif
 #if 1
-fprintf(stderr, "tape off %s rv=%d hi=%d hl=%d %s %lld\n",
-	sys->cpu.right ? "R" : "L",
-	sys->cpu.rv, hi, sys->cpu.hl,
-	sys->cpu.rc ? "wr" : "rd",
-	sys->cpu.sys.cycles);
+//fprintf(stderr, "tape off %s rv=%d hi=%d hl=%d %s %lld\n",
+//	sys->cpu.right ? "R" : "L",
+//	sys->cpu.rv, hi, sys->cpu.hl,
+//	sys->cpu.rc ? "wr" : "rd",
+//	sys->cpu.sys.cycles);
 #endif
 }
 
