@@ -1,10 +1,13 @@
-# $Id: Makefile,v 1.4 2011/12/31 14:23:20 drmiller Exp $
+# $Id: Makefile,v 1.5 2012/01/13 02:54:55 drmiller Exp $
 
 INSNAME = wang1200apc
 INSDIR = ~
 INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
 TMPDEST = $(TMPDIR)/$(INSNAME)
+
+EXAMPLES = $(wildcard examples/*.txt)
+EX = $(EXAMPLES:.txt=.wng)
 
 COPTS =
 
@@ -53,12 +56,15 @@ clobber: clean
 	rm -f *.class w1200-sim w1200_fe w1200-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
+examp: $(EX)
+
 tar:
 	cd ..;\
 	tar -czvf w1200-sim/w1200-sim.tgz \
 		w1200-sim/*.[ch] w1200-sim/Makefile w1200-sim/*.java \
 		common/*.[ch] \
 		w1200-sim/README* \
+		w1200-sim/examples/*.wng \
 		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
 		w1200-sim/docs/*.html w1200-sim/docs/*.gif
 #
@@ -101,5 +107,8 @@ www: _FRC_
 	mkdir -p /http/durgadas.com/wang1200docs
 	cp docs/*.html docs/*.gif /http/durgadas.com/wang1200docs
 	cp www/wang1200* /http/durgadas.com
+
+examples/%.wng: examples/%.txt txt2wng
+	./txt2wng <$^ >$@
 
 _FRC_:
