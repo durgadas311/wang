@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w700_ucode.h,v 1.4 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: w700_ucode.h,v 1.5 2012/01/14 21:48:42 drmiller Exp $"
 
 #ifndef __w700_ucode_h__
 #define __w700_ucode_h__

@@ -1,5 +1,5 @@
 
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
 #include <stdio.h>
 #include <stdint.h>
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ident "$Id: w600_ld.c,v 1.1 2011/06/11 02:33:58 drmiller Exp $"
+#ident "$Id: w600_ld.c,v 1.2 2012/01/14 21:48:42 drmiller Exp $"
 
 #define W6_ENDPROG	0x9e
 #define W6_MARK		0x90

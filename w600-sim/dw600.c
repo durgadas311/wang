@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: dw600.c,v 1.17 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: dw600.c,v 1.18 2012/01/14 21:48:42 drmiller Exp $"
 
 #include <stdio.h>
 #include "w600_ucode.h"

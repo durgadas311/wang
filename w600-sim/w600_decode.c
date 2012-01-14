@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.55 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.56 2012/01/14 21:48:42 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>

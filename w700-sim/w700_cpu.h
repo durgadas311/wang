@@ -1,8 +1,8 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 #ifndef __w700_cpu_h__
 #define __w700_cpu_h__
 
-#ident "$Id: w700_cpu.h,v 1.5 2011/11/14 17:18:10 drmiller Exp $"
+#ident "$Id: w700_cpu.h,v 1.6 2012/01/14 21:48:42 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>

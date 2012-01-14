@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
 #include <stdio.h>
 #include <stdint.h>

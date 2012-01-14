@@ -1,9 +1,9 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
 #ifndef __w600_sys_h__
 #define __w600_sys_h__
 
-#ident "$Id: w600_sys.h,v 1.20 2012/01/04 15:24:45 drmiller Exp $"
+#ident "$Id: w600_sys.h,v 1.21 2012/01/14 21:48:42 drmiller Exp $"
 
 #include "w600_ucode.h"
 #include "w600_cpu.h"
