@@ -1,0 +1,8 @@
+#!/bin/sh
+# $Id: INSTALL,v 1.1 2012/01/14 21:48:32 drmiller Exp $
+
+if [[ -d examples ]]; then
+        mkdir -p ~/Wang1200Files
+        cp -v examples/* ~/Wang1200Files
+fi
+echo "Ready to launch ${PWD}/run"

@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w1200_ucode.h,v 1.4 2011/11/16 21:49:15 drmiller Exp $"
+#ident "$Id: w1200_ucode.h,v 1.5 2012/01/14 21:48:32 drmiller Exp $"
 
 #ifndef __w1200_ucode_h__
 #define __w1200_ucode_h__

@@ -1,9 +1,9 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
 #ifndef __w1200_sys_h__
 #define __w1200_sys_h__
 
-#ident "$Id: w1200_sys.h,v 1.7 2012/01/04 15:24:45 drmiller Exp $"
+#ident "$Id: w1200_sys.h,v 1.8 2012/01/14 21:48:32 drmiller Exp $"
 
 #include "w1200_ucode.h"
 #include "w1200_cpu.h"

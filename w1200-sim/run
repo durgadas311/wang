@@ -1,0 +1,5 @@
+#!/bin/sh
+# $Id: run,v 1.1 2012/01/14 21:48:32 drmiller Exp $
+
+cd ${0%/*}
+exec java -jar wang1200.jar

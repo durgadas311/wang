@@ -1,6 +1,6 @@
-# $Id: Makefile,v 1.5 2012/01/13 02:54:55 drmiller Exp $
+# $Id: Makefile,v 1.6 2012/01/14 21:48:32 drmiller Exp $
 
-INSNAME = wang1200apc
+INSNAME = wang1200wps
 INSDIR = ~
 INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
@@ -68,7 +68,7 @@ tar:
 		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
 		w1200-sim/docs/*.html w1200-sim/docs/*.gif
 #
-# todo: w1200-sim/LICENSE*  w1200-sim/progs/*.wng w1200-sim/icons/*.png
+# todo: w1200-sim/LICENSE* w1200-sim/icons/*.png
 
 jar: wang1200.jar
 
@@ -88,13 +88,13 @@ temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
 	cp wang1200.jar wang1200.rom w1200-sim run INSTALL $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
-	mkdir -p $(TMPDEST)/progs
-	cp progs/*.wng $(TMPDEST)/progs
+	mkdir -p $(TMPDEST)/examples
+	cp examples/*.wng $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang1200-*x*.png $(TMPDEST)/icons
+#	cp icons/wang1200-*x*.png $(TMPDEST)/icons
 
 package: temp_dest
-	tar -czvf wang1200apc.tgz -C $(TMPDIR) $(INSNAME)
+	tar -czvf wang1200wps.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
 install: temp_dest

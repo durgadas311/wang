@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.31 2012/01/14 20:37:03 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.32 2012/01/14 21:48:32 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 

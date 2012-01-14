@@ -1,6 +1,6 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: dw1200.c,v 1.9 2011/12/26 02:42:55 drmiller Exp $"
+#ident "$Id: dw1200.c,v 1.10 2012/01/14 21:48:32 drmiller Exp $"
 
 #include <stdio.h>
 #include "w1200_ucode.h"

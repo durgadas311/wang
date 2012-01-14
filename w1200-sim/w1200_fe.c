@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Douglas Miller
+// Copyright (c) 2011,2012 Douglas Miller
 
 #include <stdio.h>
 #include <stdint.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ident "$Id: w1200_fe.c,v 1.1 2011/11/12 00:27:28 drmiller Exp $"
+#ident "$Id: w1200_fe.c,v 1.2 2012/01/14 21:48:32 drmiller Exp $"
 
 char buf[128];
 
