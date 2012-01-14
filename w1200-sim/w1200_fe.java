@@ -1,5 +1,5 @@
 // Copyright (c) 2011 Douglas Miller
-// $Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $
+// $Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -392,7 +392,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +468,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -633,7 +633,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -671,7 +671,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1074,7 +1074,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1792,7 +1792,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2069,13 +2069,12 @@ if (e.isActionKey()) {
 System.err.println("action");
 }
 		char c = e.getKeyChar();
-		if (c == '\t' && (e.getModifiers() & InputEvent.CTRL_MASK) != 0) {
-			c = '|'; // non-existent on Selectrics?
-		}
 		// every key gets printed...
 		_m611.do_cn24_direct(c);
 		int i = _m611.ascii2roti(c) & 0x0ff;
 		boolean coded = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
+		// for some reason, OSX java (at least) destroys the keycode
+		// when ALT is down. Works on Linux...
 		do_keycode(coded, i);
 	}
 
@@ -2192,7 +2191,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2338,7 +2337,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2477,7 +2476,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.25 2012/01/14 21:11:59 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.26 2012/01/14 21:30:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
