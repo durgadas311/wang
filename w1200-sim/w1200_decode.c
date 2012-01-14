@@ -1,6 +1,6 @@
 // Copyright (c) 2011 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.30 2012/01/14 20:25:59 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.31 2012/01/14 20:37:03 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -612,7 +612,7 @@ static void instr_trace(wang_sys_t *sys) {
 static inline void display_check(wang_sys_t *sys) {
 	if (sys->cpu.sys.pc == 0x03e) { // bottom of main loop?
 		//if (sys->ram[0xfc] == 0 && sys->ram[0xfe] == 0) {
-		if ((sys->ram[0xf4]) == 0) {
+		if ((sys->ram[0xf4] & 0x10) == 0) {
 			sys->keyboard(sys, NULL, 1000);
 		}
 	}
