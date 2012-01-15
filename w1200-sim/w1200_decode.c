@@ -1,6 +1,6 @@
 // Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.32 2012/01/14 21:48:32 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.33 2012/01/15 01:42:05 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -851,7 +851,13 @@ int instr_exec(wang_sys_t *sys) {
 		}
 		break;
 	case 10:
-		tape_read(sys);	// must not block, if no data being read...
+		// don't know if this register is being polled
+		// for tape data or for tape ready/protect...
+//fprintf(stderr, "mop10: %s rhs=%d lhs=%d rc=%d hl=%d rv=%d tm=%d\n", sys->cpu.right ? "R" : "L",
+//sys->cpu.rhs, sys->cpu.lhs, sys->cpu.rc, sys->cpu.hl, sys->cpu.rv, sys->cpu.tm);
+		if (sys->cpu.rc == 0) {
+			tape_read(sys);	// must not block, if no data being read...
+		}
 		// Dout<0>, Dout<1>, LeftProt, RightProt
 		sys->cpu.kb =	(sys->cpu.tck << 1) |
 				(sys->cpu.dk  << 0) |
@@ -882,6 +888,8 @@ int instr_exec(wang_sys_t *sys) {
 		sys->cpu.hl = (br_k >> 3) & 1;	// tape direction set/enable?
 		sys->cpu.rv = (br_k >> 1) & 1;	// tape motor must be off to set direction!
 		sys->cpu.tm = (u->mop == 13);
+//fprintf(stderr, "mop%d: %s rhs=%d lhs=%d rc=%d hl=%d rv=%d tm=%d\n", u->mop, sys->cpu.right ? "R" : "L",
+//sys->cpu.rhs, sys->cpu.lhs, sys->cpu.rc, sys->cpu.hl, sys->cpu.rv, sys->cpu.tm);
 		if (sys->cpu.tm) {
 			tape_on(sys);
 		} else {
