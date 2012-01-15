@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $
+// $Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -215,6 +215,7 @@ public class w1200_fe
 		//java.net.URL url = w1200_fe.class.getResource("icons/wang1200-48x48.png");
 		//Image img = Toolkit.getDefaultToolkit().getImage(url);
 		//front_end.setIconImage(img);
+		front_end.setFocusTraversalKeysEnabled(false);	// allows TAB key to work...
 		int row = 0, col = 0;
 
 		front_end.setLayout(gridbag);
@@ -392,7 +393,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -468,7 +469,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -633,7 +634,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -671,7 +672,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1075,10 +1076,12 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
+	private byte[] cn24_tabstops;
+	private int _max;	// last active tab stop, or zero if none
 
 	public void reset() {
 		// anything?
@@ -1464,12 +1467,30 @@ class Wang1200_Model611
 	}
 
 	public void do_tab() {
+		int col;
+		if (_eoc - _eol < _max) {
+			do {
+				do_space();
+				col = _eoc - _eol;
+			} while (col <= _max && cn24_tabstops[col - 1] == 0);
+		}
 	}
 
 	public void do_settab() {
+		int col = _eoc - _eol;
+		cn24_tabstops[col - 1] = 1;
+		if (col > _max) _max = col;
+//System.err.println("set tab @ "+col);
 	}
 
 	public void do_clrtab() {
+		int col = _eoc - _eol;
+		cn24_tabstops[col - 1] = 0;
+//System.err.println("clear tab @ "+col);
+		if (_max == col) {
+			while (col > 0 && cn24_tabstops[col - 1] == 0) --col;
+			_max = col;
+		}
 	}
 
 	public void do_lock(int lk) {
@@ -1496,6 +1517,11 @@ class Wang1200_Model611
 
 	public Wang1200_Model611() {
 		setup_xlate();
+		cn24_tabstops = new byte[256];
+		int x;
+		for (x = 0; x < 256; ++x) cn24_tabstops[x] = 0;
+		_max = 0;
+
 		GridBagLayout gridbag = new GridBagLayout();
 		setLayout(gridbag);
 
@@ -1774,14 +1800,20 @@ class Wang1200_Model611
 	}
 	public void do_cn24_direct(char c) {
 		// ugh... beats going through cn24_xlate/cn24_revxlate...
-		if (c == '^') c = '\u00A2';
-		else if (c == '[') c = '\u00BD';
-		else if (c == '{') c = '\u00BC';
-		else if (c == '|') c = '\0';
+		if (c == '^') c = '\u00A2';		// cent
+		else if (c == '[') c = '\u00BD';	// 1/2
+		else if (c == '{') c = '\u00BC';	// 1/4
+		else if (c == '|') {
+			do_settab();
+			return;
+		// clear tab, too?
+		}
 		if (c == '\b') {
 			do_backspace();
 		} else if (c == '\n') {
 			do_crlf();
+		} else if (c == '\t') {
+			do_tab();
 		} else if (c == ' ') {
 			do_space();
 		} else if (c != '\0') {
@@ -1793,7 +1825,7 @@ class Wang1200_Model611
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2192,7 +2224,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2338,7 +2370,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2477,7 +2509,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.28 2012/01/15 01:42:05 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.29 2012/01/15 15:41:54 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
