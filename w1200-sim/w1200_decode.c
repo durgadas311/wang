@@ -1,6 +1,6 @@
 // Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w1200_decode.c,v 1.33 2012/01/15 01:42:05 drmiller Exp $"
+#ident "$Id: w1200_decode.c,v 1.34 2012/01/15 14:53:47 drmiller Exp $"
 
 #undef DOUGS_PATCHES
 
@@ -11,9 +11,11 @@
 #include "wang-sim.h"
 #include "w1200_ucode.h"
 
-#ifdef TRACE
+#undef WANG_UCODE_VERBOSE
+
+#if defined(TRACE) || defined(WANG_UCODE_VERBOSE)
 extern int diwang(char *buf, uint64_t *t);
-#endif // TRACE
+#endif // TRACE || WANG_UCODE_VERBOSE
 
 extern uint16_t ram_mask;
 
@@ -122,14 +124,14 @@ static struct ucode_ovr_s ucode_ovr[] = {
 
         { 0x052, {
 [SYS_MODEL1220] = { .flds = {
-			.sub = 0, .jad = 0x058 >> 2, .jh = 0, .jl = 3, .ovr = 1 }},
+			.sub = 0, .jad = 0x058 >> 2, .jh = 0, .jl = 3, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.sub = 0, .jad = 0x058 >> 2, .jh = 0, .jl = 3, .ovr = 1 }},
         }},
         { 0x423, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 6, .bi = 1, .ac = 1, .bc = 1, .kk = 11,
-			.sub = 0, .jad = 0x424 >> 2, .jh = 5, .jl = 4, .ovr = 1 }},
+			.sub = 0, .jad = 0x424 >> 2, .jh = 5, .jl = 4, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 6, .bi = 1, .ac = 1, .bc = 1, .kk = 11,
 			.sub = 0, .jad = 0x424 >> 2, .jh = 5, .jl = 4, .ovr = 1 }},
@@ -137,7 +139,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x42f, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 6, .ac = 1, .mop = 6, .kk = 4, .st = 3,
-			.sub = 0, .jad = 0x424 >> 2, .jh = 7, .jl = 4, .ovr = 1 }},
+			.sub = 0, .jad = 0x424 >> 2, .jh = 7, .jl = 4, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 6, .ac = 1, .mop = 6, .kk = 4, .st = 3,
 			.sub = 0, .jad = 0x424 >> 2, .jh = 7, .jl = 4, .ovr = 1 }},
@@ -145,7 +147,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x506, {
 [SYS_MODEL1220] = { .flds = {
 			.zo = 7, .aop = 1, .mop = 3, .kk = 12, .st = 13,
-			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.zo = 7, .aop = 1, .mop = 3, .kk = 12, .st = 13,
 			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
@@ -153,7 +155,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x558, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 1, .bi = 6, .zo = 1, .ac = 1, .st = 13,
-			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
+			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 1, .bi = 6, .zo = 1, .ac = 1, .st = 13,
 			.sub = 1, .jad = 0x7fc >> 2, .jh = 1, .jl = 0, .ovr = 1 }},
@@ -161,7 +163,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x5ec, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 5, .bi = 1, .aop = 6, .ac = 1, .bc = 1, .kk = 11,
-			.sub = 0, .jad = 0x5ec >> 2, .jh = 1, .jl = 4, .ovr = 1 }},
+			.sub = 0, .jad = 0x5ec >> 2, .jh = 1, .jl = 4, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 5, .bi = 1, .aop = 6, .ac = 1, .bc = 1, .kk = 11,
 			.sub = 0, .jad = 0x5ec >> 2, .jh = 1, .jl = 4, .ovr = 1 }},
@@ -169,7 +171,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x6ee, {
 [SYS_MODEL1220] = { .flds = {
 			.bi = 1, .zo = 7, .kk = 2,
-			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.bi = 1, .zo = 7, .kk = 2,
 			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
@@ -177,7 +179,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x7fe, {
 [SYS_MODEL1220] = { .flds = {
 			.bi = 1, .zo = 7, .aop = 6, .ac = 1, .kk = 3,
-			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.bi = 1, .zo = 7, .aop = 6, .ac = 1, .kk = 3,
 			.sub = 0, .jad = 0x6c8 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
@@ -185,7 +187,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x44f, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 6, .zo = 6, .aop = 3, .ac = 1, .bc = 1,
-			.sub = 0, .jad = 0x450 >> 2, .jh = 0, .jl = 1, .ovr = 1 }},
+			.sub = 0, .jad = 0x450 >> 2, .jh = 0, .jl = 1, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 6, .zo = 6, .aop = 3, .ac = 1, .bc = 1,
 			.sub = 0, .jad = 0x450 >> 2, .jh = 0, .jl = 1, .ovr = 1 }},
@@ -193,7 +195,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x33c, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
-			.sub = 1, .jad = 0x414 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+			.sub = 1, .jad = 0x414 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
 			.sub = 1, .jad = 0x414 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
@@ -201,7 +203,7 @@ static struct ucode_ovr_s ucode_ovr[] = {
         { 0x33d, {
 [SYS_MODEL1220] = { .flds = {
 			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
-			.sub = 0, .jad = 0x034 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
+			.sub = 0, .jad = 0x034 >> 2, .jh = 0, .jl = 0, .ovr = 0 }},
 [SYS_MODEL1222] = { .flds = {
 			.ai = 7, .bi = 7, .zo = 7, .aop = 6, .ac = 1, .mop = 10, .kk = 15, .st = 15,
 			.sub = 0, .jad = 0x034 >> 2, .jh = 0, .jl = 0, .ovr = 1 }},
@@ -221,6 +223,13 @@ static void ucode_override(wang_sys_t *sys) {
 		union ucode_ovr_u u;
 		u.word = ucode_ovr[x].instr[model].word;
 		if (u.flds.ovr != 0) {
+#ifdef WANG_UCODE_VERBOSE
+			char buf[128];
+			diwang(buf, &sys->ucode[ucode_ovr[x].adr]);
+			fprintf(stderr, "%03x: %s\n", ucode_ovr[x].adr, buf);
+			diwang(buf, &u.word);
+			fprintf(stderr, "%03x: %s\n\n", ucode_ovr[x].adr, buf);
+#endif // WANG_UCODE_VERBOSE
 			sys->ucode[ucode_ovr[x].adr] = u.word;
 		}
 	}
