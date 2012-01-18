@@ -1,0 +1,80 @@
+<HTML>
+<!-- $Id: wang1200sim.html,v 1.1 2012/01/18 20:49:33 drmiller Exp $ -->
+
+<H2>About The Simulator</H2>
+
+<P>The Wang 1200 Word Processing simulator takes various liberties in order
+to allow operation on a modern computer.
+
+<H3>Typewriter</H3>
+
+The simulation uses your normal computer keyboard for
+entering text, although modern computer keyboards do not exactly match
+the keyboards for IBM Selectric typewriters. Some notable differences,
+and translations, are:
+
+<P><TABLE BORDER>
+<TR><TH>Selectric</TH><TH>Computer</TH></TR>
+<TR><TD ALIGN=CENTER>RETURN</TD><TD ALIGN=CENTER>Enter</TD></TR>
+<TR><TD ALIGN=CENTER>&#162;</TD><TD ALIGN=CENTER>^ (Shift 6)</TD></TR>
+<TR><TD ALIGN=CENTER>&#189;</TD><TD ALIGN=CENTER>[</TD></TR>
+<TR><TD ALIGN=CENTER>&#188;</TD><TD ALIGN=CENTER>{</TD></TR>
+<TR><TD ALIGN=CENTER>SET TAB</TD><TD ALIGN=CENTER>|</TD></TR>
+<TR><TD ALIGN=CENTER>CLR TAB</TD><TD ALIGN=CENTER>n/a</TD></TR>
+<TR><TD ALIGN=CENTER>INDEX</TD><TD ALIGN=CENTER>n/a</TD></TR>
+<TR><TD ALIGN=CENTER>MAR REL</TD><TD ALIGN=CENTER>n/a</TD></TR>
+</TABLE>
+
+<P>The original Selectric typewriters allowed for some variation in the character set, by
+changing type balls. This simulation does not support changing type balls, at present.
+
+<P>Also, the original typewriter had the concept of Left Margin. That makes less sense
+when a virtual page is being displayed, printed, or saved. Manipulation of the left margin
+was outside the scope of the Wang 1200 Word Processing System, being done manually on
+the typewriter without the system knowing. The simulation likewise does not
+handle a left margin.
+
+<P>Since the simulation uses "virtual paper", handling of the output is different.
+There is no platten to roll forward or backward. The "Paper" menu may be used
+to "Tear Off" (erase any currently printed text), "Save" (save to a text file), or "Print".
+The Print option only prints what is currently in the virtual paper buffer,
+and does not provide any fancy formatting. Saving to a file would permit
+inclusion in a modern word-processing program document, where additional
+formatting could be done.
+
+<H3>Wang Added Keys and Functions</H3>
+
+<P>The simulation allows the use of the computer keyboard ALT key to be used
+for the CODE function, however not all Java versions allow that to work.
+The CODE button will be illuminated whenever the ALT key is down.
+
+<P>Due to difficulties with handling color changes on buttons, the Java
+simulation uses a bright yellow color for keys that are "illuminated".
+This obscures the keys normal color, which may be confusing when
+comparing a running simulation with the original machine, and
+make it difficult to detect when a key is illuminated if you
+did not actually observe it change color.
+
+<P>The EDIT mode is selected by depressing both the PLAY and RECORD
+buttons. This is accomplished by using the SHIFT key on your
+keyboard. With either PLAY or RECORD depressed, hold the SHIFT key
+down and click on the other (RECORD or PLAY). This should result in
+both being "down". Clicking, without the SHIFT key down, on any
+of the TRANS., PLAY, or RECORD buttons should release the PLAY+RECORD
+state and select only the button that was clicked.
+
+<H3>Cassette Tapes</H3>
+
+<P>The tape drives use files on your computer, and as such operate differently
+than tapes in the original machine. When you click on the white "eject" button,
+to the right of a tape drive, a File selection dialog pops up.
+This dialog allows you to select an existing file, type the name of a new
+file (creating it), or clicking on CANCEL to leave/set the tape drive "empty".
+There is also a checkbox on the dialog to "Protect" the tape. This is equivalent to removing the
+corner tab of a cassette tape, which would prevent recording.
+
+<P>The green window on the tape drive shows the current status of the drive.
+When a tape is mounted (file selected), the file name, protection status ("R/O" 
+for Read Only), and position on the tape (by "block" or line) is shown.
+
+</HTML>

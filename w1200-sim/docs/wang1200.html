@@ -1,0 +1,102 @@
+<HTML>
+<!-- $Id: wang1200.html,v 1.1 2012/01/18 20:49:33 drmiller Exp $ -->
+
+<H2>Wang 1200 Basic Operation</H2>
+
+<P>The Wang 1200 Word Processing System consists of an IBM Selectric I typewriter, two cassette
+tape drives, and electronic ciruitry, memory, and software.
+
+<P>The typewriter operates somewhat independently, and generally whatever is typed
+will appear on the paper.
+
+<P>With a pre-recorded cassette tape inserted, the contents of that tape may be "played back"
+on the typewriter, possibly reformatted according to settings.
+
+<P>With a blank tape inserted, typed lines may be recorded onto the tape, to be
+used later during play back, transfer to another tape, or editing in-place on
+the same tape.
+
+<P>The system controls consist of the normal typewriter keyboard with two
+auxillary keypads, to the left and right respectively of the typewriter keyboard.
+
+<P>The left keypad contains tape drive selector (LEFT/RIGHT), operation mode
+(TRANS., PLAY, RECORD, or RECORD+PLAY for EDIT), and basic controls REWIND, FORWARD,
+RESET, BACK LINE, and CODE. In addition, indicators for TAPE MOVING (left and right) and RECORD
+are present.
+
+<P>The right keypad contains playback mode selectors SAME, ADJUST, and JUSTIFY,
+and controls for PARA, LINE, WORD, CHAR/STOP, AUTO START, MEMO(OUT), SEARCH, and SKIP.
+In addition, indicators for NO ADJUST and END OF DOCUMENT are present.
+
+<H3>Example 1: Recording a document</H3>
+
+<P>To begin recording, mount a blank tape in one of the tape drives (Left or Right) and depress
+the corresponding button on the left auxillary keypad. Then depress the RECORD button, also on
+the left keypad.
+
+<P>Next, start typing normally. It is not normally necessary to try and format the text
+into it's final form, as most formatting can be done during play back. Each time RETURN
+is pressed, the current line of text is recorded onto tape.
+
+<P>Mistakes made during typing a line can be corrected by backspacing. If a mistake is being
+corrected before the current end of the line, you must space forward to the end of text
+before pressing RETURN, or else the line will be truncated at the point you press RETURN,
+erasing any text that was typed after that point - even if it still appears on the paper.
+Mistakes on previous lines can be corrected, but that technique is described later.
+
+<P>Generally, paragraphs are marked by a blank line separating them. The system also
+recognizes other combinations as demarking the beginning of a paragraph,
+but are discussed later.
+
+<P>At the end of the document, a special code must be recorded so that the system
+understands that this is the end. Press the CODE key (the CODE button illuminates)
+followed by the slash "/" key (the CODE button goes out). This causes an END OF DOCUMENT
+(EOD) line to be recorded on tape.
+
+<P>Typically, you will press the REWIND key to rewind the tape after recording the EOD.
+A tape cannot be removed from the tape drive until it is rewound.
+
+<H3>Example 2: Playback of a document</H3>
+
+<P>Insert a pre-recorded tape, or REWIND the tape that was recorded in the previous example,
+and depress the PLAY button. Make certain the SAME button is depressed, on the right keypad.
+Also make certain the correct tape drive selector is depressed (LEFT or RIGHT) corresponding
+to the drive in which the tape was inserted.
+
+<P>Pressing various combinations of CHAR, WORD, LINE, and PARA will play back (type on paper)
+the next character, word, line, or paragraph, respectively. Since SAME was selected, the play back
+should appear the same as when it was recorded - although mistakes that were corrected will
+appear as finally typed, without any double-striking or other artifacts of the original typing
+session.
+
+<P>The entire document may be played back by pressing AUTO START. If part of the document has
+already been played back, only the remaining parts are played.
+
+<P>Press the REWIND key to rewind the tape. Now select the ADJUST button on the right keypad.
+Type the command sequence CODE l f and then space over the number of columns desired to set
+a right margin, pressing "a" to setup an adjust zone and the right parenthesis ")" key to set the margin. A sample of this,
+for setting the right margin at column 40, would be:
+
+<P><UL><PRE>
+learn(format
+
+@                              aaaaaaaaa)
+</PRE></UL>
+
+<P>Note, the system itself typed the "earn(" and "ormat" characters, as well as the "@". You only type
+CODE "l", "f", and the spaces, "a", and ")". Also note, this command uses the lower-case ell character,
+not the digit one.
+
+<P>Now press the AUTO START key and playback will begin, with the lines of text reformatted to the new
+margins. If a word is too long to fit on the remainder of line, play back will stop and the
+NO ADJUST indicator will light up. You can then tell the system how to handle the word. You can
+press WORD to simply let the text overflow the right margin, or you can press RETURN to end the line
+and place the word on the next line, or you can use CHAR to put some characters on the current line and press hyphen "-"
+to cause the system to hyphenate the word at that point. Play back the remainder of the document,
+making any manual adjustments required.
+
+<P>Now press REWIND and depress the JUSTIFY button. Then press AUTO START again, and the document should
+play back with straight margins, using extra spaces between words to fill out each line to the
+margins previously set.
+
+</HTML>
