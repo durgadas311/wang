@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang1200sim.html,v 1.1 2012/01/18 20:49:33 drmiller Exp $ -->
+<!-- $Id: wang1200sim.html,v 1.2 2012/01/18 23:43:20 drmiller Exp $ -->
 
 <H2>About The Simulator</H2>
 
@@ -26,7 +26,13 @@ and translations, are:
 </TABLE>
 
 <P>The original Selectric typewriters allowed for some variation in the character set, by
-changing type balls. This simulation does not support changing type balls, at present.
+changing typing elements ("golf balls"). This simulation does not support changing typing elements, at present.
+The typing elements often switched the meaning of the codes for "1" and "!" to be "]" and "[", leaving
+the only way to type the digit "1" being to use lower-case ell. In fact, the Wang Calculators
+use ell for one when printing numbers, perhaps to avoid complications if a user substituted
+a different typing element in their Selectric-based "Output Writer". When reading Wang
+documentation, you may see references to the "]" character, which should be translated to
+the digit one "1" when using the simulator.
 
 <P>Also, the original typewriter had the concept of Left Margin. That makes less sense
 when a virtual page is being displayed, printed, or saved. Manipulation of the left margin
