@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2012/01/14 21:48:32 drmiller Exp $
+# $Id: Makefile,v 1.7 2012/01/21 16:59:06 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -66,7 +66,7 @@ tar:
 		w1200-sim/README* \
 		w1200-sim/examples/*.wng \
 		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
-		w1200-sim/docs/*.html w1200-sim/docs/*.gif
+		w1200-sim/docs/*.html w1200-sim/docs/*.gif w1200-sim/docs/*.pdf
 #
 # todo: w1200-sim/LICENSE* w1200-sim/icons/*.png
 
@@ -90,6 +90,8 @@ temp_dest: all wang1200.jar
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
+	mkdir -p $(TMPDEST)/docs
+	cp docs/*.pdf $(TMPDEST)/docs
 	mkdir -p $(TMPDEST)/icons
 #	cp icons/wang1200-*x*.png $(TMPDEST)/icons
 
