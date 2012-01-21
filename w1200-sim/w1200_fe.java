@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $
+// $Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -152,7 +152,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -349,9 +349,11 @@ public class w1200_fe
 		_Key shl = kbd.locateKey(_Key.ALT_KEY(2));
 		_Key csl = kbd.locateKey(_Key.MODE2_CHG(7, 7));
 
+		Wang1200_Help help = new Wang1200_Help();
 		Wang1200_SimInput inp = new Wang1200_SimInput(fin,
 				tml, er, tmr, na, el,
 				skl, shl, csl,
+				help,
 				tapel, taper, m611f);
 
 		JMenuBar mb = new JMenuBar();
@@ -367,6 +369,15 @@ public class w1200_fe
 		mu.add(mi);
 		mi = new JMenuItem("Tear Off", KeyEvent.VK_T);
 		mi.addActionListener(m611f);
+		mu.add(mi);
+
+		mu = new JMenu("Help");
+		mb.add(mu);
+		mi = help.getMenuItem();
+		mi.addActionListener(inp);
+		mu.add(mi);
+		mi = new JMenuItem("About", KeyEvent.VK_A);
+		mi.addActionListener(inp);
 		mu.add(mi);
 
 		front_end.setJMenuBar(mb);
@@ -393,7 +404,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -469,7 +480,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -482,15 +493,22 @@ class Wang1200_SimInput
 	_Key _shl;
 	_Key _csl;
 
+	private Wang1200_Help _help;
+
 	InputStream _fin;
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
-			System.err.println("unknown Devices event source type");
+			System.err.println("unknown Menu event source type");
 			return;
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
-		if (m.getMnemonic() == KeyEvent.VK_O) {
+		if (m.getMnemonic() == KeyEvent.VK_H) {
+			_help.toggle();
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_A) {
+			// TBD some sort of pop-up
 			return;
 		}
 	}
@@ -504,6 +522,7 @@ class Wang1200_SimInput
 			_Key skl,
 			_Key shl,
 			_Key csl,
+			Wang1200_Help help,
 			Wang1200_Tape tapel,
 			Wang1200_Tape taper,
 			Wang1200_Model611 cn24) {
@@ -519,6 +538,7 @@ class Wang1200_SimInput
 		_taper = taper;
 		_m611 = cn24;
 		_fin = f;
+		_help = help;
 		if (f != null) {
 			Thread t = new Thread(this);
 			t.start();
@@ -634,7 +654,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -672,7 +692,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1082,7 +1102,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1829,10 +1849,141 @@ class Wang1200_Model611
 	}
 }
 
+class Wang1200_Help extends JComponent
+	implements ActionListener, WindowListener, ComponentListener
+{
+	static final long serialVersionUID = 311857692031L;
+	private JFrame _frame;
+	private JEditorPane _text;
+	private JScrollPane _scroll;
+	private int _xoff, _yoff;
+	private JMenuItem _help;
+	private boolean _help_on;
+
+	public JMenuItem getMenuItem() {
+		return _help;
+	}
+
+	public Wang1200_Help() {
+		_help = new JMenuItem("Help On", KeyEvent.VK_H);;
+		_help_on = false;
+
+		java.net.URL url = Wang1200_Keyboard.class.getResource("docs/wang1200.html");
+		_frame = new JFrame("Wang 1200 Help");
+		_frame.setLayout(new FlowLayout());
+		try {
+			_text = new JEditorPane(url);
+		} catch (IOException ee) {
+			System.err.println("can't create Help JEditorPane "+url);
+		}
+		_text.setEditable(false);
+		_text.setFont(new Font("Sans-serif", Font.PLAIN, 12));
+		int z = _text.getFont().getSize();
+		// for some reason, this randomly messes up scroll size...
+		//_text.setPreferredSize(new Dimension(60 * z, 32 * z));
+
+		_scroll = new JScrollPane(_text);
+		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		_scroll.setPreferredSize(new Dimension(60 * z, 32 * z));
+
+		JMenuBar mb = new JMenuBar();
+		JMenu mu;
+		mu = new JMenu("Topic");
+		mb.add(mu);
+		JMenuItem mi;
+		mi = new JMenuItem("Basic Operation", KeyEvent.VK_B);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("About the Simulator", KeyEvent.VK_S);
+		mi.addActionListener(this);
+		mu.add(mi);
+
+		_frame.setJMenuBar(mb);
+		_frame.add(_scroll);
+		_frame.pack();
+
+		_frame.addWindowListener(this);
+		_frame.addComponentListener(this);
+
+		Dimension fdim = _frame.getSize();
+		Dimension sdim = _scroll.getSize();
+System.err.println("Help frame size "+fdim+" scroll size "+sdim+" text size "+_text.getSize());
+		_xoff = fdim.width - sdim.width;
+		_yoff = fdim.height - sdim.height;
+	}
+
+	public void toggle() {
+		setOn(!_help_on);
+	}
+
+	private void setOn(boolean on) {
+		_help_on = on;
+		if (on) {
+			_frame.pack();
+			_help.setText("Help Off");
+		} else {
+			_help.setText("Help On");
+		}
+		_frame.setVisible(on);
+	}
+
+	public void windowActivated(WindowEvent e) { }
+	public void windowClosed(WindowEvent e) { }
+	public void windowIconified(WindowEvent e) { }
+	public void windowOpened(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeactivated(WindowEvent e) { }
+
+	public void windowClosing(WindowEvent e) {
+		if (e.getWindow() == _frame) {
+			setOn(false);
+			return;
+		}
+	}
+
+	public void componentHidden(ComponentEvent e) { }
+	public void componentMoved(ComponentEvent e) { }
+	public void componentShown(ComponentEvent e) { }
+
+	public void componentResized(ComponentEvent e) {
+		if (e.getComponent() == _frame) {
+			Dimension fdim = _frame.getSize();
+			_scroll.setSize(fdim.width - _xoff, fdim.height - _yoff);
+			_scroll.setPreferredSize(_scroll.getSize());
+			_frame.setSize(fdim.width, fdim.height); // redundant?
+			_frame.setPreferredSize(_frame.getSize());
+			return;
+		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof JMenuItem) {
+			JMenuItem m = (JMenuItem)e.getSource();
+			java.net.URL url = null;
+			// should use a table to lookup url?
+			if (m.getMnemonic() == KeyEvent.VK_B) {
+				url = Wang1200_Keyboard.class.getResource("docs/wang1200.html");
+			} else if (m.getMnemonic() == KeyEvent.VK_S) {
+				url = Wang1200_Keyboard.class.getResource("docs/wang1200sim.html");
+			} else {
+				System.err.println("help menu " + e.getActionCommand() +
+						" not implemented yet");
+				return;
+			}
+			try {
+				_text.setPage(url);
+			} catch (IOException ee) {
+			}
+			return;
+		}
+	}
+}
+
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2277,7 +2428,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2423,7 +2574,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2562,7 +2713,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.33 2012/01/19 01:00:04 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.34 2012/01/21 02:19:57 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
