@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $
+// $Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,6 +8,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.lang.Math;
 
 import java.awt.print.*;
 import javax.print.attribute.*;
@@ -15,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -154,7 +155,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -406,7 +407,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -482,7 +483,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -656,7 +657,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -694,7 +695,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1104,7 +1105,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1541,6 +1542,11 @@ class Wang1200_Model611
 		_shifted = true;
 	}
 
+	private JTextField _cpi;
+	private JTextField _lpi;
+	private JTextField _lpp;
+	private JTextField _fut;
+
 	public Wang1200_Model611() {
 		setup_xlate();
 		cn24_tabstops = new byte[256];
@@ -1649,6 +1655,11 @@ class Wang1200_Model611
 //		_xoff = fdim.width - sdim.width;
 //		_yoff = fdim.height - sdim.height;
 
+		_cpi = new JTextField("10");
+		_lpi = new JTextField("6");
+		_lpp = new JTextField("66");
+		_fut = new JTextField("Wang 1200 Output");
+
 		addComponentListener(this);
 	}
 
@@ -1698,8 +1709,18 @@ class Wang1200_Model611
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_P) {
+			Object[] dia = { "Chars/Inch:", _cpi,
+					"Lines/Inch:", _lpi,
+					"Lines/Page:", _lpp,
+					"Footer:", _fut
+				};
+			int ret = JOptionPane.showConfirmDialog(this, dia, "Set Page Geometry",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if (ret != JOptionPane.OK_OPTION) {
+				return;
+			}
 			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-			aset.add(OrientationRequested.LANDSCAPE);
+			aset.add(OrientationRequested.PORTRAIT);
 			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
 				(float)0.75, (float)0.5, (float)7.0, (float)10.0, MediaPrintableArea.INCH));
 			PrinterJob pj = PrinterJob.getPrinterJob();
@@ -1707,7 +1728,7 @@ class Wang1200_Model611
 			boolean print = pj.printDialog(aset);
 			if (print) {
 				java.util.Date dt = new java.util.Date();
-				_footer = new String("Wang 1200 Output - " +
+				_footer = new String(_fut.getText() + " - " +
 					w1200_fe._timestamp.format(dt));
 				try {
 					pj.print(aset);
@@ -1759,10 +1780,21 @@ class Wang1200_Model611
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.translate(x0, y0);
 
-			FontMetrics fm = _text.getFontMetrics(_text.getFont());
-			// 156 chars platten width of IBM Selectric...
-			double nf = _text.getFont().getSize() * (w0 / 156.0) /
-							fm.charWidth('M');
+//			FontMetrics fm = _text.getFontMetrics(_text.getFont());
+//			// ignore cpi? just use lpi? or lpp?
+//			double nf = _text.getFont().getSize() *
+//					(((w0 / 72.0) * Double.valueOf(_cpi.getText())) /
+//					(w0 / fm.charWidth('M')));
+			double in = (h0 / 72.0);
+			int lpi = Integer.valueOf(_lpi.getText());
+			int lpp = Integer.valueOf(_lpp.getText());
+			double nf;
+			// need room for footer also... but maybe shouldn't print that...
+			if (in * lpi < lpp) {
+				nf = Math.floor(h0 / lpp);
+			} else {
+				nf = 72.0 / lpi;
+			}
 			g2d.setFont(_text.getFont().deriveFont((float)nf));
 
 			int did = 0;
@@ -1771,7 +1803,6 @@ class Wang1200_Model611
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
 			int l = g2d.getFont().getSize();
-			int lpp = 60; // (int)(h0 / l);
 			int max = getLineCount();
 			while (pg <= pageIndex) {
 				int ln;
@@ -1930,7 +1961,7 @@ class Wang1200_Help extends JComponent
 		JOptionPane.showMessageDialog(_main,
 				"Wang 1200 Word Processor System\n"+
 				"Simulator\n"+
-				"$Revision: 1.37 $ $Date: 2012/01/21 16:59:06 $\n\n"+
+				"$Revision: 1.38 $ $Date: 2012/01/22 00:40:25 $\n\n"+
 				"Developed by Douglas Miller\n"+
 				"http://www.durgadas.com/wang1200.html\n\n"+
 				"With Jim Battle\n"+
@@ -2043,7 +2074,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2488,7 +2519,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2634,7 +2665,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2773,7 +2804,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.37 2012/01/21 16:59:06 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.38 2012/01/22 00:40:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
