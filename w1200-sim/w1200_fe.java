@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $
+// $Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -155,7 +155,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -410,7 +410,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -486,7 +486,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -660,7 +660,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -698,7 +698,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1109,7 +1109,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1377,7 +1377,6 @@ class Wang1200_Model611
 	private int _eop;	// position of user character
 	private int _eoc;	// position of internal cursor
 	private int _eol;	// position of internal newline
-	private boolean _bs;
 	//
 	// Typewriter emulation of carriage and non-destructive space/backspace:
 	//            +--- "_eop"
@@ -1409,7 +1408,8 @@ class Wang1200_Model611
 	// CLEAR: _text.setText(""); _eop = _eol = _eoc = 0; call(CR);
 	//
 	//
-	int _fx, _fy, _fa;
+	double _fx;
+	int _fy, _fa;
 	double _gx, _gy;
 
 	private void clear() {
@@ -1419,7 +1419,6 @@ class Wang1200_Model611
 		_shifted = false;
 		_text.clear();
 		_text.setCaretPosition(_eoc + 1);
-		_bs = false;
 	}
 
 	String _footer;
@@ -1470,7 +1469,6 @@ class Wang1200_Model611
 
 	public void do_backspace() {
 //System.err.println("BS");
-		_bs = true;
 		if (cursor_left()) {
 			--_eop;
 		}
@@ -1479,20 +1477,17 @@ class Wang1200_Model611
 	public void do_char(char c) {
 		String s = Character.toString(c);
 		if (_eop < _eol) {
-			if (c == '_' && _bs) {
-//				try {
-//					String us = _text.getText(_eop, 1);
-//					System.err.println("<U>"+us+"</U>");
-//				} catch(javax.swing.text.BadLocationException ee) {
-//				}
+			if (c == '_') {
+				_text.addUnderline(_eop, _eop + 1);
+				_text.repaint();
+			} else {
+				_text.replaceRange(s, _eop, _eop + 1);
 			}
-			_text.replaceRange(s, _eop, _eop + 1);
 		} else {
 			_text.insert(s, _eol);
 			++_eol;
 			++_eoc;
 		}
-		_bs = false;
 		++_eop;
 		cursor_right();
 	}
@@ -1647,7 +1642,9 @@ class Wang1200_Model611
 
 		FontMetrics fm = _text.getFontMetrics(_text.getFont());
 		_fa = fm.getAscent();
-		_fx = fm.charWidth('M');
+		char[] cc = { 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M' };
+		int wi = fm.charsWidth(cc, 0, 10);
+		_fx = wi / 10.0;
 		_fy = fm.getHeight();
 		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
 		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
@@ -1655,7 +1652,7 @@ class Wang1200_Model611
 		_scroll = new JScrollPane(_text);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		_scroll.setPreferredSize(new Dimension(96 * _fx, 32 * _fy + 24));
+		_scroll.setPreferredSize(new Dimension((int)Math.round(96 * _fx), 32 * _fy + 24));
 		s.gridx = 0;
 		s.gridy = 1;
 		s.weightx = 0;
@@ -1835,11 +1832,82 @@ class Wang1200_Model611
 			implements Printable {
 		static final long serialVersionUID = 311457692040L;
 
+		class underlines {
+			underlines(int s, int e) {
+				start = s;
+				end = e;
+			}
+			public boolean extend(int s, int e) {
+				if (e == start) {
+					start = s;
+					return true;
+				}
+				if (end == s) {
+					end = e;
+					return true;
+				}
+				return false;
+			}
+			public int start;
+			public int end;
+		}
+
 		public void clear() {
+			_nund = 0;
+			_und = null;
+		}
+
+		private underlines[] _und;
+		private int _nund;
+
+		private void do_1underline(Graphics g, int ls, int le, int x, int pos, double w) {
+			int ls_ = ls;
+			int le_ = le;
+			if (ls_ < _und[x].start) ls_ = _und[x].start;
+			if (le_ > _und[x].end) le_ = _und[x].end;
+			int x1 = (int)Math.round((ls_ - ls) * w);
+			int x2 = (int)Math.round((le_ - ls) * w);
+			int y = pos + 1;
+			g.drawLine(x1, y, x2, y);
+		}
+
+		private void do_underline(Graphics g, int ls, int ll, int pos, double w) {
+			int le = ls + ll;
+			int x;
+			for (x = 0; x < _nund; ++x) {
+				if (_und[x].start < le && _und[x].end >= ls) {
+					do_1underline(g, ls, le, x, pos, w);
+				}
+			}
+		}
+
+		public int addUnderline(int s, int e) {
+			int x;
+			for (x = 0; x < _nund; ++x) {
+				if (_und[x].extend(s, e)) return x;
+			}
+			++_nund;
+			underlines[] u = new underlines[_nund];
+			if (x > 0) {
+				System.arraycopy(_und, 0, u, 0, x);
+			}
+			u[x] = new underlines(s, e);
+			_und = u;
+			return x;
 		}
 
 		public void paint(Graphics g) {
 			super.paint(g);
+			int x;
+			for (x = 0; x < _nund; ++x) {
+				try {
+					int ln = _text.getLineOfOffset(_und[x].start);
+					int ls = _text.getLineStartOffset(ln);
+					int le = _text.getLineEndOffset(ln);
+					do_1underline(g, ls, le, x, ln * _fy + _fa, _fx);
+				} catch(javax.swing.text.BadLocationException ee) {
+				}
+			}
 		}
 
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
@@ -1865,10 +1933,10 @@ class Wang1200_Model611
 				d = 72.0 / _lpi;		// see if LPI requires smaller font...
 				if (nf == 0.0 || d < nf) nf = d;
 			}
+			FontMetrics fm;
 			if (_cpi > 0.0) {
-				FontMetrics fm = _text.getFontMetrics(_text.getFont());
-				d = _text.getFont().getSize() *		// see if CPI requires smaller font...
-					((72.0 / _cpi) / fm.charWidth('M'));
+				d = _fy *		// see if CPI requires smaller font...
+					((72.0 / _cpi) / _fx);
 				if (nf == 0.0 || d < nf) nf = d;
 			}
 			if (_cpl > 0.0) {
@@ -1886,6 +1954,11 @@ class Wang1200_Model611
 			} else {
 				g2d.setFont(_text.getFont());
 			}
+			fm = g2d.getFontMetrics(g2d.getFont());
+			char[] cc = { 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M' };
+			int wi = fm.charsWidth(cc, 0, 10);
+			double w = wi / 10.0;
+//System.err.println("Got printer font "+g2d.getFont().getFontName()+" size "+g2d.getFont().getSize()+" width(M) "+w);
 
 			int lpp = (int)_lpp;
 			if (lpp == 0.0) {
@@ -1898,6 +1971,7 @@ class Wang1200_Model611
 			g2d.setColor(Color.white);
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
+			g2d.setStroke(new BasicStroke((float)0.5));
 			int l = g2d.getFont().getSize();
 			int max = getLineCount();
 			while (pg <= pageIndex) {
@@ -1905,9 +1979,10 @@ class Wang1200_Model611
 				for (ln = 0; ln < lpp; ++ln) {
 					int nn = ln + pg * lpp;
 					if (nn >= max) break;
+					int ls, ll;
 					try {
-						int ls = getLineStartOffset(nn);
-						int ll = getLineEndOffset(nn) - ls;
+						ls = getLineStartOffset(nn);
+						ll = getLineEndOffset(nn) - ls;
 						if (ls >= _eop) break;
 						s = getText(ls, ll);
 					} catch(javax.swing.text.BadLocationException ee) {
@@ -1917,6 +1992,7 @@ class Wang1200_Model611
 						++did;
 						if (s.length() > 0) { // not blank line...
 							g2d.drawString(s, 0, ln * l + l);
+							do_underline(g2d, ls, ll, ln * l + l, w);
 						}
 					}
 				}
@@ -2059,7 +2135,7 @@ class Wang1200_Help extends JComponent
 		JOptionPane.showMessageDialog(_main,
 				"Wang 1200 Word Processor System\n"+
 				"Simulator\n"+
-				"$Revision: 1.42 $ $Date: 2012/01/22 19:46:15 $\n\n"+
+				"$Revision: 1.43 $ $Date: 2012/01/22 22:26:20 $\n\n"+
 				"Developed by Douglas Miller\n"+
 				"http://www.durgadas.com/wang1200.html\n\n"+
 				"With Jim Battle\n"+
@@ -2172,7 +2248,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2617,7 +2693,7 @@ if (false) System.err.println("stupid warnings "+url);
 
 class Wang1200_Keyboards extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2763,7 +2839,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2902,7 +2978,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.42 2012/01/22 19:46:15 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.43 2012/01/22 22:26:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
