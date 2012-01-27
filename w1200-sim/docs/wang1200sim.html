@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang1200sim.html,v 1.2 2012/01/18 23:43:20 drmiller Exp $ -->
+<!-- $Id: wang1200sim.html,v 1.3 2012/01/27 23:05:54 drmiller Exp $ -->
 
 <H2>About The Simulator</H2>
 
@@ -26,10 +26,14 @@ and translations, are:
 </TABLE>
 
 <P>The original Selectric typewriters allowed for some variation in the character set, by
-changing typing elements ("golf balls"). This simulation does not support changing typing elements, at present.
-The typing elements often switched the meaning of the codes for "1" and "!" to be "]" and "[", leaving
-the only way to type the digit "1" being to use lower-case ell. In fact, the Wang Calculators
-use ell for one when printing numbers, perhaps to avoid complications if a user substituted
+changing typing elements ("golf balls").
+This simulation does not support changing typing elements, at present.
+The typing elements often switched the meaning of the codes
+for "1" and "!" to be "]" and "[", leaving
+the only way to type the digit "1" being to use lower-case ell.
+In fact, the Wang Calculators
+use 'ell' for 'one' when printing numbers,
+perhaps to avoid complications if a user substituted
 a different typing element in their Selectric-based "Output Writer". When reading Wang
 documentation, you may see references to the "]" character, which should be translated to
 the digit one "1" when using the simulator.
@@ -47,6 +51,39 @@ The Print option only prints what is currently in the virtual paper buffer,
 and does not provide any fancy formatting. Saving to a file would permit
 inclusion in a modern word-processing program document, where additional
 formatting could be done.
+
+<P>To simulate the carriage position indicator, a small box above
+the typing area contains the current column number. In addition,
+there is a "cursor" character (&#9650;) shown below the current
+column on the typing area.
+
+<P>Also above the typing area there are two indicators, 'bell' and 'lock',
+which provide some feedback from the system.
+
+<P>'bell' will light up in addition to (or absence of) any tone or bell sound.
+
+<P>'lock' will light up whenever the system would have
+locked the typewriter keyboard. Currently, this does not actually prevent
+typing.
+
+<H3>The Paper Menu</H3>
+
+<P>The contents of the typing window may be Saved, Printed, or Torn Off (erased).
+
+<P>For printing, there is also a menu item for Print Setup that allows
+specifying desired pitch (Characters per Inch, Lines per Inch) and
+page/line size, as well as text to print in an optional footer.
+If any of the pitch or size numbers are set to zero, that setting
+is effectively "don't care". Otherwise, the smallest font that fits
+all the settings will be chosen.
+
+<P>The Save option will save the text to a file. Future options may permit
+file formats such as HTML or RichText.
+
+<P>The Tear Off option erases all text in the typing area. Future options might
+allow for a Keep feature where the current typing area is copied into
+a detached window and then erased. This would allow viewing a copy while
+making a final, clean, run.
 
 <H3>Wang Added Keys and Functions</H3>
 
@@ -76,11 +113,17 @@ than tapes in the original machine. When you click on the white "eject" button,
 to the right of a tape drive, a File selection dialog pops up.
 This dialog allows you to select an existing file, type the name of a new
 file (creating it), or clicking on CANCEL to leave/set the tape drive "empty".
-There is also a checkbox on the dialog to "Protect" the tape. This is equivalent to removing the
+There is also a checkbox on the dialog to "Protect" the tape.
+This is equivalent to removing the
 corner tab of a cassette tape, which would prevent recording.
 
 <P>The green window on the tape drive shows the current status of the drive.
 When a tape is mounted (file selected), the file name, protection status ("R/O" 
 for Read Only), and position on the tape (by "block" or line) is shown.
+
+<P>The system provided some protection from removing tapes that were not
+rewound. Currently, the simulator's tape drives are never "locked".
+If an actual signal for locking the tape drives can be found,
+that may be implemented later.
 
 </HTML>
