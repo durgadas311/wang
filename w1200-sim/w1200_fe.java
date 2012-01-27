@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $
+// $Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -35,8 +35,9 @@ class _Key {
 	static final Color neon2 = new Color(214,127,13);
 	static final Color empty = new Color(50,50,50);
 	static final Color gray = new Color(100,100,100);
+	static final Color slate = new Color(75,75,75);
 	static final Color ivory = new Color(236,226,190);
-	static final Color beige = new Color(230,230,230);
+	static final Color beige = new Color(230,220,210);
 	static final Color aqua = new Color(143,219,195);
 
 	static final int SPCL  = 0x0100;
@@ -155,7 +156,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -215,9 +216,9 @@ public class w1200_fe
 		}
 		_dir.mkdir();
 		JFrame front_end = new JFrame("Wang 1200 Word Processing System");
-		//java.net.URL url = w1200_fe.class.getResource("icons/wang1200-48x48.png");
-		//Image img = Toolkit.getDefaultToolkit().getImage(url);
-		//front_end.setIconImage(img);
+		java.net.URL url = w1200_fe.class.getResource("icons/wang1200-96x96.png");
+		Image img = Toolkit.getDefaultToolkit().getImage(url);
+		front_end.setIconImage(img);
 		front_end.setFocusTraversalKeysEnabled(false);	// allows TAB key to work...
 		int row = 0, col = 0;
 
@@ -233,7 +234,7 @@ public class w1200_fe
 		s.anchor = GridBagConstraints.NORTH;
 		JPanel pan;
 
-		java.net.URL url = w1200_fe.class.getResource("icons/logo-sm.gif");
+		url = w1200_fe.class.getResource("icons/logo-sm.gif");
 		ImageIcon ic = new ImageIcon(url);
 		JLabel lab = new JLabel(ic);
 		lab.setPreferredSize(new Dimension(150, 100));
@@ -399,7 +400,7 @@ public class w1200_fe
 		front_end.add(pan);
 
 		if (inp == null) System.err.println("damn warnings");
-		front_end.getContentPane().setBackground(Color.black);
+		front_end.getContentPane().setBackground(_Key.beige);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		front_end.setSize(1024,640);
 
@@ -410,7 +411,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -486,7 +487,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -660,7 +661,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -685,6 +686,8 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 		addTapeButton(c, 1, 1, 0, 0,_Key.white2,
 			new _Key(_Key.white1, _Key.GROUP(7,_Key.TAPE_EJECT)));
+		setPreferredSize(new Dimension(24,24));
+		setBackground(Color.black);
 	}
 
 	public _Key getKey() {
@@ -698,7 +701,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -775,8 +778,8 @@ class Wang1200_Tape extends JComponent
 		cass.setBorder(lb);
 		cass.setVerticalAlignment(SwingConstants.TOP);
 		cass.setHorizontalAlignment(SwingConstants.CENTER);
-		cass.setForeground(Color.black);
-		cass.setBackground(_Key.ivory);
+		cass.setForeground(Color.white);
+		cass.setBackground(Color.black);
 		cass.setOpaque(true);
 		font = null;
 		font = new Font("Serif", Font.PLAIN, 18);
@@ -1109,7 +1112,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -2184,7 +2187,7 @@ class Wang1200_Help extends JComponent
 		JOptionPane.showMessageDialog(_main,
 				"Wang 1200 Word Processor System\n"+
 				"Simulator\n"+
-				"$Revision: 1.47 $ $Date: 2012/01/24 00:55:09 $\n\n"+
+				"$Revision: 1.48 $ $Date: 2012/01/27 01:20:20 $\n\n"+
 				"Developed by Douglas Miller\n"+
 				"http://www.durgadas.com/wang1200.html\n\n"+
 				"With Jim Battle\n"+
@@ -2297,7 +2300,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2690,9 +2693,9 @@ System.err.println("action");
 	}
 }
 
-class Wang1200_Keyboards extends JComponent
+class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2704,7 +2707,8 @@ class Wang1200_Keyboards extends JComponent
 	int _row;
 	int _col;
 
-	void addButton(GridBagConstraints c, int lx, int ly, int px, int py,
+	void addButton(GridBagConstraints c, GridBagLayout gb, JComponent ct,
+						int lx, int ly, int px, int py,
 						int gx, int gy,
 						String icon, _Key key) {
 		final Insets inset = new Insets(2,2,2,2);
@@ -2733,18 +2737,21 @@ if (url != null) {
 		c.gridheight = ly * gy;
 		c.gridx = _col + px;
 		c.gridy = _row + py;
-		gridbag.setConstraints(butt, c);
+		gb.setConstraints(butt, c);
 
-		add(butt);
+		ct.add(butt);
 		key.button = butt;
 		_buttons[_nkeys] = butt;
 		_keys[_nkeys] = key;
 		++_nkeys;
 	}
 
-	void addPushButton(GridBagConstraints c, int lx, int ly, int px, int py,
+	void addPushButton(GridBagConstraints c, GridBagLayout gb, JComponent ct,
+				int lx, int ly, int px, int py,
 				String botlab, Color alt, boolean init, _Key key) {
-		final Dimension dim = new Dimension(15, 30);
+		final Dimension dim = new Dimension(20, 30); // button
+		final Dimension dim2 = new Dimension(30, 10); // label
+		final Font font = new Font("Sans-serif", Font.PLAIN, 7);
 		JButton butt;
 		if (alt != null) {
 			key.altcolor = alt;
@@ -2763,33 +2770,29 @@ if (url != null) {
 		butt.setBorder(lb);
 		butt.setOpaque(true);
 
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = ly;
-		c.anchor = GridBagConstraints.CENTER;
-
-		JLabel lab ;
+		lx = py; // stupid warnings
+		py = lx; // stupid warnings
 
 		c.gridx = _col + px;
 		c.gridy = _row;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
+		c.gridwidth = ly;
+		c.gridheight = py - 1;
+
+		gb.setConstraints(butt, c);
+		ct.add(butt);
+		c.gridy += c.gridheight;
 
 		if (botlab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+botlab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
+			JLabel lab;
+			lab = new JLabel(botlab);
+			lab.setFont(font);
 			lab.setForeground(Color.white);
 			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 1;
-			gridbag.setConstraints(lab, c);
-			add(lab);
+			lab.setPreferredSize(dim2);
+			lab.setHorizontalAlignment(SwingConstants.CENTER);
+			c.gridheight = 1;
+			gb.setConstraints(lab, c);
+			ct.add(lab);
 		}
 
 		key.button = butt;
@@ -2838,7 +2841,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2864,122 +2867,256 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 		setLayout(gridbag);
 
-		addPushButton(c, 5, 3, 0, 0,"LEFT",_Key.white2, true,
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+
+		// do upper panel separately... stupid gridbag
+		JPanel upper = new JPanel();
+		GridBagLayout ugb = new GridBagLayout();
+		upper.setLayout(ugb);
+		upper.setOpaque(false);
+
+		_row = 0;
+		_col = 0;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 4;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(5, 40));
+		pan.setOpaque(false);
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		++_col;
+
+		addPushButton(c,ugb,upper,
+			5, 3, 0, 4,"LEFT",_Key.white2, true,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE1_CHG(1,0))));
-		addPushButton(c, 5, 3, 3, 0,"RIGHT",_Key.white2, false,
+		addPushButton(c,ugb,upper,
+			5, 3, 3, 4,"RIGHT",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE1_CHG(1,1))));
-		addPushButton(c, 5, 3, 6, 0,"TRANS.",_Key.red2, false,
+		addPushButton(c,ugb,upper,
+			5, 3, 6, 4,"TRANS.",_Key.red2, false,
 			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(12,8))));
-		addPushButton(c, 5, 3, 9, 0,"PLAY",_Key.white2, true,
+		addPushButton(c,ugb,upper,
+			5, 3, 9, 4,"PLAY",_Key.white2, true,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.MODE1_CHG(12,0))));
-		addPushButton(c, 5, 3, 12, 0,"RECORD",_Key.red2, false,
+		addPushButton(c,ugb,upper,
+			5, 3, 12, 4,"RECORD",_Key.red2, false,
 			new _Key(_Key.red1, _Key.GROUP(2,_Key.MODE1_CHG(12,4))));
 		_col += 15;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 4;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(5, 40));
+		pan.setOpaque(false);
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		++_col;
+
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		gridbag.setConstraints(upper, c);
+		add(upper);
+
+		JPanel middle = new JPanel();
+		GridBagLayout mgb = new GridBagLayout();
+		middle.setLayout(mgb);
+		middle.setOpaque(false);
 
 		// don't bother with SINGLE/DOUBLE ?
 
 		_col = 0;
+		_row = 0;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 2;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setOpaque(false);
+		mgb.setConstraints(pan, c);
+		middle.add(pan);
+		++_col;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 4;
+		c.gridheight = 2;
+		mgb.setConstraints(tml, c);
+		middle.add(tml);
+		_col += 4;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 2;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setOpaque(false);
+		mgb.setConstraints(pan, c);
+		middle.add(pan);
+		++_col;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 4;
+		c.gridheight = 2;
+		mgb.setConstraints(er, c);
+		middle.add(er);
+		_col += 4;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 2;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setOpaque(false);
+		mgb.setConstraints(pan, c);
+		middle.add(pan);
+		++_col;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 4;
+		c.gridheight = 2;
+		mgb.setConstraints(tmr, c);
+		middle.add(tmr);
+		_col += 4;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 2;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setOpaque(false);
+		mgb.setConstraints(pan, c);
+		middle.add(pan);
+		++_col;
+
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		gridbag.setConstraints(middle, c);
+		add(middle);
+
+		_col = 0;
 		_row += 2;
 
-		c.gridx = _col;
-		c.gridy = _row;
-		c.gridwidth = 5;
-		c.gridheight = 1;
-		//c.insets.left = 10;
-		gridbag.setConstraints(tml, c);
-		add(tml);
-		_col += 5;
-
-		c.gridx = _col;
-		c.gridy = _row;
-		c.gridwidth = 5;
-		c.gridheight = 1;
-		gridbag.setConstraints(er, c);
-		add(er);
-		//c.insets.left = 0;
-		_col += 5;
-
-		c.gridx = _col;
-		c.gridy = _row;
-		c.gridwidth = 5;
-		c.gridheight = 1;
-		gridbag.setConstraints(tmr, c);
-		add(tmr);
-		_col += 5;
-
-		_col = 0;
-		_row += 1;
-
-		c.gridx = _col;
-		c.gridy = _row;
-		c.gridwidth = 15;
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 40));
+		pan.setPreferredSize(new Dimension(160, 40));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
-		c.gridwidth = 1;
-		++_col;
+		_col += 16;
+
+		JPanel lower = new JPanel();
+		GridBagLayout lgb = new GridBagLayout();
+		lower.setLayout(lgb);
+		lower.setOpaque(false);
 
 		_col = 0;
-		_row += 1;
+		_row = 0;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 3;
+		c.gridwidth = 2;
+		c.gridheight = 15;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(20, 150));
 		pan.setOpaque(false);
-		gridbag.setConstraints(pan, c);
-		add(pan);
-		++_col;
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += 2;
 
-		addButton(c,1, 1, 0, 0, 6, 1,"icons/rewind.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 0, 5, 5,"icons/rewind.gif",
 			new _Key(_Key.green1, _Key.SPCL_KEY(1)));
-		addButton(c,1, 1, 0, 1, 6, 1, "icons/forward.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 5, 5, 5, "icons/forward.gif",
 			new _Key(_Key.orange1,_Key.SPCL_KEY(2)));
-		addButton(c,1, 1, 0, 2, 6, 1, "icons/reset.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 10, 5, 5, "icons/reset.gif",
 			new _Key(_Key.pink1, _Key.SPCL_KEY(0)));
-		_col += 6;
+		_col += 5;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 3;
+		c.gridwidth = 2;
+		c.gridheight = 15;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(20, 150));
 		pan.setOpaque(false);
-		gridbag.setConstraints(pan, c);
-		add(pan);
-		++_col;
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += 2;
 
-		addButton(c,1, 1, 0, 0, 6, 1, "icons/back_line.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 0, 5, 5, "icons/back_line.gif",
 			new _Key(_Key.blue1, _Key.PROG_CODE(7,3)));
-		addButton(c,1, 2, 0, 1, 6, 1, "icons/code.gif",
+		addButton(c,lgb,lower,
+			1, 2, 0, 5, 5, 5, "icons/code.gif",
 			new _Key(_Key.white1, _Key.illum1, _Key.SHIFT));
-		_col += 6;
+		_col += 5;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 3;
+		c.gridwidth = 2;
+		c.gridheight = 15;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(20, 150));
+		pan.setOpaque(false);
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += 2;
+
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		gridbag.setConstraints(lower, c);
+		add(lower);
+
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(160, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
-		++_col;
 
-		_row += 3;
-		_col = 0;
+		//setPreferredSize(new Dimension(160, 260));
+		setBackground(_Key.slate);
+		setOpaque(true);
 	}
 }
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.47 2012/01/24 00:55:09 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -3001,113 +3138,195 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.anchor = GridBagConstraints.CENTER;
-
 		setLayout(gridbag);
 
-		c.gridx = _col;
-		c.gridy = _row;
-		c.gridwidth = 5;
-		//c.insets.left = 10;
-		gridbag.setConstraints(na, c);
-		add(na);
-		c.gridx = _col;
-		c.gridy = _row + 1;
-		gridbag.setConstraints(el, c);
-		add(el);
-		//c.insets.left = 0;
-		_col += 5;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+
+		// do upper panel separately... stupid gridbag
+		JPanel upper = new JPanel();
+		GridBagLayout ugb = new GridBagLayout();
+		upper.setLayout(ugb);
+		upper.setOpaque(false);
 
 		c.gridx = _col;
 		c.gridy = _row;
 		c.gridwidth = 1;
-		c.gridheight = 2;
+		c.gridheight = 5;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 30));
+		pan.setPreferredSize(new Dimension(10, 50));
 		pan.setOpaque(false);
-		gridbag.setConstraints(pan, c);
-		add(pan);
-		++_col;
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		_col += c.gridwidth;
 
-		addPushButton(c, 5, 3, 0, 0,"SAME",_Key.white2, true,
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 4;
+		c.gridheight = 2;
+		ugb.setConstraints(na, c);
+		upper.add(na);
+		c.gridy = _row + 2;
+		c.gridwidth = 4;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(40, 1));
+		pan.setOpaque(false);
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		c.gridy = _row + 3;
+		c.gridheight = 2;
+		ugb.setConstraints(el, c);
+		upper.add(el);
+		_col += c.gridwidth;
+
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 5;
+		c.insets = new Insets(0,0,0,0);
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 50));
+		pan.setOpaque(false);
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		_col += c.gridwidth;
+
+		addPushButton(c,ugb,upper,
+			5, 3, 0, 5,"SAME",_Key.white2, true,
 			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE3_CHG(3,1))));
-		addPushButton(c, 5, 3, 3, 0,"ADJUST",_Key.white2, false,
+		addPushButton(c,ugb,upper,
+			5, 3, 3, 5,"ADJUST",_Key.white2, false,
 			new _Key(_Key.white1, _Key.GROUP(3,_Key.MODE3_CHG(3,2))));
-		addPushButton(c, 5, 3, 6, 0,"JUSTIFY",_Key.red2, false,
+		addPushButton(c,ugb,upper,
+			5, 3, 6, 5,"JUSTIFY",_Key.red2, false,
 			new _Key(_Key.red1, _Key.GROUP(3,_Key.MODE3_CHG(3,3))));
 		_col += 9;
 
-		_col = 0;
-		_row += 2;
-
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 15;
+		c.gridwidth = 1;
+		c.gridheight = 5;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(10, 50));
+		pan.setOpaque(false);
+		ugb.setConstraints(pan, c);
+		upper.add(pan);
+		_col += c.gridwidth;
+
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		gridbag.setConstraints(upper, c);
+		add(upper);
+
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 5));
+		pan.setPreferredSize(new Dimension(160, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
-		++_col;
+
+		JPanel lower = new JPanel();
+		GridBagLayout lgb = new GridBagLayout();
+		lower.setLayout(lgb);
+		lower.setOpaque(false);
 
 		_col = 0;
-		_row += 1;
+		_row = 0;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 4;
+		c.gridwidth = 2;
+		c.gridheight = 20;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10,10));
+		pan.setPreferredSize(new Dimension(20,200));
 		pan.setOpaque(false);
-		gridbag.setConstraints(pan, c);
-		add(pan);
-		++_col;
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += c.gridwidth;
 
-		addButton(c,1, 1, 0, 0, 6, 1, "icons/para.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 0, 5, 5, "icons/para.gif",
 			new _Key(_Key.white1, _Key.MODE2_CHG(7,4)));
-		addButton(c,1, 1, 0, 1, 6, 1, "icons/line.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 5, 5, 5, "icons/line.gif",
 			new _Key(_Key.white1, _Key.MODE2_CHG(7,5)));
-		addButton(c,1, 1, 0, 2, 6, 1, "icons/word.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 10, 5, 5, "icons/word.gif",
 			new _Key(_Key.white1, _Key.MODE2_CHG(7,6)));
-		addButton(c,1, 1, 0, 3, 6, 1, "icons/char-stop.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 15, 5, 5, "icons/char-stop.gif",
 			new _Key(_Key.pink1, _Key.pink2, _Key.MODE2_CHG(7,7)));
-		_col += 6;
+		_col += c.gridwidth;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 4;
+		c.gridwidth = 2;
+		c.gridheight = 20;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(20, 200));
 		pan.setOpaque(false);
-		gridbag.setConstraints(pan, c);
-		add(pan);
-		++_col;
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += c.gridwidth;
 
-		addButton(c,1, 1, 0, 0, 6, 1, "icons/auto_start.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 0, 5, 5, "icons/auto_start.gif",
 			new _Key(_Key.green1, _Key.MODE2_CHG(7,1)));
-		addButton(c,1, 1, 0, 1, 6, 1, "icons/memo_out.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 5, 5, 5, "icons/memo_out.gif",
 			new _Key(_Key.white1, _Key.PROG_CODE(6,3)));
-		addButton(c,1, 1, 0, 2, 6, 1, "icons/search.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 10, 5, 5, "icons/search.gif",
 			new _Key(_Key.blue1, _Key.blue2, _Key.ALT_KEY(2)));
-		addButton(c,1, 1, 0, 3, 6, 1, "icons/skip.gif",
+		addButton(c,lgb,lower,
+			1, 1, 0, 15, 5, 5, "icons/skip.gif",
 			new _Key(_Key.orange1, _Key.orange2, _Key.ALT_KEY(1)));
-		_col += 6;
+		_col += c.gridwidth;
 
 		c.gridx = _col;
 		c.gridy = _row;
-		c.gridwidth = 1;
-		c.gridheight = 4;
+		c.gridwidth = 2;
+		c.gridheight = 20;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan.setPreferredSize(new Dimension(20, 200));
+		pan.setOpaque(false);
+		lgb.setConstraints(pan, c);
+		lower.add(pan);
+		_col += c.gridwidth;
+
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		gridbag.setConstraints(lower, c);
+		add(lower);
+
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(160, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
-		++_col;
 
-		_row += 4;
-		_col = 0;
+		//setPreferredSize(new Dimension(160, 260));
+		setBackground(_Key.slate);
+		setOpaque(true);
 
 	}
 }
