@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $
+// $Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -156,7 +156,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -411,7 +411,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -487,7 +487,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -661,7 +661,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -701,7 +701,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1112,7 +1112,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1390,8 +1390,8 @@ class Wang1200_Model611
 	//            ^
 	//            +--- "_eoc"
 	//
-	// Where '-' is black spaces, '@' is the cursor character (\u25b2),
-	// and '\n' is the internally-maintain newline - not part of user characters.
+	// Where '-' is blank spaces, '@' is the cursor character (\u25b2),
+	// and '\n' is the internally-maintain newline - not part of user typed text.
 	//
 	// Actions:
 	//
@@ -1485,6 +1485,7 @@ class Wang1200_Model611
 				_text.repaint();
 			} else {
 				_text.replaceRange(s, _eop, _eop + 1);
+				_text.rmUnderline(_eop, _eop + 1); // might repaint()
 			}
 		} else {
 			_text.insert(s, _eol);
@@ -1562,6 +1563,10 @@ class Wang1200_Model611
 	private String _ftt;
 	private OrientationRequested _ort;
 	private double _pfz;
+
+//	private int[] _cursor_x;
+//	private int[] _cursor_y;
+//	private int _cursor_n;
 
 	public Wang1200_Model611() {
 		setup_xlate();
@@ -1651,6 +1656,33 @@ class Wang1200_Model611
 		_fy = fm.getHeight();
 		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
 		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
+
+//		_cursor_x = new int[8];
+//		_cursor_y = new int[8];
+//		_cursor_n = 0;
+//
+//		x = (int)Math.round(_fx / 2.0);
+//		y = 0;
+//		_cursor_x[_cursor_n] = x;
+//		_cursor_y[_cursor_n] = y;
+//		++_cursor_n;
+//		x *= 2;
+//		y += (int)Math.round(_fy / 2.0);
+//		_cursor_x[_cursor_n] = x;
+//		_cursor_y[_cursor_n] = y;
+//		++_cursor_n;
+//		y *= 2;
+//		_cursor_x[_cursor_n] = x;
+//		_cursor_y[_cursor_n] = y;
+//		++_cursor_n;
+//		x = 0;
+//		_cursor_x[_cursor_n] = x;
+//		_cursor_y[_cursor_n] = y;
+//		++_cursor_n;
+//		y /= 2;
+//		_cursor_x[_cursor_n] = x;
+//		_cursor_y[_cursor_n] = y;
+//		++_cursor_n;
 
 		_scroll = new JScrollPane(_text);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -1848,6 +1880,19 @@ class Wang1200_Model611
 				}
 				return false;
 			}
+			public int trim(int s, int e) {
+				// assert (s < e)
+				if (e <= start || s >= end) return 0;
+				if (s <= start) {
+					start = e;
+					return 1;
+				}
+				if (e >= end) {
+					end = s;
+					return 1;
+				}
+				return 2;
+			}
 			public int start;
 			public int end;
 		}
@@ -1856,6 +1901,18 @@ class Wang1200_Model611
 			_nund = 0;
 			_und = null;
 		}
+
+//		public void drawCursor(Graphics g) {
+//			Polygon p = new Polygon(_cursor_x, _cursor_y, _cursor_n);
+//			int x = (_eoc - _eol) * (int)Math.round(_fx);
+//			try {
+//				int ln = _text.getLineOfOffset(_eoc);
+//				int y = ln * _fy;
+//				p.translate(x, y);
+//				g.fillPolygon(p);
+//			} catch(javax.swing.text.BadLocationException ee) {
+//			}
+//		}
 
 		private underlines[] _und;
 		private int _nund;
@@ -1881,10 +1938,10 @@ class Wang1200_Model611
 			}
 		}
 
-		public int addUnderline(int s, int e) {
+		public void addUnderline(int s, int e) {
 			int x;
 			for (x = 0; x < _nund; ++x) {
-				if (_und[x].extend(s, e)) return x;
+				if (_und[x].extend(s, e)) return;
 			}
 			++_nund;
 			underlines[] u = new underlines[_nund];
@@ -1893,7 +1950,33 @@ class Wang1200_Model611
 			}
 			u[x] = new underlines(s, e);
 			_und = u;
-			return x;
+		}
+
+		public void rmUnderline(int s, int e) {
+			int x, r = 0;
+			for (x = 0; x < _nund; ++x) {
+				r = _und[x].trim(s, e);
+				if (r != 0) break;
+			}
+			if (r == 0) return;
+			// either case, display needs to repaint...
+			if (r == 2) {
+				// must split _und[x]...
+				// _und[x].start ... s ... e ... _und[x].end
+				int t = _und[x].end;
+				_und[x].end = s;
+				s = e;
+				e = t;
+				x = _nund;
+				++_nund;
+				underlines[] u = new underlines[_nund];
+				if (x > 0) {
+					System.arraycopy(_und, 0, u, 0, x);
+				}
+				u[x] = new underlines(s, e);
+				_und = u;
+			}
+			repaint();
 		}
 
 		private String strUnderline(String s) {
@@ -1960,6 +2043,7 @@ class Wang1200_Model611
 				} catch(javax.swing.text.BadLocationException ee) {
 				}
 			}
+			// drawCursor(g);
 		}
 
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
@@ -2187,7 +2271,7 @@ class Wang1200_Help extends JComponent
 		JOptionPane.showMessageDialog(_main,
 				"Wang 1200 Word Processor System\n"+
 				"Simulator\n"+
-				"$Revision: 1.48 $ $Date: 2012/01/27 01:20:20 $\n\n"+
+				"$Revision: 1.49 $ $Date: 2012/01/27 22:35:32 $\n\n"+
 				"Developed by Douglas Miller\n"+
 				"http://www.durgadas.com/wang1200.html\n\n"+
 				"With Jim Battle\n"+
@@ -2300,7 +2384,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2695,7 +2779,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2841,7 +2925,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -3116,7 +3200,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.48 2012/01/27 01:20:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

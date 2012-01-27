@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2012/01/21 16:59:06 drmiller Exp $
+# $Id: Makefile,v 1.8 2012/01/27 22:35:32 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -63,12 +63,13 @@ tar:
 	tar -czvf w1200-sim/w1200-sim.tgz \
 		w1200-sim/*.[ch] w1200-sim/Makefile w1200-sim/*.java \
 		common/*.[ch] \
-		w1200-sim/README* \
+		w1200-sim/README* w1200-sim/LICENSE* \
+		w1200-sim/INSTALL w1200-sim/run \
 		w1200-sim/examples/*.wng \
 		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
-		w1200-sim/docs/*.html w1200-sim/docs/*.gif w1200-sim/docs/*.pdf
-#
-# todo: w1200-sim/LICENSE* w1200-sim/icons/*.png
+		w1200-sim/icons/*.png \
+		w1200-sim/docs/*.html w1200-sim/docs/*.gif
+#		w1200-sim/docs/*.pdf
 
 jar: wang1200.jar
 
@@ -90,10 +91,10 @@ temp_dest: all wang1200.jar
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
-	mkdir -p $(TMPDEST)/docs
-	cp docs/*.pdf $(TMPDEST)/docs
 	mkdir -p $(TMPDEST)/icons
-#	cp icons/wang1200-*x*.png $(TMPDEST)/icons
+	cp icons/wang1200-*x*.png $(TMPDEST)/icons
+#	mkdir -p $(TMPDEST)/docs
+#	cp docs/*.pdf $(TMPDEST)/docs
 
 package: temp_dest
 	tar -czvf wang1200wps.tgz -C $(TMPDIR) $(INSNAME)
