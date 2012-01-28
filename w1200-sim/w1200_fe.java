@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $
+// $Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -35,7 +35,7 @@ class _Key {
 	static final Color neon2 = new Color(214,127,13);
 	static final Color empty = new Color(50,50,50);
 	static final Color gray = new Color(100,100,100);
-	static final Color slate = new Color(75,75,75);
+	static final Color slate = new Color(65,65,65);
 	static final Color ivory = new Color(236,226,190);
 	static final Color beige = new Color(230,220,210);
 	static final Color aqua = new Color(143,219,195);
@@ -156,7 +156,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -411,7 +411,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -487,7 +487,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -661,7 +661,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -701,7 +701,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -774,7 +774,8 @@ class Wang1200_Tape extends JComponent
 		jp.add(_window, new Integer(1), 500);
 
 		JLabel cass = new JLabel();
-		lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
+		lb = BorderFactory.createBevelBorder(BevelBorder.RAISED,
+				Color.white, Color.gray);
 		cass.setBorder(lb);
 		cass.setVerticalAlignment(SwingConstants.TOP);
 		cass.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1112,7 +1113,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -1595,6 +1596,7 @@ class Wang1200_Model611
 		_carriage.setOpaque(true);
 		_carriage.setForeground(Color.black);
 		_carriage.setBackground(_Key.aqua);
+		_carriage.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		s.weightx = 1;
 		s.weighty = 0;
 		s.anchor = GridBagConstraints.EAST;
@@ -1610,6 +1612,7 @@ class Wang1200_Model611
 		_bell.setOpaque(true);
 		_bell.setForeground(Color.black);
 		_bell.setBackground(_Key.aqua);
+		_bell.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		s.gridx = 1;
 		s.gridy = 0;
 		s.weightx = 0;
@@ -1628,6 +1631,7 @@ class Wang1200_Model611
 		_lock.setOpaque(true);
 		_lock.setForeground(Color.black);
 		_lock.setBackground(_Key.aqua);
+		_lock.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		s.gridx = 2;
 		s.gridy = 0;
 		s.weightx = 1;
@@ -2271,7 +2275,7 @@ class Wang1200_Help extends JComponent
 		JOptionPane.showMessageDialog(_main,
 				"Wang 1200 Word Processor System\n"+
 				"Simulator\n"+
-				"$Revision: 1.49 $ $Date: 2012/01/27 22:35:32 $\n\n"+
+				"$Revision: 1.50 $ $Date: 2012/01/28 01:43:49 $\n\n"+
 				"Developed by Douglas Miller\n"+
 				"http://www.durgadas.com/wang1200.html\n\n"+
 				"With Jim Battle\n"+
@@ -2384,7 +2388,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2779,7 +2783,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2925,7 +2929,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2956,7 +2960,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setPreferredSize(new Dimension(150, 5));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
@@ -2975,7 +2979,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 4;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(5, 40));
+		pan.setPreferredSize(new Dimension(1, 40));
 		pan.setOpaque(false);
 		ugb.setConstraints(pan, c);
 		upper.add(pan);
@@ -3003,7 +3007,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 4;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(5, 40));
+		pan.setPreferredSize(new Dimension(1, 40));
 		pan.setOpaque(false);
 		ugb.setConstraints(pan, c);
 		upper.add(pan);
@@ -3031,7 +3035,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 2;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setPreferredSize(new Dimension(5, 20));
 		pan.setOpaque(false);
 		mgb.setConstraints(pan, c);
 		middle.add(pan);
@@ -3088,7 +3092,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 2;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 20));
+		pan.setPreferredSize(new Dimension(5, 20));
 		pan.setOpaque(false);
 		mgb.setConstraints(pan, c);
 		middle.add(pan);
@@ -3109,7 +3113,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 40));
+		pan.setPreferredSize(new Dimension(150, 40));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
@@ -3128,7 +3132,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 2;
 		c.gridheight = 15;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(20, 150));
+		pan.setPreferredSize(new Dimension(15, 150));
 		pan.setOpaque(false);
 		lgb.setConstraints(pan, c);
 		lower.add(pan);
@@ -3169,7 +3173,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 2;
 		c.gridheight = 15;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(20, 150));
+		pan.setPreferredSize(new Dimension(15, 150));
 		pan.setOpaque(false);
 		lgb.setConstraints(pan, c);
 		lower.add(pan);
@@ -3187,11 +3191,13 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setPreferredSize(new Dimension(150, 5));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
 
+		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED,
+				Color.white, Color.gray));
 		//setPreferredSize(new Dimension(160, 260));
 		setBackground(_Key.slate);
 		setOpaque(true);
@@ -3200,7 +3206,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.49 2012/01/27 22:35:32 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.50 2012/01/28 01:43:49 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
@@ -3229,7 +3235,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setPreferredSize(new Dimension(150, 5));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
@@ -3245,7 +3251,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 5;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 50));
+		pan.setPreferredSize(new Dimension(5, 50));
 		pan.setOpaque(false);
 		ugb.setConstraints(pan, c);
 		upper.add(pan);
@@ -3277,7 +3283,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridheight = 5;
 		c.insets = new Insets(0,0,0,0);
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 50));
+		pan.setPreferredSize(new Dimension(5, 50));
 		pan.setOpaque(false);
 		ugb.setConstraints(pan, c);
 		upper.add(pan);
@@ -3317,7 +3323,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setPreferredSize(new Dimension(150, 10));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
@@ -3335,7 +3341,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 2;
 		c.gridheight = 20;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(20,200));
+		pan.setPreferredSize(new Dimension(15,200));
 		pan.setOpaque(false);
 		lgb.setConstraints(pan, c);
 		lower.add(pan);
@@ -3385,7 +3391,7 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 2;
 		c.gridheight = 20;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(20, 200));
+		pan.setPreferredSize(new Dimension(15, 200));
 		pan.setOpaque(false);
 		lgb.setConstraints(pan, c);
 		lower.add(pan);
@@ -3403,14 +3409,15 @@ class Wang1200_Keyboard_right extends Wang1200_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(160, 10));
+		pan.setPreferredSize(new Dimension(150, 5));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
 
+		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED,
+				Color.white, Color.gray));
 		//setPreferredSize(new Dimension(160, 260));
 		setBackground(_Key.slate);
 		setOpaque(true);
-
 	}
 }
