@@ -1,8 +1,73 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700.html,v 1.1 2011/11/07 13:20:04 drmiller Exp $ -->
+<!-- $Id: wang700.html,v 1.2 2012/01/28 22:06:22 drmiller Exp $ -->
 </HEAD>
 <BODY>
-<H3>Nothing yet</H3>
+<H2>Wang 700 Basic Operation</H2>
+
+<P>The Wang 600 Advanced Programmable Calculator uses "Register Notation" to
+perform operations. This differs from most modern calculators which use
+Reverse-Polish Notation (RPN) or Algebraic Notation. All operations on
+the Wang 600 are perform either on the display or between the display and a register.
+
+<P>One of the more noticeable features of the calculator is the two display registers,
+"X" and "Y". The "X" display is the main display, where numbers are entered
+and (normally) recalled. The "Y" register is used as the target for
+arithmetic operations and as the register number for indirect operations.
+Both registers are also used as parameters for certain other functions,
+such as ploting output.
+
+<P>The main number-entry keypad is located right-center. It also include
+arithmetic operations using the "X" display targeting the "Y" display.
+In addition, square and square-root functions on the "X" display are
+located there.
+
+<P>Located left-center are keys for operations on the register
+(direct and indirect) functions and a few miscellaneous functions.
+Numbers are moved between the "X" and "Y" displays using
+the "&#8593;" (copy X to Y), "&#8595;" (copy Y to X),
+and "&#8593;&#8595;" (exchange X and Y) keys.
+
+<P>Located far-left are some scientific functions and
+special keys for printing.
+
+<P>Located far-right are programming functions keys,
+some I/O functions, and special program manipulation keys.
+Most important is the PRIME key, which is a general
+calulator reset function. This restores the calulator to a known state,
+clears the X and Y registers, but does not clear the general
+registers.
+
+<P>Above the main keyboard is a strip of keys labeled "00" through "15",
+with toggle switches to the left. The keys, in combination with toggle
+switches, can be used to produce any program or function code,
+including subroutine calls. The toggle switches are used to form
+the binary value for the upper nibble of the code. Flipping these switches does
+not produce any code or action. Pressing one of the "00" through "15"
+keys will produce the code, and associated action, based on the toggle switch
+settings (high nibble) and the key number (low nibble).
+For example, setting toggle switches "40" and "10" on and pressing
+"04" will produce the code 05&nbsp;04.
+
+<P>Here is an example of performing the arithmetic operation "5 + 6".
+
+<UL>
+<TABLE BORDER>
+<TR><TH ALIGN=LEFT ROWSPAN=2>Key</TH><TH COLSPAN=2>Displays (after)</TH></TR>
+<TR>                                 <TH>X</TH><TH>Y</TH></TR>
+<TR><TD>PRIME</TD><TD>+.000000000000</TD><TD>+.000000000000</TD></TR>
+<TR><TD>5</TD><TD>+5</TD><TD>+.000000000000</TD></TR>
+<TR><TD>&#8593;</TD><TD>+5.00000000000</TD><TD>+5.00000000000</TD></TR>
+<TR><TD>6</TD><TD>+6</TD><TD>+5.00000000000</TD></TR>
+<TR><TD>+</TD><TD>+6.00000000000</TD><TD>+11.0000000000</TD></TR>
+</TABLE>
+</UL>
+
+<P>Note, when performing arithmetic operations, the "X" register is the
+source operand and is not altered by the operation. Only the target
+register contains the result. An exception to this are the unary
+operations, such as square root, which operate only on the X register and
+produce the result in (overwriting) the X register.
+
 </BODY>
 </HTML>
