@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $
+// $Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -14,7 +14,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -96,6 +96,11 @@ class _Key {
 		return (getType() == METAP);
 	}
 
+	static final public ImageIcon toggle_on =
+		new ImageIcon(Wang700_Keyboards.class.getResource("icons/toggle_on.gif"));
+	static final public ImageIcon toggle_off =
+		new ImageIcon(Wang700_Keyboards.class.getResource("icons/toggle_off.gif"));
+
 	Color color;
 	Color altcolor;
 	int code;
@@ -127,7 +132,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -375,7 +380,7 @@ public class w700_fe
 }
 
 class Wang700_ProgErr extends JComponent {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -457,7 +462,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -595,7 +600,7 @@ if (n != 32) System.err.println("too little? "+n);
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1159,7 +1164,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1848,7 +1853,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -2124,7 +2129,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.34 $ $Date: 2012/01/28 22:46:43 $<BR>"+
+			"$Revision: 1.35 $ $Date: 2012/01/29 00:51:22 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\"file:icons/wang700.gif\">"+
 			"<BR>"+
@@ -2243,7 +2248,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2258,6 +2263,7 @@ class Wang700_Keyboard extends JComponent
 	OutputStream _fout;
 	Wang700_Tape _tape;
 
+	// never called for MODE0 switches...
 	private void setToggle(boolean on, _Key key, JButton btn) {
 		if (key.state == on) return;
 		if (key.getType() == _Key.METAP) {
@@ -2266,14 +2272,18 @@ class Wang700_Keyboard extends JComponent
 			_mode0 &= ~key.getMask();
 		}
 		if (on) {
-			btn.setBackground(key.altcolor);
 			if (key.getType() == _Key.METAP) {
 				_meta |= key.getMode();
-			} else if (key.getType() == _Key.MODE0) {
-				_mode0 |= key.getMode();
+				btn.setIcon(_Key.toggle_on);
+			} else {
+				btn.setBackground(key.altcolor);
 			}
 		} else {
-			btn.setBackground(key.color);
+			if (key.getType() == _Key.METAP) {
+				btn.setIcon(_Key.toggle_off);
+			} else {
+				btn.setBackground(key.color);
+			}
 		}
 		key.state = on;
 	}
@@ -2667,7 +2677,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2776,6 +2786,60 @@ class Wang700_Keyboards extends JComponent
 		++_nkeys;
 	}
 
+	void addToggleButton(GridBagConstraints c, int lx, int ly, int px, int py,
+				String toplab,
+				boolean init, _Key key) {
+		final Dimension dim = new Dimension(15, 30);
+		//final Insets inset = new Insets(2,2,2,2);
+		JButton butt;
+		if (init) {
+			butt = new JButton(_Key.toggle_on);
+		} else {
+			butt = new JButton(_Key.toggle_off);
+		}
+
+		butt.setPreferredSize(dim);
+		key.state = init;
+		butt.setOpaque(false);
+		butt.setFocusPainted(false);
+		butt.setBorderPainted(false);
+		butt.setBackground(Color.black);
+
+		c.insets.top = 0;
+		c.insets.bottom = 0;
+		c.insets.left = ly; // stupid warnings
+		c.insets.left = py; // stupid warnings
+		c.gridheight = 1;
+		c.gridwidth = 1;
+
+		JLabel lab ;
+		if (toplab.length() > 0) {
+			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
+			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			c.insets.left = 0;
+			c.insets.right = 0;
+			c.gridx = _col + px;
+			c.gridy = _row + 0;
+			c.anchor = GridBagConstraints.SOUTH;
+			gridbag.setConstraints(lab, c);
+			add(lab);
+		}
+
+		c.anchor = GridBagConstraints.CENTER;
+		c.gridx = _col + px;
+		c.gridy = _row + 1;
+		c.insets.left = lx;
+		c.insets.right = lx;
+		gridbag.setConstraints(butt, c);
+		add(butt);
+
+		_buttons[_nkeys] = butt;
+		_keys[_nkeys] = key;
+		++_nkeys;
+	}
+
 	void addTapeButton(GridBagConstraints c, int lx, int ly, int px, int py,
 				String toplab, Color alt, _Key key) {
 		final Dimension dim = new Dimension(60, 30);
@@ -2829,7 +2893,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -3054,7 +3118,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -3089,13 +3153,13 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 //		add(pan);
 //		++_col;
 
-		addPushButton(c, 4, 1, 0, 1,"80","",_Key.white2, false,
+		addToggleButton(c, 4, 1, 0, 1,"80", false,
 			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(15,8))));
-		addPushButton(c, 4, 1, 1, 1,"40","",_Key.white2, false,
+		addToggleButton(c, 4, 1, 1, 1,"40", false,
 			new _Key(_Key.white1, _Key.GROUP(3,_Key.META_PRE(15,4))));
-		addPushButton(c, 4, 1, 2, 1,"20","",_Key.white2, false,
+		addToggleButton(c, 4, 1, 2, 1,"20", false,
 			new _Key(_Key.white1, _Key.GROUP(4,_Key.META_PRE(15,2))));
-		addPushButton(c, 4, 1, 3, 1,"10","",_Key.white2, false,
+		addToggleButton(c, 4, 1, 3, 1,"10", false,
 			new _Key(_Key.white1, _Key.GROUP(5,_Key.META_PRE(15,1))));
 		_col += 4;
 
@@ -3183,7 +3247,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.34 2012/01/28 22:46:43 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.35 2012/01/29 00:51:22 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
