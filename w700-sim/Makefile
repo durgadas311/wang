@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2011/11/11 00:20:35 drmiller Exp $
+# $Id: Makefile,v 1.13 2012/01/30 12:07:46 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -99,8 +99,8 @@ install: temp_dest
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_
-	mkdir -p /http/durgadas.com/wang700docs
-	cp docs/*.html docs/*.gif /http/durgadas.com/wang700docs
-	cp www/wang700* /http/durgadas.com
+	mkdir -p /http/durgadas.com/wang700/wang700docs
+	cp docs/*.html docs/*.gif /http/durgadas.com/wang700/wang700docs
+	cp www/wang700* /http/durgadas.com/wang700
 
 _FRC_:
