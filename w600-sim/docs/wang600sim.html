@@ -1,5 +1,48 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.16 2011/11/23 21:27:23 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.17 2012/01/30 12:37:14 drmiller Exp $ -->
+
+<H2>Running Environment</H2>
+
+<P>The simulator recognizes the following environment variables:
+
+<DL>
+<DT>WANG600HOME<DD>Path to wang600 files, default is ~/Wang600Files.
+<DT>WANG600_FONT<DD>Font to use for display. Default is Panaplex9seg.ttf.
+<DT>WANG600_HOST<DD>Hostname of back-end server, see <B>-w</B> option. 
+<DT>WANG600_PORT<DD>Port to use for connecting to back-end server, see <B>-w</B> option. 
+</DL>
+
+<P>The simulator is normally started with the following command:
+
+<UL><PRE>
+java -jar wang600.jar
+</PRE>
+
+<P>which starts up the GUI front-end. This will attempt to run the command:
+<UL><PRE>
+./w600-sim -b
+</PRE></UL>
+<P>which will start up the simulator back-end.
+
+</UL>
+
+<P>An alternative is to run the GUI as a client to the back-end on a
+remote host. In this case, the simulator is started with:
+
+<UL><PRE>
+java -jar wang600.jar -w [ &lt;host&gt; &lt;port&gt; ]
+</PRE>
+
+<P>The &lt;host&gt; and &lt;port&gt; arguments are not needed if the environment
+variables have been set.
+The remote &lt;host&gt; must be listening on the correct &lt;port&gt; number and
+should start up the back-end using the command:
+<UL><PRE>
+/path/to/sim/w600-sim -b -w
+</PRE></UL>
+<P>and may require other options, for example to get the path to the
+microcode image.
+</UL>
 
 <H2>Wang 600 Simulator Differences</H2>
 
