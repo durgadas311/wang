@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.4 2012/02/01 16:07:56 drmiller Exp $
+# $Id: INSTALL,v 1.5 2012/02/01 16:41:45 drmiller Exp $
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
@@ -17,11 +17,8 @@ elif [[ -f ~/.DS_Store && -d ~/Desktop ]]; then
 	echo "installing OSX desktop shortcut..."
 	rm -rf ~/Desktop/${title}.app
 	mkdir -p ~/Desktop/${title}.app/Contents/{Resources,MacOS}
-	cp ${title}.plist.tmplt ~/Desktop/${title}.app/Contents/Info.plist
+	cp ${base}.plist.tmplt ~/Desktop/${title}.app/Contents/Info.plist
 	ln -s ${PWD}/run ~/Desktop/${title}.app/Contents/MacOS/
-	cp icons/${base}-48x48.icns ~/Desktop/${title}.app/Contents/Resources/
-#	~/Desktop/NAME.app/Contents/NAME.lpist
-#	~/Desktop/NAME.app/Contents/Resources/<icon>.icns
-#	~/Desktop/NAME.app/Contents/MacOS/<executable>
+	cp icons/${base}-*x*.icns ~/Desktop/${title}.app/Contents/Resources/
 fi
 echo "Ready to launch ${PWD}/run"
