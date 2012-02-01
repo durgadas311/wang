@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.3 2012/02/01 15:41:54 drmiller Exp $
+# $Id: INSTALL,v 1.4 2012/02/01 16:07:56 drmiller Exp $
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
@@ -13,13 +13,13 @@ if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 	cat wang600.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
 	done >~/Desktop/wang600.desktop
-# elif [[ -f ~/.DS_Store && -d ~/Desktop ]]; then
+elif [[ -f ~/.DS_Store && -d ~/Desktop ]]; then
 	echo "installing OSX desktop shortcut..."
 	rm -rf ~/Desktop/${title}.app
 	mkdir -p ~/Desktop/${title}.app/Contents/{Resources,MacOS}
-	cp ${title}.plist.tmplt ~/Desktop/${title}.app/Contents/${title}.plist
-	ln -s ${PWD}/run ~/Desktop/NAME.app/Contents/MacOS/
-	cp icons/${name}-48x48.icns ~/Desktop/NAME.app/Contents/Resources/
+	cp ${title}.plist.tmplt ~/Desktop/${title}.app/Contents/Info.plist
+	ln -s ${PWD}/run ~/Desktop/${title}.app/Contents/MacOS/
+	cp icons/${base}-48x48.icns ~/Desktop/${title}.app/Contents/Resources/
 #	~/Desktop/NAME.app/Contents/NAME.lpist
 #	~/Desktop/NAME.app/Contents/Resources/<icon>.icns
 #	~/Desktop/NAME.app/Contents/MacOS/<executable>

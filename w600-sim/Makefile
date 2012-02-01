@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.34 2012/02/01 15:41:54 drmiller Exp $
+# $Id: Makefile,v 1.35 2012/02/01 16:07:56 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -84,7 +84,7 @@ temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.wng $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang600-*x*.png $(TMPDEST)/icons
+	cp icons/wang600-*x*.png icons/wang600-*x*.icns $(TMPDEST)/icons
 
 package: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
