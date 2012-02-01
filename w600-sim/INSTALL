@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.5 2012/02/01 16:41:45 drmiller Exp $
+# $Id: INSTALL,v 1.6 2012/02/01 23:03:40 drmiller Exp $
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
@@ -13,7 +13,7 @@ if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 	cat wang600.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
 	done >~/Desktop/wang600.desktop
-elif [[ -f ~/.DS_Store && -d ~/Desktop ]]; then
+elif [[ -f ~/.CFUserTextEncoding && -d ~/Desktop ]]; then
 	echo "installing OSX desktop shortcut..."
 	rm -rf ~/Desktop/${title}.app
 	mkdir -p ~/Desktop/${title}.app/Contents/{Resources,MacOS}
