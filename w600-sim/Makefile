@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.37 2012/02/01 20:34:48 drmiller Exp $
+# $Id: Makefile,v 1.38 2012/02/01 20:37:47 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -26,9 +26,9 @@ FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library
 FONTDEST =
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 PNGS = $(wildcard icons/wang600-*x*.png)
+PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
 ICNS = $(subst .png,.icns,$(PNGS))
-ICNS := $(filter %32x32.icns %48x48.icns %128x128.icns, $(ICNS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
 XTRA = 
