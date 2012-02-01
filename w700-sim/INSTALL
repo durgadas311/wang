@@ -1,8 +1,25 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.1 2011/10/20 17:24:37 drmiller Exp $
+# $Id: INSTALL,v 1.2 2012/02/01 22:15:11 drmiller Exp $
 
 if [[ -d progs ]]; then
-	mkdir -p ~/Wang600Files
-	cp -v progs/* ~/Wang600Files
+	mkdir -p ~/Wang700Files
+	cp -v progs/* ~/Wang700Files
 fi
+base="wang700"
+title="Wang700"
+if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
+	echo "installing GNOME desktop shortcut..."
+	export WANG700PATH=${PWD}
+	cat ${base}.desktop.tmplt | while read line; do
+		eval "echo \"${line}\""
+	done >~/Desktop/${base}.desktop
+elif [[ -f ~/.DS_Store && -d ~/Desktop ]]; then
+	echo "installing OSX desktop shortcut..."
+	rm -rf ~/Desktop/${title}.app
+	mkdir -p ~/Desktop/${title}.app/Contents/{Resources,MacOS}
+	cp ${base}.plist.tmplt ~/Desktop/${title}.app/Contents/Info.plist
+	ln -s ${PWD}/run ~/Desktop/${title}.app/Contents/MacOS/
+	cp icons/${base}-*x*.icns ~/Desktop/${title}.app/Contents/Resources/
+fi
+
 echo "Ready to launch ${PWD}/run"
