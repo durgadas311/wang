@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+GenericName=Wang 1200 Word Processing System
+Name=Wang1200
+Exec=${WANG1200PATH}/run
+Icon=${WANG1200PATH}/icons/wang1200-48x48.png
+Terminal=true
+Type=Application
+Categories=Qt;Gnome;Applications;

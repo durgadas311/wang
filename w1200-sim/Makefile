@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2012/01/30 12:07:46 drmiller Exp $
+# $Id: Makefile,v 1.10 2012/02/01 21:49:52 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -28,6 +28,11 @@ endif
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
+PNGS = $(wildcard icons/wang1200-*x*.png)
+PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
+# sips expected: 16, 32, 48, 128, 256, 512, or 1024
+ICNS = $(subst .png,.icns,$(PNGS))
+WICONS = $(subst .png,.ico,$(PNGS))
 
 XTRA = 
 
@@ -87,17 +92,29 @@ wang1200.jar: w1200_fe.class Manifest.txt
 
 temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar wang1200.rom w1200-sim run INSTALL $(TMPDEST)
+	cp wang1200.jar wang1200.rom w1200-sim run INSTALL *.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang1200-*x*.png $(TMPDEST)/icons
+	cp icons/wang1200-*x*.png icons/wang1200-*x*.icns $(TMPDEST)/icons
 #	mkdir -p $(TMPDEST)/docs
 #	cp docs/*.pdf $(TMPDEST)/docs
 
+wtemp_dest: winicons wang600.jar
+	mkdir -p $(TMPDEST)
+	cp wang1200.jar RUN.BAT INSTALL.BAT $(TMPDEST)
+	mkdir -p $(TMPDEST)/progs
+	cp progs/*.wng $(TMPDEST)/progs
+	mkdir -p $(TMPDEST)/icons
+	cp icons/wang1200-*x*.ico $(TMPDEST)/icons
+
 package: temp_dest
 	tar -czvf wang1200wps.tgz -C $(TMPDIR) $(INSNAME)
+	rm -rf $(TMPDIR)
+
+winpack: wtemp_dest
+	cd $(TMPDIR); zip -r ../wang1200apc.zip $(INSNAME)
 	rm -rf $(TMPDIR)
 
 install: temp_dest
@@ -113,5 +130,19 @@ www: _FRC_
 
 examples/%.wng: examples/%.txt txt2wng
 	./txt2wng <$^ >$@
+
+icns: $(ICNS)
+
+%.icns: %.png
+	sips -s format icns $? --out $@
+
+winicons: $(WICONS)
+
+%.ico: %.png
+	sips -s format ico $? --out $@
+# stupid pnm bugs... lost transparency too
+#	pngtopnm $? >/tmp/pnm.$$$$; \
+#	pnmquant 256 /tmp/pnm.$$$$ | ppmtowinicon >$@; \
+#	rm -f /tmp/pnm.$$$$
 
 _FRC_:

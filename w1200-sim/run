@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: run,v 1.2 2012/01/24 23:13:42 drmiller Exp $
+# $Id: run,v 1.3 2012/02/01 21:49:52 drmiller Exp $
 
-cd "${0%/*}"
+cd ~/wang1200wps
 exec java -jar wang1200.jar

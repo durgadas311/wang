@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>run</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Wang 1200 Word Processing System</string>
+	<key>CFBundleIconFile</key>
+	<string>wang1200-48x48.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.durgadas.wang1200</string>
+	<key>CFBundleName</key>
+	<string>Wang1200</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1</string>
+	<key>CFBundleSignature</key>
+	<string>WNG12</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+</dict>
+</plist>
