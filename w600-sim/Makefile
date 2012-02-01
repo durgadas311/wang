@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.33 2012/01/30 12:07:46 drmiller Exp $
+# $Id: Makefile,v 1.34 2012/02/01 15:41:54 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -79,7 +79,7 @@ wang600.jar: w600_fe.class Manifest.txt
 
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
-	cp wang600.jar wang600.rom w600-sim run INSTALL $(TMPDEST)
+	cp wang600.jar wang600.rom w600-sim run INSTALL *.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.wng $(TMPDEST)/progs

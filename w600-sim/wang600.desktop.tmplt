@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+GenericName=Wang 600 Programmable Calculator
+Name=Wang600
+Exec=${WANG600PATH}/run
+Icon=${WANG600PATH}/icons/wang600-48x48.png
+Terminal=true
+Type=Application
+Categories=Qt;Gnome;Applications;
