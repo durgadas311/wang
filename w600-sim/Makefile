@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.36 2012/02/01 16:58:20 drmiller Exp $
+# $Id: Makefile,v 1.37 2012/02/01 20:34:48 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -27,8 +27,9 @@ FONTDEST =
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 PNGS = $(wildcard icons/wang600-*x*.png)
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
-PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS))
+ICNS := $(filter %32x32.icns %48x48.icns %128x128.icns, $(ICNS))
+WICONS = $(subst .png,.ico,$(PNGS))
 
 XTRA = 
 
@@ -90,8 +91,20 @@ temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang600-*x*.png icons/wang600-*x*.icns $(TMPDEST)/icons
 
+wtemp_dest: winicons wang600.jar
+	mkdir -p $(TMPDEST)
+	cp wang600.jar RUN.BAT INSTALL.BAT $(TMPDEST)
+	mkdir -p $(TMPDEST)/progs
+	cp progs/*.wng $(TMPDEST)/progs
+	mkdir -p $(TMPDEST)/icons
+	cp icons/wang600-*x*.ico $(TMPDEST)/icons
+
 package: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
+	rm -rf $(TMPDIR)
+
+winpack: wtemp_dest
+	cd $(TMPDIR); zip -r ../wang600apc.zip $(INSNAME)
 	rm -rf $(TMPDIR)
 
 install: temp_dest
@@ -109,5 +122,14 @@ icns: $(ICNS)
 
 %.icns: %.png
 	sips -s format icns $? --out $@
+
+winicons: $(WICONS)
+
+%.ico: %.png
+	sips -s format ico $? --out $@
+# stupid pnm bugs... lost transparency too
+#	pngtopnm $? >/tmp/pnm.$$$$; \
+#	pnmquant 256 /tmp/pnm.$$$$ | ppmtowinicon >$@; \
+#	rm -f /tmp/pnm.$$$$
 
 _FRC_:
