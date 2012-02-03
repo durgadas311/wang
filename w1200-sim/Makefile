@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2012/02/01 21:51:35 drmiller Exp $
+# $Id: Makefile,v 1.13 2012/02/03 15:28:13 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -103,7 +103,8 @@ temp_dest: all wang1200.jar
 
 wtemp_dest: winicons wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar RUN.BAT INSTALL.BAT $(TMPDEST)
+	cp wang1200.jar Wang1200.bat INSTALL.BAT $(TMPDEST)
+	cp README.windows $(TMPDEST)/README.txt
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons

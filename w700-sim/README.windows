@@ -1,0 +1,48 @@
+Unpack the file wang600apc.zip into your home directory:
+
+	Double-click on wang600apc.zip (Open), then drag-n-drop
+	"wang600apc" into your home directory.
+
+	Double-click on "wang600apc" from your home directory,
+	then double-click on INSTALL to setup files.
+
+Setup Environment Variables:
+
+	(e.g. Windows 7) Right click on "My Computer" and select
+	...
+
+	Add the following:
+
+		WANG600_HOST - set to hostname of Wang600 server
+
+		WANG600_PORT - set to port number used by Wang600 server
+
+	Ensure that "Path" contains the Java home and command directories,
+	such that typing the command "java" in a command prompt window
+	works. This should be part of normal Java install/setup.
+
+Create a shortcut on your Desktop:
+
+	Right-click on your Desktop, select "New"->"Shortcut".
+
+	Enter path to Wang600.bat, for example:
+
+		C:\Users\Owner\wang600apc\Wang600.bat
+
+	Click "Next"
+
+	Change name is desired, should default to "Wang600".
+
+	Click "Finish"
+
+	Right-click on new shortcut, select "Properties".
+
+	Click on "Change Icon", browse to C:\Users\Owner\wang600apc\icons
+	and select "wang600-48x48.ico", click "OK" as needed.
+
+
+NOTE: Requires Java. The run script (batch file) expects the command "java"
+to work, specifically that "java -jar file" will invoke the java code in
+the "jar" file named "file". Oracle/Sun Java JRE does this. Unknown if
+other Java runtimes use the same command syntax. Edit "Wang600.bat" as
+needed to change command syntax.

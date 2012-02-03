@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2012/02/01 22:38:43 drmiller Exp $
+# $Id: Makefile,v 1.16 2012/02/03 15:28:13 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -95,11 +95,12 @@ temp_dest: all wang700.jar
 
 wtemp_dest: winicons wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar RUN.BAT INSTALL.BAT $(TMPDEST)
-#	mkdir -p $(TMPDEST)/progs
-#	cp progs/*.wng $(TMPDEST)/progs
+	cp wang700.jar Wang700.bat INSTALL.BAT $(TMPDEST)
+	cp README.windows $(TMPDEST)/README.txt
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang700-*x*.ico $(TMPDEST)/icons
+#	mkdir -p $(TMPDEST)/progs
+#	cp progs/*.wng $(TMPDEST)/progs
 
 package: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
