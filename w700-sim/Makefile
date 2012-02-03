@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2012/02/03 15:40:27 drmiller Exp $
+# $Id: Makefile,v 1.18 2012/02/03 15:41:23 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -107,7 +107,7 @@ package: temp_dest
 	rm -rf $(TMPDIR)
 
 winpack: wtemp_dest
-	cd $(TMPDIR); rm -f ../wang600apc.zip; zip -r ../wang700apc.zip $(INSNAME)
+	cd $(TMPDIR); rm -f ../wang700apc.zip; zip -r ../wang700apc.zip $(INSNAME)
 	rm -rf $(TMPDIR)
 
 install: temp_dest
