@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2012/02/04 03:00:03 drmiller Exp $
+# $Id: Makefile,v 1.21 2012/02/04 03:01:48 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -123,9 +123,9 @@ www: _FRC_
 	cp www/wang700* /http/durgadas.com/wang700
 
 reicon:
-	cvs -q update
+	cvs -q update icons
 	$(MAKE) _icons
-	cvs ci -m"update icons"
+	cvs ci -m"update icons" icons
 
 _icons: $(ICNS) $(WICONS)
 
@@ -134,9 +134,5 @@ _icons: $(ICNS) $(WICONS)
 
 %.ico: %.png
 	sips -s format ico $? --out $@
-# stupid pnm bugs... lost transparency too
-#	pngtopnm $? >/tmp/pnm.$$$$; \
-#	pnmquant 256 /tmp/pnm.$$$$ | ppmtowinicon >$@; \
-#	rm -f /tmp/pnm.$$$$
 
 _FRC_:
