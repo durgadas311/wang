@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2012/02/04 01:35:41 drmiller Exp $
+# $Id: Makefile,v 1.20 2012/02/04 03:00:03 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -122,12 +122,15 @@ www: _FRC_
 	cp docs/*.html docs/*.gif /http/durgadas.com/wang700/wang700docs
 	cp www/wang700* /http/durgadas.com/wang700
 
-icns: $(ICNS)
+reicon:
+	cvs -q update
+	$(MAKE) _icons
+	cvs ci -m"update icons"
+
+_icons: $(ICNS) $(WICONS)
 
 %.icns: %.png
 	sips -s format icns $? --out $@
-
-winicons: $(WICONS)
 
 %.ico: %.png
 	sips -s format ico $? --out $@
