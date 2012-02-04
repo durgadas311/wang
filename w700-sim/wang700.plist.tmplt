@@ -8,19 +8,19 @@
 	<key>CFBundleExecutable</key>
 	<string>run</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Wang 600 Programmable Calculator</string>
+	<string>Wang 700 Advanced Programming Calculator</string>
 	<key>CFBundleIconFile</key>
-	<string>wang600-48x48.icns</string>
+	<string>wang700-48x48.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.durgadas.wang600</string>
+	<string>com.durgadas.wang700</string>
 	<key>CFBundleName</key>
-	<string>Wang600</string>
+	<string>Wang700</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1</string>
 	<key>CFBundleSignature</key>
-	<string>WNG6</string>
+	<string>WNG7</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 </dict>
