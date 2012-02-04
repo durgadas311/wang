@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2012/02/03 15:41:23 drmiller Exp $
+# $Id: Makefile,v 1.19 2012/02/04 01:35:41 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -114,6 +114,7 @@ install: temp_dest
 	rm -rf $(INSDEST)
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
+	cp ROM720C.txt $(INSDEST)
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_
