@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.40 2012/02/03 15:40:27 drmiller Exp $
+# $Id: Makefile,v 1.41 2012/02/13 22:26:21 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -79,7 +79,7 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons $(SHIP_DOCS) \
+	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
 temp_dest: all wang600.jar
