@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.49 2012/02/19 23:17:50 drmiller Exp $
+# $Id: Makefile,v 1.50 2012/02/19 23:19:20 drmiller Exp $
 
 include Makefile.ship
 
@@ -43,7 +43,7 @@ tar:
 		w600-sim/progs/*.wng w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar packages
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc
+	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w600-sim
 
 packages: $(PACKAGES)
 

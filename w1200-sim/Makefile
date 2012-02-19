@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2012/02/19 23:17:50 drmiller Exp $
+# $Id: Makefile,v 1.19 2012/02/19 23:19:20 drmiller Exp $
 
 include Makefile.ship
 
@@ -45,7 +45,7 @@ tar:
 #		w1200-sim/docs/*.pdf
 
 ship: tar packages
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc
+	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w1200-sim
 
 packages: $(PACKAGES)
 

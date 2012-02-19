@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.27 2012/02/19 23:17:50 drmiller Exp $
+# $Id: Makefile,v 1.28 2012/02/19 23:19:20 drmiller Exp $
 
 include Makefile.ship
 
@@ -42,7 +42,7 @@ tar: rom.diff wang700.jar
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
 ship: tar packages
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc
+	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w700-sim
 
 update:
 	cd ..; cvs -q update common w700-sim
