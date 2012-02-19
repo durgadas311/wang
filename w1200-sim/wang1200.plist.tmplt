@@ -23,5 +23,14 @@
 	<string>WNG12</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>WANG1200HOME</key>
+		<string>~/Wang1200Files</string>
+		<key>WANG1200_HOST</key>
+		<string>not-set</string>
+		<key>WANG1200_PORT</key>
+		<string>30311</string>
+	</dict>
 </dict>
 </plist>

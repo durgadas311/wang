@@ -1,5 +1,10 @@
 #!/bin/sh
-# $Id: run,v 1.3 2012/02/01 21:49:52 drmiller Exp $
+# $Id: run,v 1.4 2012/02/19 17:43:51 drmiller Exp $
 
-cd ~/wang1200wps
+pgm=${0}
+if [[ -L ${pgm} ]]; then
+        pgm=$(readlink ${pgm})
+fi
+cd ${pgm%/*}
+
 exec java -jar wang1200.jar

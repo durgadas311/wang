@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2012/02/13 22:26:21 drmiller Exp $
+# $Id: Makefile,v 1.16 2012/02/19 17:43:51 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -6,8 +6,13 @@ INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
 TMPDEST = $(TMPDIR)/$(INSNAME)
 
+MACOSX = mini-mac
+SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
+
 EXAMPLES = $(wildcard examples/*.txt)
 EX = $(EXAMPLES:.txt=.wng)
+
+PACKAGES = wang1200wps.tgz wang1200wps.dmg wang1200wps.exe
 
 COPTS =
 
@@ -61,6 +66,9 @@ clobber: clean
 	rm -f *.class w1200-sim w1200_fe w1200-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
+update:
+	cd ..; cvs -q update common w1200-sim
+
 examp: $(EX)
 
 tar:
@@ -90,33 +98,52 @@ wang1200.jar: w1200_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
+packages: $(PACKAGES)
+
 temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar wang1200.rom w1200-sim run INSTALL *.tmplt $(TMPDEST)
-	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+	cp wang1200.jar wang1200.rom w1200-sim run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang1200-*x*.png icons/wang1200-*x*.icns $(TMPDEST)/icons
+	cp icons/wang1200-*x*.png $(TMPDEST)/icons
 #	mkdir -p $(TMPDEST)/docs
 #	cp docs/*.pdf $(TMPDEST)/docs
 
-wtemp_dest: winicons wang1200.jar
-	mkdir -p $(TMPDEST)
-	cp wang1200.jar Wang1200.bat INSTALL.BAT $(TMPDEST)
-	cp README.windows $(TMPDEST)/README.txt
-	mkdir -p $(TMPDEST)/examples
-	cp examples/*.wng $(TMPDEST)/examples
-	mkdir -p $(TMPDEST)/icons
-	cp icons/wang1200-*x*.ico $(TMPDEST)/icons
-
-package: temp_dest
+wang1200wps.tgz: temp_dest
 	tar -czvf wang1200wps.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-winpack: wtemp_dest
-	cd $(TMPDIR); rm -f ../wang1200wps.zip; zip -r ../wang1200wps.zip $(INSNAME)
-	rm -rf $(TMPDIR)
+wang1200wps.exe: all winicons wang1200.jar wang1200.nsi
+	makensis wang1200.nsi
+
+w1200-sim.osx: w1200-sim
+	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w1200-sim
+	scp $(MACOSX):$(SUBPATH)/w1200-sim w1200-sim.osx
+
+# Need better way to estimate size of image...
+wang1200wps.dmg: all icns w1200-sim.osx wang1200.jar
+	rm -f $@
+	dd if=/dev/zero of=$@ bs=64k count=16
+	hformat -l WANG1200WPS $@
+	hmount $@
+	hmkdir Wang1200.app Wang1200Files
+	hcd Wang1200.app
+	hmkdir Contents
+	hcd Contents
+	hcopy wang1200.plist.tmplt :Info.plist
+	hmkdir Resources MacOS
+	hcopy wang1200.jar wang1200.rom run :MacOS
+	hcopy icons/wang1200-*x*.icns :Resources
+	hcd MacOS
+	hcopy w1200-sim.osx :w1200-sim
+	hcd
+	hcopy Uninstall-wang1200.sh :Uninstall-wang1200
+	hcopy -t README.osx :README.html
+	hcopy examples/*.wng :Wang1200Files
+	humount $@
+	rm -f w1200-sim.osx
 
 install: temp_dest
 	rm -rf $(INSDEST)
