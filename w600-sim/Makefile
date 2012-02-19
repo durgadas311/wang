@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.41 2012/02/13 22:26:21 drmiller Exp $
+# $Id: Makefile,v 1.42 2012/02/19 01:51:10 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -30,6 +30,8 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
+
+PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
 
 XTRA = 
 
@@ -82,31 +84,40 @@ wang600.jar: w600_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
+packages: $(PACKAGES)
+
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
-	cp wang600.jar wang600.rom w600-sim run INSTALL *.tmplt $(TMPDEST)
-	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+	cp wang600.jar wang600.rom w600-sim run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.wng $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang600-*x*.png icons/wang600-*x*.icns $(TMPDEST)/icons
+	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
-wtemp_dest: winicons wang600.jar
-	mkdir -p $(TMPDEST)
-	cp wang600.jar Wang600.bat INSTALL.BAT $(TMPDEST)
-	cp README.windows $(TMPDEST)/README.txt
-	mkdir -p $(TMPDEST)/progs
-	cp progs/*.wng $(TMPDEST)/progs
-	mkdir -p $(TMPDEST)/icons
-	cp icons/wang600-*x*.ico $(TMPDEST)/icons
+temp_app: all icns wang600.jar
+	mkdir -p $(TMPDEST)/Wang600.app/Contents/{Resources,MacOS}
+	cp wang600.jar wang600.rom w600-sim run $(TMPDEST)/Wang600.app/Contents/MacOS
+	cp icons/wang600-*x*.icns $(TMPDEST)/Wang600.app/Contents/Resources/
+	cp wang600.plist.tmplt $(TMPDEST)/Wang600.app/Contents/Info.plist
+	cp Uninstall-tele-sb-sim.sh $(TMPDEST)/Uninstall-tele-sb-sim.sh
+	chmod +x $(TMPDEST)/Wang600.app/Contents/MacOS/run
+	chmod +x $(TMPDEST)/Uninstall-tele-sb-sim.sh
+	mkdir -p $(TMPDEST)/Wang600Files/
+	cp progs/*.wng $(TMPDEST)/Wang600Files/
 
-package: temp_dest
+wang600apc.tgz: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-winpack: wtemp_dest
-	cd $(TMPDIR); rm -f ../wang600apc.zip; zip -r ../wang600apc.zip $(INSNAME)
+wang600apc.dmg: temp_app
+	cd $(TMPDEST); genisoimage -r -apple -no-desktop \
+		-V "WANG600APC" -hfs-volid "WANG600APC" \
+		-o ../../wang600apc.dmg .
 	rm -rf $(TMPDIR)
+
+wang600apc.exe: all winicons wang600.jar wang600.nsi
+	makensis wang600.nsi
 
 install: temp_dest
 	rm -rf $(INSDEST)
@@ -128,9 +139,5 @@ winicons: $(WICONS)
 
 %.ico: %.png
 	sips -s format ico $? --out $@
-# stupid pnm bugs... lost transparency too
-#	pngtopnm $? >/tmp/pnm.$$$$; \
-#	pnmquant 256 /tmp/pnm.$$$$ | ppmtowinicon >$@; \
-#	rm -f /tmp/pnm.$$$$
 
 _FRC_:
