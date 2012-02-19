@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2012/02/19 21:23:58 drmiller Exp $
+# $Id: Makefile,v 1.26 2012/02/19 21:30:01 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -100,6 +100,7 @@ temp_dest: all $(ICNS) wang700.jar
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) $(TMPDEST)/icons
+#	cp ROM720C.txt $(TMPDEST)
 #	mkdir -p $(TMPDEST)/progs
 #	cp progs/*.wng $(TMPDEST)/progs
 
