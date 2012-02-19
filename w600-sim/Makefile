@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.45 2012/02/19 02:52:45 drmiller Exp $
+# $Id: Makefile,v 1.46 2012/02/19 16:16:03 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -59,6 +59,9 @@ xinetd: w600-sim
 clean:
 	rm -f *.o
 
+update:
+	cd ..; cvs update common w600-sim
+
 clobber: clean
 	rm -f *.class w600-sim w600_fe w600-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
@@ -98,28 +101,36 @@ temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
-temp_app: all icns wang600.jar
-	ssh $(MACOSX) cd $(SUBPATH)\; make clean w600-sim
-	mkdir -p $(TMPDEST)/Wang600.app/Contents/{Resources,MacOS}
-	cp wang600.jar wang600.rom run $(TMPDEST)/Wang600.app/Contents/MacOS
-	scp $(MACOSX):$(SUBPATH)/w600-sim $(TMPDEST)/Wang600.app/Contents/MacOS
-	cp icons/wang600-*x*.icns $(TMPDEST)/Wang600.app/Contents/Resources/
-	cp wang600.plist.tmplt $(TMPDEST)/Wang600.app/Contents/Info.plist
-	cp Uninstall-wang600.sh $(TMPDEST)/Uninstall-wang600
-	chmod +x $(TMPDEST)/Wang600.app/Contents/MacOS/run
-	chmod +x $(TMPDEST)/Uninstall-wang600
-	mkdir -p $(TMPDEST)/Wang600Files/
-	cp progs/*.wng $(TMPDEST)/Wang600Files/
-
 wang600apc.tgz: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-wang600apc.dmg: temp_app
-	cd $(TMPDEST); genisoimage -r -apple -no-desktop \
-		-V "WANG600APC" -hfs-volid "WANG600APC" \
-		-o ../../wang600apc.dmg .
-	rm -rf $(TMPDIR)
+w600-sim.osx: w600-sim
+	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w600-sim
+	scp $(MACOSX):$(SUBPATH)/w600-sim w600-sim.osx
+
+# Need better way to estimate size of image...
+wang600apc.dmg: all icns w600-sim.osx wang600.jar
+	rm -f $@
+	dd if=/dev/zero of=$@ bs=64k count=16
+	hformat -l WANG600APC $@
+	hmount $@
+	hmkdir Wang600.app Wang600Files
+	hcd Wang600.app
+	hmkdir Contents
+	hcd Contents
+	hcopy wang600.plist.tmplt :Info.plist
+	hmkdir Resources MacOS
+	hcopy wang600.jar wang600.rom run :MacOS
+	hcopy icons/wang600-*x*.icns :Resources
+	hcd MacOS
+	hcopy w600-sim.osx :w600-sim
+	hcd
+	hcopy Uninstall-wang600.sh :Uninstall-wang600
+	hcopy -t README.osx :README.html
+	hcopy progs/*.wng :Wang600Files
+	humount $@
+	rm -f w600-sim.osx
 
 wang600apc.exe: all winicons wang600.jar wang600.nsi
 	makensis wang600.nsi

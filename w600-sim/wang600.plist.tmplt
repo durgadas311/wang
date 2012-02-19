@@ -23,5 +23,14 @@
 	<string>WNG6</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>WANG600HOME</key>
+		<string>~/Wang600Files</string>
+		<key>WANG600_HOST</key>
+		<string>not-set</string>
+		<key>WANG600_PORT</key>
+		<string>10311</string>
+	</dict>
 </dict>
 </plist>
