@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.46 2012/02/19 16:16:03 drmiller Exp $
+# $Id: Makefile,v 1.47 2012/02/19 16:17:12 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -60,7 +60,7 @@ clean:
 	rm -f *.o
 
 update:
-	cd ..; cvs update common w600-sim
+	cd ..; cvs -q update common w600-sim
 
 clobber: clean
 	rm -f *.class w600-sim w600_fe w600-dasm Manifest.txt *.jar *.tgz
