@@ -1,10 +1,13 @@
-# $Id: Makefile,v 1.44 2012/02/19 02:42:57 drmiller Exp $
+# $Id: Makefile,v 1.45 2012/02/19 02:52:45 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
 INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
 TMPDEST = $(TMPDIR)/$(INSNAME)
+
+MACOSX = mini-mac
+SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
 COPTS =
 
@@ -96,8 +99,10 @@ temp_dest: all wang600.jar
 	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
 temp_app: all icns wang600.jar
+	ssh $(MACOSX) cd $(SUBPATH)\; make clean w600-sim
 	mkdir -p $(TMPDEST)/Wang600.app/Contents/{Resources,MacOS}
-	cp wang600.jar wang600.rom w600-sim run $(TMPDEST)/Wang600.app/Contents/MacOS
+	cp wang600.jar wang600.rom run $(TMPDEST)/Wang600.app/Contents/MacOS
+	scp $(MACOSX):$(SUBPATH)/w600-sim $(TMPDEST)/Wang600.app/Contents/MacOS
 	cp icons/wang600-*x*.icns $(TMPDEST)/Wang600.app/Contents/Resources/
 	cp wang600.plist.tmplt $(TMPDEST)/Wang600.app/Contents/Info.plist
 	cp Uninstall-wang600.sh $(TMPDEST)/Uninstall-wang600
