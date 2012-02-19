@@ -1,6 +1,7 @@
 Name "Wang 600 Simulator"
 OutFile "wang600apc.exe"
 Section "Wang 600 Simulator"
+	Var /GLOBAL WANG600HOME
 	ReadEnvStr $0 HOMEDRIVE
 	ReadEnvStr $1 HOMEPATH
 	StrCpy $INSTDIR "$0$1\wang600apc"
