@@ -24,3 +24,4 @@ or
 ~/Desktop/Wang700.app/Contents/MacOS/wang700.rom (binary).
 As an alternative, you can connect to a server that runs the simulator back-end.
 Edit the environment variables WANG700_HOST and WANG700_PORT as needed.
+</HTML>
