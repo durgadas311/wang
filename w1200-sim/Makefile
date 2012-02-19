@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2012/02/19 17:43:51 drmiller Exp $
+# $Id: Makefile,v 1.17 2012/02/19 21:23:58 drmiller Exp $
 
 INSNAME = wang1200wps
 INSDIR = ~
@@ -132,16 +132,16 @@ wang1200wps.dmg: all icns w1200-sim.osx wang1200.jar
 	hcd Wang1200.app
 	hmkdir Contents
 	hcd Contents
-	hcopy wang1200.plist.tmplt :Info.plist
+	hcopy -r wang1200.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy wang1200.jar wang1200.rom run :MacOS
-	hcopy icons/wang1200-*x*.icns :Resources
+	hcopy -r wang1200.jar wang1200.rom run :MacOS
+	hcopy -r icons/wang1200-*x*.icns :Resources
 	hcd MacOS
-	hcopy w1200-sim.osx :w1200-sim
+	hcopy -r w1200-sim.osx :w1200-sim
 	hcd
-	hcopy Uninstall-wang1200.sh :Uninstall-wang1200
-	hcopy -t README.osx :README.html
-	hcopy examples/*.wng :Wang1200Files
+	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
+	hcopy -r README.osx :README.html
+	hcopy -r examples/*.wng :Wang1200Files
 	humount $@
 	rm -f w1200-sim.osx
 

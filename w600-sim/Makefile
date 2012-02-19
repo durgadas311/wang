@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.47 2012/02/19 16:17:12 drmiller Exp $
+# $Id: Makefile,v 1.48 2012/02/19 21:23:58 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -119,16 +119,16 @@ wang600apc.dmg: all icns w600-sim.osx wang600.jar
 	hcd Wang600.app
 	hmkdir Contents
 	hcd Contents
-	hcopy wang600.plist.tmplt :Info.plist
+	hcopy -r wang600.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy wang600.jar wang600.rom run :MacOS
-	hcopy icons/wang600-*x*.icns :Resources
+	hcopy -r wang600.jar wang600.rom run :MacOS
+	hcopy -r icons/wang600-*x*.icns :Resources
 	hcd MacOS
-	hcopy w600-sim.osx :w600-sim
+	hcopy -r w600-sim.osx :w600-sim
 	hcd
-	hcopy Uninstall-wang600.sh :Uninstall-wang600
-	hcopy -t README.osx :README.html
-	hcopy progs/*.wng :Wang600Files
+	hcopy -r Uninstall-wang600.sh :Uninstall-wang600
+	hcopy -r README.osx :README.html
+	hcopy -r progs/*.wng :Wang600Files
 	humount $@
 	rm -f w600-sim.osx
 

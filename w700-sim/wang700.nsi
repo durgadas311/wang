@@ -13,8 +13,8 @@ Section "Wang 700 Simulator"
 	File /r "icons\*.ico"
 	CreateShortCut "$DESKTOP\Wang700.lnk" "$INSTDIR\Wang700.bat" "" \
 		"$INSTDIR\wang700-48x48.ico" 0 SW_SHOWMINIMIZED
-	SetOutPath $WANG700HOME
-	File /r "progs\*.wng"
+	# SetOutPath $WANG700HOME
+	# File /r "progs\*.wng"
 	WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 Section "Uninstall"

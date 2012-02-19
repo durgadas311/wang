@@ -16,3 +16,11 @@ item for "WANG700HOME".
 
 <P>The Uninstall item in this package may be used to uninstall this program,
 or you can simply move the program icon, from desktop or dock, to the trash.
+
+<P>Currently, a ROM microcode image is not publicly available.
+If you can acquire one, place it in
+~/Desktop/Wang700.app/Contents/MacOS/ROM720C.txt (ascii)
+or
+~/Desktop/Wang700.app/Contents/MacOS/wang700.rom (binary).
+As an alternative, you can connect to a server that runs the simulator back-end.
+Edit the environment variables WANG700_HOST and WANG700_PORT as needed.

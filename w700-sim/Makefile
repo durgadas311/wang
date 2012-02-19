@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 2012/02/19 20:37:18 drmiller Exp $
+# $Id: Makefile,v 1.25 2012/02/19 21:23:58 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -121,18 +121,19 @@ wang700apc.dmg: all icns w700-sim.osx wang700.jar
 	hcd Wang700.app
 	hmkdir Contents
 	hcd Contents
-	hcopy wang700.plist.tmplt :Info.plist
+	hcopy -r wang700.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy wang700.jar wang700.rom run :MacOS
-	hcopy icons/wang700-*x*.icns :Resources
+	hcopy -r wang700.jar run :MacOS
+	hcopy -r icons/wang700-*x*.icns :Resources
 	hcd MacOS
-	hcopy w700-sim.osx :w700-sim
+	hcopy -r w700-sim.osx :w700-sim
 	hcd
-	hcopy Uninstall-wang700.sh :Uninstall-wang700
-	hcopy -t README.osx :README.html
+	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
+	hcopy -r README.osx :README.html
 	humount $@
 	rm -f w700-sim.osx
-#	hcopy progs/*.wng :Wang700Files
+#	[cwd=MacOS] hcopy -r ROM720C.txt :ROM720C.txt
+#	[cdw=/] hcopy progs/*.wng :Wang700Files
 
 wang700apc.exe: all winicons wang700.jar wang700.nsi
 	makensis wang700.nsi
