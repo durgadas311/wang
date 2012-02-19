@@ -1,4 +1,5 @@
 Name "Wang 600 Simulator"
+RequestExecutionLevel user
 OutFile "wang600apc.exe"
 Section "Wang 600 Simulator"
 	Var /GLOBAL WANG600HOME
@@ -10,10 +11,10 @@ Section "Wang 600 Simulator"
 	File "wang600.jar"
 	File "Wang600.bat"
 	File /r "icons\*.ico"
-	SetOutPath $WANG600HOME
-	File /r "progs\*.wng"
 	CreateShortCut "$DESKTOP\Wang600.lnk" "$INSTDIR\Wang600.bat" "" \
 		"$INSTDIR\wang600-48x48.ico" 0 SW_SHOWMINIMIZED
+	SetOutPath $WANG600HOME
+	File /r "progs\*.wng"
 	WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 Section "Uninstall"
@@ -24,3 +25,6 @@ Section "Uninstall"
 	Delete $INSTDIR\uninstall.exe
 	RMDir $INSTDIR
 SectionEnd
+Function ".onInstSuccess"
+	MessageBox MB_OK "This program requires environment vairables WANG600_HOST and WANG600_PORT be set up"
+FunctionEnd
