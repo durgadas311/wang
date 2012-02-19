@@ -1,0 +1,53 @@
+# $Id: Makefile.ship,v 1.1 2012/02/19 23:17:50 drmiller Exp $
+
+EXAMPLES = $(wildcard examples/*.txt)
+EX = $(EXAMPLES:.txt=.wng)
+
+COPTS =
+
+VPATH = ../common
+
+CFLAGS += -D__wang1200__ -I../common -I.
+
+OBJS = wang_sys.o wang_sim_cmd.o \
+	w1200_decode.o wang_exec.o wang_gui.o
+
+FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
+FONTDEST =
+FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
+
+XTRA = 
+
+DASM = dw1200.o loaducode_txt.o
+
+all: w1200-sim w1200_fe.class
+
+CFLAGS += -g -O3 $(COPTS)
+
+w1200-dasm: wang-dasm.o $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(DASM)
+
+w1200-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
+
+w1200_fe.class: w1200_fe.java
+	javac w1200_fe.java
+
+clean:
+	rm -f *.o
+
+examp: $(EX)
+
+jar: wang1200.jar
+
+Manifest.txt:
+	echo "Main-Class: w1200_fe" >$@
+
+SHIP_DOCS = $(filter-out docs/wang1200arch.html,$(wildcard docs/*.html))
+
+wang1200.jar: w1200_fe.class Manifest.txt
+	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
+		$(addprefix -C ../common/fonts ,$(FONTS))
+
+examples/%.wng: examples/%.txt txt2wng
+	./txt2wng <$^ >$@

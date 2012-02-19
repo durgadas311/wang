@@ -1,4 +1,6 @@
-# $Id: Makefile,v 1.48 2012/02/19 21:23:58 drmiller Exp $
+# $Id: Makefile,v 1.49 2012/02/19 23:17:50 drmiller Exp $
+
+include Makefile.ship
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -9,25 +11,6 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 MACOSX = mini-mac
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
-COPTS =
-
-VPATH = ../common
-
-CFLAGS += -D__wang600__ -I../common -I.
-
-OBJS = wang_sys.o wang_sim_cmd.o \
-	w600_decode.o wang_exec.o wang_gui.o
-
-TEST = $(shell echo -e this)
-ifeq ($(TEST),this)
-ECHOE = echo -e
-else
-ECHOE = echo
-endif
-
-FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
-FONTDEST =
-FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 PNGS = $(wildcard icons/wang600-*x*.png)
 PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
@@ -35,29 +18,10 @@ ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
 PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
-
-XTRA = 
-
-DASM = dw600.o loaducode_txt.o
-
-all: w600-sim w600_fe.class
-
-CFLAGS += -g -O3 $(COPTS)
-
-w600-dasm: wang-dasm.o $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(DASM)
-
-w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
-
-w600_fe.class: w600_fe.java
-	javac w600_fe.java
+SRCTAR = w600-sim.tgz
 
 xinetd: w600-sim
 	@echo "Ready for: cp $(PWD)/$? /usr/local/bin/wang"
-
-clean:
-	rm -f *.o
 
 update:
 	cd ..; cvs -q update common w600-sim
@@ -68,27 +32,18 @@ clobber: clean
 
 tar:
 	cd ..;\
-	tar -czvf w600-sim/w600-sim.tgz \
-		w600-sim/*.[ch] w600-sim/Makefile w600-sim/*.java \
+	tar -czv --transform 's/.ship$$//' \
+		-f w600-sim/$(SRCTAR) \
+		w600-sim/*.[ch] w600-sim/Makefile.ship w600-sim/*.java \
 		common/*.[ch] \
-		w600-sim/wang600-block-diag.pdf w600-sim/README*  w600-sim/LICENSE* \
+		w600-sim/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
+		w600-sim/README.{internals,gui} \
 		w600-sim/wang600.rom w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.wng w600-sim/docs/*.html w600-sim/docs/*.gif
 
-jar: wang600.jar
-
-ship: tar
-	mv -v w600-sim.tgz /http/durgadas.com/sebhc
-
-Manifest.txt:
-	echo "Main-Class: w600_fe" >$@
-
-SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
-
-wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
-		$(addprefix -C ../common/fonts ,$(FONTS))
+ship: tar packages
+	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc
 
 packages: $(PACKAGES)
 

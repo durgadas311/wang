@@ -1,4 +1,6 @@
-# $Id: Makefile,v 1.26 2012/02/19 21:30:01 drmiller Exp $
+# $Id: Makefile,v 1.27 2012/02/19 23:17:50 drmiller Exp $
+
+include Makefile.ship
 
 INSNAME = wang700apc
 INSDIR = ~
@@ -10,53 +12,16 @@ MACOSX = mini-mac
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
 PACKAGES = wang700apc.tgz wang700apc.dmg wang700apc.exe
+SRCTAR = w700-sim.tgz
 
-COPTS =
-
-VPATH = ../common
-
-CFLAGS += -D__wang700__ -I../common -I.
-
-OBJS = wang_sys.o wang_sim_cmd.o \
-	w700_decode.o wang_exec.o wang_gui.o
-
-TEST = $(shell echo -e this)
-ifeq ($(TEST),this)
-ECHOE = echo -e
-else
-ECHOE = echo
-endif
-
-FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
-FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 PNGS = $(wildcard icons/wang700-*x*.png)
 PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
-XTRA = 
-
-DASM = dw700.o loaducode_txt.o
-
-all: w700-sim w700_fe.class
-
-CFLAGS += -g -O3 $(COPTS)
-
-w700-dasm: wang-dasm.o $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(DASM)
-
-w700-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
-
-w700_fe.class: w700_fe.java
-	javac w700_fe.java
-
 xinetd: w700-sim
 	@echo "Ready for: cp $(PWD)/$? /usr/local/bin/wang"
-
-clean:
-	rm -f *.o
 
 clobber: clean
 	rm -f *.class w700-sim w700_fe w700-dasm Manifest.txt *.jar *.tgz
@@ -67,27 +32,17 @@ rom.diff: ROM720C.txt
 
 tar: rom.diff wang700.jar
 	cd ..;\
-	tar -czvf w700-sim/w700-sim.tgz \
-		w700-sim/*.[ch] w700-sim/Makefile w700-sim/*.java \
+	tar -czv --transform 's/.ship$$//' \
+		-f w700-sim/$(SRCTAR) \
+		w700-sim/*.[ch] w700-sim/Makefile.ship w700-sim/*.java \
 		common/*.[ch] \
-		w700-sim/README*  w700-sim/LICENSE* \
-		w700-sim/rom.diff \
+		w700-sim/README w700-sim/LICENSE \
+		w700-sim/README.{internals,gui} \
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
-jar: wang700.jar
-
-ship: tar
-	mv -v w700-sim.tgz /http/durgadas.com/sebhc
-
-Manifest.txt:
-	echo "Main-Class: w700_fe" >$@
-
-SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
-
-wang700.jar: w700_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
-		$(addprefix -C ../common/fonts ,$(FONTS))
+ship: tar packages
+	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc
 
 update:
 	cd ..; cvs -q update common w700-sim

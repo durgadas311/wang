@@ -1,0 +1,44 @@
+# $Id: Makefile.ship,v 1.1 2012/02/19 23:17:50 drmiller Exp $
+
+COPTS =
+
+VPATH = ../common
+
+CFLAGS += -D__wang700__ -I../common -I.
+
+OBJS = wang_sys.o wang_sim_cmd.o \
+	w700_decode.o wang_exec.o wang_gui.o
+
+FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
+FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
+
+XTRA = 
+
+DASM = dw700.o loaducode_txt.o
+
+all: w700-sim w700_fe.class
+
+CFLAGS += -g -O3 $(COPTS)
+
+w700-dasm: wang-dasm.o $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(DASM)
+
+w700-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
+
+w700_fe.class: w700_fe.java
+	javac w700_fe.java
+
+clean:
+	rm -f *.o
+
+jar: wang700.jar
+
+Manifest.txt:
+	echo "Main-Class: w700_fe" >$@
+
+SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
+
+wang700.jar: w700_fe.class Manifest.txt
+	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
+		$(addprefix -C ../common/fonts ,$(FONTS))
