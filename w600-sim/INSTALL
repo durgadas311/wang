@@ -1,24 +1,32 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.6 2012/02/01 23:03:40 drmiller Exp $
+# $Id: INSTALL,v 1.7 2012/02/19 01:56:46 drmiller Exp $
+
+export INSTALLPATH=${HOME}/wang600apc
+
+# path might have blanks!!!
+pgm="${0}"
+if [[ -L "${pgm}" ]]; then
+	pgm=$(readlink "${pgm}")
+fi
+cwd="${pgm%/*}"
+if [[ ! "${cwd}" -ef "${INSTALLPATH}" ]]; then
+	echo "Moving ${cwd}..."
+	rm -rf "${INSTALLPATH}"
+	cp -r "${cwd}" "${INSTALLPATH}"
+	exec "${INSTALLPATH}/${0##*/}"
+	exit 1
+fi
+cd "${INSTALLPATH}"
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
 	cp -v progs/* ~/Wang600Files
 fi
-base="wang600"
-title="Wang600"
 if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 	echo "installing GNOME desktop shortcut..."
-	export WANG600PATH=${PWD}
+	export WANG600PATH=${INSTALLPATH}
 	cat wang600.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
-	done >~/Desktop/wang600.desktop
-elif [[ -f ~/.CFUserTextEncoding && -d ~/Desktop ]]; then
-	echo "installing OSX desktop shortcut..."
-	rm -rf ~/Desktop/${title}.app
-	mkdir -p ~/Desktop/${title}.app/Contents/{Resources,MacOS}
-	cp ${base}.plist.tmplt ~/Desktop/${title}.app/Contents/Info.plist
-	ln -s ${PWD}/run ~/Desktop/${title}.app/Contents/MacOS/
-	cp icons/${base}-*x*.icns ~/Desktop/${title}.app/Contents/Resources/
+	done >~/Desktop/Wang600.desktop
 fi
 echo "Ready to launch ${PWD}/run"
