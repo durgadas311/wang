@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.43 2012/02/19 02:00:53 drmiller Exp $
+# $Id: Makefile,v 1.44 2012/02/19 02:42:57 drmiller Exp $
 
 INSNAME = wang600apc
 INSDIR = ~
@@ -100,9 +100,9 @@ temp_app: all icns wang600.jar
 	cp wang600.jar wang600.rom w600-sim run $(TMPDEST)/Wang600.app/Contents/MacOS
 	cp icons/wang600-*x*.icns $(TMPDEST)/Wang600.app/Contents/Resources/
 	cp wang600.plist.tmplt $(TMPDEST)/Wang600.app/Contents/Info.plist
-	cp Uninstall-wang600.sh $(TMPDEST)/Uninstall-wang600.sh
+	cp Uninstall-wang600.sh $(TMPDEST)/Uninstall-wang600
 	chmod +x $(TMPDEST)/Wang600.app/Contents/MacOS/run
-	chmod +x $(TMPDEST)/Uninstall-wang600.sh
+	chmod +x $(TMPDEST)/Uninstall-wang600
 	mkdir -p $(TMPDEST)/Wang600Files/
 	cp progs/*.wng $(TMPDEST)/Wang600Files/
 
