@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $
+// $Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -14,7 +14,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -97,9 +97,9 @@ class _Key {
 	}
 
 	static final public ImageIcon toggle_on =
-		new ImageIcon(Wang700_Keyboards.class.getResource("icons/toggle_on.gif"));
+		new ImageIcon(w700_fe.class.getResource("icons/toggle_on.gif"));
 	static final public ImageIcon toggle_off =
-		new ImageIcon(Wang700_Keyboards.class.getResource("icons/toggle_off.gif"));
+		new ImageIcon(w700_fe.class.getResource("icons/toggle_off.gif"));
 
 	Color color;
 	Color altcolor;
@@ -132,11 +132,12 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
+	private static JFrame front_end;
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
@@ -196,7 +197,7 @@ public class w700_fe
 			}
 		}
 		_dir.mkdir();
-		JFrame front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
+		front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
 		java.net.URL url = w700_fe.class.getResource("icons/wang700-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		front_end.setIconImage(img);
@@ -388,10 +389,23 @@ public class w700_fe
 		front_end.pack();
 		front_end.setVisible(true);
 	}
+
+	static public void fatal(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Error", JOptionPane.ERROR_MESSAGE);
+		System.exit(1);
+	}
+
+	static public void warning(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Warning", JOptionPane.WARNING_MESSAGE);
+	}
 }
 
 class Wang700_ErrLight extends JPanel {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -479,7 +493,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -617,7 +631,7 @@ if (n != 32) System.err.println("too little? "+n);
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -728,6 +742,9 @@ class Wang700_Tape extends JComponent
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
 			_prot = ch.isProtected();
+			if (_file.exists() && !_file.canWrite()) {
+				_prot = true;
+			}
 		} else {
 			_file = null;
 			_prot = false;
@@ -741,10 +758,15 @@ class Wang700_Tape extends JComponent
 			_index = 0;
 			return;
 		}
+		String mode = "rw";
+		if (_prot) mode = "r";
 		try {
-			_tf = new RandomAccessFile(_file.getAbsolutePath(), "rw");
+			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
 		} catch (FileNotFoundException ee) {
 			// can't happen?
+			w700_fe.warning(_file.getAbsolutePath(), ee.getMessage());
+			_file = null;
+			_prot = false;
 			return;
 		}
 		// not needed?
@@ -1181,7 +1203,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1870,7 +1892,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -1934,7 +1956,7 @@ class Wang700_Display extends JComponent
 		_dpc = '.';
 		_gap = ' ';
 		java.io.InputStream ttf = null;
-		ttf = Wang700_Display.class.getResourceAsStream(fontname);
+		ttf = w700_fe.class.getResourceAsStream(fontname);
 		if (ttf != null) {
 			try {
 				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
@@ -2094,7 +2116,7 @@ class Wang700_Help extends JComponent
 		_about = new JMenuItem("About", KeyEvent.VK_A);
 		_help_on = false;
 
-		java.net.URL url = Wang700_Keyboard.class.getResource("docs/wang700.html");
+		java.net.URL url = w700_fe.class.getResource("docs/wang700.html");
 		_frame = new JFrame("Wang 700 Help");
 		_frame.setLayout(new FlowLayout());
 		try {
@@ -2147,7 +2169,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.40 $ $Date: 2012/02/04 01:29:05 $<BR>"+
+			"$Revision: 1.41 $ $Date: 2012/02/19 14:51:18 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2211,11 +2233,11 @@ class Wang700_Help extends JComponent
 			java.net.URL url = null;
 			// should use a table to lookup url?
 			if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700.html");
+				url = w700_fe.class.getResource("docs/wang700.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_S) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700sim.html");
+				url = w700_fe.class.getResource("docs/wang700sim.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_K) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700bycode.html");
+				url = w700_fe.class.getResource("docs/wang700bycode.html");
 			} else {
 				System.err.println("help menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -2266,7 +2288,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2442,7 +2464,7 @@ class Wang700_Keyboard extends JComponent
 		_meta = 0;
 		_fout = fo;
 
-		java.net.URL url = Wang700_Keyboard.class.getResource("docs/wang700.html");
+		java.net.URL url = w700_fe.class.getResource("docs/wang700.html");
 
 		_frame = new JFrame("Wang 700 Help");
 		// TBD icon or not
@@ -2624,27 +2646,27 @@ class Wang700_Keyboard extends JComponent
 			java.net.URL url = null;
 			// should use a table to lookup url?
 			if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700.html");
+				url = w700_fe.class.getResource("docs/wang700.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_U) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700calc.html");
+				url = w700_fe.class.getResource("docs/wang700calc.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_D) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700tape.html");
+				url = w700_fe.class.getResource("docs/wang700tape.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_A) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700samp.html");
+				url = w700_fe.class.getResource("docs/wang700samp.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_P) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700prog.html");
+				url = w700_fe.class.getResource("docs/wang700prog.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_F) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700func.html");
+				url = w700_fe.class.getResource("docs/wang700func.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_T) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700tech.html");
+				url = w700_fe.class.getResource("docs/wang700tech.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_C) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700codes.html");
+				url = w700_fe.class.getResource("docs/wang700codes.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_K) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700bycode.html");
+				url = w700_fe.class.getResource("docs/wang700bycode.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_S) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700sim.html");
+				url = w700_fe.class.getResource("docs/wang700sim.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_G) {
-				url = Wang700_Keyboard.class.getResource("docs/wang700bugs.html");
+				url = w700_fe.class.getResource("docs/wang700bugs.html");
 			} else {
 				System.err.println("help menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -2695,7 +2717,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2714,7 +2736,7 @@ class Wang700_Keyboards extends JComponent
 		JButton butt;
 
 		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		java.net.URL url = Wang700_Keyboards.class.getResource(icon);
+		java.net.URL url = w700_fe.class.getResource(icon);
 		ImageIcon ic = new ImageIcon(url);
 		butt = new JButton(ic);
 		butt.setBackground(key.color);
@@ -2911,7 +2933,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -3136,7 +3158,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -3267,7 +3289,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.40 2012/02/04 01:29:05 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.41 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

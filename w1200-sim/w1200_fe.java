@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $
+// $Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -156,11 +156,12 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
+	private static JFrame front_end;
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
@@ -215,7 +216,7 @@ public class w1200_fe
 			}
 		}
 		_dir.mkdir();
-		JFrame front_end = new JFrame("Wang 1200 Word Processing System");
+		front_end = new JFrame("Wang 1200 Word Processing System");
 		java.net.URL url = w1200_fe.class.getResource("icons/wang1200-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		front_end.setIconImage(img);
@@ -408,10 +409,23 @@ public class w1200_fe
 
 		front_end.setVisible(true);
 	}
+
+	static public void fatal(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Error", JOptionPane.ERROR_MESSAGE);
+		System.exit(1);
+	}
+
+	static public void warning(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Warning", JOptionPane.WARNING_MESSAGE);
+	}
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -487,7 +501,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -661,7 +675,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -701,7 +715,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -826,6 +840,9 @@ class Wang1200_Tape extends JComponent
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
 			_prot = ch.isProtected();
+			if (_file.exists() && !_file.canWrite()) {
+				_prot = true;
+			}
 		} else {
 			_file = null;
 			_prot = false;
@@ -839,10 +856,15 @@ class Wang1200_Tape extends JComponent
 			_index = 0;
 			return;
 		}
+		String mode = "rw";
+		if (_prot) mode = "r";
 		try {
-			_tf = new RandomAccessFile(_file.getAbsolutePath(), "rw");
+			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
 		} catch (FileNotFoundException ee) {
 			// can't happen?
+			w1200_fe.warning(_file.getAbsolutePath(), ee.getMessage());
+			_file = null;
+			_prot = false;
 			return;
 		}
 		// not needed?
@@ -1113,7 +1135,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -2223,7 +2245,7 @@ class Wang1200_Help extends JComponent
 		_about = new JMenuItem("About", KeyEvent.VK_A);
 		_help_on = false;
 
-		java.net.URL url = Wang1200_Keyboard.class.getResource("docs/wang1200.html");
+		java.net.URL url = w1200_fe.class.getResource("docs/wang1200.html");
 		_frame = new JFrame("Wang 1200 Help");
 		_frame.setLayout(new FlowLayout());
 		try {
@@ -2276,7 +2298,7 @@ class Wang1200_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 1200 Word Processor System<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.59 $ $Date: 2012/02/04 01:25:20 $<BR>"+
+			"$Revision: 1.60 $ $Date: 2012/02/19 14:51:18 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2340,11 +2362,11 @@ class Wang1200_Help extends JComponent
 			java.net.URL url = null;
 			// should use a table to lookup url?
 			if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = Wang1200_Keyboard.class.getResource("docs/wang1200.html");
+				url = w1200_fe.class.getResource("docs/wang1200.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_S) {
-				url = Wang1200_Keyboard.class.getResource("docs/wang1200sim.html");
+				url = w1200_fe.class.getResource("docs/wang1200sim.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_L) {
-				url = Wang1200_Keyboard.class.getResource("docs/wang1200links.html");
+				url = w1200_fe.class.getResource("docs/wang1200links.html");
 			} else {
 				System.err.println("help menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -2395,7 +2417,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2794,7 +2816,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2815,7 +2837,7 @@ class Wang1200_Keyboards extends JPanel
 		JButton butt;
 
 		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		java.net.URL url = Wang1200_Keyboards.class.getResource(icon);
+		java.net.URL url = w1200_fe.class.getResource(icon);
 if (url != null) {
 		ImageIcon ic = new ImageIcon(url);
 		butt = new JButton(ic);
@@ -2940,7 +2962,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -3217,7 +3239,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.59 2012/02/04 01:25:20 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.60 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

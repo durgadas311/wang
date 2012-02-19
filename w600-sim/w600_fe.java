@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $
+// $Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -19,7 +19,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.datatransfer.StringSelection;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -150,11 +150,12 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
+	private static JFrame front_end;
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
@@ -214,7 +215,7 @@ public class w600_fe
 			}
 		}
 		_dir.mkdir();
-		JFrame front_end = new JFrame("Wang 600 Advanced Programmable Calculator");
+		front_end = new JFrame("Wang 600 Advanced Programmable Calculator");
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		front_end.setIconImage(img);
@@ -352,10 +353,23 @@ public class w600_fe
 		front_end.pack();
 		front_end.setVisible(true);
 	}
+
+	static public void fatal(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Error", JOptionPane.ERROR_MESSAGE);
+		System.exit(1);
+	}
+
+	static public void warning(String op, String err) {
+		JOptionPane.showMessageDialog(front_end,
+			new JLabel(err),
+			op + " Warning", JOptionPane.WARNING_MESSAGE);
+	}
 }
 
 class Wang600_ErrLight extends JPanel {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -443,7 +457,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Keyboard _kbd;
 	Wang600_Printer _prt;
@@ -594,7 +608,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -912,7 +926,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1019,6 +1033,9 @@ class Wang600_Tape extends JComponent
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
 			_prot = ch.isProtected();
+			if (_file.exists() && !_file.canWrite()) {
+				_prot = true;
+			}
 		} else {
 			_file = null;
 			_prot = false;
@@ -1032,10 +1049,15 @@ class Wang600_Tape extends JComponent
 			_index = 0;
 			return;
 		}
+		String mode = "rw";
+		if (_prot) mode = "r";
 		try {
-			_tf = new RandomAccessFile(_file.getAbsolutePath(), "rw");
+			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
 		} catch (FileNotFoundException ee) {
 			// can't happen?
+			w600_fe.warning(_file.getAbsolutePath(), ee.getMessage());
+			_file = null;
+			_prot = false;
 			return;
 		}
 		// not needed?
@@ -1540,7 +1562,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -2127,7 +2149,7 @@ class Wang600_Model611
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2212,7 +2234,7 @@ class Wang600_Display extends JComponent
 		disp.setOpaque(true);
 		Font font = null;
 		java.io.InputStream ttf = null;
-		ttf = Wang600_Display.class.getResourceAsStream(fontname);
+		ttf = w600_fe.class.getResourceAsStream(fontname);
 		if (ttf != null) {
 			try {
 				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
@@ -2307,7 +2329,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2759,7 +2781,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2949,7 +2971,7 @@ class Wang600_Help extends JComponent
 		_about = new JMenuItem("About", KeyEvent.VK_A);
 		_help_on = false;
 
-		java.net.URL url = Wang600_Keyboard.class.getResource("docs/wang600.html");
+		java.net.URL url = w600_fe.class.getResource("docs/wang600.html");
 		_frame = new JFrame("Wang 600 Help");
 		_frame.setLayout(new FlowLayout());
 		try {
@@ -3026,7 +3048,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.121 $ $Date: 2012/02/01 20:47:25 $<BR>"+
+			"$Revision: 1.122 $ $Date: 2012/02/19 14:51:18 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3090,27 +3112,27 @@ class Wang600_Help extends JComponent
 			java.net.URL url = null;
 			// should use a table to lookup url?
 			if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600.html");
+				url = w600_fe.class.getResource("docs/wang600.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_U) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600calc.html");
+				url = w600_fe.class.getResource("docs/wang600calc.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_D) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600tape.html");
+				url = w600_fe.class.getResource("docs/wang600tape.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_A) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600samp.html");
+				url = w600_fe.class.getResource("docs/wang600samp.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_P) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600prog.html");
+				url = w600_fe.class.getResource("docs/wang600prog.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_F) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600func.html");
+				url = w600_fe.class.getResource("docs/wang600func.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_T) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600tech.html");
+				url = w600_fe.class.getResource("docs/wang600tech.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_C) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600codes.html");
+				url = w600_fe.class.getResource("docs/wang600codes.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_K) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600bycode.html");
+				url = w600_fe.class.getResource("docs/wang600bycode.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_S) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600sim.html");
+				url = w600_fe.class.getResource("docs/wang600sim.html");
 			} else if (m.getMnemonic() == KeyEvent.VK_G) {
-				url = Wang600_Keyboard.class.getResource("docs/wang600bugs.html");
+				url = w600_fe.class.getResource("docs/wang600bugs.html");
 			} else {
 				System.err.println("help menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -3160,7 +3182,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3378,7 +3400,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3471,7 +3493,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.121 2012/02/01 20:47:25 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.122 2012/02/19 14:51:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
