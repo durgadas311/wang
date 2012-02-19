@@ -1,10 +1,15 @@
-# $Id: Makefile,v 1.23 2012/02/13 22:26:21 drmiller Exp $
+# $Id: Makefile,v 1.24 2012/02/19 20:37:18 drmiller Exp $
 
 INSNAME = wang700apc
 INSDIR = ~
 INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
 TMPDEST = $(TMPDIR)/$(INSNAME)
+
+MACOSX = mini-mac
+SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
+
+PACKAGES = wang700apc.tgz wang700apc.dmg wang700apc.exe
 
 COPTS =
 
@@ -84,31 +89,53 @@ wang700.jar: w700_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
+update:
+	cd ..; cvs -q update common w700-sim
+
+packages: $(PACKAGES)
+
 temp_dest: all $(ICNS) wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar w700-sim run INSTALL *.tmplt $(TMPDEST)
-	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL
+	cp wang700.jar w700-sim run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
-	cp $(PNGS) $(ICNS) $(TMPDEST)/icons
+	cp $(PNGS) $(TMPDEST)/icons
 #	mkdir -p $(TMPDEST)/progs
 #	cp progs/*.wng $(TMPDEST)/progs
 
-wtemp_dest: $(WICONS) wang700.jar
-	mkdir -p $(TMPDEST)
-	cp wang700.jar Wang700.bat INSTALL.BAT $(TMPDEST)
-	cp README.windows $(TMPDEST)/README.txt
-	mkdir -p $(TMPDEST)/icons
-	cp $(WICONS) $(TMPDEST)/icons
-#	mkdir -p $(TMPDEST)/progs
-#	cp progs/*.wng $(TMPDEST)/progs
-
-package: temp_dest
+wang700apc.tgz: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-winpack: wtemp_dest
-	cd $(TMPDIR); rm -f ../wang700apc.zip; zip -r ../wang700apc.zip $(INSNAME)
-	rm -rf $(TMPDIR)
+w700-sim.osx: w700-sim
+	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w700-sim
+	scp $(MACOSX):$(SUBPATH)/w700-sim w700-sim.osx
+
+# Need better way to estimate size of image...
+wang700apc.dmg: all icns w700-sim.osx wang700.jar
+	rm -f $@
+	dd if=/dev/zero of=$@ bs=74k count=17
+	hformat -l WANG700APC $@
+	hmount $@
+	hmkdir Wang700.app Wang700Files
+	hcd Wang700.app
+	hmkdir Contents
+	hcd Contents
+	hcopy wang700.plist.tmplt :Info.plist
+	hmkdir Resources MacOS
+	hcopy wang700.jar wang700.rom run :MacOS
+	hcopy icons/wang700-*x*.icns :Resources
+	hcd MacOS
+	hcopy w700-sim.osx :w700-sim
+	hcd
+	hcopy Uninstall-wang700.sh :Uninstall-wang700
+	hcopy -t README.osx :README.html
+	humount $@
+	rm -f w700-sim.osx
+#	hcopy progs/*.wng :Wang700Files
+
+wang700apc.exe: all winicons wang700.jar wang700.nsi
+	makensis wang700.nsi
 
 install: temp_dest
 	rm -rf $(INSDEST)
@@ -126,6 +153,10 @@ reicon:
 	cvs -q update icons
 	$(MAKE) _icons
 	cvs ci -m"update icons" icons
+
+icns: $(ICNS)
+
+winicons: $(WICONS)
 
 _icons: $(ICNS) $(WICONS)
 

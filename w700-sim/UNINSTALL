@@ -1,0 +1,14 @@
+#!/bin/sh
+# $Id: UNINSTALL,v 1.1 2012/02/19 20:37:18 drmiller Exp $
+
+export INSTALLPATH="${HOME}/wang700apc"
+
+# path might have blanks!!!
+cd "${HOME}"
+echo "Removing ${INSTALLPATH}..."
+rm -rf "${INSTALLPATH}"
+
+if [[ -f "${HOME}/Desktop/Wang700.desktop" ]]; then
+	echo "Removing GNOME desktop Wang700 shortcut..."
+	rm -f "${HOME}/Desktop/Wang700.desktop"
+fi
