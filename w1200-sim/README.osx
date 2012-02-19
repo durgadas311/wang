@@ -2,8 +2,8 @@
 <P>You may "drag-n-drop" the program icon to your desktop or dock.
 
 <P>You may also drag-n-drop the "Wang1200Files" folder to your home directory,
-or other location, to get the sample programs. This folder is also used
-to store any programs you create. If another location is chosen,
+or other location, to get the sample documents. This folder is also used
+to store any documents you create. If another location is chosen,
 the environment variable WANG1200HOME must be set to that path.
 This can be done by using the Property List editor as follows:
 <OL>
