@@ -1,6 +1,6 @@
 // Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang_sys.c,v 1.15 2012/01/08 15:32:23 drmiller Exp $"
+#ident "$Id: wang_sys.c,v 1.16 2012/02/25 20:07:06 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -244,6 +244,7 @@ static void sysfault(wang_sys_t *sys, const char *str) {
 	if ((sys->ops & SYS_WEB_BACKEND) == 0) {
 		dump(sys);
 	}
+	sys_stop(sys);
 	exit(1);
 }
 
