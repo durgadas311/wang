@@ -1,6 +1,6 @@
 // Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.9 2012/02/25 19:30:54 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.10 2012/02/25 20:01:24 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -29,6 +29,7 @@ static void set_intr(void) {
 
 void sig_fatal(int sig) {
 	sys.fault(&sys, "\nPipe");
+	sys_stop(&sys);
 	exit(1);
 }
 
@@ -37,6 +38,7 @@ void sig_intr(int sig) {
 		return;
 	}
 	sys.fault(&sys, "\nInterrupt");
+	sys_stop(&sys);
 	exit(1);
 }
 
