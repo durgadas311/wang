@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.28 2012/02/19 23:19:20 drmiller Exp $
+# $Id: Makefile,v 1.29 2012/02/25 19:42:46 drmiller Exp $
 
 include Makefile.ship
 
@@ -20,15 +20,18 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
-xinetd: w700-sim
-	@echo "Ready for: cp $(PWD)/$? /usr/local/bin/wang"
+ROM = ROM720C.txt
+EXE = w700-sim
+
+xinetd: $(EXE) $(ROM)
+	cp $(EXE) $(ROM) /usr/local/bin/wang
 
 clobber: clean
-	rm -f *.class w700-sim w700_fe w700-dasm Manifest.txt *.jar *.tgz
+	rm -f *.class $(EXE) w700_fe w700-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
-rom.diff: ROM720C.txt
-	-cvs diff -u -r 1.1 ROM720C.txt >rom.diff
+rom.diff: $(ROM)
+	-cvs diff -u -r 1.1 $(ROM) >rom.diff
 
 tar: rom.diff wang700.jar
 	cd ..;\
@@ -51,11 +54,11 @@ packages: $(PACKAGES)
 
 temp_dest: all $(ICNS) wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar w700-sim run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang700.jar $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) $(TMPDEST)/icons
-#	cp ROM720C.txt $(TMPDEST)
+#	cp $(ROM) $(TMPDEST)
 #	mkdir -p $(TMPDEST)/progs
 #	cp progs/*.wng $(TMPDEST)/progs
 
@@ -63,12 +66,12 @@ wang700apc.tgz: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-w700-sim.osx: w700-sim
+$(EXE).osx: $(EXE)
 	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w700-sim
-	scp $(MACOSX):$(SUBPATH)/w700-sim w700-sim.osx
+	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
 
 # Need better way to estimate size of image...
-wang700apc.dmg: all icns w700-sim.osx wang700.jar
+wang700apc.dmg: all icns $(EXE).osx wang700.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=74k count=17
 	hformat -l WANG700APC $@
@@ -82,13 +85,13 @@ wang700apc.dmg: all icns w700-sim.osx wang700.jar
 	hcopy -r wang700.jar run :MacOS
 	hcopy -r icons/wang700-*x*.icns :Resources
 	hcd MacOS
-	hcopy -r w700-sim.osx :w700-sim
+	hcopy -r $(EXE).osx :$(EXE)
 	hcd
 	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
 	hcopy -r README.osx :README.html
 	humount $@
-	rm -f w700-sim.osx
-#	[cwd=MacOS] hcopy -r ROM720C.txt :ROM720C.txt
+	rm -f $(EXE).osx
+#	[cwd=MacOS] hcopy -r $(ROM) :$(ROM)
 #	[cdw=/] hcopy progs/*.wng :Wang700Files
 
 wang700apc.exe: all winicons wang700.jar wang700.nsi
@@ -98,7 +101,7 @@ install: temp_dest
 	rm -rf $(INSDEST)
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
-	cp ROM720C.txt $(INSDEST)
+	cp $(ROM) $(INSDEST)
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2012/02/19 23:19:20 drmiller Exp $
+# $Id: Makefile,v 1.20 2012/02/25 19:42:46 drmiller Exp $
 
 include Makefile.ship
 
@@ -20,11 +20,14 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
-xinetd: w1200-sim
-	@echo "Ready for: cp $(PWD)/$? /usr/local/bin/wang"
+ROM = wang1200.rom
+EXE = w1200-sim
+
+xinetd: $(EXE) $(ROM)
+	cp $(EXE) $(ROM) /usr/local/bin/wang
 
 clobber: clean
-	rm -f *.class w1200-sim w1200_fe w1200-dasm Manifest.txt *.jar *.tgz
+	rm -f *.class $(EXE) w1200_fe w1200-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
 update:
@@ -39,7 +42,7 @@ tar:
 		w1200-sim/README.internals w1200-sim/LICENSE* \
 		w1200-sim/INSTALL w1200-sim/run \
 		w1200-sim/examples/*.wng \
-		w1200-sim/wang1200.rom w1200-sim/icons/*.gif \
+		w1200-sim/$(ROM) w1200-sim/icons/*.gif \
 		w1200-sim/icons/*.png \
 		w1200-sim/docs/*.html w1200-sim/docs/*.gif
 #		w1200-sim/docs/*.pdf
@@ -51,7 +54,7 @@ packages: $(PACKAGES)
 
 temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar wang1200.rom w1200-sim run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang1200.jar $(ROM) $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wng $(TMPDEST)/examples
@@ -67,12 +70,12 @@ wang1200wps.tgz: temp_dest
 wang1200wps.exe: all winicons wang1200.jar wang1200.nsi
 	makensis wang1200.nsi
 
-w1200-sim.osx: w1200-sim
+$(EXE).osx: $(EXE)
 	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w1200-sim
-	scp $(MACOSX):$(SUBPATH)/w1200-sim w1200-sim.osx
+	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
 
 # Need better way to estimate size of image...
-wang1200wps.dmg: all icns w1200-sim.osx wang1200.jar
+wang1200wps.dmg: all icns $(EXE).osx wang1200.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=64k count=16
 	hformat -l WANG1200WPS $@
@@ -83,16 +86,16 @@ wang1200wps.dmg: all icns w1200-sim.osx wang1200.jar
 	hcd Contents
 	hcopy -r wang1200.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang1200.jar wang1200.rom run :MacOS
+	hcopy -r wang1200.jar $(ROM) run :MacOS
 	hcopy -r icons/wang1200-*x*.icns :Resources
 	hcd MacOS
-	hcopy -r w1200-sim.osx :w1200-sim
+	hcopy -r $(EXE).osx :$(EXE)
 	hcd
 	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
 	hcopy -r README.osx :README.html
 	hcopy -r examples/*.wng :Wang1200Files
 	humount $@
-	rm -f w1200-sim.osx
+	rm -f $(EXE).osx
 
 install: temp_dest
 	rm -rf $(INSDEST)
