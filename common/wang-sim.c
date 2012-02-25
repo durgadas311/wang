@@ -1,6 +1,6 @@
 // Copyright (c) 2011, 2012 Douglas Miller
 
-#ident "$Id: wang-sim.c,v 1.8 2012/01/13 22:03:02 drmiller Exp $"
+#ident "$Id: wang-sim.c,v 1.9 2012/02/25 19:30:54 drmiller Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -16,10 +16,20 @@ wang_sys_t sys;
 static void set_intr(void) {
 	struct sigaction sa;
 	extern void sig_intr(int sig);
+	extern void sig_fatal(int sig);
 	sa.sa_handler = sig_intr;
 	sa.sa_flags = SA_RESTART;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, NULL);
+	sa.sa_handler = sig_fatal;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGPIPE, &sa, NULL);
+}
+
+void sig_fatal(int sig) {
+	sys.fault(&sys, "\nPipe");
+	exit(1);
 }
 
 void sig_intr(int sig) {
