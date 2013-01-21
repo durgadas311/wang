@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $
+// $Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,8 +18,13 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.datatransfer.StringSelection;
 
+import java.util.Properties;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
+import javax.swing.JCheckBox;
+
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -150,7 +155,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -171,11 +176,6 @@ public class w600_fe
 			dir = System.getProperty("user.home") + dir.substring(1);
 		}
 		_dir = new File(dir);
-		String dispfont;
-		dispfont = System.getenv("WANG600_FONT");
-		if (dispfont == null) {
-			dispfont = "Panaplex9seg.ttf"; // get from env? commandline?
-		}
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
 		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
@@ -221,6 +221,8 @@ public class w600_fe
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		front_end.setIconImage(img);
 
+		Wang600_Properties prop = new Wang600_Properties();
+
 		front_end.setLayout(gridbag);
 		GridBagConstraints s = new GridBagConstraints();
 		s.fill = GridBagConstraints.NONE;
@@ -242,12 +244,11 @@ public class w600_fe
 		s.gridheight = 1;
 		front_end.add(pan);
 
-		Wang600_Display dsp = new Wang600_Display(fin, dispfont);
+		Wang600_Display dsp = new Wang600_Display(fin);
 		s.gridx = 1;
 		s.gridy = 0;
 		gridbag.setConstraints(dsp, s);
 		front_end.add(dsp);
-
 		url = w600_fe.class.getResource("icons/logo-sm.gif");
 		ImageIcon ic = new ImageIcon(url);
 		JLabel lab = new JLabel(ic);
@@ -305,7 +306,7 @@ public class w600_fe
 		Wang600_XROM xROMf = new Wang600_XROM(kbd);
 
 		Wang600_Help help = new Wang600_Help(front_end);
-		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, kbd, help,
+		Wang600_SimInput inp = new Wang600_SimInput(fin, prop, dsp, kbd, help,
 						prt, tape, m611f, m630f, xROMf);
  
 		JMenuBar mb = new JMenuBar();
@@ -335,6 +336,9 @@ public class w600_fe
 		mi.setAccelerator(ks);
 		mi.addActionListener(kbd);
 		mu.add(mi);
+		mi = new JMenuItem("Preferences", KeyEvent.VK_E);
+		mi.addActionListener(inp);
+		mu.add(mi);
 
 		mu = new JMenu("Help");
 		mb.add(mu);
@@ -346,6 +350,8 @@ public class w600_fe
 		mu.add(mi);
 
 		front_end.setJMenuBar(mb);
+
+		dsp.setProperties(prop);
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -369,8 +375,62 @@ public class w600_fe
 	}
 }
 
+class Wang600_Properties extends Properties
+{
+	static final long serialVersionUID = 311000000014L;
+	private String _cfg;
+
+	public Wang600_Properties() {
+		_cfg = System.getProperty("user.home") + "/.wang600.rc";
+		try {
+			FileInputStream cfg = new FileInputStream(_cfg);
+			load(cfg);
+			cfg.close();
+		} catch (Exception e) {
+			//w600_fe.warning("Load Setup", e.getMessage());
+			// set defaults
+			setProperty("wang600_digit12", "");
+			setProperty("wang600_centerDP", "");
+			setProperty("wang600_special1", "true");
+			String dispfont;
+			dispfont = System.getenv("WANG600_FONT");
+			if (dispfont == null) {
+				dispfont = "Panaplex9seg.ttf"; // get from env? commandline?
+			}
+			setProperty("wang600_displayfont", dispfont);
+			// save, and force existence of file?
+		}
+	}
+
+	public int getInteger(String prop) {
+		try {
+			return Integer.valueOf(getProperty(prop));
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public boolean getBoolean(String prop) {
+		try {
+			return Boolean.valueOf(getProperty(prop));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public void save() {
+		try {
+			FileOutputStream cfg = new FileOutputStream(_cfg);
+			store(cfg, "Saved by Wang600");
+			cfg.close();
+		} catch (Exception e) {
+			w600_fe.warning("Save Setup", e.getMessage());
+		}
+	}
+}
+
 class Wang600_ErrLight extends JPanel {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -458,7 +518,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Keyboard _kbd;
 	Wang600_Printer _prt;
@@ -467,6 +527,15 @@ class Wang600_SimInput
 	Wang600_Model630 _m630;
 	Wang600_XROM _xROM;
 	private Wang600_Help _help;
+
+	Wang600_Properties _prop;
+	JCheckBox _d12_cb;
+	JCheckBox _cdp_cb;
+	JCheckBox _sp1_cb;
+	JRadioButton _f_rb1;
+	JRadioButton _f_rb2;
+	JRadioButton _f_rb3;
+	ButtonGroup _f_bg;
 
 	InputStream _fin;
 
@@ -501,9 +570,47 @@ class Wang600_SimInput
 			_help.showAbout();
 			return;
 		}
+		if (m.getMnemonic() == KeyEvent.VK_E) {
+			_cdp_cb.setSelected(_prop.getBoolean("wang600_centerDP"));
+			_d12_cb.setSelected(_prop.getBoolean("wang600_digit12"));
+			_sp1_cb.setSelected(_prop.getBoolean("wang600_special1"));
+			String f = _prop.getProperty("wang600_displayfont");
+			if (f.equals(_f_rb1.getActionCommand())) {
+				_f_rb1.setSelected(true);
+			} else if (f.equals(_f_rb2.getActionCommand())) {
+				_f_rb2.setSelected(true);
+			} else {
+				_f_rb3.setText(f);
+				_f_rb3.setActionCommand(f);
+				_f_rb3.setEnabled(true);
+				_f_rb3.setSelected(true);
+				// Need something user-editable...
+			}
+
+			Object[] dia = { _cdp_cb, _d12_cb, _sp1_cb, _f_rb1, _f_rb2, _f_rb3 };
+			int ret = JOptionPane.showConfirmDialog(null, dia,
+				"Set Wang600 Options",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE);
+			if (ret != JOptionPane.OK_OPTION) {
+				return;
+			}
+			// TBD: change parameters and restart?
+			// TBD: do validation?
+			ButtonModel bm = _f_bg.getSelection();
+			_prop.setProperty("wang600_displayfont", bm.getActionCommand());
+			_prop.setProperty("wang600_digit12", Boolean.toString(_d12_cb.isSelected()));
+			_prop.setProperty("wang600_centerDP", Boolean.toString(_cdp_cb.isSelected()));
+			_prop.setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
+			_prop.save();
+			_dsp.setProperties(_prop);
+			return;
+		}
 	}
 
-	public Wang600_SimInput(InputStream f, Wang600_Display dsp,
+	public Wang600_SimInput(InputStream f,
+			Wang600_Properties prop,
+			Wang600_Display dsp,
 			Wang600_Keyboard kbd,
 			Wang600_Help help,
 			Wang600_Printer prt, Wang600_Tape tape,
@@ -520,6 +627,24 @@ class Wang600_SimInput
 		_xROM = xROM;
 		_fin = f;
 		_help = help;
+
+		// Edit Properties...
+		_prop = prop;
+		_d12_cb = new JCheckBox("Enable Column 12");
+		_cdp_cb = new JCheckBox("Center DP");
+		_sp1_cb = new JCheckBox("Enable Special '1'");
+		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
+		_f_rb1.setActionCommand("Panaplex9seg.ttf");
+		_f_rb2 = new JRadioButton("Nixie Tubes");
+		_f_rb2.setActionCommand("NixieZM1336.ttf");
+		_f_rb3 = new JRadioButton("(not set)");
+		_f_rb3.setActionCommand("nothing");
+		_f_rb3.setEnabled(false);
+		_f_bg = new ButtonGroup();
+		_f_bg.add(_f_rb1);
+		_f_bg.add(_f_rb2);
+		_f_bg.add(_f_rb3);
+
 		if (f != null) {
 			Thread t = new Thread(this);
 			t.start();
@@ -609,7 +734,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -927,7 +1052,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1563,7 +1688,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -2150,14 +2275,16 @@ class Wang600_Model611
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
 
 	byte[] disp_a;
+	byte[] disp_b;
 	JLabel disp;
 	InputStream _fin;
+	boolean _d12;	// is digit 12 enabled?
 
 	Wang600_ErrLight pe;
 	Wang600_ErrLight me;
@@ -2218,10 +2345,10 @@ class Wang600_Display extends JComponent
 		}
 	}
 
-	public Wang600_Display(InputStream f, String fontname) {
-		String blank = "--- ++++++++ ---";
+	public Wang600_Display(InputStream f) {
+		String blank = "--- Wang 600 ---";
 		disp_a = new byte[16];
-		disp_a = blank.getBytes();
+		disp_b = new byte[16];
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
@@ -2233,28 +2360,8 @@ class Wang600_Display extends JComponent
 		disp.setForeground(_Key.neon);
 		disp.setBackground(_Key.empty);
 		disp.setOpaque(true);
-		Font font = null;
-		java.io.InputStream ttf = null;
-		ttf = w600_fe.class.getResourceAsStream(fontname);
-		if (ttf != null) {
-			try {
-				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
-			} catch (FontFormatException ee) {
-			} catch (IOException ee) {
-			}
-			font = font.deriveFont(40f);
-			// special decimal point, optimal placement...
-			if (font.canDisplay('\006')) disp_chr[10] = '\006';
-			// special one digit, optimal placement...
-			if (font.canDisplay('\005')) disp_chr[1] = '\005';
-		}
-		if (font == null) {
-			System.err.println("Missing font \"" +
-					fontname + "\", using default");
-			font = new Font("Monospaced", Font.PLAIN, 40);
-		}
 		disp.setPreferredSize(new Dimension(475, 75));
-		disp.setFont(font);
+		// font setup later... in setProperties()...
 
 		add(disp);
 
@@ -2263,6 +2370,42 @@ class Wang600_Display extends JComponent
 		me = new Wang600_ErrLight("Mach<BR>Error");
 		me.setOn(false);
 
+	}
+
+	public void setProperties(Wang600_Properties prop) {
+		// TODO: reconfig/redraw display...
+		String f = prop.getProperty("wang600_displayfont");
+		Font font = null;
+		java.io.InputStream ttf = w600_fe.class.getResourceAsStream(f);
+		if (ttf != null) {
+			try {
+				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
+			} catch (FontFormatException ee) {
+			} catch (IOException ee) {
+			}
+			font = font.deriveFont(40f);
+			// special decimal point, optimal placement...
+			if (prop.getBoolean("wang600_centerDP") && font.canDisplay('\006')) {
+				disp_chr[10] = '\006';
+			} else  {
+				disp_chr[10] = '.';
+			}
+			// special one digit, optimal placement...
+			// should this also be a preference?
+			if (prop.getBoolean("wang600_special1") && font.canDisplay('\005')) {
+				disp_chr[1] = '\005';
+			} else {
+				disp_chr[1] = '1';
+			}
+		}
+		if (font == null) {
+			System.err.println("Missing font \"" +
+					f + "\", using default");
+			font = new Font("Monospaced", Font.PLAIN, 40);
+		}
+		disp.setFont(font);
+		_d12 = prop.getBoolean("wang600_digit12");
+		do_display(disp_b);
 	}
 
 	private void setFlashing(boolean on) {
@@ -2307,6 +2450,7 @@ class Wang600_Display extends JComponent
 	// access to display, tape, printer, etc...
 	public void do_display(byte[] b) {
 		int ds;
+		disp_b = b;
 		ds = 0;
 		disp_a[ds] = sign_chr[b[ds * 2 + 0] & 0x0f]; // mant sign
 		++ds;
@@ -2320,6 +2464,9 @@ class Wang600_Display extends JComponent
 		++ds;
 		disp_a[ds] = disp_chr[b[ds * 2 + 0] & 0x0f];
 		++ds;
+		if (!_d12) {
+			disp_a[12] = ' ';
+		}
 
 		String s = new String(disp_a);
 		disp.setText(s);
@@ -2330,7 +2477,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2782,7 +2929,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3049,7 +3196,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.125 $ $Date: 2012/02/26 01:39:28 $<BR>"+
+			"$Revision: 1.126 $ $Date: 2013/01/21 18:04:50 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3183,7 +3330,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3401,7 +3548,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3494,7 +3641,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.125 2012/02/26 01:39:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.126 2013/01/21 18:04:50 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
