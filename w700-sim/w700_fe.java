@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $
+// $Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -13,8 +13,13 @@ import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
+import java.util.Properties;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
+import javax.swing.JCheckBox;
+
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -132,7 +137,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -144,31 +149,26 @@ public class w700_fe
 		java.io.InputStream fin = null;
 		java.io.BufferedReader ferr = null;
 		GridBagLayout gridbag = new GridBagLayout();
-		String dir;
-
-		dir = System.getenv("WANG700HOME");
-		if (dir == null) {
-			dir = System.getProperty("user.home") + "/Wang700Files";
-		} else if (dir.startsWith("~/")) {
-			dir = System.getProperty("user.home") + dir.substring(1);
-		}
-		_dir = new File(dir);
-		String dispfont;
-		dispfont = System.getenv("WANG700_FONT");
-		if (dispfont == null) {
-			dispfont = "NixieZM1336.ttf"; // get from env? commandline?
-		}
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
 		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
 		boolean web = (args.length > 0 && args[0].compareTo("-w") == 0);
-		if (back) {
+
+		Wang700_Properties prop = new Wang700_Properties();
+
+		_dir = new File(prop.getProperty("wang700_home"));
+		_dir.mkdir();
+
+		if (test) {
+			// nothing
+		} else if (back) {
 			fout = System.out;
 			fin = System.in;
-		} else if (web) {
-			String host = System.getenv("WANG700_HOST");
-			String port = System.getenv("WANG700_PORT");
-			if (args.length >= 3) {
+		} else if (web || prop.getBoolean("wang700_remote")) {
+			String host = prop.getProperty("wang700_host");
+			String port = prop.getProperty("wang700_port");
+			if (web && args.length >= 3) {
+				// should these set properties?
 				port = args[2];
 				host = args[1];
 			}
@@ -183,7 +183,7 @@ public class w700_fe
 			} catch (Exception ee) {
 				fatal("Startup", ee.getMessage());
 			}
-		} else if (!test) {
+		} else {
 			try {
 				Process _be = null;
 				_be = Runtime.getRuntime().exec("./w700-sim -b");
@@ -197,7 +197,6 @@ public class w700_fe
 				System.exit(1);
 			}
 		}
-		_dir.mkdir();
 		front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
 		java.net.URL url = w700_fe.class.getResource("icons/wang700-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -258,7 +257,7 @@ public class w700_fe
 		GridBagLayout dgb = new GridBagLayout();
 		dpan.setLayout(dgb);
 
-		Wang700_Display dspy = new Wang700_Display(null, dispfont);
+		Wang700_Display dspy = new Wang700_Display(null);
 		s.gridx = 0;
 		s.gridy = 0;
 		s.gridheight = 1;
@@ -276,7 +275,7 @@ public class w700_fe
 		dgb.setConstraints(pan, s);
 		dpan.add(pan);
 
-		Wang700_Display dspx = new Wang700_Display(dspy, dispfont);
+		Wang700_Display dspx = new Wang700_Display(dspy);
 		s.gridx = 0;
 		s.gridy = 2;
 		s.gridheight = 1;
@@ -355,7 +354,7 @@ public class w700_fe
 		Wang700_Model730 m730f = new Wang700_Model730(kbd);
 
 		Wang700_Help help = new Wang700_Help(front_end);
-		Wang700_SimInput inp = new Wang700_SimInput(fin, dspx, dspy,
+		Wang700_SimInput inp = new Wang700_SimInput(fin, prop, dspx, dspy,
 				help, tape, m711f, m730f);
 
 		JMenuBar mb = new JMenuBar();
@@ -369,6 +368,13 @@ public class w700_fe
 		mi = new JMenuItem("730 Disk - not mounted", KeyEvent.VK_D);
 		mi.addActionListener(inp);
 		mu.add(mi);
+
+		mu = new JMenu("Edit");
+		mb.add(mu);
+		mi = new JMenuItem("Preferences", KeyEvent.VK_E);
+		mi.addActionListener(inp);
+		mu.add(mi);
+
 		mu = new JMenu("Help");
 		mb.add(mu);
 		mi = help.getMenuItemHelp();
@@ -383,6 +389,10 @@ public class w700_fe
  		pan = new JPanel();
 
 		front_end.setJMenuBar(mb);
+
+		dspx.setProperties(prop);
+		dspy.setProperties(prop);
+
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
 		front_end.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -405,8 +415,106 @@ public class w700_fe
 	}
 }
 
+class Wang700_Properties extends Properties
+{
+	static final long serialVersionUID = 311000000014L;
+	private String _cfg;
+
+	public Wang700_Properties() {
+		_cfg = System.getProperty("user.home") + "/.wang700.rc";
+		try {
+			FileInputStream cfg = new FileInputStream(_cfg);
+			load(cfg);
+			cfg.close();
+		} catch (Exception e) {
+			//w700_fe.warning("Load Setup", e.getMessage());
+			// set defaults later, just leave all empty...
+			// save, and force existence of file?
+		}
+		// setup defaults for everything...
+		String s;
+		s = getProperty("wang700_special1");
+		if (s == null || s.length() == 0) {
+			setProperty("wang700_special1", "false");
+		}
+		s = getProperty("wang700_displayfont");
+		if (s == null || s.length() == 0) {
+			setProperty("wang700_displayfont", "NixieZM1336.ttf");
+		}
+		s = getProperty("wang700_home");
+		if (s == null || s.length() == 0) {
+			setProperty("wang700_home", "~/Wang700Files");
+		}
+		s = getProperty("wang700_remote");
+		if (s == null || s.length() == 0) {
+			setProperty("wang700_remote", "false");
+		}
+//	do we have defaults for these?
+//		s = getProperty("wang700_host");
+//		if (s == null || s.length() == 0) {
+//			setProperty("wang700_host", "localhost");
+//		}
+//		s = getProperty("wang700_port");
+//		if (s == null || s.length() == 0) {
+//			setProperty("wang700_port", "10311");
+//		}
+
+		// process (obsolete?) env vars...
+		s = System.getenv("WANG700HOME");
+		if (s != null) {
+			setProperty("wang700_home", s);
+		}
+		s = System.getenv("WANG700_FONT");
+		if (s != null) {
+			setProperty("wang700_displayfont", s);
+		}
+		s = System.getenv("WANG700_HOST");
+		if (s != null) {
+			setProperty("wang700_host", s);
+		}
+		s = System.getenv("WANG700_PORT");
+		if (s != null) {
+			setProperty("wang700_port", s);
+		}
+
+		// special processing for any required...
+		s = getProperty("wang700_home");
+		if (s.startsWith("~/")) {
+			s = System.getProperty("user.home") + s.substring(1);
+			setProperty("wang700_home", s);
+		}
+		// save?
+	}
+
+	public int getInteger(String prop) {
+		try {
+			return Integer.valueOf(getProperty(prop));
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public boolean getBoolean(String prop) {
+		try {
+			return Boolean.valueOf(getProperty(prop));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public void save() {
+		try {
+			FileOutputStream cfg = new FileOutputStream(_cfg);
+			store(cfg, "Saved by Wang700");
+			cfg.close();
+		} catch (Exception e) {
+			w700_fe.warning("Save Setup", e.getMessage());
+		}
+	}
+}
+
 class Wang700_ErrLight extends JPanel {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -494,13 +602,29 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
 	Wang700_Model711 _m711;
 	Wang700_Model730 _m730;
 	private Wang700_Help _help;
+
+	Wang700_Properties _prop;
+	JCheckBox _sp1_cb;
+	JCheckBox _rem_cb;
+	JRadioButton _f_rb1;
+	JRadioButton _f_rb2;
+	JRadioButton _f_rb3;
+	ButtonGroup _f_bg;
+	JLabel _f_lb;
+	JTextArea _home_tx;
+	JTextArea _host_tx;
+	JTextArea _port_tx;
+	JPanel _home_pn;
+	JPanel _host_pn;
+	JPanel _port_pn;
+	JPanel _dia_pn;
  
 	InputStream _fin;
 
@@ -526,9 +650,52 @@ class Wang700_SimInput
 			_help.showAbout();
  			return;
  		}
+		if (m.getMnemonic() == KeyEvent.VK_E) {
+			_sp1_cb.setSelected(_prop.getBoolean("wang700_special1"));
+			String f = _prop.getProperty("wang700_displayfont");
+			if (f.equals(_f_rb1.getActionCommand())) {
+				_f_rb1.setSelected(true);
+			} else if (f.equals(_f_rb2.getActionCommand())) {
+				_f_rb2.setSelected(true);
+			} else {
+				_f_rb3.setText(f);
+				_f_rb3.setActionCommand(f);
+				_f_rb3.setEnabled(true);
+				_f_rb3.setSelected(true);
+				// Need something user-editable...
+			}
+			_rem_cb.setSelected(_prop.getBoolean("wang700_remote"));
+			_home_tx.setText(_prop.getProperty("wang700_home"));
+			_host_tx.setText(_prop.getProperty("wang700_host"));
+			_port_tx.setText(_prop.getProperty("wang700_port"));
+
+			int ret = JOptionPane.showConfirmDialog(null, _dia_pn,
+				"Set Wang700 Options",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE);
+			if (ret != JOptionPane.OK_OPTION) {
+				return;
+			}
+			// TBD: change parameters and restart?
+			// TBD: do validation?
+			ButtonModel bm = _f_bg.getSelection();
+			_prop.setProperty("wang700_displayfont", bm.getActionCommand());
+			_prop.setProperty("wang700_special1", Boolean.toString(_sp1_cb.isSelected()));
+			_prop.setProperty("wang700_home", _home_tx.getText());
+			_prop.setProperty("wang700_remote", Boolean.toString(_rem_cb.isSelected()));
+			_prop.setProperty("wang700_host", _host_tx.getText());
+			_prop.setProperty("wang700_port", _port_tx.getText());
+			_prop.save();
+			_dspx.setProperties(_prop);
+			_dspy.setProperties(_prop);
+			// <others>.setProperties(_prop);
+			return;
+		}
 	}
 
-	public Wang700_SimInput(InputStream f, Wang700_Display dspx, Wang700_Display dspy,
+	public Wang700_SimInput(InputStream f,
+			Wang700_Properties prop,
+			Wang700_Display dspx, Wang700_Display dspy,
 			Wang700_Help help,
 			Wang700_Tape tape,
 			Wang700_Model711 cn24,
@@ -541,6 +708,79 @@ class Wang700_SimInput
 		_m711.getFrame().addWindowListener(this);
 		_m730 = m730;
 		_fin = f;
+
+		// Edit Properties...
+		_prop = prop;
+		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
+		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
+		_f_rb1.setActionCommand("Panaplex9seg.ttf");
+		_f_rb2 = new JRadioButton("Nixie Tubes");
+		_f_rb2.setActionCommand("NixieZM1336.ttf");
+		_f_rb3 = new JRadioButton("(not set)");
+		_f_rb3.setActionCommand("nothing");
+		_f_rb3.setEnabled(false);
+		_f_bg = new ButtonGroup();
+		_f_bg.add(_f_rb1);
+		_f_bg.add(_f_rb2);
+		_f_bg.add(_f_rb3);
+		_f_lb = new JLabel("Display style:");
+		_home_tx = new JTextArea();
+		_home_tx.setPreferredSize(new Dimension(200, 20));
+		_home_pn = new JPanel();
+		_home_pn.add(new JLabel("Home:"));
+		_home_pn.add(_home_tx);
+		_rem_cb = new JCheckBox("Use remote server");
+		_host_tx = new JTextArea();
+		_host_tx.setPreferredSize(new Dimension(200, 20));
+		_host_pn = new JPanel();
+		_host_pn.add(new JLabel("Remote host:"));
+		_host_pn.add(_host_tx);
+		_port_tx = new JTextArea();
+		_port_tx.setPreferredSize(new Dimension(50, 20));
+		_port_pn = new JPanel();
+		_port_pn.add(new JLabel("Remote port:"));
+		_port_pn.add(_port_tx);
+		_dia_pn = new JPanel();
+		GridBagLayout gridbag = new GridBagLayout();
+		_dia_pn.setLayout(gridbag);
+		GridBagConstraints s = new GridBagConstraints();
+		s.fill = GridBagConstraints.NONE;
+		s.gridx = 1;
+		s.gridy = 1;
+		s.weightx = 1;
+		s.weighty = 1;
+		s.gridwidth = 1;
+		s.gridheight = 1;
+		s.insets.left = 0;
+		s.insets.right = 0;
+		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(_sp1_cb, s);
+		_dia_pn.add(_sp1_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_lb, s);
+		_dia_pn.add(_f_lb);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb1, s);
+		_dia_pn.add(_f_rb1);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb2, s);
+		_dia_pn.add(_f_rb2);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb3, s);
+		_dia_pn.add(_f_rb3);
+		s.gridy += 1;
+		gridbag.setConstraints(_home_pn, s);
+		_dia_pn.add(_home_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_rem_cb, s);
+		_dia_pn.add(_rem_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_host_pn, s);
+		_dia_pn.add(_host_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_port_pn, s);
+		_dia_pn.add(_port_pn);
+
 		if (f != null) {
 			Thread t = new Thread(this);
 			t.start();
@@ -632,7 +872,7 @@ if (n != 32) System.err.println("too little? "+n);
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1204,7 +1444,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -1893,12 +2133,13 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
 
 	byte[] disp_a;
+	byte[] disp_b;
 	JLabel disp;
 	byte _dpc;
 	byte _gap;
@@ -1936,10 +2177,10 @@ class Wang700_Display extends JComponent
 		}
 	}
 
-	public Wang700_Display(Wang700_Display other, String fontname) {
-		String blank = "+0.00000000000 +00";
+	public Wang700_Display(Wang700_Display other) {
+		String blank = "--- Wang 700 ----";
 		disp_a = new byte[18];
-		disp_a = blank.getBytes();
+		disp_b = new byte[18];
 		flashing = false;
 		state = false;
 		ismain = (other != null);
@@ -1953,30 +2194,9 @@ class Wang700_Display extends JComponent
 		disp.setForeground(_Key.neon);
 		disp.setBackground(_Key.empty);
 		disp.setOpaque(true);
-		Font font = null;
-		_dpc = '.';
-		_gap = ' ';
-		java.io.InputStream ttf = null;
-		ttf = w700_fe.class.getResourceAsStream(fontname);
-		if (ttf != null) {
-			try {
-				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
-			} catch (FontFormatException ee) {
-			} catch (IOException ee) {
-			}
-			font = font.deriveFont(40f);
-			// special decimal point, zero-width...
-			if (font.canDisplay('\007')) _dpc = '\007';
-			if (font.canDisplay('\004')) _gap = '\004';
-		}
-		if (font == null) {
-			System.err.println("Missing font \"" +
-					fontname + "\", using default");
-			//font = new Font("Sans-serif", Font.PLAIN, 40);
-			font = new Font("Monospaced", Font.PLAIN, 40);
-		}
+
 		disp.setPreferredSize(new Dimension(560, 75));
-		disp.setFont(font);
+		// font setup later... in setProperties()...
 
 		add(disp);
 
@@ -1987,6 +2207,35 @@ class Wang700_Display extends JComponent
 			me.setOn(false);
 		}
 
+	}
+
+	public void setProperties(Wang700_Properties prop) {
+		// TODO: reconfig/redraw display...
+		String f = prop.getProperty("wang700_displayfont");
+		Font font = null;
+		java.io.InputStream ttf = w700_fe.class.getResourceAsStream(f);
+		if (ttf != null) {
+			try {
+				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
+			} catch (FontFormatException ee) {
+			} catch (IOException ee) {
+			}
+			font = font.deriveFont(40f);
+			if (font.canDisplay('\007')) _dpc = '\007'; else _dpc = '.';
+			if (font.canDisplay('\004')) _gap = '\004'; else _gap = ' ';
+			if (prop.getBoolean("wang700_special1") && font.canDisplay('\005')) {
+				disp_chr[1] = '\005';
+			} else {
+				disp_chr[1] = '1';
+			}
+		}
+		if (font == null) {
+			System.err.println("Missing font \"" +
+					f + "\", using default");
+			font = new Font("Monospaced", Font.PLAIN, 40);
+		}
+		disp.setFont(font);
+		do_display(disp_b);
 	}
 
 	private void setFlashing(boolean on) {
@@ -2041,6 +2290,7 @@ class Wang700_Display extends JComponent
 		int dc;
 		int dp;
 		byte dx;
+		disp_b = m;
 
 //System.err.println("refreshed ("+ismain+")");
 		// m[] is columns 0-15...
@@ -2170,7 +2420,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.43 $ $Date: 2012/02/25 20:53:35 $<BR>"+
+			"$Revision: 1.44 $ $Date: 2013/01/22 00:14:26 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2289,7 +2539,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2718,7 +2968,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -2934,7 +3184,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -3159,7 +3409,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -3290,7 +3540,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.43 2012/02/25 20:53:35 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
