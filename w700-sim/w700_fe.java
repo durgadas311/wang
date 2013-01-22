@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $
+// $Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -19,7 +19,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
 
 class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -137,7 +137,7 @@ class FEexit extends Thread {
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -514,16 +514,34 @@ class Wang700_Properties extends Properties
 }
 
 class Wang700_ErrLight extends JPanel {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
-	JPanel pan;
+	Wang700_Lamp pan;
+
+	private class Wang700_Lamp extends JPanel
+	{
+		static final long serialVersionUID = 311457692138L;
+
+		public void paint(Graphics g) {
+			super.paint(g);
+			Dimension d = getSize();
+			g.setColor(getForeground());
+			g.fillOval(0, 0, d.width, d.height);
+		}
+
+		public Wang700_Lamp() {
+			setForeground(_Key.empty);
+		}
+	}
 
 	public Wang700_ErrLight(String label) {
 		GridBagConstraints s = new GridBagConstraints();
 
 		setLayout(gridbag);
+		//setPreferredSize(new Dimension(30, 35));
+		setOpaque(false);
 
 		s.fill = GridBagConstraints.NONE;
 		s.gridx = 0;
@@ -538,7 +556,7 @@ class Wang700_ErrLight extends JPanel {
 
 		JLabel lab = new JLabel("<HTML><CENTER>"+label+"</CENTER></HTML>");
 		lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-		lab.setPreferredSize(new Dimension(30, 25));
+		lab.setPreferredSize(new Dimension(30, 20));
 		lab.setForeground(Color.white);
 		lab.setOpaque(false);
 		s.gridx = 0;
@@ -548,24 +566,22 @@ class Wang700_ErrLight extends JPanel {
 		gridbag.setConstraints(lab, s);
 		add(lab);
 
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(10, 10));
+		pan = new Wang700_Lamp();
+		pan.setPreferredSize(new Dimension(20, 20));
 		pan.setOpaque(true);
-		pan.setBackground(_Key.empty);
+		pan.setBackground(Color.black);
 		s.gridy = 1;
-		s.insets.left = 10;
-		s.insets.right = 10;
+		s.insets.left = 0;
+		s.insets.right = 8;
 		gridbag.setConstraints(pan, s);
 		add(pan);
-		setPreferredSize(new Dimension(30, 35));
-		setOpaque(false);
 	}
 
 	public void setOn(boolean on) {
 		if (on) {
-			pan.setBackground(_Key.neon);
+			pan.setForeground(_Key.neon);
 		} else {
-			pan.setBackground(_Key.empty);
+			pan.setForeground(_Key.empty);
 		}
 	}
 }
@@ -602,7 +618,7 @@ class Wang700_SimError
 class Wang700_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	Wang700_Display _dspx;
 	Wang700_Display _dspy;
 	Wang700_Tape _tape;
@@ -872,7 +888,7 @@ if (n != 32) System.err.println("too little? "+n);
 
 class Wang700_Tape extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1444,7 +1460,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang700_Model711
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -2133,7 +2149,7 @@ class Wang700_Model711
 class Wang700_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -2420,7 +2436,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.44 $ $Date: 2013/01/22 00:14:26 $<BR>"+
+			"$Revision: 1.45 $ $Date: 2013/01/22 00:20:55 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2539,7 +2555,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2968,7 +2984,7 @@ class Wang700_Keyboard extends JComponent
 
 class Wang700_Keyboards extends JComponent
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang700_Keyboards() { }
 
@@ -3184,7 +3200,7 @@ class Wang700_Keyboards extends JComponent
 
 class Wang700_Keyboard_main extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -3409,7 +3425,7 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 
 class Wang700_Keyboard_meta extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -3540,7 +3556,7 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 class Wang700_Keyboard_stick extends Wang700_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.44 2013/01/22 00:14:26 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.45 2013/01/22 00:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
