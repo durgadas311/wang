@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $
+// $Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -24,7 +24,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
 
 class _Key {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color blue1 = new Color(190, 230, 255, 255);
@@ -155,9 +155,11 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 
+	public static ImageIcon _icon;
 	public static File _dir;
+	public static Wang600_Properties _props;
 	public static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
 	private static JFrame front_end;
@@ -173,9 +175,9 @@ public class w600_fe
 		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
 		boolean web = (args.length > 0 && args[0].compareTo("-w") == 0);
 
-		Wang600_Properties prop = new Wang600_Properties();
+		_props = new Wang600_Properties();
 
-		_dir = new File(prop.getProperty("wang600_home"));
+		_dir = new File(_props.getProperty("wang600_home"));
 		_dir.mkdir();
 
 		if (test) {
@@ -183,9 +185,9 @@ public class w600_fe
 		} else if (back) {
 			fout = System.out;
 			fin = System.in;
-		} else if (web || prop.getBoolean("wang600_remote")) {
-			String host = prop.getProperty("wang600_host");
-			String port = prop.getProperty("wang600_port");
+		} else if (web || _props.getBoolean("wang600_remote")) {
+			String host = _props.getProperty("wang600_host");
+			String port = _props.getProperty("wang600_port");
 			if (web && args.length >= 3) {
 				// should these set properties?
 				port = args[2];
@@ -220,6 +222,7 @@ public class w600_fe
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		front_end.setIconImage(img);
+		_icon = new ImageIcon(img);
 
 		front_end.setLayout(gridbag);
 		GridBagConstraints s = new GridBagConstraints();
@@ -304,7 +307,7 @@ public class w600_fe
 		Wang600_XROM xROMf = new Wang600_XROM(kbd);
 
 		Wang600_Help help = new Wang600_Help(front_end);
-		Wang600_SimInput inp = new Wang600_SimInput(fin, prop, dsp, kbd, help,
+		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, kbd, help,
 						prt, tape, m611f, m630f, xROMf);
  
 		JMenuBar mb = new JMenuBar();
@@ -349,7 +352,7 @@ public class w600_fe
 
 		front_end.setJMenuBar(mb);
 
-		dsp.setProperties(prop);
+		dsp.setProperties(w600_fe._props);
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -376,7 +379,40 @@ public class w600_fe
 class Wang600_Properties extends Properties
 {
 	static final long serialVersionUID = 311000000014L;
+	static final int OPTION_APPLY = 0;
+	static final int OPTION_SAVE = 1;
+	static final int OPTION_CANCEL = 2;
+	static final int OPTION_NONE = 3;
 	private String _cfg;
+	private JOptionPane _prefs;
+	private Object[] _btns;
+
+	JCheckBox _d12_cb;
+	JCheckBox _cdp_cb;
+	JCheckBox _sp1_cb;
+	JCheckBox _rem_cb;
+	JRadioButton _f_rb1;
+	JRadioButton _f_rb2;
+	JRadioButton _f_rb3;
+	ButtonGroup _f_bg;
+	JLabel _f_lb;
+	JTextArea _home_tx;
+	JTextArea _host_tx;
+	JTextArea _port_tx;
+	JPanel _home_pn;
+	JPanel _host_pn;
+	JPanel _port_pn;
+	JPanel _dia_pn;
+	
+	private int doDialog() {
+		Dialog dlg = _prefs.createDialog(null, "Set Wang600 Options");
+		dlg.setVisible(true);
+		Object res = _prefs.getValue();
+		if (_btns[OPTION_APPLY].equals(res)) return OPTION_APPLY;
+		if (_btns[OPTION_SAVE].equals(res)) return OPTION_SAVE;
+		if (_btns[OPTION_CANCEL].equals(res)) return OPTION_CANCEL;
+		return OPTION_NONE;
+	}
 
 	public Wang600_Properties() {
 		_cfg = System.getProperty("user.home") + "/.wang600.rc";
@@ -389,6 +425,97 @@ class Wang600_Properties extends Properties
 			// set defaults later, just leave all empty...
 			// save, and force existence of file?
 		}
+		processDefaults();
+
+		// Edit Properties...
+		_d12_cb = new JCheckBox("Enable Column 12");
+		_cdp_cb = new JCheckBox("Center DP");
+		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
+		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
+		_f_rb1.setActionCommand("Panaplex9seg.ttf");
+		_f_rb2 = new JRadioButton("Nixie Tubes");
+		_f_rb2.setActionCommand("NixieZM1336.ttf");
+		_f_rb3 = new JRadioButton("(not set)");
+		_f_rb3.setActionCommand("nothing");
+		_f_rb3.setEnabled(false);
+		_f_bg = new ButtonGroup();
+		_f_bg.add(_f_rb1);
+		_f_bg.add(_f_rb2);
+		_f_bg.add(_f_rb3);
+		_f_lb = new JLabel("Display style:");
+		_home_tx = new JTextArea();
+		_home_tx.setPreferredSize(new Dimension(200, 20));
+		_home_pn = new JPanel();
+		_home_pn.add(new JLabel("Home:"));
+		_home_pn.add(_home_tx);
+		_rem_cb = new JCheckBox("Use remote server");
+		_host_tx = new JTextArea();
+		_host_tx.setPreferredSize(new Dimension(200, 20));
+		_host_pn = new JPanel();
+		_host_pn.add(new JLabel("Remote host:"));
+		_host_pn.add(_host_tx);
+		_port_tx = new JTextArea();
+		_port_tx.setPreferredSize(new Dimension(50, 20));
+		_port_pn = new JPanel();
+		_port_pn.add(new JLabel("Remote port:"));
+		_port_pn.add(_port_tx);
+		_dia_pn = new JPanel();
+		GridBagLayout gridbag = new GridBagLayout();
+		_dia_pn.setLayout(gridbag);
+		GridBagConstraints s = new GridBagConstraints();
+		s.fill = GridBagConstraints.NONE;
+		s.gridx = 1;
+		s.gridy = 1;
+		s.weightx = 1;
+		s.weighty = 1;
+		s.gridwidth = 1;
+		s.gridheight = 1;
+		s.insets.left = 0;
+		s.insets.right = 0;
+		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(_d12_cb, s);
+		_dia_pn.add(_d12_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_cdp_cb, s);
+		_dia_pn.add(_cdp_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_sp1_cb, s);
+		_dia_pn.add(_sp1_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_lb, s);
+		_dia_pn.add(_f_lb);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb1, s);
+		_dia_pn.add(_f_rb1);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb2, s);
+		_dia_pn.add(_f_rb2);
+		s.gridy += 1;
+		gridbag.setConstraints(_f_rb3, s);
+		_dia_pn.add(_f_rb3);
+		s.gridy += 1;
+		gridbag.setConstraints(_home_pn, s);
+		_dia_pn.add(_home_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_rem_cb, s);
+		_dia_pn.add(_rem_cb);
+		s.gridy += 1;
+		gridbag.setConstraints(_host_pn, s);
+		_dia_pn.add(_host_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_port_pn, s);
+		_dia_pn.add(_port_pn);
+
+		_btns = new Object[3];
+		_btns[OPTION_APPLY] = "Apply";
+		_btns[OPTION_SAVE] = "Save";
+		_btns[OPTION_CANCEL] = "Cancel";
+
+		_prefs = new JOptionPane(_dia_pn, JOptionPane.QUESTION_MESSAGE,
+				JOptionPane.YES_NO_CANCEL_OPTION, w600_fe._icon, _btns);
+	}
+
+	public void processDefaults() {
 		// setup defaults for everything...
 		String s;
 		s = getProperty("wang600_digit12");
@@ -449,7 +576,6 @@ class Wang600_Properties extends Properties
 			s = System.getProperty("user.home") + s.substring(1);
 			setProperty("wang600_home", s);
 		}
-		// save?
 	}
 
 	public int getInteger(String prop) {
@@ -477,10 +603,53 @@ class Wang600_Properties extends Properties
 			w600_fe.warning("Save Setup", e.getMessage());
 		}
 	}
+
+	public boolean editPreferences() {
+		_cdp_cb.setSelected(getBoolean("wang600_centerDP"));
+		_d12_cb.setSelected(getBoolean("wang600_digit12"));
+		_sp1_cb.setSelected(getBoolean("wang600_special1"));
+		String f = getProperty("wang600_displayfont");
+		if (f.equals(_f_rb1.getActionCommand())) {
+			_f_rb1.setSelected(true);
+		} else if (f.equals(_f_rb2.getActionCommand())) {
+			_f_rb2.setSelected(true);
+		} else {
+			_f_rb3.setText(f);
+			_f_rb3.setActionCommand(f);
+			_f_rb3.setEnabled(true);
+			_f_rb3.setSelected(true);
+			// Need something user-editable...
+		}
+		_rem_cb.setSelected(getBoolean("wang600_remote"));
+		_home_tx.setText(getProperty("wang600_home"));
+		_host_tx.setText(getProperty("wang600_host"));
+		_port_tx.setText(getProperty("wang600_port"));
+
+		int ret = doDialog();
+		if (ret != OPTION_APPLY && ret != OPTION_SAVE) return false;
+
+		// TBD: change parameters and restart?
+		// TBD: do validation?
+		ButtonModel bm = _f_bg.getSelection();
+		setProperty("wang600_displayfont", bm.getActionCommand());
+		setProperty("wang600_digit12", Boolean.toString(_d12_cb.isSelected()));
+		setProperty("wang600_centerDP", Boolean.toString(_cdp_cb.isSelected()));
+		setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
+		setProperty("wang600_home", _home_tx.getText());
+		setProperty("wang600_remote", Boolean.toString(_rem_cb.isSelected()));
+		setProperty("wang600_host", _host_tx.getText());
+		setProperty("wang600_port", _port_tx.getText());
+		processDefaults();
+
+		if (ret == OPTION_SAVE) {
+			save();
+		}
+		return true;
+	}
 }
 
 class Wang600_ErrLight extends JPanel {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -601,7 +770,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Keyboard _kbd;
 	Wang600_Printer _prt;
@@ -610,24 +779,6 @@ class Wang600_SimInput
 	Wang600_Model630 _m630;
 	Wang600_XROM _xROM;
 	private Wang600_Help _help;
-
-	Wang600_Properties _prop;
-	JCheckBox _d12_cb;
-	JCheckBox _cdp_cb;
-	JCheckBox _sp1_cb;
-	JCheckBox _rem_cb;
-	JRadioButton _f_rb1;
-	JRadioButton _f_rb2;
-	JRadioButton _f_rb3;
-	ButtonGroup _f_bg;
-	JLabel _f_lb;
-	JTextArea _home_tx;
-	JTextArea _host_tx;
-	JTextArea _port_tx;
-	JPanel _home_pn;
-	JPanel _host_pn;
-	JPanel _port_pn;
-	JPanel _dia_pn;
 
 	InputStream _fin;
 
@@ -663,53 +814,19 @@ class Wang600_SimInput
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_E) {
-			_cdp_cb.setSelected(_prop.getBoolean("wang600_centerDP"));
-			_d12_cb.setSelected(_prop.getBoolean("wang600_digit12"));
-			_sp1_cb.setSelected(_prop.getBoolean("wang600_special1"));
-			String f = _prop.getProperty("wang600_displayfont");
-			if (f.equals(_f_rb1.getActionCommand())) {
-				_f_rb1.setSelected(true);
-			} else if (f.equals(_f_rb2.getActionCommand())) {
-				_f_rb2.setSelected(true);
-			} else {
-				_f_rb3.setText(f);
-				_f_rb3.setActionCommand(f);
-				_f_rb3.setEnabled(true);
-				_f_rb3.setSelected(true);
-				// Need something user-editable...
+			boolean changed = w600_fe._props.editPreferences();
+			if (changed) {
+				// Apply properties...
+				w600_fe._dir = new File(w600_fe._props.getProperty("wang600_home"));
+				w600_fe._dir.mkdir();
+				_dsp.setProperties(w600_fe._props);
+				// <others>.setProperties(w600_fe._props);
 			}
-			_rem_cb.setSelected(_prop.getBoolean("wang600_remote"));
-			_home_tx.setText(_prop.getProperty("wang600_home"));
-			_host_tx.setText(_prop.getProperty("wang600_host"));
-			_port_tx.setText(_prop.getProperty("wang600_port"));
-
-			int ret = JOptionPane.showConfirmDialog(null, _dia_pn,
-				"Set Wang600 Options",
-				JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE);
-			if (ret != JOptionPane.OK_OPTION) {
-				return;
-			}
-			// TBD: change parameters and restart?
-			// TBD: do validation?
-			ButtonModel bm = _f_bg.getSelection();
-			_prop.setProperty("wang600_displayfont", bm.getActionCommand());
-			_prop.setProperty("wang600_digit12", Boolean.toString(_d12_cb.isSelected()));
-			_prop.setProperty("wang600_centerDP", Boolean.toString(_cdp_cb.isSelected()));
-			_prop.setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
-			_prop.setProperty("wang600_home", _home_tx.getText());
-			_prop.setProperty("wang600_remote", Boolean.toString(_rem_cb.isSelected()));
-			_prop.setProperty("wang600_host", _host_tx.getText());
-			_prop.setProperty("wang600_port", _port_tx.getText());
-			_prop.save();
-			_dsp.setProperties(_prop);
-			// <others>.setProperties(_prop);
 			return;
 		}
 	}
 
 	public Wang600_SimInput(InputStream f,
-			Wang600_Properties prop,
 			Wang600_Display dsp,
 			Wang600_Keyboard kbd,
 			Wang600_Help help,
@@ -727,86 +844,6 @@ class Wang600_SimInput
 		_xROM = xROM;
 		_fin = f;
 		_help = help;
-
-		// Edit Properties...
-		_prop = prop;
-		_d12_cb = new JCheckBox("Enable Column 12");
-		_cdp_cb = new JCheckBox("Center DP");
-		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
-		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
-		_f_rb1.setActionCommand("Panaplex9seg.ttf");
-		_f_rb2 = new JRadioButton("Nixie Tubes");
-		_f_rb2.setActionCommand("NixieZM1336.ttf");
-		_f_rb3 = new JRadioButton("(not set)");
-		_f_rb3.setActionCommand("nothing");
-		_f_rb3.setEnabled(false);
-		_f_bg = new ButtonGroup();
-		_f_bg.add(_f_rb1);
-		_f_bg.add(_f_rb2);
-		_f_bg.add(_f_rb3);
-		_f_lb = new JLabel("Display style:");
-		_home_tx = new JTextArea();
-		_home_tx.setPreferredSize(new Dimension(200, 20));
-		_home_pn = new JPanel();
-		_home_pn.add(new JLabel("Home:"));
-		_home_pn.add(_home_tx);
-		_rem_cb = new JCheckBox("Use remote server");
-		_host_tx = new JTextArea();
-		_host_tx.setPreferredSize(new Dimension(200, 20));
-		_host_pn = new JPanel();
-		_host_pn.add(new JLabel("Remote host:"));
-		_host_pn.add(_host_tx);
-		_port_tx = new JTextArea();
-		_port_tx.setPreferredSize(new Dimension(50, 20));
-		_port_pn = new JPanel();
-		_port_pn.add(new JLabel("Remote port:"));
-		_port_pn.add(_port_tx);
-		_dia_pn = new JPanel();
-		GridBagLayout gridbag = new GridBagLayout();
-		_dia_pn.setLayout(gridbag);
-		GridBagConstraints s = new GridBagConstraints();
-		s.fill = GridBagConstraints.NONE;
-		s.gridx = 1;
-		s.gridy = 1;
-		s.weightx = 1;
-		s.weighty = 1;
-		s.gridwidth = 1;
-		s.gridheight = 1;
-		s.insets.left = 0;
-		s.insets.right = 0;
-		s.anchor = GridBagConstraints.WEST;
-		gridbag.setConstraints(_d12_cb, s);
-		_dia_pn.add(_d12_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_cdp_cb, s);
-		_dia_pn.add(_cdp_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_sp1_cb, s);
-		_dia_pn.add(_sp1_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_lb, s);
-		_dia_pn.add(_f_lb);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb1, s);
-		_dia_pn.add(_f_rb1);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb2, s);
-		_dia_pn.add(_f_rb2);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb3, s);
-		_dia_pn.add(_f_rb3);
-		s.gridy += 1;
-		gridbag.setConstraints(_home_pn, s);
-		_dia_pn.add(_home_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_rem_cb, s);
-		_dia_pn.add(_rem_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_host_pn, s);
-		_dia_pn.add(_host_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_port_pn, s);
-		_dia_pn.add(_port_pn);
 
 
 		if (f != null) {
@@ -898,7 +935,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -1216,7 +1253,7 @@ class Wang600_Printer
 
 class Wang600_Tape extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1852,7 +1889,7 @@ class SuffFileChooser extends JFileChooser {
 class Wang600_Model611
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -2439,7 +2476,7 @@ class Wang600_Model611
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2641,7 +2678,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3093,7 +3130,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3360,7 +3397,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.130 $ $Date: 2013/01/23 01:14:50 $<BR>"+
+			"$Revision: 1.131 $ $Date: 2013/01/23 16:03:35 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3494,7 +3531,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3712,7 +3749,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3805,7 +3842,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.130 2013/01/23 01:14:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.131 2013/01/23 16:03:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
