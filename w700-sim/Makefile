@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.30 2013/01/24 02:19:28 drmiller Exp $
+# $Id: Makefile,v 1.31 2013/01/24 23:54:45 drmiller Exp $
 
 include Makefile.ship
 
@@ -57,7 +57,7 @@ temp_dest: all $(ICNS) wang700.jar
 	cp wang700.jar $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
-	cp $(PNGS) icons/cassette*.png $(TMPDEST)/icons
+	cp $(PNGS) $(TMPDEST)/icons
 #	cp $(ROM) $(TMPDEST)
 #	mkdir -p $(TMPDEST)/progs
 #	cp progs/*.wng $(TMPDEST)/progs
