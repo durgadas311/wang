@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.51 2012/02/25 19:42:46 drmiller Exp $
+# $Id: Makefile,v 1.52 2013/01/24 02:19:34 drmiller Exp $
 
 include Makefile.ship
 
@@ -57,7 +57,7 @@ temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.wng $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
-	cp icons/wang600-*x*.png $(TMPDEST)/icons
+	cp icons/wang600-*x*.png icons/cassette*.png $(TMPDEST)/icons
 
 wang600apc.tgz: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
