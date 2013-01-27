@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.1 2013/01/26 15:29:41 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.2 2013/01/27 01:39:42 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.1 2013/01/26 15:29:41 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.2 2013/01/27 01:39:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -215,14 +215,15 @@ class Wang_TapeDrive extends JComponent
 		}
 		_eot = false;
 		_index = 0;
-		_ready = true;
+		//_ready = true;
 	}
 
+	// Not used by Wang1200
 	private int tape_skipone() {
 		int nb = 0;
 		int n = 1;
 		b1[0] = 0;
-		while (n == 1 && (b1[0] & 0x00ff) != _recordMark) {
+		while (n == 1 && (b1[0] & 0x00ff) != (_recordMark & 0x00ff)) {
 			try {
 				n = _tf.read(b1);
 //System.err.println(_index + ": at " + _tf.getFilePointer() + " got " + b1[0]);
@@ -252,7 +253,7 @@ class Wang_TapeDrive extends JComponent
 	private void tape_position(int newidx) {
 		if (_file == null) return;
 		if (newidx < 0) return;
-		if (_recordMark != (byte)0x00) {
+		if ((_recordMark & 0x00ff) != (byte)0x00) {
 			if (newidx == _index) return;	// should not happen
 			// TBD: change position of file I/O
 			if (newidx < _index) { // rewind
@@ -287,10 +288,10 @@ class Wang_TapeDrive extends JComponent
 		// assert: _index == newidx
 	}
 
-	public boolean do_button(_Key btn) {
+	public boolean do_button(Wang_Keys btn) {
 		// this kills any in-progress operations...
 		_tape_on = false;
-		if (btn.code == _Key.TAPE_READY) {
+		if (btn.code == Wang_Keys.TAPE_READY) {
 			if (_file == null) {
 				_ready = false;
 				return true;
@@ -299,11 +300,11 @@ class Wang_TapeDrive extends JComponent
 			return false;
 		}
 		_ready = false;
-		if (btn.code == _Key.TAPE_REW) { // not for Wang1200
+		if (btn.code == Wang_Keys.TAPE_REW) { // not for Wang1200
 			tape_position(_index - 1);
-		} else if (btn.code == _Key.TAPE_FF) { // not for Wang1200
+		} else if (btn.code == Wang_Keys.TAPE_FF) { // not for Wang1200
 			tape_position(_index + 1);
-		} else if (btn.code == _Key.TAPE_EJECT) {
+		} else if (btn.code == Wang_Keys.TAPE_EJECT) {
 			_cassette.setVisible(false);
 			pick_file();
 		}
@@ -341,6 +342,7 @@ class Wang_TapeDrive extends JComponent
 			n = _tf.read(b1);
 		} catch (IOException ee) {
 			// close? _tf = null?
+System.err.println("read() exception... ");
 			n = 0;
 		}
 		if (n != 1) {
@@ -349,6 +351,7 @@ class Wang_TapeDrive extends JComponent
 			_end = true;
 			_eot = true;
 		} else {
+System.err.format("read() byte 0x%02x\n", b1[0]);
 			bb[0] = b1[0];
 			bb[1] = 0x0c;
 		}
@@ -371,7 +374,7 @@ class Wang_TapeDrive extends JComponent
 				_wr = false; // redundant
 			} else { // request for next byte
 				tape_read();
-				if ((bb[0] & 0x00ff) == _recordMark) { // END PROG
+				if ((bb[0] & 0x00ff) == (_recordMark & 0x00ff)) { // END PROG
 					// there is always one more byte..
 					tape_read();
 					// might be old image... treat EOF same...
@@ -379,11 +382,12 @@ class Wang_TapeDrive extends JComponent
 						bb[0] = _recordMark;
 						bb[1] = 0x0c;
 					}
-					if ((bb[0] & 0x00ff) != _recordMark) {
+					if ((bb[0] & 0x00ff) != (_recordMark & 0x00ff)) {
 						bb[0] = 0;
 						bb[1] = 0x0e;
 					}
 					++_index; // display updated later...
+System.err.println("END PROG... update display later. index = " + _index);
 					_end = true;
 				}
 				send_word();
@@ -410,14 +414,15 @@ class Wang_TapeDrive extends JComponent
 			_tape_on = false;
 			_wr = false;
 			_end = false;
+System.err.println("Tape Off... update display. index = " + _index);
 			update_tape();
 			//if (_ready) _tf.flush(); // not needed anyway?
 		} else if (b[1] == 0x0c) {	// tape write
 			if (!_ready) return;
 			tape_write(b);
-			if (_recordMark != (byte)0x00) {
+			if ((_recordMark & 0x00ff) != (byte)0x00) {
 				// only if last byte before tape-off is END PROG...
-				_end = ((b[0] & 0x00ff) == _recordMark); // END PROG
+				_end = ((b[0] & 0x00ff) == (_recordMark & 0x00ff)); // END PROG
 				if (_end) {
 					tape_write(b); // write _recordMark _recordMark - true END PROG
 					++_index; // display updated later..
