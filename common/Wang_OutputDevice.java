@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $
 
 import javax.swing.*;
 
@@ -8,6 +8,8 @@ import javax.swing.*;
 // TODO: handle Input/Output devices like IBM Selectric Typewriter (Wang1200)?
 interface Wang_OutputDevice
 {
+	static String Model = "00";
+	static String Description = "Unknown";
 
 	// General-purpose device reset
 	void reset();
@@ -24,4 +26,8 @@ interface Wang_OutputDevice
 
 	// Return current visibility of the output frame
 	boolean onOff();
+
+	// returns descriptive name of device
+	// static String getName();
+	// needs to be static, but "java to the rescue" again...
 }

@@ -1,18 +1,19 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.1 2013/01/27 17:05:15 drmiller Exp $
+// $Id: Wang_UI.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.1 2013/01/27 17:05:15 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
 	private static Wang_Properties _props;
 	private static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
+	private static String _series;
 
 //	public Wang_UI(Wang_Properties props, ImageIcon icon) {
 //		_props = props;
@@ -27,6 +28,8 @@ public class Wang_UI
 
 	public static java.text.SimpleDateFormat getTimestamp() { return _timestamp; }
 
+	public static String getSeries() { return _series; }
+
 	public static void setDir(String dir) {
 		_dir = new File(dir);
 		_dir.mkdir();
@@ -36,6 +39,9 @@ public class Wang_UI
 	}
 	public static void setIcon(ImageIcon icon) {
 		_icon = icon;
+	}
+	public static void setSeries(String series) {
+		_series = series;
 	}
 
 	static public void fatal(String op, String err) {

@@ -1,12 +1,16 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $
 
 import java.awt.*;
 
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $";
+
+	public static final String Model = "11";
+	public static final String Description = "Output Writer";
+
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
 
@@ -145,7 +149,7 @@ class Wang_OutputWriter extends Wang_Paper
 	}
 
 	public Wang_OutputWriter() {
-		super("611 Output Writer",
+		super(Wang_UI.getSeries() + Model, Description,
 				new Font("Monospaced", Font.PLAIN, 10),
 				96, 32, 0, 0);
 		setup_xlate();
@@ -286,5 +290,9 @@ class Wang_OutputWriter extends Wang_Paper
 		}
 		// "auto raise"...
 		onOff(true);
+	}
+
+	static public String getName() {
+		return Wang_UI.getSeries() + Model + " " + Description;
 	}
 }

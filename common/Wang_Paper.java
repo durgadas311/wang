@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.3 2013/01/27 23:44:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,10 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.3 2013/01/27 23:44:06 drmiller Exp $";
+
+	String _model;
+	String _descr;
 
 	private JFrame _frame;
 	PlotTextArea _text;
@@ -33,48 +36,59 @@ class Wang_Paper
 		//_shifted = false;
 		//_x = _y = 0;
 		_text.clear();
-		_hasGraphic = false;
+		_hasGraphic = (_fx == 0);
 	}
 
 	String _footer;
+	JMenuBar _mb;
 
-	public Wang_Paper(String device, Font font, int charWidth, int charHeight,
-						int dotWidth, int dotHeight) {
+	public Wang_Paper(String model, String descr,
+				Font font, int charWidth, int charHeight,
+				int dotWidth, int dotHeight) {
+		_model = model;
+		_descr = descr;
 		_onoff = false;
 
-		_frame = new JFrame("Wang " + device);
+		_frame = new JFrame("Wang " + model + " " + descr);
 		_frame.setLayout(new FlowLayout());
 		_text = new PlotTextArea();
-		_text.setFont(font);
 
 		// setting this messes up horiz scrollbar...
 		//_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
 
+		if (charWidth != 0 && charHeight != 0) {
+			_text.setFont(font);
+			FontMetrics fm = _text.getFontMetrics(_text.getFont());
+			_fa = fm.getAscent();
+			_fx = fm.charWidth('M');
+			_fy = fm.getHeight();
+			_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
+			_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
+		} else {
+			_fa = _fx = _fy = 0;
+			_gx = 1;	// or scaling?
+			_gy = 1;	// or scaling?
+		}
+
 		clear();
 
-		FontMetrics fm = _text.getFontMetrics(_text.getFont());
-		_fa = fm.getAscent();
-		_fx = fm.charWidth('M');
-		_fy = fm.getHeight();
-		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
-		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
-
 		_scroll = new JScrollPane(_text);
-		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		if (charWidth != 0 && charHeight != 0) {
+			_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			_scroll.setPreferredSize(new Dimension(charWidth * _fx, charHeight * _fy));
 		} else {
+			_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			_scroll.setPreferredSize(new Dimension(dotWidth, dotHeight));
 		}
 		_frame.add(_scroll);
 
-		JMenuBar mb = new JMenuBar();
+		_mb = new JMenuBar();
 		JMenu mu;
 		mu = new JMenu("File");
-		mb.add(mu);
+		_mb.add(mu);
 		JMenuItem mi;
 		mi = new JMenuItem("Print", KeyEvent.VK_P);
 		mi.addActionListener(this);
@@ -86,7 +100,7 @@ class Wang_Paper
 		mi.addActionListener(this);
 		mu.add(mi);
 
-		_frame.setJMenuBar(mb);
+		_frame.setJMenuBar(_mb);
 		_frame.pack();	// set size according to content...
 
 		Dimension fdim = _frame.getSize();
@@ -97,7 +111,7 @@ class Wang_Paper
 		_frame.addComponentListener(this);
 	}
 
-	private void save611(File file) {
+	private void save(File file) {
 		if (_hasGraphic) {
 			java.awt.image.BufferedImage i =
 				new java.awt.image.BufferedImage(_text.getWidth(),
@@ -107,14 +121,14 @@ class Wang_Paper
 			try {
 				javax.imageio.ImageIO.write(i, "png", file);
 			} catch (IOException ee) {
-				System.err.println("error writing 611 PNG");
+				System.err.println("error writing " + _model + " PNG");
 			}
 		} else {
 			FileOutputStream fo;
 			try {
 				fo = new FileOutputStream(file);
 			} catch (FileNotFoundException ee) {
-				System.err.println("chosen 611 file not found?");
+				System.err.println("chosen " + _model + " file not found?");
 				return;
 			}
 			try {
@@ -122,14 +136,14 @@ class Wang_Paper
 				fo.write('\n');
 				fo.close();
 			} catch (IOException ee) {
-				System.err.println("error writing 611 TXT");
+				System.err.println("error writing " + _model + " TXT");
 			}
 		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
-			System.err.println("unknown 611 event source type");
+			System.err.println("unknown " + _model + " event source type");
 			return;
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
@@ -150,7 +164,7 @@ class Wang_Paper
 						Wang_UI.getDir());
 			int rv = ch.showDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
-				save611(ch.getSelectedFile());
+				save(ch.getSelectedFile());
 			}
 			return;
 		}
@@ -164,7 +178,7 @@ class Wang_Paper
 			boolean print = pj.printDialog(aset);
 			if (print) {
 				java.util.Date dt = new java.util.Date();
-				_footer = new String("Wang 601/602/611 OutputWriter - " +
+				_footer = new String("Wang " + _model + " " + _descr + " - " +
 					Wang_UI.getTimestamp().format(dt));
 				try {
 					pj.print(aset);
@@ -174,7 +188,7 @@ class Wang_Paper
 			}
 			return;
 		}
-		System.err.println("611 menu " + e.getActionCommand() +
+		System.err.println(_model + " menu " + e.getActionCommand() +
 						" not implemented yet");
 	}
 
@@ -203,9 +217,18 @@ class Wang_Paper
 				x = x_;
 				y = y_;
 			}
+			plot(int x_, int y_, int xd_, int yd_) {
+				s = null;
+				x = x_;
+				y = y_;
+				xd = xd_;
+				yd = yd_;
+			}
 			public String s;
 			public int x;
 			public int y;
+			public int xd;
+			public int yd;
 		}
 
 		public void clear() {
@@ -213,7 +236,7 @@ class Wang_Paper
 			_xplots = 0;
 			//_plotArray.dispose();
 			_plotArray = null;
-			//_x = _y = 0;
+			repaint();
 		}
 
 		private plot[] _plotArray;
@@ -234,14 +257,35 @@ class Wang_Paper
 			_plotArray[n] = new plot(s, x, y);
 		}
 
+		public void addPlot(int x, int y, int xd, int yd) {
+			int n = _xplots++;
+			if (_xplots > _nplots) {
+				int o = _nplots;
+				_nplots += 256;
+				plot[] p = new plot[_nplots];
+				if (o > 0) {
+					System.arraycopy(_plotArray, 0, p, 0, o);
+				}
+				_plotArray = p;
+			}
+			_plotArray[n] = new plot(x, y, xd, yd);
+		}
+
 		public void paint(Graphics g) {
 			super.paint(g);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
 				double xx, yy;
 				xx = (_plotArray[x].x * _gx) + 0.5;
+				// _fa will be 0 for flatbed plotter
 				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
-				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
+				if (_plotArray[x].s != null) {
+					g.drawString(_plotArray[x].s, (int)xx, (int)yy);
+				} else {
+					double xd = (_plotArray[x].xd * _gx) + 0.5;
+					double yd = (_plotArray[x].yd * _gy) + 0.5;
+					g.drawLine((int)xx, (int)yy, (int)xd, (int)yd);
+				}
 			}
 		}
 
@@ -326,5 +370,9 @@ class Wang_Paper
 		if (_onoff == on) return;
 		_onoff = on;
 		_frame.setVisible(_onoff);
+	}
+
+	public void addMenu(JMenu mu) {
+		_mb.add(mu);
 	}
 }
