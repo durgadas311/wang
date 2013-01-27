@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.2 2013/01/27 01:39:42 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.3 2013/01/27 16:02:32 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.2 2013/01/27 01:39:42 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.3 2013/01/27 16:02:32 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -110,14 +110,14 @@ class Wang_TapeDrive extends JComponent
 		jp.add(cass, new Integer(layer), layer);
 		++layer;
 
-		url = w600_fe.class.getResource("icons/cassette_none_gry.png");
+		url = this.getClass().getResource("icons/cassette_none_gry.png");
 		ic = new ImageIcon(url);
 		cs = new JLabel(ic);
 		cs.setBounds(50, 75, 201, 100);
 		jp.add(cs, new Integer(layer), layer);
 		++layer;
 
-		url = w600_fe.class.getResource("icons/cassette_tape_data.png");
+		url = this.getClass().getResource("icons/cassette_tape_data.png");
 		ic = new ImageIcon(url);
 		_cassette = new JLabel(ic);
 		_cassette.setBounds(50, 75, 201, 100);
@@ -175,7 +175,7 @@ class Wang_TapeDrive extends JComponent
 	private void pick_file() {
 		tape_close();
 		SuffFileChooser ch = new SuffFileChooser(_mountLabel,
-						_fileType, _pickLabel);
+				_fileType, _pickLabel, new File(".")); // w600_fe._dir
 		int rv = ch.showDialog(this);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -202,7 +202,7 @@ class Wang_TapeDrive extends JComponent
 			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
 		} catch (FileNotFoundException ee) {
 			// can't happen?
-			w600_fe.warning(_file.getAbsolutePath(), ee.getMessage());
+			//_fe.warning(_file.getAbsolutePath(), ee.getMessage());
 			_file = null;
 			_prot = false;
 			return;
@@ -342,7 +342,6 @@ class Wang_TapeDrive extends JComponent
 			n = _tf.read(b1);
 		} catch (IOException ee) {
 			// close? _tf = null?
-System.err.println("read() exception... ");
 			n = 0;
 		}
 		if (n != 1) {
@@ -351,7 +350,6 @@ System.err.println("read() exception... ");
 			_end = true;
 			_eot = true;
 		} else {
-System.err.format("read() byte 0x%02x\n", b1[0]);
 			bb[0] = b1[0];
 			bb[1] = 0x0c;
 		}
@@ -387,7 +385,6 @@ System.err.format("read() byte 0x%02x\n", b1[0]);
 						bb[1] = 0x0e;
 					}
 					++_index; // display updated later...
-System.err.println("END PROG... update display later. index = " + _index);
 					_end = true;
 				}
 				send_word();
@@ -414,7 +411,6 @@ System.err.println("END PROG... update display later. index = " + _index);
 			_tape_on = false;
 			_wr = false;
 			_end = false;
-System.err.println("Tape Off... update display. index = " + _index);
 			update_tape();
 			//if (_ready) _tf.flush(); // not needed anyway?
 		} else if (b[1] == 0x0c) {	// tape write
