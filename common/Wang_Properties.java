@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.1 2013/01/26 02:47:13 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -38,22 +38,17 @@ class Wang_Properties extends Properties
 				JOptionPane.YES_NO_CANCEL_OPTION, icon, _btns);
 	}
 
-	void initProperties(String name, String cfgFile) {
+	void initProperties(String name, String cfgFile) throws Exception {
 		_name = name;
 		if (cfgFile.startsWith("~/")) {
 			_cfg = System.getProperty("user.home") + cfgFile.substring(1);
 		} else {
 			_cfg = cfgFile;
 		}
-		try {
-			FileInputStream cfg = new FileInputStream(_cfg);
-			load(cfg);
-			cfg.close();
-		} catch (Exception e) {
-			//w600_fe.warning("Load Setup", e.getMessage());
-			// set defaults later, just leave all empty...
-			// save, and force existence of file?
-		}
+		FileInputStream cfg = new FileInputStream(_cfg);
+		load(cfg);
+		cfg.close();
+		// save, and force existence of file if not exists?
 	}
 
 	int getInteger(String prop) {

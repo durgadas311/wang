@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $";
 
 	private JFrame _frame;
 	PlotTextArea _text;
@@ -146,7 +146,8 @@ class Wang_Paper
 				sfx = "txt";
 				dsc = "Text files";
 			}
-			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc, new File(".")); // w600_fe._dir
+			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc,
+						Wang_UI.getDir());
 			int rv = ch.showDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
 				save611(ch.getSelectedFile());
@@ -162,9 +163,9 @@ class Wang_Paper
 			pj.setPrintable(_text);
 			boolean print = pj.printDialog(aset);
 			if (print) {
-				//java.util.Date dt = new java.util.Date();
+				java.util.Date dt = new java.util.Date();
 				_footer = new String("Wang 601/602/611 OutputWriter - " +
-					"xxxx"); //w600_fe._timestamp.format(dt));
+					Wang_UI.getTimestamp().format(dt));
 				try {
 					pj.print(aset);
 				} catch (PrinterException ee) { 
