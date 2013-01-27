@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $
+// $Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import javax.print.attribute.standard.*;
 import java.awt.Desktop;
 
 class _Key {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180);
 	static final Color orange2 = new Color(255, 255, 100);	// illuminated
@@ -122,6 +122,7 @@ class _Key {
 		} else {
 			button.setBackground(color);
 		}
+		button.repaint();
 	}
 
 	Color color;
@@ -156,7 +157,7 @@ class FEexit extends Thread {
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -426,7 +427,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -502,7 +503,7 @@ class Wang1200_SimError
 class Wang1200_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	Wang1200_Tape _tapel;
 	Wang1200_Tape _taper;
 	Wang1200_Model611 _m611;
@@ -676,33 +677,73 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
+
+	private class Wang1200_TapeEjectButton extends JButton {
+		static final long serialVersionUID = 311057692131L;
+
+		_Key _key;
+
+		public void paint(Graphics g) {
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.addRenderingHints(new RenderingHints(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON));
+			//super.paint(g2d);
+			Dimension d = getSize();
+			Point p = new Point(0, 0);
+			g2d.setColor(Color.black);
+			g2d.fillOval(p.x, p.y, d.width, d.height);
+			p.x += 4;
+			p.y += 4;
+			d.width -= 8;
+			d.height -= 8;
+			if (!_key.state) {
+				g2d.setColor(Color.white);
+				g2d.fillArc(p.x,  p.y, d.width, d.height, 45, 180);
+				g2d.setColor(_Key.white3);
+				g2d.fillArc(p.x,  p.y, d.width, d.height, -135, 180);
+				p.x += 2;
+				p.y += 2;
+				d.width -= 4;
+				d.height -= 4;
+				g2d.setColor(_Key.white1);
+				g2d.fillOval(p.x, p.y, d.width, d.height);
+			} else {
+				g2d.setColor(_Key.white1);
+				g2d.fillArc(p.x,  p.y, d.width, d.height, 45, 180);
+				g2d.setColor(_Key.white2);
+				g2d.fillArc(p.x,  p.y, d.width, d.height, -135, 180);
+				p.x += 2;
+				p.y += 2;
+				d.width -= 4;
+				d.height -= 4;
+				g2d.setColor(_Key.white3);
+				g2d.fillOval(p.x, p.y, d.width, d.height);
+			}
+		}
+
+		public Wang1200_TapeEjectButton(_Key key) {
+			_key = key;
+			setPreferredSize(new Dimension(30,30));
+			setOpaque(false);
+		}
+	}
 
 	public Wang1200_TapeEject() {
 		_buttons = new JButton[num_keys];
 		_keys = new _Key[num_keys];
 		_nkeys = 0;
-		_row = 0;
-		_col = 0;
-		GridBagConstraints c = new GridBagConstraints();
+		_keys[_nkeys] = new _Key(_Key.white1, _Key.GROUP(7,_Key.TAPE_EJECT));
+		_buttons[_nkeys] = new Wang1200_TapeEjectButton(_keys[0]);
+		++_nkeys;
 
-		c.fill = GridBagConstraints.NONE;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.weightx = 0;
-		c.weighty = 0;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.anchor = GridBagConstraints.CENTER;
-
-		setLayout(gridbag);
-
-		addTapeButton(c, 1, 1, 0, 0,_Key.white2,
-			new _Key(_Key.white1, _Key.GROUP(7,_Key.TAPE_EJECT)));
-		setPreferredSize(new Dimension(24,24));
-		setBackground(Color.black);
+		_keys[0].button = _buttons[0];
+		add(_buttons[0]);
+		//setPreferredSize(new Dimension(30,30));
+		setOpaque(false);
 	}
 
 	public _Key getKey() {
@@ -716,7 +757,7 @@ class Wang1200_TapeEject extends Wang1200_Keyboards
 
 class Wang1200_Tape extends JComponent
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -1161,7 +1202,7 @@ class Wang1200_Model611
 	implements ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
 	private char[] cn24_spcl;
@@ -2324,7 +2365,7 @@ class Wang1200_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 1200 Word Processor System<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.64 $ $Date: 2013/01/25 00:01:46 $<BR>"+
+			"$Revision: 1.65 $ $Date: 2013/01/27 02:48:42 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2443,7 +2484,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -2842,7 +2883,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2988,7 +3029,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -3265,7 +3306,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.64 2013/01/25 00:01:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.65 2013/01/27 02:48:42 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
