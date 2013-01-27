@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.1 2012/02/19 23:17:50 drmiller Exp $
+# $Id: Makefile.ship,v 1.2 2013/01/27 17:05:59 drmiller Exp $
 
 COPTS =
 
@@ -8,6 +8,22 @@ CFLAGS += -D__wang600__ -I../common -I.
 
 OBJS = wang_sys.o wang_sim_cmd.o \
 	w600_decode.o wang_exec.o wang_gui.o
+
+# Order is significant, until we setup dependencies
+COMMON_CLASSES = \
+		SuffFileFilter.class \
+		SuffFileChooser.class \
+		Wang_Colors.class \
+		Wang_Keys.class \
+		Wang_Properties.class \
+		Wang_PropertyEditor.class \
+		Wang_UI.class \
+		Wang_ErrorLight.class \
+		Wang_TapeDevice.class \
+		Wang_TapeDrive.class \
+		Wang_OutputDevice.class \
+		Wang_Paper.class \
+		Wang_OutputWriter.class
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
@@ -27,8 +43,14 @@ w600-dasm: wang-dasm.o $(DASM)
 w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
-w600_fe.class: w600_fe.java
+w600_fe.class: w600_fe.java $(COMMON_CLASSES)
 	javac w600_fe.java
+
+.SUFFIXES: .class .java
+
+.java.class:
+	javac $?
+	mv ../common/$(basename $@)*.class .
 
 clean:
 	rm -f *.o
