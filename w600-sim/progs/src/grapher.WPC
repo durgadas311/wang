@@ -42,7 +42,7 @@ MARK(loop)
 	J_IF_P() SEARCH(loop)
 	END_PROG()
 
-MARK(plot)
+MARK(plot_setup)
 	RE(currX)
 	ST(plotY)	// note reversal of X,Y since graph goes "down page"
 	RE(lastX)
