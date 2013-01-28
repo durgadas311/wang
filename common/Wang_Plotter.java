@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.2 2013/01/28 02:27:34 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.3 2013/01/28 16:56:04 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.2 2013/01/28 02:27:34 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.3 2013/01/28 16:56:04 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -142,7 +142,7 @@ class Wang_Plotter extends Wang_Paper
 		return true;
 	}
 
-	private boolean plot() {
+	private boolean _plot(boolean draw) {
 		int xd = _x + _dx;
 		if (xd < 0) xd = 0;
 		if (xd >= 1000) xd = 999;
@@ -150,15 +150,19 @@ class Wang_Plotter extends Wang_Paper
 		if (yd < 0) yd = 0;
 		if (yd >= 1000) yd = 999;
 //System.err.println("Plot " + _x + "," + _y + " -> " + xd + "," + yd);
-		_text.addPlot(_x, _y, xd, yd);
+		if (draw) _text.addPlot(_x, _y, xd, yd);
 		_x = xd;
 		_y = yd;
-		return true;
+		return draw;
+	}
+
+	private boolean plot() {
+		return _plot(true);
 	}
 
 	private boolean move() {
-		System.err.println("move(" + _dx + "," + _dy + ")");
-		return false;
+		//System.err.println("move(" + _dx + "," + _dy + ")");
+		return _plot(false);
 	}
 
 	private boolean chrSize() {
