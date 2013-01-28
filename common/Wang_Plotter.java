@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.3 2013/01/28 16:56:04 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.4 2013/01/28 21:46:57 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.3 2013/01/28 16:56:04 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.4 2013/01/28 21:46:57 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -112,11 +112,9 @@ class Wang_Plotter extends Wang_Paper
 	}
 
 	public Wang_Plotter() {
-		super(Wang_UI.getSeries() + Model, Description,
-				null,
-				0, 0, 1000, 1000);
-		super.setScale(1.0, -1.0);
-		super.setOrigin(0, 1000);
+		super(Wang_UI.getSeries() + Model, Description, 1000, 1000);
+		super.setScale(1.0, 1.0);
+		super.setOrigin(0, 0);
 		JMenu mu;
 		mu = new JMenu("Plotter");
 		JMenuItem mi;
@@ -128,8 +126,7 @@ class Wang_Plotter extends Wang_Paper
 		mu.add(mi);
 		super.addMenu(mu);
 		setup_xlate();
-		_x = 0;
-		_y = 0;
+		home();
 		_dx = 0;
 		_dy = 0;
 	}
@@ -150,7 +147,8 @@ class Wang_Plotter extends Wang_Paper
 		if (yd < 0) yd = 0;
 		if (yd >= 1000) yd = 999;
 //System.err.println("Plot " + _x + "," + _y + " -> " + xd + "," + yd);
-		if (draw) _text.addPlot(_x, _y, xd, yd);
+		// Plotter origin is different than our drawables... flip "y".
+		if (draw) _text.addPlot(_x, 999 - _y, xd, 999 - yd);
 		_x = xd;
 		_y = yd;
 		return draw;
@@ -186,8 +184,9 @@ class Wang_Plotter extends Wang_Paper
 	}
 
 	private boolean home() {
-		//System.err.println("home");
-		_x = _y = 0;
+		// Plotter origin is different than our drawables... flip "y".
+		_x = 0;
+		_y = 0;
 		return false;
 	}
 

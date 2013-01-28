@@ -1,12 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.3 2013/01/28 21:46:57 drmiller Exp $
 
 import java.awt.*;
 
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.3 2013/01/28 21:46:57 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Output Writer";
@@ -151,7 +151,7 @@ class Wang_OutputWriter extends Wang_Paper
 	public Wang_OutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
 				new Font("Monospaced", Font.PLAIN, 10),
-				96, 32, 0, 0);
+				96, 32);
 		setup_xlate();
 	}
 
@@ -284,9 +284,7 @@ class Wang_OutputWriter extends Wang_Paper
 			//_text.setCaretPosition(_eop); // to what?
 			// todo: need to get JScrollPane to update...
 		} else {
-			_text.append(s);
-			_eop += s.length();
-			_text.setCaretPosition(_eop);
+			_text.addText(s);
 		}
 		// "auto raise"...
 		onOff(true);
