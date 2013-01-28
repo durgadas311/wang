@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.3 2013/01/27 23:44:06 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.4 2013/01/28 02:27:34 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.3 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.4 2013/01/28 02:27:34 drmiller Exp $";
 
 	String _model;
 	String _descr;
@@ -27,6 +27,7 @@ class Wang_Paper
 	boolean _hasGraphic;
 	int _fx, _fy, _fa;
 	double _gx, _gy;
+	int _ox, _oy;
 
 	private void clear() {
 		_text.setText("");
@@ -42,12 +43,24 @@ class Wang_Paper
 	String _footer;
 	JMenuBar _mb;
 
+	public void setScale(double sx, double sy) {
+		_gx = sx;
+		_gy = sy;
+	}
+
+	public void setOrigin(int ox, int oy) {
+		_ox = ox;
+		_oy = oy;
+	}
+
 	public Wang_Paper(String model, String descr,
 				Font font, int charWidth, int charHeight,
 				int dotWidth, int dotHeight) {
 		_model = model;
 		_descr = descr;
 		_onoff = false;
+		_ox = 0;
+		_oy = 0;
 
 		_frame = new JFrame("Wang " + model + " " + descr);
 		_frame.setLayout(new FlowLayout());
@@ -69,7 +82,7 @@ class Wang_Paper
 		} else {
 			_fa = _fx = _fy = 0;
 			_gx = 1;	// or scaling?
-			_gy = 1;	// or scaling?
+			_gy = -1;	// or scaling?
 		}
 
 		clear();
@@ -284,7 +297,8 @@ class Wang_Paper
 				} else {
 					double xd = (_plotArray[x].xd * _gx) + 0.5;
 					double yd = (_plotArray[x].yd * _gy) + 0.5;
-					g.drawLine((int)xx, (int)yy, (int)xd, (int)yd);
+					g.drawLine((int)xx + _ox, (int)yy + _oy,
+						(int)xd + _ox, (int)yd + _oy);
 				}
 			}
 		}
@@ -344,8 +358,15 @@ class Wang_Paper
 						yy = (_plotArray[i].y * gy) + 0.5;
 						if (yy >= ps && yy < pe) {
 							++did;
-							g2d.drawString(_plotArray[i].s,
-								(int)xx, (int)yy - ps + l);
+							if (_plotArray[i].s != null) {
+								g2d.drawString(_plotArray[i].s,
+									(int)xx, (int)yy - ps + 1);
+							} else {
+								double xd = (_plotArray[i].xd * _gx) + 0.5;
+								double yd = (_plotArray[i].yd * _gy) + 0.5;
+								g2d.drawLine((int)xx + _ox, (int)yy + _oy - ps + 1,
+									(int)xd + _ox, (int)yd + _oy - ps + 1);
+							}
 						}
 					}
 				}
