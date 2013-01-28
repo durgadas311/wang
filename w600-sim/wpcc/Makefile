@@ -1,6 +1,6 @@
 CPP = ./wpcpp
 
-all: wpcpp
+all: wpcpp dis lst
 
 LDSCRIPT = wang600raw.ld
 

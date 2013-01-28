@@ -69,11 +69,21 @@ void dump_simp(uint8_t a, uint8_t b, char *pre, char *suf) {
 	}
 }
 
-void dump_string(uint8_t **buf, int *len) {
+int dump_string(uint8_t **buf, int *len) {
 	printf("\tALPHA_STRING(\"");
-	while (0) {
+	char *s = *buf;
+	int n = *len;
+	while (n > 0 && *s != 0x22) {
+		printf("\\%03o", *s); // better xlat later...
+		--n;
+		++s;
+	}
+	if (n > 0) {
+		--n;
+		++s;
 	}
 	printf("\")\n");
+	return *len - n;
 }
 
 void dump_alpha(uint8_t c) {
@@ -193,7 +203,11 @@ void dump_two(uint8_t prefix, uint8_t **buf, int *len) {
 		case 0x92:
 		case 0xfa:
 			if (c < 0x80) {
-				dump_string(&s, &n);
+				--s;
+				++n;
+				int N = dump_string(&s, &n);
+				n -= N;
+				s += N;
 			} else {
 				dump_alpha(c);
 			}
