@@ -162,27 +162,40 @@ void do_alpha(char *s) {
 			case 'n': x = '\n'; break;
 			case 'b': x = '\b'; break;
 			case 'r': x = '\r'; break;
-			default: continue; break;
+			default:
+				if (isdigit(x) && isdigit(s[0]) && isdigit(s[1])) {
+					c = ((x & 3) << 6) |
+						((s[0] & 7) << 3) |
+						(s[1] & 7);
+					x = -1;
+					s += 2;
+					break;
+				}
+				continue;
+				break;
 			}
 		}
 		if (x == '\\') {
 			esc = 1;
 			continue;
 		}
-		c = xlat[x];
 		if (!start) {
 			start = 1;
 			printf("_opcode(0x92);\n");
 		}
-		if ((c & 0x40) && !shift) {
-			shift = 1;
-			printf("_opcode(0x13);\n");
+		if (x >= 0) {
+			c = xlat[x];
+			if ((c & 0x40) && !shift) {
+				shift = 1;
+				printf("_opcode(0x13);\n");
+			}
+			if (!(c & 0x40) && shift) {
+				shift = 0;
+				printf("_opcode(0x12);\n");
+			}
+			c &= 0x3f;
 		}
-		if (!(c & 0x40) && shift) {
-			shift = 0;
-			printf("_opcode(0x12);\n");
-		}
-		printf("_opcode(0x%x);\n", c & 0x3f);
+		printf("_opcode(0x%x);\n", c);
 	}
 	if (start) {
 		start = 0;

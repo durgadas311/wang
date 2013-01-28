@@ -1,5 +1,8 @@
+CPP = ./wpcpp
 
 all: wpcpp
+
+LDSCRIPT = wang600raw.ld
 
 wpcpp: wpcpp.c
 	$(CC) $(CFLAGS) wpcpp.c -o wpcpp
@@ -11,8 +14,14 @@ lst: lst.c
 	$(CC) -x c -c $^ -o $@
 
 %.wng: %.wpc
-	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,wang600.ld \
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(LDSCRIPT) \
 		-o $@ $^
+
+%.wng: %.WPC
+	$(CPP) < $< > $*.wpe
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(LDSCRIPT) \
+		-o $@ $*.wpe
+	@rm -f $*.wpe
 
 all.wng: junk.wpo crud.wpo wang600.h
 	$(CC) -nostartfiles -nodefaultlibs -nostdlib -T wang600.ld \
