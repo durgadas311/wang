@@ -59,6 +59,9 @@ MARK(plot_setup)
 
 MARK(f_of_x)
 	SIN()
+	RETURN()
+
+MARK(scale)
 	ST(temp)
 	ENTER(600)
 	MULT(temp)
