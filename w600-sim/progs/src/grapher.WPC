@@ -4,11 +4,12 @@
 LABEL(loop)
 LABEL(end)
 FLABEL(f_of_x)
-FLABEL(plot)
+FLABEL(plot_setup)
+FLABEL(scale)
 
 // Registers:
-#define plotX	0
-#define plotY	1
+#define plotY	0
+#define plotX	1
 #define temp	2
 #define lastX	8
 #define lastY	9
@@ -19,18 +20,20 @@ FLABEL(plot)
 
 BEGIN()
 	CLEAR()
+	ALPHA_STRING("\130")	// set carriage to left side
 	ENTER(0)
 	ST(currX)
 	ENTER(360)
 	ST(maxX)
 	ENTER(1)
 	ST(stepX)
-	ALPHA_STRING("\130")
 MARK(loop)
 	RE(currX)
 	FCALL(f_of_x)
+	FCALL(scale)
 	ST(currY)
-	FCALL(plot)
+	FCALL(plot_setup)
+	ALPHA_STRING("\131")	// plot "o"
 	RE(stepX)
 	ADD(currX)
 	ST(temp)
@@ -41,14 +44,13 @@ MARK(loop)
 
 MARK(plot)
 	RE(currX)
-	ST(plotX)
+	ST(plotY)	// note reversal of X,Y since graph goes "down page"
 	RE(lastX)
-	SUB(plotX)
-	RE(currY)
-	ST(plotY)
-	RE(lastY)
 	SUB(plotY)
-	ALPHA_STRING("\131")	// plot "o"
+	RE(currY)
+	ST(plotX)
+	RE(lastY)
+	SUB(plotX)
 	RE(currX)
 	ST(lastX)
 	RE(currY)
@@ -60,7 +62,8 @@ MARK(f_of_x)
 	ST(temp)
 	ENTER(600)
 	MULT(temp)
-	ENTER(600)
+	ENTER(600.5)
 	ADD(temp)
+	INT()
 	RETURN()
 END()

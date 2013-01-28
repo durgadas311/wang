@@ -5,10 +5,11 @@ LABEL(loop)
 LABEL(end)
 FLABEL(f_of_x)
 FLABEL(plot_setup)
+FLABEL(scale)
 
 // Registers:
-#define plotX	0
-#define plotY	1
+#define plotY	0
+#define plotX	1
 #define temp	2
 #define lastX	8
 #define lastY	9
@@ -19,6 +20,7 @@ FLABEL(plot_setup)
 
 BEGIN()
 	CLEAR()
+	ALPHA_STRING("\133")	// home pen
 	ENTER(0)
 	ST(currX)
 	ENTER(360)
@@ -28,17 +30,19 @@ BEGIN()
 	// do first point as "move", not "plot"
 	RE(currX)
 	FCALL(f_of_x)
+	FCALL(scale)
 	ST(currY)
 	FCALL(plot_setup)
-	ALPHA_STRING("\123")
+	ALPHA_STRING("\123")	// move to
 	RE(stepX)
 	ADD(currX)
 MARK(loop)
 	RE(currX)
 	FCALL(f_of_x)
+	FCALL(scale)
 	ST(currY)
 	FCALL(plot_setup)
-	ALPHA_STRING("\122")
+	ALPHA_STRING("\122")	// plot to
 	RE(stepX)
 	ADD(currX)
 	ST(temp)
@@ -49,13 +53,13 @@ MARK(loop)
 
 MARK(plot_setup)
 	RE(currX)
-	ST(plotY)
-	RE(lastX)
-	SUB(plotY)
-	RE(currY)
 	ST(plotX)
-	RE(lastY)
+	RE(lastX)
 	SUB(plotX)
+	RE(currY)
+	ST(plotY)
+	RE(lastY)
+	SUB(plotY)
 	RE(currX)
 	ST(lastX)
 	RE(currY)
@@ -64,10 +68,14 @@ MARK(plot_setup)
 
 MARK(f_of_x)
 	SIN()
+	RETURN()
+
+MARK(scale)
 	ST(temp)
 	ENTER(300)
 	MULT(temp)
-	ENTER(600)
+	ENTER(600.5)
 	ADD(temp)
+	INT()
 	RETURN()
 END()
