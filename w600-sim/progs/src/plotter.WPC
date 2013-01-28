@@ -5,18 +5,23 @@ LABEL(loop)
 LABEL(end)
 FLABEL(f_of_x)
 FLABEL(plot_setup)
-FLABEL(scale)
+FLABEL(scale_Y)
+FLABEL(trans)
 
 // Registers:
 #define plotY	0
 #define plotX	1
 #define temp	2
+#define scalX	6	// scaling
+#define scalY	7	// scaling
 #define lastX	8
 #define lastY	9
-#define currY	15
-#define currX	14
-#define maxX	13
+#define tranX	10	// translation
+#define tranY	11	// translation
 #define stepX	12
+#define maxX	13
+#define currX	14
+#define currY	15
 
 BEGIN()
 	CLEAR()
@@ -27,19 +32,28 @@ BEGIN()
 	ST(maxX)
 	ENTER(1)
 	ST(stepX)
+	ENTER(1)	// scaling in X
+	ST(scalX)
+	ENTER(300)	// scaling in Y
+	ST(scalY)
+	ENTER(100)	// translation in X
+	ST(tranX)
+	ENTER(600)	// translation in Y
+	ST(tranY)
 	// do first point as "move", not "plot"
 	RE(currX)
 	FCALL(f_of_x)
-	FCALL(scale)
+	FCALL(scale_Y)
 	ST(currY)
 	FCALL(plot_setup)
+	FCALL(trans)	// translate first point only, rest are relative
 	ALPHA_STRING("\123")	// move to
 	RE(stepX)
 	ADD(currX)
 MARK(loop)
 	RE(currX)
 	FCALL(f_of_x)
-	FCALL(scale)
+	FCALL(scale_Y)
 	ST(currY)
 	FCALL(plot_setup)
 	ALPHA_STRING("\122")	// plot to
@@ -60,6 +74,7 @@ MARK(plot_setup)
 	ST(plotY)
 	RE(lastY)
 	SUB(plotY)
+
 	RE(currX)
 	ST(lastX)
 	RE(currY)
@@ -70,12 +85,20 @@ MARK(f_of_x)
 	SIN()
 	RETURN()
 
-MARK(scale)
+MARK(scale_Y)
 	ST(temp)
-	ENTER(300)
+	RE(scalY)
 	MULT(temp)
-	ENTER(600.5)
+	ENTER(0.5)
 	ADD(temp)
 	INT()
 	RETURN()
+
+MARK(trans)
+	RE(tranX)
+	ADD(plotX)
+	RE(tranY)
+	ADD(plotY)
+	RETURN()
+
 END()
