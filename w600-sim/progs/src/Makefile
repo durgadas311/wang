@@ -2,7 +2,8 @@ WPCC = ../../wpcc
 
 CPP = $(WPCC)/wpcpp
 
-PROGS = plotter.wng countdown.wng
+SRCS = $(wildcard *.wpc *.WPC)
+PROGS = $(subst .wpc,.wng,$(subst .WPC,.wng,$(SRCS)))
 
 all: $(PROGS)
 
