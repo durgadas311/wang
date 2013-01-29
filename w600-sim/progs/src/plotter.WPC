@@ -63,6 +63,7 @@ MARK(loop)
 	RE(maxX)
 	SUB(temp)
 	J_IF_P() SEARCH(loop)
+	ALPHA_PLOT(" Y = SIN{X}")
 	END_PROG()
 
 MARK(plot_setup)

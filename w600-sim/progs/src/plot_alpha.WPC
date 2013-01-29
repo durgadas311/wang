@@ -1,0 +1,78 @@
+#include "wang600.h"
+
+// Labels:
+FLABEL(test)
+FLABEL(chrsize)
+FLABEL(chrspace)
+FLABEL(moveabs)
+
+// Registers:
+#define plotY	0
+#define plotX	1
+#define temp	2
+
+BEGIN()
+	CLEAR()
+	ENTER(10)
+	ST(plotX)
+	ST(plotY)
+	FCALL(moveabs)
+	ENTER(1)
+	FCALL(chrsize)
+	ENTER(6)
+	FCALL(chrspace)
+	FCALL(test)
+
+	ENTER(10)
+	ST(plotX)
+	ENTER(20)
+	ST(plotY)
+	FCALL(moveabs)
+	ENTER(2)
+	FCALL(chrsize)
+	ENTER(12)
+	FCALL(chrspace)
+	FCALL(test)
+
+	ENTER(10)
+	ST(plotX)
+	ENTER(50)
+	ST(plotY)
+	FCALL(moveabs)
+	ENTER(3)
+	FCALL(chrsize)
+	ENTER(18)
+	FCALL(chrspace)
+	FCALL(test)
+
+	END_PROG()
+
+MARK(moveabs)
+	ALPHA_STRING("\133")	// home pen
+	ALPHA_STRING("\123")	// move to absolute coords
+	RETURN()
+
+MARK(test)
+	ALPHA_PLOT("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+}?={,:'.");
+	RETURN()
+
+MARK(chrsize)
+	ST(plotX)
+	E(0)
+	ST(plotY)
+	ALPHA_PLOT("\130")	// set char size
+	RETURN()
+
+MARK(chrspace)
+	ST(plotX)
+	ST(temp)
+	ENTER(1.4)
+	MULT(temp)
+	ENTER(0.5)
+	ADD(temp)
+	INT()
+	ST(plotY)
+	ALPHA_PLOT("\132")	// set char spacing
+	RETURN()
+
+END()
