@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.3 2013/01/27 23:44:06 drmiller Exp $
+# $Id: Makefile.ship,v 1.4 2013/01/29 19:56:47 drmiller Exp $
 
 COPTS =
 
@@ -8,6 +8,8 @@ CFLAGS += -D__wang600__ -I../common -I.
 
 OBJS = wang_sys.o wang_sim_cmd.o \
 	w600_decode.o wang_exec.o wang_gui.o
+
+SPCL = plotter_chrgen.dat
 
 # Order is significant, until we setup dependencies
 COMMON_CLASSES = \
@@ -65,4 +67,5 @@ SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: w600_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
+		$(SPCL) \ 
 		$(addprefix -C ../common/fonts ,$(FONTS))
