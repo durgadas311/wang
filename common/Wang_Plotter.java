@@ -1,6 +1,7 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.11 2013/01/29 21:09:45 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.12 2013/01/29 23:25:01 drmiller Exp $
 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
@@ -8,7 +9,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.11 2013/01/29 21:09:45 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.12 2013/01/29 23:25:01 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -420,6 +421,8 @@ class Wang_Plotter extends Wang_Paper
 		_dx = _dy = 0;
 		if (drew) {
 			_text.repaint();
+			_text.scrollRectToVisible(new Rectangle(_x - 5, 999 - _y - 5,
+					_x + 5, 999 - _y + 5));
 		}
 		// "auto raise"...
 		onOff(true);

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.9 2013/01/29 22:52:54 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.10 2013/01/29 23:25:01 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.9 2013/01/29 22:52:54 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.10 2013/01/29 23:25:01 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -27,6 +27,7 @@ class Wang_Paper
 		Font getFont();
 		void paint(Graphics g);
 		void repaint();
+		void scrollRectToVisible(Rectangle r);
 	}
 
 	String _model;
