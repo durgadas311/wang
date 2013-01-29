@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.7 2013/01/29 16:11:23 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.8 2013/01/29 16:15:41 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.7 2013/01/29 16:11:23 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.8 2013/01/29 16:15:41 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -205,10 +205,10 @@ class Wang_Plotter extends Wang_Paper
 		return res;
 	}
 	private boolean plotChar(byte p) {
-		System.err.format("Character %02x\n", p);
+//System.err.format("Character %02x\n", p);
 		if (p >= 64) return false;
 		boolean res = _plotChar(p);
-		_x += _sx * _cx;
+		_x += _sx;
 		_dx = 0;
 		_dy = 0;
 		return res;
@@ -238,38 +238,40 @@ class Wang_Plotter extends Wang_Paper
 		return _plot(false);
 	}
 
-	private void index() {
-		_y -= _sy * _cy;
+	private boolean index() {
+		_y -= _sy;
 		if (_y < 0) _y = 0;
 		return false;
 	}
 
-	private void return_carr() {
+	private boolean return_carr() {
 		_x = 0;
 		return false;
 	}
 
-	private void rev_index() {
-		_y += _sy * _cy;
+	private boolean rev_index() {
+		_y += _sy;
 		if (_y >= 1000) _y = 999;
 		return false;
 	}
 
-	private void return_index() {
+	private boolean return_index() {
 		return_carr();
 		return index();
 	}
 
 	private boolean chrSize() {
 		//System.err.println("chrSize(" + _dx + "," + _dy + ")");
-		if (_xd > 0 && _dx < 16) {
+		if (_dx > 0 && _dx < 16) {
 			_cx = _cy = _dx;
 		}
 		return false;
 	}
 
 	private boolean chrSpace() {
-		System.err.println("chrSpace(" + _dx + "," + _dy + ")");
+		//System.err.println("chrSpace(" + _dx + "," + _dy + ")");
+		_sx = _dx;
+		_sy = _dy;
 		return false;
 	}
 
