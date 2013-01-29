@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.6 2013/01/29 15:52:03 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.7 2013/01/29 16:11:23 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.6 2013/01/29 15:52:03 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.7 2013/01/29 16:11:23 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -163,13 +163,16 @@ class Wang_Plotter extends Wang_Paper
 		home();
 		_dx = 0;
 		_dy = 0;
-		_cx = 3;
-		_cy = 3;
+		_cx = 1;
+		_cy = 1;
+		_sx = 6;
+		_sy = 9; // not used?
 	}
 
 	private int _x, _y;
 	private int _dx, _dy;
 	private int _cx, _cy;
+	private int _sx, _sy;
 
 	private boolean _plotChar(byte p) {
 		boolean res = false, r;
@@ -205,7 +208,7 @@ class Wang_Plotter extends Wang_Paper
 		System.err.format("Character %02x\n", p);
 		if (p >= 64) return false;
 		boolean res = _plotChar(p);
-		_x += 5 * _cx;
+		_x += _sx * _cx;
 		_dx = 0;
 		_dy = 0;
 		return res;
@@ -235,8 +238,33 @@ class Wang_Plotter extends Wang_Paper
 		return _plot(false);
 	}
 
+	private void index() {
+		_y -= _sy * _cy;
+		if (_y < 0) _y = 0;
+		return false;
+	}
+
+	private void return_carr() {
+		_x = 0;
+		return false;
+	}
+
+	private void rev_index() {
+		_y += _sy * _cy;
+		if (_y >= 1000) _y = 999;
+		return false;
+	}
+
+	private void return_index() {
+		return_carr();
+		return index();
+	}
+
 	private boolean chrSize() {
-		System.err.println("chrSize(" + _dx + "," + _dy + ")");
+		//System.err.println("chrSize(" + _dx + "," + _dy + ")");
+		if (_xd > 0 && _dx < 16) {
+			_cx = _cy = _dx;
+		}
 		return false;
 	}
 
@@ -346,7 +374,20 @@ class Wang_Plotter extends Wang_Paper
 			// ignore anything else
 		} else {
 			// some characters have no encoding?
-			drew = plotChar(c);
+			switch(c) {
+			case 0x18:
+				drew = return_index();
+				break;
+			case 0x1a:
+				drew = index();
+				break;
+			case 0x1b:
+				drew = rev_index();
+				break;
+			default:
+				drew = plotChar(c);
+				break;
+			}
 		}
 		_dx = _dy = 0;
 		if (drew) {
