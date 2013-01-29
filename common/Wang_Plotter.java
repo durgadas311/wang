@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.9 2013/01/29 16:48:01 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.10 2013/01/29 19:58:18 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.9 2013/01/29 16:48:01 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.10 2013/01/29 19:58:18 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -225,6 +225,7 @@ class Wang_Plotter extends Wang_Paper
 			if (dx == 0 && dy == 0) {
 				// plot a "dot"...
 				_text.addPlot(_x, 999 - _y, -1, -1);
+//System.err.format("plot dot %d<=%d %d<=%d\n", _x, xd, _y, yd);
 			} else {
 				_text.addPlot(_x, 999 - _y, xd, 999 - yd);
 			}

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.6 2013/01/29 16:48:01 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.7 2013/01/29 19:58:18 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.6 2013/01/29 16:48:01 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.7 2013/01/29 19:58:18 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -311,8 +311,8 @@ class Wang_Paper
 		private int _xplots;
 
 		public void addPlot(String s, int x, int y) {
-			int n = _xplots++;
-			if (_xplots > _nplots) {
+			int n = _xplots;
+			if (_xplots + 1 > _nplots) {
 				int o = _nplots;
 				_nplots += 256;
 				plot[] p = new plot[_nplots];
@@ -322,6 +322,7 @@ class Wang_Paper
 				_plotArray = p;
 			}
 			_plotArray[n] = new plot(s, x, y);
+			++_xplots;
 		}
 
 		public void addPlot(int x, int y, int xd, int yd) {
@@ -457,8 +458,8 @@ class Wang_Paper
 		}
 
 		public void addPlot(int x, int y, int xd, int yd) {
-			int n = _xplots++;
-			if (_xplots > _nplots) {
+			int n = _xplots;
+			if (_xplots + 1 > _nplots) {
 				int o = _nplots;
 				_nplots += 256;
 				plot[] p = new plot[_nplots];
@@ -468,6 +469,7 @@ class Wang_Paper
 				_plotArray = p;
 			}
 			_plotArray[n] = new plot(x, y, xd, yd);
+			++_xplots;
 		}
 
 		public void paint(Graphics g) {
