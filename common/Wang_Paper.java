@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.8 2013/01/29 21:09:45 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.9 2013/01/29 22:52:54 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.8 2013/01/29 21:09:45 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.9 2013/01/29 22:52:54 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -159,7 +159,7 @@ class Wang_Paper
 		_scroll = new JScrollPane((JPanel)_text);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		//_scroll.setPreferredSize(new Dimension(dotWidth, dotHeight));
+		_scroll.setPreferredSize(new Dimension(1024, 768));
 		_frame.add(_scroll);
 
 		_mb = new JMenuBar();
@@ -341,13 +341,17 @@ class Wang_Paper
 		}
 
 		public void paint(Graphics g) {
-			super.paint(g);
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.addRenderingHints(new RenderingHints(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON));
+			super.paint(g2d);
+			g2d.scale(_gx, _gy);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
-				double xx, yy;
-				xx = (_plotArray[x].x * _gx) + 0.5;
-				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
-				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
+				g2d.drawString(_plotArray[x].s,
+						_plotArray[x].x,
+						_plotArray[x].y + _fa);
 			}
 		}
 
@@ -375,6 +379,8 @@ class Wang_Paper
 			double gx = (w0 / 1300.0);
 			double gy = (l / (100.0 / 6.0));
 			int lpp = 60; // (int)(h0 / l);
+			g2d.scale(_gx, _gy);
+			g2d.scale(gx, gy);
 			int max = getLineCount();
 			int i = 0;
 			while (pg <= pageIndex) {
@@ -400,14 +406,14 @@ class Wang_Paper
 					int ps = (int)(h0 * pg);
 					int pe = (int)(ps + h0);
 					for (i = 0; i < _xplots; ++i) {
-						double xx, yy;
+						double yy;
 						// convert 1/100ths to points...
-						xx = (_plotArray[i].x * gx) + 0.5;
 						yy = (_plotArray[i].y * gy) + 0.5;
 						if (yy >= ps && yy < pe) {
 							++did;
 							g2d.drawString(_plotArray[i].s,
-								(int)xx, (int)yy - ps + 1);
+								_plotArray[i].x,
+								_plotArray[i].y - ps + 1);
 						}
 					}
 				}
@@ -478,20 +484,22 @@ class Wang_Paper
 
 		public void paint(Graphics g) {
 			Graphics2D g2d = (Graphics2D)g;
+			g2d.addRenderingHints(new RenderingHints(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON));
 			super.paint(g2d);
+			g2d.scale(_gx, _gy);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
-				double xx, yy;
-				xx = (_plotArray[x].x * _gx) + 0.5;
-				yy = (_plotArray[x].y * _gy) + 0.5;
 				if (_plotArray[x].xd < 0) {
-					g2d.drawOval((int)xx + _ox - 1, (int)yy + _oy - 1,
-							1, 1);
+					g2d.drawOval(_plotArray[x].x,
+						_plotArray[x].y,
+						1, 1);
 				} else {
-					double xd = (_plotArray[x].xd * _gx) + 0.5;
-					double yd = (_plotArray[x].yd * _gy) + 0.5;
-					g2d.drawLine((int)xx + _ox, (int)yy + _oy,
-						(int)xd + _ox, (int)yd + _oy);
+					g2d.drawLine(_plotArray[x].x,
+						_plotArray[x].y,
+						_plotArray[x].xd,
+						_plotArray[x].yd);
 				}
 			}
 		}
@@ -507,55 +515,43 @@ class Wang_Paper
 			int l = g2d.getFont().getSize();
 
 			int did = 0;
-			double oh0 = h0;
 			g2d.setColor(Color.white);
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
 
+			g2d.drawString(_footer, 0, (int)h0 - (l + 5) / 6);
 			h0 -= l; // make space for footer line
-			g2d.drawRect(0, 0, (int)w0, (int)h0);
-			
-			double gx = 1;	// TBD
-			double gy = 1;	// TBD
-			if (h0 < w0) {
-				gy = h0 / (1000 * Math.abs(_gy));
-				gx = gy * _gx;
+
+			double gs = 1.0;
+			Dimension d = getSize();
+			double ow0 = d.width;
+			double oh0 = d.height;
+			g2d.scale(_gx, _gy);
+			if (w0 / h0 > ow0 / oh0) {
+				gs = h0 / oh0;
 			} else {
-				gx = w0 / (1000 * _gx);
-				gy = gx * Math.abs(_gy);
+				gs = w0 / ow0;
 			}
-//System.err.println("print() scaling is " + gx + "x" + gy);
+			g2d.scale(gs, gs);
+			// virtual paper size is 1000x1000
+			g2d.drawRect(0, 0, 1000, 1000);
 			if (pageIndex == 0) {	// only one page - ever
 				int i;
 				for (i = 0; i < _xplots; ++i) {
-					double xx, yy;
-					// convert 1/1000ths to points...
-					xx = (_plotArray[i].x * gx) + 0.5;
-					if (xx < 0.0) xx = 0.0;
-					if (xx >= w0) xx = w0 - 0.1;
-					yy = (_plotArray[i].y * gy) + 0.5;
-					if (yy < 0.0) yy = 0.0;
-					if (yy >= h0) yy = h0 - 0.1;
 					++did;
 					if (_plotArray[i].xd < 0) {
-						g2d.drawOval((int)xx - 1, (int)yy - 1,
-								1, 1);
+						g2d.drawOval(_plotArray[i].x,
+							_plotArray[i].y,
+							1, 1);
 					} else {
-						double xd = (_plotArray[i].xd * gx) + 0.5;
-						if (xd < 0.0) xd = 0.0;
-						if (xd >= w0) xd = w0 - 0.1;
-						double yd = (_plotArray[i].yd * gy) + 0.5;
-						if (yd < 0.0) yd = 0.0;
-						if (yd >= h0) yd = h0 - 0.1;
-//System.err.println("("+_plotArray[i].x+","+_plotArray[i].y+")-("+_plotArray[i].xd+","+_plotArray[i].yd+") => ("+xx+","+yy+")-("+xd+","+yd+")");
-						g2d.drawLine((int)xx, (int)yy,
-							(int)xd, (int)yd);
+						g2d.drawLine(_plotArray[i].x,
+							_plotArray[i].y,
+							_plotArray[i].xd,
+							_plotArray[i].yd);
 					}
 				}
 			}
 			if (did > 0) {
-				// need a font for this...
-				g2d.drawString(_footer, 0, (int)oh0 - (l + 5) / 6);
 				return Printable.PAGE_EXISTS;
 			} else {
 				return Printable.NO_SUCH_PAGE;
