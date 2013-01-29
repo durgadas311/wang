@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.7 2013/01/29 19:58:18 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.8 2013/01/29 21:09:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.7 2013/01/29 19:58:18 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.8 2013/01/29 21:09:45 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -56,6 +56,10 @@ class Wang_Paper
 
 	String _footer;
 	JMenuBar _mb;
+
+	public void setPage(int x, int y) {
+		_text.setPreferredSize(new Dimension(x, y));
+	}
 
 	public void setScale(double sx, double sy) {
 		_gx = sx;
@@ -155,7 +159,7 @@ class Wang_Paper
 		_scroll = new JScrollPane((JPanel)_text);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		_scroll.setPreferredSize(new Dimension(dotWidth, dotHeight));
+		//_scroll.setPreferredSize(new Dimension(dotWidth, dotHeight));
 		_frame.add(_scroll);
 
 		_mb = new JMenuBar();
@@ -500,11 +504,16 @@ class Wang_Paper
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.translate(x0, y0);
 //System.err.println("print() " + pageIndex + ": " + x0 + "," + y0 + " " + w0 + "x" + h0);
+			int l = g2d.getFont().getSize();
 
 			int did = 0;
+			double oh0 = h0;
 			g2d.setColor(Color.white);
 			g2d.fillRect(0, 0, (int)w0, (int)h0);
 			g2d.setColor(Color.black);
+
+			h0 -= l; // make space for footer line
+			g2d.drawRect(0, 0, (int)w0, (int)h0);
 			
 			double gx = 1;	// TBD
 			double gy = 1;	// TBD
@@ -545,7 +554,8 @@ class Wang_Paper
 				}
 			}
 			if (did > 0) {
-				g2d.drawString(_footer, 0, (int)h0 - 20); // TBD
+				// need a font for this...
+				g2d.drawString(_footer, 0, (int)oh0 - (l + 5) / 6);
 				return Printable.PAGE_EXISTS;
 			} else {
 				return Printable.NO_SUCH_PAGE;

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.10 2013/01/29 19:58:18 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.11 2013/01/29 21:09:45 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.10 2013/01/29 19:58:18 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.11 2013/01/29 21:09:45 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -144,10 +144,30 @@ class Wang_Plotter extends Wang_Paper
 		// by the associated code 0x00-0x3f.
 	}
 
+	public void setPaper(double w, double h) {
+		// width and height, in inches, of "printable" area...
+		double dpi;
+		if (w < h) {
+			dpi = 1000 / w;
+		} else {
+			dpi = 1000 / h;
+		}
+		int x = (int)(w * dpi + 0.5);
+		int y = (int)(h * dpi + 0.5);
+		super.setPage(x, y);
+		double sx = 1.0;
+		double sy = 1.0;
+		if (w < h) {
+			sy = h / w;
+		} else if (h < w) {
+			sx = w / h;
+		}
+		super.setScale(sx, sy);
+	}
+
 	public Wang_Plotter() {
 		super(Wang_UI.getSeries() + Model, Description, 1000, 1000);
-		super.setScale(1.0, 1.0);
-		super.setOrigin(0, 0);
+		setPaper(11.0 - 1.0, 8.5 - 1.0);
 		JMenu mu;
 		mu = new JMenu("Plotter");
 		JMenuItem mi;
