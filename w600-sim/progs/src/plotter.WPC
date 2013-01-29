@@ -7,6 +7,7 @@ FLABEL(f_of_x)
 FLABEL(plot_setup)
 FLABEL(scale_Y)
 FLABEL(trans)
+FLABEL(char_size)
 
 // Registers:
 #define plotY	0
@@ -63,6 +64,8 @@ MARK(loop)
 	RE(maxX)
 	SUB(temp)
 	J_IF_P() SEARCH(loop)
+	ENTER(3)
+	FCALL(char_size)
 	ALPHA_PLOT(" Y = SIN{X}")
 	END_PROG()
 
@@ -100,6 +103,19 @@ MARK(trans)
 	ADD(plotX)
 	RE(tranY)
 	ADD(plotY)
+	RETURN()
+
+MARK(char_size)
+	ST(plotX)
+	ENTER(0)
+	ST(plotY)
+	ALPHA_PLOT("\130")	// char size
+	ENTER(1.4)
+	ST(plotY)
+	ENTER(6)
+	MULT(plotX)
+	MULT(plotY)
+	ALPHA_PLOT("\132")	// set char spacing
 	RETURN()
 
 END()
