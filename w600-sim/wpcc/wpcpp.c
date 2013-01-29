@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-char xlat[256] = {
+char xlat_string[256] = {
 ['-'] = 0x00,
 ['y'] = 0x01,
 [' '] = 0x02,
@@ -124,6 +124,76 @@ char xlat[256] = {
 ['L'] = 0x7f,
 };
 
+char xlat_plot[256] = {
+['-'] = 0x00,
+['Y'] = 0x01,
+[' '] = 0x02,
+['/'] = 0x03,
+['Q'] = 0x04,
+['P'] = 0x05,
+['+'] = 0x06,
+['J'] = 0x07,
+['}'] = 0x08,
+['?'] = 0x09,
+['='] = 0x0a,
+['{'] = 0x0b,
+[','] = 0x0c,
+[':'] = 0x0d,
+['F'] = 0x0e,
+['G'] = 0x0f,
+
+['W'] = 0x10,
+['S'] = 0x11,
+//[''] = 0x12,        // shift dn
+//[''] = 0x13,        // shift up
+['I'] = 0x14,
+['\''] = 0x15,
+['.'] = 0x16,
+//['\001'] = 0x17,      // 1/2...
+//['\n'] = 0x18,
+['O'] = 0x19,
+//['\n'] = 0x1a,
+//['\n'] = 0x1b,      // rev index
+['A'] = 0x1c,
+['R'] = 0x1d,
+['V'] = 0x1e,
+['M'] = 0x1f,
+
+['B'] = 0x20,
+['H'] = 0x21,
+//['+'] = 0x22,       // step x+
+//['+'] = 0x23,       // step x-
+['K'] = 0x24,
+['E'] = 0x25,
+['N'] = 0x26,
+['T'] = 0x27,
+//[''] = 0x28,        // print mode
+['1'] = 0x29,
+//['+'] = 0x2a,       // step y+
+//['+'] = 0x2b,       // step y-
+['C'] = 0x2c,
+['D'] = 0x2d,
+['U'] = 0x2e,
+['X'] = 0x2f,
+
+['9'] = 0x30,
+['0'] = 0x31,
+//[''] = 0x32,        // step x+y+
+//[''] = 0x33,        // step x-y+
+['6'] = 0x34,
+['5'] = 0x35,
+['2'] = 0x36,
+['Z'] = 0x37,
+//[''] = 0x38,        // plot mode
+['4'] = 0x39,
+//[''] = 0x3a,        // step x+y-
+//[''] = 0x3b,        // step x-y-
+['8'] = 0x3c,
+['7'] = 0x3d,
+['3'] = 0x3e,
+['L'] = 0x3f,
+};
+
 char buf[256];
 char str[256];
 
@@ -147,7 +217,7 @@ void do_enter(char *s) {
 	}
 }
 
-void do_alpha(char *s) {
+void do_alpha(char *s, char *xlat) {
 	int start = 0;
 	int shift = 0;
 	int esc = 0;
@@ -212,13 +282,18 @@ int main(int argc, char **argv) {
 		while (isspace(*t)) ++t;
 		x = sscanf(t, "ALPHA_STRING(\"%[^\"]\")", str);
 		if (x == 1) {
-			do_alpha(str);
+			do_alpha(str, xlat_string);
 		} else {
-			x = sscanf(t, "ENTER(%[^)])", str);
+			x = sscanf(t, "ALPHA_PLOT(\"%[^\"]\")", str);
 			if (x == 1) {
-				do_enter(str);
+				do_alpha(str, xlat_plot);
 			} else {
-				printf(buf);
+				x = sscanf(t, "ENTER(%[^)])", str);
+				if (x == 1) {
+					do_enter(str);
+				} else {
+					printf(buf);
+				}
 			}
 		}
 	}
