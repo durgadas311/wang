@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.8 2013/01/29 16:15:41 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.9 2013/01/29 16:48:01 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.8 2013/01/29 16:15:41 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.9 2013/01/29 16:48:01 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -194,9 +194,7 @@ class Wang_Plotter extends Wang_Paper
 				_x = sx;
 				_y = sy;
 			} else {
-				_dx = cg[i].dx * _cx;
-				_dy = cg[i].dy * _cy;
-				r = _plot(cg[i].pen != 0);
+				r = _plot(cg[i].pen != 0, cg[i].dx * _cx, cg[i].dy * _cy);
 			}
 			res = (res || r);
 		}
@@ -214,28 +212,35 @@ class Wang_Plotter extends Wang_Paper
 		return res;
 	}
 
-	private boolean _plot(boolean draw) {
-		int xd = _x + _dx;
+	private boolean _plot(boolean draw, int dx, int dy) {
+		int xd = _x + dx;
 		if (xd < 0) xd = 0;
 		if (xd >= 1000) xd = 999;
-		int yd = _y + _dy;
+		int yd = _y + dy;
 		if (yd < 0) yd = 0;
 		if (yd >= 1000) yd = 999;
 //System.err.println("Plot " + _x + "," + _y + " -> " + xd + "," + yd);
 		// Plotter origin is different than our drawables... flip "y".
-		if (draw) _text.addPlot(_x, 999 - _y, xd, 999 - yd);
+		if (draw) {
+			if (dx == 0 && dy == 0) {
+				// plot a "dot"...
+				_text.addPlot(_x, 999 - _y, -1, -1);
+			} else {
+				_text.addPlot(_x, 999 - _y, xd, 999 - yd);
+			}
+		}
 		_x = xd;
 		_y = yd;
 		return draw;
 	}
 
 	private boolean plot() {
-		return _plot(true);
+		return _plot(true, _dx, _dy);
 	}
 
 	private boolean move() {
 		//System.err.println("move(" + _dx + "," + _dy + ")");
-		return _plot(false);
+		return _plot(false, _dx, _dy);
 	}
 
 	private boolean index() {

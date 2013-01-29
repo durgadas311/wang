@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.5 2013/01/28 21:46:57 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.6 2013/01/29 16:48:01 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.5 2013/01/28 21:46:57 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.6 2013/01/29 16:48:01 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -478,10 +478,15 @@ class Wang_Paper
 				double xx, yy;
 				xx = (_plotArray[x].x * _gx) + 0.5;
 				yy = (_plotArray[x].y * _gy) + 0.5;
-				double xd = (_plotArray[x].xd * _gx) + 0.5;
-				double yd = (_plotArray[x].yd * _gy) + 0.5;
-				g2d.drawLine((int)xx + _ox, (int)yy + _oy,
+				if (_plotArray[x].xd < 0) {
+					g2d.drawOval((int)xx + _ox - 1, (int)yy + _oy - 1,
+							1, 1);
+				} else {
+					double xd = (_plotArray[x].xd * _gx) + 0.5;
+					double yd = (_plotArray[x].yd * _gy) + 0.5;
+					g2d.drawLine((int)xx + _ox, (int)yy + _oy,
 						(int)xd + _ox, (int)yd + _oy);
+				}
 			}
 		}
 
@@ -521,15 +526,20 @@ class Wang_Paper
 					if (yy < 0.0) yy = 0.0;
 					if (yy >= h0) yy = h0 - 0.1;
 					++did;
-					double xd = (_plotArray[i].xd * gx) + 0.5;
-					if (xd < 0.0) xd = 0.0;
-					if (xd >= w0) xd = w0 - 0.1;
-					double yd = (_plotArray[i].yd * gy) + 0.5;
-					if (yd < 0.0) yd = 0.0;
-					if (yd >= h0) yd = h0 - 0.1;
+					if (_plotArray[i].xd < 0) {
+						g2d.drawOval((int)xx - 1, (int)yy - 1,
+								1, 1);
+					} else {
+						double xd = (_plotArray[i].xd * gx) + 0.5;
+						if (xd < 0.0) xd = 0.0;
+						if (xd >= w0) xd = w0 - 0.1;
+						double yd = (_plotArray[i].yd * gy) + 0.5;
+						if (yd < 0.0) yd = 0.0;
+						if (yd >= h0) yd = h0 - 0.1;
 //System.err.println("("+_plotArray[i].x+","+_plotArray[i].y+")-("+_plotArray[i].xd+","+_plotArray[i].yd+") => ("+xx+","+yy+")-("+xd+","+yd+")");
-					g2d.drawLine((int)xx, (int)yy,
+						g2d.drawLine((int)xx, (int)yy,
 							(int)xd, (int)yd);
+					}
 				}
 			}
 			if (did > 0) {
