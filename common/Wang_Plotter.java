@@ -1,13 +1,14 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.4 2013/01/28 21:46:57 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.5 2013/01/29 00:56:07 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
+import java.io.*;
 
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.4 2013/01/28 21:46:57 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.5 2013/01/29 00:56:07 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -36,8 +37,39 @@ class Wang_Plotter extends Wang_Paper
 		System.err.println("Plotter Setup menu");
 	}
 
+	private class Plotter_CharGen {
+		public byte pen;
+		public byte dx;
+		public byte dy;
+	}
+
+	Plotter_CharGen[][] cn24_chrgen;
+
+	private void setup_chrgen() {
+		InputStream inp = this.getClass().getResourceAsStream("plotter_chrgen.dat");
+		cn24_chrgen = new Plotter_CharGen[64][];
+		// there MUST be an easier way...
+		try {
+			int x, y;
+			for (x = 0; x < 64; ++x) {
+				cn24_chrgen[x] = new Plotter_CharGen[16];
+				for (y = 0; y < 16; ++y) {
+					cn24_chrgen[x][y] = new Plotter_CharGen();
+//System.err.format("cn24_chrgen[%d][%d] = b[%d]\n", x, y, z);
+					cn24_chrgen[x][y].pen = (byte)inp.read(); //b[z];
+					cn24_chrgen[x][y].dx = (byte)inp.read(); //b[z];
+					cn24_chrgen[x][y].dy = (byte)inp.read(); //b[z];
+				}
+			}
+			inp.close();
+		} catch(Exception e) {
+			System.err.println("Failed to read character generator");
+		}
+	}
+
+	// This is no longer needed, really. Decode control chars explicitely?
 	private void setup_xlate() {
-		cn24_xlate = new byte[256];
+		cn24_xlate = new byte[64];
 		cn24_xlate[0x00] = '-';
 		cn24_xlate[0x01] = 'Y';
 		cn24_xlate[0x02] = ' ';
@@ -126,17 +158,56 @@ class Wang_Plotter extends Wang_Paper
 		mu.add(mi);
 		super.addMenu(mu);
 		setup_xlate();
+		setup_chrgen();
 		home();
 		_dx = 0;
 		_dy = 0;
+		_cx = 3;
+		_cy = 3;
 	}
 
 	private int _x, _y;
 	private int _dx, _dy;
+	private int _cx, _cy;
 
+	private boolean _plotChar(byte p) {
+		boolean res = false, r;
+		Plotter_CharGen[] cg;
+		cg = cn24_chrgen[p];
+//System.err.println("cg = " + cg);
+		if (cg == null) return res;
+		int sx = _x;
+		int sy = _y;
+		int i;
+		for (i = 0; i < 16; ++i) {
+//System.err.println("cg[" + i + "] = " + cg[i]);
+			if (cg[i].pen == 0 && cg[i].dx == 0 && cg[i].dy == 0) {
+				break;
+			}
+			if ((cg[i].pen & 0x80) != 0) {
+				byte q = (byte)(cg[i].pen & 0x3f);
+				r = _plotChar(q);
+				_x = sx;
+				_y = sy;
+			} else {
+				_dx = cg[i].dx * _cx;
+				_dy = cg[i].dy * _cy;
+				r = _plot(cg[i].pen != 0);
+			}
+			res = (res || r);
+		}
+		_x = sx;
+		_y = sy;
+		return res;
+	}
 	private boolean plotChar(byte p) {
-		System.err.println("Character " + p);
-		return true;
+		System.err.format("Character %02x\n", p);
+		if (p >= 64) return false;
+		boolean res = _plotChar(p);
+		_x += 5 * _cx;
+		_dx = 0;
+		_dy = 0;
+		return res;
 	}
 
 	private boolean _plot(boolean draw) {
@@ -260,7 +331,7 @@ class Wang_Plotter extends Wang_Paper
 			}
 			// ignore anything else
 		} else {
-			drew = plotChar(p);
+			drew = plotChar(c);
 		}
 		_dx = _dy = 0;
 		if (drew) {
