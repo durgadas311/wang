@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.24 2013/01/29 16:48:01 drmiller Exp $ -->
+<!-- $Id: wang600bycode.html,v 1.25 2013/01/30 08:51:55 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -899,6 +899,16 @@ or else each character will be speparated from the last by the X and Y delta.
 indicate what a programmer would put in an ALPHA - ALPHA&nbsp;END sequence
 to produce the indicated results. The device interprets the codes 0x00 through 0x3f
 according to state previously set up (e.g. plot mode or print mode).
+
+<P>Note the reversal of "1" and "L" in the Plotter table. The IBM Selectric
+considered the digit 1 to be redundant with lower-case ell. Many typeballs
+replaced "1" with other special characters. Because of this, the Wang 600
+microcode could not assume that it could print a "1" using the code for "1".
+Therefor, it uses lower case ell. In order to use the same microcode for both
+the Output Writer and the Plotter, the plotter's character decoding had to 
+interpret lower case ell as "1" and use the encoding normally assigned to "1" as "L".
+This means that programs written for the Output Writer may not be completely
+compatable with the Plotter.
 
 </BODY>
 </HTML>
