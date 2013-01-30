@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 char xlat_string[256] = {
-['-'] = 0x00,
+['-'] = 0x80,
 ['y'] = 0x01,
 [' '] = 0x02,
 ['\b'] = 0x03,
@@ -25,11 +25,11 @@ char xlat_string[256] = {
 ['i'] = 0x14,
 ['\''] = 0x15,
 ['.'] = 0x16,
-//['\001'] = 0x17,      // 1/2...
-['\n'] = 0x18,
+['['] = 0x17,      // 1/2...
+['\r'] = 0x18,		// return-index
 ['o'] = 0x19,
-//['\n'] = 0x1a,
-//['\n'] = 0x1b,      // rev index
+['\n'] = 0x1a,		// index
+['\v'] = 0x1b,		// rev index
 ['a'] = 0x1c,
 ['r'] = 0x1d,
 ['v'] = 0x1e,
@@ -44,7 +44,7 @@ char xlat_string[256] = {
 ['n'] = 0x26,
 ['t'] = 0x27,
 //[''] = 0x28,        // print mode
-['1'] = 0x29,
+['l'] = 0x29,
 //['+'] = 0x2a,       // step y+
 //['+'] = 0x2b,       // step y-
 ['c'] = 0x2c,
@@ -67,7 +67,7 @@ char xlat_string[256] = {
 ['8'] = 0x3c,
 ['7'] = 0x3d,
 ['3'] = 0x3e,
-['l'] = 0x3f,
+['1'] = 0x3f,
 
 // shifted versions...
 ['_'] = 0x40,
@@ -89,7 +89,7 @@ char xlat_string[256] = {
 ['I'] = 0x54,
 ['"'] = 0x55,
 ['.'] = 0x56,
-//['\002'] = 0x57,      // 1/4
+['{'] = 0x57,      // 1/4
 //['\n'] = 0x58,
 ['O'] = 0x59,
 //['\n'] = 0x5a,
@@ -105,7 +105,7 @@ char xlat_string[256] = {
 ['E'] = 0x65,
 ['N'] = 0x66,
 ['T'] = 0x67,
-['!'] = 0x69,
+['L'] = 0x69,
 ['C'] = 0x6c,
 ['D'] = 0x6d,
 ['U'] = 0x6e,
@@ -113,7 +113,7 @@ char xlat_string[256] = {
 
 ['('] = 0x70,
 [')'] = 0x71,
-//['\003'] = 0x74,      // cent
+['^'] = 0x74,      // cent
 ['%'] = 0x75,
 ['@'] = 0x76,
 ['Z'] = 0x77,
@@ -121,11 +121,18 @@ char xlat_string[256] = {
 ['*'] = 0x7c,
 ['&'] = 0x7d,
 ['#'] = 0x7e,
-['L'] = 0x7f,
+['!'] = 0x7f,
 };
 
 char xlat_plot[256] = {
-['-'] = 0x00,
+// plotter special commands, without "plot" bit
+['\001'] = 0x12,
+['\002'] = 0x13,
+['\003'] = 0x18,
+['\004'] = 0x1a,
+['\005'] = 0x1b,
+
+['-'] = 0x80,
 ['Y'] = 0x01,
 [' '] = 0x02,
 ['/'] = 0x03,
@@ -150,10 +157,10 @@ char xlat_plot[256] = {
 ['\''] = 0x15,
 ['.'] = 0x16,
 //['\001'] = 0x17,      // 1/2...
-//['\n'] = 0x18,
+['\r'] = 0x18,	// return-index = lineend
 ['O'] = 0x19,
-//['\n'] = 0x1a,
-//['\n'] = 0x1b,      // rev index
+['\n'] = 0x1a,	// index
+['\v'] = 0x1b,  // rev index
 ['A'] = 0x1c,
 ['R'] = 0x1d,
 ['V'] = 0x1e,
@@ -192,6 +199,33 @@ char xlat_plot[256] = {
 ['7'] = 0x3d,
 ['3'] = 0x3e,
 ['L'] = 0x3f,
+// map lowercase to upper...
+['y'] = 0x01,
+['q'] = 0x04,
+['p'] = 0x05,
+['j'] = 0x07,
+['f'] = 0x0e,
+['g'] = 0x0f,
+['w'] = 0x10,
+['s'] = 0x11,
+['i'] = 0x14,
+['o'] = 0x19,
+['a'] = 0x1c,
+['r'] = 0x1d,
+['v'] = 0x1e,
+['m'] = 0x1f,
+['b'] = 0x20,
+['h'] = 0x21,
+['k'] = 0x24,
+['e'] = 0x25,
+['n'] = 0x26,
+['t'] = 0x27,
+['c'] = 0x2c,
+['d'] = 0x2d,
+['u'] = 0x2e,
+['x'] = 0x2f,
+['z'] = 0x37,
+['l'] = 0x3f,
 };
 
 char buf[256];
@@ -221,6 +255,7 @@ void do_alpha(char *s, char *xlat) {
 	int start = 0;
 	int shift = 0;
 	int esc = 0;
+	int plot = 0;
 	int x;
 	int c;
 
@@ -232,6 +267,27 @@ void do_alpha(char *s, char *xlat) {
 			case 'n': x = '\n'; break;
 			case 'b': x = '\b'; break;
 			case 'r': x = '\r'; break;
+			case 'v': x = '\v'; break;
+			case '%':	// plotter command for draw
+				x = '\001';
+				plot = 1;
+				break;
+			case '^':	// plotter command for move
+				x = '\002';
+				plot = 1;
+				break;
+			case 'z':	// plotter command for char size
+				x = '\003';
+				plot = 1;
+				break;
+			case 's':	// plotter command for char spacing
+				x = '\004';
+				plot = 1;
+				break;
+			case 'h':	// plotter command for home
+				x = '\005';
+				plot = 1;
+				break;
 			default:
 				if (isdigit(x) && isdigit(s[0]) && isdigit(s[1])) {
 					c = ((x & 3) << 6) |
@@ -249,12 +305,22 @@ void do_alpha(char *s, char *xlat) {
 			esc = 1;
 			continue;
 		}
+		if (x == '|') {
+			plot = 1;
+			continue;
+		}
+		if (x >= 0) {
+			c = xlat[x];
+			if (c == 0) { // invalid character
+				// warning message?
+				continue;
+			}
+		}
 		if (!start) {
 			start = 1;
 			printf("_opcode(0x92);\n");
 		}
 		if (x >= 0) {
-			c = xlat[x];
 			if ((c & 0x40) && !shift) {
 				shift = 1;
 				printf("_opcode(0x13);\n");
@@ -264,6 +330,10 @@ void do_alpha(char *s, char *xlat) {
 				printf("_opcode(0x12);\n");
 			}
 			c &= 0x3f;
+			if (plot) {
+				c |= 0x40;
+				plot = 0;
+			}
 		}
 		printf("_opcode(0x%x);\n", c);
 	}
