@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.13 2013/01/30 00:07:40 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.14 2013/01/30 19:13:12 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,12 +8,11 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.13 2013/01/30 00:07:40 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.14 2013/01/30 19:13:12 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
 	boolean _plot;	// mode, plot or print...
-	private byte[] cn24_xlate;
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -66,82 +65,6 @@ class Wang_Plotter extends Wang_Paper
 		} catch(Exception e) {
 			System.err.println("Failed to read character generator");
 		}
-	}
-
-	// This is no longer needed, really. Decode control chars explicitely?
-	private void setup_xlate() {
-		cn24_xlate = new byte[64];
-		cn24_xlate[0x00] = '-';
-		cn24_xlate[0x01] = 'Y';
-		cn24_xlate[0x02] = ' ';
-		cn24_xlate[0x03] = '/';
-		cn24_xlate[0x04] = 'Q';
-		cn24_xlate[0x05] = 'P';
-		cn24_xlate[0x06] = '+';
-		cn24_xlate[0x07] = 'J';
-		cn24_xlate[0x08] = '}';
-		cn24_xlate[0x09] = '?';
-		cn24_xlate[0x0a] = '=';
-		cn24_xlate[0x0b] = '{';
-		cn24_xlate[0x0c] = ',';
-		cn24_xlate[0x0d] = ':';
-		cn24_xlate[0x0e] = 'F';
-		cn24_xlate[0x0f] = 'G';
-
-		cn24_xlate[0x10] = 'W';
-		cn24_xlate[0x11] = 'S';
-		cn24_xlate[0x12] = '\013';	// plot
-		cn24_xlate[0x13] = '\014';	// move
-		cn24_xlate[0x14] = 'I';
-		cn24_xlate[0x15] = '\'';
-		cn24_xlate[0x16] = '.';
-		cn24_xlate[0x17] = '\020';	// EXTENSION: pen color/stroke
-		cn24_xlate[0x18] = '\015';	// char size
-		cn24_xlate[0x19] = 'O';
-		cn24_xlate[0x1a] = '\016';	// char spacing
-		cn24_xlate[0x1b] = '\017';	// home
-		cn24_xlate[0x1c] = 'A';
-		cn24_xlate[0x1d] = 'R';
-		cn24_xlate[0x1e] = 'V';
-		cn24_xlate[0x1f] = 'M';
-
-		cn24_xlate[0x20] = 'B';
-		cn24_xlate[0x21] = 'H';
-		cn24_xlate[0x22] = '\001';	// step x+
-		cn24_xlate[0x23] = '\002';	// step x-
-		cn24_xlate[0x24] = 'K';
-		cn24_xlate[0x25] = 'E';
-		cn24_xlate[0x26] = 'N';
-		cn24_xlate[0x27] = 'T';
-		cn24_xlate[0x28] = '\003';	// print mode (ignored)
-		cn24_xlate[0x29] = '1';
-		cn24_xlate[0x2a] = '\004';	// step y+
-		cn24_xlate[0x2b] = '\005';	// step y-
-		cn24_xlate[0x2c] = 'C';
-		cn24_xlate[0x2d] = 'D';
-		cn24_xlate[0x2e] = 'U';
-		cn24_xlate[0x2f] = 'X';
-
-		cn24_xlate[0x30] = '9';
-		cn24_xlate[0x31] = '0';
-		cn24_xlate[0x32] = '\006';	// step x+y+
-		cn24_xlate[0x33] = '\007';	// step x-y+
-		cn24_xlate[0x34] = '6';
-		cn24_xlate[0x35] = '5';
-		cn24_xlate[0x36] = '2';
-		cn24_xlate[0x37] = 'Z';
-		cn24_xlate[0x38] = '\010';	// plot mode (ignored)
-		cn24_xlate[0x39] = '4';
-		cn24_xlate[0x3a] = '\011';	// step x+y-
-		cn24_xlate[0x3b] = '\012';	// step x-y-
-		cn24_xlate[0x3c] = '8';
-		cn24_xlate[0x3d] = '7';
-		cn24_xlate[0x3e] = '3';
-		cn24_xlate[0x3f] = 'L';
-
-		// No characters over 0x3f are ever received...
-		// Those codes cause the Wang to emit move commands followed
-		// by the associated code 0x00-0x3f.
 	}
 
 	public void setPaper(double w, double h) {
