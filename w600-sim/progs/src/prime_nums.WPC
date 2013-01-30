@@ -1,0 +1,62 @@
+/* ../prime_nums.wng */
+
+#include "wang600.h"
+
+LABEL(again)
+LABEL(done)
+LABEL(got_one)
+LABEL(not_prime)
+LABEL(keep_trying)
+
+#define compare	0
+#define prime	1
+#define temp	2
+#define temp2	8
+#define temp3	10
+
+BEGIN()
+	CLEAR()
+	ENTER(2)
+	PRINT(0,tag_X)
+	ENTER(1)
+	ST(prime)
+MARK(again)
+	ENTER(2)
+	ADD(prime)
+	ST(compare)
+	ENTER(1e10)
+	J_IF_LT()
+	SEARCH(done)
+	RE(prime)
+	SQRT()
+	INT()
+	ST(compare)
+	ENTER(2)
+	ADD(compare)
+	ENTER(1)
+	ST(temp2)
+MARK(keep_trying)
+	RE(prime)
+	ST(temp)
+	ENTER(1)
+	ADD(temp2)
+	J_IF_EQ()
+	SEARCH(not_prime)
+	SEARCH(got_one)
+MARK(not_prime)
+	RE(temp2)
+	DIV(temp)
+	ST(temp3)
+	INT()
+	SUB(temp3)
+	J_IF_0()
+	SEARCH(keep_trying)
+	SEARCH(again)
+MARK(got_one)
+	RE(prime)
+	PRINT(0,tag_X)
+	SEARCH(again)
+
+MARK(done)
+	CLR_DISP()
+END()
