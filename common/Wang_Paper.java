@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.10 2013/01/29 23:25:01 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.11 2013/01/30 00:07:40 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,13 +12,16 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.10 2013/01/29 23:25:01 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.11 2013/01/30 00:07:40 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
 		void addPlot(int x, int y, int xd, int yd);
 		void addPlot(String s, int x, int y);
 		void addText(String s);
+		void setCursor(int x, int y);
+		boolean enableCursor(boolean on);
+
 		// from JComponent:
 		void setBackground(Color c);
 		void setForeground(Color c);
@@ -195,7 +198,9 @@ class Wang_Paper
 			java.awt.image.BufferedImage i =
 				new java.awt.image.BufferedImage(d.width, d.height,
 					java.awt.image.BufferedImage.TYPE_INT_RGB);
+			boolean saved = _text.enableCursor(false);
 			_text.paint(i.getGraphics());
+			_text.enableCursor(saved);
 			try {
 				javax.imageio.ImageIO.write(i, "png", file);
 			} catch (IOException ee) {
@@ -314,6 +319,14 @@ class Wang_Paper
 		private plot[] _plotArray;
 		private int _nplots;
 		private int _xplots;
+		//private int _cx, _cy;
+		private boolean _enableCursor;
+
+		public boolean enableCursor(boolean on) {
+			boolean ret = _enableCursor;
+			_enableCursor = on;
+			return ret;
+		}
 
 		public void addPlot(String s, int x, int y) {
 			int n = _xplots;
@@ -333,6 +346,12 @@ class Wang_Paper
 		public void addPlot(int x, int y, int xd, int yd) {
 			System.err.format("should not call addPlot(%d, %d, %d, %d)\n",
 				x, y, xd, yd);
+		}
+
+		public void setCursor(int x, int y) {
+			//_cx = x;
+			//_cy = y;
+			//scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
 		public void addText(String s) {
@@ -458,6 +477,14 @@ class Wang_Paper
 		private plot[] _plotArray;
 		private int _nplots;
 		private int _xplots;
+		private int _cx, _cy;
+		private boolean _enableCursor;
+
+		public boolean enableCursor(boolean on) {
+			boolean ret = _enableCursor;
+			_enableCursor = on;
+			return ret;
+		}
 
 		public void addPlot(String s, int x, int y) {
 			System.err.format("should not call addPlot(\"%s\", %d, %d)\n",
@@ -483,6 +510,12 @@ class Wang_Paper
 			++_xplots;
 		}
 
+		public void setCursor(int x, int y) {
+			_cx = x;
+			_cy = y;
+			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
+		}
+
 		public void paint(Graphics g) {
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.addRenderingHints(new RenderingHints(
@@ -502,6 +535,12 @@ class Wang_Paper
 						_plotArray[x].xd,
 						_plotArray[x].yd);
 				}
+			}
+			if (_enableCursor) {
+				// don't want this for "save" option...
+				g2d.setColor(Color.red);
+				g2d.drawLine(_cx, _cy - 10, _cx, _cy + 10);
+				g2d.drawLine(_cx - 10, _cy, _cx + 10, _cy);
 			}
 		}
 

@@ -1,7 +1,6 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.12 2013/01/29 23:25:01 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.13 2013/01/30 00:07:40 drmiller Exp $
 
-import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
@@ -9,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.12 2013/01/29 23:25:01 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.13 2013/01/30 00:07:40 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -187,7 +186,9 @@ class Wang_Plotter extends Wang_Paper
 		_cx = 1;
 		_cy = 1;
 		_sx = 6;
-		_sy = 9; // not used?
+		_sy = 9;
+		_text.setCursor(_x, 999 - _y);
+		_text.enableCursor(true);
 	}
 
 	private int _x, _y;
@@ -223,14 +224,16 @@ class Wang_Plotter extends Wang_Paper
 		_y = sy;
 		return res;
 	}
+
 	private boolean plotChar(byte p) {
 //System.err.format("Character %02x\n", p);
 		if (p >= 64) return false;
-		boolean res = _plotChar(p);
+		//boolean res =
+		_plotChar(p);
 		_x += _sx;
 		_dx = 0;
 		_dy = 0;
-		return res;
+		return true;
 	}
 
 	private boolean _plot(boolean draw, int dx, int dy) {
@@ -253,7 +256,7 @@ class Wang_Plotter extends Wang_Paper
 		}
 		_x = xd;
 		_y = yd;
-		return draw;
+		return true;
 	}
 
 	private boolean plot() {
@@ -268,18 +271,18 @@ class Wang_Plotter extends Wang_Paper
 	private boolean index() {
 		_y -= _sy;
 		if (_y < 0) _y = 0;
-		return false;
+		return true;
 	}
 
 	private boolean return_carr() {
 		_x = 0;
-		return false;
+		return true;
 	}
 
 	private boolean rev_index() {
 		_y += _sy;
 		if (_y >= 1000) _y = 999;
-		return false;
+		return true;
 	}
 
 	private boolean return_index() {
@@ -297,8 +300,10 @@ class Wang_Plotter extends Wang_Paper
 
 	private boolean chrSpace() {
 		//System.err.println("chrSpace(" + _dx + "," + _dy + ")");
-		_sx = _dx;
-		_sy = _dy;
+		if (_dx > 0 && _dy > 0 && _dx < 1000 && _dy < 1000) {
+			_sx = _dx;
+			_sy = _dy;
+		}
 		return false;
 	}
 
@@ -318,7 +323,7 @@ class Wang_Plotter extends Wang_Paper
 		// Plotter origin is different than our drawables... flip "y".
 		_x = 0;
 		_y = 0;
-		return false;
+		return true;
 	}
 
 	private boolean setPen() {
@@ -420,9 +425,8 @@ class Wang_Plotter extends Wang_Paper
 		}
 		_dx = _dy = 0;
 		if (drew) {
+			_text.setCursor(_x, 999 - _y);
 			_text.repaint();
-			_text.scrollRectToVisible(new Rectangle(_x - 5, 999 - _y - 5,
-					_x + 5, 999 - _y + 5));
 		}
 		// "auto raise"...
 		onOff(true);
