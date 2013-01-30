@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.12 2013/01/30 22:48:41 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.13 2013/01/30 23:58:50 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,12 +12,13 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.12 2013/01/30 22:48:41 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.13 2013/01/30 23:58:50 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
 		void addPlot(int x, int y, int xd, int yd);
-		void addPlot(String s, int x, int y);
+		int addPlot(String s, int x, int y);
+		int appendLastPlot(String s, int x, int y);
 		void addText(String s);
 		void setCursor(int x, int y);
 		boolean enableCursor(boolean on);
@@ -58,6 +59,7 @@ class Wang_Paper
 		_hasGraphic = (_fx == 0);
 	}
 
+	FontMetrics _fm;
 	String _footer;
 	JMenuBar _mb;
 
@@ -107,10 +109,10 @@ class Wang_Paper
 		//_text.setEditable(false);
 
 		pa.setFont(font);
-		FontMetrics fm = pa.getFontMetrics(pa.getFont());
-		_fa = fm.getAscent();
-		_fx = fm.charWidth('M');
-		_fy = fm.getHeight();
+		_fm = pa.getFontMetrics(pa.getFont());
+		_fa = _fm.getAscent();
+		_fx = _fm.charWidth('M');
+		_fy = _fm.getHeight();
 		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
 		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
 
@@ -247,15 +249,8 @@ class Wang_Paper
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
-			String sfx, dsc;
-			if (_plotter || _hasGraphic) {
-				sfx = "png";
-				dsc = "PNG image files";
-			} else {
-				sfx = "txt";
-				dsc = "Text files";
-			}
-			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc,
+			SuffFileChooser ch = new SuffFileChooser("Save",
+						"png", "PNG image files",
 						Wang_UI.getDir());
 			int rv = ch.showDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
@@ -318,8 +313,8 @@ class Wang_Paper
 		}
 
 		public void clear() {
-			setText("");
-			setCaretPosition(0);
+			//setText("");
+			//setCaretPosition(0);
 			_nplots = 0;
 			_xplots = 0;
 			//_plotArray.dispose();
@@ -330,7 +325,8 @@ class Wang_Paper
 		private plot[] _plotArray;
 		private int _nplots;
 		private int _xplots;
-		//private int _cx, _cy;
+		private int _last = -1;
+		private int _cx, _cy;
 		private boolean _enableCursor;
 
 		public boolean enableCursor(boolean on) {
@@ -339,7 +335,7 @@ class Wang_Paper
 			return ret;
 		}
 
-		public void addPlot(String s, int x, int y) {
+		public int addPlot(String s, int x, int y) {
 			int n = _xplots;
 			if (_xplots + 1 > _nplots) {
 				int o = _nplots;
@@ -352,6 +348,17 @@ class Wang_Paper
 			}
 			_plotArray[n] = new plot(s, x, y);
 			++_xplots;
+			_last = n;
+			return _fm.stringWidth(s);
+		}
+
+		public int appendLastPlot(String s, int x, int y) {
+			if (_last < 0) {
+				return addPlot(s, x, y);
+			} else {
+				_plotArray[_last].s += s;
+				return _fm.stringWidth(s);
+			}
 		}
 
 		public void addPlot(int x, int y, int xd, int yd) {
@@ -360,15 +367,15 @@ class Wang_Paper
 		}
 
 		public void setCursor(int x, int y) {
-			//_cx = x;
-			//_cy = y;
-			//scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
+			_cx = x;
+			_cy = y;
+			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
 		public void addText(String s) {
-			append(s);
-			_eop += s.length();
-			setCaretPosition(_eop);
+			//append(s);
+			//_eop += s.length();
+			//setCaretPosition(_eop);
 		}
 
 		public void paint(Graphics g) {
@@ -383,6 +390,11 @@ class Wang_Paper
 				g2d.drawString(_plotArray[x].s,
 						_plotArray[x].x,
 						_plotArray[x].y + _fa);
+			}
+			if (_enableCursor) {
+				// don't want this for "save" option...
+				g2d.setColor(Color.red);
+				g2d.drawLine(_cx, _cy, _cx, _cy + _fy);
 			}
 		}
 
@@ -497,9 +509,16 @@ class Wang_Paper
 			return ret;
 		}
 
-		public void addPlot(String s, int x, int y) {
+		public int addPlot(String s, int x, int y) {
 			System.err.format("should not call addPlot(\"%s\", %d, %d)\n",
 					s, x, y);
+			return 0;
+		}
+
+		public int appendLastPlot(String s, int x, int y) {
+			System.err.format("should not call appendLastPlot(\"%s\", %d, %d)\n",
+					s, x, y);
+			return 0;
 		}
 
 		public void addText(String s) {

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.4 2013/01/30 22:48:41 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.5 2013/01/30 23:58:50 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.4 2013/01/30 22:48:41 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.5 2013/01/30 23:58:50 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Output Writer";
@@ -39,7 +39,7 @@ class Wang_OutputWriter extends Wang_Paper
 		cn24_xlate = new byte[256];
 		cn24_xlate[0x00] = '-';
 		cn24_xlate[0x01] = 'y';
-		cn24_xlate[0x02] = ' ';
+		//cn24_xlate[0x02] = ' ';
 		cn24_xlate[0x03] = '\b';
 		cn24_xlate[0x04] = 'q';
 		cn24_xlate[0x05] = 'p';
@@ -62,9 +62,9 @@ class Wang_OutputWriter extends Wang_Paper
 		cn24_xlate[0x15] = '\'';
 		cn24_xlate[0x16] = '.';
 		cn24_xlate[0x17] = '\001';	// 1/2...
-		cn24_xlate[0x18] = '\n';
+		//cn24_xlate[0x18] = '\n';
 		cn24_xlate[0x19] = 'o';
-		cn24_xlate[0x1a] = '\n';
+		//cn24_xlate[0x1a] = '\n';
 		//cn24_xlate[0x1b] = '\n';	// rev index
 		cn24_xlate[0x1c] = 'a';
 		cn24_xlate[0x1d] = 'r';
@@ -181,7 +181,7 @@ class Wang_OutputWriter extends Wang_Paper
 
 	public Wang_OutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
-				new Font("Monospaced", Font.PLAIN, 10));
+				new Font("Monospaced", Font.PLAIN, 12));
 		setup_xlate();
 
 		// default to portrait 8.5x11 with margins
@@ -198,12 +198,14 @@ class Wang_OutputWriter extends Wang_Paper
 		mu.add(mi);
 		super.addMenu(mu);
 
-		_text.setCursor(_x, 999 - _y);
+		_adjacent = false;
+		_text.setCursor(_x, _y);
 		_text.enableCursor(true); 
 	}
 
 	private boolean _shifted;
 	private boolean _plot;
+	private boolean _adjacent;
 	private int _x, _y;
 	private int _dx, _dy;
 
@@ -232,6 +234,7 @@ class Wang_OutputWriter extends Wang_Paper
 			case 0: // nothing
 				break;
 			case 1:	// return+index handled below...
+				_adjacent = false;
 				_x = 0;
 				if (_plot) return;
 				index();
@@ -247,6 +250,7 @@ class Wang_OutputWriter extends Wang_Paper
 		} else if ((b[0] & 0x06) == 0x02) {
 			switch((b[0] & 0x30) >> 4) {
 			case 0: // space/bspace or nothing
+				_adjacent = false;
 				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					space();
@@ -259,6 +263,7 @@ class Wang_OutputWriter extends Wang_Paper
 					_shifted = ((b[0] & 1) != 0);
 					return;
 				}
+				_adjacent = false;
 				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					index();
@@ -311,7 +316,7 @@ class Wang_OutputWriter extends Wang_Paper
 		byte[] bb;
 		String s;
 		if (p == 0) {
-			s = new String("<"+b[0]+">");
+			s = null; //new String("<"+b[0]+">");
 		} else if (p < 0x07) {
 			s = cn24_spcl[p];
 		} else {
@@ -325,14 +330,21 @@ class Wang_OutputWriter extends Wang_Paper
 			if (_x >= 1300) _x = 1299; // 13 in. platten
 			_y += _dy;
 			if (_y < 0) _y = 0;
-			_hasGraphic = true;
-			_text.addPlot(s, _x, _y);
-			_text.repaint();
-			//_text.setCaretPosition(_eop); // to what?
-			// todo: need to get JScrollPane to update...
-		} else {
-			_text.addText(s);
+			_adjacent = false;
 		}
+		if (s != null) {
+			int m;
+			if (_adjacent) {
+				m = _text.appendLastPlot(s, _x, _y);
+			} else {
+				m = _text.addPlot(s, _x, _y);
+			}
+			if (!_plot) _x += m;
+			_adjacent = true;
+		}
+		_text.repaint();
+		_text.setCursor(_x, _y);
+
 		// "auto raise"...
 		onOff(true);
 	}
