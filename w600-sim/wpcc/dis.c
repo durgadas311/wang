@@ -61,6 +61,31 @@ char *simp_ext[16] = {
 [15] = "CLR_DISP"
 };
 
+#define EX_PLOT		'\001'
+#define EX_MOVE		'\002'
+#define EX_CHRSIZE	'\003'
+#define EX_CHRSPC	'\004'
+#define EX_HOME		'\005'
+
+#define MAP(c,t)	[t] = c,
+#define REMAP(c,t)
+#define SPMAP(c,t)	MAP(c,t)
+#define EXMAP(c,t)	MAP(c,t)
+#define PLMAP(c,t)	MAP(c,t)
+
+#define NONZERO		0
+#define SHIFT		0x40
+#define PLOT		0x40	// needed in rev table for uniq vals
+
+char revxlat_ow[256] = {
+#include "xlat_outputwriter_x.h"
+};
+char revxlat_plot[256] = {
+#include "xlat_plotter_x.h"
+};
+#undef NONZERO
+#define NONZERO		0x80
+
 void dump_simp(uint8_t a, uint8_t b, char *pre, char *suf) {
 	if (a == 0 && b > 9) {
 		printf("%s%s()%s", pre, simp_ext[b], suf);
@@ -69,21 +94,107 @@ void dump_simp(uint8_t a, uint8_t b, char *pre, char *suf) {
 	}
 }
 
-int dump_string(uint8_t **buf, int *len) {
+int dump_string(uint8_t *buf, int len) {
 	printf("\tALPHA_STRING(\"");
-	char *s = *buf;
-	int n = *len;
-	while (n > 0 && *s != 0x22) {
-		printf("\\%03o", *s); // better xlat later...
-		--n;
-		++s;
+	char *s = buf;
+	int n = len;
+	int shift = 0;
+	for (;n > 0 && *s != 0x22; --n,++s) {
+		int a = *s;
+		if (a == 0x12) {
+			shift = 0;
+			continue;
+		}
+		if (a == 0x13) {
+			shift = 1;
+			continue;
+		}
+		if (shift) {
+			a |= SHIFT;
+		}
+		int c = revxlat_ow[a];
+		if (isprint(c)) {
+			printf("%c", c);
+		} else {
+			switch(c) {
+			case '\n':
+				printf("\\n");
+				break;
+			case '\r':
+				printf("\\r");
+				break;
+			case '\b':
+				printf("\\b");
+				break;
+			case '\v':
+				printf("\\v");
+				break;
+			default:
+				// more decoding later...
+				printf("\\%03o", a & ~SHIFT);
+				break;
+			}
+		}
 	}
 	if (n > 0) {
 		--n;
 		++s;
 	}
 	printf("\")\n");
-	return *len - n;
+	return len - n;
+}
+
+int dump_plot(uint8_t *buf, int len) {
+	printf("//\tALPHA_PLOT(\"");
+	char *s = buf;
+	int n = len;
+	for (;n > 0 && *s != 0x22; --n,++s) {
+		int a = *s;
+		if (a & PLOT) {
+			printf("|");
+		}
+		int c = revxlat_plot[a];
+		if (isprint(c)) {
+			printf("%c", c);
+		} else {
+			switch(c) {
+			case '\n':
+				printf("\\n");
+				break;
+			case '\r':
+				printf("\\r");
+				break;
+			case '\v':
+				printf("\\v");
+				break;
+			case EX_PLOT:
+				printf("\\%%");
+				break;
+			case EX_MOVE:
+				printf("\\^");
+				break;
+			case EX_CHRSIZE:
+				printf("\\z");
+				break;
+			case EX_CHRSPC:
+				printf("\\s");
+				break;
+			case EX_HOME:
+				printf("\\h");
+				break;
+			default:
+				// more decoding later...
+				printf("\\%03o", a);
+				break;
+			}
+		}
+	}
+	if (n > 0) {
+		--n;
+		++s;
+	}
+	printf("\")\n");
+	return len - n;
 }
 
 void dump_alpha(uint8_t c) {
@@ -164,7 +275,6 @@ void dump_alpha(uint8_t c) {
 		printf("\tALPHA(0x%02x)\n", c);
 		break;
 	}
-	printf(")\n");
 }
 
 void dump_two(uint8_t prefix, uint8_t **buf, int *len) {
@@ -205,7 +315,8 @@ void dump_two(uint8_t prefix, uint8_t **buf, int *len) {
 			if (c < 0x80) {
 				--s;
 				++n;
-				int N = dump_string(&s, &n);
+				int N = dump_string(s, n);
+				dump_plot(s, n);
 				n -= N;
 				s += N;
 			} else {
@@ -329,9 +440,10 @@ int main(int argc, char **argv) {
 			goto go_next;
 		}
 		close(fd);
-		printf("/* %s */\n\n#include \"wang600.h\"\n\n", argv[x]);
+		printf("/* %s */\n\n#include \"wang600.h\"\n\nBEGIN()\n", argv[x]);
 		//labels(buf, (int)stb.st_size);
 		dump(buf, (int)stb.st_size);
+		printf("END()\n");
 go_next:
 		free(buf);
 	}

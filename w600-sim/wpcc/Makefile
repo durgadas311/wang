@@ -1,4 +1,5 @@
 CPP = ./wpcpp
+CFLAGS += -I../../common
 
 all: wpcpp dis lst
 
