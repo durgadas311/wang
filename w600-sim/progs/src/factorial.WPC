@@ -1,0 +1,31 @@
+/* ../factorial.wng */
+
+#include "wang600.h"
+
+LABEL(error)
+LABEL(not_done)
+LABEL(loop)
+
+#define count	15
+#define fact	14
+
+BEGIN()
+	J_IF_P()
+	SEARCH(error)
+	ST(count)
+	ENTER(1)
+	ST(fact)
+MARK(loop)
+	RE(count)
+	J_IF_0()
+	SEARCH(not_done)
+	RE(fact)
+	END_PROG()
+MARK(not_done)
+	MULT(fact)
+	ENTER(1)
+	SUB(count)
+	SEARCH(loop)
+MARK(error)
+	CLR_DISP()
+END()

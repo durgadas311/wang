@@ -1,0 +1,7 @@
+/* ../hello.wng */
+
+#include "wang600.h"
+
+BEGIN()
+	ALPHA_STRING("Hello World!\r")
+END()

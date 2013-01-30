@@ -1,0 +1,19 @@
+/* ../random.wng */
+
+#include "wang600.h"
+
+FLABEL(rand)
+
+#define seed	7
+
+BEGIN()
+MARK(rand)
+	ENTER(1)
+	ADD(seed)
+	POW10(7)
+	LOG_E_X()
+	MULT(seed)
+	INT()
+	SUB(seed)
+	RETURN()
+END()
