@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600_h__
 #define __wpcc_wang600_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.9 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.10 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -131,6 +131,7 @@ asm(	".section .wang600code, \"a\";"
 
 #define SEARCH(label)	_oplabel(_search_,label)
 #define RECALL(longreg)	_longreg(0x81,longreg)
+#define _RECALL(reg)	_opcode(0x81) _opcode(reg)
 #define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
 #define GO()		_opcode(0x83)
 #define J_IF_0()	_opcode(0x84)
@@ -148,6 +149,7 @@ asm(	".section .wang600code, \"a\";"
 
 #define MARK(label)	_opcode(0x90) _opcode(label)
 #define STORE(longreg)	_longreg(0x91,longreg)
+#define _STORE(reg)	_opcode(0x91) _opcode(reg)
 #define ALPHA(cmd)	_opcode(0x92) cmd
 #define STOP()		_opcode(0x93)
 #define J_IF_N0()	_opcode(0x94)
@@ -194,8 +196,8 @@ asm(	".section .wang600code, \"a\";"
 #define POW10(n)	ALPHA(_f(n))
 #define POW_10(n)	ALPHA(_F(n))
 #define J_IF_EQ()	ALPHA(J_IF_0())
-#define J_IF_GT		ALPHA(J_IF_P())
-#define J_IF_LT		ALPHA(SIN())
+#define J_IF_GT()	ALPHA(J_IF_P())
+#define J_IF_LT()	ALPHA(SIN())
 #define JUMP(reg)	INDIR(E(reg))
 
 /* These should be pre-rpocessed and never exist when gcc invoked */

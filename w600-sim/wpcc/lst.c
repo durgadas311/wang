@@ -129,6 +129,7 @@ void dump(uint8_t *buf, int len) {
 		} else {
 			printf("%s\n", col_17[b]);
 		}
+		++step;
 	}
 }
 
