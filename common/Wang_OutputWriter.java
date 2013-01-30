@@ -1,18 +1,35 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.3 2013/01/28 21:46:57 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.4 2013/01/30 22:48:41 drmiller Exp $
 
 import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.3 2013/01/28 21:46:57 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.4 2013/01/30 22:48:41 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Output Writer";
 
 	private byte[] cn24_xlate;
 	private String[] cn24_spcl;
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof JMenuItem) {
+			JMenuItem m = (JMenuItem)e.getSource();
+			if (m.getMnemonic() == KeyEvent.VK_U) {
+				//setup();
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_H) {
+				//home();
+				return;
+			}
+		}
+		super.actionPerformed(e);
+	}
 
 	public void reset() {
 		// anything?
@@ -148,11 +165,41 @@ class Wang_OutputWriter extends Wang_Paper
 		cn24_spcl[0x03] = "\u00A2";
 	}
 
+	public void setPaper(double w, double h) {
+		// width and height, in inches, of "printable" area...
+		Wang_FontMetrics wfm = super.getFontMetrics();
+		// assuming 12cpi and 6lpi, and 100dpi,
+		// compute size of page in pixels.
+		double pw = (12.0 * wfm.width) * w; // page width in points
+		double ph = (6.0 * wfm.height) * h; // page height in points
+		super.setPage((int)pw, (int)ph);
+		// now need to be able to convert 1/100ths onto pw x ph page...
+		double sx = (12.0 * wfm.width) / 100.0;
+		double sy = (6.0 * wfm.height) / 100.0;
+		super.setScale(sx, sy);
+	}
+
 	public Wang_OutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
-				new Font("Monospaced", Font.PLAIN, 10),
-				96, 32);
+				new Font("Monospaced", Font.PLAIN, 10));
 		setup_xlate();
+
+		// default to portrait 8.5x11 with margins
+		setPaper(8.5 - 1.0, 11 - 1.0);
+
+		JMenu mu;
+		mu = new JMenu("Typewriter");
+		JMenuItem mi;
+		mi = new JMenuItem("Setup", KeyEvent.VK_U);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Home", KeyEvent.VK_H);
+		mi.addActionListener(this);
+		mu.add(mi);
+		super.addMenu(mu);
+
+		_text.setCursor(_x, 999 - _y);
+		_text.enableCursor(true); 
 	}
 
 	private boolean _shifted;

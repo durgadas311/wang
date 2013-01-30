@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.11 2013/01/30 00:07:40 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.12 2013/01/30 22:48:41 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.11 2013/01/30 00:07:40 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.12 2013/01/30 22:48:41 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -75,9 +75,21 @@ class Wang_Paper
 		_oy = oy;
 	}
 
+	public class Wang_FontMetrics {
+		int ascent;
+		int width;
+		int height;
+	}
+	public Wang_FontMetrics getFontMetrics() {
+		Wang_FontMetrics wfm = new Wang_FontMetrics();
+		wfm.ascent = _fa;
+		wfm.width = _fx;
+		wfm.height = _fy;
+		return wfm;
+	}
+
 	// variable length, a.k.a. continuous form, paper
-	public Wang_Paper(String model, String descr,
-				Font font, int charWidth, int charHeight) {
+	public Wang_Paper(String model, String descr, Font font) {
 		_plotter = false;
 		_model = model;
 		_descr = descr;
@@ -90,8 +102,7 @@ class Wang_Paper
 		PlotTextArea pa = new PlotTextArea();
 		_text = pa;
 
-		// setting this messes up horiz scrollbar...
-		//_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
+		_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
 
@@ -108,7 +119,7 @@ class Wang_Paper
 		_scroll = new JScrollPane(pa);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		_scroll.setPreferredSize(new Dimension(charWidth * _fx, charHeight * _fy));
+		_scroll.setPreferredSize(new Dimension(1024, 768));
 		_frame.add(_scroll);
 
 		_mb = new JMenuBar();
