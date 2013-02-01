@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.15 2013/01/30 22:48:24 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.16 2013/02/01 17:44:39 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.15 2013/01/30 22:48:24 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.16 2013/02/01 17:44:39 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -354,7 +354,11 @@ class Wang_Plotter extends Wang_Paper
 		onOff(true);
 	}
 
+	static public String getModel() {
+		return Wang_UI.getSeries() + Model;
+	}
+
 	static public String getName() {
-		return Wang_UI.getSeries() + Model + " " + Description;
+		return getModel() + " " + Description;
 	}
 }

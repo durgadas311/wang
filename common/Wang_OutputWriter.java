@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.5 2013/01/30 23:58:50 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.6 2013/02/01 17:44:39 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.5 2013/01/30 23:58:50 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.6 2013/02/01 17:44:39 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Output Writer";
@@ -349,7 +349,11 @@ class Wang_OutputWriter extends Wang_Paper
 		onOff(true);
 	}
 
+	static public String getModel() {
+		return Wang_UI.getSeries() + Model;
+	}
+
 	static public String getName() {
-		return Wang_UI.getSeries() + Model + " " + Description;
+		return getModel() + " " + Description;
 	}
 }

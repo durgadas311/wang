@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.2 2013/01/27 17:14:35 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.3 2013/02/01 17:44:39 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -65,6 +65,23 @@ class Wang_Properties extends Properties
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	// sets a single property in both the current set and the saved set.
+	void setAndSaveProperty(Wang_Properties temp, String prop, String value)
+	throws Exception {
+		setProperty(prop, value);
+		temp.setProperty(prop, value);
+		temp.save();
+	}
+
+	// transfers some properties from the current set to the saved set.
+	void saveSome(Wang_Properties temp, String[] props) throws Exception {
+		int x;
+		for (x = 0; x < props.length; ++x) {
+			temp.setProperty(props[x], getProperty(props[x]));
+		}
+		temp.save();
 	}
 
 	void save() throws Exception {

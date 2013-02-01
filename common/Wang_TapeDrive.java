@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.4 2013/01/27 17:14:35 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.5 2013/02/01 17:44:39 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.4 2013/01/27 17:14:35 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.5 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -28,14 +28,16 @@ class Wang_TapeDrive extends JComponent
 	String _pickLabel;
 	String _fileType;
 	String _recordName;
+	String _file_prop;
 	byte _recordMark;
 
 	public Wang_TapeDrive(OutputStream fout, String label,
 				Color doorColor, Color windowColorRef,
 				String name, String fileKind,
 				String fileType, String recordName,
-				byte recordMark) {
+				byte recordMark, String file_prop) {
 		_fout = fout;
+		_file_prop = file_prop;
 		Font font;
 		_file = null;
 		_index = 0;
@@ -46,7 +48,6 @@ class Wang_TapeDrive extends JComponent
 		_eot = false;
 		_prot = false;
 		_tf = null;
-		tape_open();
 
 		if (name != null) {
 			_mountLabel = "Mount " + name + " Tape";
@@ -138,11 +139,19 @@ class Wang_TapeDrive extends JComponent
 		_window.setPreferredSize(new Dimension(200, 100));
 		_window.setBounds(50, 75, 200, 100);
 		_window.setFont(font);
+
+		String fn = Wang_UI.getProperties().getProperty(file_prop);
+		if (fn != null) {
+			_file = new File(Wang_UI.getDir() + "/" + fn);
+			_prot = true;
+		}
+		tape_open();
 		update_tape();
 		jp.add(_window, new Integer(layer), layer);
 		++layer;
 
 		add(jp);
+
 	}
 
 	private void update_tape() {
@@ -187,6 +196,12 @@ class Wang_TapeDrive extends JComponent
 			_file = null;
 			_prot = false;
 		}
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				Wang_UI.getProperties().getClass().newInstance(),
+				_file_prop,
+				_file == null ? null : _file.getName());
+		} catch(Exception ee) {}
 		tape_open();
 	}
 
@@ -226,7 +241,6 @@ class Wang_TapeDrive extends JComponent
 		while (n == 1 && (b1[0] & 0x00ff) != (_recordMark & 0x00ff)) {
 			try {
 				n = _tf.read(b1);
-//System.err.println(_index + ": at " + _tf.getFilePointer() + " got " + b1[0]);
 			} catch (IOException ee) {
 				// close? _tf = null?
 				n = 0;

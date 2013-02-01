@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $
+// $Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -47,7 +47,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -165,8 +165,9 @@ public class w600_fe
 					"<HTML><BR><FONT SIZE=+2><B>WANG</B></FONT>" +
 					" 600 SERIES</HTML>",
 					Wang_Colors.ivory, Wang_Colors.aqua,
-					null, "program", "wng",
-					"File", (byte)0x9e);
+					null, "tape image",
+					Wang_UI.getProperties().getProperty("wang600_tape_file_suffix"),
+					"File", (byte)0x9e, "wang600_tape_image");
 		s.gridx = 3;
 		s.gridheight = 2;
 		gridbag.setConstraints(tape, s);
@@ -194,28 +195,32 @@ public class w600_fe
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
 
-		//Wang_OutputWriter m611f = new Wang_OutputWriter();
-		//Wang_Plotter m612f = new Wang_Plotter();
+		String cn24 = Wang_UI.getProperties().getProperty("wang600_cn24_device");
+		Wang_OutputDevice cn24f = null;
+		if (cn24 != null && cn24.equals(Wang_OutputWriter.getModel())) {
+			cn24f = new Wang_OutputWriter();
+		} else if (cn24 != null && cn24.equals(Wang_Plotter.getModel())) {
+			cn24f = new Wang_Plotter();
+		}
 		Wang600_Model630 m630f = new Wang600_Model630(kbd);
 		Wang600_XROM xROMf = new Wang600_XROM(kbd);
 
 		Wang600_Help help = new Wang600_Help(front_end);
 		Wang600_SimInput inp = new Wang600_SimInput(fin, dsp, kbd, help,
-						prt, tape, null, m630f, xROMf);
+						prt, tape, cn24f, m630f, xROMf);
  
 		JMenuBar mb = new JMenuBar();
 		JMenu mu;
 		mu = new JMenu("Devices");
 		mb.add(mu);
 		JMenuItem mi;
-		mi = new JMenuItem("Expansion ROM - none installed", KeyEvent.VK_R);
+		mi = xROMf.getMenu(KeyEvent.VK_R);
 		mi.addActionListener(inp);
 		mu.add(mi);
-//		mi = new JMenuItem("601/602/611 OutputWriter", KeyEvent.VK_O);
-//		mi.addActionListener(inp);
-//		mu.add(mi);
-		mu.add(inp.getOutputMenu());
-		mi = new JMenuItem("630 Disk - not mounted", KeyEvent.VK_D);
+
+		mu.add(inp.getOutputMenu()); // CN-24 output devices
+
+		mi = m630f.getMenu(KeyEvent.VK_D);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
@@ -391,6 +396,18 @@ class Wang600_Properties extends Wang_Properties
 		if (s == null || s.length() == 0) {
 			setProperty("wang600_home", "~/Wang600Files");
 		}
+		s = getProperty("wang600_tape_file_suffix");
+		if (s == null || s.length() == 0) {
+			setProperty("wang600_tape_file_suffix", "wng");
+		}
+		s = getProperty("wang600_rom_file_suffix");
+		if (s == null || s.length() == 0) {
+			setProperty("wang600_rom_file_suffix", "wng");
+		}
+		s = getProperty("wang600_disk_file_suffix");
+		if (s == null || s.length() == 0) {
+			setProperty("wang600_disk_file_suffix", "wng");
+		}
 		s = getProperty("wang600_remote");
 		if (s == null || s.length() == 0) {
 			setProperty("wang600_remote", "false");
@@ -511,7 +528,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements Runnable, WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	Wang600_Display _dsp;
 	Wang600_Keyboard _kbd;
 	Wang600_Printer _prt;
@@ -546,6 +563,12 @@ class Wang600_SimInput
 				_mi611.setText(Wang_OutputWriter.getName() +
 						" (installed)");
 				_cn24.getFrame().addWindowListener(this);
+				try { // if this fails, oh well.
+					Wang_UI.getProperties().setAndSaveProperty(
+						new Wang600_Properties(),
+						"wang600_cn24_device",
+						Wang_OutputWriter.getModel());
+				} catch(Exception ee) {}
 			} else {
 				_cn24.onOff(!_cn24.onOff());
 			}
@@ -562,6 +585,12 @@ class Wang600_SimInput
 				_mi612.setText(Wang_Plotter.getName() +
 						" (installed)");
 				_cn24.getFrame().addWindowListener(this);
+				try { // if this fails, oh well.
+					Wang_UI.getProperties().setAndSaveProperty(
+						new Wang600_Properties(),
+						"wang600_cn24_device",
+						Wang_Plotter.getModel());
+				} catch(Exception ee) {}
 			} else {
 				_cn24.onOff(!_cn24.onOff());
 			}
@@ -577,6 +606,12 @@ class Wang600_SimInput
 						" (not installed)");
 				_cn24.onOff(false);
 			}
+			try { // if this fails, oh well.
+				Wang_UI.getProperties().setAndSaveProperty(
+					new Wang600_Properties(),
+					"wang600_cn24_device",
+					null);
+			} catch(Exception ee) {}
 			_cn24 = null;
 			return;
 		}
@@ -636,13 +671,15 @@ class Wang600_SimInput
 		_help = help;
 
 		_mu = new JMenu("Output Device...");
-		_mi611 = new JMenuItem(Wang_OutputWriter.getName() +
-						" (not installed)",
+		String status = " (not installed)";
+		if (cn24 instanceof Wang_OutputWriter) status = " (installed)";
+		_mi611 = new JMenuItem(Wang_OutputWriter.getName() + status,
 					KeyEvent.VK_O);
 		_mi611.addActionListener(this);
 		_mu.add(_mi611);
-		_mi612 = new JMenuItem(Wang_Plotter.getName() +
-						" (not installed)",
+		status = " (not installed)";
+		if (cn24 instanceof Wang_Plotter) status = " (installed)";
+		_mi612 = new JMenuItem(Wang_Plotter.getName() + status,
 					KeyEvent.VK_Q);
 		_mi612.addActionListener(this);
 		_mu.add(_mi612);
@@ -744,7 +781,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -1071,10 +1108,25 @@ class Wang600_Model630 {
 	File _file;
 	byte[] _buf;
 
+	public JMenuItem getMenu(int key) {
+		String status = "not mounted";
+		if (_file != null) {
+			status = _file.getName();
+		}
+		return new JMenuItem("630 Disk - " + status, key);
+	}
+
 	public Wang600_Model630(Wang600_Keyboard kbd) {
 		reset();
 		_kbd = kbd;
 		_buf = new byte[256]; // largest transfer
+		String fn = Wang_UI.getProperties().getProperty("wang600_630_image");
+		if (fn != null) {
+			_file = new File(Wang_UI.getDir() + "/" + fn);
+			disk_open();
+		} else {
+			_file = null;
+		}
 	}
 
 	private void disk_close() {
@@ -1123,7 +1175,8 @@ class Wang600_Model630 {
 		disk_close();
 
 		SuffFileChooser ch = new SuffFileChooser("Mount",
-					"wng", "Wang program files", Wang_UI.getDir());
+					Wang_UI.getProperties().getProperty("wang600_disk_file_suffix"),
+					"Wang disk image files", Wang_UI.getDir());
 		int rv = ch.showDialog(_kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -1132,6 +1185,12 @@ class Wang600_Model630 {
 			_file = null;
 			m.setText("630 Disk - not mounted");
 		}
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				new Wang600_Properties(),
+				"wang600_630_image",
+				_file == null ? null : _file.getName());
+		} catch(Exception ee) {}
 
 		disk_open();
 	}
@@ -1220,8 +1279,22 @@ class Wang600_XROM {
 	private Wang600_Keyboard _kbd;
 	File _file;
 
+	public JMenuItem getMenu(int key) {
+		String status = "none installed";
+		if (_file != null) {
+			status = _file.getName();
+		}
+		return new JMenuItem("Expansion ROM - " + status, key);
+	}
+
 	public Wang600_XROM(Wang600_Keyboard kbd) {
 		_kbd = kbd;
+		String fn = Wang_UI.getProperties().getProperty("wang600_rom_image");
+		if (fn != null) {
+			_file = new File(Wang_UI.getDir() + "/" + fn);
+		} else {
+			_file = null;
+		}
 	}
 
 	public void do_dev(byte[] b) {
@@ -1270,7 +1343,8 @@ class Wang600_XROM {
 
 	public void pickFile(JMenuItem m) {
 		SuffFileChooser ch = new SuffFileChooser("Install",
-					"wng", "Wang program files", Wang_UI.getDir());
+					Wang_UI.getProperties().getProperty("wang600_rom_file_suffix"),
+					"Wang ROM image files", Wang_UI.getDir());
 		int rv = ch.showDialog(_kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
@@ -1282,13 +1356,19 @@ class Wang600_XROM {
 			_file = null;
 			m.setText("Expansion ROM - none installed");
 		}
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				new Wang600_Properties(),
+				"wang600_rom_image",
+				_file == null ? null : _file.getName());
+		} catch(Exception ee) {}
 	}
 }
 
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -1488,7 +1568,7 @@ class Wang600_Display extends JComponent
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1940,7 +2020,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2207,7 +2287,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.141 $ $Date: 2013/01/27 23:44:06 $<BR>"+
+			"$Revision: 1.142 $ $Date: 2013/02/01 17:44:39 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2341,7 +2421,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2559,7 +2639,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2652,7 +2732,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.141 2013/01/27 23:44:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.142 2013/02/01 17:44:39 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
