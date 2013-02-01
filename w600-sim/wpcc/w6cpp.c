@@ -17,10 +17,10 @@
 #define SHIFT		0x40
 
 #define PLOT		0	// don't want PLOT bit in this table...
-char xlat_plot[256] = {
+unsigned char xlat_plot[256] = {
 #include "xlat_plotter_x.h"
 };
-char xlat_ow[256] = {
+unsigned char xlat_ow[256] = {
 #include "xlat_outputwriter_x.h"
 };
 
@@ -118,7 +118,7 @@ void do_data_string(char *l, char *s) {
 	printf(");\n");
 }
 
-void do_alpha(char *s, char *xlat) {
+void do_alpha(char *s, unsigned char *xlat) {
 	int start = 0;
 	int shift = 0;
 	int esc = 0;
