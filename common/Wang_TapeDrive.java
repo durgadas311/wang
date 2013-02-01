@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.5 2013/02/01 17:44:39 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.6 2013/02/01 17:48:35 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.5 2013/02/01 17:44:39 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.6 2013/02/01 17:48:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -200,7 +200,7 @@ class Wang_TapeDrive extends JComponent
 			Wang_UI.getProperties().setAndSaveProperty(
 				Wang_UI.getProperties().getClass().newInstance(),
 				_file_prop,
-				_file == null ? null : _file.getName());
+				_file == null ? "" : _file.getName());
 		} catch(Exception ee) {}
 		tape_open();
 	}
