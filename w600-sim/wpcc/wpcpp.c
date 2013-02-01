@@ -63,14 +63,12 @@ void do_data(char *l, char *s) {
 			"stdin", __line__, s);
 		return;
 	}
-fprintf(stderr, "Working from \"%s\" (%e)\n", s, d);
 	sprintf(buf + 1, "%17.11e", d);
 	e = buf + 1;
 	if (*e != '-') {
 		--e;
 		*e = '+';
 	}
-fprintf(stderr, "Normalized to \"%s\"\n", e);
 	printf("\t_regdata(%s", l);
 	x = 0;
 	while (*e && x < 16) {
@@ -91,6 +89,26 @@ fprintf(stderr, "Normalized to \"%s\"\n", e);
 				++x;
 			}
 			continue;
+		} else {
+			continue;
+		}
+		printf(",%d", n);
+		++x;
+	}
+	printf(");\n");
+}
+
+void do_data_string(char *l, char *s) {
+	int x;
+	printf("\t_regdata(%s", l);
+	x = 0;
+	while (*s && x < 16) {
+		int n = 0;
+		int c = *s++;
+		if (isdigit(c)) {
+			n = c - '0';
+		} else if (isalpha(c)) {
+			n = toupper(c) - 'A' + 10;
 		} else {
 			continue;
 		}
@@ -215,6 +233,11 @@ int main(int argc, char **argv) {
 		x = sscanf(t, "ENTER(%[^)])", str);
 		if (x == 1) {
 			do_enter(str);
+			continue;
+		}
+		x = sscanf(t, "DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
+		if (x == 2) {
+			do_data_string(lab, str);
 			continue;
 		}
 		x = sscanf(t, "DATA(%[^,],%[^)])", lab, str);
