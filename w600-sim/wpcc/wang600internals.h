@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.1 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.2 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -44,14 +44,14 @@ asm(	".section .wang600code, \"a\";"
 					#reg ": .byte 0;"	\
 					".section .wang600data,\"a\";" \
 					".align 8;"		\
-					".byte ((" #b1 ") << 4) | (" #b0 ");"	\
-					".byte ((" #b3 ") << 4) | (" #b2 ");"	\
-					".byte ((" #b5 ") << 4) | (" #b4 ");"	\
-					".byte ((" #b7 ") << 4) | (" #b6 ");"	\
-					".byte ((" #b9 ") << 4) | (" #b8 ");"	\
-					".byte ((" #b11 ") << 4) | (" #b10 ");"	\
-					".byte ((" #b13 ") << 4) | (" #b12 ");"	\
 					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
+					".byte ((" #b13 ") << 4) | (" #b12 ");"	\
+					".byte ((" #b11 ") << 4) | (" #b10 ");"	\
+					".byte ((" #b9 ") << 4) | (" #b8 ");"	\
+					".byte ((" #b7 ") << 4) | (" #b6 ");"	\
+					".byte ((" #b5 ") << 4) | (" #b4 ");"	\
+					".byte ((" #b3 ") << 4) | (" #b2 ");"	\
+					".byte ((" #b1 ") << 4) | (" #b0 ");"	\
 					".popsection");
 
 #define _longreg(op,reg)	_opcode(op) \
@@ -96,6 +96,7 @@ asm(	".section .wang600code, \"a\";"
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");
+#define DATA(num)		asm(".error \"run wpcpp preprocessor for DATA()\"");
 #define ALPHA_STRING(str)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
 #define ALPHA_PLOT(str)		asm(".error \"run wpcpp preprocessor for ALPHA_PLOT()\"");
 

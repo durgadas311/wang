@@ -66,6 +66,8 @@ SECTIONS
 	__curr = (__curr + 7) & 0xfffffff8;
 	.wang600prog : AT (__curr) {
 		*(.wang600data);
+		/* must ensure register data doesn't mess up SEARCH end_prog */
+		BYTE(0); /* a better value? */
 		__curr = .;
 	} >code
 

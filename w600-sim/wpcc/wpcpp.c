@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define EX_PLOT		'\001'
 #define EX_MOVE		'\002'
@@ -28,6 +29,9 @@ char xlat_ow[256] = {
 
 char buf[256];
 char str[256];
+char lab[256];
+
+int __line__;
 
 void do_enter(char *s) {
 	int x;
@@ -47,6 +51,53 @@ void do_enter(char *s) {
 		}
 
 	}
+}
+
+void do_data(char *l, char *s) {
+	int x;
+	char buf[32], *e = NULL;
+	double d;
+	d = strtod(s, &e);
+	if (e == s || *e != '\0') {
+		fprintf(stderr, "%s: %d: Not a floating point number: \"%s\"\n",
+			"stdin", __line__, s);
+		return;
+	}
+fprintf(stderr, "Working from \"%s\" (%e)\n", s, d);
+	sprintf(buf + 1, "%17.11e", d);
+	e = buf + 1;
+	if (*e != '-') {
+		--e;
+		*e = '+';
+	}
+fprintf(stderr, "Normalized to \"%s\"\n", e);
+	printf("\t_regdata(%s", l);
+	x = 0;
+	while (*e && x < 16) {
+		int n = 0;
+		int c = *e++;
+		if (isdigit(c)) {
+			n = c - '0';
+		} else if (c == '.') {
+			//n = 10;
+			continue;
+		} else if (c == '+') {
+			n = 0;
+		} else if (c == '-') {
+			n = 1;
+		} else if (c == 'e' || c == 'E') {
+			while (x < 13) {
+				printf(",0");
+				++x;
+			}
+			continue;
+		} else {
+			continue;
+		}
+		printf(",%d", n);
+		++x;
+	}
+	printf(");\n");
 }
 
 void do_alpha(char *s, char *xlat) {
@@ -146,25 +197,32 @@ int main(int argc, char **argv) {
 	int x;
 	int c;
 	char *t;
+	__line__ = 0;
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
+		++__line__;
 		t = buf;
 		while (isspace(*t)) ++t;
 		x = sscanf(t, "ALPHA_STRING(\"%[^\"]\")", str);
 		if (x == 1) {
 			do_alpha(str, xlat_ow);
-		} else {
-			x = sscanf(t, "ALPHA_PLOT(\"%[^\"]\")", str);
-			if (x == 1) {
-				do_alpha(str, xlat_plot);
-			} else {
-				x = sscanf(t, "ENTER(%[^)])", str);
-				if (x == 1) {
-					do_enter(str);
-				} else {
-					printf(buf);
-				}
-			}
+			continue;
 		}
+		x = sscanf(t, "ALPHA_PLOT(\"%[^\"]\")", str);
+		if (x == 1) {
+			do_alpha(str, xlat_plot);
+			continue;
+		}
+		x = sscanf(t, "ENTER(%[^)])", str);
+		if (x == 1) {
+			do_enter(str);
+			continue;
+		}
+		x = sscanf(t, "DATA(%[^,],%[^)])", lab, str);
+		if (x == 2) {
+			do_data(lab, str);
+			continue;
+		}
+		printf(buf);
 	}
 	return 0;
 }
