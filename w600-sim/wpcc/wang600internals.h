@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.2 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.3 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -17,13 +17,13 @@ asm(	".section .wang600code, \"a\";"
 	".section .wang600call,\"a\";"
 	".global _call_base;"
 	".section .wang600regs,\"a\";"
+	".subsection 0;"
 	".global longreg_base;"
 	"longreg_base:;"
+	".subsection 1;"
+	".byte 0;"
 	".popsection"
 );
-
-#define BEGIN()
-#define END()
 
 #define _shadow_code(n)	 asm( \
 			".pushsection .wang600dummy,\"a\";" \
@@ -37,9 +37,14 @@ asm(	".section .wang600code, \"a\";"
 
 #define _regop(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
 
+#define _reg(reg)		asm(".pushsection .wang600regs,1,\"a\";" \
+					".global " #reg ";"	\
+					#reg ": .byte 0;"	\
+					".popsection");
+
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(".pushsection .wang600regs,\"a\";" \
-					".global _reg_base;" \
+					".subsection 0;" \
 					".global " #reg ";" \
 					#reg ": .byte 0;"	\
 					".section .wang600data,\"a\";" \
@@ -55,10 +60,12 @@ asm(	".section .wang600code, \"a\";"
 					".popsection");
 
 #define _longreg(op,reg)	_opcode(op) \
-				asm(".pushsection .wang600regs,\"a\";" \
-					".global " # reg ";" \
-					".popsection;"); \
 				_opcode(longreg_base+(longreg_base-reg))
+
+/***************************************************************************/
+
+#define BEGIN()
+#define END()
 
 // Define a label for use with SEARCH/MARK
 #define LABEL(label)		asm(".pushsection .wang600label,\"a\";" \
@@ -93,6 +100,9 @@ asm(	".section .wang600code, \"a\";"
 #define FEXTERNAL(label)	asm(".pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
 					".popsection");
+
+// Reserve an un-initialize long register
+#define UREG(name)		_reg(name)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");

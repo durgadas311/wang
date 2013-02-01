@@ -114,9 +114,4 @@
 #define J_IF_LT()	ALPHA(SIN())
 #define JUMP(reg)	INDIR(E(reg))
 
-/* These should be pre-rpocessed and never exist when gcc invoked */
-#define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");
-#define ALPHA_STRING(str)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
-#define ALPHA_PLOT(str)		asm(".error \"run wpcpp preprocessor for ALPHA_PLOT()\"");
-
 #endif /* __wpcc_wang600_h__ */

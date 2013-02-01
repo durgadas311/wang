@@ -26,10 +26,8 @@ SECTIONS
 	/* some files might use rom_*labels/rom_search/rom_call... */
 	.wang600label (NOLOAD) : {
 		*(.wang600label);
-		/* only if needed? how? */
-		PROVIDE(end_prog = .);
-		BYTE(0);
 	} >labels
+	PROVIDE(end_prog = 0xee); /* hard-code to avoid conflict with reg data */
 	.wang600flabels (NOLOAD) : {
 		*(.wang600flabel);
 	} >flabels
