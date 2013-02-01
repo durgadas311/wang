@@ -207,6 +207,10 @@ void do_alpha(char *s, unsigned char *xlat) {
 	}
 	if (start) {
 		start = 0;
+		if (shift) {
+			shift = 0;
+			printf("_opcode(0x12);\n");
+		}
 		printf("_opcode(0x22);\n");
 	}
 }
