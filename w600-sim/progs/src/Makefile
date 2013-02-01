@@ -1,6 +1,6 @@
 WPCC = ../../wpcc
 
-CPP = $(WPCC)/wpcpp
+CPP = $(WPCC)/w6cpp
 
 SRCS = $(wildcard *.wpc *.WPC)
 PROGS = $(subst .wpc,.wng,$(subst .WPC,.wng,$(SRCS)))

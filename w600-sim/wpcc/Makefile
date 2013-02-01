@@ -1,15 +1,15 @@
-CPP = ./wpcpp
+CPP = ./w6cpp
 CFLAGS += -I../../common
 
-all: wpcpp dis lst
+all: w6cpp w6dis w6lst
 
 LDSCRIPT = wang600raw.ld
 
-wpcpp: wpcpp.c
-	$(CC) $(CFLAGS) wpcpp.c -o wpcpp
+w6cpp: w6cpp.c
+	$(CC) $(CFLAGS) w6cpp.c -o w6cpp
 
-lst: lst.c
-	$(CC) $(CFLAGS) -std=c99 lst.c -o lst
+w6lst: w6lst.c
+	$(CC) $(CFLAGS) -std=c99 w6lst.c -o w6lst
 
 %.wpo: %.wpc
 	$(CC) -x c -c $^ -o $@
