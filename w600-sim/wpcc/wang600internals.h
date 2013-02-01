@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.3 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.4 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -105,10 +105,10 @@ asm(	".section .wang600code, \"a\";"
 #define UREG(name)		_reg(name)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
-#define ENTER(num)		asm(".error \"run wpcpp preprocessor for ENTER()\"");
-#define DATA(num)		asm(".error \"run wpcpp preprocessor for DATA()\"");
-#define ALPHA_STRING(str)	asm(".error \"run wpcpp preprocessor for ALPHA_STRING()\"");
-#define ALPHA_PLOT(str)		asm(".error \"run wpcpp preprocessor for ALPHA_PLOT()\"");
+#define ENTER(num)		asm(".error \"run w6cpp preprocessor for ENTER()\"");
+#define IREG_DATA(reg,num)	asm(".error \"run w6cpp preprocessor for IREG_DATA()\"");
+#define ALPHA_STRING(str)	asm(".error \"run w6cpp preprocessor for ALPHA_STRING()\"");
+#define ALPHA_PLOT(str)		asm(".error \"run w6cpp preprocessor for ALPHA_PLOT()\"");
 
 // Pseudo constructs for embedding data (future plan)
 #define NAME(prog_name)		asm(".pushsection .wang600name,\"a\",@note;" \

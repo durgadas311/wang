@@ -235,12 +235,12 @@ int main(int argc, char **argv) {
 			do_enter(str);
 			continue;
 		}
-		x = sscanf(t, "DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
+		x = sscanf(t, "IREG_DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
 		if (x == 2) {
 			do_data_string(lab, str);
 			continue;
 		}
-		x = sscanf(t, "DATA(%[^,],%[^)])", lab, str);
+		x = sscanf(t, "IREG_DATA(%[^,],%[^)])", lab, str);
 		if (x == 2) {
 			do_data(lab, str);
 			continue;
