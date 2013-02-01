@@ -1,7 +1,7 @@
 wpcpp:
 
-	ALPHA_STRING(string)
-	ALPHA_PLOT(string)
+	ALPHA_STRING("string")
+	ALPHA_PLOT("string")
 
 		Converts 'string' into a Wang 600 "alpha" sequence
 		that will output the desired text. Characters are
@@ -40,3 +40,29 @@ wpcpp:
 		command code, '-' to CHG SIGN, 'e' to SET EXP, and
 		ignores '+'. Other characters will result in compile
 		errors. 'number' should not be quoted.
+
+	DATA(reg,number)
+
+		Creates an extended register that initially contains
+		the value 'number'.
+
+	DATA(reg,"string")
+
+		Creates an extended register that initially contains
+		the value derived form 'string', which must be a 16-digit
+		hexadecimal string with the left-most digit representing
+		the value for the left-most digit on the display.
+		The affects of RECALL on such a string is left to the
+		user to discover. For example,
+
+			DATA(blank,"fffffffffffff00a")
+
+		Will result in an apparently-blank display when the
+		program step RECALL(blank) is executed.
+
+		All DATA registers are placed after the main program, but
+		before the MARK end_prog END PROG sequence that is automatically
+		appended to every program.
+
+	Note, register data can prevent proper operation of a SEARCH end_prog
+	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
