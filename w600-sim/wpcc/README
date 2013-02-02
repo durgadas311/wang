@@ -1,4 +1,37 @@
-wpcpp:
+Wang 600 programs may be written in source code form and compiled using
+these tools.  Each program must #include "wang600.h" and also should
+wrap the code section in BEGIN() and END().
+
+Some special macros allow for abstraction of statement labels and extended
+register assignment. These are:
+
+LABEL(name)	Declares that 'name' will be used as a statment label.
+		There must be a MARK(name) once in the program.
+
+FLABEL(name)	Declares that 'name' will be used as a function subroutine
+		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
+
+EXTERNAL(name)	Declares that 'name' is a statment label that exists in
+		a different module and will be linked at a later stage.
+
+FEXTERNAL(name)	Declares that 'name' is a function subroutine that exists
+		in a different module.
+
+UREG(name)	Declares that 'name' is an extended register that is not
+		initialized as part of the program load. The register will
+		be assigned from unused program steps. See also IREG_DATA().
+
+When a program is linked, a special statement label is generated followed by
+an END PROG code. The programmer should not place END PROG codes in the source files.
+Note, the END_PROG() macro produces a SEARCH(end_prog) and not an actual
+END PROG code.
+
+
+w6cpp:	Convenience pre-processor for wang program source code.
+
+	The preprocessor supports the following "macros" which allow a
+	more convenient entry of program sequences, and convert native
+	expression of text into the Wang encoding.
 
 	ALPHA_STRING("string")
 	ALPHA_PLOT("string")
@@ -49,7 +82,7 @@ wpcpp:
 	IREG_DATA(reg,"string")
 
 		Creates an extended register that initially contains
-		the value derived form 'string', which must be a 16-digit
+		the value derived from 'string', which must be a 16-digit
 		hexadecimal string with the left-most digit representing
 		the value for the left-most digit on the display.
 		The affects of RECALL on such a string is left to the
@@ -71,3 +104,93 @@ wpcpp:
 	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
 	To reduce this possibility, end_prog is defined as the label 14 14, which
 	is a value less-likely found in a register.
+
+Programming statements:
+
+In general, these directly correspond to Wang 600 commands.
+
+E(digit)	The codes E0 - E15 may be produced this way
+DP()		Shorthand for E(10)
+SET_EXP()	Shorthand for E(11)
+CHANGE_SIGN()	Shorthand for E(12)
+CLEAR()		Shorthand for E(14)
+CLR_DISP()	Shorthand for E(15)
+
+T(reg)		Total register 0-15
+ADD(reg)	Add display to register 0-15
+SUB(reg)	Subtract display from register 0-15
+MULT(reg)	Multiply register 0-15 by display
+DIV(reg)	Divide register 0-15 by display
+ST(reg)		Store display in register 0-15
+RE(reg)		Recall display from register 0-15
+
+SEARCH(label)	'label' should be declared with LABEL(), EXTERNAL(), or the F* variants.
+RECALL(longreg)	'longreg' should be declared with either UREG() or IREG_DATA()
+PRINT(dp,tag)	Print using precision 'dp' and letter 'tag'. 'dp' is a numberic value,
+		'tag' may use constants tag_X, ... tag_M. Also, 'dp' constants exist
+		for scientific notation (dp_sci) and blank (paper advance) (dp_blank).
+GO()
+J_IF_0()	Jump if zero
+J_IF_P()	Jump if plus
+SIN()
+COS()
+TAN()
+RAD_DEG()	Convert from radians to degrees
+LOG_E_X()	Log base 'e'
+E_X()		'e' to the X
+X_2()		X squared
+SQRT()		Square root of X
+LOAD_PROG()
+INV()		1/X
+
+MARK(label)	Assign label to program step ('label' must be declared as above)
+STORE(longreg)	'longreg' must be declared
+ALPHA(cmd)
+STOP()
+J_IF_N0()	Jump if not zero
+J_IF_ERR()	Jump if error
+SIN_1()		Arc sine
+COS_1()		Arc cosine
+TAN_1()		Arc tangent
+DEG_RAD()	Convert from degrees to radians
+LOG_10_X()	Log base 10
+E10_X()		10 to the X
+INT()		Integer
+ABS()		Absolute value
+END_PROG()	SEARCH(end_prog), not actual END PROG
+RETURN()
+
+Some extended functionality not directly accessible on the keyboard:
+
+EXCHG(reg)	Exchange display and register 0-15
+IO(func)	Issue I/O (func TBD)
+CALL(label)	Subroutine call to any label
+INDIR(regop)	Indirect command of T(), ADD(), ...
+GROUP1(func)	Group 1 I/O (func TBD)
+GROUP2(func)	Group 2 I/O (func TBD)
+J_IF_E()	"literal compare" ==
+J_IF_NE()	"literal compare" !=
+KTRACE_ON()	Keyboard trace ON (ALPHA PRINT)
+KTRACE_OFF()	Keyboard trace OFF
+PTRACE_ON()	Program trace ON (ALPHA LOG_E_X)
+PTRACE_OFF()	Program trace OFF
+PAUSE()		1/2 second pause
+PI()		Value of pi
+POW10(n)	Multiply display by 10^n
+POW_10(n)	Multiply display by 10^-n
+J_IF_EQ()	Jump if reg 0 == display
+J_IF_GT()	Jump if reg 0 >= display
+J_IF_LT()	Jump if reg 0 < display
+JUMP(reg)	Add contents of 'reg' to program counter
+
+Compiling:
+
+Typical sequence is (sample makefile rules):
+
+myprog.wng: myprog.WPC
+        w6cpp <myprog.WPC >myprog.wpe
+        gcc -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,wang600raw.ld \
+                -I.  -o myprog.wng myprog.wpe
+        @rm -f myprog.wpe
+
+TODO: create a shell script to hide the essoterric gcc syntax.
