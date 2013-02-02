@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.6 2013/02/01 17:44:39 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.7 2013/02/02 01:39:04 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.6 2013/02/01 17:44:39 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.7 2013/02/02 01:39:04 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Output Writer";
@@ -26,6 +26,12 @@ class Wang_OutputWriter extends Wang_Paper
 			if (m.getMnemonic() == KeyEvent.VK_H) {
 				//home();
 				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_T) {
+				_x = _y = 0;
+				_dx = _dy = 0;
+				_text.setCursor(_x, _y);
+				//return; fall through and perform base class too...
 			}
 		}
 		super.actionPerformed(e);
@@ -167,21 +173,21 @@ class Wang_OutputWriter extends Wang_Paper
 
 	public void setPaper(double w, double h) {
 		// width and height, in inches, of "printable" area...
-		Wang_FontMetrics wfm = super.getFontMetrics();
 		// assuming 12cpi and 6lpi, and 100dpi,
 		// compute size of page in pixels.
-		double pw = (12.0 * wfm.width) * w; // page width in points
-		double ph = (6.0 * wfm.height) * h; // page height in points
+		double pw = (12.0 * _wfm.width) * w; // page width in points
+		double ph = (6.0 * _wfm.height) * h; // page height in points
 		super.setPage((int)pw, (int)ph);
 		// now need to be able to convert 1/100ths onto pw x ph page...
-		double sx = (12.0 * wfm.width) / 100.0;
-		double sy = (6.0 * wfm.height) / 100.0;
+		double sx = (12.0 * _wfm.width) / 100.0;
+		double sy = (6.0 * _wfm.height) / 100.0;
 		super.setScale(sx, sy);
 	}
 
 	public Wang_OutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
 				new Font("Monospaced", Font.PLAIN, 12));
+		_wfm = super.getFontMetrics();
 		setup_xlate();
 
 		// default to portrait 8.5x11 with margins
@@ -203,6 +209,7 @@ class Wang_OutputWriter extends Wang_Paper
 		_text.enableCursor(true); 
 	}
 
+	Wang_FontMetrics _wfm;
 	private boolean _shifted;
 	private boolean _plot;
 	private boolean _adjacent;
@@ -210,25 +217,26 @@ class Wang_OutputWriter extends Wang_Paper
 	private int _dx, _dy;
 
 	private void index() {
-		_y += 14;
+		_y += _wfm.height;
 	}
 
 	private void revindex() {
-		_y -= 14;
+		_y -= _wfm.height;
 		if (_y < 0) _y = 0;
 	}
 
 	private void space() {
-		_x += 10;
+		_x += _wfm.width;
 		if (_x >= 1300) _x = 1299;
 	}
 
 	private void bkspace() {
-		_x -= 10;
+		_x -= _wfm.width;
 		if (_x < 0) _x = 0;
 	}
 
 	public void do_cn24(byte[] b) {
+		boolean printable = true;
 		if ((b[0] & 0x0f) == 0x08) { // control characters...
 			switch((b[0] & 0x30) >> 4) {
 			case 0: // nothing
@@ -238,6 +246,7 @@ class Wang_OutputWriter extends Wang_Paper
 				_x = 0;
 				if (_plot) return;
 				index();
+				printable = false;
 				break;
 			case 2:	// print mode
 				_plot = false;	// cleanup?
@@ -257,6 +266,7 @@ class Wang_OutputWriter extends Wang_Paper
 				} else {
 					bkspace();
 				}
+				printable = false;
 				break;
 			case 1:	// index/rev or shift...
 				if ((b[0] & 0x0e) == 0x02) {
@@ -270,6 +280,7 @@ class Wang_OutputWriter extends Wang_Paper
 				} else {
 					revindex();
 				}
+				printable = false;
 				break;
 			case 2:	// stepping
 			case 3:	// stepping
@@ -332,7 +343,7 @@ class Wang_OutputWriter extends Wang_Paper
 			if (_y < 0) _y = 0;
 			_adjacent = false;
 		}
-		if (s != null) {
+		if (printable && s != null) {
 			int m;
 			if (_adjacent) {
 				m = _text.appendLastPlot(s, _x, _y);
@@ -342,8 +353,8 @@ class Wang_OutputWriter extends Wang_Paper
 			if (!_plot) _x += m;
 			_adjacent = true;
 		}
-		_text.repaint();
 		_text.setCursor(_x, _y);
+		_text.repaint();
 
 		// "auto raise"...
 		onOff(true);

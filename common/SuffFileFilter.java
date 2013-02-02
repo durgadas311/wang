@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: SuffFileFilter.java,v 1.1 2013/01/27 16:02:32 drmiller Exp $
+// $Id: SuffFileFilter.java,v 1.2 2013/02/02 01:39:04 drmiller Exp $
 
 import java.io.*;
 
@@ -7,7 +7,7 @@ class SuffFileFilter extends javax.swing.filechooser.FileFilter {
 	private String _sfx;
 	private String _dsc;
 
-	private String getExtension(File f) {
+	public static String getExtension(File f) {
 		String ext = null;
 		String s = f.getName();
 		int i = s.lastIndexOf('.');
@@ -26,8 +26,7 @@ class SuffFileFilter extends javax.swing.filechooser.FileFilter {
 	public boolean accept(File f) {
 		if (f.isDirectory()) return true;
 		String extension = getExtension(f);
-		if (extension != null &&
-				extension.equals(_sfx)) {
+		if (extension != null && extension.equals(_sfx)) {
 			return true;
 		}
 		return false;
@@ -35,5 +34,9 @@ class SuffFileFilter extends javax.swing.filechooser.FileFilter {
 
 	public String getDescription() {
 		return _dsc;
+	}
+
+	public String getSuffix() {
+		return _sfx;
 	}
 }
