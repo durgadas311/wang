@@ -1,0 +1,32 @@
+#include "wang600.h"
+
+LABEL(loop)
+FLABEL(newline)
+
+#define	compare	0
+#define limit	1
+#define	rowcol	2
+
+BEGIN()
+	CLEAR()
+	ST(limit)
+MARK(loop)
+	RE(rowcol)
+	IO(0x91)
+	ENTER(0.1)
+	ADD(rowcol)
+	ST(compare)
+	INT()
+	J_IF_EQ()
+	SEARCH(loop)
+	FCALL(newline)
+	RE(limit)
+	J_IF_GT()
+	SEARCH(loop)
+	END_PROG()
+
+MARK(newline)
+	ALPHA_STRING("\r");
+	RETURN()
+
+END()

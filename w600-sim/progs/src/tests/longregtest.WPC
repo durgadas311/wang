@@ -1,0 +1,25 @@
+#include "wang600.h"
+
+UREG(test5)
+UREG(test6)
+
+IREG_DATA(test2,1.1111111111111e11)
+IREG_DATA(test3,9.99999999999e99)
+IREG_DATA(test1,3.1415926)
+IREG_DATA(test4,"fffffffffffff00a")
+
+BEGIN()
+	RECALL(test1)
+	PAUSE()
+	RECALL(test2)
+	PAUSE()
+	RECALL(test3)
+	PAUSE()
+	RECALL(test4)
+	PAUSE()
+	SQRT()
+	STORE(test5)
+	E_X()
+	STORE(test6)
+	END_PROG()
+END()
