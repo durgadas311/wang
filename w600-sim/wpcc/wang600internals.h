@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.5 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.6 $ \"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -18,7 +18,7 @@ asm(	".section .wang600code, \"a\";"
 	".global _call_base;"
 	".section .wang600regs,\"a\";"
 	".subsection 0;"
-	".global longreg_base;"
+	"longreg_base:;"
 	".subsection 1;"
 	".byte 0;"
 	".popsection"
