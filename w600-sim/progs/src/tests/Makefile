@@ -5,7 +5,7 @@ CPP = $(WPCC)/w6cpp
 include ../Make.rules
 
 SRCS = $(wildcard *.W6C)
-OBJS = $(subst .W6C,.w6o,$(SRCS))
+OBJS = $(subst .W6C,.w6t,$(SRCS))
 
 LIBS = 
 

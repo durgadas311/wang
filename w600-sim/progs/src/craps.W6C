@@ -18,6 +18,8 @@ LABEL(no_funds)
 #define temp2	14
 #define temp	15
 
+IREG_DATA(blank,"fffffffffffff00a")
+
 BEGIN()
 	ST(seed)
 	ENTER(500)
@@ -121,6 +123,4 @@ MARK(rand)
 	INT()
 	SUB(seed)
 	RETURN()
-
-	DATA(blank,"fffffffffffff00a")
 END()
