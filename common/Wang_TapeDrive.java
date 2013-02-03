@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.6 2013/02/01 17:48:35 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.7 2013/02/03 03:30:44 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.6 2013/02/01 17:48:35 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.7 2013/02/03 03:30:44 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -185,6 +185,9 @@ class Wang_TapeDrive extends JComponent
 		tape_close();
 		SuffFileChooser ch = new SuffFileChooser(_mountLabel,
 				_fileType, _pickLabel, Wang_UI.getDir());
+		if (_file != null) {
+			ch.setSelectedFile(_file);
+		}
 		int rv = ch.showDialog(this);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
