@@ -1,4 +1,4 @@
-OUTPUT_FORMAT(binary);
+/* OUTPUT_FORMAT(binary); */
 
 MEMORY {
 	labels     : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
@@ -22,6 +22,7 @@ SECTIONS
 	/DISCARD/ : { *(.text) }
 	/DISCARD/ : { *(.data) }
 	/DISCARD/ : { *(.bss) }
+	.wang600build-id (NOLOAD) : { *(.note.gnu.build-id) }
 
 	/* some files might use rom_*labels/rom_search/rom_call... */
 	.wang600label (NOLOAD) : {

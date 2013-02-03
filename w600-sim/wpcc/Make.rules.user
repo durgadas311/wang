@@ -1,0 +1,50 @@
+# $Id: Make.rules.user,v 1.1 2013/02/03 22:00:40 drmiller Exp $
+
+WPCC ?= .
+
+T_LDSCRIPT = $(WPCC)/wang600raw.ld
+X_LDSCRIPT = $(WPCC)/wang600rawrom.ld
+
+OBJCOPY = objcopy
+READELF = readelf
+AWK = awk
+CPP = $(WPCC)/w6cpp
+
+%.w6t: %.w6c
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-I $(WPCC) \
+		-o $@ $<
+
+%.w6t: %.W6C
+	$(CPP) -I$(WPCC) < $< > $*.wpe
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-I$(WPCC) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+%.w6o: %.w6c
+	$(CC) -x c -c -I $(WPCC) -o $@ $<
+
+%.w6o: %.W6C
+	$(CPP) -I$(WPCC) < $< > $*.wpe
+	$(CC) -x c -c -I$(WPCC) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+#################################
+# For making XROM images...
+.PRECIOUS: %.w6r
+
+%.w6s: %.w6r
+	@echo "Post-processing $< into $@..."
+	@$(READELF) -s $< | \
+		$(AWK) '$$5=="GLOBAL"{print ".globl " $$NF "; .set " $$NF ",0x" $$2; }' | \
+		$(AS) -o $@
+
+%.w6x: %.w6r
+	$(OBJCOPY) -j .wang600rom -O binary $< $@
+
+###%.w6r: %/%.a
+# for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
+%.w6r: %/*.w6o
+	$(CC) -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(X_LDSCRIPT) \
+		-Wl,-q \
+		-o $@ $^
