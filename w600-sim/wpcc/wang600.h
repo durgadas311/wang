@@ -43,6 +43,7 @@
 #define ST(reg)		_regop(6, reg)
 #define RE(reg)		_regop(7, reg)
 
+#define _SEARCH(label)	_opcode(0x80) label
 #define SEARCH(label)	_oplabel(_search_,label)
 #define RECALL(longreg)	_longreg(0x81,longreg)
 #define _RECALL(reg)	_opcode(0x81) _opcode(reg)
@@ -61,6 +62,7 @@
 #define LOAD_PROG()	_opcode(0x8e)
 #define INV()		_opcode(0x8f)
 
+#define _MARK(label)	_opcode(0x90) label
 #define MARK(label)	_opcode(0x90) _opcode(label)
 #define STORE(longreg)	_longreg(0x91,longreg)
 #define _STORE(reg)	_opcode(0x91) _opcode(reg)
@@ -91,10 +93,11 @@
 #define EXCHG(reg)	_regop(14, reg)
 
 #define IO(func)	_opcode(0xf2) _opcode(func)
-#define _ROM_SEARCH(label) _opcode(0xf3) _opcode(label)
+#define _ROM_SEARCH(label) _opcode(0xf3) label
+#define _CALL(label)	_opcode(0xf7) label
 #define CALL(label)	_oplabel(_call_,label)
 #define INDIR(regop)	_opcode(0xfb) regop
-#define _ROM_CALL(label) _opcode(0xfc) _opcode(label)
+#define _ROM_CALL(label) _opcode(0xfc) label
 #define GROUP1(func)	_opcode(0xfd) _opcode(func)
 #define GROUP2(func)	_opcode(0xfe) _opcode(func)
 
