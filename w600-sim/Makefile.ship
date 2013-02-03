@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.4 2013/01/29 19:56:47 drmiller Exp $
+# $Id: Makefile.ship,v 1.5 2013/02/03 22:22:17 drmiller Exp $
 
 COPTS =
 
@@ -67,5 +67,4 @@ SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: w600_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
-		$(SPCL) \ 
-		$(addprefix -C ../common/fonts ,$(FONTS))
+		$(SPCL) $(addprefix -C ../common/fonts ,$(FONTS))
