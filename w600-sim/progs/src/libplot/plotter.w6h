@@ -1,0 +1,33 @@
+// $Id: plotter.w6h,v 1.1 2013/02/03 03:25:08 drmiller Exp $
+
+#ifndef _libplot_plotter_h_
+#define _libplot_plotter_h_
+
+///// Input param registers:
+#define startX	14	//
+#define maxX	13	//
+#define stepX	12	// "FOR X = startX TO maxX STEP stepX..."
+#define tranY	11	// translation of Y on paper
+#define tranX	10	// translation of X on paper
+#define scalY	7	// scaling of Y to paper
+#define scalX	6	// scaling of X to paper
+
+#define lastX	8	// internal use
+#define lastY	9	// internal use
+#define currY	15	// internal use
+
+#define plotY	0	// system designated - volatile
+#define plotX	1	// system designated - volatile
+#define temp1	2	// volatile
+#define temp2	3
+#define temp3	4
+#define temp4	5
+
+FEXTERNAL(plotter)
+FEXTERNAL(grapher)
+
+RES_EXTERN(GRAPHING_FUNCTION,0)
+RES_EXTERN(DESCRIPTION_FUNCTION,1)
+RES_EXTERN(GRAPHING_PLOT,2)
+
+#endif // _libplot_plotter_h_

@@ -1,0 +1,41 @@
+#include "wang600.h"
+
+#include "libplot/plotter.w6h"
+
+BEGIN()
+	CLEAR()
+	ENTER(0)
+	ST(startX)
+	ENTER(360)
+	ST(maxX)
+	ENTER(1)
+	ST(stepX)
+	ENTER(1)	// scaling in X
+	ST(scalX)
+	ENTER(500)	// scaling in Y
+	ST(scalY)
+	ENTER(0)	// translation in X
+	ST(tranX)
+	ENTER(500)	// translation in Y
+	ST(tranY)
+
+	FCALL(grapher)
+	END_PROG()
+
+MARK(DESCRIPTION_FUNCTION)
+	ALPHA_STRING("\n y = SIN(x)")
+	RETURN()
+
+MARK(GRAPHING_FUNCTION)
+	SIN()
+	RETURN()
+
+MARK(GRAPHING_PLOT)
+	// exchange X,Y since we are plotting down-page...
+	RE(plotX)
+	EXCHG(plotY)
+	ST(plotX)
+	ALPHA_STRING("|o")	// plot "o"
+	RETURN()
+
+END()

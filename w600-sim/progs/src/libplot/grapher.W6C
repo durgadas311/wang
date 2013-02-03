@@ -1,0 +1,42 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+#define currX	startX
+
+FLABEL(grapher)
+FEXTERNAL(scale_Y)
+FEXTERNAL(translate)
+EXTERNAL(setup_point)
+
+// Labels:
+LLABEL(loop)
+
+BEGIN()
+MARK(grapher)
+	ALPHA_STRING("|\r")	// set carriage to known position
+	RE(currX)
+	CALL(GRAPHING_FUNCTION)
+	FCALL(scale_Y)
+	ST(currY)
+	CALL(setup_point)
+	FCALL(translate)
+	CALL(GRAPHING_PLOT)
+	RE(stepX)
+	ADD(currX)
+MARK(loop)
+	RE(currX)
+	CALL(GRAPHING_FUNCTION)
+	FCALL(scale_Y)
+	ST(currY)
+	CALL(setup_point)
+	CALL(GRAPHING_PLOT)
+	RE(stepX)
+	ADD(currX)
+	ST(temp1)
+	RE(maxX)
+	SUB(temp1)
+	J_IF_P() SEARCH(loop)
+	CALL(DESCRIPTION_FUNCTION)
+	RETURN()
+END()

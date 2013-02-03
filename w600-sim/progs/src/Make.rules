@@ -1,0 +1,21 @@
+T_LDSCRIPT = $(WPCC)/wang600raw.ld
+
+%.w6t: %.w6c
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-I $(WPCC) \
+		-o $@ $<
+
+%.w6t: %.W6C
+	$(CPP) < $< > $*.wpe
+	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-I $(WPCC) \
+		-o $@ $*.wpe
+	@rm -f $*.wpe
+
+%.w6o: %.w6c
+	$(CC) -x c -c -I $(WPCC) -o $@ $<
+
+%.w6o: %.W6C
+	$(CPP) < $< > $*.wpe
+	$(CC) -x c -c -I $(WPCC) -o $@ $*.wpe
+	@rm -f $*.wpe

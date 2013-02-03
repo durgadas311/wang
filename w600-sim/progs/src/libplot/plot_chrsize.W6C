@@ -1,0 +1,21 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+// Labels:
+FLABEL(plot_chrsize)
+
+BEGIN()
+MARK(plot_chrsize)
+	ST(plotX)
+	ENTER(0)
+	ST(plotY)
+	ALPHA_PLOT("\z")	// char size
+	ENTER(1.4)
+	ST(plotY)
+	ENTER(6)
+	MULT(plotX)
+	MULT(plotY)
+	ALPHA_PLOT("\s")	// set char spacing
+	RETURN()
+END()

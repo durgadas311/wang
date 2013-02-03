@@ -1,0 +1,32 @@
+#include "wang600.h"
+
+#include "libplot/plotter.w6h"
+
+BEGIN()
+	CLEAR()
+	ENTER(0)
+	ST(startX)
+	ENTER(360)
+	ST(maxX)
+	ENTER(1)
+	ST(stepX)
+	ENTER(1)	// scaling in X
+	ST(scalX)
+	ENTER(300)	// scaling in Y
+	ST(scalY)
+	ENTER(100)	// translation in X
+	ST(tranX)
+	ENTER(600)	// translation in Y
+	ST(tranY)
+
+	FCALL(plotter)
+	END_PROG()
+
+MARK(DESCRIPTION_FUNCTION)
+	ALPHA_PLOT(" Y = SIN{X}")
+	RETURN()
+
+MARK(GRAPHING_FUNCTION)
+	SIN()
+	RETURN()
+END()

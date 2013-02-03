@@ -1,0 +1,15 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+// Labels:
+FLABEL(translate)
+
+BEGIN()
+MARK(translate)
+	RE(tranX)
+	ADD(plotX)
+	RE(tranY)
+	ADD(plotY)
+	RETURN()
+END()

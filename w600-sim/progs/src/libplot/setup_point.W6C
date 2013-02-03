@@ -1,0 +1,27 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+#define currX	startX
+
+// Labels:
+LABEL(setup_point)
+
+BEGIN()
+MARK(setup_point)
+	// compute relative change from last point
+	RE(currX)
+	ST(plotX)
+	RE(lastX)
+	SUB(plotX)
+	RE(currY)
+	ST(plotY)
+	RE(lastY)
+	SUB(plotY)
+	// now save new "last" values for next loop...
+	RE(currX)
+	ST(lastX)
+	RE(currY)
+	ST(lastY)
+	RETURN()
+END()
