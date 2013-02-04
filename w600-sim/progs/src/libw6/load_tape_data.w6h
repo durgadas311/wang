@@ -1,0 +1,12 @@
+#ifndef _libw6_load_tape_data_w6h_
+#define _libw6_load_tape_data_w6h_
+
+// Assumes tape image formated by "w6tape2data".
+
+EXTERNAL(load_tape_data)
+
+// OUT register params
+#define top_reg		0
+#define num_regs	15
+
+#endif // _libw6_load_tape_data_w6h_

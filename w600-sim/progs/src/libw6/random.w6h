@@ -1,0 +1,9 @@
+/* ../random.wng */
+#ifndef _libw6_random_w6h_
+#define _libw6_random_w6h_
+
+FEXTERNAL(rand)
+
+#define seed	7
+
+#endif // _libw6_random_w6h_

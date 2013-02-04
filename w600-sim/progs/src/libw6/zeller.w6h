@@ -1,0 +1,12 @@
+/* ../zeller.wng */
+#ifndef _libw6_zeller_w6h_
+#define _libw6_zeller_w6h_
+
+FEXTERNAL(zeller)
+
+#define month	0
+#define day	1
+#define year	2
+#define temp	3
+
+#endif // _libw6_zeller_w6h_

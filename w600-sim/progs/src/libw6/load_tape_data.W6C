@@ -1,10 +1,8 @@
 #include "wang600.h"
+#include "load_tape_data.w6h"
 
 LABEL(load_tape_data)
 LLABEL(bad)
-
-#define top_reg		0
-#define num_regs	15
 
 // Assumes tape image contains a single-register first block with number of
 // data items, second block contains data items. Loads data items into
