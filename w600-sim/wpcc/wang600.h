@@ -35,19 +35,19 @@
 #define CHANGE_SIGN()	_opcode(0x0c)
 #define CLEAR()		_opcode(0x0e)
 #define CLR_DISP()	_opcode(0x0f)
-#define T(reg)		_regop(1, reg)
-#define ADD(reg)	_regop(2, reg)
-#define SUB(reg)	_regop(3, reg)
-#define MULT(reg)	_regop(4, reg)
-#define DIV(reg)	_regop(5, reg)
-#define ST(reg)		_regop(6, reg)
-#define RE(reg)		_regop(7, reg)
+#define T(reg)		_opreg(1, reg)
+#define ADD(reg)	_opreg(2, reg)
+#define SUB(reg)	_opreg(3, reg)
+#define MULT(reg)	_opreg(4, reg)
+#define DIV(reg)	_opreg(5, reg)
+#define ST(reg)		_opreg(6, reg)
+#define RE(reg)		_opreg(7, reg)
 
 #define _SEARCH(label)	_opcode(0x80) label
 #define SEARCH(label)	_oplabel(_search_,label)
-#define RECALL(longreg)	_longreg(0x81,longreg)
+#define RECALL(longreg)	_oplongreg(0x81,longreg)
 #define _RECALL(reg)	_opcode(0x81) _opcode(reg)
-#define PRINT(dp,tag)	_opcode(0x82) _regop(tag,dp)
+#define PRINT(dp,tag)	_opcode(0x82) _opreg(tag,dp)
 #define GO()		_opcode(0x83)
 #define J_IF_0()	_opcode(0x84)
 #define J_IF_P()	_opcode(0x85)
@@ -64,7 +64,7 @@
 
 #define _MARK(label)	_opcode(0x90) label
 #define MARK(label)	_opcode(0x90) _opcode(label)
-#define STORE(longreg)	_longreg(0x91,longreg)
+#define STORE(longreg)	_oplongreg(0x91,longreg)
 #define _STORE(reg)	_opcode(0x91) _opcode(reg)
 #define ALPHA(cmd)	_opcode(0x92) cmd
 #define STOP()		_opcode(0x93)
@@ -85,12 +85,12 @@
 #define FCALL(fx)	_opcode(fx)
 
 /* these should not be used? */
-#define _f(x)		_regop(10, x)
-#define _F(x)		_regop(11, x)
-#define _ROM_f(x)	_regop(12, x)
-#define _ROM_F(x)	_regop(13, x)
+#define _f(x)		_opreg(10, x)
+#define _F(x)		_opreg(11, x)
+#define _ROM_f(x)	_opreg(12, x)
+#define _ROM_F(x)	_opreg(13, x)
 
-#define EXCHG(reg)	_regop(14, reg)
+#define EXCHG(reg)	_opreg(14, reg)
 
 #define IO(func)	_opcode(0xf2) _opcode(func)
 #define _ROM_SEARCH(label) _opcode(0xf3) label

@@ -85,7 +85,11 @@ SECTIONS
 		. = __reg_base;
 		PROVIDE(longreg_base = .);
 		*(.wang600regs);
+		__last_reg = __reg_base - (. - __reg_base);
 	} >regs
+	PROVIDE(last_regno_100 = (__last_reg / 100));
+	PROVIDE(last_regno_10 = (__last_reg / 10) % 10);
+	PROVIDE(last_regno_1 = (__last_reg % 10));
 
 	__curr = 0x0000;
 	.wang600prog : AT (__curr) {

@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.1 2013/02/03 22:00:40 drmiller Exp $
+# $Id: Make.rules.user,v 1.2 2013/02/04 08:35:49 drmiller Exp $
 
 WPCC ?= .
 
@@ -16,7 +16,7 @@ CPP = $(WPCC)/w6cpp
 		-o $@ $<
 
 %.w6t: %.W6C
-	$(CPP) -I$(WPCC) < $< > $*.wpe
+	$(CPP) $< > $*.wpe
 	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
 		-I$(WPCC) -o $@ $*.wpe
 	@rm -f $*.wpe
@@ -25,9 +25,9 @@ CPP = $(WPCC)/w6cpp
 	$(CC) -x c -c -I $(WPCC) -o $@ $<
 
 %.w6o: %.W6C
-	$(CPP) -I$(WPCC) < $< > $*.wpe
+	$(CPP) $< > $*.wpe
 	$(CC) -x c -c -I$(WPCC) -o $@ $*.wpe
-	@rm -f $*.wpe
+#	@rm -f $*.wpe
 
 #################################
 # For making XROM images...

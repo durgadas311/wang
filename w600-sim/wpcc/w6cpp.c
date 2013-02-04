@@ -32,6 +32,7 @@ char str[256];
 char lab[256];
 
 int __line__;
+char *__file__;
 
 void do_enter(char *s) {
 	int x;
@@ -60,7 +61,7 @@ void do_data(char *l, char *s) {
 	d = strtod(s, &e);
 	if (e == s || *e != '\0') {
 		fprintf(stderr, "%s: %d: Not a floating point number: \"%s\"\n",
-			"stdin", __line__, s);
+			__file__, __line__, s);
 		return;
 	}
 	sprintf(buf + 1, "%17.11e", d);
@@ -220,7 +221,19 @@ int main(int argc, char **argv) {
 	int c;
 	char *t;
 	__line__ = 0;
-	while (fgets(buf, sizeof(buf), stdin) != NULL) {
+	__file__ = "stdin";
+	FILE *fp = stdin;
+	if (argc > 1) {
+		fp = fopen(argv[1], "r");
+		if (fp == NULL) {
+			perror(argv[1]);
+			exit(1);
+		}
+		__file__ = argv[1];
+		fprintf(stdout, "#line 1 \"%s\"\n", argv[1]);
+		fprintf(stdout, "asm(\".file \\\"%s\\\" ; .line 1\\n\");\n", argv[1]);
+	}
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
 		++__line__;
 		t = buf;
 		while (isspace(*t)) ++t;
