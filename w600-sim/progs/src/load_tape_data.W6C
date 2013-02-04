@@ -12,7 +12,7 @@ LLABEL(bad)
 // Assumed image format is output from "w6tape2data"
 BEGIN()
 MARK(load_tape_data)
-	ENTER(top_reg)	// must be 0?
+	ENTER(0)	// must be 0?
 	LOAD_REGS()	// load tape date at register 0
 	RE(top_reg)	// num registers
 	ST(num_regs)
