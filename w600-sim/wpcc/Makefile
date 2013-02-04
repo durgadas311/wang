@@ -1,7 +1,7 @@
 CFLAGS += -I../../common -g
 
 BINS = w6cpp w6dis w6lst w6data2tape
-INCS = wang600.h wang600internals.h
+INCS = wang600.h wang600internals.h wang600opcodes.s
 LDS = wang600.ld wang600raw.ld wang600rawrom.ld wang600rom.ld
 
 all: $(BINS)

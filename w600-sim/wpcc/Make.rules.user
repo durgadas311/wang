@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.4 2013/02/04 19:55:53 drmiller Exp $
+# $Id: Make.rules.user,v 1.5 2013/02/04 22:11:26 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -29,11 +29,11 @@ CPP = $(WPCCBIN)/w6cpp
 	@rm -f $*.wpe
 
 %.w6o: %.w6c
-	$(CC) -x c -c -I$(WPCCINC) -o $@ $<
+	$(CC) -x c -c -Wa,-I$(WPCCINC) -I$(WPCCINC) -o $@ $<
 
 %.w6o: %.W6C
 	$(CPP) $< > $*.wpe
-	$(CC) -x c -c -I$(WPCCINC) -o $@ $*.wpe
+	$(CC) -x c -c -Wa,-I$(WPCCINC) -I$(WPCCINC) -o $@ $*.wpe
 	@rm -f $*.wpe
 
 #################################
