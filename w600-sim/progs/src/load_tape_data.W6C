@@ -1,0 +1,30 @@
+#include "wang600.h"
+
+LABEL(load_tape_data)
+LLABEL(bad)
+
+#define top_reg		0
+#define num_regs	15
+
+// Assumes tape image contains a single-register first block with number of
+// data items, second block contains data items. Loads data items into
+// registers 16...(16+N-1). Returns R15=number of registers, R00=last reg used.
+// Assumed image format is output from "w6tape2data"
+BEGIN()
+MARK(load_tape_data)
+	ENTER(top_reg)	// must be 0?
+	LOAD_REGS()	// load tape date at register 0
+	RE(top_reg)	// num registers
+	ST(num_regs)
+	ENTER(15)
+	ADD(top_reg)	// now is "top register"
+	ENTER_LAST_REGNO()
+	J_IF_LT() SEARCH(bad)
+	RE(top_reg)
+	LOAD_REGS()	// load tape date at register N..0
+	RETURN()
+
+MARK(bad)
+	ENTER(-1)
+	RETURN()
+END()
