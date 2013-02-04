@@ -19,7 +19,7 @@ MARK(loop)
 
 MARK(load_tape_data)
 	ENTER(0)
-	ALPHA(_opcode(0x81))	// ALPHA RECALL
+	LOAD_REGS()
 	RE(0)	// num registers
 	ST(15)
 	ENTER(15)
@@ -27,7 +27,7 @@ MARK(load_tape_data)
 	ENTER_LAST_REGNO()
 	J_IF_LT() SEARCH(bad)
 	RE(0)
-	ALPHA(_opcode(0x81))	// ALPHA RECALL
+	LOAD_REGS()
 	RETURN()
 
 MARK(bad)
