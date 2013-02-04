@@ -37,10 +37,17 @@ char *__file__;
 
 void do_enter(char *s) {
 	int x;
+	// negative mantissa requires special processing...
+	int neg = (*s == '-');
+	if (neg) ++s;
 	while(*s) {
 		x = *s++;
 		if (isdigit(x)) {
 			printf("E(%c)\n", x);
+			if (neg) {
+				printf("CHANGE_SIGN()\n");
+				neg = 0;
+			}
 		} else if (x == '-') {
 			printf("CHANGE_SIGN()\n");
 		} else if (x == 'e') {

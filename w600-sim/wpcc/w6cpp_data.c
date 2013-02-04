@@ -5,16 +5,10 @@
 extern int __line__;
 extern char *__file__;
 
-int w6_do_data(char *s, uint8_t out[16]) {
+int w6_do_data_d(double d, uint8_t out[16]) {
 	int x;
-	char buf[32], *e = NULL;
-	double d;
-	d = strtod(s, &e);
-	if (e == s || (*e != '\0' && *e != '\n')) {
-		fprintf(stderr, "%s: %d: Not a floating point number: \"%s\"\n",
-			__file__, __line__, s);
-		return -1;
-	}
+	char buf[32], *e;
+
 	sprintf(buf + 1, "%17.11e", d);
 	e = buf + 1;
 	if (*e != '-') {
@@ -51,4 +45,17 @@ int w6_do_data(char *s, uint8_t out[16]) {
 		++x;
 	}
 	return 0;
+}
+
+int w6_do_data(char *s, uint8_t out[16]) {
+	int x;
+	char buf[32], *e = NULL;
+	double d;
+	d = strtod(s, &e);
+	if (e == s || (*e != '\0' && *e != '\n')) {
+		fprintf(stderr, "%s: %d: Not a floating point number: \"%s\"\n",
+			__file__, __line__, s);
+		return -1;
+	}
+	return w6_do_data_d(d, out);
 }
