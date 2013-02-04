@@ -6,8 +6,8 @@ LDS = wang600.ld wang600raw.ld wang600rawrom.ld wang600rom.ld
 
 all: $(BINS)
 
-w6cpp: w6cpp.c
-	$(CC) $(CFLAGS) w6cpp.c -o w6cpp
+w6cpp: w6cpp.c w6cpp_data.o
+	$(CC) $(CFLAGS) w6cpp.c -o w6cpp w6cpp_data.o
 
 w6lst: w6lst.c
 	$(CC) $(CFLAGS) -std=c99 w6lst.c -o w6lst
