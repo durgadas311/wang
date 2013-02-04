@@ -166,16 +166,16 @@ void do_alpha(char *s, unsigned char *xlat) {
 		}
 		if (!start) {
 			start = 1;
-			printf("_opcode(0x92);\n");
+			printf("_opcode(ALPHA);\n");
 		}
 		if (x >= 0) {
 			if ((c & SHIFT) && !shift) {
 				shift = 1;
-				printf("_opcode(0x13);\n");
+				printf("_bytecode(0x13);\n");
 			}
 			if (!(c & SHIFT) && shift) {
 				shift = 0;
-				printf("_opcode(0x12);\n");
+				printf("_bytecode(0x12);\n");
 			}
 			c &= ~SHIFT;
 			if (plot) {
@@ -183,15 +183,15 @@ void do_alpha(char *s, unsigned char *xlat) {
 				plot = 0;
 			}
 		}
-		printf("_opcode(0x%x);\n", c);
+		printf("_bytecode(0x%x);\n", c);
 	}
 	if (start) {
 		start = 0;
 		if (shift) {
 			shift = 0;
-			printf("_opcode(0x12);\n");
+			printf("_bytecode(0x12);\n");
 		}
-		printf("_opcode(0x22);\n");
+		printf("_opcode(END_ALPHA);\n");
 	}
 }
 

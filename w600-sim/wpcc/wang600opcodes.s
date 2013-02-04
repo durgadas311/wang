@@ -154,6 +154,7 @@
 .set _op_MARK,0x90
 .set _op_STORE,0x91
 .set _op_ALPHA,0x92
+.set _op_END_ALPHA,_op_ADD2
 .set _op_STOP,0x93
 .set _op_J_IF_N0,0x94
 .set _op_J_IF_ERR,0x95
