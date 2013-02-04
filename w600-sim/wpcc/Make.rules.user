@@ -1,33 +1,38 @@
-# $Id: Make.rules.user,v 1.2 2013/02/04 08:35:49 drmiller Exp $
+# $Id: Make.rules.user,v 1.3 2013/02/04 14:44:09 drmiller Exp $
 
-WPCC ?= .
+WPCC ?= /usr/local/wpcc
 
-T_LDSCRIPT = $(WPCC)/wang600raw.ld
-X_LDSCRIPT = $(WPCC)/wang600rawrom.ld
+WPCCINC = $(WPCC)/include
+WPCCLIB = $(WPCC)/lib
+WPCCBIN = $(WPCC)/bin
+
+T_LDSCRIPT = wang600raw.ld
+X_LDSCRIPT = wang600rawrom.ld
 
 OBJCOPY = objcopy
 READELF = readelf
 AWK = awk
-CPP = $(WPCC)/w6cpp
+CPP = $(WPCCBIN)/w6cpp
 
 %.w6t: %.w6c
 	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
-		-I $(WPCC) \
+		-I$(WPCCINC) -L$(WPCCLIB) \
 		-o $@ $<
 
 %.w6t: %.W6C
 	$(CPP) $< > $*.wpe
 	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
-		-I$(WPCC) -o $@ $*.wpe
+		-I$(WPCCINC) -L$(WPCCLIB) \
+		-o $@ $*.wpe
 	@rm -f $*.wpe
 
 %.w6o: %.w6c
-	$(CC) -x c -c -I $(WPCC) -o $@ $<
+	$(CC) -x c -c -I$(WPCCINC) -o $@ $<
 
 %.w6o: %.W6C
 	$(CPP) $< > $*.wpe
-	$(CC) -x c -c -I$(WPCC) -o $@ $*.wpe
-#	@rm -f $*.wpe
+	$(CC) -x c -c -I$(WPCCINC) -o $@ $*.wpe
+	@rm -f $*.wpe
 
 #################################
 # For making XROM images...
@@ -46,5 +51,5 @@ CPP = $(WPCC)/w6cpp
 # for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
 %.w6r: %/*.w6o
 	$(CC) -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(X_LDSCRIPT) \
-		-Wl,-q \
+		-L$(WPCCLIB) -Wl,-q \
 		-o $@ $^
