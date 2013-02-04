@@ -7,7 +7,8 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.7 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.8 $ \"");
+asm(".include \"wang600opcodes.s\"");
 
 asm(	".section .wang600code, \"a\";"
 	".pushsection .wang600search,\"a\";"
@@ -29,12 +30,13 @@ asm(	".section .wang600code, \"a\";"
 			".rept " # n "; .byte 0; .endr;" \
 			".popsection");
 
-#define _opcode(byte)		asm(".byte (" # byte ")" ); _shadow_code(1)
+#define _bytecode(byte)		asm(".byte (" # byte ")" ); _shadow_code(1)
+
+#define _opcode(op)		asm(".byte (_op_" # op ")" ); _shadow_code(1)
+#define _opreg(op,reg)		asm(".byte (_op_" #op #reg ")" ); _shadow_code(1)
 
 #define _oplabel(prefix,label)	asm(".byte (" # prefix # label "),(" # label ")"); \
 					_shadow_code(2)
-
-#define _opreg(cmd, reg)	_opcode((cmd << 4) | (reg & 0x0f))
 
 #define _reg(reg)		asm(".pushsection .wang600regs,1,\"a\";" \
 					".global " #reg ";"	\
@@ -59,7 +61,7 @@ asm(	".section .wang600code, \"a\";"
 					".popsection");
 
 #define _oplongreg(op,reg)	_opcode(op) \
-				_opcode(longreg_base+(longreg_base-reg))
+				_bytecode(longreg_base+(longreg_base-reg))
 
 /***************************************************************************/
 
@@ -137,9 +139,9 @@ asm(	".section .wang600code, \"a\";"
 #define ALPHA_STRING(str)	asm(".error \"run w6cpp preprocessor for ALPHA_STRING()\"");
 #define ALPHA_PLOT(str)		asm(".error \"run w6cpp preprocessor for ALPHA_PLOT()\"");
 
-#define ENTER_LAST_REGNO()	_opcode(last_regno_100) \
-				_opcode(last_regno_10) \
-				_opcode(last_regno_1)
+#define ENTER_LAST_REGNO()	_bytecode(last_regno_100) \
+				_bytecode(last_regno_10) \
+				_bytecode(last_regno_1)
 
 // Pseudo constructs for embedding data (future plan)
 #define NAME(prog_name)		asm(".pushsection .wang600name,\"a\",@note;" \

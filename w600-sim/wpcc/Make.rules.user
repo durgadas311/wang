@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.3 2013/02/04 14:44:09 drmiller Exp $
+# $Id: Make.rules.user,v 1.4 2013/02/04 19:55:53 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -16,12 +16,14 @@ CPP = $(WPCCBIN)/w6cpp
 
 %.w6t: %.w6c
 	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-Wa,-I$(WPCCINC) \
 		-I$(WPCCINC) -L$(WPCCLIB) \
 		-o $@ $<
 
 %.w6t: %.W6C
 	$(CPP) $< > $*.wpe
 	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-Wa,-I$(WPCCINC) \
 		-I$(WPCCINC) -L$(WPCCLIB) \
 		-o $@ $*.wpe
 	@rm -f $*.wpe
