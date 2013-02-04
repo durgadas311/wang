@@ -1,10 +1,16 @@
-# $Id: Make.rules.user,v 1.5 2013/02/04 22:11:26 drmiller Exp $
+# $Id: Make.rules.user,v 1.6 2013/02/04 23:04:29 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
 WPCCINC = $(WPCC)/include
 WPCCLIB = $(WPCC)/lib
 WPCCBIN = $(WPCC)/bin
+
+W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T_LDSCRIPT)
+W6TLIBS =
+W6XLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(X_LDSCRIPT) -Wl,-q
+W6XLIBS =
+W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
 
 T_LDSCRIPT = wang600raw.ld
 X_LDSCRIPT = wang600rawrom.ld
@@ -15,25 +21,21 @@ AWK = awk
 CPP = $(WPCCBIN)/w6cpp
 
 %.w6t: %.w6c
-	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
-		-Wa,-I$(WPCCINC) \
-		-I$(WPCCINC) -L$(WPCCLIB) \
-		-o $@ $<
+	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $@ $< $(W6TLIBS)
 
 %.w6t: %.W6C
 	$(CPP) $< > $*.wpe
-	$(CC) -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
-		-Wa,-I$(WPCCINC) \
-		-I$(WPCCINC) -L$(WPCCLIB) \
-		-o $@ $*.wpe
+	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $@ $*.wpe $(W6TLIBS)
 	@rm -f $*.wpe
 
 %.w6o: %.w6c
-	$(CC) -x c -c -Wa,-I$(WPCCINC) -I$(WPCCINC) -o $@ $<
+	$(CC) -x c -c $(W6CCFLAGS) -o $@ $<
 
 %.w6o: %.W6C
 	$(CPP) $< > $*.wpe
-	$(CC) -x c -c -Wa,-I$(WPCCINC) -I$(WPCCINC) -o $@ $*.wpe
+	$(CC) -x c -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
 #################################
@@ -52,6 +54,5 @@ CPP = $(WPCCBIN)/w6cpp
 ###%.w6r: %/%.a
 # for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
 %.w6r: %/*.w6o
-	$(CC) -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(X_LDSCRIPT) \
-		-L$(WPCCLIB) -Wl,-q \
+	$(CC) $(W6CCFLAGS) $(W6XLDFLAGS) \
 		-o $@ $^
