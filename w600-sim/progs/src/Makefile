@@ -1,5 +1,4 @@
-WPCC = ../../wpcc
-include $(WPCC)/Make.rules.user
+include /usr/local/wpcc/include/Make.rules.user
 
 SRCS = $(wildcard *.w6c *.W6C)
 PROGS = $(subst .w6c,.w6t,$(subst .W6C,.w6t,$(SRCS)))
@@ -10,11 +9,13 @@ all: $(SUBDIRS) $(ROMS) $(PROGS)
 
 plot_sin.w6t: plot_sin.w6o libplot.w6s
 	$(CC) -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-L$(WPCCLIB) \
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $<
 
 graph_sin.w6t: graph_sin.w6o libplot.w6s
 	$(CC) -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,$(T_LDSCRIPT) \
+		-L$(WPCCLIB) \
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $<
 
