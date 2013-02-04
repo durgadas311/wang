@@ -1,27 +1,4 @@
 #!/bin/bash
 
-wpcc() {
-	local source=${1}
-	local temp1=${source}.$$.1
-	local temp2=${source}.$$.2
-	local wng=${source%.wpc}.wng
-
-	./a.out <${source} >${temp1}
-
-	echo "gcc -x c -c -o ${temp2} ${temp1}"
-	gcc -x c -c -o ${temp2} ${temp1}
-	if [[ $? -ne 0 ]]; then return 1; fi
-	rm -f ${temp1}
-	objcopy -O binary -j .wang600 ${temp2} ${wng}
-	if [[ $? -ne 0 ]]; then return 1; fi
-	rm -f ${temp1} ${temp2}
-	return 0
-}
-
-for s in "${@}"; do
-	if [[ ${s} == *.wpc ]]; then
-		wpcc ${s}
-		if [[ $? -ne 0 ]]; then exit 1; fi
-		
-	fi
-done
+echo "Future work: wrapper script for gcc specific to Wang 600"
+exit 1
