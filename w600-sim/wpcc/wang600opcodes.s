@@ -14,6 +14,11 @@
 .set _op_E13,0x0d
 .set _op_E14,0x0e
 .set _op_E15,0x0f
+.set _op_DP,_op_E10
+.set _op_SET_EXP,_op_E11
+.set _op_CHANGE_SIGN,_op_E12
+.set _op_CLEAR,_op_E14
+.set _op_CLR_DISP,_op_E15
 
 .set _op_T0,0x10
 .set _op_T1,0x11
