@@ -1,0 +1,36 @@
+#include "wang600.h"
+
+LABEL(load_tape_data)
+LLABEL(bad)
+LLABEL(loop)
+
+BEGIN()
+	CALL(load_tape_data)
+	J_IF_P() END_PROG()
+	ENTER(16)
+	ST(1)
+MARK(loop)
+	INDIR(RE(1))
+	PRINT(0,tag_A)
+	ENTER(1)
+	ADD(1)
+	J_IF_LT() SEARCH(loop)
+	END_PROG()
+
+MARK(load_tape_data)
+	ENTER(0)
+	ALPHA(_opcode(0x81))	// ALPHA RECALL
+	RE(0)	// num registers
+	ST(15)
+	ENTER(15)
+	ADD(0)
+	ENTER_LAST_REGNO()
+	J_IF_LT() SEARCH(bad)
+	RE(0)
+	ALPHA(_opcode(0x81))	// ALPHA RECALL
+	RETURN()
+
+MARK(bad)
+	ENTER(-1)
+	RETURN()
+END()

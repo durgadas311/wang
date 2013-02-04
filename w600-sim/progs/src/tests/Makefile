@@ -1,5 +1,4 @@
-WPCC = ../../../wpcc
-include $(WPCC)/Make.rules.user
+include /usr/local/wpcc/include/Make.rules.user
 
 SRCS = $(wildcard *.W6C)
 OBJS = $(subst .W6C,.w6t,$(SRCS))
