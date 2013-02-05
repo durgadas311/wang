@@ -1,4 +1,4 @@
-// $Id: plotter.w6h,v 1.1 2013/02/03 03:25:08 drmiller Exp $
+// $Id: plotter.w6h,v 1.2 2013/02/05 00:38:32 drmiller Exp $
 
 #ifndef _libplot_plotter_h_
 #define _libplot_plotter_h_
@@ -25,6 +25,7 @@
 
 FEXTERNAL(plotter)
 FEXTERNAL(grapher)
+FEXTERNAL(plot_data)
 
 RES_EXTERN(GRAPHING_FUNCTION,0)
 RES_EXTERN(DESCRIPTION_FUNCTION,1)
