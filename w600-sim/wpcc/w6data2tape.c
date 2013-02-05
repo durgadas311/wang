@@ -43,9 +43,15 @@ int main(int argc, char **argv) {
 	}
 	x = 0;
 	while (x < 246 && fgets(buf, sizeof(buf), fp) != NULL) {
+		double d;
 		++__line__;
-		if (w6_do_data(buf, data[x]) != 0) {
-			exit(1);
+		c = sscanf(buf, " %lf\n", &d);
+		if (c == 1) {
+			if (w6_do_data_d(d, data[x]) != 0) {
+				exit(1);
+			}
+		} else {
+			// get description?
 		}
 		++x;
 	}
