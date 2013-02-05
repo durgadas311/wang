@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.7 2013/02/03 03:30:44 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.8 2013/02/05 00:33:23 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.7 2013/02/03 03:30:44 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.8 2013/02/05 00:33:23 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -140,9 +140,8 @@ class Wang_TapeDrive extends JComponent
 		_window.setBounds(50, 75, 200, 100);
 		_window.setFont(font);
 
-		String fn = Wang_UI.getProperties().getProperty(file_prop);
-		if (fn != null) {
-			_file = new File(Wang_UI.getDir() + "/" + fn);
+		_file = Wang_UI.getProperties().getFile(file_prop, true, Wang_UI.getDir());
+		if (_file != null) {
 			_prot = true;
 		}
 		tape_open();
@@ -157,7 +156,7 @@ class Wang_TapeDrive extends JComponent
 	private void update_tape() {
 		String txt;
 		if (_file == null) {
-			txt = new String("<HTML><FONT SIZE=+2>(no tape)</FONT></HTML>");
+			txt = new String("<HTML><FONT SIZE=+1>(no tape)</FONT></HTML>");
 		} else {
 			_cassette.setVisible(true);
 			String eot;

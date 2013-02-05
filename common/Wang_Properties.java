@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.3 2013/02/01 17:44:39 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.4 2013/02/05 00:33:23 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -65,6 +65,21 @@ class Wang_Properties extends Properties
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	File getFile(String prop, boolean must_exist, File dir) {
+		File f = null;
+		String s = getProperty(prop);
+		if (s != null) {
+			if (dir != null) {
+				s = dir + "/" + s;
+			}
+			f = new File(s);
+			if (must_exist && !f.exists()) {
+				f = null;
+			}
+		}
+		return f;
 	}
 
 	// sets a single property in both the current set and the saved set.
