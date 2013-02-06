@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.56 2013/02/06 20:03:28 drmiller Exp $
+# $Id: Makefile,v 1.57 2013/02/06 22:28:33 drmiller Exp $
 
 include Makefile.ship
 
@@ -26,6 +26,8 @@ EXE = w600-sim
 COMMON_W614_CLASSES = \
 		Wang_Properties.class \
 		Wang_UI.class \
+		SuffFileFilter.class \
+		SuffFileChooser.class \
 		Wang_MarkSenseCard.class
 
 w600_edit.class: w600_edit.java $(COMMON_W614_CLASSES)

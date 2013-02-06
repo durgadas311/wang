@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: SuffFileChooser.java,v 1.2 2013/02/02 01:39:04 drmiller Exp $
+// $Id: SuffFileChooser.java,v 1.3 2013/02/06 22:28:33 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -18,6 +18,16 @@ class SuffFileChooser extends JFileChooser {
 		}
 	}
 	private TapeProt _prot;
+	public SuffFileChooser(String btn, File dir) {
+		super(dir);
+		_btn = btn;
+		setApproveButtonText(btn);
+		setApproveButtonToolTipText(btn);
+		setDialogTitle(btn);
+		setDialogType(JFileChooser.SAVE_DIALOG);
+		_prot = new TapeProt("Protect");
+		setAccessory(_prot);
+	}
 	public SuffFileChooser(String btn, String sfx, String dsc, File dir) {
 		super(dir);
 		SuffFileFilter f = new SuffFileFilter(sfx, dsc);
@@ -49,13 +59,16 @@ class SuffFileChooser extends JFileChooser {
 	public int showDialog(Component frame) {
 		int rv = super.showDialog(frame, _btn);
 		if (rv == JFileChooser.APPROVE_OPTION) {
-			SuffFileFilter fi = (SuffFileFilter)getFileFilter();
-			String sfx = "." + fi.getSuffix();
-			if (getSelectedFile().getName().endsWith(sfx)) {
-				return rv;
+			javax.swing.filechooser.FileFilter ff = getFileFilter();
+			if (ff instanceof SuffFileFilter) {
+				SuffFileFilter fi = (SuffFileFilter)getFileFilter();
+				String sfx = "." + fi.getSuffix();
+				if (getSelectedFile().getName().endsWith(sfx)) {
+					return rv;
+				}
+				File f = new File(getSelectedFile().getAbsolutePath().concat(sfx));
+				setSelectedFile(f);
 			}
-			File f = new File(getSelectedFile().getAbsolutePath().concat(sfx));
-			setSelectedFile(f);
 		}
 		return rv;
 	}

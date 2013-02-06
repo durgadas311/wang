@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.5 2013/02/06 19:04:12 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.6 2013/02/06 22:28:33 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -16,9 +16,11 @@ class Wang_MarkSenseCard extends JLabel
 
 	byte[] _code;
 	int _code_used;
-	String _title = new String("my_prog_3");
+	String _title;
+	File _file;
 	int _pgix;
 	int _npg;
+	boolean _changed;
 	java.text.SimpleDateFormat _timestamp =
 		new java.text.SimpleDateFormat("MMM" + "\u2003 " + "d" + "\u2003\u2003" + "y");
 	String _date;
@@ -76,7 +78,7 @@ class Wang_MarkSenseCard extends JLabel
 				}
 			}
 		}
-		while (s > 0 && s < _rows_per_card) {
+		while (s < _rows_per_card) {
 			double ry = s * _row_spacing + _row_start;
 			g2d.fillRect((int)Math.round(_bit_start - _bit_spacing),
 					(int)Math.round(ry), _bit_width, _bit_height);
@@ -118,18 +120,47 @@ class Wang_MarkSenseCard extends JLabel
 		setPreferredSize(new Dimension(getIcon().getIconWidth(), getIcon().getIconHeight()));
 		_top = new Rectangle(0, 0, 10, 10);
 		_bottom = new Rectangle(0, getIcon().getIconHeight() - 10, 10, 10);
+		addMouseListener(this);
 
 		_code = new byte[2048];
+		if (pgm == null) {
+			newFile();
+		} else {
+			setupFile(new File(Wang_UI.getDir() + "/" + pgm));
+		}
+	}
+
+	private void newFile() {
+		_title = "untitled";
+		_file = null;
 		_code_used = 0;
 		_pgix = 0;
-		if (pgm == null) {
-			_title = "new_program";
-		} else {
-			_title = pgm;
-		}
+		_npg = 1;
+		_changed = false;
 		_date = _timestamp.format(new java.util.Date());
-		File file = new File(Wang_UI.getDir() + "/" + _title);
-		if (file != null && file.exists()) {
+	}
+
+	private File pickFile(String purpose) {
+		File file;
+		SuffFileChooser ch = new SuffFileChooser(purpose,
+			Wang_UI.getDir());
+		int rv = ch.showDialog(this);
+		if (rv == JFileChooser.APPROVE_OPTION) {
+			file = ch.getSelectedFile();
+		} else {
+			file = null;
+		}
+		return file;
+	}
+
+	private void setupFile(File file) {
+		if (file == null) {
+			// change nothing in this case...
+			return;
+		}
+		_title = file.getName();
+		_file = file;
+		if (file.exists()) {
 			_date = _timestamp.format(file.lastModified());
 			FileInputStream f;
 			try {
@@ -145,15 +176,45 @@ class Wang_MarkSenseCard extends JLabel
 					_code_used -= 2;
 				}
 			}
+			_changed = false;
+			_pgix = 0;
+			_npg = (_code_used + _rows_per_card - 1) / _rows_per_card;
+			// or, always have +1 cards?
+			if (_npg == 0) _npg = 1;
 		}
-		_npg = (_code_used + _rows_per_card - 1) / _rows_per_card;
-		addMouseListener(this);
+	}
+
+	private void saveFile() {
+		FileOutputStream f = null;
+		try {
+			f = new FileOutputStream(_file);
+		} catch (Exception ee) {
+		}
+		if (f == null) {
+			return;
+		}
+		_date = _timestamp.format(new java.util.Date());
+		// need to restore "EOF" marker...
+		int saved = _code_used;
+		if (saved >= 1 && (_code[saved - 1] & 0x0ff) == 0x9e) {
+			_code[saved++] = (byte)0x9e;
+		} else {
+			_code[saved++] = (byte)0x9e;
+			_code[saved++] = (byte)0xff;
+		}
+		try {
+			f.write(_code, 0, saved);
+		} catch (Exception ee) {
+		}
 	}
 
 	public void keyTyped(KeyEvent e) { }
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			if (_pgix * _rows_per_card == _code_used && _npg > 1) {
+				--_npg;
+			}
 			--_pgix;
 			if (_pgix < 0) {
 				_pgix = 0;
@@ -162,7 +223,11 @@ class Wang_MarkSenseCard extends JLabel
 		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			++_pgix;
 			if (_pgix >= _npg) {
-				_pgix = _npg - 1;
+				if (_pgix * _rows_per_card == _code_used) {
+					++_npg;
+				} else {
+					_pgix = _npg - 1;
+				}
 			}
 			// allow for adding new page???
 			repaint();
@@ -182,22 +247,42 @@ class Wang_MarkSenseCard extends JLabel
 		x = (x - _bit_start) / _bit_spacing;
 		boolean iny = ((y - Math.floor(y)) * _row_spacing <= _bit_height);
 		boolean inx = ((x - Math.floor(x)) * _bit_spacing <= _bit_width);
-		if (inx && iny && y >= 0 && y <= _rows_per_card - 1) {
+		if (inx && iny && y >= 0 && y < _rows_per_card) {
 			int cx = _pgix * _rows_per_card + (int)y;
-			if (x >= 0 && x <= 7) {
+			if (x >= 0 && x < 8) {
 				int bit = 0x80 >> (int)x;
+				if (cx >= _code_used) {
+					if (e.getButton() == MouseEvent.BUTTON3) { // dirty
+						_code_used = cx + 1;
+					} else { // clean...
+						while (_code_used <= cx) {
+							_code[_code_used++] = 0;
+						}
+					}
+				}
 				_code[cx] ^= bit;
-				if (cx >= _code_used) _code_used = cx + 1;
+				_changed = true;
 				repaint();
 //System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 			} else if (Math.floor(x) == -1.0) {
-				if (cx == _code_used - 1) {
-					// leaves stale data...
-					--_code_used;
+				if (cx < _code_used) {
+					// leaves stale data... recovery possible
+					_code_used = cx;
+					_npg = (_code_used + _rows_per_card - 1) /
+								_rows_per_card;
+					if (_npg == 0) _npg = 1;
+					_changed = true;
 					repaint();
-				} else if (cx == _code_used) {
+				} else if (cx >= _code_used) {
 					// exposes stale data...
-					++_code_used;
+					if (e.getButton() == MouseEvent.BUTTON3) { // dirty
+						_code_used = cx + 1;
+					} else { // clean...
+						while (_code_used <= cx) {
+							_code[_code_used++] = 0;
+						}
+					}
+					_changed = true;
 					repaint();
 				}
 			} else {
@@ -210,6 +295,17 @@ System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 	public void mousePressed(MouseEvent e) { }
 	public void mouseReleased(MouseEvent e) { }
 
+	private boolean confirmChanges(String op) {
+		if (_code_used > 0 && _changed) {
+			int res = Wang_UI.confirm(op, "Changes have not been saved. " +
+							"Discard changes?");
+			if (res == JOptionPane.YES_OPTION) {
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
@@ -217,19 +313,37 @@ System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
 		if (m.getMnemonic() == KeyEvent.VK_N) {
-System.err.println("New");
+			if (!confirmChanges("New File")) {
+				return;
+			}
+			newFile();
+			repaint();
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_O) {
-System.err.println("Open");
+			if (!confirmChanges("Open File")) {
+				return;
+			}
+			setupFile(pickFile("Load Card Deck"));
+			repaint();
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_S) {
-System.err.println("Save");
+			if (_file == null) {
+				File nu = pickFile("Save Card Deck As");
+				if (nu == null) return;
+				_file = nu;
+				_title = _file.getName();
+			}
+			saveFile();
+			_changed = false;
+			repaint();
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_P) {
 System.err.println("Print");
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_Q) {
-System.err.println("Quit");
+			if (!confirmChanges("Quit")) {
+				return;
+			}
 			return;
 		}
 	}
