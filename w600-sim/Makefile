@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.54 2013/02/03 22:22:17 drmiller Exp $
+# $Id: Makefile,v 1.55 2013/02/06 15:54:55 drmiller Exp $
 
 include Makefile.ship
 
@@ -22,6 +22,14 @@ SRCTAR = w600-sim.tgz
 
 ROM = wang600.rom
 EXE = w600-sim
+
+COMMON_W614_CLASSES = \
+		Wang_Properties.class \
+		Wang_UI.class \
+		Wang_MarkSenseCard.class
+
+w600_edit.class: w600_edit.java $(COMMON_W614_CLASSES)
+	javac w600_edit.java
 
 xinetd: $(EXE) $(ROM)
 	cp $(EXE) $(ROM) /usr/local/bin/wang
