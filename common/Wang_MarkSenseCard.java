@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.3 2013/02/06 16:48:26 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.4 2013/02/06 17:02:32 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 import java.awt.event.*;
 
 class Wang_MarkSenseCard extends JLabel
-		implements MouseListener, KeyListener {
+		implements MouseListener, KeyListener, ActionListener {
 	static final long serialVersionUID = 311614000000L;
 
 	Font font1 = new Font("Sans-serif", Font.PLAIN, 18);
@@ -199,4 +199,27 @@ System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 	public void mousePressed(MouseEvent e) { }
 	public void mouseReleased(MouseEvent e) { }
 
+
+	public void actionPerformed(ActionEvent e) {
+		if (!(e.getSource() instanceof JMenuItem)) {
+			return;
+		}
+		JMenuItem m = (JMenuItem)e.getSource();
+		if (m.getMnemonic() == KeyEvent.VK_N) {
+System.err.println("New");
+			return;
+		} else if (m.getMnemonic() == KeyEvent.VK_O) {
+System.err.println("Open");
+			return;
+		} else if (m.getMnemonic() == KeyEvent.VK_S) {
+System.err.println("Save");
+			return;
+		} else if (m.getMnemonic() == KeyEvent.VK_P) {
+System.err.println("Print");
+			return;
+		} else if (m.getMnemonic() == KeyEvent.VK_Q) {
+System.err.println("Quit");
+			return;
+		}
+	}
 }

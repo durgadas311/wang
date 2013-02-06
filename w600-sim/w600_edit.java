@@ -1,12 +1,13 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_edit.java,v 1.1 2013/02/06 15:54:55 drmiller Exp $
+// $Id: w600_edit.java,v 1.2 2013/02/06 17:02:32 drmiller Exp $
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 public class w600_edit
 {
-	final String ident = "$Id: w600_edit.java,v 1.1 2013/02/06 15:54:55 drmiller Exp $";
+	final String ident = "$Id: w600_edit.java,v 1.2 2013/02/06 17:02:32 drmiller Exp $";
 
 	public static void main(String[] args) {
 		Wang_UI.setProperties(new Wang600_Properties());
@@ -30,6 +31,28 @@ public class w600_edit
 		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scroll.setPreferredSize(new Dimension(512,800));
 		frame.add(scroll);
+
+		JMenuBar mb = new JMenuBar();
+		JMenu mu;
+		JMenuItem mi;
+		mu = new JMenu("File");
+		mb.add(mu);
+		mi = new JMenuItem("New", KeyEvent.VK_N);
+		mi.addActionListener(card);
+		mu.add(mi);
+		mi = new JMenuItem("Open", KeyEvent.VK_O);
+		mi.addActionListener(card);
+		mu.add(mi);
+		mi = new JMenuItem("Save", KeyEvent.VK_S);
+		mi.addActionListener(card);
+		mu.add(mi);
+		mi = new JMenuItem("Print", KeyEvent.VK_P);
+		mi.addActionListener(card);
+		mu.add(mi);
+		mi = new JMenuItem("Quit", KeyEvent.VK_Q);
+		mi.addActionListener(card);
+		mu.add(mi);
+		frame.setJMenuBar(mb);
 
 		frame.getContentPane().setBackground(Color.black);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
