@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.55 2013/02/06 15:54:55 drmiller Exp $
+# $Id: Makefile,v 1.56 2013/02/06 20:03:28 drmiller Exp $
 
 include Makefile.ship
 
@@ -110,7 +110,7 @@ install: temp_dest
 www: _FRC_
 	mkdir -p /http/durgadas.com/wang600/wang600docs
 	cp docs/*.html docs/*.gif /http/durgadas.com/wang600/wang600docs
-	cp www/wang600* /http/durgadas.com/wang600
+	cp www/wang6* /http/durgadas.com/wang600
 
 icns: $(ICNS)
 
