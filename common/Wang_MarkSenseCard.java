@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.4 2013/02/06 17:02:32 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.5 2013/02/06 19:04:12 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -43,38 +43,49 @@ class Wang_MarkSenseCard extends JLabel
 		"", ""
 	};
 
+	double _bit_spacing = 38.4;
+	double _bit_start = 168.0; // not including SKIP
+	double _row_spacing = 28.8;
+	double _row_start = 48.0;
+	int _bit_width = 20;
+	int _bit_height = 10;
+	int _rows_per_card = 40;
+
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
 		super.paint(g2d);
 		g2d.setColor(Color.black);
 		g2d.setFont(font2);
 		int s;
-		for (s = 0; s < 40; ++s) {
-			int cx = _pgix * 40 + s;
+		for (s = 0; s < _rows_per_card; ++s) {
+			int cx = _pgix * _rows_per_card + s;
 			if (cx >= _code_used) break;
 			byte c = _code[cx];
-			double ry = s * 28.8 + 48.0;
+			double ry = s * _row_spacing + _row_start;
 			String step = String.format("%03d", cx / 10);
 			g2d.drawString(step, 90, (int)Math.round(ry + 8));
 			int b;
 			for (b = 0; b < 8; ++b) {
-				double rx = (b * 38.4) + 168.0;
+				double rx = (b * _bit_spacing) + _bit_start;
 				boolean m = ((c & 0x80) != 0);
 				c <<= 1;
 				if (m) {
-					g2d.fillRect((int)Math.round(rx), (int)Math.round(ry), 20, 10);
+					g2d.fillRect((int)Math.round(rx),
+						(int)Math.round(ry),
+						_bit_width, _bit_height);
 				}
 			}
 		}
-		while (s > 0 && s < 40) {
-			double ry = s * 28.8 + 48.0;
-			g2d.fillRect((int)Math.round(130.1), (int)Math.round(ry), 20, 10);
+		while (s > 0 && s < _rows_per_card) {
+			double ry = s * _row_spacing + _row_start;
+			g2d.fillRect((int)Math.round(_bit_start - _bit_spacing),
+					(int)Math.round(ry), _bit_width, _bit_height);
 			++s;
 		}
 		g2d.setFont(font1);
-		for (s = 0; s < 40; ++s) {
-			double ry = s * 28.8 + 62.0;
-			int cx = _pgix * 40 + s;
+		for (s = 0; s < _rows_per_card; ++s) {
+			double ry = s * _row_spacing + _row_start + 14.0;
+			int cx = _pgix * _rows_per_card + s;
 			if (cx >= _code_used) break;
 			byte c = _code[cx];
 			int h = (c >> 4) & 0x0f;
@@ -135,7 +146,7 @@ class Wang_MarkSenseCard extends JLabel
 				}
 			}
 		}
-		_npg = (_code_used + 39) / 40;
+		_npg = (_code_used + _rows_per_card - 1) / _rows_per_card;
 		addMouseListener(this);
 	}
 
@@ -167,12 +178,12 @@ class Wang_MarkSenseCard extends JLabel
 	public void mouseClicked(MouseEvent e) {
 		double x = e.getX();
 		double y = e.getY();
-		y = (y - 48.0) / 28.8;
-		x = (x - 168.0) / 38.4;
-		boolean iny = ((y - Math.floor(y)) * 28.8 <= 10);
-		boolean inx = ((x - Math.floor(x)) * 38.4 <= 20);
-		if (inx && iny && y >= 0 && y <= 39) {
-			int cx = _pgix * 40 + (int)y;
+		y = (y - _row_start) / _row_spacing;
+		x = (x - _bit_start) / _bit_spacing;
+		boolean iny = ((y - Math.floor(y)) * _row_spacing <= _bit_height);
+		boolean inx = ((x - Math.floor(x)) * _bit_spacing <= _bit_width);
+		if (inx && iny && y >= 0 && y <= _rows_per_card - 1) {
+			int cx = _pgix * _rows_per_card + (int)y;
 			if (x >= 0 && x <= 7) {
 				int bit = 0x80 >> (int)x;
 				_code[cx] ^= bit;
