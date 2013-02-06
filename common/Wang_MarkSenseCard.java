@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.2 2013/02/06 15:54:55 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.3 2013/02/06 16:48:26 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.io.*;
 import java.awt.event.*;
 
 class Wang_MarkSenseCard extends JLabel
-		implements KeyListener {
+		implements MouseListener, KeyListener {
 	static final long serialVersionUID = 311614000000L;
 
 	Font font1 = new Font("Sans-serif", Font.PLAIN, 18);
@@ -119,6 +119,7 @@ class Wang_MarkSenseCard extends JLabel
 		_date = _timestamp.format(new java.util.Date());
 		File file = new File(Wang_UI.getDir() + "/" + _title);
 		if (file != null && file.exists()) {
+			_date = _timestamp.format(file.lastModified());
 			FileInputStream f;
 			try {
 				f = new FileInputStream(file);
@@ -135,6 +136,7 @@ class Wang_MarkSenseCard extends JLabel
 			}
 		}
 		_npg = (_code_used + 39) / 40;
+		addMouseListener(this);
 	}
 
 	public void keyTyped(KeyEvent e) { }
@@ -161,4 +163,40 @@ class Wang_MarkSenseCard extends JLabel
 	}
 
 	public void keyReleased(KeyEvent e) { }
+
+	public void mouseClicked(MouseEvent e) {
+		double x = e.getX();
+		double y = e.getY();
+		y = (y - 48.0) / 28.8;
+		x = (x - 168.0) / 38.4;
+		boolean iny = ((y - Math.floor(y)) * 28.8 <= 10);
+		boolean inx = ((x - Math.floor(x)) * 38.4 <= 20);
+		if (inx && iny && y >= 0 && y <= 39) {
+			int cx = _pgix * 40 + (int)y;
+			if (x >= 0 && x <= 7) {
+				int bit = 0x80 >> (int)x;
+				_code[cx] ^= bit;
+				if (cx >= _code_used) _code_used = cx + 1;
+				repaint();
+//System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
+			} else if (Math.floor(x) == -1.0) {
+				if (cx == _code_used - 1) {
+					// leaves stale data...
+					--_code_used;
+					repaint();
+				} else if (cx == _code_used) {
+					// exposes stale data...
+					++_code_used;
+					repaint();
+				}
+			} else {
+System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
+			}
+		}
+	}
+	public void mouseEntered(MouseEvent e) { }
+	public void mouseExited(MouseEvent e) { }
+	public void mousePressed(MouseEvent e) { }
+	public void mouseReleased(MouseEvent e) { }
+
 }
