@@ -1,0 +1,24 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+// Labels:
+FLABEL(scale_point)
+
+BEGIN()
+MARK(scale_point)
+	RE(scalX)
+	MULT(convX)
+	ENTER(0.5)
+	ADD(convX)
+	INT()
+	ST(convX)
+
+	RE(scalY)
+	MULT(convY)
+	ENTER(0.5)
+	ADD(convY)
+	INT()
+	ST(convY)
+	RETURN()
+END()

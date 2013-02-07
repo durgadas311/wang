@@ -2,12 +2,9 @@
 
 #include "plotter.w6h"	// get out interface to the world
 
-// Registers:
-#define currX	startX
-
 FLABEL(plot_data)
 FEXTERNAL(plot_chrsize)
-FEXTERNAL(scale_Y)
+FEXTERNAL(scale_point)
 FEXTERNAL(translate)
 FEXTERNAL(plot_moveabs)
 FEXTERNAL(plot_drawto)
@@ -19,9 +16,11 @@ LLABEL(loop)
 BEGIN()
 MARK(plot_data)
 	// do first point as "move", not "plot"
+	RE(currX)
+	ST(convX)
 	INDIR(RE(currX))
-	FCALL(scale_Y)
-	ST(currY)
+	ST(convY)
+	FCALL(scale_point)
 	CALL(setup_point)
 	FCALL(translate) // translate first point only, rest are relative
 	FCALL(plot_moveabs)
@@ -29,9 +28,11 @@ MARK(plot_data)
 	ADD(currX)
 	// could check limits here, for completeness, but nothing was drawn...
 MARK(loop)
+	RE(currX)
+	ST(convX)
 	INDIR(RE(currX))
-	FCALL(scale_Y)
-	ST(currY)
+	ST(convY)
+	FCALL(scale_point)
 	CALL(setup_point)
 	FCALL(plot_drawto)
 	ENTER(1)
@@ -40,8 +41,11 @@ MARK(loop)
 	RE(maxX)
 	SUB(temp1)
 	J_IF_P() SEARCH(loop)
-	ENTER(3)	// or let user set size?
-	FCALL(plot_chrsize)
+	// moveabs to someplace... need better way
+	ENTER(5)
+	ST(convX)
+	ST(convY)
+	FCALL(plot_moveabs)
 	CALL(DESCRIPTION_FUNCTION)
 	RETURN()
 END()

@@ -2,10 +2,8 @@
 
 #include "plotter.w6h"
 
-#define currX	startX
-
 FLABEL(grapher)
-FEXTERNAL(scale_Y)
+FEXTERNAL(scale_point)
 FEXTERNAL(translate)
 EXTERNAL(setup_point)
 
@@ -14,11 +12,15 @@ LLABEL(loop)
 
 BEGIN()
 MARK(grapher)
+	T(plotX)
+	T(plotY)
 	ALPHA_STRING("|\r")	// set carriage to known position
-	RE(currX)
+	RE(startX)
+	ST(currX)
+	ST(convX)
 	CALL(GRAPHING_FUNCTION)
-	FCALL(scale_Y)
-	ST(currY)
+	ST(convY)
+	FCALL(scale_point)
 	CALL(setup_point)
 	FCALL(translate)
 	CALL(GRAPHING_PLOT)
@@ -26,9 +28,10 @@ MARK(grapher)
 	ADD(currX)
 MARK(loop)
 	RE(currX)
+	ST(convX)
 	CALL(GRAPHING_FUNCTION)
-	FCALL(scale_Y)
-	ST(currY)
+	FCALL(scale_point)
+	ST(convY)
 	CALL(setup_point)
 	CALL(GRAPHING_PLOT)
 	RE(stepX)
@@ -37,6 +40,8 @@ MARK(loop)
 	RE(maxX)
 	SUB(temp1)
 	J_IF_P() SEARCH(loop)
+	// need better way to set position for title...
+	ALPHA_STRING("\r")
 	CALL(DESCRIPTION_FUNCTION)
 	RETURN()
 END()

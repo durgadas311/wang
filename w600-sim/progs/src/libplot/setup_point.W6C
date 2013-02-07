@@ -2,26 +2,19 @@
 
 #include "plotter.w6h"
 
-#define currX	startX
-
 // Labels:
 LABEL(setup_point)
 
 BEGIN()
 MARK(setup_point)
 	// compute relative change from last point
-	RE(currX)
+	RE(convX)
 	ST(plotX)
-	RE(lastX)
+	EXCHG(lastX)
 	SUB(plotX)
-	RE(currY)
+	RE(convY)
 	ST(plotY)
-	RE(lastY)
+	EXCHG(lastY)
 	SUB(plotY)
-	// now save new "last" values for next loop...
-	RE(currX)
-	ST(lastX)
-	RE(currY)
-	ST(lastY)
 	RETURN()
 END()
