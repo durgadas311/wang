@@ -11,7 +11,7 @@ BEGIN()
 	ST(startX)
 	RE(top_reg)
 	ST(maxX)
-	ENTER(1)	// scaling in X
+	ENTER(10)	// scaling in X
 	ST(scalX)
 	ENTER(30)	// scaling in Y
 	ST(scalY)
@@ -24,6 +24,8 @@ BEGIN()
 	END_PROG()
 
 MARK(DESCRIPTION_FUNCTION)
-	ALPHA_PLOT(" OUTDOOR TEMPS TODAY")
+	ENTER(2)
+	FCALL(plot_chrsize)
+	ALPHA_PLOT("OUTDOOR TEMPS TODAY")
 	RETURN()
 END()

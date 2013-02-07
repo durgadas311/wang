@@ -8,7 +8,7 @@ BEGIN()
 	ST(startX)
 	ENTER(360)
 	ST(maxX)
-	ENTER(1)
+	ENTER(5)
 	ST(stepX)
 	ENTER(1)	// scaling in X
 	ST(scalX)
@@ -23,7 +23,7 @@ BEGIN()
 	END_PROG()
 
 MARK(DESCRIPTION_FUNCTION)
-	ALPHA_PLOT(" Y = SIN{X}")
+	ALPHA_PLOT("Y = SIN{X}")
 	RETURN()
 
 MARK(GRAPHING_FUNCTION)

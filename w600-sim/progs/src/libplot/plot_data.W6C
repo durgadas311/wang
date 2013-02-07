@@ -3,7 +3,6 @@
 #include "plotter.w6h"	// get out interface to the world
 
 FLABEL(plot_data)
-FEXTERNAL(plot_chrsize)
 FEXTERNAL(scale_point)
 FEXTERNAL(translate)
 FEXTERNAL(plot_moveabs)
