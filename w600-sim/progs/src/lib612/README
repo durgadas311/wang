@@ -1,0 +1,27 @@
+Function*	Action(s)
+---		-------------------------------------------------------
+f00		Reset - clear all settings?
+
+f01		Set Scaling = X-Linear, Y-Linear
+f02		Set Scaling = X-Linear, Y-Log
+f03		Set Scaling = X-Log, Y-Linear
+f04		Set Scaling = X-Log, Y-Log
+f05		Set Scaling = Polar Coords
+
+f06		Set Type = Pie Chart
+f07		Set Type = Pt-to-Pt Line
+f08		Set Type = Vert Bar
+f09		Set Type = Point
+f10		Set Type = Linear regression
+f11		Set Type = Math function (F01) - must set 00 and 01
+
+f12		Set Axis = X+, Y+
+f13		Set Axis = X+/-, Y+/-
+f14		Set Axis = Horiz lines (?)
+f15		Set Axis = Hatch filled (?)
+
+F01		User math function
+F01		Write alpha labeling on graph (conflict!)
+
+* For ROM version, fxx (10 xx) becomes Axx (12 xx), and Fxx (11 xx) becomes Bxx (13 xx).
+Note, user function is still F01 in both cases.

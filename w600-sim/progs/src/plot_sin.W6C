@@ -12,11 +12,11 @@ BEGIN()
 	ST(stepX)
 	ENTER(1)	// scaling in X
 	ST(scalX)
-	ENTER(300)	// scaling in Y
+	ENTER(200)	// scaling in Y
 	ST(scalY)
-	ENTER(100)	// translation in X
+	ENTER(10)	// translation in X
 	ST(tranX)
-	ENTER(600)	// translation in Y
+	ENTER(210)	// translation in Y
 	ST(tranY)
 
 	FCALL(plotter)

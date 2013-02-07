@@ -11,13 +11,13 @@ BEGIN()
 	ST(startX)
 	RE(top_reg)
 	ST(maxX)
-	ENTER(10)	// scaling in X
+	ENTER(5)	// scaling in X
 	ST(scalX)
-	ENTER(30)	// scaling in Y
+	ENTER(10)	// scaling in Y
 	ST(scalY)
-	ENTER(100)	// translation in X
+	ENTER(10)	// translation in X
 	ST(tranX)
-	ENTER(500)	// translation in Y
+	ENTER(200)	// translation in Y
 	ST(tranY)
 
 	FCALL(plot_data)
