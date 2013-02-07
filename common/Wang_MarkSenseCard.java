@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.6 2013/02/06 22:28:33 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.7 2013/02/07 00:37:39 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -7,12 +7,17 @@ import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.awt.event.*;
 
+import java.awt.print.*;
+import javax.print.attribute.*;
+import javax.print.attribute.standard.*;
+
 class Wang_MarkSenseCard extends JLabel
-		implements MouseListener, KeyListener, ActionListener {
+		implements MouseListener, KeyListener, ActionListener, Printable, java.awt.image.ImageObserver {
 	static final long serialVersionUID = 311614000000L;
 
 	Font font1 = new Font("Sans-serif", Font.PLAIN, 18);
 	Font font2 = new Font("Sans-serif", Font.PLAIN, 11);
+	ImageIcon _image;
 
 	byte[] _code;
 	int _code_used;
@@ -114,8 +119,9 @@ class Wang_MarkSenseCard extends JLabel
 
 	public Wang_MarkSenseCard(String pgm) {
 		super();
-		setIcon(new ImageIcon(getClass().getResource("icons/Wang_MarkSenseCard.gif")));
-		setBackground(new Color(236,226,190));
+		_image = new ImageIcon(getClass().getResource("icons/Wang_MarkSenseCard.png"));
+		setIcon(_image);
+		setBackground(Color.black);
 		setOpaque(true);
 		setPreferredSize(new Dimension(getIcon().getIconWidth(), getIcon().getIconHeight()));
 		_top = new Rectangle(0, 0, 10, 10);
@@ -338,13 +344,68 @@ System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 			repaint();
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_P) {
-System.err.println("Print");
+			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+			aset.add(OrientationRequested.LANDSCAPE);
+			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
+				(float)0.5, (float)0.5, (float)7.5, (float)10.0, MediaPrintableArea.INCH));
+			PrinterJob pj = PrinterJob.getPrinterJob();
+			pj.setPrintable(this);
+			boolean print = pj.printDialog(aset);
+			if (print) {
+				try {
+					pj.print(aset);
+				} catch (PrinterException ee) {
+					System.out.println("print failed");
+				}
+			}
 			return;
 		} else if (m.getMnemonic() == KeyEvent.VK_Q) {
 			if (!confirmChanges("Quit")) {
 				return;
 			}
+			System.exit(0);
 			return;
 		}
+	}
+
+	public int print(Graphics g, PageFormat pf, int pageIndex) {
+		double x0 = pf.getImageableX();
+		double y0 = pf.getImageableY();
+		double w0 = pf.getImageableWidth();
+		double h0 = pf.getImageableHeight();
+		Graphics2D g2d = (Graphics2D)g;
+		g2d.translate(x0, y0);
+		g2d.setColor(Color.white);
+		g2d.fillRect(0, 0, (int)w0, (int)h0);
+		g2d.setColor(Color.black);
+
+		// determine scaling to fit cards along long edge of landscape page.
+		
+		double oh0 = getIcon().getIconHeight();
+		double ow0 = getIcon().getIconWidth();
+		double gs = h0 / oh0;
+		g2d.scale(gs, gs);
+
+		int ncards = (int)Math.round((w0 / gs) / ow0);
+		int fcard = pageIndex * ncards;
+		if (fcard >= _npg) {
+			return Printable.NO_SUCH_PAGE;
+		}
+		int saveIx = _pgix;
+		int lcard = fcard + ncards;
+		int gap = (int)Math.floor(((w0 / gs) - (ncards * ow0)) / (ncards - 1));
+		gap += (int)ow0;
+
+		int pos = 0;
+		for (int ccard = fcard; ccard < _npg && ccard < lcard; ++ccard) {
+			AffineTransform orig = g2d.getTransform();
+			g2d.translate(pos, 0);
+			_pgix = ccard;
+			paint(g2d);
+			g2d.setTransform(orig);
+			pos += gap;
+		}
+		_pgix = saveIx;
+		return Printable.PAGE_EXISTS;
 	}
 }
