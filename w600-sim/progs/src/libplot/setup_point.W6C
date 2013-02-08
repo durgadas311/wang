@@ -7,14 +7,31 @@ LABEL(setup_point)
 
 BEGIN()
 MARK(setup_point)
-	// compute relative change from last point
-	RE(convX)
+	// input point is (convX,convY), output is (plotX,plotY)
+	// scale point and compute relative change from last point
+	RE(scalX)
+	MULT(convX) // scale X
+	ENTER(0.5)
+	ADD(convX)
+	INT()
+	ST(convX)
 	ST(plotX)
+	RE(tranX)
+	ADD(plotX) // translate X
 	EXCHG(lastX)
-	SUB(plotX)
-	RE(convY)
+	SUB(plotX) // delta to last
+
+	RE(scalY)
+	MULT(convY) // scale Y
+	ENTER(0.5)
+	ADD(convY)
+	INT()
+	ST(convY)
 	ST(plotY)
+	RE(tranY)
+	ADD(plotY) // translate Y
 	EXCHG(lastY)
-	SUB(plotY)
+	SUB(plotY) // delta to last
+
 	RETURN()
 END()

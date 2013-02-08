@@ -2,6 +2,8 @@
 
 #include "libplot/plotter.w6h"
 
+EXTERNAL(setup_point)
+
 BEGIN()
 	CLEAR()
 	ENTER(0)
@@ -20,11 +22,14 @@ BEGIN()
 	ST(tranY)
 
 	FCALL(grapher)
-	END_PROG()
 
-MARK(DESCRIPTION_FUNCTION)
-	ALPHA_STRING("y = SIN(x)")
-	RETURN()
+	ENTER(0)
+	ST(convX)
+	ENTER(-1)
+	ST(convY)
+	CALL(setup_point)
+	ALPHA_STRING("|y = SIN(x)")
+	END_PROG()
 
 MARK(GRAPHING_FUNCTION)
 	SIN()

@@ -3,6 +3,9 @@
 #include "libplot/plotter.w6h"
 #include "libw6/load_tape_data.w6h"
 
+EXTERNAL(setup_point)
+FEXTERNAL(plot_moveto)
+
 BEGIN()
 	CLEAR()
 	CALL(load_tape_data)
@@ -21,11 +24,15 @@ BEGIN()
 	ST(tranY)
 
 	FCALL(plot_data)
-	END_PROG()
 
-MARK(DESCRIPTION_FUNCTION)
 	ENTER(2)
 	FCALL(plot_chrsize)
-	ALPHA_PLOT("OUTDOOR TEMPS TODAY")
-	RETURN()
+	ENTER(0)
+	ST(convX)
+	ENTER(-15)
+	ST(convY)
+	CALL(setup_point)
+	FCALL(plot_moveto)
+	ALPHA_PLOT("OUTDOOR TEMP, DEG C")
+	END_PROG()
 END()

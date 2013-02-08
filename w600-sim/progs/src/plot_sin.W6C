@@ -2,11 +2,14 @@
 
 #include "libplot/plotter.w6h"
 
+EXTERNAL(setup_point)
+FEXTERNAL(plot_moveto)
+
 BEGIN()
 	CLEAR()
 	ENTER(0)
 	ST(startX)
-	ENTER(360)
+	ENTER(361)	// make sure we plot the last point
 	ST(maxX)
 	ENTER(5)
 	ST(stepX)
@@ -20,11 +23,15 @@ BEGIN()
 	ST(tranY)
 
 	FCALL(plotter)
-	END_PROG()
 
-MARK(DESCRIPTION_FUNCTION)
+	ENTER(0)
+	ST(convX)
+	ENTER(-1)
+	ST(convY)
+	CALL(setup_point)
+	FCALL(plot_moveto)
 	ALPHA_PLOT("Y = SIN{X}")
-	RETURN()
+	END_PROG()
 
 MARK(GRAPHING_FUNCTION)
 	SIN()

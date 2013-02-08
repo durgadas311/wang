@@ -1,0 +1,12 @@
+#include "wang600.h"
+
+#include "plotter.w6h"
+
+FLABEL(plot_home)
+
+BEGIN()
+MARK(plot_home)
+	// The following in somewhat inefficient... X,Y may not be 0.
+	ALPHA_PLOT("\h")	// home pen
+	RETURN()
+END()
