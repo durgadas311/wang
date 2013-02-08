@@ -7,17 +7,11 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.8 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.9 $ \"");
 asm(".include \"wang600opcodes.s\"");
 
 asm(	".section .wang600code, \"a\";"
-	".pushsection .wang600search,\"a\";"
-	".global _search_base;"
-	".global _search_end_prog;"
-	".set _search_end_prog, _search_base;"
-	".section .wang600call,\"a\";"
-	".global _call_base;"
-	".section .wang600regs,\"a\";"
+	".pushsection .wang600regs,\"a\";"
 	".subsection 0;"
 	"longreg_base:;"
 	".subsection 1;"
@@ -86,32 +80,45 @@ asm(	".section .wang600code, \"a\";"
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
 					".global _search_" #label ";" \
-					".set _search_" #label ", _search_base;" \
+					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
 					".global _call_" #label ";" \
-					".set _call_" #label ", _call_base;" \
+					"_call_" #label ":;" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
 #define LLABEL(label)		asm(".pushsection .wang600label,\"a\";" \
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
-					".global _search_" #label ";" \
-					".set _search_" #label ", _search_base;" \
+					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
-					".global _call_" #label ";" \
-					".set _call_" #label ", _call_base;" \
+					"_call_" #label ":;" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
 #define FLABEL(label)		asm(".pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
+					".section .wang600search,\"a\";" \
+					".global _search_" #label ";" \
+					"_search_" #label ":;" \
+					".section .wang600call,\"a\";" \
+					".global _call_" #label ";" \
+					"_call_" #label ":;" \
+					".section .wang600subr,\"a\";" \
+					".global _subr_" #label ";" \
+					".set _subr_" #label "," #label ";" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
 #define FLLABEL(label)		asm(".pushsection .wang600flabel,\"a\";" \
 					#label ":  .byte 0;" \
+					".section .wang600search,\"a\";" \
+					"_search_" #label ":;" \
+					".section .wang600call,\"a\";" \
+					"_call_" #label ":;" \
+					".section .wang600subr,\"a\";" \
+					".set _subr_" #label "," #label ";" \
 					".popsection");
 
 // A label from another module for use with SEARCH/CALL
@@ -119,15 +126,19 @@ asm(	".section .wang600code, \"a\";"
 					".global " #label ";" \
 					".section .wang600search,\"a\";" \
 					".global _search_" #label ";" \
-					".set _search_" #label ", _search_base;" \
 					".section .wang600call,\"a\";" \
 					".global _call_" #label ";" \
-					".set _call_" #label ", _call_base;" \
 					".popsection");
 
 // A label from another module for use with FCALL
 #define FEXTERNAL(label)	asm(".pushsection .wang600flabel,\"a\";" \
 					".global " #label ";" \
+					".section .wang600search,\"a\";" \
+					".global _search_" #label ";" \
+					".section .wang600call,\"a\";" \
+					".global _call_" #label ";" \
+					".section .wang600subr,\"a\";" \
+					".global _subr_" #label ";" \
 					".popsection");
 
 // Reserve an un-initialize long register

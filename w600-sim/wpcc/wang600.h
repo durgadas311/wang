@@ -82,7 +82,7 @@
 #define END_PROG()	_oplabel(_search_,end_prog)
 #define RETURN()	_opcode(RETURN)
 
-#define FCALL(fx)	_bytecode(fx)
+#define FCALL(label)	_bytecode(_subr_ ## label)
 
 /* these should not be used? */
 #define _f(x)		_opreg(f, x)
