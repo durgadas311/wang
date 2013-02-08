@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.14 2013/02/02 01:39:04 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.15 2013/02/08 11:57:21 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.14 2013/02/02 01:39:04 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.15 2013/02/08 11:57:21 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -22,6 +22,7 @@ class Wang_Paper
 		void setCursor(int x, int y);
 		boolean enableCursor(boolean on);
 		void saveAsText(FileOutputStream fo) throws Exception;
+		void setPen(Color c);
 
 		// from JComponent:
 		void setBackground(Color c);
@@ -414,6 +415,10 @@ class Wang_Paper
 			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
+		public void setPen(Color c) {
+			//_pen = c;
+		}
+
 		public void saveAsText(FileOutputStream fo) throws Exception {
 			int x = 0, y = 0;
 			int dx, dy;
@@ -573,9 +578,11 @@ class Wang_Paper
 			_xplots = 0;
 			//_plotArray.dispose();
 			_plotArray = null;
+			addPlot(-1, _pen.getRed(), _pen.getGreen(), _pen.getBlue());
 			repaint();
 		}
 
+		private Color _pen = Color.black;
 		private plot[] _plotArray;
 		private int _nplots;
 		private int _xplots;
@@ -615,6 +622,11 @@ class Wang_Paper
 			++_xplots;
 		}
 
+		public void setPen(Color c) {
+			_pen = c;
+			addPlot(-1, _pen.getRed(), _pen.getGreen(), _pen.getBlue());
+		}
+
 		public void setCursor(int x, int y) {
 			_cx = x;
 			_cy = y;
@@ -635,7 +647,11 @@ class Wang_Paper
 			g2d.scale(_gx, _gy);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
-				if (_plotArray[x].xd < 0) {
+				if (_plotArray[x].x < 0) {
+					g2d.setColor(new Color(_plotArray[x].y,
+							_plotArray[x].xd,
+							_plotArray[x].yd));
+				} else if (_plotArray[x].xd < 0) {
 					g2d.drawOval(_plotArray[x].x,
 						_plotArray[x].y,
 						1, 1);
@@ -648,9 +664,13 @@ class Wang_Paper
 			}
 			if (_enableCursor) {
 				// don't want this for "save" option...
-				g2d.setColor(Color.red);
-				g2d.drawLine(_cx, _cy - 10, _cx, _cy + 10);
-				g2d.drawLine(_cx - 10, _cy, _cx + 10, _cy);
+				//g2d.setColor(Color.red);
+				g2d.setColor(new Color(255,0,0,128));
+				g2d.drawOval(_cx - 5, _cy - 5, 10, 10);
+				g2d.drawLine(_cx, _cy - 5, _cx, _cy + 5);
+				g2d.drawLine(_cx - 5, _cy, _cx + 15, _cy);
+				g2d.setStroke(new BasicStroke((float)6.0));
+				g2d.drawLine(_cx + 10, 0, _cx + 10, 999);
 			}
 		}
 

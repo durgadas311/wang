@@ -1,21 +1,42 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.16 2013/02/01 17:44:39 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.17 2013/02/08 11:57:21 drmiller Exp $
 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
 
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.16 2013/02/01 17:44:39 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.17 2013/02/08 11:57:21 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
 	boolean _plot;	// mode, plot or print...
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JMenuItem) {
+		if (e.getSource() instanceof JRadioButton) {
+			JRadioButton m = (JRadioButton)e.getSource();
+			if (m.getMnemonic() == KeyEvent.VK_0) { 
+				_text.setPen(Color.black);
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_1) { 
+				_text.setPen(Color.blue);
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_2) { 
+				_text.setPen(Color.green);
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_3) { 
+				_text.setPen(Color.red);
+				return;
+			}
+		} else if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
 			if (m.getMnemonic() == KeyEvent.VK_U) { 
 				setup();
@@ -23,6 +44,8 @@ class Wang_Plotter extends Wang_Paper
 			}
 			if (m.getMnemonic() == KeyEvent.VK_H) { 
 				home();
+				_text.setCursor(_x, 999 - _y);
+				_text.repaint();
 				return;
 			}
 		}
@@ -88,15 +111,51 @@ class Wang_Plotter extends Wang_Paper
 		super.setScale(sx, sy);
 	}
 
+	private class MnemonicAction extends AbstractAction {
+
+		static final long serialVersionUID = 311602000004L;
+
+		public MnemonicAction(int key) {
+			putValue(Action.MNEMONIC_KEY, key);
+		}
+		public void actionPerformed(ActionEvent e) { }
+	}
+
 	public Wang_Plotter() {
 		super(Wang_UI.getSeries() + Model, Description, 1000, 1000);
 		setPaper(11.0 - 1.0, 8.5 - 1.0);
 		JMenu mu;
 		mu = new JMenu("Plotter");
 		JMenuItem mi;
-		mi = new JMenuItem("Setup", KeyEvent.VK_U);
-		mi.addActionListener(this);
-		mu.add(mi);
+		JMenu smu;
+		smu = new JMenu("Pen...");
+		ButtonGroup grp = new ButtonGroup();
+		JRadioButton op = new JRadioButton("Black", true);
+		op.setAction(new MnemonicAction(KeyEvent.VK_0));
+		op.addActionListener(this);
+		op.setText("Black"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		op = new JRadioButton("Blue");
+		op.setAction(new MnemonicAction(KeyEvent.VK_1));
+		op.addActionListener(this);
+		op.setText("Blue"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		op = new JRadioButton("Green");
+		op.setAction(new MnemonicAction(KeyEvent.VK_2));
+		op.addActionListener(this);
+		op.setText("Green"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		op = new JRadioButton("Red");
+		op.setAction(new MnemonicAction(KeyEvent.VK_3));
+		op.addActionListener(this);
+		op.setText("Red"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+
+		mu.add(smu);
 		mi = new JMenuItem("Home", KeyEvent.VK_H);
 		mi.addActionListener(this);
 		mu.add(mi);
@@ -111,6 +170,7 @@ class Wang_Plotter extends Wang_Paper
 		_sy = 9;
 		_text.setCursor(_x, 999 - _y);
 		_text.enableCursor(true);
+		_text.setPen(Color.black);
 	}
 
 	private int _x, _y;
