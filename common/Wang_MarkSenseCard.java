@@ -1,11 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.7 2013/02/07 00:37:39 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.8 2013/02/08 00:27:53 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
 import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.awt.event.*;
+import java.util.Arrays;
 
 import java.awt.print.*;
 import javax.print.attribute.*;
@@ -20,6 +21,7 @@ class Wang_MarkSenseCard extends JLabel
 	ImageIcon _image;
 
 	byte[] _code;
+	byte[] _skips;
 	int _code_used;
 	String _title;
 	File _file;
@@ -66,11 +68,15 @@ class Wang_MarkSenseCard extends JLabel
 		int s;
 		for (s = 0; s < _rows_per_card; ++s) {
 			int cx = _pgix * _rows_per_card + s;
-			if (cx >= _code_used) break;
-			byte c = _code[cx];
+			byte c = 0;
+			if (cx < _code_used) c = _code[cx];
 			double ry = s * _row_spacing + _row_start;
 			String step = String.format("%03d", cx / 10);
 			g2d.drawString(step, 90, (int)Math.round(ry + 8));
+			if (_skips[cx] != 0) {
+				g2d.fillRect((int)Math.round(_bit_start - _bit_spacing),
+					(int)Math.round(ry), _bit_width, _bit_height);
+			}
 			int b;
 			for (b = 0; b < 8; ++b) {
 				double rx = (b * _bit_spacing) + _bit_start;
@@ -82,12 +88,6 @@ class Wang_MarkSenseCard extends JLabel
 						_bit_width, _bit_height);
 				}
 			}
-		}
-		while (s < _rows_per_card) {
-			double ry = s * _row_spacing + _row_start;
-			g2d.fillRect((int)Math.round(_bit_start - _bit_spacing),
-					(int)Math.round(ry), _bit_width, _bit_height);
-			++s;
 		}
 		g2d.setFont(font1);
 		for (s = 0; s < _rows_per_card; ++s) {
@@ -129,6 +129,7 @@ class Wang_MarkSenseCard extends JLabel
 		addMouseListener(this);
 
 		_code = new byte[2048];
+		_skips = new byte[2048];
 		if (pgm == null) {
 			newFile();
 		} else {
@@ -140,6 +141,7 @@ class Wang_MarkSenseCard extends JLabel
 		_title = "untitled";
 		_file = null;
 		_code_used = 0;
+		Arrays.fill(_skips, (byte)1);
 		_pgix = 0;
 		_npg = 1;
 		_changed = false;
@@ -181,6 +183,9 @@ class Wang_MarkSenseCard extends JLabel
 				} else {
 					_code_used -= 2;
 				}
+			}
+			for (int x = 0; x < _skips.length; ++x) {
+				_skips[x] = (byte)(x >= _code_used ? 1 : 0);
 			}
 			_changed = false;
 			_pgix = 0;
@@ -256,42 +261,51 @@ class Wang_MarkSenseCard extends JLabel
 		if (inx && iny && y >= 0 && y < _rows_per_card) {
 			int cx = _pgix * _rows_per_card + (int)y;
 			if (x >= 0 && x < 8) {
+				// click data bit box
 				int bit = 0x80 >> (int)x;
 				if (cx >= _code_used) {
-					if (e.getButton() == MouseEvent.BUTTON3) { // dirty
-						_code_used = cx + 1;
-					} else { // clean...
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						// extend to new mark...
 						while (_code_used <= cx) {
-							_code[_code_used++] = 0;
+							_skips[_code_used++] = 0;
 						}
+					} else { 
+						_code_used = cx + 1;
 					}
 				}
+				_skips[cx] = 0;
 				_code[cx] ^= bit;
 				_changed = true;
 				repaint();
 //System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 			} else if (Math.floor(x) == -1.0) {
+				// click SKIP box
 				if (cx < _code_used) {
-					// leaves stale data... recovery possible
-					_code_used = cx;
-					_npg = (_code_used + _rows_per_card - 1) /
-								_rows_per_card;
-					if (_npg == 0) _npg = 1;
-					_changed = true;
-					repaint();
-				} else if (cx >= _code_used) {
-					// exposes stale data...
-					if (e.getButton() == MouseEvent.BUTTON3) { // dirty
-						_code_used = cx + 1;
-					} else { // clean...
-						while (_code_used <= cx) {
-							_code[_code_used++] = 0;
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						// shrink to new mark...
+						while (cx < _code_used) {
+							_skips[_code_used--] = 1;
 						}
+						_skips[cx] = 1;
+					} else {
+						_skips[cx] ^= 1;
 					}
-					_changed = true;
-					repaint();
+				} else if (cx >= _code_used) {
+					// assumes SKIP is current set...
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						// extend to new mark...
+						while (_code_used <= cx) {
+							_skips[_code_used++] = 0;
+						}
+					} else {
+						_skips[cx] = 0;
+						_code_used = cx + 1;
+					}
 				}
+				repaint();
+				_changed = true;
 			} else {
+				// corner cases?
 System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 			}
 		}
