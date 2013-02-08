@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.15 2013/02/08 11:57:21 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.16 2013/02/08 12:45:25 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.print.attribute.standard.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.15 2013/02/08 11:57:21 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.16 2013/02/08 12:45:25 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -664,8 +664,7 @@ class Wang_Paper
 			}
 			if (_enableCursor) {
 				// don't want this for "save" option...
-				//g2d.setColor(Color.red);
-				g2d.setColor(new Color(255,0,0,128));
+				g2d.setColor(new Color(128,128,128,128));
 				g2d.drawOval(_cx - 5, _cy - 5, 10, 10);
 				g2d.drawLine(_cx, _cy - 5, _cx, _cy + 5);
 				g2d.drawLine(_cx - 5, _cy, _cx + 15, _cy);
