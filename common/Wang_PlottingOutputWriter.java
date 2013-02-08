@@ -1,17 +1,17 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class Wang_OutputWriter extends Wang_Paper
+class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $";
 
-	public static final String Model = "01";
-	public static final String Description = "Output Writer";
+	public static final String Model = "02";
+	public static final String Description = "Plotting Output Writer";
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -26,6 +26,7 @@ class Wang_OutputWriter extends Wang_Paper
 			}
 			if (m.getMnemonic() == KeyEvent.VK_T) {
 				_x = _y = 0;
+				_dx = _dy = 0;
 				_text.setCursor(_x, _y);
 				//return; fall through and perform base class too...
 			}
@@ -50,7 +51,7 @@ class Wang_OutputWriter extends Wang_Paper
 		super.setScale(sx, sy);
 	}
 
-	public Wang_OutputWriter() {
+	public Wang_PlottingOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
 				new Font("Monospaced", Font.PLAIN, 12));
 		_wfm = super.getFontMetrics();
@@ -69,13 +70,17 @@ class Wang_OutputWriter extends Wang_Paper
 		mu.add(mi);
 		super.addMenu(mu);
 
+		_adjacent = false;
 		_text.setCursor(_x, _y);
 		_text.enableCursor(true); 
 	}
 
 	Wang_FontMetrics _wfm;
 	private boolean _shifted;
+	private boolean _plot;
+	private boolean _adjacent;
 	private int _x, _y;
+	private int _dx, _dy;
 
 	private void index() {
 		_y += _wfm.height;
@@ -103,13 +108,25 @@ class Wang_OutputWriter extends Wang_Paper
 			case 0: // nothing
 				break;
 			case 1:	// return+index handled below...
+				_adjacent = false;
+				_x = 0;
+				if (_plot) return;
 				index();
 				printable = false;
 				break;
+			case 2:	// print mode
+				_plot = false;	// cleanup?
+				return;
+			case 3:	// plot mode
+				_plot = true;
+				_dx = _dy = 0;
+				return;
 			}
 		} else if ((b[0] & 0x06) == 0x02) {
 			switch((b[0] & 0x30) >> 4) {
 			case 0: // space/bspace or nothing
+				_adjacent = false;
+				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					space();
 				} else {
@@ -122,6 +139,8 @@ class Wang_OutputWriter extends Wang_Paper
 					_shifted = ((b[0] & 1) != 0);
 					return;
 				}
+				_adjacent = false;
+				if (_plot) return;
 				if ((b[0] & 1) == 0) {
 					index();
 				} else {
@@ -129,16 +148,65 @@ class Wang_OutputWriter extends Wang_Paper
 				}
 				printable = false;
 				break;
+			case 2:	// stepping
+			case 3:	// stepping
+				if (!_plot) return;
+				switch(b[0] & 0x19) {
+				case 0x00:
+					_dx += 1;
+					break;
+				case 0x01:
+					_dx -= 1;
+					break;
+				case 0x08:
+					_dy += 1;
+					break;
+				case 0x09:
+					_dy -= 1;
+					break;
+				case 0x10:
+					_dx += 1;
+					_dy += 1;
+					break;
+				case 0x11:
+					_dx -= 1;
+					_dy += 1;
+					break;
+				case 0x18:
+					_dx += 1;
+					_dy -= 1;
+					break;
+				case 0x19:
+					_dx -= 1;
+					_dy -= 1;
+					break;
+				}
+				return;
 			}
 		}
+		String s = null;
 		if (printable) {
-			String s;
 			s = Wang_UI.getCharConv().tiltrotateToAscii(b[0], _shifted);
-			if (s != null) {
-				//_text.appendText(s);
-			}
 		}
-		_text.setCursor(_x, _y);// scrollto?
+		if (_plot) {
+			_x += _dx;
+			if (_x < 0) _x = 0;
+			if (_x >= 1300) _x = 1299; // 13 in. platten
+			_y += _dy;
+			if (_y < 0) _y = 0;
+			_adjacent = false;
+		}
+		if (printable && s != null) {
+			int m;
+			if (_adjacent) {
+				m = _text.appendLastPlot(s, _x, _y);
+			} else {
+				m = _text.addPlot(s, _x, _y);
+			}
+			if (!_plot) _x += m;
+			_adjacent = true;
+		}
+		_text.setCursor(_x, _y);
 		_text.repaint();
 
 		// "auto raise"...

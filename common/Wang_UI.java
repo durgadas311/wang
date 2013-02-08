@@ -1,12 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.3 2013/02/06 22:28:33 drmiller Exp $
+// $Id: Wang_UI.java,v 1.4 2013/02/08 09:55:43 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.3 2013/02/06 22:28:33 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.4 2013/02/08 09:55:43 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -14,6 +14,7 @@ public class Wang_UI
 	private static java.text.SimpleDateFormat _timestamp =
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
 	private static String _series;
+	private static Wang_CharConverter _conv;
 
 //	public Wang_UI(Wang_Properties props, ImageIcon icon) {
 //		_props = props;
@@ -42,6 +43,13 @@ public class Wang_UI
 	}
 	public static void setSeries(String series) {
 		_series = series;
+	}
+
+	public static Wang_CharConverter getCharConv() {
+		if (_conv == null) {
+			_conv = new Wang_CharConverter();
+		}
+		return _conv;
 	}
 
 	static public void fatal(String op, String err) {

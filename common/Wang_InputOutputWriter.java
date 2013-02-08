@@ -1,17 +1,17 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class Wang_OutputWriter extends Wang_Paper
+class Wang_InputOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $";
 
-	public static final String Model = "01";
-	public static final String Description = "Output Writer";
+	public static final String Model = "11";
+	public static final String Description = "Input/Output Writer";
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -50,7 +50,7 @@ class Wang_OutputWriter extends Wang_Paper
 		super.setScale(sx, sy);
 	}
 
-	public Wang_OutputWriter() {
+	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
 				new Font("Monospaced", Font.PLAIN, 12));
 		_wfm = super.getFontMetrics();
@@ -67,6 +67,8 @@ class Wang_OutputWriter extends Wang_Paper
 		mi = new JMenuItem("Home", KeyEvent.VK_H);
 		mi.addActionListener(this);
 		mu.add(mi);
+		super.addMenu(mu);
+		mu = new JMenu("Keyboard");
 		super.addMenu(mu);
 
 		_text.setCursor(_x, _y);
