@@ -1,0 +1,40 @@
+<HTML>
+<!-- $Id: wang614.html,v 1.1 2013/02/09 03:18:39 drmiller Exp $ -->
+
+<H2>Wang 614 Mark Sense Card Editor Basic Operation</H2>
+
+<P>This editor allows changes to be made to a Wang 600 program through
+an interface that simluates use of the mark sense cards widely used for
+programming Wang Programmable Calculators.
+
+<P>The "File" menu is fairly standard. "New" clears the program and marks all
+cards as empty (SKIP filled in). "Open" will load an existing file and present
+it as a deck of cards. "Save" will save the current program out to the file
+it was loaded from, or in the case of "New" will prompt for a file name. "Print"
+will print out the current card deck in a 3-up manner on landscape pages.
+"Quit" will exit the editor. The editor attempts to prevent you from accidentally
+discarding changes, but allows you to procede if you click "Yes".
+
+<P>The editor automatically decodes the program codes and assigns step numbers.
+It also keeps track of the card number, file name, and last-modified date.
+Navigation through the card deck is by left and right arrow, and the current card
+may be scrolled to the top or bottom by using up arrow and down arrow,
+respectively.
+
+<P>Clicking on the program code "bubbles" will toggle their state.
+Clicking on a SKIP bubble will also toggle it's state, but will not
+erase the program codes, except under conditions described next.
+
+<P>If a SKIP bubble is clicked beyond the end of the current program,
+the program will be extended to that step but all steps in between
+are left with SKIP set. However, if the right mouse button is used to click
+the SKIP bubble then all steps between the current end and the step clicked will be
+"un-skipped". Likewise, if a right click is done on a SKIP bubble inside the
+current program, all steps between that and the end are "discarded" and set to SKIP.
+Note, the program codes are not erased and the steps can be reclaimed
+provided the file is not saved.
+
+<P>Saving a program will permanantly delete any SKIPed steps. In other
+words, the SKIP status is not saved in the file.
+
+</HTML>

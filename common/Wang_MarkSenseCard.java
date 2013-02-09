@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.8 2013/02/08 00:27:53 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.9 2013/02/09 03:18:39 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -30,8 +30,11 @@ class Wang_MarkSenseCard extends JLabel
 	boolean _changed;
 	java.text.SimpleDateFormat _timestamp =
 		new java.text.SimpleDateFormat("MMM" + "\u2003 " + "d" + "\u2003\u2003" + "y");
+	JMenu _menu;
 	String _date;
 	Rectangle _top, _bottom;
+
+	public JMenu getMenu() { return _menu; }
 
 	final String[] pr_16 = {
 		"E", "T", "+", "-", "\u00D7", "\u00F7", "ST", "RE",
@@ -130,6 +133,27 @@ class Wang_MarkSenseCard extends JLabel
 
 		_code = new byte[2048];
 		_skips = new byte[2048];
+
+		JMenu mu;
+		JMenuItem mi;
+		mu = new JMenu("File");
+		mi = new JMenuItem("New", KeyEvent.VK_N);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Open", KeyEvent.VK_O);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Save", KeyEvent.VK_S);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Print", KeyEvent.VK_P);
+		mi.addActionListener(this); 
+		mu.add(mi);
+		mi = new JMenuItem("Quit", KeyEvent.VK_Q);
+		mi.addActionListener(this);
+		mu.add(mi);
+		_menu = mu;
+
 		if (pgm == null) {
 			newFile();
 		} else {
