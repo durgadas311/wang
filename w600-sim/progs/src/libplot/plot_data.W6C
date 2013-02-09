@@ -13,6 +13,7 @@ LLABEL(loop)
 BEGIN()
 MARK(plot_data)
 	// do first point as "move", not "plot"
+	FCALL(plot_home)
 	RE(startX)
 	ST(currX)
 	ENTER(0)

@@ -8,7 +8,7 @@ LABEL(setup_point)
 BEGIN()
 MARK(setup_point)
 	// input point is (convX,convY), output is (plotX,plotY)
-	// scale point and compute relative change from last point
+	// scale/translate point and compute relative change from last point
 	RE(scalX)
 	MULT(convX) // scale X
 	ENTER(0.5)
