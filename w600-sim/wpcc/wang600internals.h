@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.9 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.10 $ \"");
 asm(".include \"wang600opcodes.s\"");
 
 asm(	".section .wang600code, \"a\";"
@@ -32,16 +32,18 @@ asm(	".section .wang600code, \"a\";"
 #define _oplabel(prefix,label)	asm(".byte (" # prefix # label "),(" # label ")"); \
 					_shadow_code(2)
 
-#define _reg(reg)		asm(".pushsection .wang600regs,1,\"a\";" \
-					".global " #reg ";"	\
-					#reg ": .byte 0;"	\
+#define _longreg(reg)		asm(".pushsection .wang600regs,1,\"a\";" \
+					".global _longreg_" #reg ";"	\
+					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
+					".byte 0;"	\
 					".popsection");
 
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(".pushsection .wang600regs,\"a\";" \
 					".subsection 0;" \
-					".global " #reg ";" \
-					#reg ": .byte 0;"	\
+					".global _longreg_" #reg ";" \
+					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
+					".byte 0;"	\
 					".section .wang600data,\"a\";" \
 					".align 8;"		\
 					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
@@ -54,10 +56,12 @@ asm(	".section .wang600code, \"a\";"
 					".byte ((" #b1 ") << 4) | (" #b0 ");"	\
 					".popsection");
 
-#define _oplongreg(op,reg)	_opcode(op) \
-				_bytecode(longreg_base+(longreg_base-reg))
+#define _oplongreg(op,reg)	_opcode(op) _bytecode(_longreg_ ##reg)
 
 /***************************************************************************/
+
+#define BEGIN()
+#define END()
 
 #define RES_EXTERN(label, const)	\
 				asm(".pushsection .wang600label,\"a\";" \
@@ -70,9 +74,6 @@ asm(	".section .wang600code, \"a\";"
 					".global _call_" #label ";" \
 					".set _call_" #label ", 0xf7;" \
 					".popsection");
-
-#define BEGIN()
-#define END()
 
 // Define a label for use with SEARCH/MARK
 #define LABEL(label)		asm(".pushsection .wang600label,\"a\";" \
@@ -141,8 +142,11 @@ asm(	".section .wang600code, \"a\";"
 					".global _subr_" #label ";" \
 					".popsection");
 
+#define RES_REG(label,reg)	asm(".global _longreg_" #label ";" \
+					".set _longreg_" #label "," #reg);
+
 // Reserve an un-initialize long register
-#define UREG(name)		_reg(name)
+#define UREG(name)		_longreg(name)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run w6cpp preprocessor for ENTER()\"");
