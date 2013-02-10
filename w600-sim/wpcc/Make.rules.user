@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.6 2013/02/04 23:04:29 drmiller Exp $
+# $Id: Make.rules.user,v 1.7 2013/02/10 19:48:41 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -45,7 +45,7 @@ CPP = $(WPCCBIN)/w6cpp
 %.w6s: %.w6r
 	@echo "Post-processing $< into $@..."
 	@$(READELF) -s $< | \
-		$(AWK) '$$5=="GLOBAL"{print ".globl " $$NF "; .set " $$NF ",0x" $$2; }' | \
+		$(AWK) '/<corrupt>/{next;}$$5=="GLOBAL"{print ".globl " $$NF "; .set " $$NF ",0x" $$2; }' | \
 		$(AS) -o $@
 
 %.w6x: %.w6r

@@ -35,37 +35,6 @@ SECTIONS
 	.wang600flabels (NOLOAD) : {
 		*(.wang600flabel);
 	} >flabels
-	PROVIDE(res_label0 = 0xe0);
-	PROVIDE(res_label1 = 0xe1);
-	PROVIDE(res_label2 = 0xe2);
-	PROVIDE(res_label3 = 0xe3);
-	PROVIDE(res_label4 = 0xe4);
-	PROVIDE(res_label5 = 0xe5);
-	PROVIDE(res_label6 = 0xe6);
-	PROVIDE(res_label7 = 0xe7);
-	PROVIDE(res_label8 = 0xe8);
-	PROVIDE(res_label9 = 0xe9);
-	PROVIDE(res_label10 = 0xea);
-	PROVIDE(res_label11 = 0xeb);
-	PROVIDE(res_label12 = 0xec);
-	PROVIDE(res_label13 = 0xed);
-	PROVIDE(res_label14 = 0xef);
-	PROVIDE(res_label15 = 0xf0);
-	PROVIDE(res_label16 = 0xf1);
-	PROVIDE(res_label17 = 0xf2);
-	PROVIDE(res_label18 = 0xf3);
-	PROVIDE(res_label19 = 0xf4);
-	PROVIDE(res_label20 = 0xf5);
-	PROVIDE(res_label21 = 0xf6);
-	PROVIDE(res_label22 = 0xf7);
-	PROVIDE(res_label23 = 0xf8);
-	PROVIDE(res_label24 = 0xf9);
-	PROVIDE(res_label25 = 0xfa);
-	PROVIDE(res_label26 = 0xfb);
-	PROVIDE(res_label27 = 0xfc);
-	PROVIDE(res_label28 = 0xfd);
-	PROVIDE(res_label29 = 0xfe);
-	PROVIDE(res_label30 = 0xff);
 	.wang600search (NOLOAD) : {
 		*(.wang600search);
 	} >search

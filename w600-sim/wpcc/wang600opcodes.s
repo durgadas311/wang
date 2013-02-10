@@ -1,277 +1,309 @@
-.set _op_E0,0x00
-.set _op_E1,0x01
-.set _op_E2,0x02
-.set _op_E3,0x03
-.set _op_E4,0x04
-.set _op_E5,0x05
-.set _op_E6,0x06
-.set _op_E7,0x07
-.set _op_E8,0x08
-.set _op_E9,0x09
-.set _op_E10,0x0a
-.set _op_E11,0x0b
-.set _op_E12,0x0c
-.set _op_E13,0x0d
-.set _op_E14,0x0e
-.set _op_E15,0x0f
-.set _op_DP,_op_E10
-.set _op_SET_EXP,_op_E11
-.set _op_CHANGE_SIGN,_op_E12
-.set _op_CLEAR,_op_E14
-.set _op_CLR_DISP,_op_E15
+.global _op_E0; .set _op_E0,0x00
+.global _op_E1; .set _op_E1,0x01
+.global _op_E2; .set _op_E2,0x02
+.global _op_E3; .set _op_E3,0x03
+.global _op_E4; .set _op_E4,0x04
+.global _op_E5; .set _op_E5,0x05
+.global _op_E6; .set _op_E6,0x06
+.global _op_E7; .set _op_E7,0x07
+.global _op_E8; .set _op_E8,0x08
+.global _op_E9; .set _op_E9,0x09
+.global _op_E10; .set _op_E10,0x0a
+.global _op_E11; .set _op_E11,0x0b
+.global _op_E12; .set _op_E12,0x0c
+.global _op_E13; .set _op_E13,0x0d
+.global _op_E14; .set _op_E14,0x0e
+.global _op_E15; .set _op_E15,0x0f
+.global _op_DP; .set _op_DP,_op_E10
+.global _op_SET_EXP; .set _op_SET_EXP,_op_E11
+.global _op_CHANGE_SIGN; .set _op_CHANGE_SIGN,_op_E12
+.global _op_CLEAR; .set _op_CLEAR,_op_E14
+.global _op_CLR_DISP; .set _op_CLR_DISP,_op_E15
 
-.set _op_T0,0x10
-.set _op_T1,0x11
-.set _op_T2,0x12
-.set _op_T3,0x13
-.set _op_T4,0x14
-.set _op_T5,0x15
-.set _op_T6,0x16
-.set _op_T7,0x17
-.set _op_T8,0x18
-.set _op_T9,0x19
-.set _op_T10,0x1a
-.set _op_T11,0x1b
-.set _op_T12,0x1c
-.set _op_T13,0x1d
-.set _op_T14,0x1e
-.set _op_T15,0x1f
+.global _op_T0; .set _op_T0,0x10
+.global _op_T1; .set _op_T1,0x11
+.global _op_T2; .set _op_T2,0x12
+.global _op_T3; .set _op_T3,0x13
+.global _op_T4; .set _op_T4,0x14
+.global _op_T5; .set _op_T5,0x15
+.global _op_T6; .set _op_T6,0x16
+.global _op_T7; .set _op_T7,0x17
+.global _op_T8; .set _op_T8,0x18
+.global _op_T9; .set _op_T9,0x19
+.global _op_T10; .set _op_T10,0x1a
+.global _op_T11; .set _op_T11,0x1b
+.global _op_T12; .set _op_T12,0x1c
+.global _op_T13; .set _op_T13,0x1d
+.global _op_T14; .set _op_T14,0x1e
+.global _op_T15; .set _op_T15,0x1f
 
-.set _op_ADD0,0x20
-.set _op_ADD1,0x21
-.set _op_ADD2,0x22
-.set _op_ADD3,0x23
-.set _op_ADD4,0x24
-.set _op_ADD5,0x25
-.set _op_ADD6,0x26
-.set _op_ADD7,0x27
-.set _op_ADD8,0x28
-.set _op_ADD9,0x29
-.set _op_ADD10,0x2a
-.set _op_ADD11,0x2b
-.set _op_ADD12,0x2c
-.set _op_ADD13,0x2d
-.set _op_ADD14,0x2e
-.set _op_ADD15,0x2f
+.global _op_ADD0; .set _op_ADD0,0x20
+.global _op_ADD1; .set _op_ADD1,0x21
+.global _op_ADD2; .set _op_ADD2,0x22
+.global _op_ADD3; .set _op_ADD3,0x23
+.global _op_ADD4; .set _op_ADD4,0x24
+.global _op_ADD5; .set _op_ADD5,0x25
+.global _op_ADD6; .set _op_ADD6,0x26
+.global _op_ADD7; .set _op_ADD7,0x27
+.global _op_ADD8; .set _op_ADD8,0x28
+.global _op_ADD9; .set _op_ADD9,0x29
+.global _op_ADD10; .set _op_ADD10,0x2a
+.global _op_ADD11; .set _op_ADD11,0x2b
+.global _op_ADD12; .set _op_ADD12,0x2c
+.global _op_ADD13; .set _op_ADD13,0x2d
+.global _op_ADD14; .set _op_ADD14,0x2e
+.global _op_ADD15; .set _op_ADD15,0x2f
 
-.set _op_SUB0,0x30
-.set _op_SUB1,0x31
-.set _op_SUB2,0x32
-.set _op_SUB3,0x33
-.set _op_SUB4,0x34
-.set _op_SUB5,0x35
-.set _op_SUB6,0x36
-.set _op_SUB7,0x37
-.set _op_SUB8,0x38
-.set _op_SUB9,0x39
-.set _op_SUB10,0x3a
-.set _op_SUB11,0x3b
-.set _op_SUB12,0x3c
-.set _op_SUB13,0x3d
-.set _op_SUB14,0x3e
-.set _op_SUB15,0x3f
+.global _op_SUB0; .set _op_SUB0,0x30
+.global _op_SUB1; .set _op_SUB1,0x31
+.global _op_SUB2; .set _op_SUB2,0x32
+.global _op_SUB3; .set _op_SUB3,0x33
+.global _op_SUB4; .set _op_SUB4,0x34
+.global _op_SUB5; .set _op_SUB5,0x35
+.global _op_SUB6; .set _op_SUB6,0x36
+.global _op_SUB7; .set _op_SUB7,0x37
+.global _op_SUB8; .set _op_SUB8,0x38
+.global _op_SUB9; .set _op_SUB9,0x39
+.global _op_SUB10; .set _op_SUB10,0x3a
+.global _op_SUB11; .set _op_SUB11,0x3b
+.global _op_SUB12; .set _op_SUB12,0x3c
+.global _op_SUB13; .set _op_SUB13,0x3d
+.global _op_SUB14; .set _op_SUB14,0x3e
+.global _op_SUB15; .set _op_SUB15,0x3f
 
-.set _op_MULT0,0x40
-.set _op_MULT1,0x41
-.set _op_MULT2,0x42
-.set _op_MULT3,0x43
-.set _op_MULT4,0x44
-.set _op_MULT5,0x45
-.set _op_MULT6,0x46
-.set _op_MULT7,0x47
-.set _op_MULT8,0x48
-.set _op_MULT9,0x49
-.set _op_MULT10,0x4a
-.set _op_MULT11,0x4b
-.set _op_MULT12,0x4c
-.set _op_MULT13,0x4d
-.set _op_MULT14,0x4e
-.set _op_MULT15,0x4f
+.global _op_MULT0; .set _op_MULT0,0x40
+.global _op_MULT1; .set _op_MULT1,0x41
+.global _op_MULT2; .set _op_MULT2,0x42
+.global _op_MULT3; .set _op_MULT3,0x43
+.global _op_MULT4; .set _op_MULT4,0x44
+.global _op_MULT5; .set _op_MULT5,0x45
+.global _op_MULT6; .set _op_MULT6,0x46
+.global _op_MULT7; .set _op_MULT7,0x47
+.global _op_MULT8; .set _op_MULT8,0x48
+.global _op_MULT9; .set _op_MULT9,0x49
+.global _op_MULT10; .set _op_MULT10,0x4a
+.global _op_MULT11; .set _op_MULT11,0x4b
+.global _op_MULT12; .set _op_MULT12,0x4c
+.global _op_MULT13; .set _op_MULT13,0x4d
+.global _op_MULT14; .set _op_MULT14,0x4e
+.global _op_MULT15; .set _op_MULT15,0x4f
 
-.set _op_DIV0,0x50
-.set _op_DIV1,0x51
-.set _op_DIV2,0x52
-.set _op_DIV3,0x53
-.set _op_DIV4,0x54
-.set _op_DIV5,0x55
-.set _op_DIV6,0x56
-.set _op_DIV7,0x57
-.set _op_DIV8,0x58
-.set _op_DIV9,0x59
-.set _op_DIV10,0x5a
-.set _op_DIV11,0x5b
-.set _op_DIV12,0x5c
-.set _op_DIV13,0x5d
-.set _op_DIV14,0x5e
-.set _op_DIV15,0x5f
+.global _op_DIV0; .set _op_DIV0,0x50
+.global _op_DIV1; .set _op_DIV1,0x51
+.global _op_DIV2; .set _op_DIV2,0x52
+.global _op_DIV3; .set _op_DIV3,0x53
+.global _op_DIV4; .set _op_DIV4,0x54
+.global _op_DIV5; .set _op_DIV5,0x55
+.global _op_DIV6; .set _op_DIV6,0x56
+.global _op_DIV7; .set _op_DIV7,0x57
+.global _op_DIV8; .set _op_DIV8,0x58
+.global _op_DIV9; .set _op_DIV9,0x59
+.global _op_DIV10; .set _op_DIV10,0x5a
+.global _op_DIV11; .set _op_DIV11,0x5b
+.global _op_DIV12; .set _op_DIV12,0x5c
+.global _op_DIV13; .set _op_DIV13,0x5d
+.global _op_DIV14; .set _op_DIV14,0x5e
+.global _op_DIV15; .set _op_DIV15,0x5f
 
-.set _op_ST0,0x60
-.set _op_ST1,0x61
-.set _op_ST2,0x62
-.set _op_ST3,0x63
-.set _op_ST4,0x64
-.set _op_ST5,0x65
-.set _op_ST6,0x66
-.set _op_ST7,0x67
-.set _op_ST8,0x68
-.set _op_ST9,0x69
-.set _op_ST10,0x6a
-.set _op_ST11,0x6b
-.set _op_ST12,0x6c
-.set _op_ST13,0x6d
-.set _op_ST14,0x6e
-.set _op_ST15,0x6f
+.global _op_ST0; .set _op_ST0,0x60
+.global _op_ST1; .set _op_ST1,0x61
+.global _op_ST2; .set _op_ST2,0x62
+.global _op_ST3; .set _op_ST3,0x63
+.global _op_ST4; .set _op_ST4,0x64
+.global _op_ST5; .set _op_ST5,0x65
+.global _op_ST6; .set _op_ST6,0x66
+.global _op_ST7; .set _op_ST7,0x67
+.global _op_ST8; .set _op_ST8,0x68
+.global _op_ST9; .set _op_ST9,0x69
+.global _op_ST10; .set _op_ST10,0x6a
+.global _op_ST11; .set _op_ST11,0x6b
+.global _op_ST12; .set _op_ST12,0x6c
+.global _op_ST13; .set _op_ST13,0x6d
+.global _op_ST14; .set _op_ST14,0x6e
+.global _op_ST15; .set _op_ST15,0x6f
 
-.set _op_RE0,0x70
-.set _op_RE1,0x71
-.set _op_RE2,0x72
-.set _op_RE3,0x73
-.set _op_RE4,0x74
-.set _op_RE5,0x75
-.set _op_RE6,0x76
-.set _op_RE7,0x77
-.set _op_RE8,0x78
-.set _op_RE9,0x79
-.set _op_RE10,0x7a
-.set _op_RE11,0x7b
-.set _op_RE12,0x7c
-.set _op_RE13,0x7d
-.set _op_RE14,0x7e
-.set _op_RE15,0x7f
+.global _op_RE0; .set _op_RE0,0x70
+.global _op_RE1; .set _op_RE1,0x71
+.global _op_RE2; .set _op_RE2,0x72
+.global _op_RE3; .set _op_RE3,0x73
+.global _op_RE4; .set _op_RE4,0x74
+.global _op_RE5; .set _op_RE5,0x75
+.global _op_RE6; .set _op_RE6,0x76
+.global _op_RE7; .set _op_RE7,0x77
+.global _op_RE8; .set _op_RE8,0x78
+.global _op_RE9; .set _op_RE9,0x79
+.global _op_RE10; .set _op_RE10,0x7a
+.global _op_RE11; .set _op_RE11,0x7b
+.global _op_RE12; .set _op_RE12,0x7c
+.global _op_RE13; .set _op_RE13,0x7d
+.global _op_RE14; .set _op_RE14,0x7e
+.global _op_RE15; .set _op_RE15,0x7f
 
-.set _op_SEARCH,0x80
-.set _op_RECALL,0x81
-.set _op_PRINT,0x82
-.set _op_GO,0x83
-.set _op_J_IF_0,0x84
-.set _op_J_IF_P,0x85
-.set _op_SIN,0x86
-.set _op_COS,0x87
-.set _op_TAN,0x88
-.set _op_RAD_DEG,0x89
-.set _op_LOG_E_X,0x8a
-.set _op_E_X,0x8b
-.set _op_X_2,0x8c
-.set _op_SQRT,0x8d
-.set _op_LOAD_PROG,0x8e
-.set _op_INV,0x8f
+.global _op_SEARCH; .set _op_SEARCH,0x80
+.global _op_RECALL; .set _op_RECALL,0x81
+.global _op_PRINT; .set _op_PRINT,0x82
+.global _op_GO; .set _op_GO,0x83
+.global _op_J_IF_0; .set _op_J_IF_0,0x84
+.global _op_J_IF_P; .set _op_J_IF_P,0x85
+.global _op_SIN; .set _op_SIN,0x86
+.global _op_COS; .set _op_COS,0x87
+.global _op_TAN; .set _op_TAN,0x88
+.global _op_RAD_DEG; .set _op_RAD_DEG,0x89
+.global _op_LOG_E_X; .set _op_LOG_E_X,0x8a
+.global _op_E_X; .set _op_E_X,0x8b
+.global _op_X_2; .set _op_X_2,0x8c
+.global _op_SQRT; .set _op_SQRT,0x8d
+.global _op_LOAD_PROG; .set _op_LOAD_PROG,0x8e
+.global _op_INV; .set _op_INV,0x8f
 
-.set _op_MARK,0x90
-.set _op_STORE,0x91
-.set _op_ALPHA,0x92
-.set _op_END_ALPHA,_op_ADD2
-.set _op_STOP,0x93
-.set _op_J_IF_N0,0x94
-.set _op_J_IF_ERR,0x95
-.set _op_SIN_1,0x96
-.set _op_COS_1,0x97
-.set _op_TAN_1,0x98
-.set _op_DEG_RAD,0x99
-.set _op_LOG_10_X,0x9a
-.set _op_E10_X,0x9b
-.set _op_INT,0x9c
-.set _op_ABS,0x9d
-.set _op_END_PROG,0x9e
-.set _op_RETURN,0x9f
+.global _op_MARK; .set _op_MARK,0x90
+.global _op_STORE; .set _op_STORE,0x91
+.global _op_ALPHA; .set _op_ALPHA,0x92
+.global _op_END_ALPHA; .set _op_END_ALPHA,_op_ADD2
+.global _op_STOP; .set _op_STOP,0x93
+.global _op_J_IF_N0; .set _op_J_IF_N0,0x94
+.global _op_J_IF_ERR; .set _op_J_IF_ERR,0x95
+.global _op_SIN_1; .set _op_SIN_1,0x96
+.global _op_COS_1; .set _op_COS_1,0x97
+.global _op_TAN_1; .set _op_TAN_1,0x98
+.global _op_DEG_RAD; .set _op_DEG_RAD,0x99
+.global _op_LOG_10_X; .set _op_LOG_10_X,0x9a
+.global _op_E10_X; .set _op_E10_X,0x9b
+.global _op_INT; .set _op_INT,0x9c
+.global _op_ABS; .set _op_ABS,0x9d
+.global _op_END_PROG; .set _op_END_PROG,0x9e
+.global _op_RETURN; .set _op_RETURN,0x9f
 
-.set _op_f0,0xa0
-.set _op_f1,0xa1
-.set _op_f2,0xa2
-.set _op_f3,0xa3
-.set _op_f4,0xa4
-.set _op_f5,0xa5
-.set _op_f6,0xa6
-.set _op_f7,0xa7
-.set _op_f8,0xa8
-.set _op_f9,0xa9
-.set _op_f10,0xaa
-.set _op_f11,0xab
-.set _op_f12,0xac
-.set _op_f13,0xad
-.set _op_f14,0xae
-.set _op_f15,0xaf
+.global _op_f0; .set _op_f0,0xa0
+.global _op_f1; .set _op_f1,0xa1
+.global _op_f2; .set _op_f2,0xa2
+.global _op_f3; .set _op_f3,0xa3
+.global _op_f4; .set _op_f4,0xa4
+.global _op_f5; .set _op_f5,0xa5
+.global _op_f6; .set _op_f6,0xa6
+.global _op_f7; .set _op_f7,0xa7
+.global _op_f8; .set _op_f8,0xa8
+.global _op_f9; .set _op_f9,0xa9
+.global _op_f10; .set _op_f10,0xaa
+.global _op_f11; .set _op_f11,0xab
+.global _op_f12; .set _op_f12,0xac
+.global _op_f13; .set _op_f13,0xad
+.global _op_f14; .set _op_f14,0xae
+.global _op_f15; .set _op_f15,0xaf
 
-.set _op_F0,0xb0
-.set _op_F1,0xb1
-.set _op_F2,0xb2
-.set _op_F3,0xb3
-.set _op_F4,0xb4
-.set _op_F5,0xb5
-.set _op_F6,0xb6
-.set _op_F7,0xb7
-.set _op_F8,0xb8
-.set _op_F9,0xb9
-.set _op_F10,0xba
-.set _op_F11,0xbb
-.set _op_F12,0xbc
-.set _op_F13,0xbd
-.set _op_F14,0xbe
-.set _op_F15,0xbf
+.global _op_F0; .set _op_F0,0xb0
+.global _op_F1; .set _op_F1,0xb1
+.global _op_F2; .set _op_F2,0xb2
+.global _op_F3; .set _op_F3,0xb3
+.global _op_F4; .set _op_F4,0xb4
+.global _op_F5; .set _op_F5,0xb5
+.global _op_F6; .set _op_F6,0xb6
+.global _op_F7; .set _op_F7,0xb7
+.global _op_F8; .set _op_F8,0xb8
+.global _op_F9; .set _op_F9,0xb9
+.global _op_F10; .set _op_F10,0xba
+.global _op_F11; .set _op_F11,0xbb
+.global _op_F12; .set _op_F12,0xbc
+.global _op_F13; .set _op_F13,0xbd
+.global _op_F14; .set _op_F14,0xbe
+.global _op_F15; .set _op_F15,0xbf
 
-.set _op_ROM_f0,0xc0
-.set _op_ROM_f1,0xc1
-.set _op_ROM_f2,0xc2
-.set _op_ROM_f3,0xc3
-.set _op_ROM_f4,0xc4
-.set _op_ROM_f5,0xc5
-.set _op_ROM_f6,0xc6
-.set _op_ROM_f7,0xc7
-.set _op_ROM_f8,0xc8
-.set _op_ROM_f9,0xc9
-.set _op_ROM_f10,0xca
-.set _op_ROM_f11,0xcb
-.set _op_ROM_f12,0xcc
-.set _op_ROM_f13,0xcd
-.set _op_ROM_f14,0xce
-.set _op_ROM_f15,0xcf
+.global _op_ROM_f0; .set _op_ROM_f0,0xc0
+.global _op_ROM_f1; .set _op_ROM_f1,0xc1
+.global _op_ROM_f2; .set _op_ROM_f2,0xc2
+.global _op_ROM_f3; .set _op_ROM_f3,0xc3
+.global _op_ROM_f4; .set _op_ROM_f4,0xc4
+.global _op_ROM_f5; .set _op_ROM_f5,0xc5
+.global _op_ROM_f6; .set _op_ROM_f6,0xc6
+.global _op_ROM_f7; .set _op_ROM_f7,0xc7
+.global _op_ROM_f8; .set _op_ROM_f8,0xc8
+.global _op_ROM_f9; .set _op_ROM_f9,0xc9
+.global _op_ROM_f10; .set _op_ROM_f10,0xca
+.global _op_ROM_f11; .set _op_ROM_f11,0xcb
+.global _op_ROM_f12; .set _op_ROM_f12,0xcc
+.global _op_ROM_f13; .set _op_ROM_f13,0xcd
+.global _op_ROM_f14; .set _op_ROM_f14,0xce
+.global _op_ROM_f15; .set _op_ROM_f15,0xcf
 
-.set _op_ROM_F0,0xd0
-.set _op_ROM_F1,0xd1
-.set _op_ROM_F2,0xd2
-.set _op_ROM_F3,0xd3
-.set _op_ROM_F4,0xd4
-.set _op_ROM_F5,0xd5
-.set _op_ROM_F6,0xd6
-.set _op_ROM_F7,0xd7
-.set _op_ROM_F8,0xd8
-.set _op_ROM_F9,0xd9
-.set _op_ROM_F10,0xda
-.set _op_ROM_F11,0xdb
-.set _op_ROM_F12,0xdc
-.set _op_ROM_F13,0xdd
-.set _op_ROM_F14,0xde
-.set _op_ROM_F15,0xdf
+.global _op_ROM_F0; .set _op_ROM_F0,0xd0
+.global _op_ROM_F1; .set _op_ROM_F1,0xd1
+.global _op_ROM_F2; .set _op_ROM_F2,0xd2
+.global _op_ROM_F3; .set _op_ROM_F3,0xd3
+.global _op_ROM_F4; .set _op_ROM_F4,0xd4
+.global _op_ROM_F5; .set _op_ROM_F5,0xd5
+.global _op_ROM_F6; .set _op_ROM_F6,0xd6
+.global _op_ROM_F7; .set _op_ROM_F7,0xd7
+.global _op_ROM_F8; .set _op_ROM_F8,0xd8
+.global _op_ROM_F9; .set _op_ROM_F9,0xd9
+.global _op_ROM_F10; .set _op_ROM_F10,0xda
+.global _op_ROM_F11; .set _op_ROM_F11,0xdb
+.global _op_ROM_F12; .set _op_ROM_F12,0xdc
+.global _op_ROM_F13; .set _op_ROM_F13,0xdd
+.global _op_ROM_F14; .set _op_ROM_F14,0xde
+.global _op_ROM_F15; .set _op_ROM_F15,0xdf
 
-.set _op_EXCHG0,0xe0
-.set _op_EXCHG1,0xe1
-.set _op_EXCHG2,0xe2
-.set _op_EXCHG3,0xe3
-.set _op_EXCHG4,0xe4
-.set _op_EXCHG5,0xe5
-.set _op_EXCHG6,0xe6
-.set _op_EXCHG7,0xe7
-.set _op_EXCHG8,0xe8
-.set _op_EXCHG9,0xe9
-.set _op_EXCHG10,0xea
-.set _op_EXCHG11,0xeb
-.set _op_EXCHG12,0xec
-.set _op_EXCHG13,0xed
-.set _op_EXCHG14,0xee
-.set _op_EXCHG15,0xef
+.global _op_EXCHG0; .set _op_EXCHG0,0xe0
+.global _op_EXCHG1; .set _op_EXCHG1,0xe1
+.global _op_EXCHG2; .set _op_EXCHG2,0xe2
+.global _op_EXCHG3; .set _op_EXCHG3,0xe3
+.global _op_EXCHG4; .set _op_EXCHG4,0xe4
+.global _op_EXCHG5; .set _op_EXCHG5,0xe5
+.global _op_EXCHG6; .set _op_EXCHG6,0xe6
+.global _op_EXCHG7; .set _op_EXCHG7,0xe7
+.global _op_EXCHG8; .set _op_EXCHG8,0xe8
+.global _op_EXCHG9; .set _op_EXCHG9,0xe9
+.global _op_EXCHG10; .set _op_EXCHG10,0xea
+.global _op_EXCHG11; .set _op_EXCHG11,0xeb
+.global _op_EXCHG12; .set _op_EXCHG12,0xec
+.global _op_EXCHG13; .set _op_EXCHG13,0xed
+.global _op_EXCHG14; .set _op_EXCHG14,0xee
+.global _op_EXCHG15; .set _op_EXCHG15,0xef
 
-.set _op_RECALLX,0xf0
-.set _op_PRINTF,0xf1
-.set _op_IO,0xf2
-.set _op_SEARCH_ROM,0xf3
-.set _op_SEARCH_ROM2,0xf4
-.set _op_SEARCH_ROM3,0xf5
-.set _op_SEARCH_ROM4,0xf6
-.set _op_CALL,0xf7
-.set _op_MARKX,0xf8
-.set _op_STOREX,0xf9
-.set _op_ALPHAX,0xfa
-.set _op_INDIR,0xfb
-.set _op_CALL_ROM,0xfc
-.set _op_GROUP1,0xfd
-.set _op_GROUP2,0xfe
-.set _op_SEARCHX,0xff
+.global _op_RECALLX; .set _op_RECALLX,0xf0
+.global _op_PRINTF; .set _op_PRINTF,0xf1
+.global _op_IO; .set _op_IO,0xf2
+.global _op_SEARCH_ROM; .set _op_SEARCH_ROM,0xf3
+.global _op_SEARCH_ROM2; .set _op_SEARCH_ROM2,0xf4
+.global _op_SEARCH_ROM3; .set _op_SEARCH_ROM3,0xf5
+.global _op_SEARCH_ROM4; .set _op_SEARCH_ROM4,0xf6
+.global _op_CALL; .set _op_CALL,0xf7
+.global _op_MARKX; .set _op_MARKX,0xf8
+.global _op_STOREX; .set _op_STOREX,0xf9
+.global _op_ALPHAX; .set _op_ALPHAX,0xfa
+.global _op_INDIR; .set _op_INDIR,0xfb
+.global _op_CALL_ROM; .set _op_CALL_ROM,0xfc
+.global _op_GROUP1; .set _op_GROUP1,0xfd
+.global _op_GROUP2; .set _op_GROUP2,0xfe
+.global _op_SEARCHX; .set _op_SEARCHX,0xff
+
+.global res_label0; .set res_label0,0xe0
+.global res_label1; .set res_label1,0xe1
+.global res_label2; .set res_label2,0xe2
+.global res_label3; .set res_label3,0xe3
+.global res_label4; .set res_label4,0xe4
+.global res_label5; .set res_label5,0xe5
+.global res_label6; .set res_label6,0xe6
+.global res_label7; .set res_label7,0xe7
+.global res_label8; .set res_label8,0xe8
+.global res_label9; .set res_label9,0xe9
+.global res_label10; .set res_label10,0xea
+.global res_label11; .set res_label11,0xeb
+.global res_label12; .set res_label12,0xec
+.global res_label13; .set res_label13,0xed
+.global res_label14; .set res_label14,0xef
+.global res_label15; .set res_label15,0xf0
+.global res_label16; .set res_label16,0xf1
+.global res_label17; .set res_label17,0xf2
+.global res_label18; .set res_label18,0xf3
+.global res_label19; .set res_label19,0xf4
+.global res_label20; .set res_label20,0xf5
+.global res_label21; .set res_label21,0xf6
+.global res_label22; .set res_label22,0xf7
+.global res_label23; .set res_label23,0xf8
+.global res_label24; .set res_label24,0xf9
+.global res_label25; .set res_label25,0xfa
+.global res_label26; .set res_label26,0xfb
+.global res_label27; .set res_label27,0xfc
+.global res_label28; .set res_label28,0xfd
+.global res_label29; .set res_label29,0xfe
+.global res_label30; .set res_label30,0xff
