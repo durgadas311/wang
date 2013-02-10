@@ -40,7 +40,7 @@ void do_enter(char *s) {
 	// negative mantissa requires special processing...
 	int neg = (*s == '-');
 	if (neg) ++s;
-	while(*s) {
+	while (*s) {
 		x = *s++;
 		if (isdigit(x)) {
 			printf("E(%c)\n", x);
@@ -119,7 +119,7 @@ void do_alpha(char *s, unsigned char *xlat) {
 				x = EX_PLOT;
 				plot = 1;
 				break;
-			case '^':	// plotter command for move
+			case '/':	// plotter command for move
 				x = EX_MOVE;
 				plot = 1;
 				break;
@@ -135,16 +135,43 @@ void do_alpha(char *s, unsigned char *xlat) {
 				x = EX_HOME;
 				plot = 1;
 				break;
-			default:
-				if (isdigit(x) && isdigit(s[0]) && isdigit(s[1])) {
+			case '^':	// selectric code for cent-sign
+				x = -1;
+				shift = 1;
+				c = 0x34;
+				break;
+			case '[':	// selectric code for one-half
+				x = -1;
+				shift = 0;
+				c = 0x17;
+				break;
+			case '{':	// selectric code for one-forth
+				x = -1;
+				shift = 1;
+				c = 0x17;
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+				if (isdigit(s[0]) && isdigit(s[1])) {
 					c = ((x & 3) << 6) |
 						((s[0] & 7) << 3) |
 						(s[1] & 7);
 					x = -1;
 					s += 2;
 					break;
+				} else {
+					fprintf(stderr, "malformed octal character on line %d\n", __line__);
 				}
 				continue;
+				break;
+			default:
+				fprintf(stderr, "unknown character escape '\\%c' on line %d\n", x, __line__);
 				break;
 			}
 		}

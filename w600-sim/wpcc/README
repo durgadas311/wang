@@ -50,20 +50,26 @@ w6cpp:	Convenience pre-processor for wang program source code.
 		\r	return+index
 		\n	index
 		\v	reverse-index
+		\ooo	any octal character code (tile-rotate + plot bit)
 
 		Output Writer Only:
-		[	1/2
-		{	1/4
-		^	(cent)
+		\[	1/2
+		\{	1/4
+		\^	(cent)
 		\b	backspace
 
 		Plotter Only:
 		\%	plot (draw) line
-		\^	move pen only
+		\/	move pen only
 		\h	home pen to origin
 		\z	set character size
 		\s	set character spacing
 		|x	plot character 'x'
+
+		Note: ALPHA_PLOT uses a subtly different character decoder.
+		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
+		Also, ALPHA_PLOT does not translate non-supported Selectric
+		puctuation and special characters, including 1/2, 1/4, and cent.
 
 	ENTER(number)
 
@@ -93,7 +99,7 @@ w6cpp:	Convenience pre-processor for wang program source code.
 		Will result in an apparently-blank display when the
 		program step RECALL(blank) is executed.
 
-		All IERG_DATA registers are placed after the main program, but
+		All IREG_DATA registers are placed after the main program, but
 		before the MARK end_prog END PROG sequence that is automatically
 		appended to every program. This ensures they are loaded with
 		the program from tape. UREG (un-initialized registers) are
@@ -160,16 +166,17 @@ ABS()		Absolute value
 END_PROG()	SEARCH(end_prog), not actual END PROG
 RETURN()
 
-Some extended functionality not directly accessible on the keyboard:
-
-EXCHG(reg)	Exchange display and register 0-15
 IO(func)	Issue I/O (func TBD)
-CALL(label)	Subroutine call to any label
 INDIR(regop)	Indirect command of T(), ADD(), ...
 GROUP1(func)	Group 1 I/O (func TBD)
 GROUP2(func)	Group 2 I/O (func TBD)
-J_IF_E()	"literal compare" ==
-J_IF_NE()	"literal compare" !=
+
+Some extended functionality not directly accessible on the keyboard:
+
+EXCHG(reg)	Exchange display and register 0-15
+CALL(label)	Subroutine call to any label
+J_IF_E()	"literal compare" reg 0 == display
+J_IF_NE()	"literal compare" reg 0 != display
 KTRACE_ON()	Keyboard trace ON (ALPHA PRINT)
 KTRACE_OFF()	Keyboard trace OFF
 PTRACE_ON()	Program trace ON (ALPHA LOG_E_X)
@@ -187,10 +194,11 @@ Compiling:
 
 Typical sequence is (sample makefile rules):
 
-myprog.wng: myprog.WPC
-        w6cpp <myprog.WPC >myprog.wpe
-        gcc -x c -nostartfiles -nodefaultlibs -nostdlib -Wl,-T,wang600raw.ld \
-                -I.  -o myprog.wng myprog.wpe
+(See /usr/local/wpcc/include/Make.rules.user)
+
+myprog.w6t: myprog.W6C
+        w6cpp myprog.WPC >myprog.wpe
+        gcc -x c $(W6TLDFLAGS) $(W6CCFLAGS) -I. -o $@ myprog.wpe
         @rm -f myprog.wpe
 
 TODO: create a shell script to hide the essoterric gcc syntax.
