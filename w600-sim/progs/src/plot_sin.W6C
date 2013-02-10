@@ -4,6 +4,7 @@
 
 EXTERNAL(setup_point)
 FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_Xaxis)
 
 BEGIN()
 	CLEAR()
@@ -19,14 +20,33 @@ BEGIN()
 	ST(scalY)
 	ENTER(10)	// translation in X
 	ST(tranX)
-	ENTER(210)	// translation in Y
+	ENTER(250)	// translation in Y
 	ST(tranY)
-
 	FCALL(plotter)
 
+	ENTER(1)
+	FCALL(plot_chrsize)
+	ENTER(90)
+	ST(stepX)
+	ENTER(0)
+	ST(currY)
+	FCALL(plot_Xaxis)
+
+	ENTER(-1)
+	ST(startX)
+	ENTER(1.1)	// make sure we plot the last point
+	ST(maxX)
+	ENTER(1)
+	ST(stepX)
+	ENTER(0)
+	ST(currX)
+	FCALL(plot_Yaxis)
+
+	ENTER(2)
+	FCALL(plot_chrsize)
 	ENTER(0)
 	ST(convX)
-	ENTER(-1)
+	ENTER(-1.1)
 	ST(convY)
 	CALL(setup_point)
 	FCALL(plot_moveto)

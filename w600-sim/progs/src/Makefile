@@ -15,6 +15,11 @@ plot_sin.w6t: plot_sin.w6o libplot.w6s
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $<
 
+plot_dat.w6t: plot_dat.w6o libplot.w6s
+	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
+		-Wl,--just-symbols=libplot.w6s \
+		-o $@ $<
+
 graph_sin.w6t: graph_sin.w6o libplot.w6s
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
@@ -22,7 +27,11 @@ graph_sin.w6t: graph_sin.w6o libplot.w6s
 
 zeller.w6t: zeller.W6C libw6/libw6.a
 
-plot_dat.w6t: plot_dat.W6C libw6/libw6.a libplot/libplot.a
+#plot_dat.w6t: plot_dat.W6C libw6/libw6.a libplot/libplot.a
+
+#plot_sin.w6t: plot_sin.W6C libw6/libw6.a libplot/libplot.a
+
+#graph_sin.w6t: graph_sin.W6C libw6/libw6.a libplot/libplot.a
 
 libw6/libw6.a: libw6
 
