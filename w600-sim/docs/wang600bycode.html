@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang600bycode.html,v 1.26 2013/02/05 22:48:13 drmiller Exp $ -->
+<!-- $Id: wang600bycode.html,v 1.27 2013/02/10 15:32:46 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -727,7 +727,7 @@ td.tag {text-align: center;}
 <TH>15</TH></TR>
 
 <TR><TH>00</TH>
-<TD CLASS="sym">-</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">-</TD>
 <TD CLASS="sym">Y</TD>
 <TD CLASS="sym">space</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">/</TD>
@@ -750,7 +750,7 @@ td.tag {text-align: center;}
 <TD CLASS="sym" BGCOLOR="lightgreen">pen dn</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">pen up</TD>
 <TD CLASS="sym">I</TD>
-<TD CLASS="sym">'</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">'</TD>
 <TD CLASS="sym">.</TD>
 <TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
 <TD CLASS="sym" BGCOLOR="lightyellow">return index?</TD>
@@ -772,7 +772,7 @@ td.tag {text-align: center;}
 <TD CLASS="sym">N</TD>
 <TD CLASS="sym">T</TD>
 <TD CLASS="sym" BGCOLOR="pink">print mode</TD>
-<TD CLASS="sym">1</TD>
+<TD CLASS="sym" BGCOLOR="lightgreen">1</TD>
 <TD CLASS="sym" BGCOLOR="pink">step y+</TD>
 <TD CLASS="sym" BGCOLOR="pink">step y-</TD>
 <TD CLASS="sym">C</TD>
@@ -781,22 +781,22 @@ td.tag {text-align: center;}
 <TD CLASS="sym">X</TD></TR>
 
 <TR><TH>03</TH>
-<TD CLASS="sym">9</TD>
-<TD CLASS="sym">0</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">9</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">0</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x+y+</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x-y+</TD>
-<TD CLASS="sym">6</TD>
-<TD CLASS="sym">5</TD>
-<TD CLASS="sym">2</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">6</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">5</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">2</TD>
 <TD CLASS="sym">Z</TD>
 <TD CLASS="sym" BGCOLOR="pink">plot mode</TD>
-<TD CLASS="sym">4</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">4</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x+y-</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x-y-</TD>
-<TD CLASS="sym">8</TD>
-<TD CLASS="sym">7</TD>
-<TD CLASS="sym">3</TD>
-<TD CLASS="sym">L</TD></TR>
+<TD CLASS="sym" BGCOLOR="lightgray">8</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">7</TD>
+<TD CLASS="sym" BGCOLOR="lightgray">3</TD>
+<TD CLASS="sym" BGCOLOR="lightgreen">L</TD></TR>
 
 <TR><TH>04</TH>
 <TD CLASS="sym" BGCOLOR="lightblue">-</TD>
@@ -892,6 +892,9 @@ are used as parameters, not carriage movement.
 values are used to move the pen to the desired position where the indicated character
 is drawn. Note, only the first character of a string should be marked as plotted,
 or else each character will be speparated from the last by the X and Y delta.
+
+<P>The codes highlighted gray indicate deviation from the normal shifted mode of the
+character but are otherwise still aligned with the Selectric codes.
 
 <P>The codes highlighted yellow are unknown/undefined.
 
