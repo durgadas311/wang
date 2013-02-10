@@ -1,0 +1,62 @@
+#include "wang600.h"
+
+#include "plotter.w6h"	// get out interface to the world
+
+FLABEL(plot_Xaxis)
+FLLABEL(plot_tic)
+FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_drawto)
+EXTERNAL(setup_point)
+
+// Labels:
+LLABEL(loop)
+
+BEGIN()
+MARK(plot_Xaxis)
+	// do first point as "move", not "plot"
+	FCALL(plot_home)
+	T(lastX)
+	T(lastY)
+	RE(startX)
+	ST(currX)
+	ST(convX)
+	RE(currY)
+	ST(convY)
+	CALL(setup_point)
+	FCALL(plot_moveto)
+	FCALL(plot_tic)
+	RE(stepX)
+	ADD(currX)
+	// could check limits here, for completeness, but nothing was drawn...
+MARK(loop)
+	RE(currX)
+	ST(convX)
+	RE(currY)
+	ST(convY)
+	CALL(setup_point)
+	FCALL(plot_drawto)
+	FCALL(plot_tic)
+	RE(stepX)
+	ADD(currX)
+	ST(temp1)
+	RE(maxX)
+	SUB(temp1)
+	J_IF_P() SEARCH(loop)
+	RETURN()
+
+MARK(plot_tic)
+	T(plotX)
+	ENTER(-5)	// scale?
+	ST(plotY)
+	FCALL(plot_drawto)
+	ALPHA_PLOT("\n");
+	RE(currX)
+	IO(0x30)
+	FCALL(plot_home)
+	RE(lastX)
+	ST(plotX)
+	RE(lastY)
+	ST(plotY)
+	FCALL(plot_moveto)
+	RETURN()
+END()

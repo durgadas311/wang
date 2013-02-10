@@ -1,4 +1,4 @@
-// $Id: plotter.w6h,v 1.5 2013/02/08 22:17:33 drmiller Exp $
+// $Id: plotter.w6h,v 1.6 2013/02/10 19:49:42 drmiller Exp $
 
 #ifndef _libplot_plotter_h_
 #define _libplot_plotter_h_
@@ -15,13 +15,13 @@
 #define lastY	6	// internal use
 #define lastX	5	// internal use
 #define currX	4
+#define currY	3
 #define convY	15	// internal use
 #define convX	14	// internal use
 
 #define plotY	0	// system designated - volatile
 #define plotX	1	// system designated - volatile
 #define temp1	2	// volatile
-#define temp2	3
 
 FEXTERNAL(plotter)
 FEXTERNAL(grapher)
