@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.8 2013/02/05 00:33:23 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.9 2013/02/11 08:46:35 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.8 2013/02/05 00:33:23 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.9 2013/02/11 08:46:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	java.io.OutputStream _fout;
@@ -114,6 +114,7 @@ class Wang_TapeDrive extends JComponent
 		url = this.getClass().getResource("icons/cassette_none_gry.png");
 		ic = new ImageIcon(url);
 		cs = new JLabel(ic);
+		cass.setOpaque(true);	// image handles transparency...
 		cs.setBounds(50, 75, 201, 100);
 		jp.add(cs, new Integer(layer), layer);
 		++layer;
@@ -121,6 +122,7 @@ class Wang_TapeDrive extends JComponent
 		url = this.getClass().getResource("icons/cassette_tape_data.png");
 		ic = new ImageIcon(url);
 		_cassette = new JLabel(ic);
+		cass.setOpaque(true);	// image handles transparency...
 		_cassette.setBounds(50, 75, 201, 100);
 		_cassette.setVisible(false);
 		jp.add(_cassette, new Integer(layer), layer);
@@ -133,7 +135,7 @@ class Wang_TapeDrive extends JComponent
 		_window.setHorizontalAlignment(SwingConstants.LEFT);
 		_window.setForeground(Color.black);
 		_window.setBackground(windowColor);
-		_window.setOpaque(true);
+		_window.setOpaque(true);	// color handles transparency...
 		font = null;
 		font = new Font("Sans-serif", Font.PLAIN, 10);
 		_window.setPreferredSize(new Dimension(200, 100));
