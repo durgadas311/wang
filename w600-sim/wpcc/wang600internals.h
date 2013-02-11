@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.10 $ \"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.11 $ \"");
 asm(".include \"wang600opcodes.s\"");
 
 asm(	".section .wang600code, \"a\";"
@@ -108,7 +108,7 @@ asm(	".section .wang600code, \"a\";"
 					"_call_" #label ":;" \
 					".section .wang600subr,\"a\";" \
 					".global _subr_" #label ";" \
-					".set _subr_" #label "," #label ";" \
+					"_subr_" #label ":  .byte 0;" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
@@ -119,7 +119,7 @@ asm(	".section .wang600code, \"a\";"
 					".section .wang600call,\"a\";" \
 					"_call_" #label ":;" \
 					".section .wang600subr,\"a\";" \
-					".set _subr_" #label "," #label ";" \
+					"_subr_" #label ":  .byte 0;" \
 					".popsection");
 
 // A label from another module for use with SEARCH/CALL

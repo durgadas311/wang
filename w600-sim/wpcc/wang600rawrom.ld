@@ -10,7 +10,7 @@ MEMORY {
 	rom_flabels : ORIGIN = 0xc0, LENGTH = 0x20
 	rom_search : ORIGIN = 0xf3, LENGTH = 1
 	rom_call   : ORIGIN = 0xfc, LENGTH = 1
-	rom_subr   : ORIGIN = 0xc0, LENGTH = 1
+	rom_subr   : ORIGIN = 0xc0, LENGTH = 0x20
 	regs       : ORIGIN = 0x00, LENGTH = 0xe6 /* not used for ROM */
 	hdr        : ORIGIN = 0x00, LENGTH = 0x10
 	code       : ORIGIN = 0x00, LENGTH = 0x0e70 >> 1 /* 0x100-0xf6f */
@@ -42,6 +42,7 @@ SECTIONS
 	.wang600subr (NOLOAD) : {
 		*(.wang600subr);
 	} >rom_subr
+
 	/DISCARD/ : { *(.wang600dummy); }
 	/DISCARD/ : { *(.wang600regs); }
 	/DISCARD/ : { *(.wang600data); }
