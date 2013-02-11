@@ -7,12 +7,13 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.11 $ \"");
-asm(".include \"wang600opcodes.s\"");
+asm(".ident \"Wang 600 Compiler over GCC $Revision: 1.12 $ \"");
 
 asm(	".section .wang600code, \"a\";"
+	".include \"wang600opcodes.s\";"
 	".pushsection .wang600regs,\"a\";"
 	".subsection 0;"
+	".type longreg_base STT_OBJECT;"
 	"longreg_base:;"
 	".subsection 1;"
 	".byte 0;"
@@ -33,6 +34,7 @@ asm(	".section .wang600code, \"a\";"
 					_shadow_code(2)
 
 #define _longreg(reg)		asm(".pushsection .wang600regs,1,\"a\";" \
+					".type _longreg_" #reg " STT_OBJECT;"	\
 					".global _longreg_" #reg ";"	\
 					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
 					".byte 0;"	\
@@ -41,6 +43,7 @@ asm(	".section .wang600code, \"a\";"
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(".pushsection .wang600regs,\"a\";" \
 					".subsection 0;" \
+					".type _longreg_" #reg " STT_OBJECT;" \
 					".global _longreg_" #reg ";" \
 					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
 					".byte 0;"	\
@@ -65,84 +68,110 @@ asm(	".section .wang600code, \"a\";"
 
 #define RES_EXTERN(label, const)	\
 				asm(".pushsection .wang600label,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					".set " #label ", res_label" #const ";" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					".global _search_" #label ";" \
 					".set _search_" #label ", 0x80;" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					".global _call_" #label ";" \
 					".set _call_" #label ", 0xf7;" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
 #define LABEL(label)		asm(".pushsection .wang600label,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					".global _search_" #label ";" \
 					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					".global _call_" #label ";" \
 					"_call_" #label ":;" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
 #define LLABEL(label)		asm(".pushsection .wang600label,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					"_call_" #label ":;" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
 #define FLABEL(label)		asm(".pushsection .wang600flabel,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					".global _search_" #label ";" \
 					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					".global _call_" #label ";" \
 					"_call_" #label ":;" \
 					".section .wang600subr,\"a\";" \
+					".type _subr_" #label " STT_OBJECT;" \
 					".global _subr_" #label ";" \
 					"_subr_" #label ":  .byte 0;" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
 #define FLLABEL(label)		asm(".pushsection .wang600flabel,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					#label ":  .byte 0;" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					"_search_" #label ":;" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					"_call_" #label ":;" \
 					".section .wang600subr,\"a\";" \
+					".type _subr_" #label " STT_OBJECT;" \
 					"_subr_" #label ":  .byte 0;" \
 					".popsection");
 
 // A label from another module for use with SEARCH/CALL
 #define EXTERNAL(label)		asm(".pushsection .wang600label,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					".global _search_" #label ";" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					".global _call_" #label ";" \
 					".popsection");
 
 // A label from another module for use with FCALL
 #define FEXTERNAL(label)	asm(".pushsection .wang600flabel,\"a\";" \
+					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					".section .wang600search,\"a\";" \
+					".type _search_" #label " STT_OBJECT;" \
 					".global _search_" #label ";" \
 					".section .wang600call,\"a\";" \
+					".type _call_" #label " STT_OBJECT;" \
 					".global _call_" #label ";" \
 					".section .wang600subr,\"a\";" \
+					".type _subr_" #label " STT_OBJECT;" \
 					".global _subr_" #label ";" \
 					".popsection");
 
-#define RES_REG(label,reg)	asm(".global _longreg_" #label ";" \
+#define RES_REG(label,reg)	asm(\
+					".type _longreg_" #label " STT_OBJECT;" \
+					".global _longreg_" #label ";" \
 					".set _longreg_" #label "," #reg);
 
 // Reserve an un-initialize long register
