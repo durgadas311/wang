@@ -18,7 +18,7 @@ plot_sin.w6t: plot_sin.w6o libplot.w6s
 plot_dat.w6t: plot_dat.w6o libplot.w6s
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
-		-o $@ $<
+		-o $@ $< -lw6
 
 graph_sin.w6t: graph_sin.w6o libplot.w6s
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \

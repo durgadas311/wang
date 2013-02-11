@@ -3,33 +3,57 @@
 #include "libplot/plotter.w6h"
 #include "libw6/load_tape_data.w6h"
 
+EXTERNAL(load_tape_data)
 EXTERNAL(setup_point)
 FEXTERNAL(plot_moveto)
 
 BEGIN()
 	CLEAR()
+	plotter_unused_reg()	// get plotter next unused reg
 	CALL(load_tape_data)
 	J_IF_P() END_PROG()
-	ENTER(16)
-	ST(startX)
+	plotter_unused_reg()	// get plotter next unused reg
+	STORE(startX)
 	RE(top_reg)
-	ST(maxX)
+	STORE(maxX)
 	ENTER(5)	// scaling in X
-	ST(scalX)
+	STORE(scaleX)
 	ENTER(10)	// scaling in Y
-	ST(scalY)
-	ENTER(10)	// translation in X
-	ST(tranX)
+	STORE(scaleY)
+	ENTER(40)	// translation in X
+	STORE(tranX)
 	ENTER(200)	// translation in Y
-	ST(tranY)
-
+	STORE(tranY)
 	FCALL(plot_data)
+
+	RECALL(maxX)
+	ST(temp1)
+	RECALL(startX)
+	SUB(temp1)
+	STORE(maxX)
+	ENTER(0)
+	STORE(startX)
+	ENTER(8)
+	STORE(stepX)
+	ENTER(0)
+	ST(currY)
+	FCALL(plot_Xaxis)
+
+	ENTER(-15)
+	STORE(startX)
+	ENTER(6)	// make sure we plot the last point
+	STORE(maxX)
+	ENTER(5)
+	STORE(stepX)
+	ENTER(0)
+	ST(currX)
+	FCALL(plot_Yaxis)
 
 	ENTER(2)
 	FCALL(plot_chrsize)
 	ENTER(0)
 	ST(convX)
-	ENTER(-16)
+	ENTER(-20)
 	ST(convY)
 	CALL(setup_point)
 	FCALL(plot_moveto)

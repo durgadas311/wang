@@ -9,35 +9,35 @@ FEXTERNAL(plot_Xaxis)
 BEGIN()
 	CLEAR()
 	ENTER(0)
-	ST(startX)
-	ENTER(361)	// make sure we plot the last point
-	ST(maxX)
+	STORE(startX)
+	ENTER(360)	// make sure we plot the last point
+	STORE(maxX)
 	ENTER(5)
-	ST(stepX)
+	STORE(stepX)
 	ENTER(1)	// scaling in X
-	ST(scalX)
+	STORE(scaleX)
 	ENTER(200)	// scaling in Y
-	ST(scalY)
+	STORE(scaleY)
 	ENTER(10)	// translation in X
-	ST(tranX)
+	STORE(tranX)
 	ENTER(250)	// translation in Y
-	ST(tranY)
+	STORE(tranY)
 	FCALL(plotter)
 
 	ENTER(1)
 	FCALL(plot_chrsize)
 	ENTER(90)
-	ST(stepX)
+	STORE(stepX)
 	ENTER(0)
 	ST(currY)
 	FCALL(plot_Xaxis)
 
 	ENTER(-1)
-	ST(startX)
+	STORE(startX)
 	ENTER(1.1)	// make sure we plot the last point
-	ST(maxX)
+	STORE(maxX)
 	ENTER(1)
-	ST(stepX)
+	STORE(stepX)
 	ENTER(0)
 	ST(currX)
 	FCALL(plot_Yaxis)

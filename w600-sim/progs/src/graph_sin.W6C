@@ -7,19 +7,19 @@ EXTERNAL(setup_point)
 BEGIN()
 	CLEAR()
 	ENTER(0)
-	ST(startX)
+	STORE(startX)
 	ENTER(360)
-	ST(maxX)
+	STORE(maxX)
 	ENTER(5)
-	ST(stepX)
+	STORE(stepX)
 	ENTER(1)	// scaling in X
-	ST(scalX)
+	STORE(scaleX)
 	ENTER(500)	// scaling in Y
-	ST(scalY)
+	STORE(scaleY)
 	ENTER(0)	// translation in X
-	ST(tranX)
+	STORE(tranX)
 	ENTER(500)	// translation in Y
-	ST(tranY)
+	STORE(tranY)
 
 	FCALL(grapher)
 
