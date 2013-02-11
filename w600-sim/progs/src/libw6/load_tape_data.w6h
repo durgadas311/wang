@@ -7,6 +7,7 @@ EXTERNAL(load_tape_data)
 
 // OUT register params
 #define top_reg		0
+#define reg_off		1
 #define num_regs	15
 
 #endif // _libw6_load_tape_data_w6h_
