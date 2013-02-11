@@ -40,11 +40,11 @@ libplot/libplot.a: libplot
 $(SUBDIRS): __FRC__
 	$(MAKE) -C $@
 
-install: $(PROGS)
-	cp $(PROGS) ~/Wang600Files/
+install: $(PROGS) $(ROMS)
+	cp $(PROGS) $(ROMS) ~/Wang600Files/
 
-ship: $(PROGS)
-	cp $(PROGS) ..
+ship: $(PROGS) $(ROMS)
+	cp $(PROGS) $(ROMS) ..
 
 .PHONEY: __FRC__
 

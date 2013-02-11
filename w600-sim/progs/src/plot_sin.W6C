@@ -18,7 +18,7 @@ BEGIN()
 	STORE(scaleX)
 	ENTER(200)	// scaling in Y
 	STORE(scaleY)
-	ENTER(10)	// translation in X
+	ENTER(40)	// translation in X
 	STORE(tranX)
 	ENTER(250)	// translation in Y
 	STORE(tranY)
