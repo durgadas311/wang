@@ -9,4 +9,4 @@ LIBS = libplot.a
 all: $(LIBS)
 
 libplot.a: $(OBJS)
-	$(AR) -cr $@ $?
+	$(AR) -cr $@ $^

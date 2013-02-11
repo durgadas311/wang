@@ -3,53 +3,79 @@
 #include "plotter.w6h"	// get out interface to the world
 
 FLABEL(plot_Xaxis)
-FLLABEL(plot_tic)
+
 FEXTERNAL(plot_moveto)
 FEXTERNAL(plot_drawto)
 EXTERNAL(setup_point)
 
-// Labels:
-LLABEL(loop)
+// Local Labels:
+LABEL(loop5)
+LABEL(resid)
+FLABEL(plot_tic1)
 
 BEGIN()
 MARK(plot_Xaxis)
+	ENTER(1)
+	FCALL(plot_chrsize) // so we know label offsets...
+	ENTER(3)
+	MULT(plotX)	// label width
+	ST(temp8) // hope no one trashes this...
+	RE(plotY)
+	ST(temp7)
+
 	// do first point as "move", not "plot"
 	FCALL(plot_home)
 	T(lastX)
 	T(lastY)
-	RE(startX)
+	RECALL(startX)
 	ST(currX)
 	ST(convX)
 	RE(currY)
 	ST(convY)
 	CALL(setup_point)
 	FCALL(plot_moveto)
-	FCALL(plot_tic)
-	RE(stepX)
+	FCALL(plot_tic1)
+	RECALL(stepX)
 	ADD(currX)
 	// could check limits here, for completeness, but nothing was drawn...
-MARK(loop)
+MARK(loop5)
 	RE(currX)
 	ST(convX)
 	RE(currY)
 	ST(convY)
 	CALL(setup_point)
 	FCALL(plot_drawto)
-	FCALL(plot_tic)
-	RE(stepX)
-	ADD(currX)
+	FCALL(plot_tic1)
+	RECALL(maxX)
 	ST(temp1)
-	RE(maxX)
+	RECALL(stepX)
+	ADD(currX)
 	SUB(temp1)
-	J_IF_P() SEARCH(loop)
+	J_IF_P() SEARCH(resid)
+	SEARCH(loop5)
+
+MARK(resid)
+	J_IF_N0() RETURN() GO()
+	RECALL(maxX)
+	ST(convX)
+	RE(currY)
+	ST(convY)
+	CALL(setup_point)
+	FCALL(plot_drawto)
 	RETURN()
 
-MARK(plot_tic)
+MARK(plot_tic1)
 	T(plotX)
 	ENTER(-5)	// scale?
 	ST(plotY)
 	FCALL(plot_drawto)
-	ALPHA_PLOT("\n");
+	RE(temp8)
+	CHANGE_SIGN()
+	ST(plotX)
+	RE(temp7)
+	CHANGE_SIGN()
+	ST(plotY)
+	FCALL(plot_moveto)
 	RE(currX)
 	IO(0x30)
 	FCALL(plot_home)

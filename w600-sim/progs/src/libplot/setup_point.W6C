@@ -9,26 +9,26 @@ BEGIN()
 MARK(setup_point)
 	// input point is (convX,convY), output is (plotX,plotY)
 	// scale/translate point and compute relative change from last point
-	RE(scalX)
+	RECALL(scaleX)
 	MULT(convX) // scale X
 	ENTER(0.5)
 	ADD(convX)
 	INT()
 	ST(convX)
 	ST(plotX)
-	RE(tranX)
+	RECALL(tranX)
 	ADD(plotX) // translate X
 	EXCHG(lastX)
 	SUB(plotX) // delta to last
 
-	RE(scalY)
+	RECALL(scaleY)
 	MULT(convY) // scale Y
 	ENTER(0.5)
 	ADD(convY)
 	INT()
 	ST(convY)
 	ST(plotY)
-	RE(tranY)
+	RECALL(tranY)
 	ADD(plotY) // translate Y
 	EXCHG(lastY)
 	SUB(plotY) // delta to last
