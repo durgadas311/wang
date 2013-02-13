@@ -31,7 +31,7 @@
 
 #include "wang600.h"
 
-#define WANG612
+#undef WANG612
 
 LLABEL(loop1)
 LLABEL(done1)
@@ -51,9 +51,9 @@ BEGIN()
 	ALPHA_STRING("\r")
 	ENTER(500)
 	ST(1)
-	ENTER(50)
+	ENTER(100)
 	ST(0)
-	ALPHA_STRING("| ")
+	ALPHA_STRING("|x")
 #endif
 
 	ENTER(-6)
@@ -93,7 +93,7 @@ MARK(loop2)
 #ifdef WANG612
 	ALPHA_PLOT("\%")
 #else
-	ALPHA_STRING("|:")
+	ALPHA_STRING("|*")
 #endif
 	ENTER(-.25)
 	ADD(0)
@@ -110,7 +110,7 @@ MARK(loop3)
 #ifdef WANG612
 	ALPHA_PLOT("\%")
 #else
-	ALPHA_STRING("|:")
+	ALPHA_STRING("|.")
 #endif
 	RE(0)
 	CHANGE_SIGN()
