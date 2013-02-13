@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.2 2013/02/13 15:36:37 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.2 2013/02/13 15:36:37 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -53,7 +53,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 
 	public Wang_PlottingOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
-				new Font("Monospaced", Font.PLAIN, 12));
+				new Font("Monospaced", Font.PLAIN, 12), true);
 		_wfm = super.getFontMetrics();
 
 		// default to portrait 8.5x11 with margins
@@ -126,11 +126,14 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			switch((b[0] & 0x30) >> 4) {
 			case 0: // space/bspace or nothing
 				_adjacent = false;
-				if (_plot) return;
-				if ((b[0] & 1) == 0) {
-					space();
-				} else {
-					bkspace();
+				// still need to move carriage if plot,
+				// just don't do space/bkspace movement.
+				if (!_plot) {
+					if ((b[0] & 1) == 0) {
+						space();
+					} else {
+						bkspace();
+					}
 				}
 				printable = false;
 				break;
@@ -192,7 +195,9 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			_x += _dx;
 			if (_x < 0) _x = 0;
 			if (_x >= 1300) _x = 1299; // 13 in. platten
-			_y += _dy;
+			// NOTE: our coord system is opposite Wang's in Y...
+			// _y += _dy;
+			_y -= _dy;
 			if (_y < 0) _y = 0;
 			_adjacent = false;
 		}
