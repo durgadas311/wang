@@ -1,14 +1,16 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.9 2013/02/13 23:09:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+import javax.swing.text.JTextComponent;
 
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.8 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.9 2013/02/13 23:09:57 drmiller Exp $";
 
 	public static final String Model = "01";
 	public static final String Description = "Output Writer";
@@ -44,15 +46,12 @@ class Wang_OutputWriter extends Wang_Paper
 		double pw = (12.0 * _wfm.width) * w; // page width in points
 		double ph = (6.0 * _wfm.height) * h; // page height in points
 		super.setPage((int)pw, (int)ph);
-		// now need to be able to convert 1/100ths onto pw x ph page...
-		double sx = (12.0 * _wfm.width) / 100.0;
-		double sy = (6.0 * _wfm.height) / 100.0;
-		super.setScale(sx, sy);
+		//super.setScale(1.0, 1.0); // another way
 	}
 
 	public Wang_OutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
-				new Font("Monospaced", Font.PLAIN, 12));
+				new Font("Monospaced", Font.PLAIN, 12), false);
 		_wfm = super.getFontMetrics();
 
 		// default to portrait 8.5x11 with margins
@@ -62,9 +61,6 @@ class Wang_OutputWriter extends Wang_Paper
 		mu = new JMenu("Typewriter");
 		JMenuItem mi;
 		mi = new JMenuItem("Setup", KeyEvent.VK_U);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Home", KeyEvent.VK_H);
 		mi.addActionListener(this);
 		mu.add(mi);
 		super.addMenu(mu);
@@ -94,6 +90,33 @@ class Wang_OutputWriter extends Wang_Paper
 	private void bkspace() {
 		_x -= _wfm.width;
 		if (_x < 0) _x = 0;
+	}
+
+	private class TypeBallCaret extends DefaultCaret {
+		static final long serialVersionUID = 311601000040L;
+
+		private Polygon _caret;
+
+		public TypeBallCaret() {
+			_caret = new Polygon();
+			_caret.addPoint(_wfm.width / 2, 0);
+			_caret.addPoint(_wfm.width, _wfm.height);
+			_caret.addPoint(0, _wfm.height);
+		}
+		public void paint(Graphics g) {
+			JTextComponent comp = getComponent();
+
+			g.setColor(Color.red); //comp.getCaretColor());
+			Rectangle r = null;
+			try {
+				r = comp.modelToView(getDot());
+			} catch(Exception e) { }
+			if (r == null) return;
+			// 'r' defines location of caret...
+			Polygon p = new Polygon(_caret.xpoints, _caret.ypoints, _caret.npoints);
+			p.translate(r.x, r.y + r.height);
+			g.fillPolygon(p);
+		}
 	}
 
 	public void do_cn24(byte[] b) {
@@ -132,13 +155,14 @@ class Wang_OutputWriter extends Wang_Paper
 			}
 		}
 		if (printable) {
+System.err.println("doing byte "+b[0]);
 			String s;
 			s = Wang_UI.getCharConv().tiltrotateToAscii(b[0], _shifted);
 			if (s != null) {
-				//_text.appendText(s);
+				_text.appendText(s);
 			}
 		}
-		_text.setCursor(_x, _y);// scrollto?
+		_text.setCaret(new TypeBallCaret());
 		_text.repaint();
 
 		// "auto raise"...

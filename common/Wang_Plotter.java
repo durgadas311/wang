@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.17 2013/02/08 11:57:21 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.18 2013/02/13 23:09:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ import javax.swing.JRadioButton;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.17 2013/02/08 11:57:21 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.18 2013/02/13 23:09:57 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -36,6 +36,24 @@ class Wang_Plotter extends Wang_Paper
 				_text.setPen(Color.red);
 				return;
 			}
+
+			if (m.getMnemonic() == KeyEvent.VK_A) { 
+				setPlotArea(0.5, 0.5, 7.5, 7.5);
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_B) { 
+				setPlotArea(3.0, 0.5, 7.5, 7.5);
+				return;
+			}
+
+			if (m.getMnemonic() == KeyEvent.VK_C) { 
+				_text.setZoom(1.0);
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_D) { 
+				_text.setZoom(2.0);
+				return;
+			}
 		} else if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
 			if (m.getMnemonic() == KeyEvent.VK_U) { 
@@ -44,7 +62,7 @@ class Wang_Plotter extends Wang_Paper
 			}
 			if (m.getMnemonic() == KeyEvent.VK_H) { 
 				home();
-				_text.setCursor(_x, 999 - _y);
+				setCursor(_x, _y);
 				_text.repaint();
 				return;
 			}
@@ -90,25 +108,67 @@ class Wang_Plotter extends Wang_Paper
 		}
 	}
 
-	public void setPaper(double w, double h) {
+	double _pageWidth;	// inches for physical paper
+	double _pageHeight;	// inches for physical paper
+	double _scaleX;		// ratio for PlotArea (1/1000ths to paper)
+	double _scaleY;		// ratio for PlotArea (1/1000ths to paper)
+
+	// Plottable region, in inches
+	public void setPlotArea(double xs, double ys,
+				double xw, double yh) {
 		// width and height, in inches, of "printable" area...
-		double dpi;
-		if (w < h) {
-			dpi = 1000 / w;
-		} else {
-			dpi = 1000 / h;
+		if (xs >= _pageWidth) {
+			// reject completely... need error...
+			return;
 		}
-		int x = (int)(w * dpi + 0.5);
-		int y = (int)(h * dpi + 0.5);
-		super.setPage(x, y);
-		double sx = 1.0;
-		double sy = 1.0;
-		if (w < h) {
-			sy = h / w;
-		} else if (h < w) {
-			sx = w / h;
+		if (ys >= _pageHeight) {
+			// reject completely... need error...
+			return;
 		}
-		super.setScale(sx, sy);
+		// not possible?
+		if (xs < 0.0) { // clip
+			xw += xs; // reduce xw
+			xs = 0.0;
+		}
+		if (ys < 0.0) { // clip
+			yh += ys; // reduce xw
+			ys = 0.0;
+		}
+		int ox = (int)(xs * 72.0);
+		int oy = (int)(ys * 72.0);
+		int sx = (int)(xw * 72.0 + 0.5);
+		int sy = (int)(yh * 72.0 + 0.5);
+		super.setUseableArea(ox, oy, sx, sy);
+
+//		double dpi;
+		// This device always plots within a 1000x1000 virtual area
+//		if (xw < yh) {
+//			dpi = 1000.0 / xw;
+//		} else {
+//			dpi = 1000.0 / yh;
+//		}
+//		int x = (int)(xw * dpi + 0.5);
+//		int y = (int)(yh * dpi + 0.5);
+		double gx = 1.0;
+		double gy = 1.0;
+		if (xw < yh) {
+			gy = yh / xw;
+		} else if (yh < xw) {
+			gx = xw / yh;
+		}
+		// We scale all coords before passing to 'super'...
+		// need to translate 1/1000ths into points...
+		_scaleX = gx * (sx / 1000.0);
+		_scaleY = gy * (sy / 1000.0);
+		home();
+		setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void setPaper(double w, double h) {
+		_pageWidth = w;
+		_pageHeight = h;
+		super.setPage((int)(w * 72.0), (int)(h * 72.0));
 	}
 
 	private class MnemonicAction extends AbstractAction {
@@ -122,15 +182,51 @@ class Wang_Plotter extends Wang_Paper
 	}
 
 	public Wang_Plotter() {
-		super(Wang_UI.getSeries() + Model, Description, 1000, 1000);
-		setPaper(11.0 - 1.0, 8.5 - 1.0);
+		super(Wang_UI.getSeries() + Model, Description);
+		setPaper(11.0, 8.5);
+		setPlotArea(0.5, 0.5, 7.5, 7.5);
 		JMenu mu;
 		mu = new JMenu("Plotter");
 		JMenuItem mi;
 		JMenu smu;
+		ButtonGroup grp;
+		JRadioButton op;
+
+		smu = new JMenu("Zoom...");
+		grp = new ButtonGroup();
+		op = new JRadioButton("1x", true);
+		op.setAction(new MnemonicAction(KeyEvent.VK_C));
+		op.addActionListener(this);
+		op.setText("1x"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		op = new JRadioButton("2x");
+		op.setAction(new MnemonicAction(KeyEvent.VK_D));
+		op.addActionListener(this);
+		op.setText("2x"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		mu.add(smu);
+
+		smu = new JMenu("Plot Area...");
+		grp = new ButtonGroup();
+		op = new JRadioButton("0,0-7.5x7.5", true);
+		op.setAction(new MnemonicAction(KeyEvent.VK_A));
+		op.addActionListener(this);
+		op.setText("0,0-7.5x7.5"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		op = new JRadioButton("3,0-7.5x7.5");
+		op.setAction(new MnemonicAction(KeyEvent.VK_B));
+		op.addActionListener(this);
+		op.setText("3,0-7.5x7.5"); // didn't we already do this?
+		grp.add(op);
+		smu.add(op);
+		mu.add(smu);
+
 		smu = new JMenu("Pen...");
-		ButtonGroup grp = new ButtonGroup();
-		JRadioButton op = new JRadioButton("Black", true);
+		grp = new ButtonGroup();
+		op = new JRadioButton("Black", true);
 		op.setAction(new MnemonicAction(KeyEvent.VK_0));
 		op.addActionListener(this);
 		op.setText("Black"); // didn't we already do this?
@@ -154,12 +250,14 @@ class Wang_Plotter extends Wang_Paper
 		op.setText("Red"); // didn't we already do this?
 		grp.add(op);
 		smu.add(op);
-
 		mu.add(smu);
+
 		mi = new JMenuItem("Home", KeyEvent.VK_H);
 		mi.addActionListener(this);
 		mu.add(mi);
+
 		super.addMenu(mu);
+
 		setup_chrgen();
 		home();
 		_dx = 0;
@@ -168,7 +266,7 @@ class Wang_Plotter extends Wang_Paper
 		_cy = 1;
 		_sx = 6;
 		_sy = 9;
-		_text.setCursor(_x, 999 - _y);
+		setCursor(_x, _y);
 		_text.enableCursor(true);
 		_text.setPen(Color.black);
 	}
@@ -218,6 +316,12 @@ class Wang_Plotter extends Wang_Paper
 		return true;
 	}
 
+	private void setCursor(int x, int y) {
+		int px = (int)Math.round(x * _scaleX);
+		int py = (int)Math.round((999 - y) * _scaleY);
+		_text.setCursor(px, py);
+	}
+
 	private boolean _plot(boolean draw, int dx, int dy) {
 		int xd = _x + dx;
 		if (xd < 0) xd = 0;
@@ -228,12 +332,16 @@ class Wang_Plotter extends Wang_Paper
 //System.err.println("Plot " + _x + "," + _y + " -> " + xd + "," + yd);
 		// Plotter origin is different than our drawables... flip "y".
 		if (draw) {
+			int px = (int)Math.round(_x * _scaleX);
+			int py = (int)Math.round((999 - _y) * _scaleY);
 			if (dx == 0 && dy == 0) {
 				// plot a "dot"...
-				_text.addPlot(_x, 999 - _y, -1, -1);
+				_text.addPlot(px, py, -1, -1);
 //System.err.format("plot dot %d<=%d %d<=%d\n", _x, xd, _y, yd);
 			} else {
-				_text.addPlot(_x, 999 - _y, xd, 999 - yd);
+				int pdx = (int)Math.round(xd * _scaleX);
+				int pdy = (int)Math.round((999 - yd) * _scaleY);
+				_text.addPlot(px, py, pdx, pdy);
 			}
 		}
 		_x = xd;
@@ -407,7 +515,7 @@ class Wang_Plotter extends Wang_Paper
 		}
 		_dx = _dy = 0;
 		if (drew) {
-			_text.setCursor(_x, 999 - _y);
+			setCursor(_x, _y);
 			_text.repaint();
 		}
 		// "auto raise"...

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.16 2013/02/08 12:45:25 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.17 2013/02/13 23:09:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,11 +8,12 @@ import java.io.*;
 import java.awt.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
+import javax.swing.text.*;
 
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.16 2013/02/08 12:45:25 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.17 2013/02/13 23:09:57 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -23,6 +24,7 @@ class Wang_Paper
 		boolean enableCursor(boolean on);
 		void saveAsText(FileOutputStream fo) throws Exception;
 		void setPen(Color c);
+		void setZoom(double z);
 
 		// from JComponent:
 		void setBackground(Color c);
@@ -34,6 +36,8 @@ class Wang_Paper
 		void repaint();
 		void revalidate();
 		void scrollRectToVisible(Rectangle r);
+		void setCaret(Caret c);
+		void appendText(String s);
 	}
 
 	String _model;
@@ -48,8 +52,8 @@ class Wang_Paper
 	int _eop;
 	private boolean _onoff;
 	int _fx, _fy, _fa;
-	double _gx, _gy;
-	int _ox, _oy;
+	int _ox, _oy;	// origin, points/pixels, on page
+	int _sx, _sy;	// usable size, points/pixels, on page
 	int _base_x, _base_y;
 
 	private void clear() {
@@ -67,22 +71,24 @@ class Wang_Paper
 	String _footer;
 	JMenuBar _mb;
 
+	// x,y are "points" (i.e. pixels)
 	public void setPage(int x, int y) {
 		_base_x = x;
 		_base_y = y;
+		// makes no sense to keep old plots...
+		clear();
 		_text.setPreferredSize(new Dimension(_base_x, _base_y));
 		_text.revalidate();
 		_text.repaint();
 	}
 
-	public void setScale(double sx, double sy) {
-		_gx = sx;
-		_gy = sy;
-	}
-
-	public void setOrigin(int ox, int oy) {
+	public void setUseableArea(int ox, int oy, int sx, int sy) {
+		// all points we receive will be translated to (ox,oy) and
+		// clipped by (sx,sy)...
 		_ox = ox;
 		_oy = oy;
+		_sx = sx;
+		_sy = sy;
 	}
 
 	public class Wang_FontMetrics {
@@ -99,8 +105,8 @@ class Wang_Paper
 	}
 
 	// variable length, a.k.a. continuous form, paper
-	public Wang_Paper(String model, String descr, Font font) {
-		_plotter = false;
+	public Wang_Paper(String model, String descr, Font font, boolean canPlot) {
+		_plotter = false; // not a line-drawing plotter device...
 		_model = model;
 		_descr = descr;
 		_onoff = false;
@@ -109,8 +115,27 @@ class Wang_Paper
 
 		_frame = new JFrame("Wang " + model + " " + descr);
 		_frame.setLayout(new FlowLayout());
-		PlotTextArea pa = new PlotTextArea();
-		_text = pa;
+		if (canPlot) {
+			PlotTextArea pa = new PlotTextArea();
+			// is all this subterfuge really needed?
+			_text = pa;
+			pa.setFont(font);
+			_fm = pa.getFontMetrics(pa.getFont());
+			_scroll = new JScrollPane(pa);
+		} else {
+			TextOnlyArea ta = new TextOnlyArea();
+			// is all this subterfuge really needed?
+			_text = ta;
+			ta.setFont(font);
+			_fm = ta.getFontMetrics(ta.getFont());
+			_scroll = new JScrollPane(ta);
+		}
+
+		_fa = _fm.getAscent();
+		_fx = _fm.charWidth('M');
+		_fy = _fm.getHeight();
+		//_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
+		//_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
 
 		_base_x = 60 * _fx;
 		_base_y = 32 * _fy;
@@ -120,17 +145,8 @@ class Wang_Paper
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
 
-		pa.setFont(font);
-		_fm = pa.getFontMetrics(pa.getFont());
-		_fa = _fm.getAscent();
-		_fx = _fm.charWidth('M');
-		_fy = _fm.getHeight();
-		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
-		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
-
 		clear();
 
-		_scroll = new JScrollPane(pa);
 		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		_scroll.setPreferredSize(new Dimension(1024, 768));
@@ -163,28 +179,27 @@ class Wang_Paper
 	}
 
 	// fixed size paper - e.g. flatbed plotter
-	public Wang_Paper(String model, String descr,
-				int dotWidth, int dotHeight) {
+	public Wang_Paper(String model, String descr) {
 		_plotter = true;
 		_model = model;
 		_descr = descr;
 		_onoff = false;
 		_ox = 0;
 		_oy = 0;
+		_sx = 0;
+		_sy = 0;
 
-		_base_x = dotWidth;
-		_base_y = dotHeight;
+		_base_x = 0;
+		_base_y = 0;
 
 		_frame = new JFrame("Wang " + model + " " + descr);
 		_frame.setLayout(new FlowLayout());
 		_text = new PlotOnlyArea();
-		_text.setPreferredSize(new Dimension(_base_x, _base_y));
-		_text.setBackground(Color.white);
+		//_text.setPreferredSize(new Dimension(_base_x, _base_y));
+		_text.setBackground(Color.gray);
 		_text.setForeground(Color.black);
 
 		_fa = _fx = _fy = 0;
-		_gx = 1;	// or scaling?
-		_gy = -1;	// or scaling?
 
 		clear();
 
@@ -272,6 +287,7 @@ class Wang_Paper
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
+			// todo: default to "txt" for TextOnlyArea...
 			SuffFileChooser ch = new SuffFileChooser("Save",
 					new String[] {"png", "txt"},
 					new String[] {"PNG image files", "Text files"},
@@ -322,6 +338,138 @@ class Wang_Paper
 		}
 	}
 
+	// e.g. IBM Selectric
+	class TextOnlyArea extends JTextArea
+			implements Printable, Wang_Plottable {
+		static final long serialVersionUID = 311457692140L;
+
+		public void setCaret(Caret c) {
+			super.setCaret(c);
+		}
+		public void setZoom(double z) {
+		}
+
+		public void appendText(String s) {
+			super.append(s);
+		}
+
+		public void clear() {
+			setText("");
+			// set carat position?
+			repaint();
+		}
+
+		private int _cx, _cy;
+		private boolean _enableCursor;
+
+		public boolean enableCursor(boolean on) {
+			boolean ret = _enableCursor;
+			_enableCursor = on;
+			return ret;
+		}
+
+		public int addPlot(String s, int x, int y) {
+			System.err.format("should not call addPlot(\"%s\", %d, %d)\n",
+				s, x, y);
+			return 0;
+		}
+
+		public int appendLastPlot(String s, int x, int y) {
+			System.err.format("should not call appendLastPlot(\"%s\", %d, %d)\n",
+				s, x, y);
+			return 0;
+		}
+
+		public void addPlot(int x, int y, int xd, int yd) {
+			System.err.format("should not call addPlot(%d, %d, %d, %d)\n",
+				x, y, xd, yd);
+		}
+
+		public void setCursor(int x, int y) {
+			_cx = x;
+			_cy = y;
+			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
+		}
+
+		public void setPen(Color c) {
+			//_pen = c;
+		}
+
+		public void saveAsText(FileOutputStream fo) throws Exception {
+			String s = getText();
+			fo.write(s.getBytes());
+		}
+
+		public void paint(Graphics g) {
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.addRenderingHints(new RenderingHints(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON));
+			super.paint(g2d);
+			if (_enableCursor) {
+				// don't want this for "save" option...
+				g2d.setColor(Color.red);
+				g2d.drawRect(_cx, _cy, _fx, _fy);
+			}
+		}
+
+		public int print(Graphics g, PageFormat pf, int pageIndex) {
+			double x0 = pf.getImageableX();
+			double y0 = pf.getImageableY();
+			double w0 = pf.getImageableWidth();
+			double h0 = pf.getImageableHeight();
+			int pg = 0;
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.translate(x0, y0);
+			int l = g2d.getFont().getSize();
+
+			g2d.setColor(Color.white);
+			g2d.fillRect(0, 0, (int)w0, (int)h0);
+			g2d.setColor(Color.black);
+
+			pg = pageIndex + 1;
+			String s = new String("Page " + pg +
+					" - " + _footer);
+			g2d.drawString(s, 0, (int)h0 - (l + 5) / 6);
+			h0 -= l; // make space for footer line
+
+			Dimension d = getSize();
+			double gx = w0 / d.width;
+			double gy = gx;
+			// divide up pane (virtically only) by h0...
+			g2d.scale(gx, gy);
+
+//			FontMetrics fm = this.getFontMetrics(_text.getFont());
+//			// 156 chars platten width of IBM Selectric...
+//			double nf = this.getFont().getSize() * (w0 / 156.0) /
+//							fm.charWidth('M');
+//			g2d.setFont(this.getFont().deriveFont((float)nf));
+			g2d.setFont(this.getFont());
+
+			int did = 0;
+			//int i = 0;
+			// sorted list, find first one that is beyond
+			// "current page" and reset next page from there.
+			pg = 0;
+			//int ps = 0;
+			//int pe = ps + (int)h0;
+			// todo: locate text page-by-page...
+			{
+				// Note, once pg > pageIndex we can just stop...
+				if (pg == pageIndex) {
+					++did;
+					// todo: paint text...
+				}
+			}
+			if (did > 0) {
+				return Printable.PAGE_EXISTS;
+			} else {
+				return Printable.NO_SUCH_PAGE;
+			}
+		}
+	}
+
+	// e.g. IBM Selectric, modified for micro-carriage movement
 	class PlotTextArea extends JPanel
 			implements Printable, Wang_Plottable {
 		static final long serialVersionUID = 311457692040L;
@@ -349,6 +497,11 @@ class Wang_Paper
 //				return (ob1.y == y && ob1.x == x);
 //			}
 //		}
+
+		public void setCaret(Caret c) {
+		}
+		public void setZoom(double z) {
+		}
 
 		public void clear() {
 			_nplots = 0;
@@ -402,6 +555,10 @@ class Wang_Paper
 				_plotArray[_last].s += s;
 				return _fm.stringWidth(s);
 			}
+		}
+
+		public void appendText(String s) {
+			System.err.format("should not call String(\"%s\")\n", s);
 		}
 
 		public void addPlot(int x, int y, int xd, int yd) {
@@ -468,7 +625,6 @@ class Wang_Paper
 				RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON));
 			super.paint(g2d);
-			g2d.scale(_gx, _gy);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
 				paintString(g2d, _plotArray[x], 0);
@@ -560,6 +716,7 @@ class Wang_Paper
 	class PlotOnlyArea extends JPanel
 			implements Printable, Wang_Plottable {
 		static final long serialVersionUID = 311457692040L;
+		double _zoom = 1.0;
 		class plot {
 			plot(int x_, int y_, int xd_, int yd_) {
 				x = x_;
@@ -571,6 +728,17 @@ class Wang_Paper
 			public int y;
 			public int xd;
 			public int yd;
+		}
+
+		public void setCaret(Caret c) {
+		}
+
+		public void setZoom(double z) {
+			_zoom = z;
+			setPreferredSize(new Dimension((int)Math.round(_base_x * z),
+							(int)Math.round(_base_y * z)));
+			revalidate();
+			repaint();
 		}
 
 		public void clear() {
@@ -593,6 +761,10 @@ class Wang_Paper
 			boolean ret = _enableCursor;
 			_enableCursor = on;
 			return ret;
+		}
+
+		public void appendText(String s) {
+			System.err.format("should not call String(\"%s\")\n", s);
 		}
 
 		public int addPlot(String s, int x, int y) {
@@ -618,6 +790,12 @@ class Wang_Paper
 				}
 				_plotArray = p;
 			}
+			if (x >= 0 && xd >= 0) {
+				x = x + _ox;
+				y = y + _oy;
+				xd = xd + _ox;
+				yd = yd + _oy;
+			}
 			_plotArray[n] = new plot(x, y, xd, yd);
 			++_xplots;
 		}
@@ -628,9 +806,9 @@ class Wang_Paper
 		}
 
 		public void setCursor(int x, int y) {
-			_cx = x;
-			_cy = y;
-			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
+			_cx = x + _ox;
+			_cy = y + _oy;
+			scrollRectToVisible(new Rectangle(_cx - 10, _cy - 10, 20, 20));
 		}
 
 		public void saveAsText(FileOutputStream fo) throws Exception {
@@ -643,8 +821,10 @@ class Wang_Paper
 			g2d.addRenderingHints(new RenderingHints(
 				RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON));
+			g2d.scale(_zoom, _zoom);
 			super.paint(g2d);
-			g2d.scale(_gx, _gy);
+			g2d.setColor(Color.white);
+			g2d.fillRect(0, 0, _base_x, _base_y);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
 				if (_plotArray[x].x < 0) {
@@ -665,6 +845,7 @@ class Wang_Paper
 			if (_enableCursor) {
 				// don't want this for "save" option...
 				g2d.setColor(new Color(128,128,128,128));
+				g2d.drawRect(_ox, _oy, _sx, _sy);
 				g2d.drawOval(_cx - 5, _cy - 5, 10, 10);
 				g2d.drawLine(_cx, _cy - 5, _cx, _cy + 5);
 				g2d.drawLine(_cx - 5, _cy, _cx + 15, _cy);
@@ -695,7 +876,6 @@ class Wang_Paper
 			Dimension d = getSize();
 			double ow0 = d.width;
 			double oh0 = d.height;
-			g2d.scale(_gx, _gy);
 			if (w0 / h0 > ow0 / oh0) {
 				gs = h0 / oh0;
 			} else {

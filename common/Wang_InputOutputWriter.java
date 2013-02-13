@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.2 2013/02/13 23:09:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_InputOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.1 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.2 2013/02/13 23:09:57 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -52,7 +52,7 @@ class Wang_InputOutputWriter extends Wang_Paper
 
 	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description,
-				new Font("Monospaced", Font.PLAIN, 12));
+				new Font("Monospaced", Font.PLAIN, 12), false);
 		_wfm = super.getFontMetrics();
 
 		// default to portrait 8.5x11 with margins
