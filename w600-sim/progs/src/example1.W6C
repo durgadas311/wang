@@ -1,0 +1,122 @@
+// Example from 2202 Reference Manual - 602/702/2202 Plotting Output Writers
+//
+// 10 SELECT PLOT 413
+// 20 FOR Y=-6 TO 6 STEP .25
+// 30 X=SQR(36-Y^2)
+// 40 PLOT <X,Y,":">
+// 50 NEXT Y
+// 60 FOR Y=5 TO -5 STEP -.25
+// 70 X=SQR(25-Y^2)
+// 80 PLOT <-X,Y,"*">
+// 90 NEXT Y
+// 100 FOR Y=7 TO -7 STEP -.3
+// 110 X=Y
+// 120 PLOT <X,-Y,".">
+// 130 NEXT Y
+// 140 END
+//
+// Produces a plot (drawing counter-clock-wise from left-most ':') something like:
+//
+//                **
+//             *      *
+//           *          *
+//            .          *
+//      :      .         :
+//       :      .       :
+//          :    .   :
+//              : .
+//                 .
+//
+// With the final line of '.' retracing itself back to the last '*'.
+
+#include "wang600.h"
+
+#define WANG612
+
+LLABEL(loop1)
+LLABEL(done1)
+LLABEL(loop2)
+LLABEL(loop3)
+
+BEGIN()
+	T(0)
+	T(1)
+#ifdef WANG612
+	ALPHA_PLOT("\h")
+	ENTER(500)
+	ST(0)
+	ST(1)
+	ALPHA_PLOT("\/")
+#else
+	ALPHA_STRING("\r")
+	ENTER(500)
+	ST(1)
+	ENTER(50)
+	ST(0)
+	ALPHA_STRING("| ")
+#endif
+
+	ENTER(-6)
+	ST(0)
+MARK(loop1)
+	ENTER(36)
+	ST(1)
+	RE(0)
+	X_2()
+	SUB(1)
+	SQRT()
+	ST(1)
+#ifdef WANG612
+	ALPHA_PLOT("\%")
+#else
+	ALPHA_STRING("|:")
+#endif
+	ENTER(.25)
+	ADD(0)
+	ENTER(6)
+	J_IF_GE() SEARCH(loop1)
+	J_IF_EQ() SEARCH(done1)
+	SEARCH(loop1)
+MARK(done1)
+
+	ENTER(5)
+	ST(0)
+MARK(loop2)
+	ENTER(25)
+	ST(1)
+	RE(0)
+	X_2()
+	SUB(1)
+	SQRT()
+	CHANGE_SIGN()
+	ST(1)
+#ifdef WANG612
+	ALPHA_PLOT("\%")
+#else
+	ALPHA_STRING("|:")
+#endif
+	ENTER(-.25)
+	ADD(0)
+	ENTER(-5)
+	J_IF_LT() SEARCH(loop2)
+
+	ENTER(7)
+	ST(0)
+MARK(loop3)
+	RE(0)
+	ST(1)
+	CHANGE_SIGN()
+	ST(0)
+#ifdef WANG612
+	ALPHA_PLOT("\%")
+#else
+	ALPHA_STRING("|:")
+#endif
+	RE(0)
+	CHANGE_SIGN()
+	ST(0)
+	ENTER(-.25)
+	ADD(0)
+	ENTER(-7)
+	J_IF_LT() SEARCH(loop3)
+END()
