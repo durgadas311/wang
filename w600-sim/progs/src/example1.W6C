@@ -51,9 +51,9 @@ BEGIN()
 	ALPHA_STRING("\r")
 	ENTER(500)
 	ST(1)
-	ENTER(100)
+	ENTER(-100)
 	ST(0)
-	ALPHA_STRING("|x")
+	ALPHA_STRING("| ")
 #endif
 
 	ENTER(-6)
