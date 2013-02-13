@@ -161,7 +161,7 @@ class Wang_CharConverter {
 		bb[0] = cn24_xlate[code];
 		if (bb[0] == 0) {
 			s = null;
-		} else if (bb[0] < 0x07) {
+		} else if ((bb[0] & 0x00ff) < 0x07) {
 			s = cn24_spcl[bb[0]];
 		} else {
 			s = new String(bb);
