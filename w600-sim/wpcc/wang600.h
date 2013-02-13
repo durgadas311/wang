@@ -115,7 +115,7 @@
 #define POW10(n)	ALPHA(f ## n)
 #define POW_10(n)	ALPHA(F ## n)
 #define J_IF_EQ()	ALPHA(J_IF_0)
-#define J_IF_GT()	ALPHA(J_IF_P)
+#define J_IF_GE()	ALPHA(J_IF_P)
 #define J_IF_LT()	ALPHA(SIN)
 #define JUMP(reg)	INDIR(E(reg))
 

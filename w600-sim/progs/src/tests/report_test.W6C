@@ -21,7 +21,7 @@ MARK(loop)
 	SEARCH(loop)
 	FCALL(newline)
 	RE(limit)
-	J_IF_GT()
+	J_IF_GE()
 	SEARCH(loop)
 	END_PROG()
 

@@ -252,7 +252,7 @@ void dump_alpha(uint8_t c) {
 		printf("\tJ_IF_EQ()\n");
 		break;
 	case 0x85:
-		printf("\tJ_IF_GT()\n");
+		printf("\tJ_IF_GE()\n");
 		break;
 	case 0x86:
 		printf("\tJ_IF_LT()\n");

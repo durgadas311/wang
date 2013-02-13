@@ -186,7 +186,7 @@ PI()		Value of pi
 POW10(n)	Multiply display by 10^n
 POW_10(n)	Multiply display by 10^-n
 J_IF_EQ()	Jump if reg 0 == display
-J_IF_GT()	Jump if reg 0 >= display
+J_IF_GE()	Jump if reg 0 >= display
 J_IF_LT()	Jump if reg 0 < display
 JUMP(reg)	Add contents of 'reg' to program counter
 
