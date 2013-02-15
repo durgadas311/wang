@@ -10,17 +10,17 @@ W6TLIBS += -lw6 -lplot
 
 all: $(SUBDIRS) $(ROMS) $(PROGS)
 
-plot_sin.w6t: plot_sin.w6o libplot.w6s
+plot_sin.w6t: plot_sin.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $<
 
-plot_dat.w6t: plot_dat.w6o libplot.w6s
+plot_dat.w6t: plot_dat.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $< -lw6
 
-graph_sin.w6t: graph_sin.w6o libplot.w6s
+graph_sin.w6t: graph_sin.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
 		-o $@ $<
