@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.19 2013/02/15 20:08:55 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.20 2013/02/15 20:46:30 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.19 2013/02/15 20:08:55 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.20 2013/02/15 20:46:30 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -25,6 +25,7 @@ class Wang_Paper
 		void saveAsText(FileOutputStream fo) throws Exception;
 		void setPen(Color c);
 		void setZoom(double z);
+		void setDpi(double dpi);
 
 		// from JComponent:
 		void setBackground(Color c);
@@ -73,9 +74,10 @@ class Wang_Paper
 	JMenuBar _mb;
 
 	// x,y are "points" (i.e. pixels)
-	public void setPage(int x, int y) {
+	public void setPage(int x, int y, double dpi) {
 		_base_x = x;
 		_base_y = y;
+		_text.setDpi(dpi);
 		// makes no sense to keep old plots...
 		clear();
 		_text.setPreferredSize(new Dimension(_base_x, _base_y));
@@ -347,6 +349,8 @@ class Wang_Paper
 		public void setCaret(Caret c) {
 			super.setCaret(c);
 		}
+		public void setDpi(double z) {
+		}
 		public void setZoom(double z) {
 		}
 
@@ -500,6 +504,8 @@ class Wang_Paper
 //		}
 
 		public void setCaret(Caret c) {
+		}
+		public void setDpi(double z) {
 		}
 		public void setZoom(double z) {
 		}
@@ -734,6 +740,15 @@ class Wang_Paper
 		public void setCaret(Caret c) {
 		}
 
+		BasicStroke _plot_bar;
+		int _plot_pen1, _plot_pen2;
+
+		public void setDpi(double dpi) {
+			_plot_bar = new BasicStroke((float)(dpi / 7.2));
+			_plot_pen1 = (int)Math.round(dpi / 7.2);
+			_plot_pen2 = _plot_pen1 / 2;
+		}
+
 		public void setZoom(double z) {
 			_zoom = z;
 			setPreferredSize(new Dimension((int)Math.round(_base_x * z),
@@ -850,11 +865,11 @@ class Wang_Paper
 				// don't want this for "save" option...
 				g2d.setColor(new Color(128,128,128,128));
 				g2d.drawRect(_ox, _oy, _sx, _sy);
-				g2d.drawOval(_cx - 5, _cy - 5, 10, 10);
-				g2d.drawLine(_cx, _cy - 5, _cx, _cy + 5);
-				g2d.drawLine(_cx - 5, _cy, _cx + 15, _cy);
-				g2d.setStroke(new BasicStroke((float)6.0));
-				g2d.drawLine(_cx + 10, 0, _cx + 10, _base_y);
+				g2d.drawOval(_cx - _plot_pen2, _cy - _plot_pen2, _plot_pen1, _plot_pen1);
+				g2d.drawLine(_cx, _cy - _plot_pen2, _cx, _cy + _plot_pen2);
+				g2d.drawLine(_cx - _plot_pen2, _cy, _cx + _plot_pen1 + _plot_pen2, _cy);
+				g2d.setStroke(_plot_bar);
+				g2d.drawLine(_cx + _plot_pen1, 0, _cx + _plot_pen1, _base_y);
 			}
 		}
 

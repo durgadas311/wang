@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.20 2013/02/15 20:08:39 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.21 2013/02/15 20:46:30 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ import javax.swing.JRadioButton;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.20 2013/02/15 20:08:39 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.21 2013/02/15 20:46:30 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -255,9 +255,10 @@ class Wang_Plotter extends Wang_Paper
 	public void setPaper(double w, double h) {
 		_pageWidth = w;
 		_pageHeight = h;
-		int pw = (int)Math.floor(w * 72.0 * 2.0);
-		int ph = (int)Math.floor(h * 72.0 * 2.0);
-		super.setPage(pw, ph);
+		double dpi = 72.0 * 2.0; // set desired resultion
+		int pw = (int)Math.floor(w * dpi);
+		int ph = (int)Math.floor(h * dpi);
+		super.setPage(pw, ph, dpi);
 	}
 
 	private class MnemonicAction extends AbstractAction {
