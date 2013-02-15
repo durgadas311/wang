@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.18 2013/02/13 23:09:57 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.19 2013/02/15 00:31:23 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,9 +11,14 @@ import javax.swing.JRadioButton;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.18 2013/02/13 23:09:57 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.19 2013/02/15 00:31:23 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
+
+	private static final Color _black = Color.black;
+	private static final Color _blue = new Color(0, 0, 190);
+	private static final Color _green = new Color(0, 190, 0);
+	private static final Color _red = new Color(190, 0, 0);
 
 	boolean _plot;	// mode, plot or print...
 
@@ -21,37 +26,19 @@ class Wang_Plotter extends Wang_Paper
 		if (e.getSource() instanceof JRadioButton) {
 			JRadioButton m = (JRadioButton)e.getSource();
 			if (m.getMnemonic() == KeyEvent.VK_0) { 
-				_text.setPen(Color.black);
+				_text.setPen(_black);
 				return;
 			}
 			if (m.getMnemonic() == KeyEvent.VK_1) { 
-				_text.setPen(Color.blue);
+				_text.setPen(_blue);
 				return;
 			}
 			if (m.getMnemonic() == KeyEvent.VK_2) { 
-				_text.setPen(Color.green);
+				_text.setPen(_green);
 				return;
 			}
 			if (m.getMnemonic() == KeyEvent.VK_3) { 
-				_text.setPen(Color.red);
-				return;
-			}
-
-			if (m.getMnemonic() == KeyEvent.VK_A) { 
-				setPlotArea(0.5, 0.5, 7.5, 7.5);
-				return;
-			}
-			if (m.getMnemonic() == KeyEvent.VK_B) { 
-				setPlotArea(3.0, 0.5, 7.5, 7.5);
-				return;
-			}
-
-			if (m.getMnemonic() == KeyEvent.VK_C) { 
-				_text.setZoom(1.0);
-				return;
-			}
-			if (m.getMnemonic() == KeyEvent.VK_D) { 
-				_text.setZoom(2.0);
+				_text.setPen(_red);
 				return;
 			}
 		} else if (e.getSource() instanceof JMenuItem) {
@@ -66,8 +53,104 @@ class Wang_Plotter extends Wang_Paper
 				_text.repaint();
 				return;
 			}
+
+			if (m.getMnemonic() == KeyEvent.VK_A) { 
+				doSetPlotArea();
+				return;
+			}
 		}
 		super.actionPerformed(e);
+	}
+
+	JTextArea _org_x_tx, _org_y_tx, _siz_x_tx, _siz_y_tx;
+	JPanel _org_x_pn, _org_y_pn, _siz_x_pn, _siz_y_pn;
+	JPanel _dia_pn;
+	JOptionPane _plot_area;
+	static final int OPTION_APPLY = 0;
+	static final int OPTION_CANCEL = 1;
+	static final int OPTION_NONE = 2;
+	private Object[] _btns;
+
+	double _orgX, _orgY, _sizeX, _sizeY;
+
+	private void doSetPlotArea() {
+		_org_x_tx.setText(Double.toString(_orgX));
+		_org_y_tx.setText(Double.toString(_orgY));
+		_siz_x_tx.setText(Double.toString(_sizeX));
+		_siz_y_tx.setText(Double.toString(_sizeY));
+		Dialog dlg = _plot_area.createDialog(null, "Set Plot Area");
+		dlg.setVisible(true);
+		Object res = _plot_area.getValue();
+		if (_btns[OPTION_APPLY].equals(res)) {
+			try {
+				double xs = Double.parseDouble(_org_x_tx.getText());
+				double ys = Double.parseDouble(_org_y_tx.getText());
+				double xw = Double.parseDouble(_siz_x_tx.getText());
+				double yw = Double.parseDouble(_siz_y_tx.getText());
+				setPlotArea(xs, ys, xw, yw);
+			} catch(Exception e) { }
+		}
+	}
+
+	private void makePlotAreaDialog() {
+		// Create dialog for Plot Area
+		_org_x_tx = new JTextArea();
+		_org_x_tx.setPreferredSize(new Dimension(50, 20));
+		_org_x_pn = new JPanel();
+		_org_x_pn.add(new JLabel("X Org:"));
+		_org_x_pn.add(_org_x_tx);
+
+		_org_y_tx = new JTextArea();
+		_org_y_tx.setPreferredSize(new Dimension(50, 20));
+		_org_y_pn = new JPanel();
+		_org_y_pn.add(new JLabel("Y Org:"));
+		_org_y_pn.add(_org_y_tx);
+
+		_siz_x_tx = new JTextArea();
+		_siz_x_tx.setPreferredSize(new Dimension(50, 20));
+		_siz_x_pn = new JPanel();
+		_siz_x_pn.add(new JLabel("X Size:"));
+		_siz_x_pn.add(_siz_x_tx);
+
+		_siz_y_tx = new JTextArea();
+		_siz_y_tx.setPreferredSize(new Dimension(50, 20));
+		_siz_y_pn = new JPanel();
+		_siz_y_pn.add(new JLabel("Y Size:"));
+		_siz_y_pn.add(_siz_y_tx);
+
+		_dia_pn = new JPanel();
+		GridBagLayout gridbag = new GridBagLayout();
+		_dia_pn.setLayout(gridbag);
+		GridBagConstraints s = new GridBagConstraints();
+		s.fill = GridBagConstraints.NONE;
+		s.gridx = 1;
+		s.gridy = 1;
+		s.weightx = 1;
+		s.weighty = 1;
+		s.gridwidth = 1;
+		s.gridheight = 1;
+		s.insets.left = 0;
+		s.insets.right = 0;
+		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(_org_x_pn, s);
+		_dia_pn.add(_org_x_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_org_y_pn, s);
+		_dia_pn.add(_org_y_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_siz_x_pn, s);
+		_dia_pn.add(_siz_x_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_siz_y_pn, s);
+		_dia_pn.add(_siz_y_pn);
+
+		Icon icon = null;
+		_btns = new Object[2];
+		_btns[OPTION_APPLY] = "Apply";
+		_btns[OPTION_CANCEL] = "Cancel";
+		_plot_area = new JOptionPane(_dia_pn, JOptionPane.QUESTION_MESSAGE,
+			JOptionPane.OK_CANCEL_OPTION, icon, _btns);
+
 	}
 
 	public void reset() {
@@ -134,10 +217,14 @@ class Wang_Plotter extends Wang_Paper
 			yh += ys; // reduce xw
 			ys = 0.0;
 		}
-		int ox = (int)(xs * 72.0);
-		int oy = (int)(ys * 72.0);
-		int sx = (int)(xw * 72.0 + 0.5);
-		int sy = (int)(yh * 72.0 + 0.5);
+		_orgX = xs;
+		_orgY = ys;
+		_sizeX = xw;
+		_sizeY = yh;
+		int ox = (int)Math.floor(xs * 72.0 * 2.0);
+		int oy = (int)Math.floor(ys * 72.0 * 2.0);
+		int sx = (int)Math.round(xw * 72.0 * 2.0);
+		int sy = (int)Math.round(yh * 72.0 * 2.0);
 		super.setUseableArea(ox, oy, sx, sy);
 
 //		double dpi;
@@ -168,7 +255,9 @@ class Wang_Plotter extends Wang_Paper
 	public void setPaper(double w, double h) {
 		_pageWidth = w;
 		_pageHeight = h;
-		super.setPage((int)(w * 72.0), (int)(h * 72.0));
+		int pw = (int)Math.floor(w * 72.0 * 2.0);
+		int ph = (int)Math.floor(h * 72.0 * 2.0);
+		super.setPage(pw, ph);
 	}
 
 	private class MnemonicAction extends AbstractAction {
@@ -192,37 +281,13 @@ class Wang_Plotter extends Wang_Paper
 		ButtonGroup grp;
 		JRadioButton op;
 
-		smu = new JMenu("Zoom...");
-		grp = new ButtonGroup();
-		op = new JRadioButton("1x", true);
-		op.setAction(new MnemonicAction(KeyEvent.VK_C));
-		op.addActionListener(this);
-		op.setText("1x"); // didn't we already do this?
-		grp.add(op);
-		smu.add(op);
-		op = new JRadioButton("2x");
-		op.setAction(new MnemonicAction(KeyEvent.VK_D));
-		op.addActionListener(this);
-		op.setText("2x"); // didn't we already do this?
-		grp.add(op);
-		smu.add(op);
-		mu.add(smu);
+		mi = new JMenuItem("Plot Area...", KeyEvent.VK_A);
+		mi.addActionListener(this);
+		mu.add(mi);
 
-		smu = new JMenu("Plot Area...");
-		grp = new ButtonGroup();
-		op = new JRadioButton("0,0-7.5x7.5", true);
-		op.setAction(new MnemonicAction(KeyEvent.VK_A));
-		op.addActionListener(this);
-		op.setText("0,0-7.5x7.5"); // didn't we already do this?
-		grp.add(op);
-		smu.add(op);
-		op = new JRadioButton("3,0-7.5x7.5");
-		op.setAction(new MnemonicAction(KeyEvent.VK_B));
-		op.addActionListener(this);
-		op.setText("3,0-7.5x7.5"); // didn't we already do this?
-		grp.add(op);
-		smu.add(op);
-		mu.add(smu);
+		makePlotAreaDialog();
+
+		//
 
 		smu = new JMenu("Pen...");
 		grp = new ButtonGroup();
