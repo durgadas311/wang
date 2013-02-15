@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.18 2013/02/15 00:30:55 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.19 2013/02/15 20:08:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.18 2013/02/15 00:30:55 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.19 2013/02/15 20:08:55 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -35,6 +35,7 @@ class Wang_Paper
 		void paint(Graphics g);
 		void repaint();
 		void revalidate();
+		Rectangle getVisibleRect();
 		void scrollRectToVisible(Rectangle r);
 		void setCaret(Caret c);
 		void appendText(String s);
@@ -808,7 +809,10 @@ class Wang_Paper
 		public void setCursor(int x, int y) {
 			_cx = x + _ox;
 			_cy = y + _oy;
-			scrollRectToVisible(new Rectangle(_cx - 10, _cy - 10, 20, 20));
+			Rectangle r = getVisibleRect();
+			if (!r.contains(_cx - 5, _cy - 5, 10, 10)) {
+				scrollRectToVisible(new Rectangle(_cx - 50, _cy - 50, 100, 100));
+			}
 		}
 
 		public void saveAsText(FileOutputStream fo) throws Exception {
