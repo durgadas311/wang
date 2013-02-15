@@ -55,6 +55,8 @@ MARK(loop5)
 	SEARCH(loop5)
 
 MARK(resid)
+	RECALL(stepX)
+	ADD(temp1)
 	J_IF_N0() RETURN() GO()
 	RECALL(maxX)
 	ST(convX)
