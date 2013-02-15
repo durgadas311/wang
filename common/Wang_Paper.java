@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.17 2013/02/13 23:09:57 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.18 2013/02/15 00:30:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.17 2013/02/13 23:09:57 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.18 2013/02/15 00:30:55 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -850,7 +850,7 @@ class Wang_Paper
 				g2d.drawLine(_cx, _cy - 5, _cx, _cy + 5);
 				g2d.drawLine(_cx - 5, _cy, _cx + 15, _cy);
 				g2d.setStroke(new BasicStroke((float)6.0));
-				g2d.drawLine(_cx + 10, 0, _cx + 10, 999);
+				g2d.drawLine(_cx + 10, 0, _cx + 10, _base_y);
 			}
 		}
 
