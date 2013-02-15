@@ -6,6 +6,7 @@ EXTERNAL(setup_point)
 FEXTERNAL(plot_moveto)
 FEXTERNAL(plot_Xaxis)
 
+// Use full 1000x1000 plotter "window"
 BEGIN()
 	CLEAR()
 	ENTER(0)
@@ -14,13 +15,13 @@ BEGIN()
 	STORE(maxX)
 	ENTER(5)
 	STORE(stepX)
-	ENTER(1)	// scaling in X
+	ENTER(2.5)	// scaling in X
 	STORE(scaleX)
-	ENTER(200)	// scaling in Y
+	ENTER(450)	// scaling in Y
 	STORE(scaleY)
-	ENTER(40)	// translation in X
+	ENTER(50)	// translation in X
 	STORE(tranX)
-	ENTER(250)	// translation in Y
+	ENTER(500)	// translation in Y
 	STORE(tranY)
 	FCALL(plotter)
 
@@ -34,7 +35,7 @@ BEGIN()
 
 	ENTER(-1)
 	STORE(startX)
-	ENTER(1.1)	// make sure we plot the last point
+	ENTER(1)
 	STORE(maxX)
 	ENTER(1)
 	STORE(stepX)
@@ -46,7 +47,7 @@ BEGIN()
 	FCALL(plot_chrsize)
 	ENTER(0)
 	ST(convX)
-	ENTER(-1.1)
+	ENTER(-1.05)
 	ST(convY)
 	CALL(setup_point)
 	FCALL(plot_moveto)
