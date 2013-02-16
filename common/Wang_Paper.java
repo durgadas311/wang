@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.21 2013/02/16 03:10:03 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.22 2013/02/16 15:28:10 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.21 2013/02/16 03:10:03 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.22 2013/02/16 15:28:10 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -56,7 +56,7 @@ class Wang_Paper
 	int _fx, _fy, _fa;
 	int _ox, _oy;	// origin, points/pixels, on page
 	int _sx, _sy;	// usable size, points/pixels, on page
-	int _base_x, _base_y;
+	int _base_x, _base_y, _incr_y;
 
 	private void clear() {
 		_eop = 0;
@@ -77,10 +77,15 @@ class Wang_Paper
 	public void setPage(int x, int y, double dpi) {
 		_base_x = x;
 		_base_y = y;
+		_incr_y = y;
 		_text.setDpi(dpi);
 		// makes no sense to keep old plots...
 		clear();
-		_text.setPreferredSize(new Dimension(_base_x, _base_y));
+		int z = 3;
+		if (_plotter) {
+			z += 3;
+		}
+		_text.setPreferredSize(new Dimension(_base_x + 6, _base_y + z));
 		_text.revalidate();
 		_text.repaint();
 	}
@@ -143,7 +148,7 @@ class Wang_Paper
 		_base_x = 60 * _fx;
 		_base_y = 32 * _fy;
 		_text.setPreferredSize(new Dimension(_base_x, _base_y));
-		_text.setBackground(Color.white);
+		_text.setBackground(Color.gray);
 		_text.setForeground(Color.black);
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
@@ -366,12 +371,13 @@ class Wang_Paper
 			repaint();
 		}
 
-		private int _cx, _cy;
+		//private int _cx, _cy;
 		private boolean _enableCursor;
 
 		public boolean enableCursor(boolean on) {
 			boolean ret = _enableCursor;
 			_enableCursor = on;
+			// _caret.setVisible(???)
 			return ret;
 		}
 
@@ -393,8 +399,8 @@ class Wang_Paper
 		}
 
 		public void setCursor(int x, int y) {
-			_cx = x;
-			_cy = y;
+			//_cx = x;
+			//_cy = y;
 			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
@@ -516,7 +522,8 @@ class Wang_Paper
 			_xplots = 0;
 			//_plotArray.dispose();
 			_plotArray = null;
-			repaint();
+			_base_y = _incr_y;
+			// repaint, etc, handled by caller...
 		}
 
 		private plot[] _plotArray;
@@ -579,7 +586,19 @@ class Wang_Paper
 			_cx = x;
 			_cy = y;
 			_caret.setMagicCaretPosition(new Point(_cx, _cy));
-			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
+			// also need to "extend" page first!
+			Dimension d = getSize();
+			if (_cy >= d.height) {
+				_base_y += _incr_y;
+				d.height = _base_y;
+				setPreferredSize(d);
+				revalidate();
+				repaint();
+			}
+			Rectangle r = getVisibleRect();
+			if (!r.contains(_cx - 5, _cy - 5, 10, 20)) {
+				scrollRectToVisible(new Rectangle(_cx - 50, _cy - 50, 100, 100));
+			}
 		}
 
 		public void setPen(Color c) {
@@ -639,12 +658,19 @@ class Wang_Paper
 				RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON));
 			super.paint(g2d);
+			// show paper - disable for print()/save()?
+			g2d.setColor(Color.white);
+			g2d.fillRect(3, 3, _base_x, _base_y);
+			g2d.translate(3, 3);
+			g2d.setColor(Color.black);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
 				paintString(g2d, _plotArray[x], 0);
 			}
 			if (_enableCursor) {
-				_caret.paint(g2d);
+				if (_caret != null) {
+					_caret.paint(g2d);
+				}
 			}
 		}
 
@@ -745,16 +771,14 @@ class Wang_Paper
 			public int yd;
 		}
 
+		Caret _caret;
+
 		public void setCaret(Caret c) {
+			_caret = c;
+			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 		}
 
-		BasicStroke _plot_bar;
-		int _plot_pen1, _plot_pen2;
-
 		public void setDpi(double dpi) {
-			_plot_bar = new BasicStroke((float)(dpi / 7.2));
-			_plot_pen1 = (int)Math.round(dpi / 7.2);
-			_plot_pen2 = _plot_pen1 / 2;
 		}
 
 		public void setZoom(double z) {
@@ -832,6 +856,7 @@ class Wang_Paper
 		public void setCursor(int x, int y) {
 			_cx = x + _ox;
 			_cy = y + _oy;
+			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 			Rectangle r = getVisibleRect();
 			if (!r.contains(_cx - 5, _cy - 5, 10, 10)) {
 				scrollRectToVisible(new Rectangle(_cx - 50, _cy - 50, 100, 100));
@@ -848,10 +873,12 @@ class Wang_Paper
 			g2d.addRenderingHints(new RenderingHints(
 				RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON));
-			g2d.scale(_zoom, _zoom);
+			//g2d.scale(_zoom, _zoom);
 			super.paint(g2d);
+			// show paper - disable for print()/save()?
 			g2d.setColor(Color.white);
-			g2d.fillRect(0, 0, _base_x, _base_y);
+			g2d.fillRect(3, 3, _base_x, _base_y);
+			g2d.translate(3, 3);
 			int x;
 			for (x = 0; x < _xplots; ++x) {
 				if (_plotArray[x].x < 0) {
@@ -872,12 +899,10 @@ class Wang_Paper
 			if (_enableCursor) {
 				// don't want this for "save" option...
 				g2d.setColor(new Color(128,128,128,128));
-				g2d.drawRect(_ox, _oy, _sx, _sy);
-				g2d.drawOval(_cx - _plot_pen2, _cy - _plot_pen2, _plot_pen1, _plot_pen1);
-				g2d.drawLine(_cx, _cy - _plot_pen2, _cx, _cy + _plot_pen2);
-				g2d.drawLine(_cx - _plot_pen2, _cy, _cx + _plot_pen1 + _plot_pen2, _cy);
-				g2d.setStroke(_plot_bar);
-				g2d.drawLine(_cx + _plot_pen1, 0, _cx + _plot_pen1, _base_y);
+				g2d.drawRect(_ox, _oy, _sx, _sy); // plottable area
+				if (_caret != null) {
+					_caret.paint(g2d);
+				}
 			}
 		}
 
