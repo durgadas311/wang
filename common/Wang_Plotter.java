@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.21 2013/02/15 20:46:30 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.22 2013/02/16 15:27:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,11 +7,12 @@ import javax.swing.*;
 import java.io.*;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
+import javax.swing.text.DefaultCaret;
 
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.21 2013/02/15 20:46:30 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.22 2013/02/16 15:27:45 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -248,8 +249,32 @@ class Wang_Plotter extends Wang_Paper
 		_scaleX = gx * (sx / 1000.0);
 		_scaleY = gy * (sy / 1000.0);
 		home();
+		_text.setCaret(new PlotBarCaret());
 		setCursor(_x, _y);
 		_text.repaint();
+	}
+
+	private class PlotBarCaret extends DefaultCaret {
+		static final long serialVersionUID = 311601000040L;
+
+		int _plot_pen1 = 20;
+		int _plot_pen2 = 10;
+		BasicStroke _plot_bar = new BasicStroke(20);
+
+		public PlotBarCaret() {
+		}
+		public void paint(Graphics g) {
+			Graphics2D g2d = (Graphics2D)g;
+			Dimension d = _text.getSize();
+			Point p = getMagicCaretPosition();
+
+			g2d.setColor(new Color(128,128,128,128));
+			g2d.drawOval(p.x - _plot_pen2, p.y - _plot_pen2, _plot_pen1, _plot_pen1);
+			g2d.drawLine(p.x, p.y - _plot_pen2, p.x, p.y + _plot_pen2);	
+			g2d.drawLine(p.x - _plot_pen2, p.y, p.x + _plot_pen1 + _plot_pen2, p.y);
+			g2d.setStroke(_plot_bar);
+			g2d.drawLine(p.x + _plot_pen1, 0, p.x + _plot_pen1, d.height);
+		}
 	}
 
 	public void setPaper(double w, double h) {
