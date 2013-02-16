@@ -1,14 +1,15 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.3 2013/02/13 23:09:57 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.4 2013/02/16 03:10:52 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.3 2013/02/13 23:09:57 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.4 2013/02/16 03:10:52 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -44,7 +45,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		// compute size of page in pixels.
 		double pw = (12.0 * _wfm.width) * w; // page width in points
 		double ph = (6.0 * _wfm.height) * h; // page height in points
-		super.setPage((int)pw, (int)ph);
+		super.setPage((int)pw, (int)ph, 0.0);
 		// now need to be able to convert 1/100ths onto pw x ph page...
 		//double sx = (12.0 * _wfm.width) / 100.0;
 		//double sy = (6.0 * _wfm.height) / 100.0;
@@ -71,8 +72,28 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		super.addMenu(mu);
 
 		_adjacent = false;
+		_text.setCaret(new TypeBallCaret());
 		_text.setCursor(_x, _y);
 		_text.enableCursor(true); 
+	}
+
+	private class TypeBallCaret extends DefaultCaret {
+		static final long serialVersionUID = 311601000040L;
+
+		private Image _caret;
+
+		public TypeBallCaret() {
+			java.net.URL url = getClass().getResource("icons/selectric.png");
+			_caret = Toolkit.getDefaultToolkit().getImage(url).getScaledInstance(25, -1, Image.SCALE_DEFAULT);
+		}
+		public void paint(Graphics g) {
+			JComponent comp = getComponent();
+			Point p = getMagicCaretPosition();
+			boolean b = g.drawImage(_caret,
+				p.x + (_wfm.width / 2) - (_caret.getWidth(comp) / 2),
+						p.y + _wfm.height, comp);
+			if (b) b = false;
+		}
 	}
 
 	Wang_FontMetrics _wfm;

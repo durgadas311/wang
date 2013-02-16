@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.9 2013/02/13 23:09:57 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.10 2013/02/16 03:10:36 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -10,7 +10,7 @@ import javax.swing.text.JTextComponent;
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.9 2013/02/13 23:09:57 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.10 2013/02/16 03:10:36 drmiller Exp $";
 
 	public static final String Model = "01";
 	public static final String Description = "Output Writer";
@@ -45,7 +45,7 @@ class Wang_OutputWriter extends Wang_Paper
 		// compute size of page in pixels.
 		double pw = (12.0 * _wfm.width) * w; // page width in points
 		double ph = (6.0 * _wfm.height) * h; // page height in points
-		super.setPage((int)pw, (int)ph);
+		super.setPage((int)pw, (int)ph, 0.0);
 		//super.setScale(1.0, 1.0); // another way
 	}
 
@@ -65,6 +65,7 @@ class Wang_OutputWriter extends Wang_Paper
 		mu.add(mi);
 		super.addMenu(mu);
 
+		_text.setCaret(new TypeBallCaret());
 		_text.setCursor(_x, _y);
 		_text.enableCursor(true); 
 	}
@@ -95,27 +96,26 @@ class Wang_OutputWriter extends Wang_Paper
 	private class TypeBallCaret extends DefaultCaret {
 		static final long serialVersionUID = 311601000040L;
 
-		private Polygon _caret;
+		private Image _caret;
 
 		public TypeBallCaret() {
-			_caret = new Polygon();
-			_caret.addPoint(_wfm.width / 2, 0);
-			_caret.addPoint(_wfm.width, _wfm.height);
-			_caret.addPoint(0, _wfm.height);
+			java.net.URL url = getClass().getResource("icons/selectric.png");
+			_caret = Toolkit.getDefaultToolkit().getImage(url).getScaledInstance(25, -1, Image.SCALE_DEFAULT);
 		}
 		public void paint(Graphics g) {
 			JTextComponent comp = getComponent();
 
-			g.setColor(Color.red); //comp.getCaretColor());
 			Rectangle r = null;
 			try {
 				r = comp.modelToView(getDot());
 			} catch(Exception e) { }
 			if (r == null) return;
 			// 'r' defines location of caret...
-			Polygon p = new Polygon(_caret.xpoints, _caret.ypoints, _caret.npoints);
-			p.translate(r.x, r.y + r.height);
-			g.fillPolygon(p);
+//System.err.println("TypeBallCaret.paint() "+r.x+","+r.y);
+			boolean b = g.drawImage(_caret,
+				r.x + (r.width / 2) - (_caret.getWidth(comp) / 2),
+						r.y + r.height, comp);
+			if (b) b = false;
 		}
 	}
 
@@ -162,7 +162,6 @@ System.err.println("doing byte "+b[0]);
 				_text.appendText(s);
 			}
 		}
-		_text.setCaret(new TypeBallCaret());
 		_text.repaint();
 
 		// "auto raise"...
