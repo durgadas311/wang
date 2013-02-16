@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.20 2013/02/15 20:46:30 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.21 2013/02/16 03:10:03 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.20 2013/02/15 20:46:30 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.21 2013/02/16 03:10:03 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -355,7 +355,9 @@ class Wang_Paper
 		}
 
 		public void appendText(String s) {
+			_eop += s.length();
 			super.append(s);
+			super.setCaretPosition(_eop);
 		}
 
 		public void clear() {
@@ -411,11 +413,6 @@ class Wang_Paper
 				RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON));
 			super.paint(g2d);
-			if (_enableCursor) {
-				// don't want this for "save" option...
-				g2d.setColor(Color.red);
-				g2d.drawRect(_cx, _cy, _fx, _fy);
-			}
 		}
 
 		public int print(Graphics g, PageFormat pf, int pageIndex) {
@@ -503,7 +500,11 @@ class Wang_Paper
 //			}
 //		}
 
+		Caret _caret;
+
 		public void setCaret(Caret c) {
+			_caret = c;
+			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 		}
 		public void setDpi(double z) {
 		}
@@ -532,6 +533,7 @@ class Wang_Paper
 		}
 
 		public int addPlot(String s, int x, int y) {
+			// _sorted = false; // can be smarter?
 			int n = _xplots;
 			if (_xplots + 1 > _nplots) {
 				int o = _nplots;
@@ -576,6 +578,7 @@ class Wang_Paper
 		public void setCursor(int x, int y) {
 			_cx = x;
 			_cy = y;
+			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
@@ -587,6 +590,10 @@ class Wang_Paper
 			int x = 0, y = 0;
 			int dx, dy;
 			int i;
+			// if (!_sorted) {
+			//     Array.sort(_plotArray, new TextPlotComparator());
+			//     _sorted = true;
+			// }
 			for (i = 0; i < _xplots; ++i) {
 				dy = _plotArray[i].y - y;
 				if (dy > 0) {
@@ -637,10 +644,7 @@ class Wang_Paper
 				paintString(g2d, _plotArray[x], 0);
 			}
 			if (_enableCursor) {
-				// don't want this for "save" option...
-				g2d.setColor(Color.red);
-				//g2d.drawLine(_cx, _cy, _cx, _cy + _fy);
-				g2d.drawRect(_cx, _cy, _fx, _fy);
+				_caret.paint(g2d);
 			}
 		}
 
@@ -679,6 +683,10 @@ class Wang_Paper
 
 			int did = 0;
 			int i = 0;
+			// if (!_sorted) {
+			//     Array.sort(_plotArray, new TextPlotComparator());
+			//     _sorted = true;
+			// }
 			// sorted list, find first one that is beyond
 			// "current page" and reset next page from there.
 			pg = 0;
