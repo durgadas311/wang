@@ -10,25 +10,25 @@ BEGIN()
 	STORE(startX)
 	ENTER(360)
 	STORE(maxX)
-	ENTER(5)
+	ENTER(1)
 	STORE(stepX)
 	ENTER(1)	// scaling in X
 	STORE(scaleX)
-	ENTER(500)	// scaling in Y
+	ENTER(200)	// scaling in Y
 	STORE(scaleY)
 	ENTER(0)	// translation in X
 	STORE(tranX)
-	ENTER(500)	// translation in Y
+	ENTER(300)	// translation in Y
 	STORE(tranY)
 
 	FCALL(grapher)
 
 	ENTER(0)
 	ST(convX)
-	ENTER(-1)
+	ENTER(1)
 	ST(convY)
 	CALL(setup_point)
-	ALPHA_STRING("|y = SIN(x)")
+	ALPHA_STRING("| y = SIN(x)")
 	END_PROG()
 
 MARK(GRAPHING_FUNCTION)
@@ -37,10 +37,12 @@ MARK(GRAPHING_FUNCTION)
 
 MARK(GRAPHING_PLOT)
 	// exchange X,Y since we are plotting down-page...
+	// also, downpage is negative...
 	RE(plotX)
+	CHANGE_SIGN()
 	EXCHG(plotY)
 	ST(plotX)
-	ALPHA_STRING("|o")	// plot "o"
+	ALPHA_STRING("|.")	// plot a "point"
 	RETURN()
 
 END()
