@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.22 2013/02/16 15:28:10 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.22 2013/02/16 15:28:10 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		void clear();
@@ -25,7 +25,7 @@ class Wang_Paper
 		void saveAsText(FileOutputStream fo) throws Exception;
 		void setPen(Color c);
 		void setZoom(double z);
-		void setDpi(double dpi);
+		void newSize();
 
 		// from JComponent:
 		void setBackground(Color c);
@@ -64,9 +64,8 @@ class Wang_Paper
 		//_shifted = false;
 		//_x = _y = 0;
 		_text.clear();
-		_text.setPreferredSize(new Dimension(_base_x, _base_y));
-		_text.revalidate();
-		_text.repaint();
+		_base_y = _incr_y;
+		_text.newSize();
 	}
 
 	FontMetrics _fm;
@@ -74,20 +73,12 @@ class Wang_Paper
 	JMenuBar _mb;
 
 	// x,y are "points" (i.e. pixels)
-	public void setPage(int x, int y, double dpi) {
+	public void setPage(int x, int y) {
 		_base_x = x;
 		_base_y = y;
 		_incr_y = y;
-		_text.setDpi(dpi);
 		// makes no sense to keep old plots...
 		clear();
-		int z = 3;
-		if (_plotter) {
-			z += 3;
-		}
-		_text.setPreferredSize(new Dimension(_base_x + 6, _base_y + z));
-		_text.revalidate();
-		_text.repaint();
 	}
 
 	public void setUseableArea(int ox, int oy, int sx, int sy) {
@@ -354,8 +345,6 @@ class Wang_Paper
 		public void setCaret(Caret c) {
 			super.setCaret(c);
 		}
-		public void setDpi(double z) {
-		}
 		public void setZoom(double z) {
 		}
 
@@ -396,6 +385,12 @@ class Wang_Paper
 		public void addPlot(int x, int y, int xd, int yd) {
 			System.err.format("should not call addPlot(%d, %d, %d, %d)\n",
 				x, y, xd, yd);
+		}
+
+		public void newSize() {
+			setPreferredSize(new Dimension(_base_x + 6, _base_y + 3));
+			revalidate();
+			repaint();
 		}
 
 		public void setCursor(int x, int y) {
@@ -507,12 +502,14 @@ class Wang_Paper
 //		}
 
 		Caret _caret;
+		int _caret_range;
 
 		public void setCaret(Caret c) {
 			_caret = c;
+			//DefaultCaret dc = (DefaultCaret)c;
+			//_caret_range = (int)Math.round(dc.getHeight());
+			_caret_range = 20; // not rendered yet...
 			_caret.setMagicCaretPosition(new Point(_cx, _cy));
-		}
-		public void setDpi(double z) {
 		}
 		public void setZoom(double z) {
 		}
@@ -554,13 +551,6 @@ class Wang_Paper
 			_plotArray[n] = new plot(s, x, y);
 			++_xplots;
 			_last = n;
-			if (y >= getHeight()) {
-				// should bump by "page size"...
-				Dimension d = new Dimension(getWidth(), getHeight() + 100);
-				setPreferredSize(d);
-				revalidate();
-				repaint();
-			}
 			return _fm.stringWidth(s);
 		}
 
@@ -582,21 +572,23 @@ class Wang_Paper
 				x, y, xd, yd);
 		}
 
+		public void newSize() {
+			setPreferredSize(new Dimension(_base_x + 6, _base_y + 3));
+			revalidate();
+			repaint();
+		}
+
 		public void setCursor(int x, int y) {
 			_cx = x;
 			_cy = y;
 			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 			// also need to "extend" page first!
-			Dimension d = getSize();
-			if (_cy >= d.height) {
+			if (_cy + _fy + _caret_range >= _base_y) {
 				_base_y += _incr_y;
-				d.height = _base_y;
-				setPreferredSize(d);
-				revalidate();
-				repaint();
+				newSize();
 			}
 			Rectangle r = getVisibleRect();
-			if (!r.contains(_cx - 5, _cy - 5, 10, 20)) {
+			if (!r.contains(_cx, _cy, _fx, _fy + _caret_range)) {
 				scrollRectToVisible(new Rectangle(_cx - 50, _cy - 50, 100, 100));
 			}
 		}
@@ -778,9 +770,6 @@ class Wang_Paper
 			_caret.setMagicCaretPosition(new Point(_cx, _cy));
 		}
 
-		public void setDpi(double dpi) {
-		}
-
 		public void setZoom(double z) {
 			_zoom = z;
 			setPreferredSize(new Dimension((int)Math.round(_base_x * z),
@@ -851,6 +840,13 @@ class Wang_Paper
 		public void setPen(Color c) {
 			_pen = c;
 			addPlot(-1, _pen.getRed(), _pen.getGreen(), _pen.getBlue());
+		}
+
+		// should only get called when new paper size configured
+		public void newSize() {
+			setPreferredSize(new Dimension(_base_x + 6, _base_y + 6));
+			revalidate();
+			repaint();
 		}
 
 		public void setCursor(int x, int y) {

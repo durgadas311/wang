@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.10 2013/02/16 03:10:36 drmiller Exp $
+// $Id: Wang_OutputWriter.java,v 1.11 2013/02/17 04:44:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -10,7 +10,7 @@ import javax.swing.text.JTextComponent;
 class Wang_OutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.10 2013/02/16 03:10:36 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.11 2013/02/17 04:44:45 drmiller Exp $";
 
 	public static final String Model = "01";
 	public static final String Description = "Output Writer";
@@ -45,7 +45,7 @@ class Wang_OutputWriter extends Wang_Paper
 		// compute size of page in pixels.
 		double pw = (12.0 * _wfm.width) * w; // page width in points
 		double ph = (6.0 * _wfm.height) * h; // page height in points
-		super.setPage((int)pw, (int)ph, 0.0);
+		super.setPage((int)pw, (int)ph);
 		//super.setScale(1.0, 1.0); // another way
 	}
 

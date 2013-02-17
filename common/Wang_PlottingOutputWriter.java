@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.4 2013/02/16 03:10:52 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.5 2013/02/17 04:44:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.text.DefaultCaret;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.4 2013/02/16 03:10:52 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.5 2013/02/17 04:44:45 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -45,7 +45,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		// compute size of page in pixels.
 		double pw = (12.0 * _wfm.width) * w; // page width in points
 		double ph = (6.0 * _wfm.height) * h; // page height in points
-		super.setPage((int)pw, (int)ph, 0.0);
+		super.setPage((int)pw, (int)ph);
 		// now need to be able to convert 1/100ths onto pw x ph page...
 		//double sx = (12.0 * _wfm.width) / 100.0;
 		//double sy = (6.0 * _wfm.height) / 100.0;
@@ -57,8 +57,8 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				new Font("Monospaced", Font.PLAIN, 12), true);
 		_wfm = super.getFontMetrics();
 
-		// default to portrait 8.5x11 with margins
-		setPaper(8.5 - 1.0, 11 - 1.0);
+		// default to portrait 8.5x11
+		setPaper(8.5, 11.0);
 
 		JMenu mu;
 		mu = new JMenu("Typewriter");
