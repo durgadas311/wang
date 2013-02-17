@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.24 2013/02/17 15:14:59 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,9 +13,13 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.24 2013/02/17 15:14:59 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
+		boolean hasGraphics();	// i.e. can save as PNG
+		boolean hasText();	// i.e. can save as TXT
+		boolean canPlot();
+
 		void clear();
 		void addPlot(int x, int y, int xd, int yd);
 		int addPlot(String s, int x, int y);
@@ -48,7 +52,6 @@ class Wang_Paper
 	private JFrame _frame;
 	Wang_Plottable _text;
 	private JScrollPane _scroll;
-	private boolean _plotter;	// i.e. not printer w/continuous forms
 
 	private int _xoff, _yoff;
 	int _eop;
@@ -105,7 +108,6 @@ class Wang_Paper
 
 	// variable length, a.k.a. continuous form, paper
 	public Wang_Paper(String model, String descr, Font font, boolean canPlot) {
-		_plotter = false; // not a line-drawing plotter device...
 		_model = model;
 		_descr = descr;
 		_onoff = false;
@@ -179,7 +181,6 @@ class Wang_Paper
 
 	// fixed size paper - e.g. flatbed plotter
 	public Wang_Paper(String model, String descr) {
-		_plotter = true;
 		_model = model;
 		_descr = descr;
 		_onoff = false;
@@ -236,12 +237,20 @@ class Wang_Paper
 
 	private void save(File file) {
 		String ext = SuffFileFilter.getExtension(file);
-		if (_plotter && !ext.equals("png")) {
-			Wang_UI.warning("Save", "Can't save Plotter output as text");
+		if (!ext.equals("txt") && !ext.equals("png")) {
+			Wang_UI.warning("Save", "Unsupported file type: ." + ext);
 			return;
 		}
-		if (!ext.equals("png") && !ext.equals("txt")) {
-			Wang_UI.warning("Save", "Can only save output as .txt or .png, not " + ext);
+		if (!_text.hasText() && ext.equals("txt")) {
+			Wang_UI.warning("Save", "Can't save " +
+					_model + " " + _descr +
+					" output as text");
+			return;
+		}
+		if (!_text.hasGraphics() && ext.equals("png")) {
+			Wang_UI.warning("Save", "Can't save " +
+					_model + " " + _descr +
+					" output as image");
 			return;
 		}
 		if (ext.equals("png")) {
@@ -286,11 +295,23 @@ class Wang_Paper
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
-			// todo: default to "txt" for TextOnlyArea...
+			String[] exts;
+			String[] typs;
+			if (_text.hasGraphics() && _text.hasText()) {
+				exts = new String[] {"png", "txt"};
+				typs = new String[] {"PNG image files", "Text files"};
+			} else if (_text.hasGraphics()) {
+				exts = new String[] {"png"};
+				typs = new String[] {"PNG image files"};
+			} else if (_text.hasText()) {
+				exts = new String[] {"txt"};
+				typs = new String[] {"Text files"};
+			} else { //What??? can't happen...
+				return;
+			}
+
 			SuffFileChooser ch = new SuffFileChooser("Save",
-					new String[] {"png", "txt"},
-					new String[] {"PNG image files", "Text files"},
-					Wang_UI.getDir());
+					exts, typs, Wang_UI.getDir());
 			int rv = ch.showDialog(_frame);
 			if (rv == JFileChooser.APPROVE_OPTION) {
 				save(ch.getSelectedFile());
@@ -299,6 +320,7 @@ class Wang_Paper
 		}
 		if (m.getMnemonic() == KeyEvent.VK_P) {
 			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+			// todo: select PORTRAIT based on current width:hegiht ratio?
 			aset.add(OrientationRequested.LANDSCAPE);
 			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
 				(float)0.75, (float)0.5, (float)7.0, (float)10.0, MediaPrintableArea.INCH));
@@ -341,6 +363,10 @@ class Wang_Paper
 	class TextOnlyArea extends JTextArea
 			implements Printable, Wang_Plottable {
 		static final long serialVersionUID = 311457692140L;
+
+		public boolean canPlot() { return false; }
+		public boolean hasGraphics() { return false; }
+		public boolean hasText() { return true; }
 
 		public void setCaret(Caret c) {
 			super.setCaret(c);
@@ -476,6 +502,11 @@ class Wang_Paper
 	class PlotTextArea extends JPanel
 			implements Printable, Wang_Plottable {
 		static final long serialVersionUID = 311457692040L;
+
+		public boolean canPlot() { return true; }
+		public boolean hasGraphics() { return true; }
+		public boolean hasText() { return true; }
+
 		class plot {
 			plot(String s_, int x_, int y_) {
 				s = s_;
@@ -749,6 +780,11 @@ class Wang_Paper
 	class PlotOnlyArea extends JPanel
 			implements Printable, Wang_Plottable {
 		static final long serialVersionUID = 311457692040L;
+
+		public boolean canPlot() { return true; }
+		public boolean hasGraphics() { return true; }
+		public boolean hasText() { return false; }
+
 		double _zoom = 1.0;
 		class plot {
 			plot(int x_, int y_, int xd_, int yd_) {
