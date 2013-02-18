@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.24 2013/02/17 15:14:59 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.25 2013/02/18 17:43:19 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.24 2013/02/17 15:14:59 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.25 2013/02/18 17:43:19 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
@@ -120,6 +120,7 @@ class Wang_Paper
 			PlotTextArea pa = new PlotTextArea();
 			// is all this subterfuge really needed?
 			_text = pa;
+			_text.setBackground(Color.gray);
 			pa.setFont(font);
 			_fm = pa.getFontMetrics(pa.getFont());
 			_scroll = new JScrollPane(pa);
@@ -127,6 +128,7 @@ class Wang_Paper
 			TextOnlyArea ta = new TextOnlyArea();
 			// is all this subterfuge really needed?
 			_text = ta;
+			_text.setBackground(Color.white);
 			ta.setFont(font);
 			_fm = ta.getFontMetrics(ta.getFont());
 			_scroll = new JScrollPane(ta);
@@ -141,7 +143,6 @@ class Wang_Paper
 		_base_x = 60 * _fx;
 		_base_y = 32 * _fy;
 		_text.setPreferredSize(new Dimension(_base_x, _base_y));
-		_text.setBackground(Color.gray);
 		_text.setForeground(Color.black);
 		// doing this prevents "auto warp" when printing...
 		//_text.setEditable(false);
