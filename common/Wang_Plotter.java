@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.24 2013/02/18 15:02:50 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +12,7 @@ import javax.swing.text.DefaultCaret;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.23 2013/02/17 04:44:45 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.24 2013/02/18 15:02:50 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -259,21 +259,46 @@ class Wang_Plotter extends Wang_Paper
 
 		int _plot_pen1 = 20;
 		int _plot_pen2 = 10;
-		BasicStroke _plot_bar = new BasicStroke(20);
+		Color _bar = new Color(128,128,128,128);
+		Color _bar_lt = new Color(168,168,168,128);
+		Color _bar_dk = new Color(108,108,108,128);
+
+		private Image _pen_holder;
 
 		public PlotBarCaret() {
+			java.net.URL url = getClass().getResource("icons/penholder.png");
+			_pen_holder = Toolkit.getDefaultToolkit().getImage(url);
 		}
+
 		public void paint(Graphics g) {
+			JComponent comp = getComponent();
 			Graphics2D g2d = (Graphics2D)g;
 			Dimension d = _text.getSize();
 			Point p = getMagicCaretPosition();
 
-			g2d.setColor(new Color(128,128,128,128));
-			g2d.drawOval(p.x - _plot_pen2, p.y - _plot_pen2, _plot_pen1, _plot_pen1);
-			g2d.drawLine(p.x, p.y - _plot_pen2, p.x, p.y + _plot_pen2);	
-			g2d.drawLine(p.x - _plot_pen2, p.y, p.x + _plot_pen1 + _plot_pen2, p.y);
-			g2d.setStroke(_plot_bar);
-			g2d.drawLine(p.x + _plot_pen1, 0, p.x + _plot_pen1, d.height);
+			int ytd = p.y - _plot_pen2 - 5;
+			int yb = p.y + _plot_pen2 + 5;
+			int ybd = d.height - yb;
+
+			g2d.setColor(_bar_lt);
+			g2d.fillRect(p.x + _plot_pen2, 0, 3, ytd);
+			g2d.fillRect(p.x + _plot_pen2, yb, 3, ybd);
+			g2d.setColor(_bar_dk);
+			g2d.fillRect(p.x + _plot_pen2 + _plot_pen1 - 3, 0, 3, ytd);
+			g2d.fillRect(p.x + _plot_pen2 + _plot_pen1 - 3, yb, 3, ybd);
+			g2d.setColor(_bar);
+			g2d.fillRect(p.x + _plot_pen2 + 3, 0, _plot_pen1 - 6, ytd);
+			g2d.fillRect(p.x + _plot_pen2 + 3, yb, _plot_pen1 - 6, ybd);
+
+			boolean b = g.drawImage(_pen_holder,
+					p.x - _plot_pen2 - 5, p.y - _plot_pen2 - 5, comp);
+			if (!b) {
+				b = false;
+System.err.println("failed drawImage?");
+			}
+
+			g2d.drawLine(p.x, p.y - _plot_pen2 + 2, p.x, p.y + _plot_pen2 - 2);	
+			g2d.drawLine(p.x - _plot_pen2 + 2, p.y, p.x + _plot_pen2 - 2, p.y);
 		}
 	}
 
