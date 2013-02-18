@@ -1,14 +1,15 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: IBM_Selectric.java,v 1.1 2013/02/18 23:00:32 drmiller Exp $
+// $Id: IBM_Selectric.java,v 1.2 2013/02/18 23:44:36 drmiller Exp $
 
 import java.awt.*;
+import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 
 class IBM_Selectric extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: IBM_Selectric.java,v 1.1 2013/02/18 23:00:32 drmiller Exp $";
+	final String ident = "$Id: IBM_Selectric.java,v 1.2 2013/02/18 23:44:36 drmiller Exp $";
 
 	public void reset() {
 		// anything?
@@ -24,6 +25,8 @@ class IBM_Selectric extends Wang_Paper
 		//super.setScale(1.0, 1.0); // another way
 	}
 
+	JTextArea _jtext;
+
 	public IBM_Selectric(String model, String descr) {
 		super(model, descr,
 				new Font("Monospaced", Font.PLAIN, 12), false);
@@ -34,6 +37,7 @@ class IBM_Selectric extends Wang_Paper
 
 		_text.setCaret(new TypeBallCaret());
 		_text.enableCursor(true); 
+		_jtext = (JTextArea)_text;
 	}
 
 	Wang_FontMetrics _wfm;
@@ -51,22 +55,43 @@ class IBM_Selectric extends Wang_Paper
 	}
 
 	private void retindex() {
+		// need to check if at end of text, else
+		// must non-destructively move to next line...
 		_text.appendText("\n");
 	}
 
 	private void index() {
 		// need to add spaces equiv to current column...
-		_text.appendText("\n");
+try {
+		int pos = _jtext.getCaretPosition();
+		int nl = _jtext.getLineCount();
+		int cur = _jtext.getLineOfOffset(pos);
+		if (cur + 1 == nl) {
+			int col = pos - _jtext.getLineStartOffset(cur);
+			_text.appendText("\n");
+			// must be better way...
+			while (col > 0) {
+				_text.appendText(" ");
+				--col;
+			}
+		} else {
+			// handle later... previous revindex(es) landed us here...
+		}
+} catch(Exception e) { }
 	}
 
 	private void revindex() {
+		// must move to previous line, possibly padding with spaces
 	}
 
 	private void space() {
+		// need to check if at end of text, else
+		// must non-destructively move to next character...
 		_text.appendText(" ");
 	}
 
 	private void bkspace() {
+		// only back up as far as previous line-end
 	}
 
 	private class TypeBallCaret extends DefaultCaret {
@@ -113,7 +138,7 @@ class IBM_Selectric extends Wang_Paper
 		} else if ((b[0] & 0x06) == 0x02) {
 			// X2, X3, Xa, Xb
 			printable = false;
-			switch((b[0] & 0x39) >> 4) {
+			switch((b[0] & 0x39)) {
 			case 0x00:	// space
 				space();
 				break;
