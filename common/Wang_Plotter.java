@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.24 2013/02/18 15:02:50 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.25 2013/02/18 16:27:29 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,11 +8,12 @@ import java.io.*;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.text.DefaultCaret;
+import java.awt.image.*;
 
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.24 2013/02/18 15:02:50 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.25 2013/02/18 16:27:29 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -254,7 +255,8 @@ class Wang_Plotter extends Wang_Paper
 		_text.repaint();
 	}
 
-	private class PlotBarCaret extends DefaultCaret {
+	private class PlotBarCaret extends DefaultCaret
+			implements ImageObserver {
 		static final long serialVersionUID = 311601000040L;
 
 		int _plot_pen1 = 20;
@@ -264,41 +266,62 @@ class Wang_Plotter extends Wang_Paper
 		Color _bar_dk = new Color(108,108,108,128);
 
 		private Image _pen_holder;
+		boolean _draw_bar;
 
 		public PlotBarCaret() {
 			java.net.URL url = getClass().getResource("icons/penholder.png");
 			_pen_holder = Toolkit.getDefaultToolkit().getImage(url);
+			_draw_bar = true;
+		}
+
+		public boolean imageUpdate(Image img,
+                           int infoflags,
+                           int x,
+                           int y,
+                           int width,
+                           int height) {
+			repaint();
+//System.err.println("PlotBarCaret.imageUpdate() " + infoflags);
+			// we get about 32 calls before all bits are available...
+			return ((infoflags & ImageObserver.ALLBITS) == 0);
 		}
 
 		public void paint(Graphics g) {
-			JComponent comp = getComponent();
+			//JComponent comp = getComponent();
 			Graphics2D g2d = (Graphics2D)g;
 			Dimension d = _text.getSize();
 			Point p = getMagicCaretPosition();
 
+if (_draw_bar) {
 			int ytd = p.y - _plot_pen2 - 5;
 			int yb = p.y + _plot_pen2 + 5;
 			int ybd = d.height - yb;
 
+			// plotter bar highlight:
 			g2d.setColor(_bar_lt);
 			g2d.fillRect(p.x + _plot_pen2, 0, 3, ytd);
 			g2d.fillRect(p.x + _plot_pen2, yb, 3, ybd);
+			// plotter bar shadow:
 			g2d.setColor(_bar_dk);
 			g2d.fillRect(p.x + _plot_pen2 + _plot_pen1 - 3, 0, 3, ytd);
 			g2d.fillRect(p.x + _plot_pen2 + _plot_pen1 - 3, yb, 3, ybd);
+			// main plotter bar:
 			g2d.setColor(_bar);
 			g2d.fillRect(p.x + _plot_pen2 + 3, 0, _plot_pen1 - 6, ytd);
 			g2d.fillRect(p.x + _plot_pen2 + 3, yb, _plot_pen1 - 6, ybd);
-
-			boolean b = g.drawImage(_pen_holder,
-					p.x - _plot_pen2 - 5, p.y - _plot_pen2 - 5, comp);
-			if (!b) {
-				b = false;
-System.err.println("failed drawImage?");
-			}
-
+} else {
+			g2d.setColor(_bar);
+}
+			// cross-hairs:
 			g2d.drawLine(p.x, p.y - _plot_pen2 + 2, p.x, p.y + _plot_pen2 - 2);	
 			g2d.drawLine(p.x - _plot_pen2 + 2, p.y, p.x + _plot_pen2 - 2, p.y);
+
+			boolean b = g.drawImage(_pen_holder,
+					p.x - _plot_pen2 - 5, p.y - _plot_pen2 - 5, this);
+			if (!b) {
+				b = false;
+//System.err.println("failed drawImage?");
+			}
 		}
 	}
 
