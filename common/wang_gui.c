@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.20 2012/01/13 17:11:40 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.21 2013/02/19 21:20:03 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -217,6 +217,8 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	switch(b >> 8) {
 	case 0:	// simple key pressed
 		// can't really avoid overrun... ?
+		/// @todo: implement kbd locking:
+		/// if ((sys->cpu.iob & 0x6) == 0) *kc = 0x0100 | b;
 		*kc = 0x0100 | b;	// ensure non-zero...
 		break;
 	case 1:	// special key - force new microcode PC
