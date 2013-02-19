@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.25 2013/02/18 16:27:29 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.26 2013/02/19 15:36:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import java.awt.image.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.25 2013/02/18 16:27:29 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.26 2013/02/19 15:36:55 drmiller Exp $";
 	public static final String Model = "12";
 	public static final String Description = "Plotter";
 
@@ -23,6 +23,22 @@ class Wang_Plotter extends Wang_Paper
 	private static final Color _red = new Color(190, 0, 0);
 
 	boolean _plot;	// mode, plot or print...
+
+	public void showAbout() {
+		java.net.URL url = this.getClass().getResource("icons/wang612.png");
+		JLabel lab = new JLabel("<HTML><CENTER>"+
+			"Wang " + getName() + " Emulation<BR>"+
+			"$Revision: 1.26 $ $Date: 2013/02/19 15:36:55 $<BR>"+
+			"<BR>"+
+			"<IMG SRC=\""+url.toString()+"\">"+
+			"<BR>"+
+			"Developed by Douglas Miller<BR>"+
+			"http://wang600.durgadas.com<BR>"+
+			"</CENTER></HTML>");
+		JOptionPane.showMessageDialog(null, lab,
+			"About: Wang " + getModel() + " Emulation", JOptionPane.PLAIN_MESSAGE);
+	}
+
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JRadioButton) {
@@ -58,6 +74,10 @@ class Wang_Plotter extends Wang_Paper
 
 			if (m.getMnemonic() == KeyEvent.VK_A) { 
 				doSetPlotArea();
+				return;
+			}
+			if (m.getMnemonic() == KeyEvent.VK_B) { 
+				showAbout();
 				return;
 			}
 		}
@@ -281,6 +301,7 @@ class Wang_Plotter extends Wang_Paper
                            int width,
                            int height) {
 			repaint();
+// can't figure out why sometimes it does not draw...
 //System.err.println("PlotBarCaret.imageUpdate() " + infoflags);
 			// we get about 32 calls before all bits are available...
 			return ((infoflags & ImageObserver.ALLBITS) == 0);
@@ -395,6 +416,12 @@ if (_draw_bar) {
 		mi.addActionListener(this);
 		mu.add(mi);
 
+		super.addMenu(mu);
+
+		mu = new JMenu("Help");
+		mi = new JMenuItem("About", KeyEvent.VK_B);
+		mi.addActionListener(this);
+		mu.add(mi);
 		super.addMenu(mu);
 
 		setup_chrgen();

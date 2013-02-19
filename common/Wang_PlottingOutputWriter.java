@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.5 2013/02/17 04:44:45 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.6 2013/02/19 15:36:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,10 +9,25 @@ import javax.swing.text.DefaultCaret;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.5 2013/02/17 04:44:45 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.6 2013/02/19 15:36:55 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
+
+	public void showAbout() {
+		java.net.URL url = this.getClass().getResource("icons/wang602.png");
+		JLabel lab = new JLabel("<HTML><CENTER>"+
+			"Wang " + getName() + " Emulation<BR>"+
+			"$Revision: 1.6 $ $Date: 2013/02/19 15:36:55 $<BR>"+
+			"<BR>"+
+			"<IMG SRC=\""+url.toString()+"\">"+
+			"<BR>"+
+			"Developed by Douglas Miller<BR>"+
+			"http://wang600.durgadas.com<BR>"+
+			"</CENTER></HTML>");
+		JOptionPane.showMessageDialog(null, lab,
+			"About: Wang " + getModel() + " Emulation", JOptionPane.PLAIN_MESSAGE);
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -30,6 +45,10 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				_dx = _dy = 0;
 				_text.setCursor(_x, _y);
 				//return; fall through and perform base class too...
+			}
+			if (m.getMnemonic() == KeyEvent.VK_B) { 
+				showAbout();
+				return;
 			}
 		}
 		super.actionPerformed(e);
@@ -67,6 +86,12 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		mi.addActionListener(this);
 		mu.add(mi);
 		mi = new JMenuItem("Home", KeyEvent.VK_H);
+		mi.addActionListener(this);
+		mu.add(mi);
+		super.addMenu(mu);
+
+		mu = new JMenu("Help");
+		mi = new JMenuItem("About", KeyEvent.VK_B);
 		mi.addActionListener(this);
 		mu.add(mi);
 		super.addMenu(mu);
