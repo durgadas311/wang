@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.22 2013/02/22 01:37:06 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.23 2013/02/22 13:40:46 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -225,9 +225,8 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 	switch(b >> 8) {
 	case 0:	// simple key pressed
 		// can't really avoid overrun... ?
-		/// @todo: implement kbd locking:
-		/// if ((sys->cpu.iob & 0x6) == 0) *kc = 0x0100 | b;
-		*kc = 0x0100 | b;	// ensure non-zero...
+		// implement kbd locking:
+		if ((sys->cpu.iob & 0x6) == 0) *kc = 0x0100 | b;
 		break;
 	case 1:	// special key - force new microcode PC
 		// jam new PC...
@@ -261,11 +260,11 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 			return;
 		}
 		if ((b & 0xf000) == 0x4000) {
-			// TBD
+			*kc = b; // must be non-zero to be seen
 			return;
 		}
 		if ((b & 0xf000) == 0x5000) {
-			// TBD
+			*kc = b; // must be non-zero to be seen
 			return;
 		}
 #ifdef WANG_ROM_SIZE
