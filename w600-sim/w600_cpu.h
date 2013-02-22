@@ -2,7 +2,7 @@
 #ifndef __w600_cpu_h__
 #define __w600_cpu_h__
 
-#ident "$Id: w600_cpu.h,v 1.14 2012/01/14 21:48:42 drmiller Exp $"
+#ident "$Id: w600_cpu.h,v 1.15 2013/02/22 01:37:06 drmiller Exp $"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -48,6 +48,7 @@ typedef struct {
 	uint16_t stk1;
 	uint16_t stk2;
 
+	uint8_t glrn;	// forcing LEARN from peripherals
 	wang_sys_cpu_t sys;	// common elements
 } w600_cpu_t;
 

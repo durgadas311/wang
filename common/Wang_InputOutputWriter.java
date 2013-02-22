@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.7 2013/02/19 22:50:19 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.8 2013/02/22 01:37:05 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_InputOutputWriter extends IBM_Selectric
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.7 2013/02/19 22:50:19 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.8 2013/02/22 01:37:05 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -17,7 +17,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.7 $ $Date: 2013/02/19 22:50:19 $<BR>"+
+			"$Revision: 1.8 $ $Date: 2013/02/22 01:37:05 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -96,6 +96,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		Wang_Indicator ind = new Wang_Indicator("OUTPUT");
 		gridbag.setConstraints(ind, s);
 		frame.add(ind);
+		ind.setOn(true);
 		++s.gridx;
 
 		ind = new Wang_Indicator("TYPE");

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.9 2013/02/11 08:46:35 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.10 2013/02/22 01:37:06 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,10 +8,9 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.9 2013/02/11 08:46:35 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.10 2013/02/22 01:37:06 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
-	java.io.OutputStream _fout;
 	byte[] bb = new byte[2];
 	byte[] b1 = new byte[1];
 	boolean _wr;
@@ -31,12 +30,11 @@ class Wang_TapeDrive extends JComponent
 	String _file_prop;
 	byte _recordMark;
 
-	public Wang_TapeDrive(OutputStream fout, String label,
+	public Wang_TapeDrive(String label,
 				Color doorColor, Color windowColorRef,
 				String name, String fileKind,
 				String fileType, String recordName,
 				byte recordMark, String file_prop) {
-		_fout = fout;
 		_file_prop = file_prop;
 		Font font;
 		_file = null;
@@ -332,8 +330,8 @@ class Wang_TapeDrive extends JComponent
 
 	private void send_word() {
 		try {
-			_fout.write(bb);
-			_fout.flush();
+			Wang_UI.getFout().write(bb);
+			Wang_UI.getFout().flush();
 		} catch (IOException ee) {
 		}
 	}

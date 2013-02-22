@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.21 2013/02/19 21:20:03 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.22 2013/02/22 01:37:06 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -183,7 +183,15 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 		b = *kc;
 		*kc = 0;
 		if ((b & 0xfc00) != 0) {
-			if ((b & 0x0f00) != 0) return; // don't ACK ACK's
+			if ((b & 0x0f00) != 0) {
+#ifdef __wang600__ // will also be 700...
+				// check for Group 1/2 asserting GLRN in ACK...
+				if ((b & 0xe000) == 0x4000) {
+					sys->cpu.glrn = (b & 1);
+				}
+#endif // __wang600__
+				return; // don't ACK ACK's
+			}
 			b = (b & 0xf0ff) | 0x0100;
 			write(__gui_dfd, &b, sizeof(b));
 			return;
@@ -444,6 +452,9 @@ static void guidev(wang_sys_t *sys, uint8_t c, uint8_t sts) {
 	// sts might be 00... need to send "reset" to GUI...
 	b = (sts << 12);
 	if (sts == 0) {
+#ifdef __wang600__ // will also be 700...
+		sys->cpu.glrn = 0;
+#endif // __wang600__
 		b = 0x7f00;
 	} else if (sts == 1) {
 #ifdef __wang1200__

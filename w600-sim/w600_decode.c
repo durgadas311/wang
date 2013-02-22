@@ -1,6 +1,6 @@
 // Copyright (c) 2011,2012 Douglas Miller
 
-#ident "$Id: w600_decode.c,v 1.56 2012/01/14 21:48:42 drmiller Exp $"
+#ident "$Id: w600_decode.c,v 1.57 2013/02/22 01:37:06 drmiller Exp $"
 
 #include <unistd.h>
 #include <time.h>
@@ -762,6 +762,8 @@ int instr_exec(wang_sys_t *sys) {
 	case 2:
 		g = sys->cpu.d1;
 		sys->cpu.d1 &= ~D13_STEP;
+		// clear 0010 if glrn?
+		g |= ((sys->cpu.glrn & 1) << 2);
 		break;
 	case 3: g = sys->cpu.d2; break;
 	case 4: g = sys->cpu.ka; break;

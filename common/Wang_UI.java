@@ -1,12 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.4 2013/02/08 09:55:43 drmiller Exp $
+// $Id: Wang_UI.java,v 1.5 2013/02/22 01:37:06 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.4 2013/02/08 09:55:43 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.5 2013/02/22 01:37:06 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -15,6 +15,9 @@ public class Wang_UI
 			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
 	private static String _series;
 	private static Wang_CharConverter _conv;
+	private static Wang_InputDevice[] _cn36;
+	private static java.io.InputStream _fin;
+	private static java.io.OutputStream _fout;
 
 //	public Wang_UI(Wang_Properties props, ImageIcon icon) {
 //		_props = props;
@@ -31,6 +34,9 @@ public class Wang_UI
 
 	public static String getSeries() { return _series; }
 
+	public static java.io.InputStream getFin() { return _fin; }
+	public static java.io.OutputStream getFout() { return _fout; }
+
 	public static void setDir(String dir) {
 		_dir = new File(dir);
 		_dir.mkdir();
@@ -43,6 +49,10 @@ public class Wang_UI
 	}
 	public static void setSeries(String series) {
 		_series = series;
+	}
+	public static void setSimIO(java.io.InputStream fin, java.io.OutputStream fout) {
+		_fin = fin;
+		_fout = fout;
 	}
 
 	public static Wang_CharConverter getCharConv() {
@@ -70,5 +80,39 @@ public class Wang_UI
 			new JLabel(err),
 			op + " Confirmation", JOptionPane.YES_NO_OPTION);
 		return res;
+	}
+
+	// need de-register?
+	static public void registerCN36(Wang_InputDevice dev) {
+		Wang_InputDevice[] newdevs;
+		if (_cn36 == null) {
+			newdevs = new Wang_InputDevice[1];
+			newdevs[0] = dev;
+		} else {
+			int oldnum = _cn36.length;
+			newdevs = new Wang_InputDevice[oldnum + 1];	
+			System.arraycopy(_cn36, 0, newdevs, 0, oldnum);
+			newdevs[oldnum] = dev;
+		}
+		_cn36 = newdevs;
+	}
+	static public void resetCN36() {
+		if (_cn36 != null) {
+			for (int x = 0; x < _cn36.length; ++x) {
+				_cn36[x].reset();
+			}
+		}
+	}
+	static public Wang_InputDevice startCN36(byte[] b) {
+		Wang_InputDevice dev = null;
+		if (_cn36 != null) {
+			for (int x = 0; x < _cn36.length; ++x) {
+				if (_cn36[x].start_cn36(b)) {
+					dev = _cn36[x];
+					break;
+				}
+			}
+		}
+		return dev;
 	}
 }
