@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.24 2013/02/22 21:01:13 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.25 2013/02/22 21:28:32 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -187,6 +187,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 #ifdef __wang600__ // will also be 700...
 				// check for Group 1/2 asserting GLRN in ACK...
 				if ((b & 0xe000) == 0x4000) {
+//fprintf(stderr, "glrn = %d\n", (b & 1));
 					sys->cpu.glrn = (b & 1);
 				}
 #endif // __wang600__
@@ -259,13 +260,14 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 			//}
 			return;
 		}
-		if ((b & 0xf000) == 0x4000) {
-			*kc = b; // must be non-zero to be seen
-			return;
-		}
-		if ((b & 0xf000) == 0x5000) {
+		if ((b & 0xe000) == 0x4000) {
 //fprintf(stderr, "\tGRP2< %02x %x\n", b & 0x0ff, sys->cpu.iob);
-			*kc = b; // must be non-zero to be seen
+			if ((b & 0x0f00) != 0) {
+//fprintf(stderr, "glrn = %d\n", (b & 1));
+				sys->cpu.glrn = (b & 1);
+			} else {
+				*kc = b; // must be non-zero to be seen
+			}
 			return;
 		}
 #ifdef WANG_ROM_SIZE

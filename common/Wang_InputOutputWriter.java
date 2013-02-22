@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.8 2013/02/22 01:37:05 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.9 2013/02/22 21:28:32 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,17 +7,49 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 class Wang_InputOutputWriter extends IBM_Selectric
+		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.8 2013/02/22 01:37:05 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.9 2013/02/22 21:28:32 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
+
+	// Group 2 04 12 = Enter program steps (GLRN)
+	// Group 2 04 13 = Type (echo back to OutputWriter) (!GLRN)
+
+	public void reset() {
+		_input = false;
+		_indTYPE.setOn(false);
+		_indINPUT.setOn(false);
+	}
+
+	public boolean start_cn36(byte[] b) {
+		if (b[1] != (byte)0x50) return false;
+		if (b[0] == (byte)0x4c) {
+			_input = true;
+			sendACK((byte)1); // assert GLRN
+			_indINPUT.setOn(true);
+			return true;
+		}
+		if (b[0] == (byte)0x4d) {
+			_input = true;
+			sendACK((byte)0); // do not assert GLRN
+			_indTYPE.setOn(true);
+			return true;
+		}
+		return false;
+	}
+
+	public void do_cn36(byte[] b) {
+		// should be ACK for previous code... should enable next...
+		// TODO
+	}
 
 	public void showAbout() {
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.8 $ $Date: 2013/02/22 01:37:05 $<BR>"+
+			"$Revision: 1.9 $ $Date: 2013/02/22 21:28:32 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -28,7 +60,62 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			"About: Wang " + getModel() + " Emulation", JOptionPane.PLAIN_MESSAGE);
 	}
 
+	ImageIcon _togL;
+	ImageIcon _togR;
+	Wang_Indicator _indTYPE;
+	Wang_Indicator _indOUTPUT;
+	Wang_Indicator _indINPUT;
+	boolean _input;
+
+	private void _send(byte[] b) {
+		try {
+			Wang_UI.getFout().write(b);
+			Wang_UI.getFout().flush();
+		} catch(Exception e) {
+System.err.println(e.getMessage());
+		}
+	}
+
+	private void sendACK(byte b) {
+		_send(new byte[] { b, (byte)0x51 });
+	}
+
+	private void sendCode(byte b) {
+		if (!_input) return;
+		_send(new byte[] { b, (byte)0x50 });
+	}
+
 	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof JButton) {
+			JButton butt = (JButton)e.getSource();
+			if (butt.getMnemonic() == KeyEvent.VK_G) {
+				sendACK((byte)0); // force de-assert GLRN
+				sendCode((byte)0x83);
+				return;
+			}
+			if (butt.getMnemonic() == KeyEvent.VK_E) {
+				sendCode((byte)0x22);
+				return;
+			}
+			if (butt.getMnemonic() == KeyEvent.VK_A) {
+				sendCode((byte)0x92);
+				return;
+			}
+			if (butt.getMnemonic() == KeyEvent.VK_L) {
+				boolean on = !butt.isSelected();
+				butt.setSelected(on);
+				if (on) {
+					// I/O mode...
+					butt.setIcon(_togL);
+					_indOUTPUT.setOn(true);
+				} else {
+					// LOCAL mode...
+					butt.setIcon(_togR);
+					_indOUTPUT.setOn(false);
+				}
+				return;
+			}
+		}
 		if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
 			if (m.getMnemonic() == KeyEvent.VK_U) {
@@ -46,8 +133,18 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		super.actionPerformed(e);
 	}
 
+	private class MnemonicAction extends AbstractAction {
+		static final long serialVersionUID = 311602000004L;
+		public MnemonicAction(int key) {
+			putValue(Action.MNEMONIC_KEY, key);
+		}
+		public void actionPerformed(ActionEvent e) { }
+	}
+
 	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description);
+
+		_input = false;
 
 		JMenu mu;
 		mu = new JMenu("Typewriter");
@@ -93,20 +190,19 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		s.gridwidth = 1;
 		++s.gridy;
 
-		Wang_Indicator ind = new Wang_Indicator("OUTPUT");
-		gridbag.setConstraints(ind, s);
-		frame.add(ind);
-		ind.setOn(true);
+		_indOUTPUT = new Wang_Indicator("OUTPUT");
+		gridbag.setConstraints(_indOUTPUT, s);
+		frame.add(_indOUTPUT);
 		++s.gridx;
 
-		ind = new Wang_Indicator("TYPE");
-		gridbag.setConstraints(ind, s);
-		frame.add(ind);
+		_indTYPE = new Wang_Indicator("TYPE");
+		gridbag.setConstraints(_indTYPE, s);
+		frame.add(_indTYPE);
 		++s.gridx;
 
-		ind = new Wang_Indicator("INPUT");
-		gridbag.setConstraints(ind, s);
-		frame.add(ind);
+		_indINPUT = new Wang_Indicator("INPUT");
+		gridbag.setConstraints(_indINPUT, s);
+		frame.add(_indINPUT);
 
 		s.insets.left = 0;
 		s.insets.right = 0;
@@ -124,12 +220,15 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		s.gridx = 1;
 		++s.gridy;
 
-		JButton butt = new JButton("GO");
+		JButton butt = new JButton("<HTML><CENTER>GO</CENTER></HTML>");
 		butt.setBackground(Wang_Colors.white1);
 		butt.setBorder(lb);
+		butt.setFocusPainted(false);
 		butt.setOpaque(true);
 		butt.setPreferredSize(new Dimension(50, 50));
 		butt.setMargin(new Insets(2,2,2,2));
+		butt.setMnemonic(KeyEvent.VK_G);
+		butt.addActionListener(this);
 		gridbag.setConstraints(butt, s);
 		frame.add(butt);
 		++s.gridy;
@@ -137,19 +236,25 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		butt = new JButton("<HTML><CENTER>END<BR>ALPHA</CENTER></HTML>");
 		butt.setBackground(Wang_Colors.orange1);
 		butt.setBorder(lb);
+		butt.setFocusPainted(false);
 		butt.setOpaque(true);
 		butt.setPreferredSize(new Dimension(50, 50));
 		butt.setMargin(new Insets(2,2,2,2));
+		butt.setMnemonic(KeyEvent.VK_E);
+		butt.addActionListener(this);
 		gridbag.setConstraints(butt, s);
 		frame.add(butt);
 		++s.gridy;
 
-		butt = new JButton("ALPHA");
+		butt = new JButton("<HTML><CENTER>ALPHA</CENTER></HTML>");
 		butt.setBackground(Wang_Colors.green1);
 		butt.setBorder(lb);
+		butt.setFocusPainted(false);
 		butt.setOpaque(true);
 		butt.setPreferredSize(new Dimension(50, 50));
 		butt.setMargin(new Insets(2,2,2,2));
+		butt.setMnemonic(KeyEvent.VK_A);
+		butt.addActionListener(this);
 		gridbag.setConstraints(butt, s);
 		frame.add(butt);
 		++s.gridy;
@@ -167,19 +272,25 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		JLabel lab = new JLabel("I/O");
 		lab.setForeground(Color.white);
 		lab.setOpaque(false);
+		s.anchor = GridBagConstraints.EAST;
 		gridbag.setConstraints(lab, s);
 		frame.add(lab);
 		++s.gridx;
+		s.anchor = GridBagConstraints.CENTER;
 
-		ImageIcon togL = new ImageIcon(this.getClass().getResource("icons/toggle_L.png"));
-		//ImageIcon togR = new ImageIcon(this.getClass().getResource("icons/toggle_R.png"));
-		butt = new JButton(togL);
-		butt.setBackground(Wang_Colors.green1);
-		butt.setBorder(lb);
+		_togL = new ImageIcon(this.getClass().getResource("icons/toggle_L.png"));
+		_togR = new ImageIcon(this.getClass().getResource("icons/toggle_R.png"));
+		butt = new JButton();
 		butt.setOpaque(false);
+		butt.setBackground(Color.black);
 		butt.setFocusPainted(false);
 		butt.setBorderPainted(false);
 		butt.setPreferredSize(new Dimension(34, 20));
+		butt.setAction(new MnemonicAction(KeyEvent.VK_L));
+		butt.addActionListener(this);
+		butt.setIcon(_togL);
+		butt.setSelected(true);
+		_indOUTPUT.setOn(true);
 		gridbag.setConstraints(butt, s);
 		frame.add(butt);
 		++s.gridx;
@@ -187,9 +298,11 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		lab = new JLabel("LOCAL");
 		lab.setForeground(Color.white);
 		lab.setOpaque(false);
+		s.anchor = GridBagConstraints.WEST;
 		gridbag.setConstraints(lab, s);
 		frame.add(lab);
 		++s.gridy;
+		s.anchor = GridBagConstraints.CENTER;
 
 		s.gridx = 0;
 		s.gridwidth = 3;
@@ -204,6 +317,10 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 		frame.getContentPane().setBackground(Color.black);
 		frame.pack();
+
+		Wang_UI.registerCN36(this);
+
+		// Not initially...
 		frame.setVisible(true);
 	}
 
