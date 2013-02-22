@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
-#ident "$Id: wang_gui.c,v 1.23 2013/02/22 13:40:46 drmiller Exp $"
+#ident "$Id: wang_gui.c,v 1.24 2013/02/22 21:01:13 drmiller Exp $"
 
 #include "wang-sim.h"
 
@@ -264,6 +264,7 @@ static void guikeyboard(wang_sys_t *sys, uint16_t *kc, int ack) {
 			return;
 		}
 		if ((b & 0xf000) == 0x5000) {
+//fprintf(stderr, "\tGRP2< %02x %x\n", b & 0x0ff, sys->cpu.iob);
 			*kc = b; // must be non-zero to be seen
 			return;
 		}
