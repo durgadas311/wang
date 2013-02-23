@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.25 2013/02/18 17:43:19 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.26 2013/02/23 02:53:25 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.25 2013/02/18 17:43:19 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.26 2013/02/23 02:53:25 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
@@ -127,6 +127,7 @@ class Wang_Paper
 		} else {
 			TextOnlyArea ta = new TextOnlyArea();
 			// is all this subterfuge really needed?
+			ta.setEditable(false);
 			_text = ta;
 			_text.setBackground(Color.white);
 			ta.setFont(font);

@@ -1,6 +1,7 @@
 class Wang_CharConverter {
 
 	private byte[] cn24_xlate;
+	private byte[] cn24_revxlate;
 	private String[] cn24_spcl;
 
 	private void setup_xlate() {
@@ -147,9 +148,172 @@ class Wang_CharConverter {
 		cn24_spcl[0x02] = "\u00BC";	// 1/4
 		cn24_spcl[0x03] = "\u00A2";	// cent
 	}
+	private void setup_revxlate() {
+		cn24_revxlate = new byte[256];
+		cn24_revxlate['-'] = 0x00;
+		cn24_revxlate['y'] = 0x01;
+		cn24_revxlate[' '] = 0x02;
+		cn24_revxlate['\b'] = 0x03;
+		cn24_revxlate['q'] = 0x04;
+		cn24_revxlate['p'] = 0x05;
+		cn24_revxlate['='] = 0x06;
+		cn24_revxlate['j'] = 0x07;
+		//cn24_revxlate[''] = (byte)0x08; // tab
+		cn24_revxlate['/'] = 0x09;
+		//cn24_revxlate[''] = (byte)0x0a; // set tab
+		//cn24_revxlate[''] = (byte)0x0b; // clr tab
+		cn24_revxlate[','] = 0x0c;
+		cn24_revxlate[';'] = 0x0d;
+		cn24_revxlate['f'] = 0x0e;
+		cn24_revxlate['g'] = 0x0f;
+
+		cn24_revxlate['w'] = 0x10;
+		cn24_revxlate['s'] = 0x11;
+		//cn24_revxlate[''] = (byte)0x12; // shift down
+		//cn24_revxlate[''] = (byte)0x13; // shift up
+		cn24_revxlate['i'] = 0x14;
+		cn24_revxlate['\''] = 0x15;
+		cn24_revxlate['.'] = 0x16;
+		cn24_revxlate['['] = 0x17;	// 1/2...
+		cn24_revxlate['\r'] = 0x18;	// ret+index - can this happen?
+		cn24_revxlate['o'] = 0x19;
+		cn24_revxlate['\n'] = 0x1a;	// index
+		cn24_revxlate['\f'] = 0x1b;	// rev-index
+		cn24_revxlate['a'] = 0x1c;
+		cn24_revxlate['r'] = 0x1d;
+		cn24_revxlate['v'] = 0x1e;
+		cn24_revxlate['m'] = 0x1f;
+
+		cn24_revxlate['b'] = 0x20;
+		cn24_revxlate['h'] = 0x21;
+		//cn24_revxlate[''] = (byte)0x22; // plotter
+		//cn24_revxlate[''] = (byte)0x23; // plotter
+		cn24_revxlate['k'] = 0x24;
+		cn24_revxlate['e'] = 0x25;
+		cn24_revxlate['n'] = 0x26;
+		cn24_revxlate['t'] = 0x27;
+		//cn24_revxlate[''] = (byte)0x28; // plotter
+		cn24_revxlate['l'] = 0x29;
+		//cn24_revxlate[''] = (byte)0x2a; // plotter
+		//cn24_revxlate[''] = (byte)0x2b; // plotter
+		cn24_revxlate['c'] = 0x2c;
+		cn24_revxlate['d'] = 0x2d;
+		cn24_revxlate['u'] = 0x2e;
+		cn24_revxlate['x'] = 0x2f;
+
+		cn24_revxlate['9'] = 0x30;
+		cn24_revxlate['0'] = 0x31;
+		//cn24_revxlate[''] = (byte)0x32; // plotter
+		//cn24_revxlate[''] = (byte)0x33; // plotter
+		cn24_revxlate['6'] = 0x34;
+		cn24_revxlate['5'] = 0x35;
+		cn24_revxlate['2'] = 0x36;
+		cn24_revxlate['z'] = 0x37;
+		//cn24_revxlate[''] = (byte)0x38; // plotter
+		cn24_revxlate['4'] = 0x39;
+		//cn24_revxlate[''] = (byte)0x3a; // plotter
+		//cn24_revxlate[''] = (byte)0x3b; // plotter
+		cn24_revxlate['8'] = 0x3c;
+		cn24_revxlate['7'] = 0x3d;
+		cn24_revxlate['3'] = 0x3e;
+		cn24_revxlate['1'] = 0x3f;
+
+		// shifted versions...
+		cn24_revxlate['_'] = (byte)0x80;
+		cn24_revxlate['Y'] = (byte)0x81;
+		//cn24_revxlate[''] = (byte)0x82;
+		//cn24_revxlate[''] = (byte)0x83;
+		cn24_revxlate['Q'] = (byte)0x84;
+		cn24_revxlate['P'] = (byte)0x85;
+		cn24_revxlate['+'] = (byte)0x86;
+		cn24_revxlate['J'] = (byte)0x87;
+		//cn24_revxlate[''] = (byte)0x88;
+		cn24_revxlate['?'] = (byte)0x89;
+		//cn24_revxlate[''] = (byte)0x8a;
+		//cn24_revxlate[''] = (byte)0x8b;
+		cn24_revxlate[','] = (byte)0x8c;
+		cn24_revxlate[':'] = (byte)0x8d;
+		cn24_revxlate['F'] = (byte)0x8e;
+		cn24_revxlate['G'] = (byte)0x8f;
+
+		cn24_revxlate['W'] = (byte)0x90;
+		cn24_revxlate['S'] = (byte)0x91;
+		//cn24_revxlate[''] = (byte)0x92;
+		//cn24_revxlate[''] = (byte)0x93;
+		cn24_revxlate['I'] = (byte)0x94;
+		cn24_revxlate['"'] = (byte)0x95;
+		cn24_revxlate['.'] = (byte)0x96;
+		cn24_revxlate['{'] = (byte)0x97;	// 1/4
+		//cn24_revxlate[''] = (byte)0x98;
+		cn24_revxlate['O'] = (byte)0x99;
+		//cn24_revxlate[''] = (byte)0x9a;
+		//cn24_revxlate[''] = (byte)0x9b;
+		cn24_revxlate['A'] = (byte)0x9c;
+		cn24_revxlate['R'] = (byte)0x9d;
+		cn24_revxlate['V'] = (byte)0x9e;
+		cn24_revxlate['M'] = (byte)0x9f;
+
+		cn24_revxlate['B'] = (byte)0xa0;
+		cn24_revxlate['H'] = (byte)0xa1;
+		//cn24_revxlate[''] = (byte)0xa2;
+		//cn24_revxlate[''] = (byte)0xa3;
+		cn24_revxlate['K'] = (byte)0xa4;
+		cn24_revxlate['E'] = (byte)0xa5;
+		cn24_revxlate['N'] = (byte)0xa6;
+		cn24_revxlate['T'] = (byte)0xa7;
+		//cn24_revxlate[''] = (byte)0xa8;
+		cn24_revxlate['L'] = (byte)0xa9;
+		//cn24_revxlate[''] = (byte)0xaa;
+		//cn24_revxlate[''] = (byte)0xab;
+		cn24_revxlate['C'] = (byte)0xac;
+		cn24_revxlate['D'] = (byte)0xad;
+		cn24_revxlate['U'] = (byte)0xae;
+		cn24_revxlate['X'] = (byte)0xaf;
+
+		cn24_revxlate['('] = (byte)0xb0;
+		cn24_revxlate[')'] = (byte)0xb1;
+		//cn24_revxlate[''] = (byte)0xb2;
+		//cn24_revxlate[''] = (byte)0xb3;
+		cn24_revxlate['^'] = (byte)0xb4;	// cent
+		cn24_revxlate['%'] = (byte)0xb5;
+		cn24_revxlate['@'] = (byte)0xb6;
+		cn24_revxlate['Z'] = (byte)0xb7;
+		//cn24_revxlate[''] = (byte)0xb8;
+		cn24_revxlate['$'] = (byte)0xb9;
+		//cn24_revxlate[''] = (byte)0xba;
+		//cn24_revxlate[''] = (byte)0xbb;
+		cn24_revxlate['*'] = (byte)0xbc;
+		cn24_revxlate['&'] = (byte)0xbd;
+		cn24_revxlate['#'] = (byte)0xbe;
+		cn24_revxlate['!'] = (byte)0xbf;
+	}
+
+	private void setup1200_revxlate() {
+		setup_revxlate();
+		cn24_revxlate['|'] = (byte)0x92;	// Set Tab
+		cn24_revxlate['\n'] = 0x33;
+		cn24_revxlate['\t'] = 0x23;
+		cn24_revxlate['\b'] = 0x13;
+	}
 
 	public Wang_CharConverter() {
 		setup_xlate();
+		if (cn24_xlate == null) {
+			setup1200_revxlate();
+		} else {
+			setup_revxlate();
+		}
+	}
+
+	public byte[] asciiToTiltrotate(byte code) {
+		byte c = cn24_revxlate[code];
+		boolean shifted = ((c & 0x80) != 0);
+		c &= 0x7f;
+		if (shifted) {
+			return new byte[] { 0x13, c };
+		} else {
+			return new byte[] { 0x12, c };
+		}
 	}
 
 	public String tiltrotateToAscii(byte code, boolean shifted) {

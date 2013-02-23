@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.9 2013/02/22 21:28:32 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.10 2013/02/23 02:53:25 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,9 +7,9 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 class Wang_InputOutputWriter extends IBM_Selectric
-		implements Wang_InputDevice
+		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.9 2013/02/22 21:28:32 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.10 2013/02/23 02:53:25 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -45,11 +45,27 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		// TODO
 	}
 
+	byte _shifted;
+	public void keyTyped(KeyEvent e) {
+		char c = e.getKeyChar();
+		byte b = (byte)c;
+		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
+System.err.format("convert %02x to %02x\n", b, tr[1]);
+		if (tr[0] != _shifted) {
+			sendCode(tr[0]);
+			_shifted = tr[0];
+		}
+		sendCode(tr[1]); // ignored in TYPE mode?
+		do_cn24(new byte[] { tr[1] });
+	}
+	public void keyPressed(KeyEvent e) { }
+	public void keyReleased(KeyEvent e) { }
+
 	public void showAbout() {
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.9 $ $Date: 2013/02/22 21:28:32 $<BR>"+
+			"$Revision: 1.10 $ $Date: 2013/02/23 02:53:25 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -133,18 +149,172 @@ System.err.println(e.getMessage());
 		super.actionPerformed(e);
 	}
 
-	private class MnemonicAction extends AbstractAction {
+	private class ControlPanel extends JComponent
+	{
 		static final long serialVersionUID = 311602000004L;
-		public MnemonicAction(int key) {
-			putValue(Action.MNEMONIC_KEY, key);
+
+		public ControlPanel(Wang_InputOutputWriter parent) {
+			Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
+			GridBagLayout gridbag = new GridBagLayout();
+			setLayout(gridbag);
+			GridBagConstraints s = new GridBagConstraints();
+
+			s.fill = GridBagConstraints.NONE;
+			s.gridx = 0;
+			s.gridy = 0;
+			s.weightx = 0;
+			s.weighty = 0;
+			s.gridwidth = 1;
+			s.gridheight = 1;
+			s.insets.left = 2;
+			s.insets.right = 2;
+			s.anchor = GridBagConstraints.CENTER;
+
+			s.gridx = 0;
+			s.gridwidth = 3;
+			JPanel pan = new JPanel();
+			pan.setPreferredSize(new Dimension(50, 10));
+			pan.setOpaque(false);
+			gridbag.setConstraints(pan, s);
+			add(pan);
+			s.gridwidth = 1;
+			++s.gridy;
+
+			_indOUTPUT = new Wang_Indicator("OUTPUT");
+			gridbag.setConstraints(_indOUTPUT, s);
+			add(_indOUTPUT);
+			++s.gridx;
+
+			_indTYPE = new Wang_Indicator("TYPE");
+			gridbag.setConstraints(_indTYPE, s);
+			add(_indTYPE);
+			++s.gridx;
+
+			_indINPUT = new Wang_Indicator("INPUT");
+			gridbag.setConstraints(_indINPUT, s);
+			add(_indINPUT);
+
+			s.insets.left = 0;
+			s.insets.right = 0;
+
+			++s.gridy;
+			s.gridx = 0;
+			s.gridwidth = 3;
+			pan = new JPanel();
+			pan.setPreferredSize(new Dimension(50, 20));
+			pan.setOpaque(false);
+			gridbag.setConstraints(pan, s);
+			add(pan);
+
+			s.gridwidth = 1;
+			s.gridx = 1;
+			++s.gridy;
+
+			JButton butt = new JButton("<HTML><CENTER>GO</CENTER></HTML>");
+			butt.setBackground(Wang_Colors.white1);
+			butt.setBorder(lb);
+			butt.setFocusPainted(false);
+			butt.setOpaque(true);
+			butt.setPreferredSize(new Dimension(50, 50));
+			butt.setMargin(new Insets(2,2,2,2));
+			butt.setMnemonic(KeyEvent.VK_G);
+			butt.addActionListener(parent);
+			gridbag.setConstraints(butt, s);
+			add(butt);
+			++s.gridy;
+
+			butt = new JButton("<HTML><CENTER>END<BR>ALPHA</CENTER></HTML>");
+			butt.setBackground(Wang_Colors.orange1);
+			butt.setBorder(lb);
+			butt.setFocusPainted(false);
+			butt.setOpaque(true);
+			butt.setPreferredSize(new Dimension(50, 50));
+			butt.setMargin(new Insets(2,2,2,2));
+			butt.setMnemonic(KeyEvent.VK_E);
+			butt.addActionListener(parent);
+			gridbag.setConstraints(butt, s);
+			add(butt);
+			++s.gridy;
+
+			butt = new JButton("<HTML><CENTER>ALPHA</CENTER></HTML>");
+			butt.setBackground(Wang_Colors.green1);
+			butt.setBorder(lb);
+			butt.setFocusPainted(false);
+			butt.setOpaque(true);
+			butt.setPreferredSize(new Dimension(50, 50));
+			butt.setMargin(new Insets(2,2,2,2));
+			butt.setMnemonic(KeyEvent.VK_A);
+			butt.addActionListener(parent);
+			gridbag.setConstraints(butt, s);
+			add(butt);
+			++s.gridy;
+
+			s.gridx = 0;
+			s.gridwidth = 3;
+			pan = new JPanel();
+			pan.setPreferredSize(new Dimension(50, 20));
+			pan.setOpaque(false);
+			gridbag.setConstraints(pan, s);
+			add(pan);
+			++s.gridy;
+			s.gridwidth = 1;
+
+			JLabel lab = new JLabel("I/O");
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			s.anchor = GridBagConstraints.EAST;
+			gridbag.setConstraints(lab, s);
+			add(lab);
+			++s.gridx;
+			s.anchor = GridBagConstraints.CENTER;
+
+			_togL = new ImageIcon(this.getClass().getResource("icons/toggle_L.png"));
+			_togR = new ImageIcon(this.getClass().getResource("icons/toggle_R.png"));
+			butt = new JButton();
+			butt.setOpaque(false);
+			butt.setBackground(Color.black);
+			butt.setFocusPainted(false);
+			butt.setBorderPainted(false);
+			butt.setPreferredSize(new Dimension(34, 20));
+			butt.setMnemonic(KeyEvent.VK_L);
+			butt.addActionListener(parent);
+			butt.setIcon(_togL);
+			butt.setSelected(true);
+			_indOUTPUT.setOn(true);
+			gridbag.setConstraints(butt, s);
+			add(butt);
+			++s.gridx;
+
+			lab = new JLabel("LOCAL");
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			s.anchor = GridBagConstraints.WEST;
+			gridbag.setConstraints(lab, s);
+			add(lab);
+			++s.gridy;
+			s.anchor = GridBagConstraints.CENTER;
+
+			s.gridx = 0;
+			s.gridwidth = 3;
+			pan = new JPanel();
+			pan.setPreferredSize(new Dimension(50, 10));
+			pan.setOpaque(false);
+			gridbag.setConstraints(pan, s);
+			add(pan);
+			++s.gridy;
+			s.gridwidth = 1;
+			s.gridx = 1;
+
+			setFocusCycleRoot(true);
+			setRequestFocusEnabled(true);
 		}
-		public void actionPerformed(ActionEvent e) { }
 	}
 
 	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description);
 
 		_input = false;
+		_shifted = (byte)0x12;	// Shift Down
 
 		JMenu mu;
 		mu = new JMenu("Typewriter");
@@ -163,162 +333,16 @@ System.err.println(e.getMessage());
 		super.addMenu(mu);
 
 		// now create control panel...
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
+
 		JFrame frame = new JFrame();
-		GridBagLayout gridbag = new GridBagLayout();
-		frame.setLayout(gridbag);
-		GridBagConstraints s = new GridBagConstraints();
-
-		s.fill = GridBagConstraints.NONE;
-		s.gridx = 0;
-		s.gridy = 0;
-		s.weightx = 0;
-		s.weighty = 0;
-		s.gridwidth = 1;
-		s.gridheight = 1;
-		s.insets.left = 2;
-		s.insets.right = 2;
-		s.anchor = GridBagConstraints.CENTER;
-
-		s.gridx = 0;
-		s.gridwidth = 3;
-		JPanel pan = new JPanel();
-		pan.setPreferredSize(new Dimension(50, 10));
-		pan.setOpaque(false);
-		gridbag.setConstraints(pan, s);
-		frame.add(pan);
-		s.gridwidth = 1;
-		++s.gridy;
-
-		_indOUTPUT = new Wang_Indicator("OUTPUT");
-		gridbag.setConstraints(_indOUTPUT, s);
-		frame.add(_indOUTPUT);
-		++s.gridx;
-
-		_indTYPE = new Wang_Indicator("TYPE");
-		gridbag.setConstraints(_indTYPE, s);
-		frame.add(_indTYPE);
-		++s.gridx;
-
-		_indINPUT = new Wang_Indicator("INPUT");
-		gridbag.setConstraints(_indINPUT, s);
-		frame.add(_indINPUT);
-
-		s.insets.left = 0;
-		s.insets.right = 0;
-
-		++s.gridy;
-		s.gridx = 0;
-		s.gridwidth = 3;
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(50, 20));
-		pan.setOpaque(false);
-		gridbag.setConstraints(pan, s);
-		frame.add(pan);
-
-		s.gridwidth = 1;
-		s.gridx = 1;
-		++s.gridy;
-
-		JButton butt = new JButton("<HTML><CENTER>GO</CENTER></HTML>");
-		butt.setBackground(Wang_Colors.white1);
-		butt.setBorder(lb);
-		butt.setFocusPainted(false);
-		butt.setOpaque(true);
-		butt.setPreferredSize(new Dimension(50, 50));
-		butt.setMargin(new Insets(2,2,2,2));
-		butt.setMnemonic(KeyEvent.VK_G);
-		butt.addActionListener(this);
-		gridbag.setConstraints(butt, s);
-		frame.add(butt);
-		++s.gridy;
-
-		butt = new JButton("<HTML><CENTER>END<BR>ALPHA</CENTER></HTML>");
-		butt.setBackground(Wang_Colors.orange1);
-		butt.setBorder(lb);
-		butt.setFocusPainted(false);
-		butt.setOpaque(true);
-		butt.setPreferredSize(new Dimension(50, 50));
-		butt.setMargin(new Insets(2,2,2,2));
-		butt.setMnemonic(KeyEvent.VK_E);
-		butt.addActionListener(this);
-		gridbag.setConstraints(butt, s);
-		frame.add(butt);
-		++s.gridy;
-
-		butt = new JButton("<HTML><CENTER>ALPHA</CENTER></HTML>");
-		butt.setBackground(Wang_Colors.green1);
-		butt.setBorder(lb);
-		butt.setFocusPainted(false);
-		butt.setOpaque(true);
-		butt.setPreferredSize(new Dimension(50, 50));
-		butt.setMargin(new Insets(2,2,2,2));
-		butt.setMnemonic(KeyEvent.VK_A);
-		butt.addActionListener(this);
-		gridbag.setConstraints(butt, s);
-		frame.add(butt);
-		++s.gridy;
-
-		s.gridx = 0;
-		s.gridwidth = 3;
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(50, 20));
-		pan.setOpaque(false);
-		gridbag.setConstraints(pan, s);
-		frame.add(pan);
-		++s.gridy;
-		s.gridwidth = 1;
-
-		JLabel lab = new JLabel("I/O");
-		lab.setForeground(Color.white);
-		lab.setOpaque(false);
-		s.anchor = GridBagConstraints.EAST;
-		gridbag.setConstraints(lab, s);
-		frame.add(lab);
-		++s.gridx;
-		s.anchor = GridBagConstraints.CENTER;
-
-		_togL = new ImageIcon(this.getClass().getResource("icons/toggle_L.png"));
-		_togR = new ImageIcon(this.getClass().getResource("icons/toggle_R.png"));
-		butt = new JButton();
-		butt.setOpaque(false);
-		butt.setBackground(Color.black);
-		butt.setFocusPainted(false);
-		butt.setBorderPainted(false);
-		butt.setPreferredSize(new Dimension(34, 20));
-		butt.setAction(new MnemonicAction(KeyEvent.VK_L));
-		butt.addActionListener(this);
-		butt.setIcon(_togL);
-		butt.setSelected(true);
-		_indOUTPUT.setOn(true);
-		gridbag.setConstraints(butt, s);
-		frame.add(butt);
-		++s.gridx;
-
-		lab = new JLabel("LOCAL");
-		lab.setForeground(Color.white);
-		lab.setOpaque(false);
-		s.anchor = GridBagConstraints.WEST;
-		gridbag.setConstraints(lab, s);
-		frame.add(lab);
-		++s.gridy;
-		s.anchor = GridBagConstraints.CENTER;
-
-		s.gridx = 0;
-		s.gridwidth = 3;
-		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(50, 10));
-		pan.setOpaque(false);
-		gridbag.setConstraints(pan, s);
-		frame.add(pan);
-		++s.gridy;
-		s.gridwidth = 1;
-		s.gridx = 1;
-
+		frame.add(new ControlPanel(this));
 		frame.getContentPane().setBackground(Color.black);
 		frame.pack();
 
 		Wang_UI.registerCN36(this);
+
+		frame.addKeyListener(this); // enable/disable? or use output window?
+		frame.setFocusTraversalKeysEnabled(false);  // allows TAB key to work
 
 		// Not initially...
 		frame.setVisible(true);
