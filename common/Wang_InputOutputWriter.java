@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.10 2013/02/23 02:53:25 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.11 2013/03/03 23:50:24 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.10 2013/02/23 02:53:25 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.11 2013/03/03 23:50:24 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -48,15 +48,18 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	byte _shifted;
 	public void keyTyped(KeyEvent e) {
 		char c = e.getKeyChar();
+		e.consume(); // doesn't fix anything
 		byte b = (byte)c;
 		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
-System.err.format("convert %02x to %02x\n", b, tr[1]);
 		if (tr[0] != _shifted) {
 			sendCode(tr[0]);
 			_shifted = tr[0];
+			do_cn24(new byte[] { tr[0] });
 		}
+System.err.format("convert %02x to %02x ...", b, tr[1]);
 		sendCode(tr[1]); // ignored in TYPE mode?
 		do_cn24(new byte[] { tr[1] });
+System.err.format("(done)\n");
 	}
 	public void keyPressed(KeyEvent e) { }
 	public void keyReleased(KeyEvent e) { }
@@ -65,7 +68,7 @@ System.err.format("convert %02x to %02x\n", b, tr[1]);
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.10 $ $Date: 2013/02/23 02:53:25 $<BR>"+
+			"$Revision: 1.11 $ $Date: 2013/03/03 23:50:24 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -211,6 +214,7 @@ System.err.println(e.getMessage());
 			++s.gridy;
 
 			JButton butt = new JButton("<HTML><CENTER>GO</CENTER></HTML>");
+			butt.setFocusable(false);
 			butt.setBackground(Wang_Colors.white1);
 			butt.setBorder(lb);
 			butt.setFocusPainted(false);
@@ -224,6 +228,7 @@ System.err.println(e.getMessage());
 			++s.gridy;
 
 			butt = new JButton("<HTML><CENTER>END<BR>ALPHA</CENTER></HTML>");
+			butt.setFocusable(false);
 			butt.setBackground(Wang_Colors.orange1);
 			butt.setBorder(lb);
 			butt.setFocusPainted(false);
@@ -237,6 +242,7 @@ System.err.println(e.getMessage());
 			++s.gridy;
 
 			butt = new JButton("<HTML><CENTER>ALPHA</CENTER></HTML>");
+			butt.setFocusable(false);
 			butt.setBackground(Wang_Colors.green1);
 			butt.setBorder(lb);
 			butt.setFocusPainted(false);
@@ -271,6 +277,7 @@ System.err.println(e.getMessage());
 			_togL = new ImageIcon(this.getClass().getResource("icons/toggle_L.png"));
 			_togR = new ImageIcon(this.getClass().getResource("icons/toggle_R.png"));
 			butt = new JButton();
+			butt.setFocusable(false);
 			butt.setOpaque(false);
 			butt.setBackground(Color.black);
 			butt.setFocusPainted(false);
