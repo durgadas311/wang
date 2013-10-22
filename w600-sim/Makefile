@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.57 2013/02/06 22:28:33 drmiller Exp $
+# $Id: Makefile,v 1.58 2013/10/22 18:02:04 drmiller Exp $
 
 include Makefile.ship
 
@@ -80,7 +80,7 @@ $(EXE).osx: $(EXE)
 # Need better way to estimate size of image...
 wang600apc.dmg: all icns $(EXE).osx wang600.jar
 	rm -f $@
-	dd if=/dev/zero of=$@ bs=64k count=16
+	dd if=/dev/zero of=$@ bs=64k count=18
 	hformat -l WANG600APC $@
 	hmount $@
 	hmkdir Wang600.app Wang600Files
