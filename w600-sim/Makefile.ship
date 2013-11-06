@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.9 2013/02/22 01:37:06 drmiller Exp $
+# $Id: Makefile.ship,v 1.10 2013/11/06 21:53:35 drmiller Exp $
 
 COPTS =
 
@@ -34,6 +34,11 @@ COMMON_CLASSES = \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class
 
+W600_CLASSES = \
+	Wang600_Core.class \
+	Wang600_SimulatorPipe.class \
+	Wang600_SimulatorJava.class
+
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
@@ -52,14 +57,16 @@ w600-dasm: wang-dasm.o $(DASM)
 w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
-w600_fe.class: w600_fe.java $(COMMON_CLASSES)
+w600_fe.class: w600_fe.java $(W600_CLASSES) $(COMMON_CLASSES)
 	javac w600_fe.java
 
 .SUFFIXES: .class .java
 
 .java.class:
 	javac $?
-	mv ../common/$(basename $@)*.class .
+	if [[ -f ../common/$(basename $@)*.class ]]; then \
+		mv ../common/$(basename $@)*.class .; \
+	fi
 
 clean:
 	rm -f *.o

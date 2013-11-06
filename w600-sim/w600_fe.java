@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $
+// $Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -47,7 +47,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -71,11 +71,14 @@ public class w600_fe
 		Wang_UI.setSeries("6");
 
 		if (test) {
-			// nothing special
+			// Test front-end stand-alone - nothing special
 		} else if (back) {
+			// Used for debugging? Need adapter class to convert
+			// multi-stream comm to fin/fout.
 			fout = System.out;
 			fin = System.in;
 		} else if (web || Wang_UI.getProperties().getBoolean("wang600_remote")) {
+			// Not needed any more
 			String host = Wang_UI.getProperties().getProperty("wang600_host");
 			String port = Wang_UI.getProperties().getProperty("wang600_port");
 			if (web && args.length >= 3) {
@@ -133,11 +136,11 @@ public class w600_fe
 		s.gridheight = 1;
 		front_end.add(pan);
 
-		Wang600_Display dsp = new Wang600_Display();
+		Wang600.Disp = new Wang600_Display();
 		s.gridx = 1;
 		s.gridy = 0;
-		gridbag.setConstraints(dsp, s);
-		front_end.add(dsp);
+		gridbag.setConstraints(Wang600.Disp, s);
+		front_end.add(Wang600.Disp);
 		url = w600_fe.class.getResource("icons/logo-sm.gif");
 		ImageIcon ic = new ImageIcon(url);
 		JLabel lab = new JLabel(ic);
@@ -162,7 +165,7 @@ public class w600_fe
 		s.gridheight = 1;
 		front_end.add(pan);
 
-		Wang_TapeDrive tape = new Wang_TapeDrive(
+		Wang600.Tape = new Wang_TapeDrive(
 					"<HTML><BR><FONT SIZE=+2><B>WANG</B></FONT>" +
 					" 600 SERIES</HTML>",
 					Wang_Colors.ivory, Wang_Colors.aqua,
@@ -171,20 +174,21 @@ public class w600_fe
 					"File", (byte)0x9e, "wang600_tape_image");
 		s.gridx = 3;
 		s.gridheight = 2;
-		gridbag.setConstraints(tape, s);
+		gridbag.setConstraints(Wang600.Tape, s);
 		s.gridheight = 1;
-		front_end.add(tape);
+		front_end.add(Wang600.Tape);
 
-		Wang600_Printer prt = new Wang600_Printer();
+		Wang600.Prt = new Wang600_Printer();
 
-		Wang600_Keyboard kbd = new Wang600_Keyboard(dsp.pe, dsp.me, prt, tape);
+		// Must be after Display, Tape, and Printer are created.
+		Wang600.Kbd = new Wang600_Keyboard(); //dsp.pe, dsp.me, prt, tape);
 		s.gridx = 0;
 		s.gridy = 2;
 		s.gridwidth = 4;
 		s.gridheight = 1;
-		gridbag.setConstraints(kbd, s);
-		front_end.add(kbd);
-		front_end.addKeyListener(kbd);
+		gridbag.setConstraints(Wang600.Kbd, s);
+		front_end.add(Wang600.Kbd);
+		front_end.addKeyListener(Wang600.Kbd);
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(110, 5));
@@ -197,35 +201,37 @@ public class w600_fe
 		front_end.add(pan);
 
 		String cn24 = Wang_UI.getProperties().getProperty("wang600_cn24_device");
-		Wang_OutputDevice cn24f = null;
+		Wang600.CN24 = null;
 		if (cn24 != null && cn24.equals(Wang_PlottingOutputWriter.getModel())) {
-			cn24f = new Wang_PlottingOutputWriter();
+			Wang600.CN24 = new Wang_PlottingOutputWriter();
 		} else if (cn24 != null && cn24.equals(Wang_OutputWriter.getModel())) {
-			cn24f = new Wang_OutputWriter();
+			Wang600.CN24 = new Wang_OutputWriter();
 		} else if (cn24 != null && cn24.equals(Wang_InputOutputWriter.getModel())) {
-			cn24f = new Wang_InputOutputWriter();
+			Wang600.CN24 = new Wang_InputOutputWriter();
 		} else if (cn24 != null && cn24.equals(Wang_Plotter.getModel())) {
-			cn24f = new Wang_Plotter();
+			Wang600.CN24 = new Wang_Plotter();
 		}
-		Wang600_Model630 m630f = new Wang600_Model630(kbd);
-		Wang600_XROM xROMf = new Wang600_XROM(kbd);
+		// Must be after Keyboard created.
+		Wang600.M630 = new Wang600_Model630();
+		Wang600.XROM = new Wang600_XROM();
 
-		Wang600_Help help = new Wang600_Help(front_end);
-		Wang600_SimInput inp = new Wang600_SimInput(dsp, kbd, help,
-						prt, tape, cn24f, m630f, xROMf);
+		Wang600.Help = new Wang600_Help(front_end);
+
+		// Must be alfter all components created.
+		Wang600_SimInput inp = new Wang600_SimInput();
  
 		JMenuBar mb = new JMenuBar();
 		JMenu mu;
 		mu = new JMenu("Devices");
 		mb.add(mu);
 		JMenuItem mi;
-		mi = xROMf.getMenu(KeyEvent.VK_R);
+		mi = Wang600.XROM.getMenu(KeyEvent.VK_R);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
 		mu.add(inp.getOutputMenu()); // CN-24 output devices
 
-		mi = m630f.getMenu(KeyEvent.VK_D);
+		mi = Wang600.M630.getMenu(KeyEvent.VK_D);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
@@ -239,7 +245,7 @@ public class w600_fe
 		mi = new JMenuItem("Paste", KeyEvent.VK_PASTE);
 		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK);
 		mi.setAccelerator(ks);
-		mi.addActionListener(kbd);
+		mi.addActionListener(Wang600.Kbd);
 		mu.add(mi);
 		mi = new JMenuItem("Preferences", KeyEvent.VK_E);
 		mi.addActionListener(inp);
@@ -247,16 +253,16 @@ public class w600_fe
 
 		mu = new JMenu("Help");
 		mb.add(mu);
-		mi = help.getMenuItemHelp();
+		mi = Wang600.Help.getMenuItemHelp();
 		mi.addActionListener(inp);
 		mu.add(mi);
-		mi = help.getMenuItemAbout();
+		mi = Wang600.Help.getMenuItemAbout();
 		mi.addActionListener(inp);
 		mu.add(mi);
 
 		front_end.setJMenuBar(mb);
 
-		dsp.setProperties((Wang600_Properties)Wang_UI.getProperties());
+		Wang600.Disp.setProperties((Wang600_Properties)Wang_UI.getProperties());
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -501,6 +507,18 @@ class Wang600_Properties extends Wang_Properties
 	}
 }
 
+class Wang600 {
+	public static Wang600_Display Disp;
+	public static Wang600_Printer Prt;
+	public static Wang_TapeDrive Tape;
+	public static Wang_OutputDevice CN24;
+	public static Wang600_Model630 M630;
+	public static Wang600_Keyboard Kbd;
+	public static Wang600_XROM XROM;
+	public static Wang600_Help Help;
+	public static Wang600_Core Core;
+}
+
 class Wang600_SimError
 		implements Runnable
 {
@@ -531,17 +549,9 @@ class Wang600_SimError
 }
 
 class Wang600_SimInput
-		implements Runnable, WindowListener, ActionListener
+		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
-	Wang600_Display _dsp;
-	Wang600_Keyboard _kbd;
-	Wang600_Printer _prt;
-	Wang_TapeDrive _tape;
-	Wang_OutputDevice _cn24;
-	Wang600_Model630 _m630;
-	Wang600_XROM _xROM;
-	private Wang600_Help _help;
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -551,39 +561,36 @@ class Wang600_SimInput
 	private JMenu _mu;
 	public JMenu getOutputMenu() { return _mu; }
 
-	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_InputDevice _cn36;	// current active device
-
-	private void disposeDevice(Wang_OutputDevice cn24) {
-		if (cn24 instanceof Wang_Plotter) {
+	private void disposeDevice() {
+		if (Wang600.CN24 instanceof Wang_Plotter) {
 			_mi612.setText(Wang_Plotter.getName() +
 				" (not installed)");
-			cn24.onOff(false);
-		} else if (cn24 instanceof Wang_OutputWriter) {
+			Wang600.CN24.onOff(false);
+		} else if (Wang600.CN24 instanceof Wang_OutputWriter) {
 			_mi601.setText(Wang_OutputWriter.getName() +
 				" (not installed)");
-			cn24.onOff(false);
-		} else if (cn24 instanceof Wang_PlottingOutputWriter) {
+			Wang600.CN24.onOff(false);
+		} else if (Wang600.CN24 instanceof Wang_PlottingOutputWriter) {
 			_mi602.setText(Wang_PlottingOutputWriter.getName() +
 				" (not installed)");
-			cn24.onOff(false);
-		} else if (cn24 instanceof Wang_InputOutputWriter) {
+			Wang600.CN24.onOff(false);
+		} else if (Wang600.CN24 instanceof Wang_InputOutputWriter) {
 			_mi611.setText(Wang_InputOutputWriter.getName() +
 				" (not installed)");
-			cn24.onOff(false);
+			Wang600.CN24.onOff(false);
 		}
 	}
 
-	private void setupDevice(Wang_OutputDevice cn24) {
-		cn24.getFrame().addWindowListener(this);
+	private void setupDevice() {
+		Wang600.CN24.getFrame().addWindowListener(this);
 		String model = "";
-		if (cn24 instanceof Wang_Plotter) {
+		if (Wang600.CN24 instanceof Wang_Plotter) {
 			model = Wang_Plotter.getModel();
-		} else if (cn24 instanceof Wang_OutputWriter) {
+		} else if (Wang600.CN24 instanceof Wang_OutputWriter) {
 			model = Wang_OutputWriter.getModel();
-		} else if (cn24 instanceof Wang_PlottingOutputWriter) {
+		} else if (Wang600.CN24 instanceof Wang_PlottingOutputWriter) {
 			model = Wang_PlottingOutputWriter.getModel();
-		} else if (cn24 instanceof Wang_InputOutputWriter) {
+		} else if (Wang600.CN24 instanceof Wang_InputOutputWriter) {
 			model = Wang_InputOutputWriter.getModel();
 		}
 		try { // if this fails, oh well.
@@ -601,83 +608,83 @@ class Wang600_SimInput
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
 		if (m.getMnemonic() == KeyEvent.VK_1) {
-			if (!(_cn24 instanceof Wang_OutputWriter)) {
-				disposeDevice(_cn24);
-				_cn24 = new Wang_OutputWriter();
+			if (!(Wang600.CN24 instanceof Wang_OutputWriter)) {
+				disposeDevice();
+				Wang600.CN24 = new Wang_OutputWriter();
 				_mi601.setText(Wang_OutputWriter.getName() +
 						" (installed)");
-				setupDevice(_cn24);
+				setupDevice();
 			} else {
-				_cn24.onOff(!_cn24.onOff());
+				Wang600.CN24.onOff(!Wang600.CN24.onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_2) {
-			if (!(_cn24 instanceof Wang_PlottingOutputWriter)) {
-				disposeDevice(_cn24);
-				_cn24 = new Wang_PlottingOutputWriter();
+			if (!(Wang600.CN24 instanceof Wang_PlottingOutputWriter)) {
+				disposeDevice();
+				Wang600.CN24 = new Wang_PlottingOutputWriter();
 				_mi602.setText(Wang_PlottingOutputWriter.getName() +
 						" (installed)");
-				setupDevice(_cn24);
+				setupDevice();
 			} else {
-				_cn24.onOff(!_cn24.onOff());
+				Wang600.CN24.onOff(!Wang600.CN24.onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_3) {
-			if (!(_cn24 instanceof Wang_InputOutputWriter)) {
-				disposeDevice(_cn24);
-				_cn24 = new Wang_InputOutputWriter();
+			if (!(Wang600.CN24 instanceof Wang_InputOutputWriter)) {
+				disposeDevice();
+				Wang600.CN24 = new Wang_InputOutputWriter();
 				_mi611.setText(Wang_InputOutputWriter.getName() +
 						" (installed)");
-				setupDevice(_cn24);
+				setupDevice();
 			} else {
-				_cn24.onOff(!_cn24.onOff());
+				Wang600.CN24.onOff(!Wang600.CN24.onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_4) {
-			if (!(_cn24 instanceof Wang_Plotter)) {
-				disposeDevice(_cn24);
-				_cn24 = new Wang_Plotter();
+			if (!(Wang600.CN24 instanceof Wang_Plotter)) {
+				disposeDevice();
+				Wang600.CN24 = new Wang_Plotter();
 				_mi612.setText(Wang_Plotter.getName() +
 						" (installed)");
-				setupDevice(_cn24);
+				setupDevice();
 			} else {
-				_cn24.onOff(!_cn24.onOff());
+				Wang600.CN24.onOff(!Wang600.CN24.onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_0) {
-			disposeDevice(_cn24);
+			disposeDevice();
 			try { // if this fails, oh well.
 				Wang_UI.getProperties().setAndSaveProperty(
 					new Wang600_Properties(),
 					"wang600_cn24_device",
 					"");
 			} catch(Exception ee) {}
-			_cn24 = null;
+			Wang600.CN24 = null;
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_D) {
-			_m630.pickFile(m);
+			Wang600.M630.pickFile(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_R) {
-			_xROM.pickFile(m);
+			Wang600.XROM.pickFile(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_COPY) {
-			_dsp.copy();
+			Wang600.Disp.copy();
 			return;
 		}
 		// note: potential conflicts with Devices and Help menus...
 		if (m.getMnemonic() == KeyEvent.VK_H) {
-			_help.toggle();
+			Wang600.Help.toggle();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_A) {
-			_help.showAbout();
+			Wang600.Help.showAbout();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_E) {
@@ -686,54 +693,40 @@ class Wang600_SimInput
 			if (changed) {
 				// Apply properties...
 				Wang_UI.setDir(props.getProperty("wang600_home"));
-				_dsp.setProperties(props);
+				Wang600.Disp.setProperties(props);
 				// <others>.setProperties(props);
 			}
 			return;
 		}
 	}
 
-	public Wang600_SimInput(Wang600_Display dsp,
-			Wang600_Keyboard kbd,
-			Wang600_Help help,
-			Wang600_Printer prt, Wang_TapeDrive tape,
-			Wang_OutputDevice cn24,
-			Wang600_Model630 m630,
-			Wang600_XROM xROM) {
-		_kbd = kbd;
-		_dsp = dsp;
-		_prt = prt;
-		_tape = tape;
-		_cn24 = cn24;
-		if (_cn24 != null) {
-			_cn24.getFrame().addWindowListener(this);
+	public Wang600_SimInput() {
+		if (Wang600.CN24 != null) {
+			Wang600.CN24.getFrame().addWindowListener(this);
 		}
-		_m630 = m630;
-		_xROM = xROM;
-		_help = help;
 
 		_mu = new JMenu("Output Device...");
 		// todo: make this a radio-button sub-menu
 		String status = " (not installed)";
-		if (cn24 instanceof Wang_OutputWriter) status = " (installed)";
+		if (Wang600.CN24 instanceof Wang_OutputWriter) status = " (installed)";
 		_mi601 = new JMenuItem(Wang_OutputWriter.getName() + status,
 					KeyEvent.VK_1);
 		_mi601.addActionListener(this);
 		_mu.add(_mi601);
 		status = " (not installed)";
-		if (cn24 instanceof Wang_PlottingOutputWriter) status = " (installed)";
+		if (Wang600.CN24 instanceof Wang_PlottingOutputWriter) status = " (installed)";
 		_mi602 = new JMenuItem(Wang_PlottingOutputWriter.getName() + status,
 					KeyEvent.VK_2);
 		_mi602.addActionListener(this);
 		_mu.add(_mi602);
 		status = " (not installed)";
-		if (cn24 instanceof Wang_InputOutputWriter) status = " (installed)";
+		if (Wang600.CN24 instanceof Wang_InputOutputWriter) status = " (installed)";
 		_mi611 = new JMenuItem(Wang_InputOutputWriter.getName() + status,
 					KeyEvent.VK_3);
 		_mi611.addActionListener(this);
 		_mu.add(_mi611);
 		status = " (not installed)";
-		if (cn24 instanceof Wang_Plotter) status = " (installed)";
+		if (Wang600.CN24 instanceof Wang_Plotter) status = " (installed)";
 		_mi612 = new JMenuItem(Wang_Plotter.getName() + status,
 					KeyEvent.VK_4);
 		_mi612.addActionListener(this);
@@ -743,93 +736,10 @@ class Wang600_SimInput
 		_miNone.addActionListener(this);
 		_mu.add(_miNone);
 
-		if (Wang_UI.getFin() != null) {
-			Thread t = new Thread(this);
-			t.start();
-		}
-	}
-
-	// this really should be set aside in a neutral class, which is given
-	// access to display, tape, printer, etc...
-	public void run() {
-		int n = 0;
-		byte[] b = new byte[2];
-
-		while (true) {
-			try {
-				n = Wang_UI.getFin().read(b);
-			} catch (IOException ee) {
-				// System.err.println("Broken pipe for SimInput!");
-				return;
-			}
-			if (n == 0) {
-				continue;
-			}
-			if (n < 0) {
-				//System.err.println("simulator shutdown");
-				System.exit(1);
-			}
-			if ((b[1] & 0x00ff) == 0xf0) {
-				// fatal error, message follows...
-				byte[] m = new byte[1024];
-				try {
-					Wang_UI.getFin().read(m);
-					String err = new String(m);
-					System.err.println(err);
-				} catch (IOException ee) {
-					System.err.println("ugh!");
-				}
-				System.exit(1);
-			} else if ((b[1] & 0xfc) == 0x00) {
-				// there will be 16 total sent...
-				// and they are in order: 0-15...
-				byte[] m = new byte[32];
-				try {
-					n = Wang_UI.getFin().read(m);
-				} catch (IOException ee) {
-				}
-if (n != 32) System.err.println("too little? "+n);
-				_dsp.do_display(m);
-			} else if ((b[1] & 0xfe) == 0x04) {
-				_dsp.do_indicators(b);
-			} else if ((b[1] & 0xfe) == 0x06) {
-				_dsp.do_blanking();
-			} else if ((b[1] & ~1) == 0x08) {
-				_prt.do_printer(b);
-			} else if ((b[1]  & ~3) == 0x0c) {
-				_tape.do_tape(b);
-			} else if ((b[1] & 0x0ff) == 0x7f) {
-				_cn36 = null;
-				if (_cn24 != null) {
-					_cn24.reset();
-				}
-				_m630.reset();
-				Wang_UI.resetCN36();
-			} else if (b[1] == 0x10) {
-				if (_cn24 != null) {
-					_cn24.do_cn24(b);
-				}
-			} else if ((b[1] & ~0x1f) == 0x20) { // IOB = 2,3
-				// Random-access devices on CN-36
-				// might need to support daisy-chained devices?
-				_m630.do_dev(b);
-			} else if ((b[1] & ~0x1f) == 0x40) { // IOB = 4,5
-				// Group 1 / Group 2 devices on CN-36
-				// need to find which device "wants" this...
-				// ACK, gets directed to the dvice "currently
-				// in charge", as determined by (prior) start command.
-				if (_cn36 != null) {
-					// this should only happen for ACKs... (?)
-					_cn36.do_cn36(b);
-				} else {
-					// find a device that "wants" this code
-					_cn36 = Wang_UI.startCN36(b);
-				}
-			} else if ((b[1] & 0x80) != 0) {
-				_xROM.do_dev(b);
-			} else {
-				System.err.format("Unexpected traffic (%d) %02x %02x\n", n, b[1], b[0]);
-			}
+		if (Wang_UI.getFin() == null) {
+			Wang600.Core = new Wang600_SimulatorJava();
+		} else {
+			Wang600.Core = new Wang600_SimulatorPipe();
 		}
 	}
 
@@ -841,8 +751,8 @@ if (n != 32) System.err.println("too little? "+n);
 	public void windowDeactivated(WindowEvent e) { }
 
 	public void windowClosing(WindowEvent e) {
-		if (_cn24 != null && e.getWindow() == _cn24.getFrame()) {
-			_cn24.onOff(false);
+		if (Wang600.CN24 != null && e.getWindow() == Wang600.CN24.getFrame()) {
+			Wang600.CN24.onOff(false);
 			return;
 		}
 	}
@@ -851,7 +761,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_Printer
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -1173,7 +1083,6 @@ class Wang600_Model630 {
 	private boolean _wr;
 	private int _len;
 	private int _idx;
-	private Wang600_Keyboard _kbd;
 	java.io.RandomAccessFile _f;
 	File _file;
 	byte[] _buf;
@@ -1186,9 +1095,8 @@ class Wang600_Model630 {
 		return new JMenuItem("630 Disk - " + status, key);
 	}
 
-	public Wang600_Model630(Wang600_Keyboard kbd) {
+	public Wang600_Model630() {
 		reset();
-		_kbd = kbd;
 		_buf = new byte[256]; // largest transfer
 		_file = Wang_UI.getProperties().getFile("wang600_630_image",
 							true, Wang_UI.getDir());
@@ -1248,7 +1156,7 @@ class Wang600_Model630 {
 		if (_file != null) {
 			ch.setSelectedFile(_file);
 		}
-		int rv = ch.showDialog(_kbd);
+		int rv = ch.showDialog(Wang600.Kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
 			m.setText("630 Disk - " + _file.getName());
@@ -1333,7 +1241,8 @@ System.err.println("sync error");
 			++_idx;
 		}
 //System.err.printf("got %02x%02x put %04x\n", b[1], b[0], bb);
-		_kbd.do_keycode(bb);
+		// TODO: send generic data
+		Wang600.Core.sendCN36(bb);
 	}
 
 	public void reset() {
@@ -1347,8 +1256,8 @@ System.err.println("sync error");
 }
 
 class Wang600_XROM {
-	private Wang600_Keyboard _kbd;
 	File _file;
+	byte[] _xrom;
 
 	public JMenuItem getMenu(int key) {
 		String status = "none installed";
@@ -1358,91 +1267,84 @@ class Wang600_XROM {
 		return new JMenuItem("Expansion ROM - " + status, key);
 	}
 
-	public Wang600_XROM(Wang600_Keyboard kbd) {
-		_kbd = kbd;
-		_file = Wang_UI.getProperties().getFile("wang600_rom_image",
-							true, Wang_UI.getDir());
-		if (_file != null) {
-			// wait for init to complete? seems to work...
-			_kbd.do_keycode(0x8100);
-		}
-	}
-
-	public void do_dev(byte[] b) {
-		// now, the back-end is waiting for us...
-		// dump the whole file...
-		FileInputStream f;
-		if ((b[1] & 0x00ff) != 0x81) {
-			// should not happen, but don't keep them waiting...
-			_kbd.do_keycode(0xff00);
-			return;
-		}
-
-		if (_file == null) {
-			// should not happen, but don't keep them waiting...
-			_kbd.do_keycode(0xff00);
-			return;
-		}
-		try {
-			f = new FileInputStream(_file);
-		} catch (FileNotFoundException ee) {
-			// should not happen, but don't keep them waiting...
-			_kbd.do_keycode(0xff00);
-			return;
-		}
-		byte[] buf = new byte[256];
-		int x;
-		int n;
-
-		do {
+	private void loadXROM(File img) {
+		_xrom = null;
+		if (img != null) {
+			FileInputStream f;
+			try {
+				f = new FileInputStream(img);
+			} catch (FileNotFoundException ee) {
+				return;
+			}
+			int n = 0;
+			byte[] buf = new byte[2048];
 			try {
 				n = f.read(buf);
 			} catch (IOException ee) {
 				n = -1;
 			}
-			for (x = 0; x < n; ++x) {
-				_kbd.do_keycode(0x8000 | (buf[x] & 0x0ff));
+			try {
+				f.close();
+			} catch (IOException ee) {
 			}
-		} while (n > 0);
-
-		try {
-			f.close();
-		} catch (IOException ee) {
+			if (n > 0) {
+				_xrom = buf;
+				// inform back-end we have a new image...
+				// this is only done if not running embedded sim
+				Wang600.Core.chgXROM();
+			}
 		}
-		_kbd.do_keycode(0xff00);
+	}
+
+	public Wang600_XROM() {
+		loadXROM(Wang_UI.getProperties().getFile("wang600_rom_image",
+							true, Wang_UI.getDir()));
+	}
+
+	public byte getByte(int adr) {
+		if (_xrom.length > adr) {
+			return _xrom[adr];
+		} else {
+			return (byte)0xff;
+		}
 	}
 
 	public void pickFile(JMenuItem m) {
 		SuffFileChooser ch = new SuffFileChooser("Install",
 					Wang_UI.getProperties().getProperty("wang600_rom_file_suffix"),
 					"Wang ROM image files", Wang_UI.getDir());
-		if (_file != null) {
-			ch.setSelectedFile(_file);
+		File file = Wang_UI.getProperties().getFile("wang600_rom_image",
+							true, Wang_UI.getDir());
+		if (file != null) {
+			ch.setSelectedFile(file);
 		}
-		int rv = ch.showDialog(_kbd);
+		int rv = ch.showDialog(Wang600.Kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
-			_file = ch.getSelectedFile();
-			_kbd.do_keycode(0x8100);
+			file = ch.getSelectedFile();
 			// are we being too optimistic? maybe wait until
 			// download succeeds?
 			m.setText("Expansion ROM - " + _file.getName());
 		} else {
-			_file = null;
+			file = null;
 			m.setText("Expansion ROM - none installed");
 		}
 		try { // if this fails, oh well.
 			Wang_UI.getProperties().setAndSaveProperty(
 				new Wang600_Properties(),
 				"wang600_rom_image",
-				_file == null ? "" : _file.getName());
+				file == null ? "" : _file.getName());
 		} catch(Exception ee) {}
+		// NOTE: on real hardware, you can't change ROMs without
+		// risking severe damage to ROM cartridge or calculator!
+		// We could just save the property and wait for restart?
+		loadXROM(file);
 	}
 }
 
 class Wang600_Display extends JComponent
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -1641,7 +1543,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends JComponent
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1659,10 +1561,16 @@ class Wang600_Keyboard extends JComponent
 	int _meta;
 	int _metas;
 	int _mode0;
+	int _mode0r;
 	int _mode1;
 	int _defreg;
-	Wang_TapeDrive _tape;
-	Wang600_Printer _prt;
+
+	public int getMode0() {
+		int code = _mode0;
+		_mode0 &= ~_mode0r; // STEP is reset on read
+		return code;
+	}
+	public int getMode1() { return _mode1; }
 
 	private void setShift(boolean _new) {
 		_shift = _new;
@@ -1721,25 +1629,6 @@ class Wang600_Keyboard extends JComponent
 		setToggle(!_kbds[y]._keys[x].state, _kbds[y]._keys[x], _kbds[y]._buttons[x]);
 	}
 
-	public void do_keycode(int code) {
-		if (Wang_UI.getFout() == null) {
-			int t = code >> 8;
-			int h = (code >> 4) & 0x0f;
-			int l = code & 0x0f;
-			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
-		} else {
-			byte[] b = new byte[2];
-			b[0] = (byte)(code & 0x0ff);
-			b[1] = (byte)(code >> 8);
-			try {
-				Wang_UI.getFout().write(b);
-				Wang_UI.getFout().flush();	// why?
-			} catch (IOException ee) {
-				System.err.println("Broken pipe for keyboard!");
-			}
-		}
-	}
-
 	private void do_button(boolean shifted, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
 		if (_kbds[y]._keys[x].isSHIFT()) {
@@ -1747,14 +1636,14 @@ class Wang600_Keyboard extends JComponent
 			return;
 		}
 		if (_kbds[y]._keys[x].isFEED()) {
-			_prt.feed();
+			Wang600.Prt.feed();
 			return;
 		}
 		int type = _kbds[y]._keys[x].getType();
 		int g = _kbds[y]._keys[x].getGroup();
 		if (_kbds[y]._keys[x].isTAPE()) {
 			set_group(g, y, x);
-			boolean st = _tape.do_button(_kbds[y]._keys[x]);
+			boolean st = Wang600.Tape.do_button(_kbds[y]._keys[x]);
 			if (st) {
 				setToggle(!_kbds[y]._keys[x].state,
 					_kbds[y]._keys[x], _kbds[y]._buttons[x]);
@@ -1769,24 +1658,29 @@ class Wang600_Keyboard extends JComponent
 		}
 		// _mode0, _mode1, _meta were already updated above...
 		if (type == Wang_Keys.MODE0) {
-			code = Wang_Keys.MODE0 | _mode0;
 			if (g == 0) {
 				// did not previously update things...
-				// not a toggle...
-				code |= _kbds[y]._keys[x].getMode();
+				// not a toggle... Reading must clear it...
+				_mode0 |= _kbds[y]._keys[x].getMode();
+				_mode0r |= _kbds[y]._keys[x].getMode();
 			}
+			Wang600.Core.chgMode0();
+			return;
 		}
 		if (type == Wang_Keys.SPCL) {
-			code |= Wang_Keys.SPCL;
 			if (_shift) {
 				code += 4;
 			}
+			Wang600.Core.pressCmd(code);
+			return;
 		}
 		if (type == Wang_Keys.MODE1) {
 			boolean on = ((_mode1 & 2) != 0);
-			_prt.onOff(on);
-			code = Wang_Keys.MODE1 | _mode1;
+			Wang600.Prt.onOff(on);
+			Wang600.Core.chgMode1();
+			return;
 		}
+		// From here on, generate a "normal" keyboard code...
 		if (type == 0 && _shift && (code & 0x0f0) == 0x080) {
 			code |= 0x010;
 		}
@@ -1799,21 +1693,15 @@ class Wang600_Keyboard extends JComponent
 		}
 		if (!shifted) setShift(false);
 
-		do_keycode(code);
+		Wang600.Core.pressKey(code);
 	}
 
 	JFrame _frame;
 	JScrollPane _scroll;
 	int _xoff, _yoff;
-	char[] _paste_text;
-	int _paste_pos;
-	private javax.swing.Timer timer; // must regulate flow...
 
-	public Wang600_Keyboard(Wang_ErrorLight pe, Wang_ErrorLight me,
-				Wang600_Printer prt, Wang_TapeDrive tape) {
+	public Wang600_Keyboard() {
 		int x;
-		_tape = tape;
-		_prt = prt;
 		_kbds = new Wang600_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
@@ -1822,11 +1710,8 @@ class Wang600_Keyboard extends JComponent
 		_meta = 0;
 		_metas = 0;
 		_defreg = 15;
-		_paste_text = null;
-		_paste_pos = 0;
-		timer = new Timer(10, this);
 
-		_prt.getFrame().addWindowListener(this);
+		Wang600.Prt.getFrame().addWindowListener(this);
 
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
@@ -1870,7 +1755,7 @@ class Wang600_Keyboard extends JComponent
 		_col = 0;
 		_row += 1;
 
-		kbd = new Wang600_Keyboard_meta(pe, me);
+		kbd = new Wang600_Keyboard_meta();
 		// assume the meta keys 00-15 are in order...
 		_meta_kbd = _nkbds;
 		for (x = 0; x < kbd._nkeys; ++x) {
@@ -1930,24 +1815,6 @@ class Wang600_Keyboard extends JComponent
 		return null;
 	}
 
-	public boolean do_paste() {
-		if (_paste_text != null) {
-			if (_paste_pos < _paste_text.length) {
-				int p = _paste_pos++;
-				char c = _paste_text[p];
-				do_key(c);
-			} else {
-				_paste_text = null;
-				_paste_pos = 0;
-				// need a non-desctructive "end input"...
-				//do_keycode(0x009f); // TBD
-				timer.stop();
-			}
-			return true;
-		}
-		return false;
-	}
-
 	public void paste() {
 		String s = getClipboard();
 		// even strip off trailing manitissa '0'...
@@ -1969,11 +1836,14 @@ class Wang600_Keyboard extends JComponent
 			// give some indication
 			s = "";
 		}
-		_paste_text = s.toCharArray();
-		// simulate keyboard input from clipboard...
-		_paste_pos = 0;
-		do_keycode(0x000f); // clear display - start entering number...
-		timer.start();
+		// Let Wang600_Core buffer up input...
+		char[] keys = s.toCharArray();
+		int x = 0;
+		do_key('\b');
+		while (x < keys.length) {
+			char c = keys[x++];
+			do_key(c);
+		}
 	}
 
 	public void keyTyped(KeyEvent e) {
@@ -1987,33 +1857,33 @@ System.err.println("action");
 
 	private void do_key(char c) {
 		if (c >= '0' && c <= '9') {
-			do_keycode(c - '0');
+			Wang600.Core.pressKey(c - '0');
 		} else if (c == 'e' || c == 'E') {
-			do_keycode(11);
+			Wang600.Core.pressKey(11);
 		} else if (c == '.') {
-			do_keycode(10);
+			Wang600.Core.pressKey(10);
 		} else if (c == '-') {
-			do_keycode(12);
+			Wang600.Core.pressKey(12);
 		} else if (c == '\b') {
-			do_keycode(15);
+			Wang600.Core.pressKey(15);
 		} else if (c == 't' || c == 'T') {
-			do_keycode(0x0010 | _defreg);
+			Wang600.Core.pressKey(0x0010 | _defreg);
 		} else if (c == '+') {
-			do_keycode(0x0020 | _defreg);
+			Wang600.Core.pressKey(0x0020 | _defreg);
 		} else if (c == '_') {
-			do_keycode(0x0030 | _defreg);
+			Wang600.Core.pressKey(0x0030 | _defreg);
 		} else if (c == '*') {
-			do_keycode(0x0040 | _defreg);
+			Wang600.Core.pressKey(0x0040 | _defreg);
 		} else if (c == '/') {
-			do_keycode(0x0050 | _defreg);
+			Wang600.Core.pressKey(0x0050 | _defreg);
 		} else if (c == 's' || c == 'S') {
-			do_keycode(0x0060 | _defreg);
+			Wang600.Core.pressKey(0x0060 | _defreg);
 		} else if (c == 'r' || c == 'R') {
-			do_keycode(0x0070 | _defreg);
+			Wang600.Core.pressKey(0x0070 | _defreg);
 		} else if (c == 'i' || c == 'I') {
-			do_keycode(0x00fb);
+			Wang600.Core.pressKey(0x00fb);
 		} else if (c == 'x' || c == 'X') {
-			do_keycode(0x00e0 | _defreg);
+			Wang600.Core.pressKey(0x00e0 | _defreg);
 		}
 	}
 
@@ -2034,10 +1904,6 @@ System.err.println("action");
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == timer) {
-			do_paste();
-			return;
-		}
 		if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
 			if (m.getMnemonic() == KeyEvent.VK_PASTE) {
@@ -2067,7 +1933,7 @@ System.err.println("action");
 	public void windowDeactivated(WindowEvent e) { }
 
 	public void windowClosing(WindowEvent e) {
-		if (e.getWindow() == _prt.getFrame()) {
+		if (e.getWindow() == Wang600.Prt.getFrame()) {
 			do_button(false, _print_kbd, _print_btn);
 			return;
 		}
@@ -2090,7 +1956,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -2357,7 +2223,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.151 $ $Date: 2013/02/22 01:37:06 $<BR>"+
+			"$Revision: 1.152 $ $Date: 2013/11/06 21:53:35 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2491,7 +2357,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2709,11 +2575,11 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
-	public Wang600_Keyboard_meta(Wang_ErrorLight pe, Wang_ErrorLight me) {
+	public Wang600_Keyboard_meta() {
 		_buttons = new JButton[num_keys];
 		_keys = new Wang_Keys[num_keys];
 		_nkeys = 0;
@@ -2785,13 +2651,13 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 		c.gridx = _col;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(pe, c);
-		add(pe);
+		gridbag.setConstraints(Wang600.Disp.pe, c);
+		add(Wang600.Disp.pe);
 		++_col;
 		c.gridx = _col;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(me, c);
-		add(me);
+		gridbag.setConstraints(Wang600.Disp.me, c);
+		add(Wang600.Disp.me);
 
 		++_col;
 		_col = 0;
@@ -2802,7 +2668,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.151 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.152 2013/11/06 21:53:35 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
