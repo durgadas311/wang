@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang600_SimulatorPipe.java,v 1.2 2013/11/07 13:09:53 drmiller Exp $
+// $Id: Wang600_SimulatorPipe.java,v 1.3 2013/11/07 21:19:38 drmiller Exp $
 
 import java.awt.event.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import javax.swing.*;
 class Wang600_SimulatorPipe
 	implements ActionListener, Wang600_Core
 {
-	final String ident = "$Id: Wang600_SimulatorPipe.java,v 1.2 2013/11/07 13:09:53 drmiller Exp $";
+	final String ident = "$Id: Wang600_SimulatorPipe.java,v 1.3 2013/11/07 21:19:38 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -130,7 +130,8 @@ class Wang600_SimulatorPipe
 if (n != 32) System.err.println("too little? "+n);
 				Wang600.Disp.do_display(m);
 			} else if ((b[1] & 0xfe) == 0x04) {
-				Wang600.Disp.do_indicators(b);
+				Wang600.Disp.setOv(b[0] & 1);
+				Wang600.Disp.setErr(b[0] & 2);
 			} else if ((b[1] & 0xfe) == 0x06) {
 				Wang600.Disp.do_blanking();
 			} else if ((b[1] & ~1) == 0x08) {
