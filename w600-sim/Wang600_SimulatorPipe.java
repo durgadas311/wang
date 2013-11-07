@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang600_SimulatorPipe.java,v 1.1 2013/11/06 21:53:35 drmiller Exp $
+// $Id: Wang600_SimulatorPipe.java,v 1.2 2013/11/07 13:09:53 drmiller Exp $
 
 import java.awt.event.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import javax.swing.*;
 class Wang600_SimulatorPipe
 	implements ActionListener, Wang600_Core
 {
-	final String ident = "$Id: Wang600_SimulatorPipe.java,v 1.1 2013/11/06 21:53:35 drmiller Exp $";
+	final String ident = "$Id: Wang600_SimulatorPipe.java,v 1.2 2013/11/07 13:09:53 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -84,6 +84,7 @@ class Wang600_SimulatorPipe
 
 	public Wang600_SimulatorPipe() {
 		timer = new Timer(10, this);
+		keyCodes = new java.util.LinkedList<Integer>();
 
 		Thread t = new Thread(this);
 		t.start();
