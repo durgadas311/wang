@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.10 2013/02/22 01:37:06 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.11 2013/11/08 21:12:28 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,11 +8,9 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.10 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.11 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
-	byte[] bb = new byte[2];
-	byte[] b1 = new byte[1];
 	boolean _wr;
 	boolean _end;
 	boolean _ready;
@@ -239,7 +237,7 @@ class Wang_TapeDrive extends JComponent
 	private int tape_skipone() {
 		int nb = 0;
 		int n = 1;
-		b1[0] = 0;
+		byte[] b1 = new byte[]{0};
 		while (n == 1 && (b1[0] & 0x00ff) != (_recordMark & 0x00ff)) {
 			try {
 				n = _tf.read(b1);
@@ -328,14 +326,6 @@ class Wang_TapeDrive extends JComponent
 		return true;	// reset button OFF - i.e. momentary only
 	}
 
-	private void send_word() {
-		try {
-			Wang_UI.getFout().write(bb);
-			Wang_UI.getFout().flush();
-		} catch (IOException ee) {
-		}
-	}
-
 	private void tape_close() {
 		if (_tf != null) {
 			try {
@@ -347,12 +337,11 @@ class Wang_TapeDrive extends JComponent
 		}
 	}
 
-	private void tape_read() {
+	private int tape_read() {
+		byte[] b1 = new byte[]{0};
 		int n = 0;
 		if (_tf == null || _end || !_tape_on || !_ready) {
-			bb[0] = 0;
-			bb[1] = 0x0e;
-			return;
+			return -1;
 		}
 		try {
 			n = _tf.read(b1);
@@ -361,87 +350,82 @@ class Wang_TapeDrive extends JComponent
 			n = 0;
 		}
 		if (n != 1) {
-			bb[0] = 0;
-			bb[1] = 0x0e;
 			_end = true;
 			_eot = true;
+			return -1;
 		} else {
-			bb[0] = b1[0];
-			bb[1] = 0x0c;
+			return b1[0];
 		}
 	}
 
-	private void tape_write(byte[] b) {
+	private void tape_write(byte b) {
 		if (_prot) return;
 		try {
-			_tf.write(b[0]);
+			_tf.write(b);
 		} catch (IOException ee) {
 			// can't happen?
 		}
 	}
 
-	public void do_tape(byte[] b) {
-		if (b[1] == 0x0d) {		// tape on - read
-			if (b[0] == 0) { // tape-on
-				if (_ready) _tape_on = true;
-				_end = false;
-				_wr = false; // redundant
-			} else { // request for next byte
-				tape_read();
-				if ((bb[0] & 0x00ff) == (_recordMark & 0x00ff)) { // END PROG
-					// there is always one more byte..
-					tape_read();
-					// might be old image... treat EOF same...
-					if ((bb[1] & 0x00ff) == 0x0e) {	// saw EOF
-						bb[0] = _recordMark;
-						bb[1] = 0x0c;
-					}
-					if ((bb[0] & 0x00ff) != (_recordMark & 0x00ff)) {
-						bb[0] = 0;
-						bb[1] = 0x0e;
-					}
-					++_index; // display updated later...
-					_end = true;
-				}
-				send_word();
-			}
-			return;
-		} else if (b[1] == 0x0f) {	// tape on - write
-			// should not happen on Wang1200...
+	public void tape_on(int wr) {
+		if (wr == 0) { // tape on - read
+			if (_ready) _tape_on = true;
+			_end = false;
+			_wr = false; // redundant
+		} else {
 			if (_ready) _tape_on = true;
 			_wr = true;
 			_end = false;
-		} else if (b[1] == 0x0e) {	// tape off
-			// should not happen on Wang1200...
-			if (_wr && !_end && _ready) {
-				// did not just write END PROG, so need
-				// to mark end of tape "file".
-				// use _recordMark 0xff to mean "invisible" END PROG
-				b[1] = 0x0c;
-				b[0] = _recordMark;
-				tape_write(b);
-				b[0] = (byte)0xff;
-				tape_write(b);
-				++_index;
+		}
+	}
+
+	public void tape_off(int wr) {
+		// should not happen on Wang1200...
+		if (_wr && !_end && _ready) {
+			// did not just write END PROG, so need
+			// to mark end of tape "file".
+			// use _recordMark 0xff to mean "invisible" END PROG
+			tape_write(_recordMark);
+			tape_write((byte)0xff);
+			++_index;
+		}
+		_tape_on = false;
+		_wr = (wr != 0);
+		_wr = false;
+		_end = false;
+		update_tape();
+		//if (_ready) _tf.flush(); // not needed anyway?
+	}
+
+	public int tape_play() {
+		// request for next byte
+		int b = tape_read();
+		if ((b & 0x00ff) == (_recordMark & 0x00ff)) { // END PROG
+			// there is always one more byte..
+			b = tape_read();
+			// might be old image... treat EOF same...
+			if (b < 0) {	// saw EOF
+				b = _recordMark;
 			}
-			_tape_on = false;
-			_wr = false;
-			_end = false;
-			update_tape();
-			//if (_ready) _tf.flush(); // not needed anyway?
-		} else if (b[1] == 0x0c) {	// tape write
-			if (!_ready) return;
-			tape_write(b);
-			if ((_recordMark & 0x00ff) != (byte)0x00) {
-				// only if last byte before tape-off is END PROG...
-				_end = ((b[0] & 0x00ff) == (_recordMark & 0x00ff)); // END PROG
-				if (_end) {
-					tape_write(b); // write _recordMark _recordMark - true END PROG
-					++_index; // display updated later..
-				}
+			if ((b & 0x00ff) != (_recordMark & 0x00ff)) {
+				b = -1;
 			}
-		} else {
-			System.err.format("invalid tape command (%04x)\n", (b[1] << 8) | b[0]);
+			++_index; // display updated later...
+			_end = true;
+		}
+		return b;
+	}
+
+	public void tape_record(int byt) {
+		if (!_ready) return;
+		tape_write((byte)byt);
+		if ((_recordMark & 0x00ff) != (byte)0x00) {
+			// only if last byte before tape-off is END PROG...
+			_end = ((byt & 0x00ff) == (_recordMark & 0x00ff)); // END PROG
+			if (_end) {
+				tape_write((byte)byt); // write _recordMark _recordMark - true END PROG
+				++_index; // display updated later..
+			}
 		}
 	}
 }

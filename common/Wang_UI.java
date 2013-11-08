@@ -1,12 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.5 2013/02/22 01:37:06 drmiller Exp $
+// $Id: Wang_UI.java,v 1.6 2013/11/08 21:12:28 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.5 2013/02/22 01:37:06 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.6 2013/11/08 21:12:28 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -18,6 +18,7 @@ public class Wang_UI
 	private static Wang_InputDevice[] _cn36;
 	private static java.io.InputStream _fin;
 	private static java.io.OutputStream _fout;
+	private static Wang_Core _core;
 
 //	public Wang_UI(Wang_Properties props, ImageIcon icon) {
 //		_props = props;
@@ -37,6 +38,8 @@ public class Wang_UI
 	public static java.io.InputStream getFin() { return _fin; }
 	public static java.io.OutputStream getFout() { return _fout; }
 
+	public static Wang_Core getCore() { return _core; }
+
 	public static void setDir(String dir) {
 		_dir = new File(dir);
 		_dir.mkdir();
@@ -54,6 +57,8 @@ public class Wang_UI
 		_fin = fin;
 		_fout = fout;
 	}
+
+	public static void setCore(Wang_Core core) { _core = core; }
 
 	public static Wang_CharConverter getCharConv() {
 		if (_conv == null) {
@@ -103,11 +108,11 @@ public class Wang_UI
 			}
 		}
 	}
-	static public Wang_InputDevice startCN36(byte[] b) {
+	static public Wang_InputDevice startCN36(int iob, int c) {
 		Wang_InputDevice dev = null;
 		if (_cn36 != null) {
 			for (int x = 0; x < _cn36.length; ++x) {
-				if (_cn36[x].start_cn36(b)) {
+				if (_cn36[x].start_cn36(iob, c)) {
 					dev = _cn36[x];
 					break;
 				}

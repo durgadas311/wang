@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.11 2013/03/03 23:50:24 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.12 2013/11/08 21:12:28 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.11 2013/03/03 23:50:24 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.12 2013/11/08 21:12:28 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -17,33 +17,45 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	// Group 2 04 12 = Enter program steps (GLRN)
 	// Group 2 04 13 = Type (echo back to OutputWriter) (!GLRN)
 
+	private int _glrn;
+
 	public void reset() {
+		_glrn = 0;
 		_input = false;
 		_indTYPE.setOn(false);
 		_indINPUT.setOn(false);
 	}
 
-	public boolean start_cn36(byte[] b) {
-		if (b[1] != (byte)0x50) return false;
-		if (b[0] == (byte)0x4c) {
+	public boolean start_cn36(int iob, int c) {
+		if (iob != 5) return false;
+		if (c == 0x4c) {
+			_glrn = 1;
 			_input = true;
-			sendACK((byte)1); // assert GLRN
+			sendACK();
 			_indINPUT.setOn(true);
 			return true;
 		}
-		if (b[0] == (byte)0x4d) {
+		if (c == 0x4d) {
+			_glrn = 0;
 			_input = true;
-			sendACK((byte)0); // do not assert GLRN
+			sendACK();
 			_indTYPE.setOn(true);
 			return true;
 		}
 		return false;
 	}
 
-	public void do_cn36(byte[] b) {
+	public void do_ack(int iob) {
 		// should be ACK for previous code... should enable next...
 		// TODO
 	}
+
+	public void do_dev(int iob, int b) {
+		// right now only ACK happens
+		// TODO
+	}
+
+	public int getGLRN() { return _glrn; }
 
 	byte _shifted;
 	public void keyTyped(KeyEvent e) {
@@ -54,11 +66,11 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (tr[0] != _shifted) {
 			sendCode(tr[0]);
 			_shifted = tr[0];
-			do_cn24(new byte[] { tr[0] });
+			do_cn24(tr[0]);
 		}
 System.err.format("convert %02x to %02x ...", b, tr[1]);
 		sendCode(tr[1]); // ignored in TYPE mode?
-		do_cn24(new byte[] { tr[1] });
+		do_cn24(tr[1]);
 System.err.format("(done)\n");
 	}
 	public void keyPressed(KeyEvent e) { }
@@ -68,7 +80,7 @@ System.err.format("(done)\n");
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.11 $ $Date: 2013/03/03 23:50:24 $<BR>"+
+			"$Revision: 1.12 $ $Date: 2013/11/08 21:12:28 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -86,29 +98,20 @@ System.err.format("(done)\n");
 	Wang_Indicator _indINPUT;
 	boolean _input;
 
-	private void _send(byte[] b) {
-		try {
-			Wang_UI.getFout().write(b);
-			Wang_UI.getFout().flush();
-		} catch(Exception e) {
-System.err.println(e.getMessage());
-		}
-	}
-
-	private void sendACK(byte b) {
-		_send(new byte[] { b, (byte)0x51 });
+	private void sendACK() {
+		Wang_UI.getCore().ackIO(5);
 	}
 
 	private void sendCode(byte b) {
 		if (!_input) return;
-		_send(new byte[] { b, (byte)0x50 });
+		Wang_UI.getCore().replyIO(5, b);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JButton) {
 			JButton butt = (JButton)e.getSource();
 			if (butt.getMnemonic() == KeyEvent.VK_G) {
-				sendACK((byte)0); // force de-assert GLRN
+				sendACK(); // force de-assert GLRN
 				sendCode((byte)0x83);
 				return;
 			}

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.6 2013/02/19 15:36:55 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.7 2013/11/08 21:12:28 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.text.DefaultCaret;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.6 2013/02/19 15:36:55 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.7 2013/11/08 21:12:28 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -18,7 +18,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		java.net.URL url = this.getClass().getResource("icons/wang602.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.6 $ $Date: 2013/02/19 15:36:55 $<BR>"+
+			"$Revision: 1.7 $ $Date: 2013/11/08 21:12:28 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -147,10 +147,10 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		if (_x < 0) _x = 0;
 	}
 
-	public void do_cn24(byte[] b) {
+	public void do_cn24(byte b) {
 		boolean printable = true;
-		if ((b[0] & 0x0f) == 0x08) { // control characters...
-			switch((b[0] & 0x30) >> 4) {
+		if ((b & 0x0f) == 0x08) { // control characters...
+			switch((b & 0x30) >> 4) {
 			case 0: // nothing
 				break;
 			case 1:	// return+index handled below...
@@ -168,14 +168,14 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				_dx = _dy = 0;
 				return;
 			}
-		} else if ((b[0] & 0x06) == 0x02) {
-			switch((b[0] & 0x30) >> 4) {
+		} else if ((b & 0x06) == 0x02) {
+			switch((b & 0x30) >> 4) {
 			case 0: // space/bspace or nothing
 				_adjacent = false;
 				// still need to move carriage if plot,
 				// just don't do space/bkspace movement.
 				if (!_plot) {
-					if ((b[0] & 1) == 0) {
+					if ((b & 1) == 0) {
 						space();
 					} else {
 						bkspace();
@@ -184,13 +184,13 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				printable = false;
 				break;
 			case 1:	// index/rev or shift...
-				if ((b[0] & 0x0e) == 0x02) {
-					_shifted = ((b[0] & 1) != 0);
+				if ((b & 0x0e) == 0x02) {
+					_shifted = ((b & 1) != 0);
 					return;
 				}
 				_adjacent = false;
 				if (_plot) return;
-				if ((b[0] & 1) == 0) {
+				if ((b & 1) == 0) {
 					index();
 				} else {
 					revindex();
@@ -200,7 +200,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			case 2:	// stepping
 			case 3:	// stepping
 				if (!_plot) return;
-				switch(b[0] & 0x19) {
+				switch(b & 0x19) {
 				case 0x00:
 					_dx += 1;
 					break;
@@ -235,7 +235,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		}
 		String s = null;
 		if (printable) {
-			s = Wang_UI.getCharConv().tiltrotateToAscii(b[0], _shifted);
+			s = Wang_UI.getCharConv().tiltrotateToAscii(b, _shifted);
 		}
 		if (_plot) {
 			_x += _dx;

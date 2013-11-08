@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.11 2013/11/07 21:20:23 drmiller Exp $
+# $Id: Makefile.ship,v 1.12 2013/11/08 21:12:28 drmiller Exp $
 
 COPTS =
 
@@ -22,6 +22,7 @@ COMMON_CLASSES = \
 		Wang_CharConverter.class \
 		Wang_Indicator.class \
 		Wang_InputDevice.class \
+		Wang_Core.class \
 		Wang_UI.class \
 		Wang_ErrorLight.class \
 		Wang_TapeDevice.class \
@@ -32,10 +33,16 @@ COMMON_CLASSES = \
 		Wang_Plotter.class \
 		Wang_InputOutputWriter.class \
 		Wang_PlottingOutputWriter.class \
-		Wang_OutputWriter.class
+		Wang_OutputWriter.class \
+		Wang_CN36_Type2.class \
+		Wang_Display.class \
+		Wang_Help.class \
+		Wang_Keyboard.class \
+		Wang_Printer.class \
+		Wang_XROM.class
 
-W600_CLASSES = 
-#	Wang600_Core.class \
+W600_CLASSES = \
+	Wang600.class
 #	Wang600_SimulatorPipe.class \
 #	Wang600_SimulatorJava.class
 

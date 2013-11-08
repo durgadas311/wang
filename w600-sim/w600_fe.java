@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $
+// $Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -247,7 +247,7 @@ public class w600_fe
 		mi = new JMenuItem("Paste", KeyEvent.VK_PASTE);
 		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK);
 		mi.setAccelerator(ks);
-		mi.addActionListener(Wang600.Kbd);
+		mi.addActionListener((Wang600_Keyboard)Wang600.Kbd);
 		mu.add(mi);
 		mi = new JMenuItem("Preferences", KeyEvent.VK_E);
 		mi.addActionListener(inp);
@@ -264,7 +264,8 @@ public class w600_fe
 
 		front_end.setJMenuBar(mb);
 
-		Wang600.Disp.setProperties((Wang600_Properties)Wang_UI.getProperties());
+		Wang600.Disp.setProperties(Wang_UI.getProperties());
+		// others?
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -509,35 +510,12 @@ class Wang600_Properties extends Wang_Properties
 	}
 }
 
-class Wang600 {
-	public static Wang600_Display Disp;
-	public static Wang600_Printer Prt;
-	public static Wang_TapeDrive Tape;
-	public static Wang_OutputDevice CN24;
-	public static Wang600_Model630 M630;
-	public static Wang600_Keyboard Kbd;
-	public static Wang600_XROM XROM;
-	public static Wang600_Help Help;
-	public static Wang600_Core Core;
-}
-
-interface Wang600_Core extends Runnable {
-	public void chgMode0();
-	public void chgMode1();
-	public void pressCmd(int cmd);
-	public void pressKey(int key);
-	public void chgXROM();
-	public void sendCN36(int rep);
-
-	public void run();
-}
-
 // Receives single byte-stream input from BackEnd simulator and directs
 // messages to components.
 class Wang600_SimulatorPipe
-	implements ActionListener, Wang600_Core
+	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -576,9 +554,16 @@ class Wang600_SimulatorPipe
 		do_keycode(code);
 	}
 
-	public void sendCN36(int rep) {
-		// TODO: accept generic data and apply meta...
-		do_keycode(rep);
+	public void ackIO(int iob) {
+		int code = ((iob << 12) | 0x0100);
+		if ((iob & ~1) == 4 && _cn36 != null) {
+			code |= _cn36.getGLRN();
+		}
+		do_keycode(code);
+	}
+
+	public void replyIO(int iob, int rep) {
+		do_keycode((iob << 12) | 0x0100 | (rep & 0x0ff));
 	}
 
 	public void chgXROM() {
@@ -662,9 +647,34 @@ if (n != 32) System.err.println("too little? "+n);
 			} else if ((b[1] & 0xfe) == 0x06) {
 				Wang600.Disp.do_blanking();
 			} else if ((b[1] & ~1) == 0x08) {
-				Wang600.Prt.do_printer(b);
+				int col = (((b[1] & 1) << 4) | ((b[0] & 0xf0) >> 4)) & 0x1f;
+				int drm = (b[0] & 0x0f);
+				if (col == 0x1f) {
+					Wang600.Prt.do_line();
+				} else {
+					Wang600.Prt.do_printer(col, drm);
+				}
 			} else if ((b[1]  & ~3) == 0x0c) {
-				Wang600.Tape.do_tape(b);
+				if (b[1] == 0x0d) { // tape on - read
+					if (b[0] == 0) { // tape-on
+						Wang600.Tape.tape_on(0);
+					} else { // request for next byte
+						int i = Wang600.Tape.tape_play();
+						if (i < 0) {
+							do_keycode(0x0e00);
+						} else {
+							do_keycode(0x0c00 | i);
+						}
+					}
+				} else if (b[1] == 0x0f) { // tape on - write
+					Wang600.Tape.tape_on(1);
+				} else if (b[1] == 0x0e) { // tape off
+					Wang600.Tape.tape_off(0);
+				} else if (b[1] == 0x0c) { // tape write
+					Wang600.Tape.tape_record(b[0]);
+				} else {
+					System.err.format("invalid tape command (%04x)\n", (b[1] << 8) | b[0]);
+				}
 			} else if ((b[1] & 0x0ff) == 0x7f) {
 				_cn36 = null;
 				if (Wang600.CN24 != null) {
@@ -674,12 +684,16 @@ if (n != 32) System.err.println("too little? "+n);
 				Wang_UI.resetCN36();
 			} else if (b[1] == 0x10) {
 				if (Wang600.CN24 != null) {
-					Wang600.CN24.do_cn24(b);
+					Wang600.CN24.do_cn24(b[0]);
 				}
 			} else if ((b[1] & ~0x1f) == 0x20) { // IOB = 2,3
 				// Random-access devices on CN-36
 				// might need to support daisy-chained devices?
-				Wang600.M630.do_dev(b);
+				if ((b[1] & 0x0f) == 1) { // ACK
+					Wang600.M630.do_ack(b[1] >> 4);
+				} else {
+					Wang600.M630.do_dev(b[1] >> 4, b[0]);
+				}
 			} else if ((b[1] & ~0x1f) == 0x40) { // IOB = 4,5
 				// Group 1 / Group 2 devices on CN-36
 				// need to find which device "wants" this...
@@ -687,10 +701,10 @@ if (n != 32) System.err.println("too little? "+n);
 				// in charge", as determined by (prior) start command.
 				if (_cn36 != null) {
 					// this should only happen for ACKs... (?)
-					_cn36.do_cn36(b);
+					_cn36.do_ack(b[1] >> 4);
 				} else {
 					// find a device that "wants" this code
-					_cn36 = Wang_UI.startCN36(b);
+					_cn36 = Wang_UI.startCN36(b[1] >> 4, b[0]);
 				}
 			} else if ((b[1] & 0x80) != 0) {
 				int x;
@@ -712,9 +726,9 @@ if (n != 32) System.err.println("too little? "+n);
 // Implements the Wang600 hardware. Does not provide any debug/trace support.
 
 class Wang600_SimulatorJava
-	implements Wang600_Core
+	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -733,8 +747,6 @@ class Wang600_SimulatorJava
 	byte gioa;
 	byte giob;
 	byte iob;
-	byte d1;
-	byte d2;
 
 	// status flags (1 bit)
 	byte zo;
@@ -743,7 +755,6 @@ class Wang600_SimulatorJava
 	byte kbd;
 	byte ov;
 	byte err;
-	byte glrn;
 
 	// ucode subroutine stack
 	int stk1;
@@ -860,8 +871,18 @@ class Wang600_SimulatorJava
 		// needs other side-effects... display? clear key buffer?
 	}
 
-	public void sendCN36(int rep) {
-		// probably just set register
+	public void ackIO(int iob) {
+		// might need to separate from keyboard input, but hardware
+		// doesn't (?)
+		// do some validation on iob?
+		pressKey(0);
+	}
+
+	public void replyIO(int iob, int rep) {
+		// might need to separate from keyboard input, but hardware
+		// doesn't (?)
+		// do some validation on iob?
+		pressKey(rep);
 	}
 
 	public void chgXROM() { }	// don't care
@@ -886,10 +907,6 @@ class Wang600_SimulatorJava
 		disp = new byte[16];
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 
-		// These need to come from the keyboard setup...
-		d1 = 0;
-		d2 = D20_DEGREES;
-
 		Thread t = new Thread(this);
 		t.start();
 	}
@@ -912,16 +929,12 @@ class Wang600_SimulatorJava
 		byte h = (byte)(to_last & 0x03);
 		if (h == 0x02 || h == 0x01) bit = 1;
 		if (++to_bitc == 5) {
-			//if (odd_parity[data] != bit) {
-			//	fprintf(stderr, "parity error in tape write %x %d [%02x]\n", data, bit, last);
-			//}
 			to_nibc ^= 1;
 			if (to_nibc != 0) {
 				to_byte = (byte)((to_byte & 0x0f) | (to_data << 4));
 			} else {
 				to_byte = (byte)((to_byte & 0xf0) | to_data);
-				// clean this up - should not be using pipe protocol
-				Wang600.Tape.do_tape(new byte[] { 0x0c, to_byte });
+				Wang600.Tape.tape_record(to_byte);
 			}
 			to_data = 0;
 			to_bitc = 0;
@@ -932,7 +945,7 @@ class Wang600_SimulatorJava
 	}
 
 	byte ti_last;
-	byte ti_data;
+	int ti_data;
 	int ti_bitc;
 	int ti_sigc;
 	long ti_repc;
@@ -951,7 +964,7 @@ class Wang600_SimulatorJava
 	private int do_bitc() {
 		--ti_bitc;
 		ti_data <<= 1;
-		if ((ti_data & 0x20) != 0) {
+		if ((ti_data & 0x400) != 0) {
 			ti_last = 0x05;	// lsb first out...
 		} else {
 			ti_last = 0x01;	// lsb first out...
@@ -961,8 +974,6 @@ class Wang600_SimulatorJava
 	}
 
 	private int tape_read() {
-		byte nib;
-
 		// wait for TD 0->1
 		// delay 56 cycles
 		// wait 220 cycles (sample TD for end of loop)
@@ -986,23 +997,23 @@ class Wang600_SimulatorJava
 		if (ti_bitc > 0) {
 			return do_bitc();
 		}
-		// clean this up - should not use pipe protocol...
-		// also, need to get byte/nibble somehow...
-		nib = 0;
-		Wang600.Tape.do_tape(new byte[] { (byte)0x0d, 1});
-		if (nib == 0xff) { // EOF
+		int ti = Wang600.Tape.tape_play();
+		if (ti < 0) { // EOF
 			ti_repc = cycles + 700;	// expects at least 650?
 			ti_bit = 0;
 			return do_repc();
 		}
-		ti_data = (byte)((nib << 1) | odd_parity[nib]);
-		ti_bitc = 5;
+		int x = ((ti >> 4) & 0x0f);
+		ti_data = (x << 1) | odd_parity[x];
+		x = (ti & 0x0f);
+		ti_data <<= 5;
+		ti_data |= (x << 1) | odd_parity[x];
+		ti_bitc = 10;
 		return do_bitc();
 	}
 
 	private void tape_on(int wr) {
-		// clean this up - should not use pipe protocol...
-		Wang600.Tape.do_tape(new byte[] { (byte)(0x0d | (wr << 1)), 0});
+		Wang600.Tape.tape_on(wr);
 		if (wr == 0) {
 			ti_bit = 0;
 			ti_last = 0;
@@ -1013,14 +1024,12 @@ class Wang600_SimulatorJava
 	}
 
 	private void tape_off() {
-		// clean this up - should not use pipe protocol...
-		Wang600.Tape.do_tape(new byte[] { (byte)0x0e, 0});
+		Wang600.Tape.tape_off(0);
 	}
 
 	private void dev_out() {
 		byte c = (byte)((ka << 4) | kb);
 		if (iob == 0) {
-			glrn = 0;
 			_cn36 = null;
 			if (Wang600.CN24 != null) {
 				Wang600.CN24.reset();
@@ -1030,18 +1039,16 @@ class Wang600_SimulatorJava
 		} else if (iob == 1) { // CN24 output only, 6 bits
 			c &= 0x3f;
 			if (Wang600.CN24 != null) {
-				// clean this up - should not use pipe protocol...
-				Wang600.CN24.do_cn24(new byte[]{(byte)(iob << 4), c});
+				Wang600.CN24.do_cn24(c);
 			}
 		} else if (iob == 2 || iob == 3) { // CN36 Model 630
-			// clean this up - should not use pipe protocol...
-			Wang600.M630.do_dev(new byte[]{(byte)(iob << 4), c});
+			Wang600.M630.do_dev(iob, c);
 		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
-			// clean this up - should not use pipe protocol...
 			if (_cn36 != null) {
-				_cn36.do_cn36(new byte[]{(byte)(iob << 4), c});
+				// All known devices are ACK only
+				_cn36.do_ack(iob);
 			} else {
-				_cn36 = Wang_UI.startCN36(new byte[]{(byte)(iob << 4), c});
+				_cn36 = Wang_UI.startCN36(iob, c);
 			}
 		}
 	}
@@ -1093,7 +1100,7 @@ class Wang600_SimulatorJava
 	private void printer_status() {
 		// we don't want to do this unless it is really the
 		// drum printer we're looking at... can't tell?
-		if ((d2 & D21_PRT_ON) == 0) {
+		if ((Wang600.Kbd.getMode1() & D21_PRT_ON) == 0) {
 			// only if running program doesn't get here...
 			// printer is off, tach will never pulse, so don't spin
 			if (pc == 0x6db) {
@@ -1122,7 +1129,7 @@ class Wang600_SimulatorJava
 			h = pr_hammers;
 			for (x = 0; h != 0; ++x) {
 				if ((h & 1) != 0) {
-					Wang600.Prt.do_printer(new byte[]{(byte)x, pr_drum});
+					Wang600.Prt.do_printer(x, pr_drum);
 				}
 				h >>= 1;
 			}
@@ -1132,7 +1139,7 @@ class Wang600_SimulatorJava
 
 	private void printer_feed() {
 		// now, actually print it...
-		Wang600.Prt.do_printer(new byte[]{0x01, (byte)0xff});
+		Wang600.Prt.do_line();
 	}
 
 	private void rd_ram_i(byte ah, byte am, byte al) {
@@ -1271,12 +1278,13 @@ class Wang600_SimulatorJava
 		case 0: g = 0; break;
 		case 1: g = br_k; break;
 		case 2:
-			g = d1;
-			d1 &= ~D13_STEP;
+			g = (byte)Wang600.Kbd.getMode0();
 			// clear 0010 if glrn?
-			g |= ((glrn & 1) << 2);
+			if (_cn36 != null) {
+				g |= (byte)((_cn36.getGLRN() & 1) << 2);
+			}
 			break;
-		case 3: g = d2; break;
+		case 3: g = (byte)Wang600.Kbd.getMode1(); break;
 		case 4: g = ka; break;
 		case 5: g = kb; break;
 		case 6: g = ca; break;
@@ -1436,6 +1444,11 @@ class Wang600_SimulatorJava
 					kbd = 1;
 					ka = (byte)((key >> 4) & 0x0f);
 					kb = (byte)(key & 0x0f);
+					if ((iob & ~1) == 2) {
+						Wang600.M630.do_ack(iob);
+					} else if (_cn36 != null) {
+						_cn36.do_ack(iob);
+					}
 				}
 				nxt |= (kbd << 1);
 				if (kbd != 0) {
@@ -1523,7 +1536,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1731,9 +1744,9 @@ class Wang600_SimInput
 }
 
 class Wang600_Printer
-	implements ActionListener, ComponentListener
+	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -1997,59 +2010,57 @@ class Wang600_Printer
 	}
 
 	// col = { 0..19 };
-	public void do_printer(byte[] b) {
-		int x, y, z;
-		int col = (((b[1] & 1) << 4) | ((b[0] & 0xf0) >> 4)) & 0x1f;
-		if (col == 0x1f) {
-			String s;
-			if (_eop > 0) {
-				_text.append("\n");
-				++_eop;
-			}
-			if (_pr_buf[PR_XCOL_STRT + 2] == 0x10 &&
-			    _pr_buf[PR_XCOL_STRT + 3] != 0x10) {
-				_pr_buf[PR_XCOL_STRT + 2] = 0x11;
-			} else if (_pr_buf[PR_XCOL_STRT + 3] == 0x10 &&
-			    _pr_buf[PR_XCOL_STRT + 2] != 0x10) {
-				_pr_buf[PR_XCOL_STRT + 3] = 0x11;
-			}
-			for (x = 0; x < PR_NUM_COL; ++x) {
-				y = _pr_buf[x];
-				if (x < PR_XCOL_STRT) {
-					if (y >= 0x10) {
-						s = pr_0_15[15]; // blank
-					} else {
-						s = pr_0_15[y];
-						if (s == null) {
-							// "....OVERFLOW...."
-							s = pr_ovr[x];
-						}
-					}
-				} else {
-					if (x == PR_XCOL_STRT) {
-						// 16th column on print drum,
-						// but not accessible by code...
-						s = pr_0_15[15]; // blank
-						_text.append(s);
-						_eop += s.length();
-					}
-					z = x - PR_XCOL_STRT;
-					String[] ww = pr_16_20[z];
-					s = ww[y];
-				}
-				_text.append(s);
-				_eop += s.length();
-			}
-			_text.setCaretPosition(_eop);
-			clear_buf();
-			return;
-		}
-		int drm = (b[0] & 0x0f);
+	public void do_printer(int col, int drm) {
 		_pr_buf[col] = (byte)drm;
+	}
+
+	public void do_line() {
+		int x, y, z;
+		String s;
+		if (_eop > 0) {
+			_text.append("\n");
+			++_eop;
+		}
+		if (_pr_buf[PR_XCOL_STRT + 2] == 0x10 &&
+		    _pr_buf[PR_XCOL_STRT + 3] != 0x10) {
+			_pr_buf[PR_XCOL_STRT + 2] = 0x11;
+		} else if (_pr_buf[PR_XCOL_STRT + 3] == 0x10 &&
+		    _pr_buf[PR_XCOL_STRT + 2] != 0x10) {
+			_pr_buf[PR_XCOL_STRT + 3] = 0x11;
+		}
+		for (x = 0; x < PR_NUM_COL; ++x) {
+			y = _pr_buf[x];
+			if (x < PR_XCOL_STRT) {
+				if (y >= 0x10) {
+					s = pr_0_15[15]; // blank
+				} else {
+					s = pr_0_15[y];
+					if (s == null) {
+						// "....OVERFLOW...."
+						s = pr_ovr[x];
+					}
+				}
+			} else {
+				if (x == PR_XCOL_STRT) {
+					// 16th column on print drum,
+					// but not accessible by code...
+					s = pr_0_15[15]; // blank
+					_text.append(s);
+					_eop += s.length();
+				}
+				z = x - PR_XCOL_STRT;
+				String[] ww = pr_16_20[z];
+				s = ww[y];
+			}
+			_text.append(s);
+			_eop += s.length();
+		}
+		_text.setCaretPosition(_eop);
+		clear_buf();
 	}
 }
 
-class Wang600_Model630 {
+class Wang600_Model630 implements Wang_CN36_Type2 {
 	private int _cmd;
 	private int _adr;
 	private boolean _wr;
@@ -2146,34 +2157,35 @@ class Wang600_Model630 {
 		disk_open();
 	}
 
-	public void do_dev(byte[] b) {
-		int res;
-		if (_cmd == 0 && (b[1] & 0x0f) == 1) { // ACK when no command
-			return;
+	public void do_ack(int iob) {
+		// only respond to ACK if in a command already
+		// and don't respond to an ACK of an ACK
+		if (_cmd > 4 && !_wr) {
+			do_dev(iob, 0);
 		}
+	}
+
+	public void do_dev(int iob, int c) {
+		int res;
 		++_cmd;
-//System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-		boolean dat = ((b[1] & 0x10) != 0);
+//System.err.println("dev 2 ["+_cmd+"] "+c);
+		boolean dat = ((iob & 1) != 0);
 		if (_cmd <= 4 && dat || _cmd > 4 && !dat) {
 System.err.println("sync error");
 			return;
 		}
-		int bb;
 //try{
 // Thread.currentThread().sleep(50);
 //}
 //catch(InterruptedException ie){
 //}
-		// unless we know otherwise, just ACK with a "0"...
-		bb = ((b[1] & 0xf0) << 8) | (_cmd & 0x0ff); // temp! debug
 		if (_cmd < 4) {
 			_adr <<= 8;
-			_adr |= (b[0] & 0x00ff);
-			bb |= 0x0100;
+			_adr |= (c & 0x00ff);
+			Wang600.Core.ackIO(iob);
 		} else if (_cmd == 4) {
-			_wr = ((b[0] & 0x80) != 0);
-			_len = (b[0] & 0x7f);
-			bb |= 0x0100;
+			_wr = ((c & 0x80) != 0);
+			_len = (c & 0x7f);
 			if (_len == 0) {
 				_len = 64;
 			} else if (_len > 1) {
@@ -2188,33 +2200,32 @@ System.err.println("sync error");
 			_idx = 0;
 			if (!_wr) {
 				res = disk_read(_len);
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
+				Wang600.Core.replyIO(iob, res);
 //System.err.println("rd result "+res+" ("+_len+")");
+			} else {
+				Wang600.Core.ackIO(iob);
 			}
 		} else {
 			if (_idx < _len) {
 				if (_wr) {
-					bb |= 0x0100;
-					_buf[_idx] = b[0];
+					_buf[_idx] = (byte)c;
+					Wang600.Core.ackIO(iob);
 				} else {
-					bb = (bb & 0xff00) | (_buf[_idx] & 0x00ff);
+					Wang600.Core.replyIO(iob, _buf[_idx]);
 				}
 			} else {
 				if (_wr) {
-					bb |= 0x0100;
 					res = disk_write(_len);
+					Wang600.Core.replyIO(iob, res);
 				} else {
-					res = 0; // something else?
+					Wang600.Core.ackIO(iob);
 				}
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
 				_cmd = 0;
 //System.err.println("result "+res+" ("+_idx+")");
 			}
 			++_idx;
 		}
-//System.err.printf("got %02x%02x put %04x\n", b[1], b[0], bb);
-		// TODO: send generic data
-		Wang600.Core.sendCN36(bb);
+//System.err.printf("got %02x%02x put %04x\n", iob, c, bb);
 	}
 
 	public void reset() {
@@ -2227,7 +2238,7 @@ System.err.println("sync error");
 	}
 }
 
-class Wang600_XROM {
+class Wang600_XROM implements Wang_XROM {
 	File _file;
 	byte[] _xrom;
 
@@ -2316,10 +2327,10 @@ class Wang600_XROM {
 	}
 }
 
-class Wang600_Display extends JComponent
+class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2329,11 +2340,14 @@ class Wang600_Display extends JComponent
 	JLabel disp;
 	boolean _d12;	// is digit 12 enabled?
 
-	Wang_ErrorLight pe;
-	Wang_ErrorLight me;
-	boolean flashing;
-	boolean state;
-	javax.swing.Timer timer;
+	private Wang_ErrorLight pe;
+	private Wang_ErrorLight me;
+	private boolean flashing;
+	private boolean state;
+	private javax.swing.Timer timer;
+
+	public Wang_ErrorLight getOv() { return pe; }
+	public Wang_ErrorLight getErr() { return me; }
 
 	private void flasher() {
 		if (!flashing) {
@@ -2413,7 +2427,8 @@ class Wang600_Display extends JComponent
 
 	}
 
-	public void setProperties(Wang600_Properties prop) {
+	public void setProperties(Wang_Properties p) {
+		Wang600_Properties prop = (Wang600_Properties)p;
 		// TODO: reconfig/redraw display...
 		String f = prop.getProperty("wang600_displayfont");
 		Font font = null;
@@ -2521,10 +2536,10 @@ System.err.println("IOException for " + f);
 	}
 }
 
-class Wang600_Keyboard extends JComponent
-	implements ActionListener, KeyListener, WindowListener, ComponentListener
+class Wang600_Keyboard extends Wang_Keyboard
+	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2796,7 +2811,7 @@ class Wang600_Keyboard extends JComponent
 		return null;
 	}
 
-	public void paste() {
+	private void paste() {
 		String s = getClipboard();
 		// even strip off trailing manitissa '0'...
 		try {
@@ -2937,7 +2952,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3101,7 +3116,7 @@ class Wang600_Keyboards extends JComponent
 }
 
 class Wang600_Help extends JComponent
-	implements ActionListener, WindowListener, ComponentListener, HyperlinkListener
+	implements Wang_Help, ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
 	static final long serialVersionUID = 311857692031L;
 	private JFrame _frame;
@@ -3204,7 +3219,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.154 $ $Date: 2013/11/07 21:20:23 $<BR>"+
+			"$Revision: 1.155 $ $Date: 2013/11/08 21:12:28 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3338,7 +3353,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3556,7 +3571,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3632,13 +3647,13 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 		c.gridx = _col;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(Wang600.Disp.pe, c);
-		add(Wang600.Disp.pe);
+		gridbag.setConstraints(Wang600.Disp.getOv(), c);
+		add(Wang600.Disp.getOv());
 		++_col;
 		c.gridx = _col;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(Wang600.Disp.me, c);
-		add(Wang600.Disp.me);
+		gridbag.setConstraints(Wang600.Disp.getErr(), c);
+		add(Wang600.Disp.getErr());
 
 		++_col;
 		_col = 0;
@@ -3649,7 +3664,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.154 2013/11/07 21:20:23 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

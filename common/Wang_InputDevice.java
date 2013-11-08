@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputDevice.java,v 1.2 2013/02/22 14:12:56 drmiller Exp $
+// $Id: Wang_InputDevice.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
 
 
 // e.g. Group 1/2 Devices attached to a Wang "CN-36" port (Input only)
@@ -17,12 +17,18 @@ interface Wang_InputDevice
 	// Return "true" if this device "owns" that code.
 	// This represents the "negotiation" protocol when the Group I/O
 	// is first issued.
-	boolean start_cn36(byte[] b);
+	boolean start_cn36(int iob, int c);
 
-	// Process normal byte-pair in context of Wang Input Device.
-	// This is typically only used for ACK data in response to
+	// Process output byte in context of Wang Input Device.
+	// There are typically only ACKs sent in response to
 	// codes sent from peripheral device.
-	void do_cn36(byte[] b);
+	void do_dev(int iob, int c);
+
+	// Process ACK for previous send
+	void do_ack(int iob);
+
+	// Get device's assertion state for GLRN signal (0/1)
+	int getGLRN();
 
 	// returns descriptive name of device. Since an interface can't
 	// define static methods, these can't be enforced.

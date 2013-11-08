@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: IBM_Selectric.java,v 1.2 2013/02/18 23:44:36 drmiller Exp $
+// $Id: IBM_Selectric.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import javax.swing.text.JTextComponent;
 class IBM_Selectric extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: IBM_Selectric.java,v 1.2 2013/02/18 23:44:36 drmiller Exp $";
+	final String ident = "$Id: IBM_Selectric.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $";
 
 	public void reset() {
 		// anything?
@@ -120,11 +120,11 @@ try {
 		}
 	}
 
-	public void do_cn24(byte[] b) {
+	public void do_cn24(byte b) {
 		boolean printable = true;
-		if ((b[0] & 0x0f) == 0x08) { // control characters...
+		if ((b & 0x0f) == 0x08) { // control characters...
 			printable = false;
-			switch((b[0] & 0x30) >> 4) {
+			switch((b & 0x30) >> 4) {
 			case 0: // tab
 				tab();
 				break;
@@ -135,10 +135,10 @@ try {
 			case 3: // nothing
 				return;
 			}
-		} else if ((b[0] & 0x06) == 0x02) {
+		} else if ((b & 0x06) == 0x02) {
 			// X2, X3, Xa, Xb
 			printable = false;
-			switch((b[0] & 0x39)) {
+			switch((b & 0x39)) {
 			case 0x00:	// space
 				space();
 				break;
@@ -153,7 +153,7 @@ try {
 				return;
 			case 0x10:
 			case 0x11:
-				_shifted = ((b[0] & 1) != 0);
+				_shifted = ((b & 1) != 0);
 				return;
 			case 0x18:
 				index();
@@ -166,9 +166,9 @@ try {
 			}
 		}
 		if (printable) {
-//System.err.println("doing byte "+b[0]);
+//System.err.println("doing byte "+b);
 			String s;
-			s = Wang_UI.getCharConv().tiltrotateToAscii(b[0], _shifted);
+			s = Wang_UI.getCharConv().tiltrotateToAscii(b, _shifted);
 			if (s != null) {
 				_text.appendText(s);
 			}

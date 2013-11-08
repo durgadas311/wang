@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.2 2013/01/27 23:44:06 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
 
 import javax.swing.*;
 
@@ -15,7 +15,7 @@ interface Wang_OutputDevice
 	void reset();
 
 	// Process byte-pair in context of Wang Output Device
-	void do_cn24(byte[] b);
+	void do_cn24(byte b);
 
 	// Return the text-frame of the device, for handling events
 	// and setting up action listeners
