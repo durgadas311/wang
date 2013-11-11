@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $
+// $Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -515,7 +515,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -728,7 +728,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -1536,7 +1536,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1746,7 +1746,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2280,11 +2280,11 @@ class Wang600_XROM implements Wang_XROM {
 	}
 
 	public Wang600_XROM() {
+		_file = Wang_UI.getProperties().getFile("wang600_rom_image", true, Wang_UI.getDir());
 	}
 
 	public void Initialize() {
-		loadXROM(Wang_UI.getProperties().getFile("wang600_rom_image",
-							true, Wang_UI.getDir()));
+		loadXROM(_file);
 	}
 
 	public byte getByte(int adr) {
@@ -2330,7 +2330,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2539,7 +2539,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2952,7 +2952,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3219,7 +3219,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.155 $ $Date: 2013/11/08 21:12:28 $<BR>"+
+			"$Revision: 1.156 $ $Date: 2013/11/11 19:40:45 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3353,7 +3353,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3571,7 +3571,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3664,7 +3664,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.155 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

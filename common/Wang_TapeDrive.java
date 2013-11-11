@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.11 2013/11/08 21:12:28 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.12 2013/11/11 19:40:45 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.11 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.12 2013/11/11 19:40:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -354,7 +354,7 @@ class Wang_TapeDrive extends JComponent
 			_eot = true;
 			return -1;
 		} else {
-			return b1[0];
+			return b1[0] & 0x00ff;
 		}
 	}
 
@@ -400,14 +400,14 @@ class Wang_TapeDrive extends JComponent
 	public int tape_play() {
 		// request for next byte
 		int b = tape_read();
-		if ((b & 0x00ff) == (_recordMark & 0x00ff)) { // END PROG
+		if (b == (_recordMark & 0x00ff)) { // END PROG
 			// there is always one more byte..
 			b = tape_read();
 			// might be old image... treat EOF same...
 			if (b < 0) {	// saw EOF
 				b = _recordMark;
 			}
-			if ((b & 0x00ff) != (_recordMark & 0x00ff)) {
+			if (b != (_recordMark & 0x00ff)) {
 				b = -1;
 			}
 			++_index; // display updated later...
