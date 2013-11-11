@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $
+// $Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,14 +48,14 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 
 	private static JFrame front_end;
 
 	public static void main(String[] args) {
 		java.io.OutputStream fout = null;
 		java.io.InputStream fin = null;
-		java.io.BufferedReader ferr = null;
+//		java.io.BufferedReader ferr = null;
 		GridBagLayout gridbag = new GridBagLayout();
 
 
@@ -99,18 +99,18 @@ public class w600_fe
 				Wang_UI.fatal("Startup", ee.getMessage());
 			}
 		} else {
-			try {
-				Process _be = null;
-				_be = Runtime.getRuntime().exec("./w600-sim -b");
-				fout = _be.getOutputStream();
-				fin = _be.getInputStream();
-				ferr = new BufferedReader(new InputStreamReader(_be.getErrorStream()));
-				Runtime.getRuntime().addShutdownHook(new FEexit(_be));
-				new Wang600_SimError(ferr);
-			} catch (IOException ee) {
-				System.err.println("Unable to exec back-end!");
-				System.exit(1);
-			}
+//			try {
+//				Process _be = null;
+//				_be = Runtime.getRuntime().exec("./w600-sim -b");
+//				fout = _be.getOutputStream();
+//				fin = _be.getInputStream();
+//				ferr = new BufferedReader(new InputStreamReader(_be.getErrorStream()));
+//				Runtime.getRuntime().addShutdownHook(new FEexit(_be));
+//				new Wang600_SimError(ferr);
+//			} catch (IOException ee) {
+//				System.err.println("Unable to exec back-end!");
+//				System.exit(1);
+//			}
 		}
 		Wang_UI.setSimIO(fin, fout);
 		front_end = new JFrame("Wang 600 Advanced Programmable Calculator");
@@ -515,7 +515,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -711,7 +711,9 @@ if (n != 32) System.err.println("too little? "+n);
 
 				// now, the back-end is waiting for us...
 				// dump the whole ROM image...
-				for (x = 0; x < 2048; ++x) {
+				// back-end is expecting reversed image, but XROM
+				// is reversing it already, so have to re-reverse.
+				for (x = 0x7ff; x >= 0; --x) {
 					byte bb = Wang600.XROM.getByte(x);
 					do_keycode(0x8000 | (bb & 0x0ff));
 				}
@@ -728,7 +730,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -801,7 +803,7 @@ class Wang600_SimulatorJava
 			// "LE", i.e. "jl" in byte[0]
 			jl = (byte)((instr[0] >> 2) & 0x07);
 			jh = (byte)((instr[0] >> 5) & 0x07);
-			jad = (instr[1] | ((instr[2] & 1) << 8));
+			jad = ((instr[1] & 0x00ff) | ((instr[2] & 1) << 8));
 			sub = (byte)((instr[2] >> 1) & 1);
 			st = (byte)((instr[2] >> 2) & 0x0f);
 			kk = (byte)(((instr[2] >> 6) & 0x03) | ((instr[3] & 0x03) << 2));
@@ -857,6 +859,9 @@ class Wang600_SimulatorJava
 		public Wang600_Ucode fetch(int adr) {
 			int idx = adr * 8;
 			return new Wang600_Ucode(Arrays.copyOfRange(_ucode, idx, idx + 7));
+//Wang600_Ucode u = new Wang600_Ucode(Arrays.copyOfRange(_ucode, idx, idx + 7));
+//System.err.format("%03x: %d %d %03x\n", adr, u.jl, u.jh, u.jad << 2);
+//return u;
 		}
 	}
 
@@ -904,8 +909,9 @@ class Wang600_SimulatorJava
 		pr_hammers = 0;
 		pr_tach = 0;
 		pr_col = 0;
-		disp = new byte[16];
+		disp = new byte[32];	// compatable with Wang700's dual display
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
+		keyCodes = new java.util.LinkedList<Integer>();
 
 		Thread t = new Thread(this);
 		t.start();
@@ -1143,26 +1149,23 @@ class Wang600_SimulatorJava
 	}
 
 	private void rd_ram_i(byte ah, byte am, byte al) {
-		int adr = (ah << 8) | (am << 4) | al;
+		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
 		byte b = _ram[adr >> 1];
 		if ((adr & 1) != 0) {
 			b >>= 4;
-		} else {
-			b &= 0x0f;
 		}
-		rb = ca = b;
+		rb = ca = (byte)(b & 0x0f);
 		b = Wang600.XROM.getByte(adr >> 1);
 		if ((adr & 1) != 0) {
 			b >>= 4;
-		} else {
-			b &= 0x0f;
 		}
-		cb = b;
+		cb = (byte)(b & 0x0f);
+//if (adr < 0x7b8) System.err.format("%03x: %02x %02x\n", adr, ca, cb);
 	}
 
 	private void wr_ram_i(byte ah, byte am, byte al) {
-		int adr = (ah << 8) | (am << 4) | al;
+		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
 		byte a = ca;
 		byte b = _ram[adr >> 1];
@@ -1184,8 +1187,8 @@ class Wang600_SimulatorJava
 
 	private void refresh() {
 		byte x = (byte)((n << 4) | rb);
-		if (disp[n] != x) {
-			disp[n] = x;
+		if (disp[n * 2 + 0] != x) {
+			disp[n * 2 + 0] = x;
 			good = 0;
 		}
 		if (++lastx >= 16) {
@@ -1284,7 +1287,7 @@ class Wang600_SimulatorJava
 				g |= (byte)((_cn36.getGLRN() & 1) << 2);
 			}
 			break;
-		case 3: g = (byte)Wang600.Kbd.getMode1(); break;
+		case 3: g = (byte)(Wang600.Kbd.getMode1() ^ D20_DEGREES); break;
 		case 4: g = ka; break;
 		case 5: g = kb; break;
 		case 6: g = ca; break;
@@ -1437,10 +1440,15 @@ class Wang600_SimulatorJava
 			case 3: nxt |= ((br_acc & 8) >> 2); break;
 			case 4:
 				nxt |= (ov << 1);
+				ov = 0;
+				Wang600.Disp.setOv(ov);
+				break;
+			case 5: nxt |= (cc << 1); break;
+			case 6:
 				if (keyCodes.size() > 0) {
 					int key = keyCodes.remove();
-	//fprintf(stderr,"%03x: chk pe\n", pc, key);
-	//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+//fprintf(stderr,"%03x: chk pe\n", pc, key);
+//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
 					kbd = 1;
 					ka = (byte)((key >> 4) & 0x0f);
 					kb = (byte)(key & 0x0f);
@@ -1536,7 +1544,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1721,7 +1729,7 @@ class Wang600_SimInput
 		_miNone.addActionListener(this);
 		_mu.add(_miNone);
 
-		if (Wang_UI.getFin() == null) {
+		if (Wang_UI.getFin() == null) { // && getFout() == null
 			Wang600.Core = new Wang600_SimulatorJava();
 		} else {
 			Wang600.Core = new Wang600_SimulatorPipe();
@@ -1746,7 +1754,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2288,8 +2296,10 @@ class Wang600_XROM implements Wang_XROM {
 	}
 
 	public byte getByte(int adr) {
-		if (_xrom.length > adr) {
-			return _xrom[adr];
+		if (_xrom != null && _xrom.length > adr) {
+			// ROM image needs to be reversed... do it here
+			// (but some users need to reverse it back...)
+			return _xrom[0x7ff - adr];
 		} else {
 			return (byte)0xff;
 		}
@@ -2330,7 +2340,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2405,7 +2415,7 @@ class Wang600_Display extends Wang_Display
 	public Wang600_Display() {
 		String blank = "--- Wang 600 ---";
 		disp_a = new byte[16];
-		disp_b = new byte[16];
+		disp_b = new byte[32];	// replaced before used?
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
@@ -2511,6 +2521,7 @@ System.err.println("IOException for " + f);
 	}
 
 	public void do_display(byte[] b) {
+		// b[*] is actually more like uint8_t b[16][2]!
 		int ds;
 		disp_b = b;
 		ds = 0;
@@ -2539,7 +2550,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2952,7 +2963,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3219,7 +3230,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.156 $ $Date: 2013/11/11 19:40:45 $<BR>"+
+			"$Revision: 1.157 $ $Date: 2013/11/11 22:00:29 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3353,7 +3364,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3571,7 +3582,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3664,7 +3675,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.156 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.157 2013/11/11 22:00:29 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
