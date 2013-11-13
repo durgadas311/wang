@@ -1,1 +1,1 @@
-java -jar wang600.jar -w
+java -jar wang600.jar

@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.12 2013/11/08 21:12:28 drmiller Exp $
+# $Id: Makefile.ship,v 1.13 2013/11/13 23:34:00 drmiller Exp $
 
 COPTS =
 
@@ -8,6 +8,10 @@ CFLAGS += -D__wang600__ -I../common -I.
 
 OBJS = wang_sys.o wang_sim_cmd.o \
 	w600_decode.o wang_exec.o wang_gui.o
+
+ROM = wang600.rom
+
+EXE = w600-sim
 
 SPCL = plotter_chrgen.dat
 
@@ -54,14 +58,14 @@ XTRA =
 
 DASM = dw600.o loaducode_txt.o
 
-all: w600-sim w600_fe.class
+all: $(EXE) w600_fe.class
 
 CFLAGS += -g -O3 $(COPTS)
 
 w600-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
-w600-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
+$(EXE): wang-sim.o $(OBJS) $(XTRA) $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
 
 w600_fe.class: w600_fe.java $(COMMON_CLASSES) $(W600_CLASSES)
@@ -86,5 +90,5 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: w600_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
+	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(SPCL) $(addprefix -C ../common/fonts ,$(FONTS))

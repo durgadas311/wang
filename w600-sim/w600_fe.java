@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $
+// $Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -515,7 +515,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -735,7 +735,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -826,27 +826,25 @@ class Wang600_SimulatorJava
 		// right now, the only override is for mem size, so just hardcode
 		// all that.
 
-		public Wang600_UcodeRom(File img, int memsize) {
+		public Wang600_UcodeRom(java.io.InputStream img, int memsize) {
 			// Can't change _ucode after initial setup (i.e. while running).
 			// Can't run if _ucode is null... need to check
 			// (right now, will throw NULL pointer exception when fetching)
 			// Enforce fixed-size 2048-word x 64-bit ucode.
 			if (_ucode == null && img != null) {
-				FileInputStream f;
-				try {
-					f = new FileInputStream(img);
-				} catch (FileNotFoundException ee) {
-					return;
-				}
 				int n = 0;
 				byte[] buf = new byte[16384];
 				try {
-					n = f.read(buf);
+					// if 'img' came from a resource stream,
+					// the read() may not return all bytes...
+					while (n < 16384) {
+						n += img.read(buf, n, 16384 - n);
+					}
 				} catch (IOException ee) {
-					n = -1;
+					Wang_UI.fatal("Loading microcode", ee.getMessage());
 				}
 				try {
-					f.close();
+					img.close();
 				} catch (IOException ee) {
 				}
 				if (n == 16384) {
@@ -857,6 +855,8 @@ class Wang600_SimulatorJava
 					byte kk = (byte)(((memsize - 1) >> 8) & 0x0f);
 					_ucode[idx + 2] |= ((kk & 0x03) << 6);
 					_ucode[idx + 3] |= ((kk >> 2) & 0x03);
+				} else {
+					Wang_UI.fatal("Loading microcode", "Wrong size");
 				}
 			}
 		}
@@ -864,9 +864,6 @@ class Wang600_SimulatorJava
 		public Wang600_Ucode fetch(int adr) {
 			int idx = adr * 8;
 			return new Wang600_Ucode(Arrays.copyOfRange(_ucode, idx, idx + 7));
-//Wang600_Ucode u = new Wang600_Ucode(Arrays.copyOfRange(_ucode, idx, idx + 7));
-//System.err.format("%03x: %d %d %03x\n", adr, u.jl, u.jh, u.jad << 2);
-//return u;
 		}
 	}
 
@@ -915,7 +912,16 @@ class Wang600_SimulatorJava
 	public Wang600_SimulatorJava() {
 		// at some point, get these from properties...
 		int memsize = 2048; // based on Model (2TP, 6TP, 14TP, ...)
-		_rom = new Wang600_UcodeRom(new File("wang600.rom"), memsize);
+		String romfile = "wang600.rom";
+		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
+		if (rom == null) {
+			try {
+				rom = new FileInputStream(romfile);
+			} catch(Exception ee) {
+				Wang_UI.fatal("Opening microcode", ee.getMessage());
+			}
+		}
+		_rom = new Wang600_UcodeRom(rom, memsize);
 		_ram = new byte[memsize];
 
 		pr_drum = 0;
@@ -1583,7 +1589,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1793,7 +1799,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2304,6 +2310,7 @@ class Wang600_XROM implements Wang_XROM {
 			try {
 				f = new FileInputStream(img);
 			} catch (FileNotFoundException ee) {
+				Wang_UI.warning("Install ROM", ee.getMessage());
 				return;
 			}
 			int n = 0;
@@ -2311,6 +2318,7 @@ class Wang600_XROM implements Wang_XROM {
 			try {
 				n = f.read(buf);
 			} catch (IOException ee) {
+				Wang_UI.warning("Install ROM", ee.getMessage());
 				n = -1;
 			}
 			try {
@@ -2358,7 +2366,7 @@ class Wang600_XROM implements Wang_XROM {
 			file = ch.getSelectedFile();
 			// are we being too optimistic? maybe wait until
 			// download succeeds?
-			m.setText("Expansion ROM - " + _file.getName());
+			m.setText("Expansion ROM - " + file.getName());
 		} else {
 			file = null;
 			m.setText("Expansion ROM - none installed");
@@ -2367,7 +2375,7 @@ class Wang600_XROM implements Wang_XROM {
 			Wang_UI.getProperties().setAndSaveProperty(
 				new Wang600_Properties(),
 				"wang600_rom_image",
-				file == null ? "" : _file.getName());
+				file == null ? "" : file.getName());
 		} catch(Exception ee) {}
 		// NOTE: on real hardware, you can't change ROMs without
 		// risking severe damage to ROM cartridge or calculator!
@@ -2379,7 +2387,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2589,7 +2597,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3002,7 +3010,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3269,7 +3277,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.159 $ $Date: 2013/11/13 00:14:40 $<BR>"+
+			"$Revision: 1.160 $ $Date: 2013/11/13 23:34:00 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3403,7 +3411,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3621,7 +3629,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3714,7 +3722,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.160 2013/11/13 23:34:00 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.58 2013/10/22 18:02:04 drmiller Exp $
+# $Id: Makefile,v 1.59 2013/11/13 23:34:00 drmiller Exp $
 
 include Makefile.ship
 
@@ -19,9 +19,6 @@ WICONS = $(subst .png,.ico,$(PNGS))
 
 PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
 SRCTAR = w600-sim.tgz
-
-ROM = wang600.rom
-EXE = w600-sim
 
 COMMON_W614_CLASSES = \
 		Wang_Properties.class \
@@ -51,7 +48,7 @@ tar:
 		common/*.[ch] \
 		w600-sim/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
 		w600-sim/README.{internals,gui} \
-		w600-sim/wang600.rom w600-sim/icons/*.gif \
+		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.w6* w600-sim/docs/*.html w600-sim/docs/*.gif
 
@@ -62,7 +59,7 @@ packages: $(PACKAGES)
 
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
-	cp wang600.jar wang600.rom $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang600.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.w6* $(TMPDEST)/progs
@@ -78,7 +75,7 @@ $(EXE).osx: $(EXE)
 	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
 
 # Need better way to estimate size of image...
-wang600apc.dmg: all icns $(EXE).osx wang600.jar
+wang600apc.dmg: all icns wang600.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=64k count=18
 	hformat -l WANG600APC $@
@@ -89,16 +86,14 @@ wang600apc.dmg: all icns $(EXE).osx wang600.jar
 	hcd Contents
 	hcopy -r wang600.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang600.jar wang600.rom run :MacOS
+	hcopy -r wang600.jar run :MacOS
 	hcopy -r icons/wang600-*x*.icns :Resources
 	hcd MacOS
-	hcopy -r $(EXE).osx :$(EXE)
 	hcd
 	hcopy -r Uninstall-wang600.sh :Uninstall-wang600
 	hcopy -r README.osx :README.html
 	hcopy -r progs/*.w6* :Wang600Files
 	humount $@
-	rm -f $(EXE).osx
 
 wang600apc.exe: all winicons wang600.jar wang600.nsi
 	makensis wang600.nsi
