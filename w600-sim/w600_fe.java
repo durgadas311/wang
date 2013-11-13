@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $
+// $Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -515,7 +515,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -640,7 +640,12 @@ class Wang600_SimulatorPipe
 				} catch (IOException ee) {
 				}
 if (n != 32) System.err.println("too little? "+n);
-				Wang600.Disp.do_display(m);
+				short[] d = new short[16];
+				int x;
+				for (x = 0; x < 16; ++x) {
+					d[x] = m[x * 2 + 0];
+				}
+				Wang600.Disp.do_display(d);
 			} else if ((b[1] & 0xfe) == 0x04) {
 				Wang600.Disp.setOv((byte)(b[0] & 1));
 				Wang600.Disp.setErr((byte)(b[0] & 2));
@@ -730,7 +735,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -907,20 +912,17 @@ class Wang600_SimulatorJava
 		// needs other side-effects... display?
 	}
 
-	boolean _canSleep;
-
 	public Wang600_SimulatorJava() {
 		// at some point, get these from properties...
 		int memsize = 2048; // based on Model (2TP, 6TP, 14TP, ...)
 		_rom = new Wang600_UcodeRom(new File("wang600.rom"), memsize);
 		_ram = new byte[memsize];
 
-		_canSleep = false;
 		pr_drum = 0;
 		pr_hammers = 0;
 		pr_tach = 0;
 		pr_col = 0;
-		disp = new byte[32];	// compatable with Wang700's dual display
+		disp = new short[16];
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
 
@@ -1189,24 +1191,44 @@ class Wang600_SimulatorJava
 		_ram[adr >> 1] = (byte)(b | a);
 	}
 
-	private byte[] disp;
+	private short[] disp;
 	int good;
 	int lastx;
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
 
-	private void refresh() {
-		byte x = (byte)((n << 4) | rb);
-		if (disp[n * 2 + 0] != x) {
-			disp[n * 2 + 0] = x;
+	private void refresh(boolean canSleep) {
+		short x = (short)((n << 4) | rb);
+		if (disp[n] != x) {
+			disp[n] = x;
 			good = 0;
 		}
 		if (++lastx >= 16) {
 			lastx = 0;
 			++good;
 			Wang600.Disp.do_display(disp);
+		} else {
+			if (good > 4) {
+				if (canSleep) {
+					int k = -1;
+					try {
+						k = keyCodes.take();
+					} catch(Exception ee) {
+						k = -1;
+					}
+					if (k >= 0) {
+						keyCodes.addFirst(k);
+					}
+					good = 0;
+				}
+			}
 		}
+	}
+
+	private void do_blanking() {
+		Arrays.fill(disp, (short)-1);
+		Wang600.Disp.do_blanking();
 	}
 
 	private void display_check() {
@@ -1216,29 +1238,12 @@ class Wang600_SimulatorJava
 		if (pc == 0x51c) {	// display refresh routine...
 			next = 0x51f;	// update some regs too?
 			cycles += 272;
-			refresh();
-			if (good > 4) {
-				// OK to sleep now... but only have take() to
-				// wait for key press. So, have to signal the
-				// next ucode instruction to test keyboard
-				// that it should sleep.
-//				_canSleep = true;
-				int k = -1;
-				try {
-					k = keyCodes.take();
-				} catch(Exception ee) {
-					k = -1;
-				}
-				if (k >= 0) {
-					keyCodes.addFirst(k);
-				}
-				good = 0;
-			}
+			refresh(true);
 		// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
 		} else if (pc == 0x5c0) {	// alpha-stop refresh routine...
 			next = 0x5c3;
 			cycles += 272;
-			refresh();
+			refresh(false);
 		} else if (pc == 0x5c6) {	// alpha-stop done... "return"...
 			if (next == 0x27b) { // alpha-stop in running program...
 				// observed 211975 cycles or about 0.53 second
@@ -1247,7 +1252,7 @@ class Wang600_SimulatorJava
 				} catch(Exception ee) {
 				}
 			}
-			Wang600.Disp.do_blanking();
+			do_blanking();
 		}
 	}
 
@@ -1474,16 +1479,9 @@ class Wang600_SimulatorJava
 			case 5: nxt |= (cc << 1); break;
 			case 6:
 				int key = -1;
-				if (_canSleep) {
-					_canSleep = false;
-					try {
-						// problem: need to also wake on special
-						key = keyCodes.take();
-					} catch(Exception ee) {
-						key = -1;
-					}
-					good = 0;
-				} else if (keyCodes.size() > 0) {
+				if (keyCodes.size() > 0) {
+					// might return -1 for wake-up only,
+					// must ignore in that case.
 					key = keyCodes.remove();
 				}
 				if (key >= 0) {
@@ -1502,7 +1500,7 @@ class Wang600_SimulatorJava
 				if (kbd != 0) {
 					good = 0;
 					kbd = 0;
-					Wang600.Disp.do_blanking();
+					do_blanking();
 				}
 				break;
 			case 7: rc = 3; break;
@@ -1585,7 +1583,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1795,7 +1793,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2381,13 +2379,13 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
 
 	byte[] disp_a;
-	byte[] disp_b;
+	short[] disp_b;
 	JLabel disp;
 	boolean _d12;	// is digit 12 enabled?
 
@@ -2456,7 +2454,7 @@ class Wang600_Display extends Wang_Display
 	public Wang600_Display() {
 		String blank = "--- Wang 600 ---";
 		disp_a = new byte[16];
-		disp_b = new byte[32];	// replaced before used?
+		disp_b = new short[16];	// replaced before used?
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
@@ -2561,22 +2559,22 @@ System.err.println("IOException for " + f);
 		repaint();
 	}
 
-	public void do_display(byte[] b) {
+	public void do_display(short[] b) {
 		// b[*] is actually more like uint8_t b[16][2]!
 		int ds;
 		disp_b = b;
 		ds = 0;
-		disp_a[ds] = sign_chr[b[ds * 2 + 0] & 0x0f]; // mant sign
+		disp_a[ds] = sign_chr[b[ds] & 0x0f]; // mant sign
 		++ds;
 		do {
-			disp_a[ds] = disp_chr[b[ds * 2 + 0] & 0x0f];
+			disp_a[ds] = disp_chr[b[ds] & 0x0f];
 			++ds;
 		} while (ds < 13);
-		disp_a[ds] = sign_chr[b[ds * 2 + 0] & 0x0f]; // exp sign
+		disp_a[ds] = sign_chr[b[ds] & 0x0f]; // exp sign
 		++ds;
-		disp_a[ds] = disp_chr[b[ds * 2 + 0] & 0x0f];
+		disp_a[ds] = disp_chr[b[ds] & 0x0f];
 		++ds;
-		disp_a[ds] = disp_chr[b[ds * 2 + 0] & 0x0f];
+		disp_a[ds] = disp_chr[b[ds] & 0x0f];
 		++ds;
 		if (!_d12) {
 			disp_a[12] = ' ';
@@ -2591,7 +2589,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3004,7 +3002,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3271,7 +3269,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.158 $ $Date: 2013/11/11 23:02:50 $<BR>"+
+			"$Revision: 1.159 $ $Date: 2013/11/13 00:14:40 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3405,7 +3403,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3623,7 +3621,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3716,7 +3714,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.158 2013/11/11 23:02:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.159 2013/11/13 00:14:40 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

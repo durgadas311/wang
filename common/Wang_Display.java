@@ -13,7 +13,7 @@ abstract class Wang_Display extends JComponent
 
 	public abstract void do_blanking(); // Blank display - i.e. when refreshing stops
 
-	public abstract void do_display(byte[] b); // Update display contents
+	public abstract void do_display(short[] b); // Update display contents
 
 	public abstract Wang_ErrorLight getOv();
 	public abstract Wang_ErrorLight getErr();
