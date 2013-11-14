@@ -20,3 +20,9 @@ install: $(BINS) $(INCS) $(LDS)
 	cp $(LDS) /usr/local/wpcc/lib
 	cp $(INCS) Make.rules.user /usr/local/wpcc/include
 	cp $(BINS) /usr/local/wpcc/bin
+
+clean:
+	rm -f *.o
+
+clobber: clean
+	rm -f $(BINS)

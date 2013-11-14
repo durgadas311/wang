@@ -2,20 +2,52 @@ Wang 600 programs may be written in source code form and compiled using
 these tools.  Each program must #include "wang600.h" and also should
 wrap the code section in BEGIN() and END().
 
+Use of this facility requires GNU Compiler tools, and probably Linux (unless GCC
+is available for your platform).
+
+The sample Makefile targets/actions use the following program file name suffixes:
+
+	W6C	Wang 600 Program module to be pre-processed by w6cpp
+	w6c	Program module not requiring pre-processing
+	w6e	Intermediate file already pre-processed
+	w6o	Object file (to be linked/loaded)
+	w6t	Tape image file, ready to load via tape drive
+	w6x	Expansion ROM image file, ready to install
+	w6r	Intermediate file for building Expansion ROM images.
+		Contains relocation information.
+	w6s	Intermediate file for building Expansion ROM images.
+		Contains symbol definitions, used to link user programs
+		against (for use with) this ROM image.
+
 Some special macros allow for abstraction of statement labels and extended
 register assignment. These are:
 
-LABEL(name)	Declares that 'name' will be used as a statment label.
+LABEL(name)	Declares that 'name' will be used as a statement label.
 		There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+LLABEL(name)	Declares that 'name' will be used as a statement label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
 
 FLABEL(name)	Declares that 'name' will be used as a function subroutine
 		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
 
-EXTERNAL(name)	Declares that 'name' is a statment label that exists in
+FLLABEL(name)	Declares that 'name' will be used as a function subroutine label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+EXTERNAL(name)	Declares that 'name' is a statement label that exists in
 		a different module and will be linked at a later stage.
 
 FEXTERNAL(name)	Declares that 'name' is a function subroutine that exists
 		in a different module.
+
+RES_REG(label,reg)	(Experimental?)
+		Reserves a long register (?)
 
 UREG(name)	Declares that 'name' is an extended register that is not
 		initialized as part of the program load. The register will
@@ -69,7 +101,7 @@ w6cpp:	Convenience pre-processor for wang program source code.
 		Note: ALPHA_PLOT uses a subtly different character decoder.
 		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
 		Also, ALPHA_PLOT does not translate non-supported Selectric
-		puctuation and special characters, including 1/2, 1/4, and cent.
+		punctuation and special characters, including 1/2, 1/4, and cent.
 
 	ENTER(number)
 
@@ -80,10 +112,17 @@ w6cpp:	Convenience pre-processor for wang program source code.
 		ignores '+'. Other characters will result in compile
 		errors. 'number' should not be quoted.
 
+	ENTER_LAST_REGNO()	(Not actually processed by w6cpp)
+		Insert E0-E9 codes to enter the number of the last
+		long register that was unused by program code (i.e.
+		number of "free" registers for use, e.g., through
+		indirection (0 - ENTER_LAST_REGNO()).
+
 	IREG_DATA(reg,number)
 
 		Creates an extended register that initially contains
-		the value 'number'.
+		the value 'number'. The register may be accessed with
+		RECALL(reg) and STORE(reg) statements.
 
 	IREG_DATA(reg,"string")
 
@@ -150,10 +189,10 @@ LOAD_PROG()
 INV()		1/X
 
 MARK(label)	Assign label to program step ('label' must be declared as above)
-STORE(longreg)	'longreg' must be declared
+STORE(longreg)	'longreg' must be declared as described above
 ALPHA(cmd)
 STOP()
-J_IF_N0()	Jump if not zero
+J_IF_N0()	Jump if not zero (letter enn followed by zero)
 J_IF_ERR()	Jump if error
 SIN_1()		Arc sine
 COS_1()		Arc cosine
@@ -202,3 +241,8 @@ myprog.w6t: myprog.W6C
         @rm -f myprog.wpe
 
 TODO: create a shell script to hide the essoterric gcc syntax.
+
+See the example programs for examples of how to use both the programming
+language and the Makefiles.
+
+See "README.ld" if you are interested in the internal workings of the "compiler".

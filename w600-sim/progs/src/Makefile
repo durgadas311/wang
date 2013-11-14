@@ -46,6 +46,13 @@ install: $(PROGS) $(ROMS)
 ship: $(PROGS) $(ROMS)
 	cp $(PROGS) $(ROMS) ..
 
+export: __FRC__
+	cp Make* *.W6C $(DEST)
+	for d in $(SUBDIRS); do \
+		mkdir -p $(DEST)/$$d; \
+		cp $$d/Make* $$d/*.W6C $(DEST)/$$d; \
+	done
+
 .PHONEY: __FRC__
 
 __FRC__:

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.59 2013/11/13 23:34:00 drmiller Exp $
+# $Id: Makefile,v 1.60 2013/11/14 15:47:02 drmiller Exp $
 
 include Makefile.ship
 
@@ -52,8 +52,8 @@ tar:
 		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.w6* w600-sim/docs/*.html w600-sim/docs/*.gif
 
-ship: tar packages
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w600-sim
+ship: tar packages wpcc.tgz
+	mv -v $(SRCTAR) $(PACKAGES) wpcc.tgz /http/durgadas.com/sebhc/w600-sim
 
 packages: $(PACKAGES)
 
@@ -103,6 +103,14 @@ install: temp_dest
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
 	cd $(INSDEST); ./INSTALL
+
+wpcc.tgz: _FRC_
+	rm -rf temp_wpcc
+	mkdir -p temp_wpcc/wpcc/examples
+	cp wpcc/Make* wpcc/README* wpcc/*.[chs] wpcc/*.ld temp_wpcc/wpcc
+	make -C progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples
+	tar -czvf $@ -C temp_wpcc wpcc
+	rm -rf temp_wpcc
 
 www: _FRC_
 	mkdir -p /http/durgadas.com/wang600/wang600docs
