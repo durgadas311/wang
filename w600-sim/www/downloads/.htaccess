@@ -1,0 +1,9 @@
+HeaderName header.html
+ReadmeName footer.html
+IndexIgnore header.html footer.html
+IndexOrderDefault Descending Date
+AddDescription "Wang 600 Programmable Calculator simulator, OSX" wang600apc.dmg
+AddDescription "Wang 600 Programmable Calculator simulator, Windows" wang600apc.exe
+AddDescription "Wang 600 Programmable Calculator simulator, Linux" wang600apc.tgz
+AddDescription "Wang 600 Programmable Calculator simulator (full source)" w600-sim.tgz
+AddDescription "Experimental Wang 600 compiler" wpcc.tgz

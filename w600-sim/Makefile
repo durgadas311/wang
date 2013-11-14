@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.61 2013/11/14 21:16:24 drmiller Exp $
+# $Id: Makefile,v 1.62 2013/11/14 21:30:06 drmiller Exp $
 
 include Makefile.ship
 
@@ -44,6 +44,7 @@ tar:
 
 ship: tar packages wpcc.tgz
 	mv -v $(SRCTAR) $(PACKAGES) wpcc.tgz /http/durgadas.com/sebhc/w600-sim
+	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w600-sim
 
 packages: $(PACKAGES)
 
