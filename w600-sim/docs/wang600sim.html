@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.17 2012/01/30 12:37:14 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.18 2013/11/14 21:16:24 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -141,12 +141,12 @@ in a folder named "Wang600Files". The environment variable WANG600HOME
 may be used to select a different path.
 
 <P>Files are organized by suffix. Currently, all program image files
-have the <B>.wng</B> suffix.
-All <B>.wng</B> files are raw binary program codes and registers,
+have the <B>.w6t</B> suffix (for Wang 600 Tape images).
+All <B>.w6t</B> files are raw binary program codes and registers,
 with a program record ending in two END&nbsp;PROG codes (0x9e 0x9e),
 and a register image (ALPHA STORE) ending with 0x9e 0xff.
-Future versions will also separate by
-device (Tape, ROM, Model 630) and use different formats optimized for device.
+Expansion ROM images have the suffix <B>.w6x</B>.
+Model 630 Disk images have the suffix <B>.w6d</B>.
 
 <H3>Tape Operation</H3>
 
@@ -198,20 +198,51 @@ The file is formatted like other program images, the first byte is
 loaded into the highest address, the next is loaded into the next lower
 address, etc.
 
-<H3>601/602/611 OutputWriter</H3>
+<H3>601 OutputWriter</H3>
 
-These peripherals were based on modified IBM Selectric typewriters.
+This peripheral was based on modified IBM Selectric typewriter.
+It is capable of text output only.
+The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device from the "Devices" menu also makes it visible.
-Currently, the device is always considered "connected" and "on".
-The output may be consumed in the same way as for the built-in printer
-(Saved, Printed, or Tear Off).
+Selecting the device from the "Output Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the built-in printer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Typewriter" menu will eventually provide setup of margins, etc.
 
-<P>The Print option formats the output onto separate pages that are
-156 characters wide and typically 58 lines long. Plotted data is
-printed in the same scale. Note that long plots will be split
-between several pages, as continuous-feed paper is not supported
-on most printers currently in use.
+<H3>602 Plotting OutputWriter</H3>
+
+This peripheral was based on modified IBM Selectric typewriter.
+It is capable of text output along with micro-spacing which allows plotting.
+The device is "connected" through the "Devices"/"Output Device..." sub-menu.
+Printing to this device causes the "output window" to become visible.
+Selecting the device from the "Output Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the built-in printer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Typewriter" menu that provides a "Home" function for
+the carriage, and will eventually provide setup of margins, etc.
+
+<H3>611 Input/OutputWriter</H3>
+
+This peripheral was based on modified IBM Selectric typewriter.
+It is capable of text output as well as input from the keyboard.
+The device is "connected" through the "Devices"/"Output Device..." sub-menu.
+Printing to this device causes the "output window" to become visible.
+Selecting the device from the "Output Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the built-in printer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Typewriter" menu will eventually provide setup of margins, etc.
+
+<H3>612 Flatbed Plotter</H3>
+
+This device is capable of vector (line) plotting as well as (drawn) text from a limited
+character set.
+The device is "connected" through the "Devices"/"Output Device..." sub-menu.
+Plotting to this device causes the "output window" to become visible.
+Selecting the device from the "Output Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the built-in printer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Plotter" menu that allows setting the plot area, pen color,
+and returning the plot carriage to the "home" position.
 
 <H3>630 Fixed/Removable Disk</H3>
 
@@ -223,6 +254,16 @@ a file selection dialog from which a image may be selected to use as
 the disk. The file will be expanded as needed by writes. The file may
 also be "sparse", if writes are made beyond the current end of file.
 Unwritten portions of the file will read back as zero.
+
+<H3>614 Mark-Sense Card Reader</H3>
+
+While support for the actual card reader is pending, there is
+a novelty program that allows one to "edit" a program image
+in a similar way that a stack of mark-sense cards were edited.
+This is provided in the wang600.jar file, and may be run
+with the command "java -cp wang600.jar w600_edit", or the "edit" 
+("Wang614" on Windows) startup script
+in the package directory (typically HOME/wang600apc).
 
 <H3>Simulator Internals</H3>
 

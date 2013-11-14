@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.13 2013/11/13 23:34:00 drmiller Exp $
+# $Id: Makefile.ship,v 1.14 2013/11/14 21:16:24 drmiller Exp $
 
 COPTS =
 
@@ -46,9 +46,16 @@ COMMON_CLASSES = \
 		Wang_XROM.class
 
 W600_CLASSES = \
-	Wang600.class
-#	Wang600_SimulatorPipe.class \
-#	Wang600_SimulatorJava.class
+		Wang600.class
+#		Wang600_SimulatorPipe.class \
+#		Wang600_SimulatorJava.class
+
+COMMON_W614_CLASSES = \
+		Wang_Properties.class \
+		Wang_UI.class \
+		SuffFileFilter.class \
+		SuffFileChooser.class \
+		Wang_MarkSenseCard.class
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
@@ -71,6 +78,9 @@ $(EXE): wang-sim.o $(OBJS) $(XTRA) $(DASM)
 w600_fe.class: w600_fe.java $(COMMON_CLASSES) $(W600_CLASSES)
 	javac w600_fe.java
 
+w600_edit.class: w600_edit.java $(COMMON_W614_CLASSES)
+	javac w600_edit.java
+
 .SUFFIXES: .class .java
 
 .java.class:
@@ -89,6 +99,6 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
-wang600.jar: w600_fe.class Manifest.txt
+wang600.jar: w600_fe.class w600_edit.class Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(SPCL) $(addprefix -C ../common/fonts ,$(FONTS))

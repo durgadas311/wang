@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.60 2013/11/14 15:47:02 drmiller Exp $
+# $Id: Makefile,v 1.61 2013/11/14 21:16:24 drmiller Exp $
 
 include Makefile.ship
 
@@ -19,16 +19,6 @@ WICONS = $(subst .png,.ico,$(PNGS))
 
 PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
 SRCTAR = w600-sim.tgz
-
-COMMON_W614_CLASSES = \
-		Wang_Properties.class \
-		Wang_UI.class \
-		SuffFileFilter.class \
-		SuffFileChooser.class \
-		Wang_MarkSenseCard.class
-
-w600_edit.class: w600_edit.java $(COMMON_W614_CLASSES)
-	javac w600_edit.java
 
 xinetd: $(EXE) $(ROM)
 	cp $(EXE) $(ROM) /usr/local/bin/wang
@@ -59,8 +49,8 @@ packages: $(PACKAGES)
 
 temp_dest: all wang600.jar
 	mkdir -p $(TMPDEST)
-	cp wang600.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
-	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
+	cp wang600.jar run edit INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	chmod +x $(TMPDEST)/run $(TMPDEST)/edit $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.w6* $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
@@ -86,7 +76,7 @@ wang600apc.dmg: all icns wang600.jar
 	hcd Contents
 	hcopy -r wang600.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang600.jar run :MacOS
+	hcopy -r wang600.jar run edit :MacOS
 	hcopy -r icons/wang600-*x*.icns :Resources
 	hcd MacOS
 	hcd

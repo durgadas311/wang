@@ -1,0 +1,10 @@
+#!/bin/sh
+# $Id: edit,v 1.1 2013/11/14 21:16:24 drmiller Exp $
+
+pgm=${0}
+if [[ -L ${pgm} ]]; then
+        pgm=$(readlink ${pgm})
+fi
+cd ${pgm%/*}
+
+exec java -cp wang600.jar w600_edit
