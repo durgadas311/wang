@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.9 2013/02/09 03:18:39 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.10 2013/11/14 21:06:18 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -216,6 +216,13 @@ class Wang_MarkSenseCard extends JLabel
 			_npg = (_code_used + _rows_per_card - 1) / _rows_per_card;
 			// or, always have +1 cards?
 			if (_npg == 0) _npg = 1;
+		} else {
+			_code_used = 0;
+			Arrays.fill(_skips, (byte)1);
+			_pgix = 0;
+			_npg = 1;
+			_changed = false;
+			_date = _timestamp.format(new java.util.Date());
 		}
 	}
 
