@@ -1,22 +1,22 @@
 <HTML>
-<!-- $Id: wang600samp.html,v 1.7 2011/10/15 00:48:24 drmiller Exp $ -->
+<!-- $Id: wang600samp.html,v 1.8 2013/11/15 16:21:57 drmiller Exp $ -->
 
 <H2>Sample Programs</H2>
 
 See "Using the Tape Drive" for instructions on how to load programs,
 and to verify the program loaded correctly.
 
-<H3>countdown.wng - Count Down timer</H3>
+<H3>countdown.w6t - Count Down timer</H3>
 
-VERIFY PROG: 133
+VERIFY PROG: 210
 
 <P>USE: Enter a number and press GO. This display will count down that number until 0.
 
 <P>This program demonstrates basic use of ALPHA STOP and program loops.
 
-<H3>celsius.wng - Convert Degrees Fahrenheit to Celsius</H3>
+<H3>celsius.w6t - Convert Degrees Fahrenheit to Celsius</H3>
 
-VERIFY PROG: 120
+VERIFY PROG: 193
 
 <P>USE: Enter degrees Fahrenheit and press GO. The display will show the
 equivalent degrees Celsius.
@@ -24,9 +24,9 @@ equivalent degrees Celsius.
 <P>This program demonstrates how to do basic math calculations
 using registers.
 
-<H3>zeller.wng - Compute Day of Week given Month/Day/Year</H3>
+<H3>zeller.w6t - Compute Day of Week given Month/Day/Year</H3>
 
-VERIFY PROG: 689
+VERIFY PROG: 675
 
 <P>USE: Turn printer on. Enter month (1-12), press GO. 
 Enter dat (1-31), press GO. Enter 4-digit year, press GO.
@@ -36,9 +36,9 @@ Prints month, day, and year as they are entered, then prints result.
 <P>Uses a formula known as "Zeller's Congruence" to compute
 the day-of-week.
 
-<H3>factorial.wng - Compute Factorials</H3>
+<H3>factorial.w6t - Compute Factorials</H3>
 
-VERIFY PROG: 260
+VERIFY PROG: 315
 
 <P>USE: Enter a number and press GO. The display will show the
 result of N!. Note, N! or "N Factorial" is the product of
@@ -49,27 +49,27 @@ N * (N-1) * (N-2) ... * 1
 <P>This program is from Rick Bensene's Old Calculator Museum,
 http://www.oldcalculatormuseum.com/wang600.html.
 
-<H3>prime_nums.wng - Find Prime Numbers</H3>
+<H3>prime_nums.w6t - Find Prime Numbers</H3>
 
-VERIFY PROG: 503
+VERIFY PROG: 498
 
 <P>USE: Turn on Printer and press GO. The program still start at 2
 and print all prime numbers.
 
 <P>This program is from Alf Urban, http://www.genealpha.de/wang/.
 
-<H3>hello.wng - Simple Example of the Model 611 OutputWriter</H3>
+<H3>hello.w6t - Simple Example of the Model 601 OutputWriter</H3>
 
-VERIFY PROG: 195
+VERIFY PROG: 218
 
 <P>USE: Press GO. The OutputWriter window should appear with the
 text "Hello World!" printed on it.
 
 <P>This program demonstrates how to print a text string to the OutputWriter.
 
-<H3>grapher.wng - Example of Plotting Graphs on the OutputWriter</H3>
+<H3>graph_sin.w6t - Example of Plotting Graphs on the 602 Plotting OutputWriter</H3>
 
-VERIFY PROG: 654
+VERIFY PROG: 595
 
 <P>USE: Press GO. The OutputWriter window should appear and a graph
 of a sine wave is plotted on it. Note, the plotting takes up to a minute
@@ -81,9 +81,9 @@ so it may be resized as desired.
 fixed scaling. It is tailored to plotting functions that fit within
 a -1 to +1 range of 'f(x)' and a 0 to 360 range if 'x'.
 
-<H3>craps.wng - Game of Craps</H3>
+<H3>craps.w6t - Game of Craps</H3>
 
-VERIFY PROG: 1618
+VERIFY PROG: 1581
 
 <P>USE: Optionally enter a random number (use decimal places), then press GO.
 The number 500 should appear on the display. This is your bank.
@@ -98,16 +98,44 @@ and the appropriate action taken (win, lose, repeat).
 simulation. It also shows use of "special effects" like making the display
 flash without aborting the program, and making the display blank.
 
-<H3>random.wng - Low-Quality Pseudo-Random Number Generator</H3>
+<H3>calendar.w6t - Prints one month calendar on OutputWriter</H3>
 
-VERIFY PROG: 164
+VERIFY PROG: 3609
 
-<P>USE: Press f0 (depress f(x) and press 00)
-to get (another) random number between 0 and 1.0.
-Optionally, a "Random seed" may be put in register 07 to alter
-the pattern of random numbers.
+<P>Enter month (1-12) and press GO, then enter year (4-digits) and press GO.
+Calendar for the given month/year should appear on the OutputWriter window.
 
-<P>This program shows a poor-quality random number generator, but demonstrates
-use of the f(x) functions.
+<H3>hex2dec.w6t - Crude hexidecimal-to-decimal converter</H3>
+
+VERIFY PROG: 1131
+
+Set the "f(x)" pushbutton down (on). Use the keys "00" - "15" to enter hex digits,
+the decimal value will accrue on the display. Use PRIME or CLEAR DISPLAY to start
+a new conversion.
+
+<H3>example1.w6t - "Example 1" from the Wang 2202 Reference Manual</H3>
+
+VERIFY PROG: 832
+
+<P>Compiled for the 602 Plotting OutputWriter. Produces a "swirl" pattern
+comprised of colons, asterisks, and periods.
+
+<H3>plot_sin.w6t - Draw a sine-wave graph on the 612 Flatbed Plotter</H3>
+
+VERIFY PROG: 714
+
+<P>The Expansion ROM image "libplot.w6x" must also be installed. The 612 Plotter
+must also be connected. Press GO and the graph, with axii and labeling, will appear on the
+plotter window.
+
+<H3>list_dat.w6t - Requires data file (unfinished)</H3>
+<H3>plot_dat.w6t - Requires data file (unfinished)</H3>
+<H3>plot_alpha.w6t - Demonstrates the character set of the 612 Plotter (unfinished)</H3>
+
+<H3>libplot.w6x - Expansion ROM image for plotting/graphing routines</H3>
+
+<H2>Source Code</H2>
+
+The above programs are available in "source" format in the "wpcc.tgz" package.
 
 </HTML>
