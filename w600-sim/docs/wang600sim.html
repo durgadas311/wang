@@ -1,15 +1,55 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.18 2013/11/14 21:16:24 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.19 2013/11/15 09:06:59 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
-<P>The simulator recognizes the following environment variables:
+<P>The simulator configuration is controlled by the "rc" file "~/.wang600.rc".
+This file is normally configured through the "Edit"/"Preferences" menu items,
+but may also be editted manually if necessary (beware of mispelling paramters).
+The following parameters on the "Preferences" window control certain aspects of the calculator.
+The corresponding parameter names in the rc file are listed in square brackets.
 
 <DL>
-<DT>WANG600HOME<DD>Path to wang600 files, default is ~/Wang600Files.
-<DT>WANG600_FONT<DD>Font to use for display. Default is Panaplex9seg.ttf.
-<DT>WANG600_HOST<DD>Hostname of back-end server, see <B>-w</B> option. 
-<DT>WANG600_PORT<DD>Port to use for connecting to back-end server, see <B>-w</B> option. 
+<DT>Enable Column 12<DD>[wang600_digit12]
+	Enables display of digit column 12,
+	which was not connected in the original hardware. Default: off.
+<DT>Center DP<DD>[wang600_centerDP]
+	Uses a custom decimal point character that is centered in the digit cell,
+	but does not resemble the original hardware. Default: off.
+<DT>Enable PanaPlex '1'<DD>[wang600_special1]
+	Enables use of the center segments of the PanaPlex 9-segment display
+	when representing the digit one. This is what the original hardware did.
+	Default: on.
+<DT>Display style<DD>[wang600_displayfont]
+	Selects the font to use for the display. Original hardware matches the
+	default "PanaPlex 9-Segment" (Panaplex9seg.ttf).
+	Optional (may match some early Wang 600 hardware)
+	is "Nixie Tunes" (NixieZM1336.ttf). If not set, some system-default font
+	is used.
+<DT>Home<DD>[wang600_home]
+	Path to wang600 files. Default: ~/Wang600Files.
+<DT>Use remote server<DD>[wang600_remote]
+	(deprecated) Enables using a remote host to run the simulator
+	back-end. Default: false (off).
+<DT>Remote host<DD>[wang600_host]
+	(deprecated) Hostname of back-end server, see <B>-w</B> option. 
+<DT>Remote port<DD>[wang600_port]
+	(deprecated) Port to use for connecting to back-end server, see <B>-w</B> option. 
+</DL>
+
+Other parameters (maintained by the calculator, not typically user-controlled),
+that are not exposed in the "Preferences" dialog, are:
+
+<DL>
+<DT>Last Tape image<DD>[wang600_tape_image] The tape image file that was in the
+	tape drive when the calculator was last used. Default: none.
+<DT>Last ROM image<DD>[wang600_rom_image] The expansion ROM image file that was
+	installed when the calculator was last used. Default: none.
+<DT>Last Disk image<DD>[wang600_rom_image] The expansion Model 630 disk image file that was
+	installed when the calculator was last used. Default: none.
+<DT>Tape file suffix<DD>[wang600_tape_file_suffix] Default: "w6t".
+<DT>ROM file suffix<DD>[wang600_rom_file_suffix] Expansion ROM files, Default: "w6x".
+<DT>Disk (Model 630) file suffix<DD>[wang600_disk_file_suffix] Default: "w6d".
 </DL>
 
 <P>The simulator is normally started with the following command:
@@ -18,13 +58,20 @@
 java -jar wang600.jar
 </PRE>
 
-<P>which starts up the GUI front-end. This will attempt to run the command:
-<UL><PRE>
-./w600-sim -b
-</PRE></UL>
-<P>which will start up the simulator back-end.
+<P>which starts up the GUI front-end using the built-in simulator.
 
 </UL>
+
+<P>The special "Mark-Sense Card Editor" program is also included in the jar file.
+It may be started with the command:
+
+<UL><PRE>
+java -cp wang600.jar w600_edit
+</PRE>
+</UL>
+
+<P>The installable packages contain helper commands that execute the above java
+commands. For the calculator, that is exposed as a desktop icon to click.
 
 <P>An alternative is to run the GUI as a client to the back-end on a
 remote host. In this case, the simulator is started with:
@@ -33,8 +80,8 @@ remote host. In this case, the simulator is started with:
 java -jar wang600.jar -w [ &lt;host&gt; &lt;port&gt; ]
 </PRE>
 
-<P>The &lt;host&gt; and &lt;port&gt; arguments are not needed if the environment
-variables have been set.
+<P>The &lt;host&gt; and &lt;port&gt; arguments are not needed if the preferences
+have been set.
 The remote &lt;host&gt; must be listening on the correct &lt;port&gt; number and
 should start up the back-end using the command:
 <UL><PRE>
@@ -42,7 +89,31 @@ should start up the back-end using the command:
 </PRE></UL>
 <P>and may require other options, for example to get the path to the
 microcode image.
+The back-end binary is not delivered in the installable packages, and thus
+must be built from the source code package.
 </UL>
+
+<P>Another alternative is to run the back-end as a debug/trace facility,
+with the GUI as a slave process. This requires building the simulation software
+from source code, as the back-end binary is not delivered in the installable packages.
+
+<UL><PRE>
+/path/to/sim/w600-sim -g -i
+</PRE></UL>
+
+<P>and may require other options, for example to get the path to the
+microcode image. The back-end will attempt to execute the command:
+
+<UL><PRE>
+java w600_fe -b
+</PRE></UL>
+
+<P>Note, in this environment all the java class files must be present.
+The jar file is not used. This is typically run from the directory used
+to build the simulator from source code.
+
+<P>Pressing Ctrl-C in the "w600-sim" window will pause the simulation and print 
+a command prompt. The command "help" will display available debug commands.
 
 <H2>Wang 600 Simulator Differences</H2>
 
