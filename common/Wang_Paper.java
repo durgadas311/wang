@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.26 2013/02/23 02:53:25 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.27 2013/11/15 16:14:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.26 2013/02/23 02:53:25 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.27 2013/11/15 16:14:06 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
@@ -865,11 +865,13 @@ class Wang_Paper
 				}
 				_plotArray = p;
 			}
-			if (x >= 0 && xd >= 0) {
+			if (x >= 0) {
 				x = x + _ox;
 				y = y + _oy;
-				xd = xd + _ox;
-				yd = yd + _oy;
+				if (xd >= 0) {
+					xd = xd + _ox;
+					yd = yd + _oy;
+				}
 			}
 			_plotArray[n] = new plot(x, y, xd, yd);
 			++_xplots;
