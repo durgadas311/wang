@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.3 2013/11/17 16:53:34 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.4 2013/11/17 21:39:06 drmiller Exp $
 
 import java.io.*;
 
@@ -176,6 +176,15 @@ new DbgFunc() {
 		new DbgCmd( "core", "file", "Dump all of RAM (2K) to <file>",
 		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
+				if (line.length > 1) {
+					try {
+						FileOutputStream file =
+							new FileOutputStream(line[1]);
+						_dbg.core(core, file);
+					} catch(Exception ee) {
+						System.out.format("Can't create/write file \"%s\": %s\n", line[1], ee.getMessage());
+					}
+				}
 				return 0;
 			}
 		}
@@ -230,9 +239,28 @@ new DbgFunc() {
 			}
 		}
 		),
-		new DbgCmd( "trace", "[file]", "Toggle trace on/off",
+		new DbgCmd( "trace", "[file]", "Set trace on/off/file(on)",
 		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
+				if (line.length > 1) {
+					if (line[1].equals("on")) {
+						try {
+							_dbg.setTrace(core, true);
+						} catch(Exception ee) {}
+					} else if (line[1].equals("off")) {
+						try {
+							_dbg.setTrace(core, false);
+						} catch(Exception ee) {}
+					} else {
+						try {
+							FileOutputStream file =
+								new FileOutputStream(line[1]);
+							_dbg.setTraceFile(core, file);
+						} catch(Exception ee) {
+							System.out.format("Can't create/close trace file: %s\n", ee.getMessage());
+						}
+					}
+				}
 				return 0;
 			}
 		}
@@ -264,6 +292,7 @@ new DbgFunc() {
 		new DbgCmd( "dup", null, "Copy program space into ROM",
 		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
+				_dbg.dup(core);
 				return 0;
 			}
 		}
@@ -308,5 +337,14 @@ new DbgFunc() {
 			return 1;
 		}
 		return 0;
+	}
+
+	public void instr_trace(Wang_Core core) {
+		try {
+			_dbg.putTrace(core);
+		} catch(Exception ee) {
+			// either abort or ignore  - can't print message and continue
+			// or flood will ensue.
+		}
 	}
 }

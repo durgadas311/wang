@@ -1,5 +1,7 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_Debugger.java,v 1.2 2013/11/17 16:53:34 drmiller Exp $
+// $Id: Wang_Debugger.java,v 1.3 2013/11/17 21:39:06 drmiller Exp $
+
+import java.io.*;
 
 interface Wang_Debugger
 {
@@ -14,5 +16,9 @@ interface Wang_Debugger
 	public String romDump(Wang_Core core, int adr, int len);
 	public String getRegisters(Wang_Core core);
 	public String getMachine(Wang_Core core);
-	public String getTrace(Wang_Core core);
+	public void putTrace(Wang_Core core) throws Exception ;
+	public void core(Wang_Core core, FileOutputStream file) throws Exception;
+	public void setTrace(Wang_Core core, boolean on) throws Exception;
+	public void setTraceFile(Wang_Core core, FileOutputStream file) throws Exception;
+	public void dup(Wang_Core core);
 }

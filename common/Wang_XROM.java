@@ -8,4 +8,6 @@ interface Wang_XROM {
 	public byte getByte(int adr); // Get byte from ROM at location 'adr'
 
 	public void pickFile(JMenuItem m); // Install new ROM image
+
+	public void setXROM(byte[] img);
 }
