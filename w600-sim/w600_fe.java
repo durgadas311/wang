@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $
+// $Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -507,7 +507,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -745,8 +745,176 @@ class Wang600_Debugger
 	public Wang600_Debugger() {
 	}
 
-	public String disas(Wang_Core core, int adr) {
-		return new String("implement disas()");
+	public String disas(Wang_Core co, int adr) {
+		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+		Wang600_SimulatorJava.Wang600_Ucode u = core.getUcode(adr);
+		String stack = new String();;
+		int k = u.kk;
+		int nxt = u.jad << 2;
+		if (u.jh < 2) {
+			nxt |= (u.jh << 1);
+		}
+		if (u.jl < 2) {
+			nxt |= (u.jl << 0);
+		}
+		if (u.jl == 7) {
+			stack += "return";
+		} else {
+			if (u.sub != 0) {
+				stack += "call";
+			} else {
+				stack += "jump";
+			}
+			stack += String.format(" %03x", nxt);
+			if (u.jh >= 2 || u.jl >= 2) {
+				stack += "[";
+				switch(u.jh) {
+				case 2: stack += "S<1>"; break;
+				case 3: stack += "S<3>"; break;
+				case 4: stack += "OV"; break;
+				case 5: stack += "CC"; break;
+				case 6: stack += "KBD"; break;
+				}
+				stack += ":";
+				switch(u.jl) {
+				case 2: stack += "S<0>"; break;
+				case 3: stack += "S<2>"; break;
+				case 4: stack += "Zo"; break;
+				case 5: stack += "Q?"; break;
+				case 6: stack += "SC"; break;
+				case 7: stack += "1?"; break;
+				}
+				stack += "]";
+			}
+		}
+		String h;
+		switch(u.ai) {
+		case 0: h = "S"; break;
+		case 1: h = "T"; break;
+		case 2: h = "U"; break;
+		case 3: h = "V"; break;
+		case 4: h = "KA"; break;
+		case 5: h = "KB"; break;
+		case 6: h = "CA"; break;
+		case 7: h = "CB"; break;
+		default: h = ""; break;
+		}
+		String g;
+		switch(u.bi) {
+		case 0: g = "0"; break;
+		case 1: g = Integer.toString(k); break;
+		case 2: g = "D1"; break;
+		case 3: g = "D2"; break;
+		case 4: g = "KA"; break;
+		case 5: g = "KB"; break;
+		case 6: g = "CA"; break;
+		case 7: g = "CB"; break;
+		default: g = ""; break;
+		}
+
+		if (u.ac == 0) h = "0"; // "15"? "0"? ???
+		String ops = "+++++&|$";
+		if (u.bc != 0) ops = "-----&^$";
+		String alu;
+		if (u.aop == 7) {
+			alu = "0";
+		} else {
+			alu = h + " " + ops.substring(u.aop, u.aop + 1) + " " + g;
+			switch (u.aop) {
+			case 1:
+			case 4:
+				alu += " " + ops.substring(u.aop, u.aop + 1) + " 1";
+				break;
+			case 3:
+				alu += " " + ops.substring(u.aop, u.aop + 1) + " SC";
+				break;
+			}
+			alu += " ->[Zo";
+			if (u.aop < 5) {
+				alu += ",CC";
+				switch (u.aop) {
+				case 2:
+				case 3:
+				case 4:
+					alu += ",SC";
+					break;
+				}
+			}
+			alu += "]";
+		}
+		String acc = null;
+		String mach = null;
+		if (u.st >=1 && u.st <= 8) {
+			acc = String.format("S<%d>=%d", (u.st - 1) & 3, ((u.st - 1) >> 2) ^ 1);
+		} else {
+			switch(u.st) {
+			case 0: /* sprintf(mach, "NOP"); */ break;
+			case 9: mach = "RESET"; break;
+			case 10: acc = "S<0>=!Z"; break;
+			case 11: acc = "S<1>=Z"; break;
+			case 12: mach = "OV=1"; break;
+			case 13: acc = "S=0"; break;
+			case 14: mach = "ERR=1"; break;
+			}
+		}
+		String targ = new String();
+		if (targ.length() > 0 && u.zo != 7) {	// always false???
+			targ += " = ";
+		}
+		switch(u.zo) {
+		case 0:	if (u.st == 15) targ += "S"; break;
+		case 1:	targ += "T"; break;
+		case 2:	targ += "U"; break;
+		case 3:	targ += "V"; break;
+		case 4:	targ += "KA"; break;
+		case 5:	targ += "KB"; break;
+		case 6:	targ += "CA"; break;
+		}
+		if (targ.length() > 0) {
+			targ += " = ";
+		}
+
+		String opA = null;
+		switch(u.mop) {
+		case 1:	opA = "mem(T,U,V) = CA"; break;
+		case 2:	opA = String.format("mem(15,%d,V) = CA", k); break;
+		case 3:	opA = String.format("mem(15,15,%d) = CA", k); break;
+		case 4:	opA = "CA = mem(T,U,V), CB = rom(T,U,V)"; break;
+		case 5:	opA = String.format("CA = mem(15,%d,V), CB = rom(15,%d,V)", k, k); break;
+		case 6:	opA = String.format("CA = mem(15,15,%d), CB = rom(15,15,%d)", k, k); break;
+		case 7:	opA = "KBP <<+ KB<0>"; break;
+		case 8:	opA = "PPF=1"; break;
+		case 9:	opA = "<A9>"; break;
+		case 10:	opA = "KB<0> = MHG/MHO"; break;
+		case 11:	opA = "WDT = KB<0>"; break;
+		case 12:	opA = "KA=PC0-3, KB<3>=PC4, KB<1>=RBS"; break;
+		case 13:	opA = "TMR=1(";
+				if ((u.bi & 1) != 0) opA += "WR";
+				else opA += "RD";
+				opA += ")";
+				break;
+		case 14:	opA = "TMR=0";
+				if ((u.bi & 1) != 0) opA += "(noreset)";
+				break;
+		case 15:	opA = "GIOA=KA, GIOB=KB, IOB=";
+				opA += Integer.toString(k);
+				break;
+		}
+
+		String buf = targ + alu;
+		if (acc != null) {
+			buf += "; " + acc;
+		}
+		if (mach != null) {
+			buf += "; " + mach;
+		}
+		if (opA != null) {
+			buf += "; " + opA;
+		}
+		if (stack.length() > 0) {
+			buf += "; " + stack;
+		}
+		return buf;
 	}
 
 	public String getRegisters(Wang_Core core) {
@@ -820,7 +988,7 @@ class Wang600_Debugger
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -875,7 +1043,7 @@ class Wang600_SimulatorJava
 
 	byte[] _ram;
 
-	private class Wang600_Ucode {
+	public class Wang600_Ucode {
 		public byte jl;
 		public byte jh;
 		public int jad;
@@ -961,15 +1129,15 @@ class Wang600_SimulatorJava
 
 		public byte[] fetchBytes(int adr) {
 			int idx = adr * 8;
-			return Arrays.copyOfRange(_ucode, idx, idx + 7);
+			return Arrays.copyOfRange(_ucode, idx, idx + 8);
 		}
 
 		public long fetchLong(int adr) {
 			byte[] b = fetchBytes(adr);
-			long u = (b[0] & 0xff) | ((b[1] & 0xff) << 8) |
-				((b[2] & 0xff) << 16) | ((b[3] & 0xff) << 24) |
-				((b[4] & 0xff) << 32) | ((b[5] & 0xff) << 40) |
-				((b[6] & 0xff) << 48) | ((b[7] & 0xff) << 56);
+			long u = (long)(b[0] & 0x00ff) | ((long)(b[1] & 0x00ff) << 8) |
+				((long)(b[2] & 0x00ff) << 16) | ((long)(b[3] & 0x00ff) << 24) |
+				((long)(b[4] & 0x00ff) << 32) | ((long)(b[5] & 0x00ff) << 40) |
+				((long)(b[6] & 0x00ff) << 48) | ((long)(b[7] & 0x00ff) << 56);
 			return u;
 		}
 
@@ -990,6 +1158,10 @@ class Wang600_SimulatorJava
 
 	public boolean breakPoint(int adr) {
 		return _rom.breakPoint(adr);
+	}
+
+	public Wang600_Ucode getUcode(int adr) {
+		return _rom.fetchUcode(adr);
 	}
 
 	public long getUcodeLong(int adr) {
@@ -1111,7 +1283,6 @@ class Wang600_SimulatorJava
 	}
 
 	public void debugIntr() {
-System.err.println("Debug interrupt");
 		if (_dbg != null) {
 			// might be sleeping, so need to wake up...
 			run_sim = false;
@@ -1787,7 +1958,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1997,7 +2168,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2585,7 +2756,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2795,7 +2966,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3210,7 +3381,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3477,7 +3648,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.163 $ $Date: 2013/11/17 03:20:55 $<BR>"+
+			"$Revision: 1.164 $ $Date: 2013/11/17 10:46:03 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3611,7 +3782,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3829,7 +4000,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3922,7 +4093,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.164 2013/11/17 10:46:03 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
