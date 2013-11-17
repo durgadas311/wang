@@ -24,6 +24,8 @@ interface Wang_Core extends Runnable {
 	public void setRun(boolean run);
 	public boolean breakPoint(int adr);	// toggles BP at adr
 	public boolean getBreakPoint(int adr);
+	public int setReg(String reg, int val);
+	public int getReg(String reg);
 
 	public void run();
 }

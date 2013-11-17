@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_Debugger.java,v 1.1 2013/11/17 03:20:55 drmiller Exp $
+// $Id: Wang_Debugger.java,v 1.2 2013/11/17 16:53:34 drmiller Exp $
 
 interface Wang_Debugger
 {
@@ -14,4 +14,5 @@ interface Wang_Debugger
 	public String romDump(Wang_Core core, int adr, int len);
 	public String getRegisters(Wang_Core core);
 	public String getMachine(Wang_Core core);
+	public String getTrace(Wang_Core core);
 }

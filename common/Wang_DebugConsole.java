@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.2 2013/11/17 10:45:28 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.3 2013/11/17 16:53:34 drmiller Exp $
 
 import java.io.*;
 
@@ -124,6 +124,20 @@ class Wang_DebugConsole
 		new DbgCmd( "set", "reg=value [...]", "Set register(s)",
 		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
+				for (int x = 1; x < line.length; ++x) {
+					int q = line[x].indexOf('=');
+					if (q == -1) {
+						System.out.format("'set' sytax error at \"%s\"\n", line[x]);
+						break;
+					}
+					String reg = line[x].substring(0, q);
+					int val = Integer.valueOf(line[x].substring(q + 1), 16);
+					if (core.setReg(reg, val) == -1) {
+						System.out.format("Unknown register \"%s\"\n", reg);
+						break;
+					}
+					System.out.format("%s = %x\n", reg, val);
+				}
 				return 0;
 			}
 		}
@@ -150,7 +164,7 @@ new DbgFunc() {
 			}
 		}
 		),
-		new DbgCmd( "step", null, "Disassemble ucode ROM at PC [or hex addr]",
+		new DbgCmd( "step", null, "Single-step one instruction",
 		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				core.relCycleLimit(1);
@@ -268,7 +282,7 @@ new DbgFunc() {
 			s = null;
 		}
 		if (s == null) {
-			System.out.format("%s00 Simulation done.\n", Wang_UI.getSeries());
+			System.out.format("Wang %s00 Simulation done.\n", Wang_UI.getSeries());
 			return 1;
 		}
 		if (s.length() == 0) {
