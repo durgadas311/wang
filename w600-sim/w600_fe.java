@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $
+// $Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -56,11 +56,12 @@ public class w600_fe
 		java.io.OutputStream fout = null;
 		java.io.InputStream fin = null;
 		GridBagLayout gridbag = new GridBagLayout();
-
+		Wang_DebugConsole dbgr = null;
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
 		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
 		boolean web = (args.length > 0 && args[0].compareTo("-w") == 0);
+		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
 
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -97,6 +98,9 @@ public class w600_fe
 			} catch (Exception ee) {
 				Wang_UI.fatal("Startup", ee.getMessage());
 			}
+		} else if (dbg) {
+			// fin/fout == null means use internal simulator...
+			dbgr = new Wang_DebugConsole(new Wang600_Debugger());
 		} else {
 			// fin/fout == null means use internal simulator...
 		}
@@ -207,7 +211,7 @@ public class w600_fe
 		Wang600.Help = new Wang600_Help(front_end);
 
 		// Must be alfter all components created.
-		Wang600_SimInput inp = new Wang600_SimInput();
+		Wang600_SimInput inp = new Wang600_SimInput(dbgr);
 		Wang600.XROM.Initialize();
  
 		JMenuBar mb = new JMenuBar();
@@ -503,7 +507,7 @@ class Wang600_Properties extends Wang_Properties
 class Wang600_SimulatorPipe
 	implements Wang_Core, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
 	private Wang_InputDevice _cn36;	// current active device
@@ -716,6 +720,99 @@ if (n != 32) System.err.println("too little? "+n);
 			}
 		}
 	}
+
+	// unused debug interfaces...
+	public void debugIntr() {}
+	public int getPC() { return 0; }
+	public int getRamAdr() { return 0; }
+	public int getRamSize() { return 0; }
+	public int getUcodeSize() { return 0; }
+	public long getUcodeLong(int adr) { return 0; }
+	public byte[] getUcodeBytes(int adr) { return null; }
+	public byte getRam(int adr) { return 0; }
+	public void putRam(int adr, byte b) {}
+	public int getXRomSize() { return 0; }
+	public byte getXRom(int adr) { return 0; }
+	public long relCycleLimit(long n) { return 0; }
+	public void setRun(boolean run) {}
+	public boolean breakPoint(int adr) { return false; }
+	public boolean getBreakPoint(int adr) { return false; }
+}
+
+class Wang600_Debugger
+	implements Wang_Debugger
+{
+	public Wang600_Debugger() {
+	}
+
+	public String disas(Wang_Core core, int adr) {
+		return new String("implement disas()");
+	}
+
+	public String getRegisters(Wang_Core core) {
+		return new String("implement getRegisters()\n");
+	}
+
+	public String getMachine(Wang_Core core) {
+		return new String("implement getMachine()\n");
+	}
+
+	public String ramDump(Wang_Core core, int adr, int len) {
+		String s = new String();
+		int a = adr >> 1; 
+		int l = (len + 1) & ~1;
+		int x, y;
+		for (x = 0; x < l;) {
+			if (a >= core.getRamSize()) {
+				s += " end memory\n";
+				break;
+			}
+			s += String.format("%03x:", a << 1);
+			for (y = 0; x + y < l && y < 16; y += 2) {
+				byte b = core.getRam(a);
+				s += String.format(" %01x-%01x", (b & 0x0f), (b >> 4) & 0x0f);
+				++a;
+			}
+			s += "\n";
+			x += y;
+		}
+		return s;
+	}
+
+	public String romDump(Wang_Core core, int adr, int len) {
+		String s = new String();
+		int a = adr >> 1; 
+		int l = (len + 1) & ~1;
+		int x, y;
+		for (x = 0; x < l;) {
+			if (a >= core.getRamSize()) {
+				s += " end ROM\n";
+				break;
+			}
+			s += String.format("%03x:", a << 1);
+			for (y = 0; x + y < l && y < 16; y += 2) {
+				byte b = core.getXRom(a);
+				s += String.format(" %01x-%01x", (b & 0x0f), (b >> 4) & 0x0f);
+				++a;
+			}
+			s += "\n";
+			x += y;
+		}
+		return s;
+	}
+
+	public void ramSet(Wang_Core core, int adr, byte val) {
+		byte v = (byte)(val & 0x0f);
+		int a = adr >> 1;
+		byte b = core.getRam(a);
+		if ((adr & 1) != 0) {
+			b &= 0x0f;
+			v <<= 4;
+		} else {
+			b &= 0x0f0;
+		}
+		core.putRam(a, (byte)(b | v));
+	}
 }
 
 // Implements the Wang600 hardware. Does not provide any debug/trace support.
@@ -723,7 +820,7 @@ if (n != 32) System.err.println("too little? "+n);
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -759,8 +856,9 @@ class Wang600_SimulatorJava
 	int jam;
 	int next;
 	int pc;
-	int cycles;
-	int cylimit; // debug, not used
+	long cycles;
+	long cylimit;
+	boolean run_sim;
 
 	byte pr_drum;
 	int pr_hammers;
@@ -850,13 +948,95 @@ class Wang600_SimulatorJava
 			}
 		}
 
-		public Wang600_Ucode fetch(int adr) {
+		public boolean getBreakPoint(int adr) {
 			int idx = adr * 8;
-			return new Wang600_Ucode(Arrays.copyOfRange(_ucode, idx, idx + 7));
+			return ((_ucode[idx + 7] & 1) != 0);
+		}
+
+		public boolean breakPoint(int adr) {
+			int idx = adr * 8;
+			_ucode[idx + 7] ^= 1;
+			return ((_ucode[idx + 7] & 1) != 0);
+		}
+
+		public byte[] fetchBytes(int adr) {
+			int idx = adr * 8;
+			return Arrays.copyOfRange(_ucode, idx, idx + 7);
+		}
+
+		public long fetchLong(int adr) {
+			byte[] b = fetchBytes(adr);
+			long u = (b[0] & 0xff) | ((b[1] & 0xff) << 8) |
+				((b[2] & 0xff) << 16) | ((b[3] & 0xff) << 24) |
+				((b[4] & 0xff) << 32) | ((b[5] & 0xff) << 40) |
+				((b[6] & 0xff) << 48) | ((b[7] & 0xff) << 56);
+			return u;
+		}
+
+		public Wang600_Ucode fetchUcode(int adr) {
+			return new Wang600_Ucode(fetchBytes(adr));
 		}
 	}
 
 	private Wang600_UcodeRom _rom;
+
+	public int getUcodeSize() {
+		return 2048;
+	}
+
+	public boolean getBreakPoint(int adr) {
+		return _rom.getBreakPoint(adr);
+	}
+
+	public boolean breakPoint(int adr) {
+		return _rom.breakPoint(adr);
+	}
+
+	public long getUcodeLong(int adr) {
+		return _rom.fetchLong(adr);
+	}
+
+	public byte[] getUcodeBytes(int adr) {
+		return _rom.fetchBytes(adr);
+	}
+
+	public int getPC() { return pc; }
+
+	public int getRamSize() {
+		return 2048;
+	}
+
+	public int getRamAdr() {
+		return ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
+	}
+
+	public byte getRam(int adr) {
+		//adr &= ram_mask;
+		return _ram[adr];
+	}
+
+	public void putRam(int adr, byte b) {
+		//adr &= ram_mask;
+		_ram[adr] = b;
+	}
+
+	public int getXRomSize() {
+		return 2048;
+	}
+
+	public byte getXRom(int adr) {
+		//adr &= ram_mask;
+		return Wang600.XROM.getByte(adr);
+	}
+
+	public long relCycleLimit(long n) {
+		cylimit = cycles + n;
+		return cylimit;
+	}
+
+	public void setRun(boolean r) {
+		run_sim = r;
+	}
 
 	public void chgMode0() {
 		good = 0;
@@ -898,7 +1078,10 @@ class Wang600_SimulatorJava
 		// needs other side-effects... display?
 	}
 
-	public Wang600_SimulatorJava() {
+	private Wang_DebugConsole _dbg;
+
+	public Wang600_SimulatorJava(Wang_DebugConsole dbg) {
+		_dbg = dbg;
 		// at some point, get these from properties...
 		int memsize = 2048; // based on Model (2TP, 6TP, 14TP, ...)
 		String romfile = "wang600.rom";
@@ -920,9 +1103,20 @@ class Wang600_SimulatorJava
 		disp = new short[16];
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
+		run_sim = true;
+		cylimit = Long.MAX_VALUE;
 
 		Thread t = new Thread(this);
 		t.start();
+	}
+
+	public void debugIntr() {
+System.err.println("Debug interrupt");
+		if (_dbg != null) {
+			// might be sleeping, so need to wake up...
+			run_sim = false;
+			keyCodes.addFirst(-1);
+		}
 	}
 
 	private byte[] odd_parity;
@@ -1159,31 +1353,30 @@ class Wang600_SimulatorJava
 	private void rd_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
-		byte b = _ram[adr >> 1];
+		byte b = getRam(adr >> 1);
 		if ((adr & 1) != 0) {
 			b >>= 4;
 		}
 		rb = ca = (byte)(b & 0x0f);
-		b = Wang600.XROM.getByte(adr >> 1);
+		b = getXRom(adr >> 1);
 		if ((adr & 1) != 0) {
 			b >>= 4;
 		}
 		cb = (byte)(b & 0x0f);
-//if (adr < 0x7b8) System.err.format("%03x: %02x %02x\n", adr, ca, cb);
 	}
 
 	private void wr_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
 		byte a = ca;
-		byte b = _ram[adr >> 1];
+		byte b = getRam(adr >> 1);
 		if ((adr & 1) != 0) {
 			a <<= 4;
 			b &= 0x0f;
 		} else {
 			b &= 0xf0;
 		}
-		_ram[adr >> 1] = (byte)(b | a);
+		putRam(adr >> 1, (byte)(b | a));
 	}
 
 	private short[] disp;
@@ -1252,7 +1445,7 @@ class Wang600_SimulatorJava
 	}
 
 	private int instr_exec() {
-		Wang600_Ucode uu = _rom.fetch(pc);
+		Wang600_Ucode uu = _rom.fetchUcode(pc);
 		int nxt;
 		int rc = 0;
 
@@ -1538,10 +1731,26 @@ class Wang600_SimulatorJava
 
 	public void run() {
 		// Run the simulator...
+		boolean debug = (_dbg != null);
 		int rc = 0;
-		while (rc == 0) {
+		do {
+			while (debug && !run_sim) {
+				rc = _dbg.command(this);
+				if (rc != 0) {
+					System.exit(0);
+				}
+			}
 			rc = instr_exec();
-		}
+			if (rc != 0) {
+				break;
+			}
+			if (debug && cycles >= cylimit) {
+				// PC has NOT been executed...
+				cylimit = Long.MAX_VALUE;
+				run_sim = false;
+			}
+		} while (run_sim || debug);
+		// not normally reached...
 		Wang_UI.fatal("Wang600 Core", "Simulation error");
 	}
 }
@@ -1578,7 +1787,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1727,7 +1936,7 @@ class Wang600_SimInput
 		}
 	}
 
-	public Wang600_SimInput() {
+	public Wang600_SimInput(Wang_DebugConsole dbg) {
 		if (Wang600.CN24 != null) {
 			Wang600.CN24.getFrame().addWindowListener(this);
 		}
@@ -1764,7 +1973,7 @@ class Wang600_SimInput
 		_mu.add(_miNone);
 
 		if (Wang_UI.getFin() == null) { // && getFout() == null
-			Wang600.Core = new Wang600_SimulatorJava();
+			Wang600.Core = new Wang600_SimulatorJava(dbg);
 		} else {
 			Wang600.Core = new Wang600_SimulatorPipe();
 		}
@@ -1788,7 +1997,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2376,7 +2585,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2586,7 +2795,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -2927,6 +3136,8 @@ System.err.println("action");
 			Wang600.Core.pressKey(0x00fb);
 		} else if (c == 'x' || c == 'X') {
 			Wang600.Core.pressKey(0x00e0 | _defreg);
+		} else if (c == '%') {
+			Wang600.Core.debugIntr();
 		}
 	}
 
@@ -2999,7 +3210,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3266,7 +3477,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.162 $ $Date: 2013/11/15 19:11:02 $<BR>"+
+			"$Revision: 1.163 $ $Date: 2013/11/17 03:20:55 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3400,7 +3611,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3618,7 +3829,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3711,7 +3922,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.162 2013/11/15 19:11:02 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.163 2013/11/17 03:20:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
