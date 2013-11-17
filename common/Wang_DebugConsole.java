@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.1 2013/11/17 03:20:55 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.2 2013/11/17 10:45:28 drmiller Exp $
 
 import java.io.*;
 
@@ -31,14 +31,14 @@ class Wang_DebugConsole
 
 	private DbgCmd[] commands = new DbgCmd[]{
 		new DbgCmd( "quit", null, "End simulation",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				return 1;
 			}
-}
+		}
 		),
 		new DbgCmd( "help", null, "Display this help",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int x;
 				int m = 0;
@@ -62,10 +62,10 @@ new DbgFunc() {
 				}
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "dump", null, "Dump processor state/registers",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int pc = core.getPC();
 				System.out.format("PC = %03x %s\n", pc, _dbg.disas(core, pc));
@@ -73,10 +73,10 @@ new DbgFunc() {
 				System.out.format("[%s]\n", _dbg.getMachine(core));
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "disas", "[addr [instrs]]", "Disassemble ucode ROM at PC [or hex addr]",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int pc = core.getPC();
 				int len = 16;
@@ -94,16 +94,16 @@ new DbgFunc() {
 				if (max - pc < len) len = max - pc;
 
 				while (len > 0) {
-					System.out.format("%03x: [%011lx] %s\n", pc, core.getUcodeLong(pc), _dbg.disas(core, pc));
+					System.out.format("%03x: [%011x] %s\n", pc, core.getUcodeLong(pc), _dbg.disas(core, pc));
 					--len;
 					++pc;
 				}
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "exam", "[addr [words]]", "Examine RAM at L,M,N [or hex addr]",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int adr = core.getRamAdr();
 				int len = 256;
@@ -119,14 +119,14 @@ new DbgFunc() {
 				System.out.format("%s", _dbg.ramDump(core, adr, len));
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "set", "reg=value [...]", "Set register(s)",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "store", "[@addr] value...", "Store hex val(s) in RAM at L,M,N [or hex addr]",
 new DbgFunc() {
@@ -148,26 +148,26 @@ new DbgFunc() {
 				}
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "step", null, "Disassemble ucode ROM at PC [or hex addr]",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				core.relCycleLimit(1);
 				core.setRun(true);
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "core", "file", "Dump all of RAM (2K) to <file>",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "break", "[addr ...]", "Set/Clear/Show one-shot breakpoint(s)",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int pc = core.getPC();
 				int max = core.getUcodeSize();
@@ -197,16 +197,16 @@ new DbgFunc() {
 				}
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "go", "[+cycles]", "Resume program at current PC [break after <cycles>]",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				if (line.length > 1) {
 					if (line[1].indexOf('+') == 0) {
 						long n = Integer.valueOf(line[1].substring(1));
 						long limit = core.relCycleLimit(n);
-						System.out.format("breakpoint at %ld cycles (now + %ld)\n",
+						System.out.format("breakpoint at %d cycles (now + %d)\n",
 							limit, n);
 					}
 				}
@@ -214,18 +214,18 @@ new DbgFunc() {
 				System.out.format("resuming at %03x\n", core.getPC());
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "trace", "[file]", "Toggle trace on/off",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				return 0;
 			}
-}
+		}
 		),
 		// these two should be conditionally added based on getXRomSize()
 		new DbgCmd( "rom", "[addr [words]]", "Examine ROM at L,M,N [or hex addr]",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				int adr = core.getRamAdr();
 				int len = 256;
@@ -245,14 +245,14 @@ new DbgFunc() {
 				System.out.format("%s", _dbg.romDump(core, adr, len));
 				return 0;
 			}
-}
+		}
 		),
 		new DbgCmd( "dup", null, "Copy program space into ROM",
-new DbgFunc() {
+		new DbgFunc() {
 			public int do_cmd(Wang_Core core, String[] line) {
 				return 0;
 			}
-}
+		}
 		),
 	};
 
