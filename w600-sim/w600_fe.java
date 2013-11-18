@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $
+// $Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,7 +7,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import java.io.*;
-import java.net.Socket;
 import java.util.Arrays;
 
 import java.awt.print.*;
@@ -48,19 +47,14 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 
 	private static JFrame front_end;
 
 	public static void main(String[] args) {
-		java.io.OutputStream fout = null;
-		java.io.InputStream fin = null;
 		GridBagLayout gridbag = new GridBagLayout();
-		Wang_DebugConsole dbgr = null;
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
-		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
-		boolean web = (args.length > 0 && args[0].compareTo("-w") == 0);
 		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
 
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
@@ -71,40 +65,6 @@ public class w600_fe
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
 		Wang_UI.setSeries("6");
 
-		if (test) {
-			// Test front-end stand-alone - nothing special
-		} else if (back) {
-			// Used for debugging? Need adapter class to convert
-			// multi-stream comm to fin/fout.
-			fout = System.out;
-			fin = System.in;
-		} else if (web || Wang_UI.getProperties().getBoolean("wang600_remote")) {
-			// Not needed any more
-			String host = Wang_UI.getProperties().getProperty("wang600_host");
-			String port = Wang_UI.getProperties().getProperty("wang600_port");
-			if (web && args.length >= 3) {
-				// should these set properties?
-				port = args[2];
-				host = args[1];
-			}
-			if (host == null || port == null) {
-				System.err.println("Usage: w600_fe -w <host> <port>");
-				System.exit(1);
-			}
-			try {
-				Socket sock = new Socket(host, Integer.parseInt(port));
-				fout = sock.getOutputStream();
-				fin = sock.getInputStream();
-			} catch (Exception ee) {
-				Wang_UI.fatal("Startup", ee.getMessage());
-			}
-		} else if (dbg) {
-			// fin/fout == null means use internal simulator...
-			dbgr = new Wang_DebugConsole(new Wang600_Debugger());
-		} else {
-			// fin/fout == null means use internal simulator...
-		}
-		Wang_UI.setSimIO(fin, fout);
 		front_end = new JFrame("Wang 600 Advanced Programmable Calculator");
 		front_end.setIconImage(img);
 
@@ -211,7 +171,7 @@ public class w600_fe
 		Wang600.Help = new Wang600_Help(front_end);
 
 		// Must be alfter all components created.
-		Wang600_SimInput inp = new Wang600_SimInput(dbgr);
+		Wang600_SimInput inp = new Wang600_SimInput(test, dbg);
 		Wang600.XROM.Initialize();
  
 		JMenuBar mb = new JMenuBar();
@@ -502,253 +462,119 @@ class Wang600_Properties extends Wang_Properties
 	}
 }
 
-// Receives single byte-stream input from BackEnd simulator and directs
-// messages to components.
-class Wang600_SimulatorPipe
-	implements Wang_Core, ActionListener
-{
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
-
-	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_InputDevice _cn36;	// current active device
-
-	private void do_keycode(int code) {
-		if (Wang_UI.getFout() == null) {
-			int t = code >> 8;
-			int h = (code >> 4) & 0x0f;
-			int l = code & 0x0f;
-			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
-		} else {
-			byte[] b = new byte[2];
-			b[0] = (byte)(code & 0x0ff);
-			b[1] = (byte)(code >> 8);
-			try {
-				Wang_UI.getFout().write(b);
-				Wang_UI.getFout().flush();	// why?
-			} catch (IOException ee) {
-				System.err.println("Broken pipe for keyboard!");
-			}
-		}
-	}
-
-	public void chgMode0() {
-		int code = Wang_Keys.MODE0 | Wang600.Kbd.getMode0();
-		do_keycode(code);
-	}
-
-	public void chgMode1() {
-		int code = Wang_Keys.MODE1 | Wang600.Kbd.getMode1();
-		do_keycode(code);
-	}
-
-	public void pressCmd(int cmd) {
-		int code = Wang_Keys.SPCL | cmd;
-		do_keycode(code);
-	}
-
-	public void ackIO(int iob) {
-		int code = ((iob << 12) | 0x0100);
-		if ((iob & ~1) == 4 && _cn36 != null) {
-			code |= _cn36.getGLRN();
-		}
-		do_keycode(code);
-	}
-
-	public void replyIO(int iob, int rep) {
-		do_keycode((iob << 12) | 0x0100 | (rep & 0x0ff));
-	}
-
-	public void chgXROM() {
-		do_keycode(0x8100);
-	}
-
-	java.util.LinkedList<Integer> keyCodes;
-
-	public void pressKey(int key) {
-		keyCodes.add(key);
-		if (!timer.isRunning()) {
-			timer.start();
-		}
-	}
-
-	private javax.swing.Timer timer; // must regulate flow...
-
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == timer) {
-			if (keyCodes.size() > 0) {
-				int k = keyCodes.remove();
-				do_keycode(k);
-			}
-			if (keyCodes.size() == 0) {
-				timer.stop();
-			}
-			return;
-		}
-	}
-
-	public Wang600_SimulatorPipe() {
-		timer = new Timer(10, this);
-		keyCodes = new java.util.LinkedList<Integer>();
-
-		Thread t = new Thread(this);
-		t.start();
-	}
-
-	public void run() {
-		int n = 0;
-		byte[] b = new byte[2];
-
-		while (true) {
-			try {
-				n = Wang_UI.getFin().read(b);
-			} catch (IOException ee) {
-				// System.err.println("Broken pipe for SimInput!");
-				return;
-			}
-			if (n == 0) {
-				continue;
-			}
-			if (n < 0) {
-				//System.err.println("simulator shutdown");
-				System.exit(1);
-			}
-			if ((b[1] & 0x00ff) == 0xf0) {
-				// fatal error, message follows...
-				byte[] m = new byte[1024];
-				try {
-					Wang_UI.getFin().read(m);
-					String err = new String(m);
-					System.err.println(err);
-				} catch (IOException ee) {
-					System.err.println("ugh!");
-				}
-				System.exit(1);
-			} else if ((b[1] & 0xfc) == 0x00) {
-				// there will be 16 total sent...
-				// and they are in order: 0-15...
-				byte[] m = new byte[32];
-				try {
-					n = Wang_UI.getFin().read(m);
-				} catch (IOException ee) {
-				}
-if (n != 32) System.err.println("too little? "+n);
-				short[] d = new short[16];
-				int x;
-				for (x = 0; x < 16; ++x) {
-					d[x] = m[x * 2 + 0];
-				}
-				Wang600.Disp.do_display(d);
-			} else if ((b[1] & 0xfe) == 0x04) {
-				Wang600.Disp.setOv((byte)(b[0] & 1));
-				Wang600.Disp.setErr((byte)(b[0] & 2));
-			} else if ((b[1] & 0xfe) == 0x06) {
-				Wang600.Disp.do_blanking();
-			} else if ((b[1] & ~1) == 0x08) {
-				int col = (((b[1] & 1) << 4) | ((b[0] & 0xf0) >> 4)) & 0x1f;
-				int drm = (b[0] & 0x0f);
-				if (col == 0x1f) {
-					Wang600.Prt.do_line();
-				} else {
-					Wang600.Prt.do_printer(col, drm);
-				}
-			} else if ((b[1]  & ~3) == 0x0c) {
-				if (b[1] == 0x0d) { // tape on - read
-					if (b[0] == 0) { // tape-on
-						Wang600.Tape.tape_on(0);
-					} else { // request for next byte
-						int i = Wang600.Tape.tape_play();
-						if (i < 0) {
-							do_keycode(0x0e00);
-						} else {
-							do_keycode(0x0c00 | i);
-						}
-					}
-				} else if (b[1] == 0x0f) { // tape on - write
-					Wang600.Tape.tape_on(1);
-				} else if (b[1] == 0x0e) { // tape off
-					Wang600.Tape.tape_off(0);
-				} else if (b[1] == 0x0c) { // tape write
-					Wang600.Tape.tape_record(b[0]);
-				} else {
-					System.err.format("invalid tape command (%04x)\n", (b[1] << 8) | b[0]);
-				}
-			} else if ((b[1] & 0x0ff) == 0x7f) {
-				_cn36 = null;
-				if (Wang600.CN24 != null) {
-					Wang600.CN24.reset();
-				}
-				Wang600.M630.reset();
-				Wang_UI.resetCN36();
-			} else if (b[1] == 0x10) {
-				if (Wang600.CN24 != null) {
-					Wang600.CN24.do_cn24(b[0]);
-				}
-			} else if ((b[1] & ~0x1f) == 0x20) { // IOB = 2,3
-				// Random-access devices on CN-36
-				// might need to support daisy-chained devices?
-				if ((b[1] & 0x0f) == 1) { // ACK
-					Wang600.M630.do_ack(b[1] >> 4);
-				} else {
-					Wang600.M630.do_dev(b[1] >> 4, b[0]);
-				}
-			} else if ((b[1] & ~0x1f) == 0x40) { // IOB = 4,5
-				// Group 1 / Group 2 devices on CN-36
-				// need to find which device "wants" this...
-				// ACK, gets directed to the device "currently
-				// in charge", as determined by (prior) start command.
-				if (_cn36 != null) {
-					// this should only happen for ACKs... (?)
-					_cn36.do_ack(b[1] >> 4);
-				} else {
-					// find a device that "wants" this code
-					_cn36 = Wang_UI.startCN36(b[1] >> 4, b[0]);
-				}
-			} else if ((b[1] & 0x80) != 0) {
-				int x;
-
-				// now, the back-end is waiting for us...
-				// dump the whole ROM image...
-				// back-end is expecting reversed image, but XROM
-				// is reversing it already, so have to re-reverse.
-				for (x = 0x7ff; x >= 0; --x) {
-					byte bb = Wang600.XROM.getByte(x);
-					do_keycode(0x8000 | (bb & 0x0ff));
-				}
-				do_keycode(0xff00);
-			} else {
-				System.err.format("Unexpected traffic (%d) %02x %02x\n", n, b[1], b[0]);
-			}
-		}
-	}
-
-	// unused debug interfaces...
-	public void debugIntr() {}
-	public int getPC() { return 0; }
-	public int getRamAdr() { return 0; }
-	public int getRamSize() { return 0; }
-	public int getUcodeSize() { return 0; }
-	public long getUcodeLong(int adr) { return 0; }
-	public byte[] getUcodeBytes(int adr) { return null; }
-	public byte getRam(int adr) { return 0; }
-	public void putRam(int adr, byte b) {}
-	public int getXRomSize() { return 0; }
-	public byte getXRom(int adr) { return 0; }
-	public long relCycleLimit(long n) { return 0; }
-	public void setRun(boolean run) {}
-	public boolean breakPoint(int adr) { return false; }
-	public boolean getBreakPoint(int adr) { return false; }
-	public int getReg(String reg) { return -1; }
-	public int setReg(String reg, int val) { return -1; }
-}
-
 class Wang600_Debugger
 	implements Wang_Debugger
 {
-	public Wang600_Debugger() {
+	private Wang600_SimulatorJava core;
+
+	public Wang600_Debugger(Wang600_SimulatorJava co) {
+		core = co;
 	}
 
-	public String disas(Wang_Core co, int adr) {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public int getPC() {
+		return core.pc;
+	}
+	public int getReg(String reg) {
+		if (reg.equalsIgnoreCase("s")) {
+			return core.s;
+		} else if (reg.equalsIgnoreCase("t")) {
+			return core.t;
+		} else if (reg.equalsIgnoreCase("u")) {
+			return core.u;
+		} else if (reg.equalsIgnoreCase("v")) {
+			return core.v;
+		} else if (reg.equalsIgnoreCase("ca")) {
+			return core.ca;
+		} else if (reg.equalsIgnoreCase("cb")) {
+			return core.cb;
+		} else if (reg.equalsIgnoreCase("ka")) {
+			return core.ka;
+		} else if (reg.equalsIgnoreCase("kb")) {
+			return core.kb;
+		} else if (reg.equalsIgnoreCase("gioa")) {
+			return core.gioa;
+		} else if (reg.equalsIgnoreCase("giob")) {
+			return core.giob;
+		} else if (reg.equalsIgnoreCase("iob")) {
+			return core.iob;
+		} else if (reg.equalsIgnoreCase("ov")) {
+			return core.ov;
+		} else if (reg.equalsIgnoreCase("err")) {
+			return core.err;
+		} else if (reg.equalsIgnoreCase("pc")) {
+			return core.pc;
+		} else if (reg.equalsIgnoreCase("stk1")) {
+			return core.stk1;
+		} else if (reg.equalsIgnoreCase("stk2")) {
+			return core.stk2;
+		} else {
+			return -1;
+		}
+	}
+
+	public int setReg(String reg, int val) {
+		if (reg.equalsIgnoreCase("s")) {
+			core.s = (byte)val;
+		} else if (reg.equalsIgnoreCase("t")) {
+			core.t = (byte)val;
+		} else if (reg.equalsIgnoreCase("u")) {
+			core.u = (byte)val;
+		} else if (reg.equalsIgnoreCase("v")) {
+			core.v = (byte)val;
+		} else if (reg.equalsIgnoreCase("ca")) {
+			core.ca = (byte)val;
+		} else if (reg.equalsIgnoreCase("cb")) {
+			core.cb = (byte)val;
+		} else if (reg.equalsIgnoreCase("ka")) {
+			core.ka = (byte)val;
+		} else if (reg.equalsIgnoreCase("kb")) {
+			core.kb = (byte)val;
+		} else if (reg.equalsIgnoreCase("gioa")) {
+			core.gioa = (byte)val;
+		} else if (reg.equalsIgnoreCase("giob")) {
+			core.giob = (byte)val;
+		} else if (reg.equalsIgnoreCase("iob")) {
+			core.iob = (byte)(val & 0x03);
+		} else if (reg.equalsIgnoreCase("ov")) {
+			core.ov = (byte)(val != 0 ? 1 : 0);
+		} else if (reg.equalsIgnoreCase("err")) {
+			core.err = (byte)(val != 0 ? 1 : 0);
+		} else if (reg.equalsIgnoreCase("pc")) {
+			core.pc = val & 0x7ff;
+		} else if (reg.equalsIgnoreCase("stk1")) {
+			core.stk1 = val & 0x7ff;
+		} else if (reg.equalsIgnoreCase("stk2")) {
+			core.stk2 = val & 0x7ff;
+		} else if (reg.equalsIgnoreCase("t")) {
+			core.t = (byte)val;
+		} else {
+			return -1;
+		}
+		return getReg(reg);
+	}
+
+	public long relCycleLimit(long n) {
+		core.cylimit = core.cycles + n;
+		return core.cylimit;
+	}
+
+	public void setRun(boolean r) {
+		core.run_sim = r;
+	}
+
+	public boolean getBreakPoint(int adr) {
+		return core._rom.getBreakPoint(adr);
+	}
+
+	public boolean breakPoint(int adr) {
+		return core._rom.breakPoint(adr);
+	}
+
+	public int getRamAdr() {
+		return ((core.l & 0x0f) << 8) | ((core.m & 0x0f) << 4) | (core.n & 0x0f);
+	}
+
+	public String disas(int adr, boolean raw) {
 		Wang600_SimulatorJava.Wang600_Ucode u = core.getUcode(adr);
 		String stack = new String();;
 		int k = u.kk;
@@ -916,16 +742,19 @@ class Wang600_Debugger
 		if (stack.length() > 0) {
 			buf += "; " + stack;
 		}
+		if (raw) {
+			buf = String.format("[%x%x%x%x%x%x%x%x%x%x%03x%x%x] ",
+				u.ai, u.bi, u.zo, u.aop, u.ac, u.bc, u.mop, u.kk, u.st,
+				u.sub, u.jad << 2, u.jh, u.jl) + buf;
+		}
 		return buf;
 	}
 
-	public void core(Wang_Core co, FileOutputStream file) throws Exception {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public void core(FileOutputStream file) throws Exception {
 		file.write(core._ram);
 	}
 
-	public void setTrace(Wang_Core co, boolean on) throws Exception {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public void setTrace(boolean on) throws Exception {
 		if (!on && core.trc_fp != null) {
 			core.trc_fp.close();
 			core.trc_fp = null;
@@ -933,15 +762,13 @@ class Wang600_Debugger
 		core.trace = on;
 	}
 
-	public void setTraceFile(Wang_Core co, FileOutputStream file) throws Exception {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
-		setTrace(core, false);	// ensure previous file gets closed
+	public void setTraceFile(FileOutputStream file) throws Exception {
+		setTrace(false);	// ensure previous file gets closed
 		core.trc_fp = file;
-		setTrace(core, true);
+		setTrace(true);
 	}
 
-	public String getRegisters(Wang_Core co) {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public String getRegisters() {
 		String s = String.format("STK1 = %03x STK2 = %03x\n", core.stk1, core.stk2);
 		s += String.format("T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
 			core.t, core.u, core.v, core.ca, core.cb);
@@ -952,8 +779,7 @@ class Wang600_Debugger
 		return s;
 	}
 
-	public String getMachine(Wang_Core co) {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public String getMachine() {
 		String s = String.format("d1=%01x|d2=%01x", Wang600.Kbd.getMode0(), Wang600.Kbd.getMode1());
 		if (core.ov != 0) s += "|Prog Err";
 		if (core.err != 0) s += "|Mach Err";
@@ -961,16 +787,13 @@ class Wang600_Debugger
 		return s;
 	}
 
-	public void dup(Wang_Core co) {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
+	public void dup() {
 		int x = 0x100;
-		int y = core.getRamSize() - 0x0a0;
+		int y = core._ram.length - 0x0a0;
 		Wang600.XROM.setXROM(Arrays.copyOfRange(core._ram, x, y));
 	}
 
-	public void putTrace(Wang_Core co) throws Exception {
-		Wang600_SimulatorJava core = (Wang600_SimulatorJava)co;
-		Wang600_SimulatorJava.Wang600_Ucode u = core.getUcode(core.pc);
+	public void putTrace() throws Exception {
 		String s = String.format("TRACE: %03x: [%03x %03x %03x] ",
 			core.pc, core.next, core.stk1, core.stk2);
 		s += String.format("%01x %01x %01x %01x [",
@@ -980,10 +803,7 @@ class Wang600_Debugger
 		if (core.sc != 0) s += "C"; else s += "c";
 		s += String.format("] %01x %01x %01x : ",
 			core.s, core.ka, core.kb);
-		s += String.format("[%x%x%x%x%x%x%x%x%x%x%03x%x%x] ",
-			u.ai, u.bi, u.zo, u.aop, u.ac, u.bc, u.mop, u.kk, u.st,
-			u.sub, u.jad << 2, u.jh, u.jl);
-		s += disas(core, core.pc);
+		s += disas(core.pc, true);
 		s += "\n";
 		if (core.trc_fp != null) {
 			core.trc_fp.write(s.getBytes());
@@ -992,19 +812,19 @@ class Wang600_Debugger
 		}
 	}
 
-	public String ramDump(Wang_Core core, int adr, int len) {
+	public String ramDump(int adr, int len) {
 		String s = new String();
 		int a = adr >> 1; 
 		int l = (len + 1) & ~1;
 		int x, y;
 		for (x = 0; x < l;) {
-			if (a >= core.getRamSize()) {
+			if (a >= core._ram.length) {
 				s += " end memory\n";
 				break;
 			}
 			s += String.format("%03x:", a << 1);
 			for (y = 0; x + y < l && y < 16; y += 2) {
-				byte b = core.getRam(a);
+				byte b = core._ram[a];
 				s += String.format(" %01x-%01x", (b & 0x0f), (b >> 4) & 0x0f);
 				++a;
 			}
@@ -1014,19 +834,19 @@ class Wang600_Debugger
 		return s;
 	}
 
-	public String romDump(Wang_Core core, int adr, int len) {
+	public String romDump(int adr, int len) {
 		String s = new String();
 		int a = adr >> 1; 
 		int l = (len + 1) & ~1;
 		int x, y;
 		for (x = 0; x < l;) {
-			if (a >= core.getRamSize()) {
+			if (a >= core._ram.length) {
 				s += " end ROM\n";
 				break;
 			}
 			s += String.format("%03x:", a << 1);
 			for (y = 0; x + y < l && y < 16; y += 2) {
-				byte b = core.getXRom(a);
+				byte b = Wang600.XROM.getByte(a);
 				s += String.format(" %01x-%01x", (b & 0x0f), (b >> 4) & 0x0f);
 				++a;
 			}
@@ -1036,17 +856,25 @@ class Wang600_Debugger
 		return s;
 	}
 
-	public void ramSet(Wang_Core core, int adr, byte val) {
+	public void ramSet(int adr, byte val) {
 		byte v = (byte)(val & 0x0f);
 		int a = adr >> 1;
-		byte b = core.getRam(a);
+		byte b = core._ram[a];
 		if ((adr & 1) != 0) {
 			b &= 0x0f;
 			v <<= 4;
 		} else {
 			b &= 0x0f0;
 		}
-		core.putRam(a, (byte)(b | v));
+		core._ram[a] = (byte)(b | v);
+	}
+
+	public int getUcodeSize() {
+		return core._rom._ucode.length / 8;
+	}
+
+	public int getXRomSize() {
+		return Wang600.XROM.getSize();
 	}
 }
 
@@ -1055,7 +883,7 @@ class Wang600_Debugger
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -1147,8 +975,9 @@ class Wang600_SimulatorJava
 			brkpt = ((instr[7] & 1) != 0);
 		}
 	}
-	private class Wang600_UcodeRom {
-		private byte[] _ucode; // raw ucode from file, 64-bit words
+
+	public class Wang600_UcodeRom {
+		public byte[] _ucode; // raw ucode from file, 64-bit words
 		// right now, the only override is for mem size, so just hardcode
 		// all that.
 
@@ -1218,148 +1047,12 @@ class Wang600_SimulatorJava
 		}
 	}
 
-	private Wang600_UcodeRom _rom;
-
-	public int getUcodeSize() {
-		return 2048;
-	}
-
-	public boolean getBreakPoint(int adr) {
-		return _rom.getBreakPoint(adr);
-	}
-
-	public boolean breakPoint(int adr) {
-		return _rom.breakPoint(adr);
-	}
+	public Wang600_UcodeRom _rom;
 
 	public Wang600_Ucode getUcode(int adr) {
 		return _rom.fetchUcode(adr);
 	}
 
-	public long getUcodeLong(int adr) {
-		return _rom.fetchLong(adr);
-	}
-
-	public byte[] getUcodeBytes(int adr) {
-		return _rom.fetchBytes(adr);
-	}
-
-	public int getPC() { return pc; }
-
-	public int getRamSize() {
-		return 2048;
-	}
-
-	public int getRamAdr() {
-		return ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
-	}
-
-	public byte getRam(int adr) {
-		//adr &= ram_mask;
-		return _ram[adr];
-	}
-
-	public void putRam(int adr, byte b) {
-		//adr &= ram_mask;
-		_ram[adr] = b;
-	}
-
-	public int getXRomSize() {
-		return 2048;
-	}
-
-	public byte getXRom(int adr) {
-		//adr &= ram_mask;
-		return Wang600.XROM.getByte(adr);
-	}
-
-	public int getReg(String reg) {
-		if (reg.equalsIgnoreCase("s")) {
-			return s;
-		} else if (reg.equalsIgnoreCase("t")) {
-			return t;
-		} else if (reg.equalsIgnoreCase("u")) {
-			return u;
-		} else if (reg.equalsIgnoreCase("v")) {
-			return v;
-		} else if (reg.equalsIgnoreCase("ca")) {
-			return ca;
-		} else if (reg.equalsIgnoreCase("cb")) {
-			return cb;
-		} else if (reg.equalsIgnoreCase("ka")) {
-			return ka;
-		} else if (reg.equalsIgnoreCase("kb")) {
-			return kb;
-		} else if (reg.equalsIgnoreCase("gioa")) {
-			return gioa;
-		} else if (reg.equalsIgnoreCase("giob")) {
-			return giob;
-		} else if (reg.equalsIgnoreCase("iob")) {
-			return iob;
-		} else if (reg.equalsIgnoreCase("ov")) {
-			return ov;
-		} else if (reg.equalsIgnoreCase("err")) {
-			return err;
-		} else if (reg.equalsIgnoreCase("pc")) {
-			return pc;
-		} else if (reg.equalsIgnoreCase("stk1")) {
-			return stk1;
-		} else if (reg.equalsIgnoreCase("stk2")) {
-			return stk2;
-		} else {
-			return -1;
-		}
-	}
-
-	public int setReg(String reg, int val) {
-		if (reg.equalsIgnoreCase("s")) {
-			s = (byte)val;
-		} else if (reg.equalsIgnoreCase("t")) {
-			t = (byte)val;
-		} else if (reg.equalsIgnoreCase("u")) {
-			u = (byte)val;
-		} else if (reg.equalsIgnoreCase("v")) {
-			v = (byte)val;
-		} else if (reg.equalsIgnoreCase("ca")) {
-			ca = (byte)val;
-		} else if (reg.equalsIgnoreCase("cb")) {
-			cb = (byte)val;
-		} else if (reg.equalsIgnoreCase("ka")) {
-			ka = (byte)val;
-		} else if (reg.equalsIgnoreCase("kb")) {
-			kb = (byte)val;
-		} else if (reg.equalsIgnoreCase("gioa")) {
-			gioa = (byte)val;
-		} else if (reg.equalsIgnoreCase("giob")) {
-			giob = (byte)val;
-		} else if (reg.equalsIgnoreCase("iob")) {
-			iob = (byte)(val & 0x03);
-		} else if (reg.equalsIgnoreCase("ov")) {
-			ov = (byte)(val != 0 ? 1 : 0);
-		} else if (reg.equalsIgnoreCase("err")) {
-			err = (byte)(val != 0 ? 1 : 0);
-		} else if (reg.equalsIgnoreCase("pc")) {
-			pc = val & 0x7ff;
-		} else if (reg.equalsIgnoreCase("stk1")) {
-			stk1 = val & 0x7ff;
-		} else if (reg.equalsIgnoreCase("stk2")) {
-			stk2 = val & 0x7ff;
-		} else if (reg.equalsIgnoreCase("t")) {
-			t = (byte)val;
-		} else {
-			return -1;
-		}
-		return getReg(reg);
-	}
-
-	public long relCycleLimit(long n) {
-		cylimit = cycles + n;
-		return cylimit;
-	}
-
-	public void setRun(boolean r) {
-		run_sim = r;
-	}
 
 	public void chgMode0() {
 		good = 0;
@@ -1403,8 +1096,12 @@ class Wang600_SimulatorJava
 
 	private Wang_DebugConsole _dbg;
 
-	public Wang600_SimulatorJava(Wang_DebugConsole dbg) {
-		_dbg = dbg;
+	public Wang600_SimulatorJava(boolean dbg) {
+		if (dbg) {
+			_dbg = new Wang_DebugConsole(new Wang600_Debugger(this));
+		} else {
+			_dbg = null;
+		}
 		// at some point, get these from properties...
 		int memsize = 2048; // based on Model (2TP, 6TP, 14TP, ...)
 		String romfile = "wang600.rom";
@@ -1677,12 +1374,12 @@ class Wang600_SimulatorJava
 	private void rd_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
-		byte b = getRam(adr >> 1);
+		byte b = _ram[adr >> 1];
 		if ((adr & 1) != 0) {
 			b >>= 4;
 		}
 		rb = ca = (byte)(b & 0x0f);
-		b = getXRom(adr >> 1);
+		b = Wang600.XROM.getByte(adr >> 1);
 		if ((adr & 1) != 0) {
 			b >>= 4;
 		}
@@ -1693,14 +1390,14 @@ class Wang600_SimulatorJava
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
 		byte a = ca;
-		byte b = getRam(adr >> 1);
+		byte b = _ram[adr >> 1];
 		if ((adr & 1) != 0) {
 			a <<= 4;
 			b &= 0x0f;
 		} else {
 			b &= 0xf0;
 		}
-		putRam(adr >> 1, (byte)(b | a));
+		_ram[adr >> 1] = (byte)(b | a);
 	}
 
 	private short[] disp;
@@ -2039,7 +1736,7 @@ class Wang600_SimulatorJava
 		next = nxt;
 
 		if (_dbg != null && trace) {
-			_dbg.instr_trace(this);
+			_dbg.instr_trace();
 		}
 
 		// the following are called in specific order...
@@ -2072,7 +1769,7 @@ class Wang600_SimulatorJava
 			if (debug && !run_sim) {
 				System.out.format("break at %03x\n", pc);
 				while (debug && !run_sim) {
-					rc = _dbg.command(this);
+					rc = _dbg.command();
 					if (rc != 0) {
 						System.exit(0);
 					}
@@ -2125,7 +1822,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -2274,7 +1971,7 @@ class Wang600_SimInput
 		}
 	}
 
-	public Wang600_SimInput(Wang_DebugConsole dbg) {
+	public Wang600_SimInput(boolean test, boolean dbg) {
 		if (Wang600.CN24 != null) {
 			Wang600.CN24.getFrame().addWindowListener(this);
 		}
@@ -2310,10 +2007,8 @@ class Wang600_SimInput
 		_miNone.addActionListener(this);
 		_mu.add(_miNone);
 
-		if (Wang_UI.getFin() == null) { // && getFout() == null
+		if (!test) {
 			Wang600.Core = new Wang600_SimulatorJava(dbg);
-		} else {
-			Wang600.Core = new Wang600_SimulatorPipe();
 		}
 	}
 
@@ -2335,7 +2030,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2831,6 +2526,10 @@ class Wang600_XROM implements Wang_XROM {
 	File _file;
 	byte[] _xrom;
 
+	public int getSize() {
+		return _xrom == null ? 0 : _xrom.length;
+	}
+
 	public JMenuItem getMenu(int key) {
 		String status = "none installed";
 		if (_file != null) {
@@ -2935,7 +2634,7 @@ class Wang600_XROM implements Wang_XROM {
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -3145,7 +2844,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3560,7 +3259,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3827,7 +3526,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.166 $ $Date: 2013/11/17 21:39:06 $<BR>"+
+			"$Revision: 1.167 $ $Date: 2013/11/18 15:21:01 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3961,7 +3660,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -4179,7 +3878,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -4272,7 +3971,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.166 2013/11/17 21:39:06 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

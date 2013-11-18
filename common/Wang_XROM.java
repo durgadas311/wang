@@ -10,4 +10,5 @@ interface Wang_XROM {
 	public void pickFile(JMenuItem m); // Install new ROM image
 
 	public void setXROM(byte[] img);
+	public int getSize(); // bytes
 }
