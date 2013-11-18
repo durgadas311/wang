@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $
+// $Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -47,7 +47,7 @@ class FEexit extends Thread {
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -166,20 +166,19 @@ public class w600_fe
 		}
 		// Must be after Keyboard created.
 		Wang600.M630 = new Wang600_Model630();
-		Wang600.XROM = new Wang600_XROM();
 
 		Wang600.Help = new Wang600_Help(front_end);
 
 		// Must be alfter all components created.
 		Wang600_SimInput inp = new Wang600_SimInput(test, dbg);
-		Wang600.XROM.Initialize();
+		// Wang600.Core is now setup...
  
 		JMenuBar mb = new JMenuBar();
 		JMenu mu;
 		mu = new JMenu("Devices");
 		mb.add(mu);
 		JMenuItem mi;
-		mi = Wang600.XROM.getMenu(KeyEvent.VK_R);
+		mi = ((Wang600_SimulatorJava)Wang600.Core).getXRomMenu(KeyEvent.VK_R);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
@@ -790,7 +789,7 @@ class Wang600_Debugger
 	public void dup() {
 		int x = 0x100;
 		int y = core._ram.length - 0x0a0;
-		Wang600.XROM.setXROM(Arrays.copyOfRange(core._ram, x, y));
+		core.setXRom(Arrays.copyOfRange(core._ram, x, y));
 	}
 
 	public void putTrace() throws Exception {
@@ -836,17 +835,21 @@ class Wang600_Debugger
 
 	public String romDump(int adr, int len) {
 		String s = new String();
+		if (core._xrom == null) {
+			s = "No ROM installed";
+			return s;
+		}
 		int a = adr >> 1; 
 		int l = (len + 1) & ~1;
 		int x, y;
 		for (x = 0; x < l;) {
-			if (a >= core._ram.length) {
+			if (a >= core._xrom.length) {
 				s += " end ROM\n";
 				break;
 			}
 			s += String.format("%03x:", a << 1);
 			for (y = 0; x + y < l && y < 16; y += 2) {
-				byte b = Wang600.XROM.getByte(a);
+				byte b = core._xrom[a];
 				s += String.format(" %01x-%01x", (b & 0x0f), (b >> 4) & 0x0f);
 				++a;
 			}
@@ -872,10 +875,6 @@ class Wang600_Debugger
 	public int getUcodeSize() {
 		return core._rom._ucode.length / 8;
 	}
-
-	public int getXRomSize() {
-		return Wang600.XROM.getSize();
-	}
 }
 
 // Implements the Wang600 hardware. Does not provide any debug/trace support.
@@ -883,7 +882,7 @@ class Wang600_Debugger
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -939,7 +938,94 @@ class Wang600_SimulatorJava
 	static final int D20_DEGREES = 0x01;
 	static final int D21_PRT_ON = 0x02;
 
-	byte[] _ram;
+	public byte[] _ram;
+	public byte[] _xrom;
+
+	private File _xromFile;
+
+	public JMenuItem getXRomMenu(int key) {
+		String status = "none installed";
+		if (_xromFile != null) {
+			status = _xromFile.getName();
+		}
+		return new JMenuItem("Expansion ROM - " + status, key);
+	}
+
+	public void setXRom(byte[] img) {
+		int l = img.length;
+		if (l > _xrom.length) {
+			// just in case...
+			l = _xrom.length;
+		}
+		int z = _xrom.length - l;
+		for (int x = 0; x < l; ++x) {
+			_xrom[z] = img[x];
+		}
+	}
+
+	private void loadXRom(File img) {
+		// must reverse order of bytes....
+		_xrom = null;
+		if (img != null) {
+			FileInputStream f;
+			try {
+				f = new FileInputStream(img);
+			} catch (FileNotFoundException ee) {
+				Wang_UI.warning("Install ROM", ee.getMessage());
+				return;
+			}
+			int n = 0;
+			int len = 2048;
+			byte[] buf = new byte[len];
+			try {
+				n = f.read(buf);
+			} catch (IOException ee) {
+				Wang_UI.warning("Install ROM", ee.getMessage());
+				n = -1;
+			}
+			try {
+				f.close();
+			} catch (IOException ee) {
+			}
+			if (n > 0) {
+				_xrom = new byte[len];
+				for (int x = 0; x < n; ++x) {
+					_xrom[len - x - 1] = buf[x];
+				}
+			}
+		}
+	}
+
+	public void pickXRomFile(JMenuItem m) {
+		SuffFileChooser ch = new SuffFileChooser("Install",
+					Wang_UI.getProperties().getProperty("wang600_rom_file_suffix"),
+					"Wang ROM image files", Wang_UI.getDir());
+		File file = Wang_UI.getProperties().getFile("wang600_rom_image",
+							true, Wang_UI.getDir());
+		if (file != null) {
+			ch.setSelectedFile(file);
+		}
+		int rv = ch.showDialog(Wang600.Kbd);
+		if (rv == JFileChooser.APPROVE_OPTION) {
+			file = ch.getSelectedFile();
+			// are we being too optimistic? maybe wait until
+			// download succeeds?
+			m.setText("Expansion ROM - " + file.getName());
+		} else {
+			file = null;
+			m.setText("Expansion ROM - none installed");
+		}
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				new Wang600_Properties(),
+				"wang600_rom_image",
+				file == null ? "" : file.getName());
+		} catch(Exception ee) {}
+		// NOTE: on real hardware, you can't change ROMs without
+		// risking severe damage to ROM cartridge or calculator!
+		// We could just save the property and wait for restart?
+		loadXRom(file);
+	}
 
 	public class Wang600_Ucode {
 		public byte jl;
@@ -1085,8 +1171,6 @@ class Wang600_SimulatorJava
 		pressKey(rep);
 	}
 
-	public void chgXROM() { }	// don't care
-
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
 	public void pressKey(int key) {
@@ -1103,7 +1187,7 @@ class Wang600_SimulatorJava
 			_dbg = null;
 		}
 		// at some point, get these from properties...
-		int memsize = 2048; // based on Model (2TP, 6TP, 14TP, ...)
+		int memsize = 2048; // could be based on Model (2TP, 6TP, 14TP, ...)
 		String romfile = "wang600.rom";
 		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
 		if (rom == null) {
@@ -1115,6 +1199,9 @@ class Wang600_SimulatorJava
 		}
 		_rom = new Wang600_UcodeRom(rom, memsize);
 		_ram = new byte[memsize];
+
+		_xromFile = Wang_UI.getProperties().getFile("wang600_rom_image", true, Wang_UI.getDir());
+		loadXRom(_xromFile);
 
 		pr_drum = 0;
 		pr_hammers = 0;
@@ -1374,14 +1461,22 @@ class Wang600_SimulatorJava
 	private void rd_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
 		//adr &= ram_mask;
-		byte b = _ram[adr >> 1];
-		if ((adr & 1) != 0) {
+		boolean odd = ((adr & 1) != 0);
+		adr >>= 1;
+		byte b = _ram[adr];
+		if (odd) {
 			b >>= 4;
 		}
 		rb = ca = (byte)(b & 0x0f);
-		b = Wang600.XROM.getByte(adr >> 1);
-		if ((adr & 1) != 0) {
-			b >>= 4;
+		// ROM should always be >= RAM in size... always 2K...
+		// (if present)
+		if (_xrom != null && adr < _xrom.length) {
+			b = _xrom[adr];
+			if (odd) {
+				b >>= 4;
+			}
+		} else {
+			b = 0x0f;
 		}
 		cb = (byte)(b & 0x0f);
 	}
@@ -1822,7 +1917,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -1942,7 +2037,7 @@ class Wang600_SimInput
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_R) {
-			Wang600.XROM.pickFile(m);
+			((Wang600_SimulatorJava)Wang600.Core).pickXRomFile(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_COPY) {
@@ -2030,7 +2125,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2522,119 +2617,10 @@ System.err.println("sync error");
 	}
 }
 
-class Wang600_XROM implements Wang_XROM {
-	File _file;
-	byte[] _xrom;
-
-	public int getSize() {
-		return _xrom == null ? 0 : _xrom.length;
-	}
-
-	public JMenuItem getMenu(int key) {
-		String status = "none installed";
-		if (_file != null) {
-			status = _file.getName();
-		}
-		return new JMenuItem("Expansion ROM - " + status, key);
-	}
-
-	public void setXROM(byte[] img) {
-		int l = img.length;
-		if (l > _xrom.length) {
-			// just in case...
-			l = _xrom.length;
-		}
-		int z = _xrom.length - l;
-		for (int x = 0; x < l; ++x) {
-			_xrom[z] = img[x];
-		}
-	}
-
-	private void loadXROM(File img) {
-		_xrom = null;
-		if (img != null) {
-			FileInputStream f;
-			try {
-				f = new FileInputStream(img);
-			} catch (FileNotFoundException ee) {
-				Wang_UI.warning("Install ROM", ee.getMessage());
-				return;
-			}
-			int n = 0;
-			byte[] buf = new byte[2048];
-			try {
-				n = f.read(buf);
-			} catch (IOException ee) {
-				Wang_UI.warning("Install ROM", ee.getMessage());
-				n = -1;
-			}
-			try {
-				f.close();
-			} catch (IOException ee) {
-			}
-			if (n > 0) {
-				_xrom = buf;
-				// inform back-end we have a new image...
-				// this is only done if not running embedded sim
-				Wang600.Core.chgXROM();
-			}
-		}
-	}
-
-	public Wang600_XROM() {
-		_file = Wang_UI.getProperties().getFile("wang600_rom_image", true, Wang_UI.getDir());
-	}
-
-	public void Initialize() {
-		loadXROM(_file);
-	}
-
-	public byte getByte(int adr) {
-		if (_xrom != null && _xrom.length > adr) {
-			// ROM image needs to be reversed... do it here
-			// (but some users need to reverse it back...)
-			return _xrom[0x7ff - adr];
-		} else {
-			return (byte)0xff;
-		}
-	}
-
-	public void pickFile(JMenuItem m) {
-		SuffFileChooser ch = new SuffFileChooser("Install",
-					Wang_UI.getProperties().getProperty("wang600_rom_file_suffix"),
-					"Wang ROM image files", Wang_UI.getDir());
-		File file = Wang_UI.getProperties().getFile("wang600_rom_image",
-							true, Wang_UI.getDir());
-		if (file != null) {
-			ch.setSelectedFile(file);
-		}
-		int rv = ch.showDialog(Wang600.Kbd);
-		if (rv == JFileChooser.APPROVE_OPTION) {
-			file = ch.getSelectedFile();
-			// are we being too optimistic? maybe wait until
-			// download succeeds?
-			m.setText("Expansion ROM - " + file.getName());
-		} else {
-			file = null;
-			m.setText("Expansion ROM - none installed");
-		}
-		try { // if this fails, oh well.
-			Wang_UI.getProperties().setAndSaveProperty(
-				new Wang600_Properties(),
-				"wang600_rom_image",
-				file == null ? "" : file.getName());
-		} catch(Exception ee) {}
-		// NOTE: on real hardware, you can't change ROMs without
-		// risking severe damage to ROM cartridge or calculator!
-		// We could just save the property and wait for restart?
-		loadXROM(file);
-	}
-}
-
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2844,7 +2830,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3259,7 +3245,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3526,7 +3512,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.167 $ $Date: 2013/11/18 15:21:01 $<BR>"+
+			"$Revision: 1.168 $ $Date: 2013/11/18 18:19:10 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3660,7 +3646,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3878,7 +3864,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3971,7 +3957,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.167 2013/11/18 15:21:01 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.15 2013/11/18 15:48:31 drmiller Exp $
+# $Id: Makefile.ship,v 1.16 2013/11/18 18:19:10 drmiller Exp $
 
 COPTS =
 
@@ -36,7 +36,6 @@ COMMON_CLASSES = \
 		Wang_Help.class \
 		Wang_Keyboard.class \
 		Wang_Printer.class \
-		Wang_XROM.class \
 		Wang_Debugger.class \
 		Wang_DebugConsole.class
 

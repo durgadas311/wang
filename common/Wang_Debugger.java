@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_Debugger.java,v 1.4 2013/11/18 15:21:01 drmiller Exp $
+// $Id: Wang_Debugger.java,v 1.5 2013/11/18 18:19:10 drmiller Exp $
 
 import java.io.*;
 
@@ -29,6 +29,5 @@ interface Wang_Debugger
 	public int getReg(String reg);
 	public int getPC();		// current CPU PC register
 	public int getRamAdr();		// current CPU RAM address register(s)
-	public int getXRomSize();	// bytes
 	public int getUcodeSize();	// words (instructions)
 }
