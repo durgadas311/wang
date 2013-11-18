@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $
+// $Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -22,32 +22,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
 
-// (red) CLEAR button is 00 14...
-// f(x) is 10 xx
-// F(x) is 11 xx
-// XCHG is 14 xx
-// I/O, etc is 15 xx
-
-class FEexit extends Thread {
-	private Process _be = null;
-
-	public FEexit(Process be) {
-		_be = be;
-	}
-	public void run() {
-		if (_be != null) {
-			_be.destroy();
-			try {
-				_be.waitFor();
-			} catch (InterruptedException ee) {
-			}
-		}
-	}
-}
-
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -56,6 +33,7 @@ public class w600_fe
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
 		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
+		boolean stop = (args.length > 0 && args[0].compareTo("-I") == 0);
 
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -170,7 +148,7 @@ public class w600_fe
 		Wang600.Help = new Wang600_Help(front_end);
 
 		// Must be alfter all components created.
-		Wang600_SimInput inp = new Wang600_SimInput(test, dbg);
+		Wang600_SimInput inp = new Wang600_SimInput(test, dbg || stop, stop);
 		// Wang600.Core is now setup...
  
 		JMenuBar mb = new JMenuBar();
@@ -573,6 +551,10 @@ class Wang600_Debugger
 		return ((core.l & 0x0f) << 8) | ((core.m & 0x0f) << 4) | (core.n & 0x0f);
 	}
 
+	public long getCycles() {
+		return core.cycles;
+	}
+
 	public String disas(int adr, boolean raw) {
 		Wang600_SimulatorJava.Wang600_Ucode u = core.getUcode(adr);
 		String stack = new String();;
@@ -754,9 +736,13 @@ class Wang600_Debugger
 	}
 
 	public void setTrace(boolean on) throws Exception {
-		if (!on && core.trc_fp != null) {
-			core.trc_fp.close();
-			core.trc_fp = null;
+		if (!on) {
+			if (core.trc_fp != null) {
+				core.trc_fp.close();
+				core.trc_fp = null;
+			}
+			core.trc_cycles = false;
+			core.trc_raw = false;
 		}
 		core.trace = on;
 	}
@@ -765,6 +751,34 @@ class Wang600_Debugger
 		setTrace(false);	// ensure previous file gets closed
 		core.trc_fp = file;
 		setTrace(true);
+	}
+
+	public void setTraceCycles(boolean on) {
+		core.trc_cycles = on;
+	}
+
+	public void setTraceRaw(boolean on) {
+		core.trc_raw = on;
+	}
+
+	public String getTrace() {
+		String s = "Tracing is now ";
+		if (core.trace) {
+			if (core.trc_fp != null) {
+				s += "<file>";
+			} else {
+				s += "on";
+			}
+			if (core.trc_cycles) {
+				s += " cycles";
+			}
+			if (core.trc_raw) {
+				s += " raw";
+			}
+		} else {
+			s += "off";
+		}
+		return s;
 	}
 
 	public String getRegisters() {
@@ -792,8 +806,31 @@ class Wang600_Debugger
 		core.setXRom(Arrays.copyOfRange(core._ram, x, y));
 	}
 
+	public void putWarp(String tag, int next, int cycles) throws Exception {
+		String s = String.format("TRACE: %03x: %s", core.pc, tag);
+		if (cycles > 0) {
+			core.next = next;
+			core.cycles += cycles;
+			s += " Warp";
+		} else if (next >= 0) {
+			s += String.format(" PC %03x", next);
+		} else {
+			s += " Sleep";
+		}
+		s += String.format("... %d\n", core.cycles);
+		if (core.trc_fp != null) {
+			core.trc_fp.write(s.getBytes());
+		} else {
+			System.err.print(s);
+		}
+	}
+
 	public void putTrace() throws Exception {
-		String s = String.format("TRACE: %03x: [%03x %03x %03x] ",
+		String s = ": ";
+		if (core.trc_cycles) {
+			s += String.format("%9d ", core.cycles);
+		}
+		s += String.format("%03x: [%03x %03x %03x] ",
 			core.pc, core.next, core.stk1, core.stk2);
 		s += String.format("%01x %01x %01x %01x [",
 			core.t, core.u, core.v, core.ca);
@@ -802,7 +839,7 @@ class Wang600_Debugger
 		if (core.sc != 0) s += "C"; else s += "c";
 		s += String.format("] %01x %01x %01x : ",
 			core.s, core.ka, core.kb);
-		s += disas(core.pc, true);
+		s += disas(core.pc, core.trc_raw);
 		s += "\n";
 		if (core.trc_fp != null) {
 			core.trc_fp.write(s.getBytes());
@@ -882,7 +919,7 @@ class Wang600_Debugger
 class Wang600_SimulatorJava
 	implements Wang_Core
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -923,6 +960,8 @@ class Wang600_SimulatorJava
 	boolean run_sim;
 
 	boolean trace;
+	boolean trc_cycles;
+	boolean trc_raw;
 	FileOutputStream trc_fp;
 
 	byte pr_drum;
@@ -1152,6 +1191,9 @@ class Wang600_SimulatorJava
 
 	public void pressCmd(int cmd) {
 		jam = 0x1000 | cmd;
+		if (trace) { // can only be if _dbg != null
+			_dbg.warp("Key Jam", cmd, 0);
+		}
 		// needs other side-effects... display? clear key buffer?
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
@@ -1180,7 +1222,7 @@ class Wang600_SimulatorJava
 
 	private Wang_DebugConsole _dbg;
 
-	public Wang600_SimulatorJava(boolean dbg) {
+	public Wang600_SimulatorJava(boolean dbg, boolean stop) {
 		if (dbg) {
 			_dbg = new Wang_DebugConsole(new Wang600_Debugger(this));
 		} else {
@@ -1210,9 +1252,11 @@ class Wang600_SimulatorJava
 		disp = new short[16];
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
-		run_sim = true;
+		run_sim = !stop;
 		cylimit = Long.MAX_VALUE;
 		trace = false;
+		trc_cycles = false;
+		trc_raw = false;
 		trc_fp = null;
 
 		Thread t = new Thread(this);
@@ -1540,16 +1584,27 @@ class Wang600_SimulatorJava
 		}
 		// 51c: begin display-refresh delay loop... short-cut to 51f...
 		if (pc == 0x51c) {	// display refresh routine...
-			next = 0x51f;	// update some regs too?
-			cycles += 272;
-			refresh(true);
+			if (trace) { // can only be if _dbg != null
+				_dbg.warp("Display Refresh", 0x51f, 272);
+			} else {
+				next = 0x51f;	// update some regs too?
+				cycles += 272;
+			}
+			refresh(cylimit == Long.MAX_VALUE);
 		// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
 		} else if (pc == 0x5c0) {	// alpha-stop refresh routine...
-			next = 0x5c3;
-			cycles += 272;
+			if (trace) { // can only be if _dbg != null
+				_dbg.warp("Alpha-Stop", 0x5c3, 272);
+			} else {
+				next = 0x5c3;
+				cycles += 272;
+			}
 			refresh(false);
 		} else if (pc == 0x5c6) {	// alpha-stop done... "return"...
 			if (next == 0x27b) { // alpha-stop in running program...
+				if (trace) { // can only be if _dbg != null
+					_dbg.warp("Alpha-Stop", -1, -1);
+				}
 				// observed 211975 cycles or about 0.53 second
 				try {
 					Thread.sleep(530);
@@ -1830,7 +1885,7 @@ class Wang600_SimulatorJava
 		++cycles;
 		next = nxt;
 
-		if (_dbg != null && trace) {
+		if (trace) { // can only be if _dbg != null
 			_dbg.instr_trace();
 		}
 
@@ -1862,7 +1917,7 @@ class Wang600_SimulatorJava
 		int rc = 0;
 		do {
 			if (debug && !run_sim) {
-				System.out.format("break at %03x\n", pc);
+				System.out.format("break at %03x %d\n", pc, cycles);
 				while (debug && !run_sim) {
 					rc = _dbg.command();
 					if (rc != 0) {
@@ -1917,7 +1972,7 @@ class Wang600_SimError
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -2066,7 +2121,7 @@ class Wang600_SimInput
 		}
 	}
 
-	public Wang600_SimInput(boolean test, boolean dbg) {
+	public Wang600_SimInput(boolean test, boolean dbg, boolean stop) {
 		if (Wang600.CN24 != null) {
 			Wang600.CN24.getFrame().addWindowListener(this);
 		}
@@ -2103,7 +2158,7 @@ class Wang600_SimInput
 		_mu.add(_miNone);
 
 		if (!test) {
-			Wang600.Core = new Wang600_SimulatorJava(dbg);
+			Wang600.Core = new Wang600_SimulatorJava(dbg, stop);
 		}
 	}
 
@@ -2125,7 +2180,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -2620,7 +2675,7 @@ System.err.println("sync error");
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -2830,7 +2885,7 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -3245,7 +3300,7 @@ System.err.println("action");
 
 class Wang600_Keyboards extends JComponent
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang600_Keyboards() { }
 
@@ -3512,7 +3567,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.168 $ $Date: 2013/11/18 18:19:10 $<BR>"+
+			"$Revision: 1.169 $ $Date: 2013/11/18 23:31:37 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -3646,7 +3701,7 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -3864,7 +3919,7 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 class Wang600_Keyboard_meta extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -3957,7 +4012,7 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 
 class Wang600_Keyboard_stick extends Wang600_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.168 2013/11/18 18:19:10 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.169 2013/11/18 23:31:37 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 

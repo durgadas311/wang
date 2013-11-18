@@ -1,7 +1,8 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.5 2013/11/18 15:21:01 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.6 2013/11/18 23:31:37 drmiller Exp $
 
 import java.io.*;
+import java.util.Arrays;
 
 class Wang_DebugConsole
 {
@@ -60,6 +61,9 @@ class Wang_DebugConsole
 						commands[x].args != null ? commands[x].args : "",
 						commands[x].help);
 				}
+				String s = "<cmd>";
+				n = 1;
+				System.out.format("  ! %-" + (m - n) + "s Execute cmd in shell\n", s);
 				return 0;
 			}
 		}
@@ -68,7 +72,8 @@ class Wang_DebugConsole
 		new DbgFunc() {
 			public int do_cmd(String[] line) {
 				int pc = _dbg.getPC();
-				System.out.format("%03x: %s\n", pc, _dbg.disas(pc, true));
+				System.out.format("%9d %03x: %s\n",
+					_dbg.getCycles(), pc, _dbg.disas(pc, true));
 				System.out.format("%s", _dbg.getRegisters());
 				System.out.format("[%s]\n", _dbg.getMachine());
 				return 0;
@@ -239,28 +244,33 @@ new DbgFunc() {
 			}
 		}
 		),
-		new DbgCmd( "trace", "[file]", "Set trace on/off/file(on)",
+		new DbgCmd( "trace", "[file]", "Set trace [off | {on|<file>} [cycles] [raw]]",
 		new DbgFunc() {
 			public int do_cmd(String[] line) {
-				if (line.length > 1) {
-					if (line[1].equals("on")) {
+				for (int x = 1; x < line.length; ++x) {
+					if (line[x].equals("on")) {
 						try {
 							_dbg.setTrace(true);
 						} catch(Exception ee) {}
-					} else if (line[1].equals("off")) {
+					} else if (line[x].equals("off")) {
 						try {
 							_dbg.setTrace(false);
 						} catch(Exception ee) {}
+					} else if (line[x].equals("cycles")) {
+							_dbg.setTraceCycles(true);
+					} else if (line[x].equals("raw")) {
+							_dbg.setTraceRaw(true);
 					} else {
 						try {
 							FileOutputStream file =
-								new FileOutputStream(line[1]);
+								new FileOutputStream(line[x]);
 							_dbg.setTraceFile(file);
 						} catch(Exception ee) {
 							System.out.format("Can't create/close trace file: %s\n", ee.getMessage());
 						}
 					}
 				}
+				System.out.println(_dbg.getTrace());
 				return 0;
 			}
 		}
@@ -313,6 +323,43 @@ new DbgFunc() {
 		if (s.length() == 0) {
 			return 0;
 		}
+		if (s.substring(0, 1).equals("!")) {
+			try {
+				ProcessBuilder cmd = 
+					new ProcessBuilder("sh", "-c", s.substring(1));
+				cmd.redirectErrorStream(true);
+				// eventually want:
+				//cmd.redirectError(cmd.Redirect.INHERIT);
+				//cmd.redirectOutput(cmd.Redirect.INHERIT);
+				// but instead have to get stream and copy to stdout...
+				// yuk!
+				Process proc = cmd.start();
+				java.io.InputStream out = proc.getInputStream();
+				byte[] buf = new byte[256];
+				while (out != null) {
+					try {
+						int n = out.read(buf);
+						if (n > 0) {
+							System.out.write(Arrays.copyOfRange(buf, 0, n));
+						} else if (n < 0) {
+							out.close();
+							out = null;
+						}
+					} catch(Exception ee) {
+						out.close();
+						out = null;
+					}
+				}
+				x = proc.waitFor();
+			} catch(Exception ee) {
+				x = 1;
+			}
+			if (x != 0) {
+				// does the user already know it failed?
+				System.out.println("! command failed");
+			}
+			return 0;
+		}
 
 		String[] l = s.split("[ \t]");
 		if (l.length == 0) {
@@ -338,6 +385,15 @@ new DbgFunc() {
 	public void instr_trace() {
 		try {
 			_dbg.putTrace();
+		} catch(Exception ee) {
+			// either abort or ignore  - can't print message and continue
+			// or flood will ensue.
+		}
+	}
+
+	public void warp(String tag, int next, int cycles) {
+		try {
+			_dbg.putWarp(tag, next, cycles);
 		} catch(Exception ee) {
 			// either abort or ignore  - can't print message and continue
 			// or flood will ensue.

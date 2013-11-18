@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_Debugger.java,v 1.5 2013/11/18 18:19:10 drmiller Exp $
+// $Id: Wang_Debugger.java,v 1.6 2013/11/18 23:31:37 drmiller Exp $
 
 import java.io.*;
 
@@ -17,9 +17,13 @@ interface Wang_Debugger
 	public String getRegisters();
 	public String getMachine();
 	public void putTrace() throws Exception ;
+	public void putWarp(String tag, int next, int cycles) throws Exception;
 	public void core(FileOutputStream file) throws Exception;
 	public void setTrace(boolean on) throws Exception;
+	public void setTraceCycles(boolean on);
+	public void setTraceRaw(boolean on);
 	public void setTraceFile(FileOutputStream file) throws Exception;
+	public String getTrace();
 	public void dup();
 	public long relCycleLimit(long n);
 	public void setRun(boolean run);
@@ -27,6 +31,7 @@ interface Wang_Debugger
 	public boolean getBreakPoint(int adr);
 	public int setReg(String reg, int val);
 	public int getReg(String reg);
+	public long getCycles();
 	public int getPC();		// current CPU PC register
 	public int getRamAdr();		// current CPU RAM address register(s)
 	public int getUcodeSize();	// words (instructions)
