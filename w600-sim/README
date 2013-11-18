@@ -1,4 +1,4 @@
-$Id: README,v 1.6 2013/11/18 15:48:31 drmiller Exp $
+$Id: README,v 1.7 2013/11/18 23:34:44 drmiller Exp $
 
 The simulator has been redesigned totally in JAVA. This means that it should run
 on any platform (provided that platform supports a sufficient JAVA VM).
@@ -16,11 +16,29 @@ Typically, the simulator is run using the following command:
 
 To enable the debugger:
 
-	java -jar wang600.jar -i
+	java -jar wang600.jar -i	(run simulator normally)
+	java -jar wang600.jar -I	(start in debugger)
 
-And then the debugger can be activated by pressing '%' in the main
-calculator window. See README.dbg for more information on the debugger,
-although the debugger command 'help' will ordinarely be enough.
+The debugger can be activated at any time by pressing '%' in the main
+calculator window. The debugger command 'help' will ordinarely be enough:
+
+Wang 600 Simulator Commands:
+  quit                   End simulation
+  help                   Display this help
+  dump                   Dump processor state/registers
+  disas [addr [instrs]]  Disassemble ucode ROM at PC [or hex addr]
+  exam [addr [words]]    Examine RAM at L,M,N [or hex addr]
+  set reg=value [...]    Set register(s)
+  store [@addr] value... Store hex val(s) in RAM at L,M,N [or hex addr]
+  step                   Single-step one instruction
+  core file              Dump all of RAM (2K) to <file>
+  break [addr ...]       Set/Clear/Show one-shot breakpoint(s)
+  go [+cycles]           Resume program at current PC [break after <cycles>]
+  trace [file]           Set trace [off | {on|<file>} [cycles] [raw]]
+  rom [addr [words]]     Examine ROM at L,M,N [or hex addr]
+  dup                    Copy program space into ROM
+  ! <cmd>                Execute cmd in shell
+
 
 Other capabilities of the JAR file:
 
