@@ -1,17 +1,10 @@
-# $Id: Makefile.ship,v 1.14 2013/11/14 21:16:24 drmiller Exp $
+# $Id: Makefile.ship,v 1.15 2013/11/18 15:48:31 drmiller Exp $
 
 COPTS =
 
 VPATH = ../common
 
-CFLAGS += -D__wang600__ -I../common -I.
-
-OBJS = wang_sys.o wang_sim_cmd.o \
-	w600_decode.o wang_exec.o wang_gui.o
-
 ROM = wang600.rom
-
-EXE = w600-sim
 
 SPCL = plotter_chrgen.dat
 
@@ -43,7 +36,9 @@ COMMON_CLASSES = \
 		Wang_Help.class \
 		Wang_Keyboard.class \
 		Wang_Printer.class \
-		Wang_XROM.class
+		Wang_XROM.class \
+		Wang_Debugger.class \
+		Wang_DebugConsole.class
 
 W600_CLASSES = \
 		Wang600.class
@@ -63,17 +58,7 @@ FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 
 XTRA = 
 
-DASM = dw600.o loaducode_txt.o
-
-all: $(EXE) w600_fe.class
-
-CFLAGS += -g -O3 $(COPTS)
-
-w600-dasm: wang-dasm.o $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(DASM)
-
-$(EXE): wang-sim.o $(OBJS) $(XTRA) $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
+all: w600_fe.class
 
 w600_fe.class: w600_fe.java $(COMMON_CLASSES) $(W600_CLASSES)
 	javac w600_fe.java

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.62 2013/11/14 21:30:06 drmiller Exp $
+# $Id: Makefile,v 1.63 2013/11/18 15:48:31 drmiller Exp $
 
 include Makefile.ship
 
@@ -20,24 +20,19 @@ WICONS = $(subst .png,.ico,$(PNGS))
 PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
 SRCTAR = w600-sim.tgz
 
-xinetd: $(EXE) $(ROM)
-	cp $(EXE) $(ROM) /usr/local/bin/wang
-
 update:
 	cd ..; cvs -q update common w600-sim
 
 clobber: clean
-	rm -f *.class $(EXE) w600_fe w600-dasm Manifest.txt *.jar *.tgz
+	rm -f *.class Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
 tar:
 	cd ..;\
 	tar -czv --transform 's/.ship$$//' \
 		-f w600-sim/$(SRCTAR) \
-		w600-sim/*.[ch] w600-sim/Makefile.ship w600-sim/*.java \
-		common/*.[ch] \
+		w600-sim/Makefile.ship w600-sim/*.java common/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
-		w600-sim/README.{internals,gui} \
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/fonts/*.ttf	\
 		w600-sim/progs/*.w6* w600-sim/docs/*.html w600-sim/docs/*.gif
@@ -60,10 +55,6 @@ temp_dest: all wang600.jar
 wang600apc.tgz: temp_dest
 	tar -czvf wang600apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
-
-$(EXE).osx: $(EXE)
-	ssh $(MACOSX) cd $(SUBPATH)\; make clean update $(EXE)
-	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
 
 # Need better way to estimate size of image...
 wang600apc.dmg: all icns wang600.jar
