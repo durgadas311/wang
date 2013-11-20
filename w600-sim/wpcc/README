@@ -9,6 +9,7 @@ The sample Makefile targets/actions use the following program file name suffixes
 
 	W6C	Wang 600 Program module to be pre-processed by w6cpp
 	w6c	Program module not requiring pre-processing
+	w6h	Program header file (include) - usually defines the interface
 	w6e	Intermediate file already pre-processed
 	w6o	Object file (to be linked/loaded)
 	w6t	Tape image file, ready to load via tape drive

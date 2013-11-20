@@ -1,6 +1,6 @@
 CFLAGS += -I../../common -g
 
-BINS = w6cpp w6dis w6lst w6data2tape
+BINS = w6cpp w6dis w6lst w6data2tape w6verify
 INCS = wang600.h wang600internals.h wang600opcodes.s
 LDS = wang600.ld wang600raw.ld wang600rawrom.ld wang600rom.ld
 
@@ -14,6 +14,9 @@ w6data2tape: w6data2tape.c w6cpp_data.o
 
 w6lst: w6lst.c
 	$(CC) $(CFLAGS) -std=c99 w6lst.c -o w6lst
+
+w6verify: w6verify.c
+	$(CC) $(CFLAGS) -std=c99 w6verify.c -o w6verify
 
 install: $(BINS) $(INCS) $(LDS)
 	mkdir -p /usr/local/wpcc/{bin,lib,include}
