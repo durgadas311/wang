@@ -46,10 +46,10 @@ $(SUBDIRS): __FRC__
 	$(MAKE) -C $@
 
 install: $(PROGS) $(ROMS) $(DATAT)
-	cp $(PROGS) $(ROMS) ~/Wang600Files/
+	cp $(PROGS) $(ROMS) $(DATAT) ~/Wang600Files/
 
 ship: $(PROGS) $(ROMS) $(DATAT)
-	cp $(PROGS) $(ROMS) ..
+	cp $(PROGS) $(ROMS) $(DATAT) ..
 
 # TODO: use "make... export" in subdirs, too
 export: __FRC__
