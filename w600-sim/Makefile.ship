@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.16 2013/11/18 18:19:10 drmiller Exp $
+# $Id: Makefile.ship,v 1.17 2013/11/20 16:22:37 drmiller Exp $
 
 COPTS =
 
@@ -40,9 +40,8 @@ COMMON_CLASSES = \
 		Wang_DebugConsole.class
 
 W600_CLASSES = \
-		Wang600.class
-#		Wang600_SimulatorPipe.class \
-#		Wang600_SimulatorJava.class
+		Wang600.class \
+		Wang600_Simulator.class
 
 COMMON_W614_CLASSES = \
 		Wang_Properties.class \
