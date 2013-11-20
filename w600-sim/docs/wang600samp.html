@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600samp.html,v 1.8 2013/11/15 16:21:57 drmiller Exp $ -->
+<!-- $Id: wang600samp.html,v 1.9 2013/11/20 20:18:30 drmiller Exp $ -->
 
 <H2>Sample Programs</H2>
 
@@ -128,11 +128,37 @@ VERIFY PROG: 714
 must also be connected. Press GO and the graph, with axii and labeling, will appear on the
 plotter window.
 
-<H3>list_dat.w6t - Requires data file (unfinished)</H3>
-<H3>plot_dat.w6t - Requires data file (unfinished)</H3>
-<H3>plot_alpha.w6t - Demonstrates the character set of the 612 Plotter (unfinished)</H3>
+<H3>plot_dat.w6t - Plots data samples from a tape file</H3>
+
+VERIFY PROG: 1080
+
+<P>The Expansion ROM image "libplot.w6x" must also be installed.
+The 612 Plotter must also be connected.
+After loading (and verifying) program, mount the tape "tempurature.w6t"
+and set Tape Ready.
+Press GO and the graph, with axii and labeling, will appear on the
+plotter window.
+
+<P>Data file image is created by the "wpcc" utility "w6data2tape". It produces a file
+with two tape images, first one contains the number of datapoints in a single register,
+the econd contains all the datapoints.
+
+<H3>list_dat.w6t - Lists datapoints from a tape file</H3>
+
+VERIFY PROG: 3587
+
+<P>One of the 601/602/611 OutputWriter devices must be connected.
+After loading (and verifying) program, mount the tape "tempurature.w6t"
+and set Tape Ready.
+Press GO and a tabular list of the datapoints in the tape image will be printed.
+
+<H3>plot_alpha.w6t - Demonstrates the character set of the 612 Plotter</H3>
+
+VERIFY PROG: 1155
 
 <H3>libplot.w6x - Expansion ROM image for plotting/graphing routines</H3>
+
+<P>Required by some of the above programs.
 
 <H2>Source Code</H2>
 
