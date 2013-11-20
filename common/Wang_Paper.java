@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.27 2013/11/15 16:14:06 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.28 2013/11/20 21:25:31 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import javax.swing.text.*;
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.27 2013/11/15 16:14:06 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.28 2013/11/20 21:25:31 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
@@ -380,11 +380,25 @@ class Wang_Paper
 			_eop += s.length();
 			super.append(s);
 			super.setCaretPosition(_eop);
+			// TODO: what happens if a line gets wrapped?
+			int y = super.getLineCount();
+			y *= _fy;
+			// can we tell the 'x' position?
+			int x = 0;
+			// TODO: ensure Caret height is factored-in...
+			if (y + _fy > _base_y) {
+				_base_y += _incr_y;
+				newSize();
+			}
+			Rectangle r = getVisibleRect();
+			if (!r.contains(x, y, _fx, _fy)) {
+				scrollRectToVisible(new Rectangle(x - 50, y - 50, 100, 100));
+			}
 		}
 
 		public void clear() {
 			setText("");
-			// set carat position?
+			// set caret position?
 			repaint();
 		}
 
@@ -422,9 +436,9 @@ class Wang_Paper
 		}
 
 		public void setCursor(int x, int y) {
+			// Never called!
 			//_cx = x;
 			//_cy = y;
-			scrollRectToVisible(new Rectangle(x - 10, y - 10, x + 10, y + 10));
 		}
 
 		public void setPen(Color c) {
