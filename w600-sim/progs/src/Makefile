@@ -1,7 +1,7 @@
 include /usr/local/wpcc/include/Make.rules.user
 
 SRCS = $(wildcard *.w6c *.W6C)
-DATAT = $(wildcard *.data)
+DATAS = $(wildcard *.data)
 PROGS = $(subst .w6c,.w6t,$(subst .W6C,.w6t,$(SRCS)))
 DATAT = $(subst .data,.w6t,$(DATAS))
 SUBDIRS = libw6 libplot tests
