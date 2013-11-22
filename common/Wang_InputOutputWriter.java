@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.13 2013/11/22 00:33:05 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.14 2013/11/22 23:37:55 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.13 2013/11/22 00:33:05 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.14 2013/11/22 23:37:55 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -32,7 +32,6 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (c == 0x4c) {
 			_glrn = 1;
 			_input = true;
-			sendACK();
 			_indINPUT.setOn(true);
 			super.getPaper().addKeyListener(this);
 			super.onOff(true);
@@ -41,7 +40,6 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (c == 0x4d) {
 			_glrn = 0;
 			_input = true;
-			sendACK();
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
 			super.onOff(true);
@@ -66,7 +64,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.13 $ $Date: 2013/11/22 00:33:05 $<BR>"+
+			"$Revision: 1.14 $ $Date: 2013/11/22 23:37:55 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -90,14 +88,15 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 	private void sendCode(byte b) {
 		if (!_input) return;
-		Wang_UI.getCore().replyIO(5, b);
+		Wang_UI.getCore().replyIO(5, (b & 0x0ff));
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JButton) {
 			JButton butt = (JButton)e.getSource();
 			if (butt.getMnemonic() == KeyEvent.VK_G) {
-				sendACK(); // force de-assert GLRN
+				// TODO: must release GLRN first... timing...
+				// might have to notify Simulator?
 				sendCode((byte)0x83);
 				return;
 			}
@@ -142,6 +141,24 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			}
 		}
 		super.actionPerformed(e);
+	}
+
+	private class ProxyKeyHandler
+			implements KeyListener
+	{
+		static final long serialVersionUID = 311603000004L;
+		Wang_InputOutputWriter _parent;
+
+		public ProxyKeyHandler(Wang_InputOutputWriter parent) {
+			_parent = parent;
+		}
+
+		public void keyTyped(KeyEvent e) {
+System.err.println("ControlPanel.keyTyped()");
+			_parent.keyTyped(e);
+		}
+		public void keyReleased(KeyEvent e) { }
+		public void keyPressed(KeyEvent e) { }
 	}
 
 	private class ControlPanel extends JComponent
@@ -313,7 +330,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 	public void keyTyped(KeyEvent e) {
 		char c = e.getKeyChar();
-		e.consume(); // doesn't fix anything
+		e.consume(); // prevent JTextArea from seeing it
 		byte b = (byte)c;
 		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
 		if (tr[0] != _shifted) {
@@ -356,6 +373,7 @@ System.err.format("(done)\n");
 		frame.add(new ControlPanel(this));
 		frame.getContentPane().setBackground(Color.black);
 		frame.pack();
+		frame.addKeyListener(new ProxyKeyHandler(this));
 
 		Wang_UI.registerCN36(this);
 
