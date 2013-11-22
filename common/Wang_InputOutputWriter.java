@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.12 2013/11/08 21:12:28 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.13 2013/11/22 00:33:05 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.12 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.13 2013/11/22 00:33:05 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -24,6 +24,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		_input = false;
 		_indTYPE.setOn(false);
 		_indINPUT.setOn(false);
+		super.getPaper().removeKeyListener(this);
 	}
 
 	public boolean start_cn36(int iob, int c) {
@@ -33,6 +34,8 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			_input = true;
 			sendACK();
 			_indINPUT.setOn(true);
+			super.getPaper().addKeyListener(this);
+			super.onOff(true);
 			return true;
 		}
 		if (c == 0x4d) {
@@ -40,6 +43,8 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			_input = true;
 			sendACK();
 			_indTYPE.setOn(true);
+			super.getPaper().addKeyListener(this);
+			super.onOff(true);
 			return true;
 		}
 		return false;
@@ -57,30 +62,11 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 	public int getGLRN() { return _glrn; }
 
-	byte _shifted;
-	public void keyTyped(KeyEvent e) {
-		char c = e.getKeyChar();
-		e.consume(); // doesn't fix anything
-		byte b = (byte)c;
-		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
-		if (tr[0] != _shifted) {
-			sendCode(tr[0]);
-			_shifted = tr[0];
-			do_cn24(tr[0]);
-		}
-System.err.format("convert %02x to %02x ...", b, tr[1]);
-		sendCode(tr[1]); // ignored in TYPE mode?
-		do_cn24(tr[1]);
-System.err.format("(done)\n");
-	}
-	public void keyPressed(KeyEvent e) { }
-	public void keyReleased(KeyEvent e) { }
-
 	public void showAbout() {
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.12 $ $Date: 2013/11/08 21:12:28 $<BR>"+
+			"$Revision: 1.13 $ $Date: 2013/11/22 00:33:05 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -130,10 +116,13 @@ System.err.format("(done)\n");
 					// I/O mode...
 					butt.setIcon(_togL);
 					_indOUTPUT.setOn(true);
+					super.getPaper().removeKeyListener(this);
 				} else {
 					// LOCAL mode...
 					butt.setIcon(_togR);
 					_indOUTPUT.setOn(false);
+					super.getPaper().addKeyListener(this);
+					super.onOff(true);
 				}
 				return;
 			}
@@ -320,11 +309,30 @@ System.err.format("(done)\n");
 		}
 	}
 
+	private byte _shifted = (byte)0x12;	// default to (start with) Shift Down
+
+	public void keyTyped(KeyEvent e) {
+		char c = e.getKeyChar();
+		e.consume(); // doesn't fix anything
+		byte b = (byte)c;
+		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
+		if (tr[0] != _shifted) {
+			sendCode(tr[0]);
+			_shifted = tr[0];
+			do_cn24(tr[0]);
+		}
+System.err.format("convert %02x to %02x ...", b, tr[1]);
+		sendCode(tr[1]); // ignored in TYPE mode?
+		do_cn24(tr[1]);
+System.err.format("(done)\n");
+	}
+	public void keyReleased(KeyEvent e) { }
+	public void keyPressed(KeyEvent e) { }
+
 	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description);
 
 		_input = false;
-		_shifted = (byte)0x12;	// Shift Down
 
 		JMenu mu;
 		mu = new JMenu("Typewriter");
@@ -350,9 +358,6 @@ System.err.format("(done)\n");
 		frame.pack();
 
 		Wang_UI.registerCN36(this);
-
-		frame.addKeyListener(this); // enable/disable? or use output window?
-		frame.setFocusTraversalKeysEnabled(false);  // allows TAB key to work
 
 		// Not initially...
 		frame.setVisible(true);

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.28 2013/11/20 21:25:31 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.29 2013/11/22 00:33:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,11 +9,12 @@ import java.awt.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 import javax.swing.text.*;
+import java.lang.reflect.*;
 
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.28 2013/11/20 21:25:31 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.29 2013/11/22 00:33:06 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
@@ -113,9 +114,9 @@ class Wang_Paper
 		_onoff = false;
 		_ox = 0;
 		_oy = 0;
-
-		_frame = new JFrame("Wang " + model + " " + descr);
+		_frame = new JFrame("Wang " + _model + " " + _descr);
 		_frame.setLayout(new FlowLayout());
+
 		if (canPlot) {
 			PlotTextArea pa = new PlotTextArea();
 			// is all this subterfuge really needed?
@@ -177,7 +178,7 @@ class Wang_Paper
 		Dimension sdim = _scroll.getSize();
 		_xoff = fdim.width - sdim.width;
 		_yoff = fdim.height - sdim.height;
-		
+
 		_frame.addComponentListener(this);
 	}
 
@@ -196,6 +197,8 @@ class Wang_Paper
 
 		_frame = new JFrame("Wang " + model + " " + descr);
 		_frame.setLayout(new FlowLayout());
+		// allows TAB key, in case used for input
+		_frame.setFocusTraversalKeysEnabled(false);
 		_text = new PlotOnlyArea();
 		//_text.setPreferredSize(new Dimension(_base_x, _base_y));
 		_text.setBackground(Color.gray);
@@ -346,6 +349,7 @@ class Wang_Paper
 	}
 
 	public JFrame getFrame() { return _frame; }
+	public JComponent getPaper() { return (JComponent)_text; }
 
 	public void componentHidden(ComponentEvent e) { }
 	public void componentMoved(ComponentEvent e) { }
