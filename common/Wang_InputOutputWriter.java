@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.14 2013/11/22 23:37:55 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.15 2013/11/23 02:53:01 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.14 2013/11/22 23:37:55 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.15 2013/11/23 02:53:01 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -22,6 +22,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	public void reset() {
 		_glrn = 0;
 		_input = false;
+		_indOUTPUT.setOn(true);
 		_indTYPE.setOn(false);
 		_indINPUT.setOn(false);
 		super.getPaper().removeKeyListener(this);
@@ -32,6 +33,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (c == 0x4c) {
 			_glrn = 1;
 			_input = true;
+			_indOUTPUT.setOn(false);
 			_indINPUT.setOn(true);
 			super.getPaper().addKeyListener(this);
 			super.onOff(true);
@@ -40,6 +42,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (c == 0x4d) {
 			_glrn = 0;
 			_input = true;
+			_indOUTPUT.setOn(false);
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
 			super.onOff(true);
@@ -64,7 +67,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.14 $ $Date: 2013/11/22 23:37:55 $<BR>"+
+			"$Revision: 1.15 $ $Date: 2013/11/23 02:53:01 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -96,6 +99,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			JButton butt = (JButton)e.getSource();
 			if (butt.getMnemonic() == KeyEvent.VK_G) {
 				// TODO: must release GLRN first... timing...
+				_glrn = 0;
 				// might have to notify Simulator?
 				sendCode((byte)0x83);
 				return;
@@ -154,7 +158,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		}
 
 		public void keyTyped(KeyEvent e) {
-System.err.println("ControlPanel.keyTyped()");
+			_parent.onOff(true);
 			_parent.keyTyped(e);
 		}
 		public void keyReleased(KeyEvent e) { }
@@ -338,10 +342,8 @@ System.err.println("ControlPanel.keyTyped()");
 			_shifted = tr[0];
 			do_cn24(tr[0]);
 		}
-System.err.format("convert %02x to %02x ...", b, tr[1]);
 		sendCode(tr[1]); // ignored in TYPE mode?
 		do_cn24(tr[1]);
-System.err.format("(done)\n");
 	}
 	public void keyReleased(KeyEvent e) { }
 	public void keyPressed(KeyEvent e) { }
