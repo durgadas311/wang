@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600samp.html,v 1.10 2013/11/20 20:36:35 drmiller Exp $ -->
+<!-- $Id: wang600samp.html,v 1.11 2013/11/24 19:06:43 drmiller Exp $ -->
 
 <H2>Sample Programs</H2>
 
@@ -62,7 +62,10 @@ and print all prime numbers.
 
 VERIFY PROG: 218
 
-<P>USE: Press GO. The OutputWriter window should appear with the
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (601, 602, or 611).
+<LI> Press GO
+<P>The OutputWriter window should appear with the
 text "Hello World!" printed on it.
 
 <P>This program demonstrates how to print a text string to the OutputWriter.
@@ -71,7 +74,13 @@ text "Hello World!" printed on it.
 
 VERIFY PROG: 595
 
-<P>USE: Press GO. The OutputWriter window should appear and a graph
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 602 Plotting OutputWriter.
+<LI>If not already done, use the Devices -> Expansion ROM menu to
+install the ROM image "libplot.w6x".
+<LI>Press GO.
+<P>The OutputWriter window should appear and a graph
 of a sine wave is plotted on it. Note, the plotting takes up to a minute
 to complete, however progress should be visible as it is being plotted.
 The default OutputWriter window is not large enough to show the entire graph,
@@ -102,14 +111,18 @@ flash without aborting the program, and making the display blank.
 
 VERIFY PROG: 3609
 
-<P>Enter month (1-12) and press GO, then enter year (4-digits) and press GO.
-Calendar for the given month/year should appear on the OutputWriter window.
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (601, 602, or 611).
+<LI>Enter month (1-12) and press GO
+<LI> Enter year (4-digits) and press GO.
+<P>Calendar for the given month/year should appear on the OutputWriter window.
 
 <H3>hex2dec.w6t - Crude hexidecimal-to-decimal converter</H3>
 
 VERIFY PROG: 1131
 
-Set the "f(x)" pushbutton down (on). Use the keys "00" - "15" to enter hex digits,
+<P>Set the "f(x)" pushbutton down (on). Use the keys "00" - "15" to enter hex digits,
 the decimal value will accrue on the display. Use PRIME or CLEAR DISPLAY to start
 a new conversion.
 
@@ -117,44 +130,67 @@ a new conversion.
 
 VERIFY PROG: 832
 
-<P>Compiled for the 602 Plotting OutputWriter. Produces a "swirl" pattern
-comprised of colons, asterisks, and periods.
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 602 Plotting OutputWriter.
+<LI> Press GO
+<P>The pattern described in the example should appear, namely a
+swirl pattern of colons, asterisks, and periods.
 
 <H3>plot_sin.w6t - Draw a sine-wave graph on the 612 Flatbed Plotter</H3>
 
 VERIFY PROG: 714
 
-<P>The Expansion ROM image "libplot.w6x" must also be installed. The 612 Plotter
-must also be connected. Press GO and the graph, with axii and labeling, will appear on the
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 612 Flatbed Plotter.
+<LI>If not already done, use the Devices -> Expansion ROM menu to
+install the ROM image "libplot.w6x".
+<LI> Press GO
+<P> The graph of a sine wave, with axii and labeling, will appear on the
 plotter window.
 
 <H3>plot_dat.w6t - Plots data samples from a tape file</H3>
 
 VERIFY PROG: 1080
 
-<P>The Expansion ROM image "libplot.w6x" must also be installed.
-The 612 Plotter must also be connected.
-After loading (and verifying) program, mount the tape "temperature.w6t"
-and set Tape Ready.
-Press GO and the graph, with axii and labeling, will appear on the
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 612 Flatbed Plotter.
+<LI>If not already done, use the Devices -> Expansion ROM menu to
+install the ROM image "libplot.w6x".
+<LI> Mount the tape image "temperature.w6t" and set Tape Ready.
+<LI> Press GO
+<P>The graph of the temperature data, with axii and labeling, will appear on the
 plotter window.
 
 <P>Data file image is created by the "wpcc" utility "w6data2tape". It produces a file
 with two tape images, first one contains the number of datapoints in a single register,
-the econd contains all the datapoints.
+the second contains all the datapoints.
 
 <H3>list_dat.w6t - Lists datapoints from a tape file</H3>
 
 VERIFY PROG: 3587
 
-<P>One of the 601/602/611 OutputWriter devices must be connected.
-After loading (and verifying) program, mount the tape "temperature.w6t"
-and set Tape Ready.
-Press GO and a tabular list of the datapoints in the tape image will be printed.
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (601, 602, or 611).
+<LI> Mount the tape image "temperature.w6t" and set Tape Ready.
+<LI> Press GO
+<P>A tabular list of the datapoints in the tape image will be printed.
 
 <H3>plot_alpha.w6t - Demonstrates the character set of the 612 Plotter</H3>
 
 VERIFY PROG: 1155
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 612 Flatbed Plotter.
+<LI>If not already done, use the Devices -> Expansion ROM menu to
+install the ROM image "libplot.w6x".
+<LI> Press GO
+<P> The complete character set, in three different sizes, will be drawn on the
+plotter.
 
 <H3>libplot.w6x - Expansion ROM image for plotting/graphing routines</H3>
 
@@ -162,6 +198,6 @@ VERIFY PROG: 1155
 
 <H2>Source Code</H2>
 
-The above programs are available in "source" format in the "wpcc.tgz" package.
+The above programs (and data) are available in "source" format in the "wpcc.tgz" package.
 
 </HTML>

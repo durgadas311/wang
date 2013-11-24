@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.19 2013/11/15 09:06:59 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.20 2013/11/24 19:06:43 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -58,7 +58,7 @@ that are not exposed in the "Preferences" dialog, are:
 java -jar wang600.jar
 </PRE>
 
-<P>which starts up the GUI front-end using the built-in simulator.
+<P>which starts up the simulator in normal mode.
 
 </UL>
 
@@ -73,47 +73,23 @@ java -cp wang600.jar w600_edit
 <P>The installable packages contain helper commands that execute the above java
 commands. For the calculator, that is exposed as a desktop icon to click.
 
-<P>An alternative is to run the GUI as a client to the back-end on a
-remote host. In this case, the simulator is started with:
+<P>An alternative is to run the simulator with debugging enabled.
 
 <UL><PRE>
-java -jar wang600.jar -w [ &lt;host&gt; &lt;port&gt; ]
-</PRE>
-
-<P>The &lt;host&gt; and &lt;port&gt; arguments are not needed if the preferences
-have been set.
-The remote &lt;host&gt; must be listening on the correct &lt;port&gt; number and
-should start up the back-end using the command:
-<UL><PRE>
-/path/to/sim/w600-sim -b -w
-</PRE></UL>
-<P>and may require other options, for example to get the path to the
-microcode image.
-The back-end binary is not delivered in the installable packages, and thus
-must be built from the source code package.
-</UL>
-
-<P>Another alternative is to run the back-end as a debug/trace facility,
-with the GUI as a slave process. This requires building the simulation software
-from source code, as the back-end binary is not delivered in the installable packages.
-
-<UL><PRE>
-/path/to/sim/w600-sim -g -i
+java -jar wang600.jar -i
 </PRE></UL>
 
-<P>and may require other options, for example to get the path to the
-microcode image. The back-end will attempt to execute the command:
+<P>Or the option "-I" (capital "I") causes the program to stop in the debug
+console before the calculator is initialized. Type the command "go" to start
+the calulator (other commands allow tracing, setting break points, etc).
 
-<UL><PRE>
-java w600_fe -b
-</PRE></UL>
-
-<P>Note, in this environment all the java class files must be present.
-The jar file is not used. This is typically run from the directory used
-to build the simulator from source code.
-
-<P>Pressing Ctrl-C in the "w600-sim" window will pause the simulation and print 
+<P>Pressing "%" in the calculator window will pause the simulation and print 
 a command prompt. The command "help" will display available debug commands.
+
+<P>In order to use the debugging console, the simulator must have been started
+from a "terminal window" that is still active (all debug interaction will
+take place there, i.e. using stdin/out). Note, desktop icons often do not
+retain a terminal window after starting the program.
 
 <H2>Wang 600 Simulator Differences</H2>
 
@@ -126,6 +102,18 @@ it should behave identically to the original. However, some practicalities
 as well as possible oversights in hardware simulation may result in
 subtle differences. See the section on "Simulator Internals", below,
 for more information.
+
+<P>One notable difference in in "keyboard locking". There were situations
+(mainly I/O commands) where the calculator keyboard (with the exception of PRIME and
+debug keys) were disabled. This is not currently implemented, which means it is possible to interfere
+with certain operations (again, typically I/O) by pressing calculator keys during
+those operations.
+
+<P>Also, operation of the peripherals is based on incomplete documentation
+(not all peripheral schematics are available, little-to-no example software
+remains, and very few operators manuals have been found). The best effort
+has been made to emulate these peripherals accurately. Anyone with knowledge
+(or resources) related to Wang peripherals is encouraged to contact me.
 
 <H3>Keyboard Operation</H3>
 
@@ -271,37 +259,53 @@ address, etc.
 
 <H3>601 OutputWriter</H3>
 
-This peripheral was based on modified IBM Selectric typewriter.
-It is capable of text output only.
+This peripheral was based on a modified IBM Selectric typewriter.
+It is capable of text output only, with standard spacing.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
 The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
-There is also a "Typewriter" menu will eventually provide setup of margins, etc.
+There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
 
 <H3>602 Plotting OutputWriter</H3>
 
-This peripheral was based on modified IBM Selectric typewriter.
+This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output along with micro-spacing which allows plotting.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
 The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Typewriter" menu that provides a "Home" function for
-the carriage, and will eventually provide setup of margins, etc.
+the carriage, and will eventually provide setup of paper size, margins, etc.
 
 <H3>611 Input/OutputWriter</H3>
 
-This peripheral was based on modified IBM Selectric typewriter.
+This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output as well as input from the keyboard.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
 The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
-There is also a "Typewriter" menu will eventually provide setup of margins, etc.
+There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
+
+<P>In addition to the "paper view" window there is a control panel that indicates
+and controls the input modes. Clicking the I/O LOCAL switch will toggle between
+those two modes. In LOCAL mode the page may be typed directly without
+sending anything to the calculator. Unlike the real hardware, the calculator is
+allowed to run normally in LOCAL mode.
+I/O mode is when the device is under full control of the calulator.
+
+<P>The calculator command Group&NBSP;2 04&NBSP;12 places the device in the "input mode", where the calulator is forced into LEARN mode and characters typed in the device window
+are stored in the program memory of the calculator. Typically, a sequence of characters
+are preceded by the ALPHA code and ended with an END&NBSP;ALPHA code.
+Press the GO button to end input mode.
+
+<P>The calculator command Group&NBSP;2 04&NBSP;13 places the device in the "type mode", where characters typed in the devuice window are printed but not sent to the calculator.
+The calculator remains in the RUN mode, but is waiting for the GO command from the device
+in order to be released.
 
 <H3>612 Flatbed Plotter</H3>
 
@@ -309,11 +313,12 @@ This device is capable of vector (line) plotting as well as (drawn) text from a 
 character set.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Plotting to this device causes the "output window" to become visible.
-Selecting the device from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
 The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Plotter" menu that allows setting the plot area, pen color,
 and returning the plot carriage to the "home" position.
+Future enhancements will include control over the paper size.
 
 <H3>630 Fixed/Removable Disk</H3>
 
