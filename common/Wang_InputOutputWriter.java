@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.15 2013/11/23 02:53:01 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.16 2013/11/24 18:22:08 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.15 2013/11/23 02:53:01 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.16 2013/11/24 18:22:08 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -41,7 +41,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		}
 		if (c == 0x4d) {
 			_glrn = 0;
-			_input = true;
+			_input = false; // do not send codes to Calculator...
 			_indOUTPUT.setOn(false);
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
@@ -67,7 +67,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.15 $ $Date: 2013/11/23 02:53:01 $<BR>"+
+			"$Revision: 1.16 $ $Date: 2013/11/24 18:22:08 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
