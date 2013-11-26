@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.2 2013/11/26 23:04:00 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.3 2013/11/26 23:16:50 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.2 2013/11/26 23:04:00 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.3 2013/11/26 23:16:50 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -612,7 +612,7 @@ class Wang600_Simulator
 		}
 
 		public String getMachine() {
-			String str = String.format("d1=%01x|d2=%01x", Wang600.Kbd.getMode0(), Wang600.Kbd.getMode1());
+			String str = String.format("d1=%01x|d2=%01x", Wang600.Kbd.getMode0(false), Wang600.Kbd.getMode1(false));
 			if (ov != 0) str += "|Prog Err";
 			if (err != 0) str += "|Mach Err";
 			if (keyCodes.size() > 0) str += "|Key Pressed";
@@ -1021,7 +1021,7 @@ class Wang600_Simulator
 	private void printer_status() {
 		// we don't want to do this unless it is really the
 		// drum printer we're looking at... can't tell?
-		if ((Wang600.Kbd.getMode1() & D21_PRT_ON) == 0) {
+		if ((Wang600.Kbd.getMode1(false) & D21_PRT_ON) == 0) {
 			// only if running program doesn't get here...
 			// printer is off, tach will never pulse, so don't spin
 			if (pc == 0x6db) {
@@ -1240,13 +1240,13 @@ class Wang600_Simulator
 		case 0: g = 0; break;
 		case 1: g = br_k; break;
 		case 2:
-			g = (byte)Wang600.Kbd.getMode0();
+			g = (byte)Wang600.Kbd.getMode0(true);
 			// clear 0010 if glrn?
 			if (_cn36 != null) {
 				g |= (byte)((_cn36.getGLRN() & 1) << 2);
 			}
 			break;
-		case 3: g = (byte)(Wang600.Kbd.getMode1() ^ D20_DEGREES); break;
+		case 3: g = (byte)(Wang600.Kbd.getMode1(true) ^ D20_DEGREES); break;
 		case 4: g = ka; break;
 		case 5: g = kb; break;
 		case 6: g = ca; break;

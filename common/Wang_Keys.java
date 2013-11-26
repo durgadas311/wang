@@ -1,10 +1,11 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Keys.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $
+// $Id: Wang_Keys.java,v 1.3 2013/11/26 23:17:11 drmiller Exp $
 
 import java.awt.*;
+import javax.swing.*;
 
 class Wang_Keys {
-	final String ident = "$Id: Wang_Keys.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $";
+	final String ident = "$Id: Wang_Keys.java,v 1.3 2013/11/26 23:17:11 drmiller Exp $";
 
 	static final int SPCL = 0x0100;
 	static final int MODE0 = 0x0200;
@@ -116,4 +117,5 @@ class Wang_Keys {
 	Color altcolor;
 	int code;
 	boolean state;
+	JButton button;
 }
