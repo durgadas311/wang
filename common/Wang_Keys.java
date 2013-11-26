@@ -1,21 +1,30 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Keys.java,v 1.1 2013/01/27 01:39:42 drmiller Exp $
+// $Id: Wang_Keys.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $
 
 import java.awt.*;
 
 class Wang_Keys {
-	final String ident = "$Id: Wang_Keys.java,v 1.1 2013/01/27 01:39:42 drmiller Exp $";
+	final String ident = "$Id: Wang_Keys.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $";
 
 	static final int SPCL = 0x0100;
 	static final int MODE0 = 0x0200;
 	static final int MODE1 = 0x0300;
+	static final int MODE2 = 0x0700;
 	static final int META = 0x0400;		// never sent
+	static final int ALT = META;		// never sent
 	static final int METAP = 0x0500;	// never sent
 	static final int METAS = 0x0600;	// never sent
 
 	public Wang_Keys(Color sl, int c) {
 		this.color = sl;
 		this.altcolor = sl;
+		this.code = c;
+		this.state = false;
+	}
+
+	public Wang_Keys(Color sl, Color xl, int c) {
+		this.color = sl;
+		this.altcolor = xl;
 		this.code = c;
 		this.state = false;
 	}
@@ -42,8 +51,14 @@ class Wang_Keys {
 	static final int MODE1_CHG(int a, int b) {
 		return (MODE1 | (a << 4) | b);
 	}
+	static final int MODE2_CHG(int a, int b) {
+		return (MODE2 | (a << 4) | b);
+	}
 	static final int META_KEY(int b) {
 		return (META | b);
+	}
+	static final int ALT_KEY(int b) {
+		return (ALT | b);
 	}
 	// a = mask
 	static final int META_PRE(int a, int b) {
@@ -86,6 +101,15 @@ class Wang_Keys {
 	}
 	public boolean isMETA() {
 		return (getType() == METAP || getType() == METAS);
+	}
+	public void setOn(boolean on) {
+		state = on;
+		if (on) {
+			button.setBackground(altcolor);
+		} else {
+			button.setBackground(color);
+		}
+		button.repaint();
 	}
 
 	Color color;
