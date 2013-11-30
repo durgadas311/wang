@@ -1,16 +1,38 @@
-# $Id: Makefile.ship,v 1.1 2012/02/19 23:17:50 drmiller Exp $
+# $Id: Makefile.ship,v 1.2 2013/11/30 17:51:46 drmiller Exp $
 
 EXAMPLES = $(wildcard examples/*.txt)
-EX = $(EXAMPLES:.txt=.wng)
+EX = $(EXAMPLES:.txt=.wpt)
 
 COPTS =
 
 VPATH = ../common
 
-CFLAGS += -D__wang1200__ -I../common -I.
+ROM = wang1200.rom
 
-OBJS = wang_sys.o wang_sim_cmd.o \
-	w1200_decode.o wang_exec.o wang_gui.o
+COMMON_CLASSES = \
+		SuffFileFilter.class \
+		SuffFileChooser.class \
+		Wang_Colors.class \
+		Wang_Keys.class \
+		Wang_Properties.class \
+		Wang_PropertyEditor.class \
+		Wang_CharConverter.class \
+		Wang_InputDevice.class \
+		Wang_TapeDevice.class \
+		Wang_TapeDrive.class \
+		Wang_Keyboard.class \
+		Wang_OutputDevice.class \
+		Wang_Core.class \
+		Wang_UI.class \
+		Wang_Help.class \
+		Wang_Keyboard.class \
+		Wang_Debugger.class \
+		Wang_DebugConsole.class
+
+W1200_CLASSES = \
+		Wang1200.class \
+		Wang1200_Properties.class \
+		Wang1200_Simulator.class
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
@@ -18,20 +40,20 @@ FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 
 XTRA = 
 
-DASM = dw1200.o loaducode_txt.o
-
-all: w1200-sim w1200_fe.class
+all: w1200_fe.class
 
 CFLAGS += -g -O3 $(COPTS)
 
-w1200-dasm: wang-dasm.o $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(DASM)
-
-w1200-sim: wang-sim.o $(OBJS) $(XTRA) $(DASM)
-	$(CC) $(CFLAGS) -o $@ $< $(OBJS) $(XTRA) $(DASM)
-
-w1200_fe.class: w1200_fe.java
+w1200_fe.class: w1200_fe.java $(COMMON_CLASSES) $(W1200_CLASSES)
 	javac w1200_fe.java
+
+.SUFFIXES: .class .java
+
+.java.class:
+	javac $?
+	if [[ "$?" == "../common/"* ]]; then \
+		mv ../common/$(basename $@)*.class .; \
+	fi
 
 clean:
 	rm -f *.o
@@ -46,8 +68,8 @@ Manifest.txt:
 SHIP_DOCS = $(filter-out docs/wang1200arch.html,$(wildcard docs/*.html))
 
 wang1200.jar: w1200_fe.class Manifest.txt
-	jar cfm $@ Manifest.txt *.class icons/*.{gif,png} $(SHIP_DOCS) \
+	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
-examples/%.wng: examples/%.txt txt2wng
+examples/%.wpt: examples/%.txt txt2wng
 	./txt2wng <$^ >$@

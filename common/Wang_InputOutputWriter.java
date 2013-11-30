@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.16 2013/11/24 18:22:08 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.17 2013/11/30 17:51:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.16 2013/11/24 18:22:08 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.17 2013/11/30 17:51:45 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -67,7 +67,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.16 $ $Date: 2013/11/24 18:22:08 $<BR>"+
+			"$Revision: 1.17 $ $Date: 2013/11/30 17:51:45 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -85,9 +85,9 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	Wang_Indicator _indINPUT;
 	boolean _input;
 
-	private void sendACK() {
-		Wang_UI.getCore().ackIO(5);
-	}
+//	private void sendACK() {
+//		Wang_UI.getCore().ackIO(5);
+//	}
 
 	private void sendCode(byte b) {
 		if (!_input) return;

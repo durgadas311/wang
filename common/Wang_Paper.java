@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Paper.java,v 1.29 2013/11/22 00:33:06 drmiller Exp $
+// $Id: Wang_Paper.java,v 1.30 2013/11/30 17:51:45 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,12 +9,11 @@ import java.awt.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 import javax.swing.text.*;
-import java.lang.reflect.*;
 
 class Wang_Paper
 	implements ActionListener, ComponentListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.29 2013/11/22 00:33:06 drmiller Exp $";
+	final String ident = "$Id: Wang_Paper.java,v 1.30 2013/11/30 17:51:45 drmiller Exp $";
 
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG

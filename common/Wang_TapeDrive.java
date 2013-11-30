@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.12 2013/11/11 19:40:45 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.13 2013/11/30 17:51:45 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.12 2013/11/11 19:40:45 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.13 2013/11/30 17:51:45 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -20,6 +20,7 @@ class Wang_TapeDrive extends JComponent
 	int _index;
 	JLabel _window;
 	JLabel _cassette;
+	Wang_Keys _eject;
 	File _file;
 	String _mountLabel;
 	String _pickLabel;
@@ -27,12 +28,17 @@ class Wang_TapeDrive extends JComponent
 	String _recordName;
 	String _file_prop;
 	byte _recordMark;
+	int _recordLen;
+	int _bytc;
 
-	public Wang_TapeDrive(String label,
+	public Wang_TapeDrive(Wang_Keys ej, String label,
 				Color doorColor, Color windowColorRef,
 				String name, String fileKind,
 				String fileType, String recordName,
-				byte recordMark, String file_prop) {
+				byte recordMark, // 0 == unused
+				int recordLen,   // 0 == unused
+				String file_prop) {
+		_eject = ej;
 		_file_prop = file_prop;
 		Font font;
 		_file = null;
@@ -62,6 +68,7 @@ class Wang_TapeDrive extends JComponent
 		}
 		_recordName = recordName;
 		_recordMark = recordMark;
+		_recordLen = recordLen;
 
 		setLayout(new FlowLayout());
 
@@ -302,10 +309,14 @@ class Wang_TapeDrive extends JComponent
 		// assert: _index == newidx
 	}
 
+	public Wang_Keys ejectKey() {
+		return _eject;
+	}
+
 	public boolean do_button(Wang_Keys btn) {
 		// this kills any in-progress operations...
 		_tape_on = false;
-		if (btn.code == Wang_Keys.TAPE_READY) {
+		if (btn.code == Wang_Keys.TAPE_READY) { // not for Wang1200
 			if (_file == null) {
 				_ready = false;
 				return true;
@@ -381,7 +392,7 @@ class Wang_TapeDrive extends JComponent
 
 	public void tape_off(int wr) {
 		// should not happen on Wang1200...
-		if (_wr && !_end && _ready) {
+		if (_recordMark != 0 && _wr && !_end && _ready) {
 			// did not just write END PROG, so need
 			// to mark end of tape "file".
 			// use _recordMark 0xff to mean "invisible" END PROG
@@ -397,14 +408,30 @@ class Wang_TapeDrive extends JComponent
 		//if (_ready) _tf.flush(); // not needed anyway?
 	}
 
+	public void tape_on(byte rc, byte tm, byte hi, byte rv, byte hl, byte op) {
+		if (rc == tm || hi == rv || hl == op) {} // stupid warnings
+	}
+
+	public void tape_off(byte rc, byte tm, byte hi, byte rv, byte hl, byte op) {
+		if (rc == tm || hi == rv || hl == op) {} // stupid warnings
+	}
+
 	public int tape_play() {
 		// request for next byte
 		int b = tape_read();
-		if (b == (_recordMark & 0x00ff)) { // END PROG
+		if (_recordLen > 0) {
+			++_bytc;
+			if (_bytc >= _recordLen) {
+//System.err.println("Tape Read ++index ("+_index+" @ "+_bytc+")");
+				_bytc = 0;
+				++_index;
+				update_tape();
+			}
+		} else if (_recordMark != 0 && b == (_recordMark & 0x00ff)) { // END PROG
 			// there is always one more byte..
 			b = tape_read();
 			// might be old image... treat EOF same...
-			if (b < 0) {	// saw EOF
+			if (b < 0) {    // saw EOF
 				b = _recordMark;
 			}
 			if (b != (_recordMark & 0x00ff)) {
@@ -419,7 +446,15 @@ class Wang_TapeDrive extends JComponent
 	public void tape_record(int byt) {
 		if (!_ready) return;
 		tape_write((byte)byt);
-		if ((_recordMark & 0x00ff) != (byte)0x00) {
+		if (_recordLen > 0) {
+			++_bytc;
+			if (_bytc >= _recordLen) {
+//System.err.println("Tape Write ++index ("+_index+" @ "+_bytc+")");
+				_bytc = 0;
+				++_index;
+				update_tape();
+			}
+		} else if (_recordMark != 0) {
 			// only if last byte before tape-off is END PROG...
 			_end = ((byt & 0x00ff) == (_recordMark & 0x00ff)); // END PROG
 			if (_end) {

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.1 2013/11/26 23:18:09 drmiller Exp $
+// $Id: Wang1200_Simulator.java,v 1.2 2013/11/30 17:51:46 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.1 2013/11/26 23:18:09 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.2 2013/11/30 17:51:46 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -139,9 +139,9 @@ class Wang1200_Simulator
 			ai = (byte)((instr[5] >> 1) & 0x07);
 			brkpt = ((instr[7] & 1) != 0);
 		}
-		public byte[] ovr(byte ai, byte bi, byte zo, byte aop, byte ac,
-				byte bc, byte mop, byte kk, byte st, byte sub,
-				int jad, byte jh, byte jl) {
+		public byte[] ovr(int ai, int bi, int zo, int aop, int ac,
+				int bc, int mop, int kk, int st, int sub,
+				int jad, int jh, int jl) {
 			byte[] b = new byte[8];
 			b[0] = (byte)((jl << 2) | (jh << 5));
 			b[1] = (byte)((jad >> 2) & 0x0ff);
@@ -167,7 +167,7 @@ class Wang1200_Simulator
 			}
 		}
 
-		public Wang1200_UcodeRom(java.io.InputStream img, int memsize) {
+		public Wang1200_UcodeRom(java.io.InputStream img) {
 			// Can't change _ucode after initial setup (i.e. while running).
 			// Can't run if _ucode is null... need to check
 			// (right now, will throw NULL pointer exception when fetching)
@@ -192,19 +192,21 @@ class Wang1200_Simulator
 					_ucode = buf;
 
 					// TODO: apply patches... or patch file?
+// ugh, for stupid...
+Wang1200_Ucode uu = fetchUcode(0x000);
 //////////////////////////// ai bi zo aop ac bc mop  kk  st sub    jad jh jl
-ovr(0x3d0, Wang1200_Ucode.ovr(0, 0, 0,  0, 0, 0,  0,  0,  0,  1, 0x5fc, 1, 0));
-ovr(0x052, Wang1200_Ucode.ovr(0, 0, 0,  0, 0, 0,  0,  0,  0,  0, 0x058, 0, 3));
-ovr(0x423, Wang1200_Ucode.ovr(6, 1, 0,  0, 1, 1,  0, 11,  0,  0, 0x424, 5, 4));
-ovr(0x42f, Wang1200_Ucode.ovr(6, 1, 0,  0, 0, 0,  6,  4,  3,  0, 0x424, 7, 4));
-ovr(0x506, Wang1200_Ucode.ovr(0, 0, 7,  1, 0, 0,  3, 12, 13,  1, 0x7fc, 1, 0));
-ovr(0x558, Wang1200_Ucode.ovr(1, 6, 1,  0, 1, 0,  0,  0, 13,  1, 0x7fc, 1, 0));
-ovr(0x5ec, Wang1200_Ucode.ovr(5, 1, 0,  6, 1, 1,  0, 11,  0,  0, 0x5ec, 1, 4));
-ovr(0x6ee, Wang1200_Ucode.ovr(0, 1, 7,  0, 0, 0,  0,  2,  0,  0, 0x6c8, 0, 0));
-ovr(0x7fe, Wang1200_Ucode.ovr(0, 1, 7,  6, 1, 0,  0,  3,  0,  0, 0x6c8, 0, 0));
-ovr(0x44f, Wang1200_Ucode.ovr(6, 0, 6,  3, 1, 1,  0,  0,  0,  0, 0x450, 0, 1));
-ovr(0x33c, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  1, 0x414, 0, 0));
-ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
+ovr(0x3d0, uu.ovr(0, 0, 0,  0, 0, 0,  0,  0,  0,  1, 0x5fc, 1, 0));
+ovr(0x052, uu.ovr(0, 0, 0,  0, 0, 0,  0,  0,  0,  0, 0x058, 0, 3));
+ovr(0x423, uu.ovr(6, 1, 0,  0, 1, 1,  0, 11,  0,  0, 0x424, 5, 4));
+ovr(0x42f, uu.ovr(6, 1, 0,  0, 0, 0,  6,  4,  3,  0, 0x424, 7, 4));
+ovr(0x506, uu.ovr(0, 0, 7,  1, 0, 0,  3, 12, 13,  1, 0x7fc, 1, 0));
+ovr(0x558, uu.ovr(1, 6, 1,  0, 1, 0,  0,  0, 13,  1, 0x7fc, 1, 0));
+ovr(0x5ec, uu.ovr(5, 1, 0,  6, 1, 1,  0, 11,  0,  0, 0x5ec, 1, 4));
+ovr(0x6ee, uu.ovr(0, 1, 7,  0, 0, 0,  0,  2,  0,  0, 0x6c8, 0, 0));
+ovr(0x7fe, uu.ovr(0, 1, 7,  6, 1, 0,  0,  3,  0,  0, 0x6c8, 0, 0));
+ovr(0x44f, uu.ovr(6, 0, 6,  3, 1, 1,  0,  0,  0,  0, 0x450, 0, 1));
+ovr(0x33c, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  1, 0x414, 0, 0));
+ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 
 				} else {
 					Wang_UI.fatal("Loading microcode", "Wrong size");
@@ -612,9 +614,9 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 
 		public String getMachine() {
 			String str = String.format("d1=%01x|d2=%01x|d3=%01x",
-				Wang1200.Kbd.getMode0(),
+				Wang1200.Kbd.getMode0(false),
 				Wang1200.Kbd.getMode1(false),
-				Wang1200.Kbd.getMode2());
+				Wang1200.Kbd.getMode2(false));
 			// indicators?
 			if (keyCodes.size() > 0) str += "|Key Pressed";
 			return str;
@@ -787,10 +789,9 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 				Wang_UI.fatal("Opening microcode", ee.getMessage());
 			}
 		}
-		_rom = new Wang1200_UcodeRom(rom, memsize);
+		_rom = new Wang1200_UcodeRom(rom);
 		_ram = new byte[memsize];
 
-		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
 		run_sim = !stop;
 		cylimit = Long.MAX_VALUE;
@@ -811,22 +812,24 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		}
 	}
 
-	private byte[] odd_parity;
-
 	byte to_last;
 	byte to_data;
 	int to_bitc;
 
-	private void tape_write(int dat) {
-		byte curr = (din1 << 1) | din0;
-		byte chg = (curr ^ to_last);
+	private void tape_write() {
+		byte curr = (byte)((din1 << 1) | din0);
+		byte chg = (byte)(curr ^ to_last);
 		to_last = curr;
 		if (chg != 0) {
 			--chg;
 			to_data <<= 1;
 			to_data |= chg;
 			if (++to_bitc >= 8) {
-				Wang1200.Tape.tape_record(to_data);
+				if (right != 0) {
+					Wang1200.TapeR.tape_record(to_data);
+				} else {
+					Wang1200.TapeL.tape_record(to_data);
+				}
 				to_data = 0;
 			}
 		}
@@ -839,7 +842,7 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 	int ti_sigc;
 	long ti_repc;
 	byte ti_init;
-	byte ti_curr;
+	int ti_curr;
 	byte ti_chunk;
 	int[] ti_chunks = new int[5];
 
@@ -873,7 +876,11 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			// TODO: when to stop (BOT)?
 			ti_data = 0;
 		} else {
-			ti_data = Wang1200.Tape.tape_play();
+			if (right != 0) {
+				ti_data = Wang1200.TapeR.tape_play();
+			} else {
+				ti_data = Wang1200.TapeL.tape_play();
+			}
 		}
 		if (ti_data < 0) { // EOF
 			ti_repc = cycles + 900;	// 27,928cy... ?
@@ -940,15 +947,15 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		}
 	}
 
-	private void tape_on(int wr) {
-		byte hi;
+	private void tape_on() {
+		//byte hi;
 		if (right != 0) {
 			tmr = tm;
-			hi = rhs;
+			//hi = rhs;
 			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
 		} else {
 			tml = tm;
-			hi = lhs;
+			//hi = lhs;
 			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
 		}
 		tck = 0;
@@ -958,7 +965,11 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		to_last = 0;
 		to_data = 0;
 		to_bitc = 0;
-		Wang1200.Tape.tape_on(rc);
+		if (right != 0) {
+			Wang1200.TapeR.tape_on(rc);
+		} else {
+			Wang1200.TapeL.tape_on(rc);
+		}
 		if (rc == 0) {
 			ti_lastc = 0;
 			ti_lastd = 0;
@@ -969,14 +980,14 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 	}
 
 	private void tape_off() {
-		byte hi;
+		//byte hi;
 		if (right != 0) {
 			tmr = tm;
-			hi = rhs;
+			//hi = rhs;
 			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
 		} else {
 			tml = tm;
-			hi = lhs;
+			//hi = lhs;
 			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
 		}
 		tck = 0;
@@ -986,7 +997,11 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		to_last = 0;
 		to_data = 0;
 		to_bitc = 0;
-		Wang1200.Tape.tape_off(0);
+		if (right != 0) {
+			Wang1200.TapeR.tape_off(0);
+		} else {
+			Wang1200.TapeL.tape_off(0);
+		}
 	}
 
 	private void dev_out() {
@@ -1041,9 +1056,6 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 	private void rd_ram_i() {
 		int adr = ((m & 0x0f) << 4) | (n & 0x0f);
 		byte b = _ram[adr];
-		if (odd) {
-			b >>= 4;
-		}
 		ca = (byte)((b >> 4) & 0x0f);
 		cb = (byte)(b & 0x0f);
 	}
@@ -1057,7 +1069,7 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		if (canSleep) {
 			int k = -1;
 			try {
-				k = keyCodes.pollFirst(1000, TimeUnit.MILLISECONDS);
+				k = keyCodes.pollFirst(1000, java.util.concurrent.TimeUnit.MILLISECONDS);
 			} catch(Exception ee) {
 				k = -1;
 			}
@@ -1154,7 +1166,7 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		switch(uu.bi) {
 		case 0: g = 0; break;
 		case 1: g = br_k; break;
-		case 2: g = (byte)Wang1200.Kbd.getMode0(); break;
+		case 2: g = (byte)Wang1200.Kbd.getMode0(true); break;
 		case 3:
 			g = (byte)Wang1200.Kbd.getMode1(true); // clears it...
 			g = (byte)((g & 0x07) | (skl << 3));
@@ -1270,19 +1282,19 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		case 6:	rd_ram_i(); break;
 		case 7:
 			if ((br_k & 1) != 0) {
-				csl = (byte)(u.bi & 1);
+				csl = (byte)(uu.bi & 1);
 				Wang1200.Kbd.setCHAR_STOP(csl != 0);
 			}
 			if ((br_k & 2) != 0) {
-				eln = (byte)(u.bi & 1);
+				eln = (byte)(uu.bi & 1);
 				Wang1200.Kbd.setEND_DOC(eln != 0);
 			}
 			if ((br_k & 4) != 0) {
-				ern = (byte)(u.bi & 1);
+				ern = (byte)(uu.bi & 1);
 				Wang1200.Kbd.setRECORD(ern != 0);
 			}
 			if ((br_k & 8) != 0) {
-				nan = (byte)(u.bi & 1);
+				nan = (byte)(uu.bi & 1);
 				Wang1200.Kbd.setNO_ADJUST(nan != 0);
 			}
 			break;
@@ -1290,7 +1302,7 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			if ((br_k & 1) != 0) {
 				// [un]lock keyboard...
 				function = 1;
-				Wang1200.CN24.do_cn24((byte)(0xd0 + ((u.bi & 1) << 4)));
+				Wang1200.CN24.do_cn24((byte)(0xd0 + ((uu.bi & 1) << 4)));
 			}
 			if ((br_k & 2) != 0) {
 				// sound alarm/bell
@@ -1300,32 +1312,32 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			if ((br_k & 4) != 0) {
 				to = ka;
 				ro = kb;
-				function = (u.bi & 1);
+				function = (byte)(uu.bi & 1);
 				dev_out();
 			}
 			break;
 		case 9:
 			switch(br_k & 7) {
 			case 0:
-				ka = (byte)Wang1200.Kbd.getMode2();
+				ka = (byte)Wang1200.Kbd.getMode2(true);
 				break;
 			case 1:
 				ka = (byte)4; // temp workaround for UART
 				break;
 			case 4:
-				ka = // TRE, SHC, PRINT, ATTN...
+				ka = (byte) // TRE, SHC, PRINT, ATTN...
 					(ls << 2);
 				break;
 			}
 			break;
 		case 10:
 			if (rc == 0) {
-				tape_read());
+				tape_read();
 			}
-			kb =	(tck << 1) |
+			kb = (byte)((tck << 1) |
 				(dk << 0) |
 				(lop << 2) |
-				(rop << 3);
+				(rop << 3));
 			break;
 		case 11:
 			din0 = (byte)(kb & 1);
@@ -1334,23 +1346,23 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			break;
 		case 12:
 			// RHS : LHS : R/B : L/S
-			kb =	(rhs << 3) |
+			kb = (byte)((rhs << 3) |
 				(lhs << 2) |
 				(1 << 1) |	// R/B (always ready)
-				(ls << 0);	// L/S
+				(ls << 0));	// L/S
 			break;
 		case 13:
 		case 14:
-			right = ((br_k >> 0) & 1);
+			right = (byte)((br_k >> 0) & 1);
 			if (right != 0) {
-				rhs = (((br_k >> 2) & 1) ^ 1);
+				rhs = (byte)(((br_k >> 2) & 1) ^ 1);
 			} else {
-				lhs = (((br_k >> 2) & 1) ^ 1);
+				lhs = (byte)(((br_k >> 2) & 1) ^ 1);
 			}
-			rc = (u.bi & 1);
-			hl = ((br_k >> 3) & 1);
-			rv = ((br_k >> 1) & 1);
-			tm = (u.mop == 13 ? 1 : 0);
+			rc = (byte)(uu.bi & 1);
+			hl = (byte)((br_k >> 3) & 1);
+			rv = (byte)((br_k >> 1) & 1);
+			tm = (byte)(uu.mop == 13 ? 1 : 0);
 			if (tm == 0) {
 				tape_off();
 			} else {
@@ -1392,7 +1404,6 @@ ovr(0x33d, Wang1200_Ucode.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 					kbd = 1;
 					ka = (byte)((key >> 4) & 0x0f);
 					kb = (byte)(key & 0x0f);
-					Wang1200.M630.do_ack(iob);
 				}
 				nxt |= (kbd << 1);
 				if (kbd != 0) {

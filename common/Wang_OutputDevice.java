@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.4 2013/11/30 17:51:45 drmiller Exp $
 
 import javax.swing.*;
 
@@ -16,10 +16,12 @@ interface Wang_OutputDevice
 
 	// Process byte-pair in context of Wang Output Device
 	void do_cn24(byte b);
+	void do_cn24_direct(char c);
 
 	// Return the text-frame of the device, for handling events
 	// and setting up action listeners
 	JFrame getFrame();
+	JComponent getComponent();
 
 	// Set the visibility of the output frame
 	void onOff(boolean on);

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2012/02/25 19:42:46 drmiller Exp $
+# $Id: Makefile,v 1.21 2013/11/30 17:51:45 drmiller Exp $
 
 include Makefile.ship
 
@@ -8,7 +8,6 @@ INSDEST = $(INSDIR)/$(INSNAME)
 TMPDIR = temp
 TMPDEST = $(TMPDIR)/$(INSNAME)
 
-MACOSX = mini-mac
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
 PACKAGES = wang1200wps.tgz wang1200wps.dmg wang1200wps.exe
@@ -20,18 +19,9 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
-ROM = wang1200.rom
-EXE = w1200-sim
-
-xinetd: $(EXE) $(ROM)
-	cp $(EXE) $(ROM) /usr/local/bin/wang
-
 clobber: clean
-	rm -f *.class $(EXE) w1200_fe w1200-dasm Manifest.txt *.jar *.tgz
+	rm -f *.class Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
-
-update:
-	cd ..; cvs -q update common w1200-sim
 
 tar:
 	cd ..;\
@@ -41,7 +31,7 @@ tar:
 		common/*.[ch] \
 		w1200-sim/README.internals w1200-sim/LICENSE* \
 		w1200-sim/INSTALL w1200-sim/run \
-		w1200-sim/examples/*.wng \
+		w1200-sim/examples/*.wpt \
 		w1200-sim/$(ROM) w1200-sim/icons/*.gif \
 		w1200-sim/icons/*.png \
 		w1200-sim/docs/*.html w1200-sim/docs/*.gif
@@ -54,10 +44,10 @@ packages: $(PACKAGES)
 
 temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar $(ROM) $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang1200.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/examples
-	cp examples/*.wng $(TMPDEST)/examples
+	cp examples/*.wpt $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang1200-*x*.png $(TMPDEST)/icons
 #	mkdir -p $(TMPDEST)/docs
@@ -70,12 +60,8 @@ wang1200wps.tgz: temp_dest
 wang1200wps.exe: all winicons wang1200.jar wang1200.nsi
 	makensis wang1200.nsi
 
-$(EXE).osx: $(EXE)
-	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w1200-sim
-	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
-
 # Need better way to estimate size of image...
-wang1200wps.dmg: all icns $(EXE).osx wang1200.jar
+wang1200wps.dmg: all icns wang1200.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=64k count=16
 	hformat -l WANG1200WPS $@
@@ -86,16 +72,13 @@ wang1200wps.dmg: all icns $(EXE).osx wang1200.jar
 	hcd Contents
 	hcopy -r wang1200.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang1200.jar $(ROM) run :MacOS
+	hcopy -r wang1200.jar run :MacOS
 	hcopy -r icons/wang1200-*x*.icns :Resources
-	hcd MacOS
-	hcopy -r $(EXE).osx :$(EXE)
 	hcd
 	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
 	hcopy -r README.osx :README.html
 	hcopy -r examples/*.wng :Wang1200Files
 	humount $@
-	rm -f $(EXE).osx
 
 install: temp_dest
 	rm -rf $(INSDEST)

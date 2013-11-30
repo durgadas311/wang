@@ -1,10 +1,9 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $
+// $Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.event.*;
 import java.io.*;
 
@@ -19,7 +18,7 @@ import java.awt.datatransfer.StringSelection;
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -91,13 +90,14 @@ public class w600_fe
 		s.gridheight = 1;
 		front_end.add(pan);
 
-		Wang600.Tape = new Wang_TapeDrive(
+		Wang_Keys ej = Wang600_Keyboard_stick.getEject();
+		Wang600.Tape = new Wang_TapeDrive(ej,
 					"<HTML><BR><FONT SIZE=+2><B>WANG</B></FONT>" +
 					" 600 SERIES</HTML>",
 					Wang_Colors.ivory, Wang_Colors.aqua,
 					null, "tape image",
 					Wang_UI.getProperties().getProperty("wang600_tape_file_suffix"),
-					"File", (byte)0x9e, "wang600_tape_image");
+					"File", (byte)0x9e, 0, "wang600_tape_image");
 		s.gridx = 3;
 		s.gridheight = 2;
 		gridbag.setConstraints(Wang600.Tape, s);
@@ -203,7 +203,7 @@ public class w600_fe
 class Wang600_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 
 	private JMenuItem _mi601;
 	private JMenuItem _mi602;
@@ -412,7 +412,7 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -907,7 +907,7 @@ System.err.println("sync error");
 class Wang600_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
@@ -1117,13 +1117,13 @@ System.err.println("IOException for " + f);
 class Wang600_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
 	GridBagLayout gridbag = new GridBagLayout();
 	int _nkbds;
-	Wang600_Keyboards[] _kbds;
+	Wang_Keyboards[] _kbds;
 	int _row;
 	int _col;
 	boolean _shift;
@@ -1277,7 +1277,7 @@ class Wang600_Keyboard extends Wang_Keyboard
 
 	public Wang600_Keyboard() {
 		int x;
-		_kbds = new Wang600_Keyboards[num_kbds];
+		_kbds = new Wang_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
@@ -1291,7 +1291,7 @@ class Wang600_Keyboard extends Wang_Keyboard
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JPanel pan;
-		Wang600_Keyboards kbd;
+		Wang_Keyboards kbd;
 
 		s.fill = GridBagConstraints.NONE;
 		s.gridx = 0;
@@ -1531,171 +1531,6 @@ System.err.println("action");
 	}
 }
 
-class Wang600_Keyboards extends JComponent
-{
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
-	static final long serialVersionUID = 311457692034L;
-	public Wang600_Keyboards() { }
-
-	int _nkeys;
-	Wang_Keys[] _keys;
-	JButton[] _buttons;
-// private:
-	GridBagLayout gridbag = new GridBagLayout();
-	int _row;
-	int _col;
-
-	void addButton(GridBagConstraints c, int lx, int ly, int px, int py,
-						String icon, Wang_Keys key) {
-		final Insets inset = new Insets(2,2,2,2);
-		final Dimension dim = new Dimension(50, 50);
-		JButton butt;
-
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		java.net.URL url = Wang600_Keyboards.class.getResource(icon);
-		ImageIcon ic = new ImageIcon(url);
-		butt = new JButton(ic);
-		butt.setBackground(key.color);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-		// butt.setHorizontalAlignment(SwingConstants.CENTER); // didn't help...
-
-		dim.width = 50 * lx;
-		dim.height = 50 * ly;
-		butt.setPreferredSize(dim);
-		butt.setMargin(inset);
-
-		c.gridwidth = lx;
-		c.gridheight = ly;
-		c.gridx = _col + px;
-		c.gridy = _row + py;
-		gridbag.setConstraints(butt, c);
-
-		add(butt);
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-
-	void addPushButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, String botlab, Color alt, boolean init, Wang_Keys key) {
-		final Dimension dim = new Dimension(15, 30);
-		JButton butt;
-		if (alt != null) {
-			key.altcolor = alt;
-		}
-
-		butt = new JButton();
-
-		butt.setPreferredSize(dim);
-		if (init) {
-			butt.setBackground(key.altcolor);
-		} else {
-			butt.setBackground(key.color);
-		}
-		key.state = init;
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = ly; // stupid warnings
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		c.anchor = GridBagConstraints.CENTER;
-
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		c.gridx = _col + px;
-		c.gridy = _row + 1;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
-
-		if (botlab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+botlab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 2;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-
-	void addTapeButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, Color alt, Wang_Keys key) {
-		final Dimension dim = new Dimension(60, 30);
-		JButton butt;
-		if (alt != null) {
-			key.altcolor = alt;
-		}
-
-		butt = new JButton();
-
-		butt.setPreferredSize(dim);
-		butt.setBackground(key.color);
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = ly; // stupid warnings
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		c.anchor = GridBagConstraints.CENTER;
-
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 11));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		c.gridx = _col + px;
-		c.gridy = _row + 1;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
-
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-}
-
 class Wang600_Help extends JComponent
 	implements Wang_Help, ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
@@ -1800,7 +1635,7 @@ class Wang600_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 600 Advanced Programmable Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.173 $ $Date: 2013/11/26 23:16:50 $<BR>"+
+			"$Revision: 1.174 $ $Date: 2013/11/30 17:51:46 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1932,9 +1767,9 @@ class Wang600_Help extends JComponent
 	}
 }
 
-class Wang600_Keyboard_main extends Wang600_Keyboards
+class Wang600_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
@@ -2147,12 +1982,13 @@ class Wang600_Keyboard_main extends Wang600_Keyboards
 
 		_col = 0;
 		_row += 4;
+		setBackground(Color.black);
 	}
 }
 
-class Wang600_Keyboard_meta extends Wang600_Keyboards
+class Wang600_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
@@ -2240,14 +2076,20 @@ class Wang600_Keyboard_meta extends Wang600_Keyboards
 		_col = 0;
 		_row += 1;
 
+		setBackground(Color.black);
 	}
 }
 
-class Wang600_Keyboard_stick extends Wang600_Keyboards
+class Wang600_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.173 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: w600_fe.java,v 1.174 2013/11/30 17:51:46 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
+
+	static public Wang_Keys getEject() {
+		return new Wang_Keys(Wang_Colors.ivory,
+				Wang_Keys.GROUP(7,Wang_Keys.TAPE_EJECT));
+	}
 
 	public Wang600_Keyboard_stick() {
 		_buttons = new JButton[num_keys];
@@ -2328,8 +2170,8 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		++_col;
 
 		addTapeButton(c, 5, 1, 0, 0, "RELEASE", Wang_Colors.white2,
-			new Wang_Keys(Wang_Colors.ivory, Wang_Keys.GROUP(7,Wang_Keys.TAPE_EJECT)));
-
+			Wang600.Tape.ejectKey());
+	
 		addTapeButton(c, 5, 1, 1, 0, "FORWARD", Wang_Colors.white2,
 			new Wang_Keys(Wang_Colors.ivory, Wang_Keys.GROUP(7,Wang_Keys.TAPE_FF)));
 
@@ -2342,5 +2184,6 @@ class Wang600_Keyboard_stick extends Wang600_Keyboards
 		_col = 0;
 		_row += 1;
 
+		setBackground(Color.black);
 	}
 }
