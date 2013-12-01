@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.13 2013/11/30 17:51:45 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.14 2013/12/01 16:49:59 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.13 2013/11/30 17:51:45 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.14 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -224,7 +224,6 @@ class Wang_TapeDrive extends JComponent
 			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
 		} catch (FileNotFoundException ee) {
 			// can't happen?
-			//_fe.warning(_file.getAbsolutePath(), ee.getMessage());
 			_file = null;
 			_prot = false;
 			return;

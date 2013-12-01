@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.4 2013/11/30 17:51:45 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.5 2013/12/01 16:49:59 drmiller Exp $
 
 import javax.swing.*;
 
@@ -17,6 +17,18 @@ interface Wang_OutputDevice
 	// Process byte-pair in context of Wang Output Device
 	void do_cn24(byte b);
 	void do_cn24_direct(char c);
+	// carriage-control, etc.
+	void do_space();
+	void do_backspace();
+	void do_crlf();
+	void do_index();
+	void do_tab();
+	void do_settab();
+	void do_clrtab();
+	void do_shift_up();
+	void do_shift_dn();
+	void do_lock(int lk);
+	void do_bell();
 
 	// Return the text-frame of the device, for handling events
 	// and setting up action listeners

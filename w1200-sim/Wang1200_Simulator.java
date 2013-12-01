@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.2 2013/11/30 17:51:46 drmiller Exp $
+// $Id: Wang1200_Simulator.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.2 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -34,7 +34,6 @@ class Wang1200_Simulator
 	byte sc;
 	byte kbd;
 
-	byte function;	// MOP==8, etc
 	byte ls;	// L/S - Lock/Shift on keyboard
 
 	// indicators
@@ -856,6 +855,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		ti_lastc >>= 1;
 		ti_lastd >>= 1;
 		ti_repc = cycles + 10;	// sensitive?
+System.err.format("tape signal %d %d\n", tck, dk);
 		return do_repc();
 	}
 	private int do_bitc() {
@@ -881,6 +881,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			} else {
 				ti_data = Wang1200.TapeL.tape_play();
 			}
+System.err.format("tape data is %02x (%d)\n", ti_data, ti_curr);
 		}
 		if (ti_data < 0) { // EOF
 			ti_repc = cycles + 900;	// 27,928cy... ?
@@ -921,7 +922,6 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		if (right == 0 && lhs == 0) {
 			return 0; // do not read tape unless read-head is engaged...
 		}
-
 
 		if (cycles < ti_repc) {
 			return do_repc();
@@ -966,8 +966,10 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		to_data = 0;
 		to_bitc = 0;
 		if (right != 0) {
+System.err.println("Tape On R");
 			Wang1200.TapeR.tape_on(rc);
 		} else {
+System.err.println("Tape On L");
 			Wang1200.TapeL.tape_on(rc);
 		}
 		if (rc == 0) {
@@ -1002,11 +1004,6 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		} else {
 			Wang1200.TapeL.tape_off(0);
 		}
-	}
-
-	private void dev_out() {
-		byte c = (byte)((to << 4) | ro);
-		Wang1200.CN24.do_cn24(c);
 	}
 
 	private byte add3_i(byte a, byte b, byte c) {
@@ -1301,19 +1298,37 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		case 8:
 			if ((br_k & 1) != 0) {
 				// [un]lock keyboard...
-				function = 1;
-				Wang1200.CN24.do_cn24((byte)(0xd0 + ((uu.bi & 1) << 4)));
+				Wang1200.CN24.do_lock(uu.bi & 1);
 			}
 			if ((br_k & 2) != 0) {
 				// sound alarm/bell
-				function = 1;
-				Wang1200.CN24.do_cn24((byte)0xf0);
+				Wang1200.CN24.do_bell();
 			}
 			if ((br_k & 4) != 0) {
 				to = ka;
 				ro = kb;
-				function = (byte)(uu.bi & 1);
-				dev_out();
+				if ((uu.bi & 1) != 0) {
+					// special function codes
+					switch(to) {
+					case 0: Wang1200.CN24.do_space(); break;
+					case 1: Wang1200.CN24.do_backspace(); break;
+					case 2: Wang1200.CN24.do_tab(); break;
+					case 3: Wang1200.CN24.do_crlf(); break;
+					case 4: Wang1200.CN24.do_shift_up(); break;
+					case 5: Wang1200.CN24.do_shift_dn(); break;
+					case 8: Wang1200.CN24.do_index(); break;
+					case 9: Wang1200.CN24.do_settab(); break;
+					case 10: Wang1200.CN24.do_clrtab(); break;
+					case 13: Wang1200.CN24.do_lock(0); break;
+					case 14: Wang1200.CN24.do_lock(1); break;
+					case 15: Wang1200.CN24.do_bell(); break;
+					default:
+						// assert or print error?
+					}
+				} else {
+					byte c = (byte)(((to << 4) | ro) & 0x3f);
+					Wang1200.CN24.do_cn24(c);
+				}
 			}
 			break;
 		case 9:

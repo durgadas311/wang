@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $
+// $Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import java.awt.Desktop;
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -81,16 +81,16 @@ public class w1200_fe
 
 		Wang_Keys ej = new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(7,Wang_Keys.TAPE_EJECT));
 		Wang1200.TapeL = new Wang_TapeDrive(ej, null,
-					Color.black, Wang_Colors.aqua,
+					Color.black, Wang_Colors.aquaGlass,
 					"Left", "word processing image",
 					Wang_UI.getProperties().getProperty("wang1200_tape_file_suffix"),
-					"Block", (byte)0, 108, "wang1200_tape_image");
+					"Block", (byte)0, 108, "wang1200_left_tape_image");
 		ej = new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(7,Wang_Keys.TAPE_EJECT));
 		Wang1200.TapeR = new Wang_TapeDrive(ej, null,
-					Color.black, Wang_Colors.aqua,
+					Color.black, Wang_Colors.aquaGlass,
 					"Right", "word processing image",
 					Wang_UI.getProperties().getProperty("wang1200_tape_file_suffix"),
-					"Block", (byte)0, 108, "wang1200_tape_image");
+					"Block", (byte)0, 108, "wang1200_right_tape_image");
 
 		// This now creates a widget for insertion in main frame...
 		Wang1200_Model611 m611 = new Wang1200_Model611();
@@ -242,7 +242,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -289,7 +289,7 @@ class Wang1200_Indicator extends JLabel {
 class Wang1200_SimInput
 		implements ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
@@ -317,7 +317,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -392,7 +392,7 @@ class Wang1200_Model611 extends JComponent
 	implements Wang_OutputDevice, ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	private byte[] cn24_tabstops;
 	private int _max;	// last active tab stop, or zero if none
 
@@ -513,17 +513,19 @@ class Wang1200_Model611 extends JComponent
 
 	public void do_backspace() {
 //System.err.println("BS");
+		// TODO: need to prevent reverse-wrap to previous line?
+		// The Wang1200 prevents that...
 		if (cursor_left()) {
 			--_eop;
 		}
 	}
 
-	public void do_char(char c) {
+	private void do_char(char c) {
 		String s = Character.toString(c);
 		do_char(s);
 	}
 
-	public void do_char(String s) {
+	private void do_char(String s) {
 		if (_eop < _eol) {
 			if (s.equals("_")) {
 				_text.addUnderline(_eop, _eop + 1);
@@ -1221,6 +1223,7 @@ class Wang1200_Model611 extends JComponent
 //System.err.println("ch="+c);
 		do_char(p);
 	}
+
 	public void do_cn24_direct(char c) {
 		// ugh... beats going through xlate tables...
 		if (c == '^') c = '\u00A2';		// cent
@@ -1325,7 +1328,7 @@ class Wang1200_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 1200 Word Processor System<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.66 $ $Date: 2013/11/30 17:51:46 $<BR>"+
+			"$Revision: 1.67 $ $Date: 2013/12/01 16:49:59 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1444,7 +1447,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_Keyboard extends Wang_Keyboard
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1668,7 +1671,8 @@ class Wang1200_Keyboard extends Wang_Keyboard
 			code = Wang_Keys.MODE2 | _mode2;
 		}
 		if (type == Wang_Keys.SPCL) {
-			code |= Wang_Keys.SPCL;
+			Wang1200.Core.pressCmd(code);
+			return;
 		}
 		if (type == Wang_Keys.ALT) {
 			code |= Wang_Keys.ALT;
@@ -1783,9 +1787,9 @@ class Wang1200_Keyboard extends Wang_Keyboard
 		_ejRight = _nkbds;
 		++_nkbds;
 
-		_skl = Wang1200.Kbd.locateKey(Wang_Keys.ALT_KEY(1));
-		_shl = Wang1200.Kbd.locateKey(Wang_Keys.ALT_KEY(2));
-		_csl = Wang1200.Kbd.locateKey(Wang_Keys.MODE1_CHG(7, 7));
+		_skl = locateKey(Wang_Keys.ALT_KEY(1));
+		_shl = locateKey(Wang_Keys.ALT_KEY(2));
+		_csl = locateKey(Wang_Keys.MODE1_CHG(7, 7));
 	}
 
 	private void process_keychar(char c, boolean coded) {
@@ -1805,9 +1809,14 @@ System.err.println("action");
 }
 		// on some platforms, ALT causes extended character codes...
 		// so we have to handle ALT (as CODE) in the keyPressed event.
-		if ((e.getModifiers() & InputEvent.ALT_MASK) != 0) return;
+		int m = e.getModifiers();
+		if ((m & InputEvent.ALT_MASK) != 0) return;
 		char c = e.getKeyChar();
-		process_keychar(c, false);
+		if (c == 0x04) {
+			Wang1200.Core.debugIntr();
+		} else {
+			process_keychar(c, false);
+		}
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -1815,7 +1824,8 @@ System.err.println("action");
 			setCode(true);
 			return;
 		}
-		if ((e.getModifiers() & InputEvent.ALT_MASK) == 0) return;
+		int m = e.getModifiers();
+		if ((m & InputEvent.ALT_MASK) == 0) return;
 		int k = e.getKeyCode();
 		if (k != KeyEvent.VK_BACK_SPACE &&
 			k != KeyEvent.VK_ENTER &&
@@ -1882,7 +1892,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -2028,7 +2038,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2305,7 +2315,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.66 2013/11/30 17:51:46 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.67 2013/12/01 16:49:59 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 

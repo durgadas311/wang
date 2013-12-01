@@ -1,10 +1,10 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Colors.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $
+// $Id: Wang_Colors.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $
 
 import java.awt.*;
 
 class Wang_Colors {
-	final String ident = "$Id: Wang_Colors.java,v 1.2 2013/11/26 23:07:27 drmiller Exp $";
+	final String ident = "$Id: Wang_Colors.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color orange2 = new Color(255, 255, 100, 255); // illuminated key
@@ -26,5 +26,6 @@ class Wang_Colors {
 	static final Color slate = new Color(65,65,65, 255);
 	static final Color ivory = new Color(236,226,190, 255);
 	static final Color beige = new Color(230,220,210, 255);
-	static final Color aqua = new Color(143,219,195,127);
+	static final Color aqua = new Color(143,219,195,255);
+	static final Color aquaGlass = new Color(143,219,195,127);
 }
