@@ -1,9 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDevice.java,v 1.3 2013/11/30 17:51:45 drmiller Exp $
+// $Id: Wang_TapeDevice.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $
 
 interface Wang_TapeDevice {
+	public int tape_prot();
 	public void tape_on(int wr);
+	public void tape_on(byte rc, byte tm, byte hi, byte rv, byte hl);
 	public void tape_off(int wr);
+	public void tape_off(byte rc, byte tm, byte hi, byte rv, byte hl);
 	public void tape_record(int byt);
 	public int tape_play();
 

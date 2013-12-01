@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $
+// $Id: Wang1200_Simulator.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -57,8 +57,6 @@ class Wang1200_Simulator
 	byte dk;	// left/right tape read data bit
 	byte lhs;	// tape head engage, left
 	byte rhs;	// tape head engage, right
-	byte lop;	// tape protected, left (from GUI)
-	byte rop;	// tape protected, right (from GUI)
 
 	// ucode subroutine stack
 	int stk1;
@@ -668,18 +666,18 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 
 		public String ramDump(int adr, int len) {
 			String str = new String();
-			int aa = adr >> 1; 
-			int ln = (len + 1) & ~1;
+			int aa = adr; 
+			int ln = len;
 			int xx, yy;
 			for (xx = 0; xx < ln;) {
 				if (aa >= _ram.length) {
 					str += " end memory\n";
 					break;
 				}
-				str += String.format("%03x:", aa << 1);
-				for (yy = 0; xx + yy < ln && yy < 16; yy += 2) {
+				str += String.format("%03x:", aa);
+				for (yy = 0; xx + yy < ln && yy < 16; ++yy) {
 					byte bb = _ram[aa];
-					str += String.format(" %01x-%01x", (bb & 0x0f), (bb >> 4) & 0x0f);
+					str += String.format(" %02x", bb);
 					++aa;
 				}
 				str += "\n";
@@ -861,7 +859,7 @@ System.err.format("tape signal %d %d\n", tck, dk);
 	private int do_bitc() {
 		--ti_bitc;
 		ti_data <<= 1;
-		if ((ti_data & 0x10) != 0) {
+		if ((ti_data & 0x100) != 0) {
 			ti_lastc = 0x00;
 			ti_lastd = 0x01;
 		} else {
@@ -948,16 +946,6 @@ System.err.format("tape data is %02x (%d)\n", ti_data, ti_curr);
 	}
 
 	private void tape_on() {
-		//byte hi;
-		if (right != 0) {
-			tmr = tm;
-			//hi = rhs;
-			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
-		} else {
-			tml = tm;
-			//hi = lhs;
-			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
-		}
 		tck = 0;
 		dk = 0;
 		din0 = 0;
@@ -967,10 +955,14 @@ System.err.format("tape data is %02x (%d)\n", ti_data, ti_curr);
 		to_bitc = 0;
 		if (right != 0) {
 System.err.println("Tape On R");
-			Wang1200.TapeR.tape_on(rc);
+			tmr = tm;
+			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
+			Wang1200.TapeR.tape_on(rc, tm, rhs, rv, hl);
 		} else {
 System.err.println("Tape On L");
-			Wang1200.TapeL.tape_on(rc);
+			tml = tm;
+			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
+			Wang1200.TapeL.tape_on(rc, tm, lhs, rv, hl);
 		}
 		if (rc == 0) {
 			ti_lastc = 0;
@@ -982,16 +974,6 @@ System.err.println("Tape On L");
 	}
 
 	private void tape_off() {
-		//byte hi;
-		if (right != 0) {
-			tmr = tm;
-			//hi = rhs;
-			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
-		} else {
-			tml = tm;
-			//hi = lhs;
-			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
-		}
 		tck = 0;
 		dk = 0;
 		din0 = 0;
@@ -1000,9 +982,13 @@ System.err.println("Tape On L");
 		to_data = 0;
 		to_bitc = 0;
 		if (right != 0) {
-			Wang1200.TapeR.tape_off(0);
+			tmr = tm;
+			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
+			Wang1200.TapeR.tape_off(rc, tm, rhs, rv, hl);
 		} else {
-			Wang1200.TapeL.tape_off(0);
+			tml = tm;
+			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
+			Wang1200.TapeL.tape_off(rc, tm, lhs, rv, hl);
 		}
 	}
 
@@ -1349,10 +1335,11 @@ System.err.println("Tape On L");
 			if (rc == 0) {
 				tape_read();
 			}
+			// TCK : DK : LOP : ROP
 			kb = (byte)((tck << 1) |
 				(dk << 0) |
-				(lop << 2) |
-				(rop << 3));
+				(Wang1200.TapeL.tape_prot() << 2) |
+				(Wang1200.TapeR.tape_prot() << 3));
 			break;
 		case 11:
 			din0 = (byte)(kb & 1);

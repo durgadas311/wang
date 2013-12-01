@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.14 2013/12/01 16:49:59 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.15 2013/12/01 20:57:47 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.14 2013/12/01 16:49:59 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.15 2013/12/01 20:57:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -17,6 +17,7 @@ class Wang_TapeDrive extends JComponent
 	boolean _tape_on;
 	boolean _eot;
 	boolean _prot;
+	byte _op; // "live" version of _prot (++)
 	int _index;
 	JLabel _window;
 	JLabel _cassette;
@@ -30,6 +31,7 @@ class Wang_TapeDrive extends JComponent
 	byte _recordMark;
 	int _recordLen;
 	int _bytc;
+	boolean _initReady;
 
 	public Wang_TapeDrive(Wang_Keys ej, String label,
 				Color doorColor, Color windowColorRef,
@@ -37,6 +39,7 @@ class Wang_TapeDrive extends JComponent
 				String fileType, String recordName,
 				byte recordMark, // 0 == unused
 				int recordLen,   // 0 == unused
+				boolean autoReady,
 				String file_prop) {
 		_eject = ej;
 		_file_prop = file_prop;
@@ -48,8 +51,10 @@ class Wang_TapeDrive extends JComponent
 		_ready = false;
 		_tape_on = false;
 		_eot = false;
+		_op = 0;
 		_prot = false;
 		_tf = null;
+		_initReady = autoReady;
 
 		if (name != null) {
 			_mountLabel = "Mount " + name + " Tape";
@@ -236,10 +241,10 @@ class Wang_TapeDrive extends JComponent
 		}
 		_eot = false;
 		_index = 0;
-		//_ready = true;
+		_ready = _initReady;
 	}
 
-	// Not used by Wang1200
+	// Not used by Wang1200 (only when _recordMark != 0)
 	private int tape_skipone() {
 		int nb = 0;
 		int n = 1;
@@ -273,20 +278,8 @@ class Wang_TapeDrive extends JComponent
 	private void tape_position(int newidx) {
 		if (_file == null) return;
 		if (newidx < 0) return;
-		if ((_recordMark & 0x00ff) != (byte)0x00) {
-			if (newidx == _index) return;	// should not happen
-			// TBD: change position of file I/O
-			if (newidx < _index) { // rewind
-				try {
-					_tf.seek(0);
-				} catch (IOException ee) {
-					// can't happen?
-				}
-				_index = 0;
-				_eot = false;
-			}
-			while (_index < newidx && tape_skipone() == 1);
-		} else {
+
+		if (_recordLen > 0) {
 			if (newidx == 0) { // rewind
 				try {
 					_tf.seek(0);
@@ -299,11 +292,25 @@ class Wang_TapeDrive extends JComponent
 			}
 			if (newidx == _index) return;	// should not happen
 			try {
-				_tf.seek(newidx * 108);
+				_tf.seek(newidx * _recordLen);
 			} catch (IOException ee) {
 				// can't happen?
 			}
 			_index = newidx;
+
+		} else if (_recordMark != 0) {
+			if (newidx == _index) return;	// should not happen
+			// TBD: change position of file I/O
+			if (newidx < _index) { // rewind
+				try {
+					_tf.seek(0);
+				} catch (IOException ee) {
+					// can't happen?
+				}
+				_index = 0;
+				_eot = false;
+			}
+			while (_index < newidx && tape_skipone() == 1);
 		}
 		// assert: _index == newidx
 	}
@@ -387,6 +394,8 @@ class Wang_TapeDrive extends JComponent
 			_wr = true;
 			_end = false;
 		}
+		if (_ready && (!_wr || !_prot)) _op = 1;
+		else _op = 0;
 	}
 
 	public void tape_off(int wr) {
@@ -403,16 +412,57 @@ class Wang_TapeDrive extends JComponent
 		_wr = (wr != 0);
 		_wr = false;
 		_end = false;
+		_op = 0;
 		update_tape();
 		//if (_ready) _tf.flush(); // not needed anyway?
 	}
 
-	public void tape_on(byte rc, byte tm, byte hi, byte rv, byte hl, byte op) {
-		if (rc == tm || hi == rv || hl == op) {} // stupid warnings
+	private void tape_onOff(boolean on, byte rc, byte tm, byte hi, byte rv, byte hl) {
+		_wr = (rc != 0);
+//		if (_wr && !_end && _ready) {
+//			++_index;
+//		}
+		_tape_on = _ready && on;
+// not the lock signal?	// visual indicator of what might be the "door lock"
+//		if (hl != 0) {
+//			ejectBtn().setBackground(_Key.red1);
+//		} else {
+//			ejectBtn().setBackground(_Key.white1);
+//		}
+		if (hl != 0) {
+			if (_tape_on) {
+				// fast-forward or rewind...
+				_op = 0;
+				// now change file position...
+				// TBD: what to do for FORWARD
+				tape_position(rv != 0 ? 0 : -1);
+			} else {
+				if (_ready) _op = 1;
+				else _op = 0;
+			}
+		} else if (hi != 0) {
+			// ready for record/play...
+			// TBD: test RO file...
+			if (_ready && (!_wr || !_prot)) _op = 1;
+			else _op = 0;
+			// for reverse, just update position...
+			if (_tape_on && rv != 0) {
+				tape_position(_index - 1);
+			}
+		}
+		if (!_tape_on) _bytc = 0;
+		_end = false;
+		update_tape();
 	}
 
-	public void tape_off(byte rc, byte tm, byte hi, byte rv, byte hl, byte op) {
-		if (rc == tm || hi == rv || hl == op) {} // stupid warnings
+	public int tape_prot() { return _op; }
+
+	public void tape_on(byte rc, byte tm, byte hi, byte rv, byte hl) {
+		tape_onOff(true, rc, tm, hi, rv, hl);
+	}
+
+	public void tape_off(byte rc, byte tm, byte hi, byte rv, byte hl) {
+		tape_onOff(false, rc, tm, hi, rv, hl);
 	}
 
 	public int tape_play() {
