@@ -1,12 +1,12 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.6 2013/11/08 21:12:28 drmiller Exp $
+// $Id: Wang_UI.java,v 1.7 2013/12/02 21:41:04 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.6 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.7 2013/12/02 21:41:04 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -62,7 +62,7 @@ public class Wang_UI
 
 	public static Wang_CharConverter getCharConv() {
 		if (_conv == null) {
-			_conv = new Wang_CharConverter();
+			_conv = new Wang_CharConverter(_series.equals("12"));
 		}
 		return _conv;
 	}

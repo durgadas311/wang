@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.3 2013/11/26 23:16:50 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.4 2013/12/02 21:41:04 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.3 2013/11/26 23:16:50 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.4 2013/12/02 21:41:04 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -819,6 +819,8 @@ class Wang600_Simulator
 		trc_cycles = false;
 		trc_raw = false;
 		trc_fp = null;
+		// On real machines, did not always happen that power-on asserted PRIME...
+		pc = 0x000;	// force PRIME on power-up...
 
 		Thread t = new Thread(this);
 		t.start();

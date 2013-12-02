@@ -294,11 +294,12 @@ class Wang_CharConverter {
 		cn24_revxlate['\n'] = 0x33;
 		cn24_revxlate['\t'] = 0x23;
 		cn24_revxlate['\b'] = 0x13;
+		cn24_revxlate[' '] = 0x03;
 	}
 
-	public Wang_CharConverter() {
+	public Wang_CharConverter(boolean codeKey) {
 		setup_xlate();
-		if (cn24_xlate == null) {
+		if (codeKey) {
 			setup1200_revxlate();
 		} else {
 			setup_revxlate();

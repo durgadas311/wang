@@ -1,9 +1,10 @@
 // Copyright (c) 2013 Douglas Miller
-// $Id: Wang_Core.java,v 1.5 2013/11/18 18:19:10 drmiller Exp $
+// $Id: Wang_Core.java,v 1.6 2013/12/02 21:41:04 drmiller Exp $
 
 interface Wang_Core extends Runnable {
 	public void chgMode0();
 	public void chgMode1();
+	public void chgMode2();
 	public void pressCmd(int cmd);
 	public void pressKey(int key);
 	public void ackIO(int iob);

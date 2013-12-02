@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $
+// $Id: Wang1200_Simulator.java,v 1.5 2013/12/02 21:41:04 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.5 2013/12/02 21:41:04 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -57,6 +57,8 @@ class Wang1200_Simulator
 	byte dk;	// left/right tape read data bit
 	byte lhs;	// tape head engage, left
 	byte rhs;	// tape head engage, right
+
+	byte d2;	// only D2 is latched special
 
 	// ucode subroutine stack
 	int stk1;
@@ -648,8 +650,8 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			}
 			str += String.format("%03x: [%03x %03x %03x] ",
 				pc, next, stk1, stk2);
-			str += String.format("%01x %01x %01x %01x [",
-				t, u, v, ca);
+			str += String.format("%01x %01x %01x %01x %01x [",
+				t, u, v, ca, cb);
 			if (zo != 0) str += "Z"; else str += "z";
 			if (cc != 0) str += "I"; else str += "i";
 			if (sc != 0) str += "C"; else str += "c";
@@ -720,6 +722,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 	}
 
 	public void chgMode1() {
+		d2 = (byte)((d2 & 0x08) | (Wang1200.Kbd.getMode1(false) & 0x07));
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
@@ -758,6 +761,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		if (key == Wang_Keys.ALT_KEY(1)) { // SKIP
 			skl ^= 1;
 			Wang1200.Kbd.setSKIP(skl != 0);
+			d2 = (byte)((skl << 3) | (d2 & 0x07));
 			return;
 		} else if (key == Wang_Keys.ALT_KEY(2)) { // SEARCH
 			shl ^= 1;
@@ -796,6 +800,8 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		trc_cycles = false;
 		trc_raw = false;
 		trc_fp = null;
+		d2 = 0;
+		pc = 0x004; // "APR" signal triggers this initial ucode PC...
 
 		Thread t = new Thread(this);
 		t.start();
@@ -853,7 +859,6 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		ti_lastc >>= 1;
 		ti_lastd >>= 1;
 		ti_repc = cycles + 10;	// sensitive?
-System.err.format("tape signal %d %d\n", tck, dk);
 		return do_repc();
 	}
 	private int do_bitc() {
@@ -879,7 +884,6 @@ System.err.format("tape signal %d %d\n", tck, dk);
 			} else {
 				ti_data = Wang1200.TapeL.tape_play();
 			}
-System.err.format("tape data is %02x (%d)\n", ti_data, ti_curr);
 		}
 		if (ti_data < 0) { // EOF
 			ti_repc = cycles + 900;	// 27,928cy... ?
@@ -954,12 +958,10 @@ System.err.format("tape data is %02x (%d)\n", ti_data, ti_curr);
 		to_data = 0;
 		to_bitc = 0;
 		if (right != 0) {
-System.err.println("Tape On R");
 			tmr = tm;
 			Wang1200.Kbd.setTAPE_MOV_R(tmr != 0);
 			Wang1200.TapeR.tape_on(rc, tm, rhs, rv, hl);
 		} else {
-System.err.println("Tape On L");
 			tml = tm;
 			Wang1200.Kbd.setTAPE_MOV_L(tml != 0);
 			Wang1200.TapeL.tape_on(rc, tm, lhs, rv, hl);
@@ -1072,6 +1074,22 @@ System.err.println("Tape On L");
 				refresh(cylimit == Long.MAX_VALUE);
 			}
 		}
+		if (pc == 0x658) {	// (error) delay loop
+			int delay = ((ca << 12) | (cb << 8) | (ka << 4) | kb) * 6;
+			if (trace) {
+				_dbg.warp("Delay Loop", 0x65a, delay);
+			} else {
+				next = 0x65a;
+				cycles += delay;
+			}
+			ca = cb = ka = kb = (byte)0x0f;
+			if (delay > 400) { // 400 cycles per millisecond...
+				try {
+					Thread.sleep(delay / 400);
+				} catch(Exception ee) {
+				}
+			}
+		}
 	}
 
 	private int instr_exec() {
@@ -1151,8 +1169,9 @@ System.err.println("Tape On L");
 		case 1: g = br_k; break;
 		case 2: g = (byte)Wang1200.Kbd.getMode0(true); break;
 		case 3:
-			g = (byte)Wang1200.Kbd.getMode1(true); // clears it...
-			g = (byte)((g & 0x07) | (skl << 3));
+			g = d2;
+			d2 = (byte)Wang1200.Kbd.getMode1(true);
+			d2 = 0;
 			break;
 		case 4: g = ka; break;
 		case 5: g = kb; break;
