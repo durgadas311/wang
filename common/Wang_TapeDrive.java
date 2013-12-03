@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.15 2013/12/01 20:57:47 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.16 2013/12/03 16:33:18 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.15 2013/12/01 20:57:47 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.16 2013/12/03 16:33:18 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -418,6 +418,7 @@ class Wang_TapeDrive extends JComponent
 	}
 
 	private void tape_onOff(boolean on, byte rc, byte tm, byte hi, byte rv, byte hl) {
+		if (tm != 0) {} // stupid warnings
 		_wr = (rc != 0);
 //		if (_wr && !_end && _ready) {
 //			++_index;
@@ -468,7 +469,14 @@ class Wang_TapeDrive extends JComponent
 	public int tape_play() {
 		// request for next byte
 		int b = tape_read();
-		if (_recordLen > 0) {
+		if (b < 0) {
+			if (!_end && _bytc > 0) {
+				_bytc = 0;
+				++_index;
+				update_tape();
+			}
+			_end = true;
+		} else if (_recordLen > 0) {
 			++_bytc;
 			if (_bytc >= _recordLen) {
 //System.err.println("Tape Read ++index ("+_index+" @ "+_bytc+")");
@@ -476,18 +484,21 @@ class Wang_TapeDrive extends JComponent
 				++_index;
 				update_tape();
 			}
-		} else if (_recordMark != 0 && b == (_recordMark & 0x00ff)) { // END PROG
-			// there is always one more byte..
-			b = tape_read();
-			// might be old image... treat EOF same...
-			if (b < 0) {    // saw EOF
-				b = _recordMark;
+		} else if (_recordMark != 0) {
+			if (b == (_recordMark & 0x00ff)) { // END PROG
+				// there is always one more byte..
+				b = tape_read();
+				// might be old image... treat EOF same...
+				if (b < 0) {    // saw EOF
+					b = _recordMark;
+				}
+				if (b != (_recordMark & 0x00ff)) {
+					b = -1;
+				}
+				++_index;
+				_end = true;
+				update_tape();
 			}
-			if (b != (_recordMark & 0x00ff)) {
-				b = -1;
-			}
-			++_index; // display updated later...
-			_end = true;
 		}
 		return b;
 	}

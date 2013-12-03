@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.5 2013/12/02 21:41:04 drmiller Exp $
+// $Id: Wang1200_Simulator.java,v 1.6 2013/12/03 16:33:18 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.5 2013/12/02 21:41:04 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.6 2013/12/03 16:33:18 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -833,6 +833,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 				} else {
 					Wang1200.TapeL.tape_record(to_data);
 				}
+				to_bitc = 0;
 				to_data = 0;
 			}
 		}
@@ -1095,7 +1096,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 	private int instr_exec() {
 		Wang1200_Ucode uu = _rom.fetchUcode(pc);
 		int nxt;
-		int rc = 0;
+		int ret = 0;
 
 		if (uu.brkpt) {
 			_rom.breakPoint(pc);
@@ -1127,7 +1128,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			} else {
 				stk1 = stk2; // bugfix?
 				//stk1 = pc;	// bad?
-				// rc = 1;
+				// ret = 1;
 			}
 		} else {
 			nxt = uu.jad << 2;
@@ -1441,7 +1442,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			case 4: nxt |= (zo << 0); break;
 			case 5: nxt |= (cc << 0); break;
 			case 6: nxt |= (br_c << 0); break;
-			case 7: rc = 5; break;
+			case 7: ret = 5; break;
 			}
 		}
 
@@ -1469,7 +1470,7 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 		}
 
 		pc = next;
-		return rc;
+		return ret;
 	}
 
 	public void run() {
@@ -1488,7 +1489,12 @@ ovr(0x33d, uu.ovr(7, 7, 7,  6, 1, 0, 10, 15, 15,  0, 0x034, 0, 0));
 			}
 			rc = instr_exec();
 			if (rc != 0) {
-				break;
+				if (debug) {
+					System.out.format("Simulation error %d at %03x %d\n", rc, pc, cycles);
+					run_sim = false;
+				} else {
+					break;
+				}
 			}
 			if (debug && cycles >= cylimit) {
 				// PC has NOT been executed...
