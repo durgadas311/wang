@@ -1,7 +1,12 @@
+// Copyright (c) 2010, 2013 Douglas Miller
+// $Id: Wang_CharConverter.java,v 1.5 2013/12/03 23:05:36 drmiller Exp $
+
+// Handles Wang 1200 oddities...
 class Wang_CharConverter {
 
 	private byte[] cn24_xlate;
 	private byte[] cn24_revxlate;
+	private byte[] code_xlate;
 	private String[] cn24_spcl;
 
 	private void setup_xlate() {
@@ -295,6 +300,24 @@ class Wang_CharConverter {
 		cn24_revxlate['\t'] = 0x23;
 		cn24_revxlate['\b'] = 0x13;
 		cn24_revxlate[' '] = 0x03;
+
+		code_xlate = new byte[16];
+		code_xlate[0] = 8;
+		code_xlate[1] = 1;
+		code_xlate[2] = 2;
+		code_xlate[3] = 2;
+		code_xlate[4] = 4;
+		code_xlate[5] = 5;
+		code_xlate[6] = 6;
+		code_xlate[7] = 7;
+		code_xlate[8] = 8;
+		code_xlate[9] = 10;
+		code_xlate[10] = 10;
+		code_xlate[11] = 11;
+		code_xlate[12] = 12;
+		code_xlate[13] = 13;
+		code_xlate[14] = 14;
+		code_xlate[15] = 11;
 	}
 
 	public Wang_CharConverter(boolean codeKey) {
@@ -315,6 +338,22 @@ class Wang_CharConverter {
 		} else {
 			return new byte[] { 0x12, c };
 		}
+	}
+
+	public byte tiltrotateToCodedTiltrotate(byte code, boolean coded) {
+		byte c = code;
+		if (coded) {
+			int ix = c & 0x0f; 
+			c &= ~0x0f;
+			c |= code_xlate[ix];
+		}
+		return c;
+	}
+
+	public byte asciiToCodedTiltrotate(byte code, boolean coded) {
+		byte c = cn24_revxlate[code];
+		c = tiltrotateToCodedTiltrotate(c, coded);
+		return c;
 	}
 
 	public String tiltrotateToAscii(byte code, boolean shifted) {
