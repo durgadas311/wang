@@ -1,0 +1,55 @@
+<HTML>
+
+<H3>Utuilities</H3>
+
+<P>The command "txt2wng" ("Text2Wang" on windows), located in the package install directory,
+may be used to convert (almost) plain ASCII text to tape images suitable
+for use with this Wang 1200 simulator. The following restrictions on the text
+must be observed:
+
+<UL>
+<LI>Lines must be no longer than 100 characters, including the CR-LF.
+<LI>Only a subset of 7-bit ASCII is supported, as can be converted to
+the 88-position type-ball of the IBM Selectric.
+<LI>CODE characters must be enclosed in square brackets [].
+The standard escapes \n, \b, and \t are supported in CODE characters.
+<LI>Underlining is not (yet) supported.
+<LI>If a file contains and End-Of-Document CODE (i.e. [/]), it must be at the
+end of the file (anything after will be skipped). If no EOD exists,
+one will be added.
+</UL>
+
+<P>The input files are assumed to be named "*.txt" and output files
+will be created as "*.wpt". If no files are specified on the command,
+stdin/stdout are used.
+
+<H3>Installing on Linux/BSD</H3>
+Open/unpack the package and run the INSTALL command.
+The install location should be "wang1200wps" in your "HOME" directory.
+This includes installing "Wang1200Files" (sample documents)
+in your "HOME" directory.
+This folder is also used
+to store any documents you create. Another location may be chosen
+in the preferences menu.
+Inside "wang1200wps" is an UNINSTALL command, if needed.
+
+<H3>Installing on Windows</H3>
+<P>Run the package (EXE file) and it should get installed, complete with example
+files. The install location should be "wang1200wps" in your "HOME" directory.
+This includes installing "Wang1200Files" (sample documents)
+in your "HOME" directory.
+This folder is also used
+to store any documents you create. Another location may be chosen
+in the preferences menu.
+Inside "wang1200wps" is an uninstall command, if needed.
+
+<H3>Installing on OSX</H3>
+<P>Open the package image file.
+<P>You may "drag-n-drop" the program icon to your desktop or dock.
+
+<P>You may also drag-n-drop the "Wang1200Files" folder to your home directory,
+or other location, to get the sample documents.
+
+<P>The Uninstall item in this package may be used to uninstall this program,
+or you can simply move the program icon, from desktop or dock, to the trash.
+</HTML>

@@ -10,11 +10,12 @@ Section "Wang 1200 Simulator"
 	SetOutPath $INSTDIR
 	File "wang1200.jar"
 	File "Wang1200.bat"
+	File "Text2Wang.bat"
 	File /r "icons\*.ico"
 	CreateShortCut "$DESKTOP\Wang1200.lnk" "$INSTDIR\Wang1200.bat" "" \
 		"$INSTDIR\wang1200-48x48.ico" 0 SW_SHOWMINIMIZED
 	SetOutPath $WANG1200HOME
-	File /r "examples\*.wng"
+	File /r "examples\*.wpt"
 	WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 Section "Uninstall"

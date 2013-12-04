@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: run,v 1.6 2013/12/04 23:03:25 drmiller Exp $
+# $Id: txt2wng,v 1.1 2013/12/04 23:03:25 drmiller Exp $
 
 pgm=${0}
 if [[ -L ${pgm} ]]; then
@@ -9,4 +9,4 @@ cd ${pgm%/*}
 
 opts=""
 
-exec java -jar wang1200.jar ${opts}
+exec java -cp wang1200.jar txt2wng ${opts}

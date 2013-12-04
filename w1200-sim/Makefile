@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2013/11/30 17:51:45 drmiller Exp $
+# $Id: Makefile,v 1.22 2013/12/04 23:03:25 drmiller Exp $
 
 include Makefile.ship
 
@@ -27,10 +27,9 @@ tar:
 	cd ..;\
 	tar -czv --transform 's/.ship$$//' \
 		-f w1200-sim/$(SRCTAR) \
-		w1200-sim/*.[ch] w1200-sim/Makefile.ship w1200-sim/*.java \
-		common/*.[ch] \
-		w1200-sim/README.internals w1200-sim/LICENSE* \
-		w1200-sim/INSTALL w1200-sim/run \
+		w1200-sim/Makefile.ship w1200-sim/*.java common/*.java \
+		w1200-sim/README w1200-sim/LICENSE* \
+		w1200-sim/INSTALL w1200-sim/run w1200-sim/txt2wng \
 		w1200-sim/examples/*.wpt \
 		w1200-sim/$(ROM) w1200-sim/icons/*.gif \
 		w1200-sim/icons/*.png \
@@ -44,8 +43,8 @@ packages: $(PACKAGES)
 
 temp_dest: all wang1200.jar
 	mkdir -p $(TMPDEST)
-	cp wang1200.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
-	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
+	cp wang1200.jar run txt2wng INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	chmod +x $(TMPDEST)/run $(TMPDEST)/txt2wng $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/examples
 	cp examples/*.wpt $(TMPDEST)/examples
 	mkdir -p $(TMPDEST)/icons
@@ -72,11 +71,11 @@ wang1200wps.dmg: all icns wang1200.jar
 	hcd Contents
 	hcopy -r wang1200.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang1200.jar run :MacOS
+	hcopy -r wang1200.jar run txt2wng :MacOS
 	hcopy -r icons/wang1200-*x*.icns :Resources
 	hcd
 	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
-	hcopy -r README.osx :README.html
+	hcopy -r README :README.html
 	hcopy -r examples/*.wng :Wang1200Files
 	humount $@
 
