@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.2 2013/11/30 17:51:46 drmiller Exp $
+# $Id: Makefile.ship,v 1.3 2013/12/04 14:00:49 drmiller Exp $
 
 EXAMPLES = $(wildcard examples/*.txt)
 EX = $(EXAMPLES:.txt=.wpt)
@@ -40,12 +40,15 @@ FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 
 XTRA = 
 
-all: w1200_fe.class
+all: w1200_fe.class txt2wng.class
 
 CFLAGS += -g -O3 $(COPTS)
 
 w1200_fe.class: w1200_fe.java $(COMMON_CLASSES) $(W1200_CLASSES)
 	javac w1200_fe.java
+
+txt2wng.class: txt2wng.java Wang1200_TextToTape.class Wang_CharConverter.class
+	javac txt2wng.java
 
 .SUFFIXES: .class .java
 
@@ -71,5 +74,5 @@ wang1200.jar: w1200_fe.class Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
-examples/%.wpt: examples/%.txt txt2wng
-	./txt2wng <$^ >$@
+examples/%.wpt: examples/%.txt txt2wng.class
+	java txt2wng $<
