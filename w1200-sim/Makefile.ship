@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.3 2013/12/04 14:00:49 drmiller Exp $
+# $Id: Makefile.ship,v 1.4 2013/12/04 14:23:56 drmiller Exp $
 
 EXAMPLES = $(wildcard examples/*.txt)
 EX = $(EXAMPLES:.txt=.wpt)
@@ -18,18 +18,19 @@ COMMON_CLASSES = \
 		Wang_PropertyEditor.class \
 		Wang_CharConverter.class \
 		Wang_InputDevice.class \
+		Wang_Core.class \
+		Wang_UI.class \
 		Wang_TapeDevice.class \
 		Wang_TapeDrive.class \
 		Wang_Keyboard.class \
 		Wang_OutputDevice.class \
-		Wang_Core.class \
-		Wang_UI.class \
 		Wang_Help.class \
 		Wang_Keyboard.class \
 		Wang_Debugger.class \
 		Wang_DebugConsole.class
 
 W1200_CLASSES = \
+		Wang1200_Keyboard.class \
 		Wang1200.class \
 		Wang1200_Properties.class \
 		Wang1200_Simulator.class
@@ -70,7 +71,7 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang1200arch.html,$(wildcard docs/*.html))
 
-wang1200.jar: w1200_fe.class Manifest.txt
+wang1200.jar: w1200_fe.class txt2wng.class Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS))
 
