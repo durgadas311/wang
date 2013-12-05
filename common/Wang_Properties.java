@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.4 2013/02/05 00:33:23 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.5 2013/12/05 22:31:57 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -56,6 +56,14 @@ class Wang_Properties extends Properties
 			return Integer.valueOf(getProperty(prop));
 		} catch (Exception e) {
 			return 0;
+		}
+	}
+
+	double getDouble(String prop) {
+		try {
+			return Double.valueOf(getProperty(prop));
+		} catch (Exception e) {
+			return 0.0;
 		}
 	}
 

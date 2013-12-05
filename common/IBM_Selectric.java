@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: IBM_Selectric.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
+// $Id: IBM_Selectric.java,v 1.4 2013/12/05 22:31:57 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,9 @@ import javax.swing.text.JTextComponent;
 class IBM_Selectric extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: IBM_Selectric.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $";
+	final String ident = "$Id: IBM_Selectric.java,v 1.4 2013/12/05 22:31:57 drmiller Exp $";
+
+	public void setProperties(Wang_Properties p) { }
 
 	public void reset() {
 		// anything?

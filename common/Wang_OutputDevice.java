@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.5 2013/12/01 16:49:59 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.6 2013/12/05 22:31:57 drmiller Exp $
 
 import javax.swing.*;
 
@@ -40,6 +40,8 @@ interface Wang_OutputDevice
 
 	// Return current visibility of the output frame
 	boolean onOff();
+
+	public void setProperties(Wang_Properties p);
 
 	// returns descriptive name of device
 	// static String getName();

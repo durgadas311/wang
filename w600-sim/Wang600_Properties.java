@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang600_Properties.java,v 1.1 2013/11/20 21:35:55 drmiller Exp $
+// $Id: Wang600_Properties.java,v 1.2 2013/12/05 22:31:57 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -11,18 +11,13 @@ class Wang600_Properties extends Wang_Properties
 	JCheckBox _d12_cb;
 	JCheckBox _cdp_cb;
 	JCheckBox _sp1_cb;
-	JCheckBox _rem_cb;
 	JRadioButton _f_rb1;
 	JRadioButton _f_rb2;
 	JRadioButton _f_rb3;
 	ButtonGroup _f_bg;
 	JLabel _f_lb;
 	JTextArea _home_tx;
-	JTextArea _host_tx;
-	JTextArea _port_tx;
 	JPanel _home_pn;
-	JPanel _host_pn;
-	JPanel _port_pn;
 	JPanel _dia_pn;
 
 	public Wang600_Properties() {
@@ -54,17 +49,6 @@ class Wang600_Properties extends Wang_Properties
 		_home_pn = new JPanel();
 		_home_pn.add(new JLabel("Home:"));
 		_home_pn.add(_home_tx);
-		_rem_cb = new JCheckBox("Use remote server");
-		_host_tx = new JTextArea();
-		_host_tx.setPreferredSize(new Dimension(200, 20));
-		_host_pn = new JPanel();
-		_host_pn.add(new JLabel("Remote host:"));
-		_host_pn.add(_host_tx);
-		_port_tx = new JTextArea();
-		_port_tx.setPreferredSize(new Dimension(50, 20));
-		_port_pn = new JPanel();
-		_port_pn.add(new JLabel("Remote port:"));
-		_port_pn.add(_port_tx);
 		_dia_pn = new JPanel();
 		GridBagLayout gridbag = new GridBagLayout();
 		_dia_pn.setLayout(gridbag);
@@ -102,15 +86,6 @@ class Wang600_Properties extends Wang_Properties
 		s.gridy += 1;
 		gridbag.setConstraints(_home_pn, s);
 		_dia_pn.add(_home_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_rem_cb, s);
-		_dia_pn.add(_rem_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_host_pn, s);
-		_dia_pn.add(_host_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_port_pn, s);
-		_dia_pn.add(_port_pn);
 
 		setupDialog(_dia_pn, Wang_UI.getIcon());
 	}
@@ -154,15 +129,6 @@ class Wang600_Properties extends Wang_Properties
 		if (s == null || s.length() == 0) {
 			setProperty("wang600_remote", "false");
 		}
-//	do we have defaults for these?
-//		s = getProperty("wang600_host");
-//		if (s == null || s.length() == 0) {
-//			setProperty("wang600_host", "localhost");
-//		}
-//		s = getProperty("wang600_port");
-//		if (s == null || s.length() == 0) {
-//			setProperty("wang600_port", "10311");
-//		}
 
 		// process (obsolete?) env vars...
 		s = System.getenv("WANG600HOME");
@@ -172,14 +138,6 @@ class Wang600_Properties extends Wang_Properties
 		s = System.getenv("WANG600_FONT");
 		if (s != null) {
 			setProperty("wang600_displayfont", s);
-		}
-		s = System.getenv("WANG600_HOST");
-		if (s != null) {
-			setProperty("wang600_host", s);
-		}
-		s = System.getenv("WANG600_PORT");
-		if (s != null) {
-			setProperty("wang600_port", s);
 		}
 
 		// special processing for any required...
@@ -206,10 +164,7 @@ class Wang600_Properties extends Wang_Properties
 			_f_rb3.setSelected(true);
 			// Need something user-editable...
 		}
-		_rem_cb.setSelected(getBoolean("wang600_remote"));
 		_home_tx.setText(getProperty("wang600_home"));
-		_host_tx.setText(getProperty("wang600_host"));
-		_port_tx.setText(getProperty("wang600_port"));
 
 		int ret = doDialog();
 		if (ret != OPTION_APPLY && ret != OPTION_SAVE) return false;
@@ -222,9 +177,6 @@ class Wang600_Properties extends Wang_Properties
 		setProperty("wang600_centerDP", Boolean.toString(_cdp_cb.isSelected()));
 		setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
 		setProperty("wang600_home", _home_tx.getText());
-		setProperty("wang600_remote", Boolean.toString(_rem_cb.isSelected()));
-		setProperty("wang600_host", _host_tx.getText());
-		setProperty("wang600_port", _port_tx.getText());
 		processDefaults();
 
 		if (ret == OPTION_SAVE) {
