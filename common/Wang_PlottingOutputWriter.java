@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.8 2013/12/05 22:31:57 drmiller Exp $
+// $Id: Wang_PlottingOutputWriter.java,v 1.9 2013/12/06 20:54:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.text.DefaultCaret;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.8 2013/12/05 22:31:57 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.9 2013/12/06 20:54:06 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -20,7 +20,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		java.net.URL url = this.getClass().getResource("icons/wang602.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.8 $ $Date: 2013/12/05 22:31:57 $<BR>"+
+			"$Revision: 1.9 $ $Date: 2013/12/06 20:54:06 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -149,6 +149,58 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		if (_x < 0) _x = 0;
 	}
 
+	public void do_space() {
+		space();
+		_text.setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void do_backspace() {
+		bkspace();
+		_text.setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void do_revindex() {
+		revindex();
+		_text.setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void do_index() {
+		index();
+		_text.setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void do_crlf() {
+		_x = 0;
+		index();
+		_text.setCursor(_x, _y);
+		_text.repaint();
+	}
+
+	public void do_shift_up() {
+		_shifted = true;
+	}
+
+	public void do_shift_dn() {
+		_shifted = false;
+	}
+
+	public void do_lock(int on) {
+		if (on == 0) {}
+	}
+
+	public void do_bell() {}
+	public void do_settab() {}
+	public void do_clrtab() {}
+	public void do_tab() {}
+
+	public void do_cn24_direct(char c) {
+		if (c == ' ') {}
+	}
+
 	public void do_cn24(byte b) {
 		boolean printable = true;
 		if ((b & 0x0f) == 0x08) { // control characters...
@@ -186,8 +238,11 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				printable = false;
 				break;
 			case 1:	// index/rev or shift...
-				if ((b & 0x0e) == 0x02) {
-					_shifted = ((b & 1) != 0);
+				if (b == 0x02) {
+					do_shift_dn();
+					return;
+				} else if (b == 0x03) {
+					do_shift_up();
 					return;
 				}
 				_adjacent = false;

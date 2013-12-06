@@ -1,6 +1,7 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.6 2013/12/05 22:31:57 drmiller Exp $
+// $Id: Wang_OutputDevice.java,v 1.7 2013/12/06 20:54:06 drmiller Exp $
 
+import java.awt.*;
 import javax.swing.*;
 
 
@@ -33,7 +34,7 @@ interface Wang_OutputDevice
 	// Return the text-frame of the device, for handling events
 	// and setting up action listeners
 	JFrame getFrame();
-	JComponent getComponent();
+	Component getComponent();
 
 	// Set the visibility of the output frame
 	void onOff(boolean on);

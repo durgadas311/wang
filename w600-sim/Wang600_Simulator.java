@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.4 2013/12/02 21:41:04 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.4 2013/12/02 21:41:04 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -749,6 +749,8 @@ class Wang600_Simulator
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
+
+	public void chgMode2() {} // never called on 600
 
 	public void pressCmd(int cmd) {
 		jam = 0x1000 | cmd;

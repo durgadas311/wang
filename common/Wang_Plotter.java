@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.28 2013/12/05 22:31:57 drmiller Exp $
+// $Id: Wang_Plotter.java,v 1.29 2013/12/06 20:54:06 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import java.awt.image.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.28 2013/12/05 22:31:57 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.29 2013/12/06 20:54:06 drmiller Exp $";
 
 	public void setProperties(Wang_Properties p) { }
 
@@ -31,7 +31,7 @@ class Wang_Plotter extends Wang_Paper
 		java.net.URL url = this.getClass().getResource("icons/wang612.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.28 $ $Date: 2013/12/05 22:31:57 $<BR>"+
+			"$Revision: 1.29 $ $Date: 2013/12/06 20:54:06 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -41,7 +41,6 @@ class Wang_Plotter extends Wang_Paper
 		JOptionPane.showMessageDialog(null, lab,
 			"About: Wang " + getModel() + " Emulation", JOptionPane.PLAIN_MESSAGE);
 	}
-
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JRadioButton) {
@@ -587,6 +586,23 @@ if (_draw_bar) {
 	private boolean setPen() {
 		System.err.println("setPen(" + _dx + "," + _dy + ")");
 		return false;
+	}
+
+	public void do_bell() {}
+	public void do_shift_up() {}
+	public void do_shift_dn() {}
+	public void do_lock(int on) { if (on == 0) {} }
+	public void do_settab() {}
+	public void do_clrtab() {}
+	public void do_tab() {}
+	public void do_crlf() { if (return_index()) { setCursor(_x, _y); _text.repaint(); } }
+	public void do_index() { if (index()) { setCursor(_x, _y); _text.repaint(); } }
+	public void do_revindex() { if (rev_index()) { setCursor(_x, _y); _text.repaint(); } }
+	public void do_space() { if (plotChar((byte)0x02)) { setCursor(_x, _y); _text.repaint(); } }
+	public void do_backspace() {}
+
+	public void do_cn24_direct(char c) {
+		if (c == ' ') {}
 	}
 
 	public void do_cn24(byte c) {

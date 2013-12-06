@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: IBM_Selectric.java,v 1.4 2013/12/05 22:31:57 drmiller Exp $
+// $Id: IBM_Selectric.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import javax.swing.text.JTextComponent;
 class IBM_Selectric extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: IBM_Selectric.java,v 1.4 2013/12/05 22:31:57 drmiller Exp $";
+	final String ident = "$Id: IBM_Selectric.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $";
 
 	public void setProperties(Wang_Properties p) { }
 
@@ -45,24 +45,39 @@ class IBM_Selectric extends Wang_Paper
 	Wang_FontMetrics _wfm;
 	private boolean _shifted;
 
-	private void settab() {
+	public void do_bell() {
 	}
 
-	private void clrtab() {
+	public void do_shift_up() {
+		_shifted = true;
 	}
 
-	private void tab() {
+	public void do_shift_dn() {
+		_shifted = false;
+	}
+
+	public void do_lock(int on) {
+		if (on == 0) {}
+	}
+
+	public void do_settab() {
+	}
+
+	public void do_clrtab() {
+	}
+
+	public void do_tab() {
 		// need to honor tabsets
 		_text.appendText("\t");
 	}
 
-	private void retindex() {
+	public void do_crlf() {
 		// need to check if at end of text, else
 		// must non-destructively move to next line...
 		_text.appendText("\n");
 	}
 
-	private void index() {
+	public void do_index() {
 		// need to add spaces equiv to current column...
 try {
 		int pos = _jtext.getCaretPosition();
@@ -82,17 +97,17 @@ try {
 } catch(Exception e) { }
 	}
 
-	private void revindex() {
+	public void do_revindex() {
 		// must move to previous line, possibly padding with spaces
 	}
 
-	private void space() {
+	public void do_space() {
 		// need to check if at end of text, else
 		// must non-destructively move to next character...
 		_text.appendText(" ");
 	}
 
-	private void bkspace() {
+	public void do_backspace() {
 		// only back up as far as previous line-end
 	}
 
@@ -122,16 +137,20 @@ try {
 		}
 	}
 
+	public void do_cn24_direct(char c) {
+		if (c == ' ') {}
+	}
+
 	public void do_cn24(byte b) {
 		boolean printable = true;
 		if ((b & 0x0f) == 0x08) { // control characters...
 			printable = false;
 			switch((b & 0x30) >> 4) {
 			case 0: // tab
-				tab();
+				do_tab();
 				break;
 			case 1:	// return+index
-				retindex();
+				do_crlf();
 				break;
 			case 2: // nothing
 			case 3: // nothing
@@ -142,26 +161,28 @@ try {
 			printable = false;
 			switch((b & 0x39)) {
 			case 0x00:	// space
-				space();
+				do_space();
 				break;
 			case 0x01:	// bkspace
-				bkspace();
+				do_backspace();
 				break;
 			case 0x08:	// set tab
-				settab();
+				do_settab();
 				return;
 			case 0x09:	// clr tab
-				clrtab();
+				do_clrtab();
 				return;
 			case 0x10:
+				do_shift_dn();
+				return;
 			case 0x11:
-				_shifted = ((b & 1) != 0);
+				do_shift_up();
 				return;
 			case 0x18:
-				index();
+				do_index();
 				break;
 			case 0x19:
-				revindex();
+				do_revindex();
 				break;
 			default:	// 2x, 3x: nothing
 				return;
