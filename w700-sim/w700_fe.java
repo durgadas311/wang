@@ -1,210 +1,42 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $
+// $Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.event.*;
 import java.io.*;
-import java.net.Socket;
 
-import java.awt.print.*;
-import javax.print.attribute.*;
-import javax.print.attribute.standard.*;
 import java.awt.Desktop;
-
-import java.util.Properties;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButton;
-import javax.swing.JCheckBox;
-
-class _Key {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-
-	static final Color orange1 = new Color(255, 210, 180, 255);
-	static final Color blue1 = new Color(190, 230, 255, 255);
-	static final Color green1 = new Color(230, 240, 220, 255);
-	static final Color pink1 = new Color(255, 220, 220, 255);
-	static final Color white1 = new Color(250, 250, 250, 255);
-	static final Color white2 = new Color(150, 150, 150, 255);
-	static final Color illum1 = new Color(255, 255, 100, 255);
-	static final Color red1 = new Color(255, 128, 128, 255);
-	static final Color neon = new Color(244,157,33);
-	static final Color neon2 = new Color(214,127,13);
-	static final Color empty = new Color(50,50,50);
-	static final Color ivory = new Color(236,226,190);
-	static final Color beige = new Color(230,230,230);
-	static final Color aqua = new Color(143,219,195,127);
-
-	static final int SPCL = 0x0100;
-	static final int MODE0 = 0x0200;
-	static final int META = 0x0400;		// never sent
-	static final int METAP = 0x0500;	// never sent
-
-	public _Key(Color sl, int c) {
-		this.color = sl;
-		this.altcolor = sl;
-		this.code = c;
-		this.state = false;
-	}
-
-	static final int TAPE_EJECT = -3;
-	static final int TAPE_REW = -4;
-	static final int TAPE_FF = -5;
-	static final int TAPE_READY = -6;
-
-	static final int PROG_CODE(int a, int b) {
-		return ((a << 4) | b);
-	}
-	static final int SPCL_KEY(int b) {
-		// shift is += 4...
-		return (SPCL | b);
-	}
-	// 'a' is mask of bits that change
-	static final int MODE0_CHG(int a, int b) {
-		return (MODE0 | (a << 4) | b);
-	}
-	static final int META_KEY(int b) {
-		return (META | b);
-	}
-	// a = mask
-	static final int META_PRE(int a, int b) {
-		return (METAP | (a << 4) | b);
-	}
-	// group is never sent.
-	// group=-1 is toggle (no group)
-	// group=0 is momentary switch (no group)
-	// group=N is ganged bank N (radio buttons)
-	static final int GROUP(int a, int b) {
-		return ((a << 12) | b);
-	}
-
-	public int getCode() {
-		return code & 0x0ff;
-	}
-	public int getMode() {
-		return code & 0x0f;
-	}
-	public int getMask() {
-		return (code >> 4) & 0x0f;
-	}
-	public int getType() {
-		return code & (0x0f << 8);
-	}
-	public int getGroup() {
-		return (code >> 12);
-	}
-	public boolean isTAPE() {
-		return (code <= TAPE_EJECT);
-	}
-	public boolean isMETA() {
-		return (getType() == METAP);
-	}
-
-	static final public ImageIcon toggle_on =
-		new ImageIcon(w700_fe.class.getResource("icons/toggle_on.gif"));
-	static final public ImageIcon toggle_off =
-		new ImageIcon(w700_fe.class.getResource("icons/toggle_off.gif"));
-
-	Color color;
-	Color altcolor;
-	int code;
-	boolean state;
-}
-
-// (red) CLEAR button is 00 14...
-// f(x) is 10 xx
-// F(x) is 11 xx
-// XCHG is 14 xx
-// I/O, etc is 15 xx
-
-class FEexit extends Thread {
-	private Process _be = null;
-
-	public FEexit(Process be) {
-		_be = be;
-	}
-	public void run() {
-		if (_be != null) {
-			_be.destroy();
-			try {
-				_be.waitFor();
-			} catch (InterruptedException ee) {
-			}
-		}
-	}
-}
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.StringSelection;
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 
-	public static File _dir;
-	public static ImageIcon _icon;
-	public static Wang700_Properties _props;
-	public static java.text.SimpleDateFormat _timestamp =
-			new java.text.SimpleDateFormat("MMMM d, yyyy HH:mm:ss");
 	private static JFrame front_end;
 
 	public static void main(String[] args) {
-		java.io.OutputStream fout = null;
-		java.io.InputStream fin = null;
-		java.io.BufferedReader ferr = null;
 		GridBagLayout gridbag = new GridBagLayout();
 
 		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
-		boolean back = (args.length > 0 && args[0].compareTo("-b") == 0);
-		boolean web = (args.length > 0 && args[0].compareTo("-w") == 0);
+		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
+		boolean stop = (args.length > 0 && args[0].compareTo("-I") == 0);
 
 		java.net.URL url = w700_fe.class.getResource("icons/wang700-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
-		_icon = new ImageIcon(img);
+		Wang_UI.setProperties(new Wang700_Properties());
+		Wang_UI.setIcon(new ImageIcon(img));
+		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang700_home"));
+		Wang_UI.setSeries("7");
 
-		_props = new Wang700_Properties();
-
-		_dir = new File(_props.getProperty("wang700_home"));
-		_dir.mkdir();
-
-		if (test) {
-			// nothing
-		} else if (back) {
-			fout = System.out;
-			fin = System.in;
-		} else if (web || _props.getBoolean("wang700_remote")) {
-			String host = _props.getProperty("wang700_host");
-			String port = _props.getProperty("wang700_port");
-			if (web && args.length >= 3) {
-				// should these set properties?
-				port = args[2];
-				host = args[1];
-			}
-			if (host == null || port == null) {
-				System.err.println("Usage: w700_fe -w <host> <port>");
-				System.exit(1);
-			}
-			try {
-				Socket sock = new Socket(host, Integer.parseInt(port));
-				fout = sock.getOutputStream();
-				fin = sock.getInputStream();
-			} catch (Exception ee) {
-				fatal("Startup", ee.getMessage());
-			}
-		} else {
-			try {
-				Process _be = null;
-				_be = Runtime.getRuntime().exec("./w700-sim -b");
-				fout = _be.getOutputStream();
-				fin = _be.getInputStream();
-				ferr = new BufferedReader(new InputStreamReader(_be.getErrorStream()));
-				Runtime.getRuntime().addShutdownHook(new FEexit(_be));
-				new Wang700_SimError(ferr);
-			} catch (IOException ee) {
-				System.err.println("Unable to exec back-end!");
-				System.exit(1);
-			}
-		}
 		front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
 		front_end.setIconImage(img);
+
+		Wang_Keys.toggle_on = new ImageIcon(w700_fe.class.getResource("icons/toggle_on.gif"));
+		Wang_Keys.toggle_off = new ImageIcon(w700_fe.class.getResource("icons/toggle_off.gif"));
 
 		front_end.setLayout(gridbag);
 		GridBagConstraints s = new GridBagConstraints();
@@ -261,13 +93,13 @@ public class w700_fe
 		GridBagLayout dgb = new GridBagLayout();
 		dpan.setLayout(dgb);
 
-		Wang700_Display dspy = new Wang700_Display(null);
+		Wang700.DispY = new Wang700_Display(null);
 		s.gridx = 0;
 		s.gridy = 0;
 		s.gridheight = 1;
 		s.gridwidth = 1;
-		dgb.setConstraints(dspy, s);
-		dpan.add(dspy);
+		dgb.setConstraints(Wang700.DispY, s);
+		dpan.add(Wang700.DispY);
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(560, 25));
@@ -279,16 +111,16 @@ public class w700_fe
 		dgb.setConstraints(pan, s);
 		dpan.add(pan);
 
-		Wang700_Display dspx = new Wang700_Display(dspy);
+		Wang700.DispX = new Wang700_Display(Wang700.DispY);
 		s.gridx = 0;
 		s.gridy = 2;
 		s.gridheight = 1;
 		s.gridwidth = 1;
-		dgb.setConstraints(dspx, s);
-		dpan.add(dspx);
+		dgb.setConstraints(Wang700.DispX, s);
+		dpan.add(Wang700.DispX);
 
 		dpan.setOpaque(true);
-		dpan.setBackground(_Key.empty);
+		dpan.setBackground(Wang_Colors.empty);
 
 		s.gridx = 1;
 		s.gridy = 0;
@@ -307,13 +139,24 @@ public class w700_fe
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
 
-		Wang700_Tape tape = new Wang700_Tape(fout);
+		String tapeDoor = "<HTML><BR>" +
+			"<FONT STYLE=\"font-family: serif; font-size: 150%; font-weight: bold;\">" +
+			"WANG </FONT>" +
+			"<FONT STYLE=\"font-family: sans-serif;\">700 SERIES</FONT><BR>" +
+			"<FONT STYLE=\"font-family: sans-serif; font-size: 75%;\">" +
+			"ADVANCED PROGRAMMING CALCULATOR</FONT></HTML>";
+		Wang_Keys ej = Wang700_Keyboard_stick.getEject();
+		Wang700.Tape = new Wang_TapeDrive(ej, tapeDoor,
+					Wang_Colors.ivory, Wang_Colors.aquaGlass,
+					null, "tape image",
+					Wang_UI.getProperties().getProperty("wang700_tape_file_suffix"),
+					"File", (byte)0x5c, 0, false, "wang700_tape_image");
 		s.gridx = 3;
 		s.gridy = 0;
 		s.gridheight = 4;
 		s.gridwidth = 1;
-		gridbag.setConstraints(tape, s);
-		front_end.add(tape);
+		gridbag.setConstraints(Wang700.Tape, s);
+		front_end.add(Wang700.Tape);
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(50, 25));
@@ -335,14 +178,14 @@ public class w700_fe
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
 
-		Wang700_Keyboard kbd = new Wang700_Keyboard(fout, dspx.pe, dspx.me, tape);
+		Wang700.Kbd = new Wang700_Keyboard();
 		s.gridx = 0;
 		s.gridy = 4;
 		s.gridheight = 1;
 		s.gridwidth = 5;
-		gridbag.setConstraints(kbd, s);
-		front_end.add(kbd);
-		front_end.addKeyListener(kbd);
+		gridbag.setConstraints(Wang700.Kbd, s);
+		front_end.add(Wang700.Kbd);
+		front_end.addKeyListener(Wang700.Kbd);
 
 		pan = new JPanel();
 		pan.setPreferredSize(new Dimension(110, 5));
@@ -354,37 +197,59 @@ public class w700_fe
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
 
-		Wang700_Model711 m711f = new Wang700_Model711(kbd);
-		Wang700_Model730 m730f = new Wang700_Model730(kbd);
+		String cn24 = Wang_UI.getProperties().getProperty("wang700_cn24_device");
+		Wang700.CN24 = null;
+		if (cn24 != null && cn24.equals(Wang_PlottingOutputWriter.getModel())) {
+			Wang700.CN24 = new Wang_PlottingOutputWriter();
+		} else if (cn24 != null && cn24.equals(Wang_OutputWriter.getModel())) {
+			Wang700.CN24 = new Wang_OutputWriter();
+		} else if (cn24 != null && cn24.equals(Wang_InputOutputWriter.getModel())) {
+			Wang700.CN24 = new Wang_InputOutputWriter();
+		} else if (cn24 != null && cn24.equals(Wang_Plotter.getModel())) {
+			Wang700.CN24 = new Wang_Plotter();
+		}
+		// Must be after Keyboard created.
+		Wang700.M730 = new Wang700_Model730();
 
-		Wang700_Help help = new Wang700_Help(front_end);
-		Wang700_SimInput inp = new Wang700_SimInput(fin, dspx, dspy,
-				help, tape, m711f, m730f);
+		Wang700.Help = new Wang700_Help(front_end);
+
+		// Must be alfter all components created.
+		Wang700_SimInput inp = new Wang700_SimInput(test, dbg || stop, stop);
+		// Wang700.Core is now setup...
 
 		JMenuBar mb = new JMenuBar();
 		JMenu mu;
 		mu = new JMenu("Devices");
 		mb.add(mu);
 		JMenuItem mi;
-		mi = new JMenuItem("701/702/711 OutputWriter", KeyEvent.VK_O);
-		mi.addActionListener(inp);
-		mu.add(mi);
-		mi = new JMenuItem("730 Disk - not mounted", KeyEvent.VK_D);
+		mu.add(inp.getOutputMenu()); // CN-24 output devices
+
+		mi = Wang700.M730.getMenu(KeyEvent.VK_D);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
 		mu = new JMenu("Edit");
 		mb.add(mu);
+		mi = new JMenuItem("Copy", KeyEvent.VK_COPY);
+		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK);
+		mi.setAccelerator(ks);
+		mi.addActionListener(inp);
+		mu.add(mi);
+		mi = new JMenuItem("Paste", KeyEvent.VK_PASTE);
+		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK);
+		mi.setAccelerator(ks);
+		mi.addActionListener((Wang700_Keyboard)Wang700.Kbd);
+		mu.add(mi);
 		mi = new JMenuItem("Preferences", KeyEvent.VK_E);
 		mi.addActionListener(inp);
 		mu.add(mi);
 
 		mu = new JMenu("Help");
 		mb.add(mu);
-		mi = help.getMenuItemHelp();
+		mi = Wang700.Help.getMenuItemHelp();
 		mi.addActionListener(inp);
 		mu.add(mi);
-		mi = help.getMenuItemAbout();
+		mi = Wang700.Help.getMenuItemAbout();
 		mi.addActionListener(inp);
 		mu.add(mi);
 
@@ -394,8 +259,8 @@ public class w700_fe
 
 		front_end.setJMenuBar(mb);
 
-		dspx.setProperties(_props);
-		dspy.setProperties(_props);
+		Wang700.DispX.setProperties(Wang_UI.getProperties());
+		Wang700.DispY.setProperties(Wang_UI.getProperties());
 
 		if (inp == null) System.err.println("damn warnings");
 		front_end.getContentPane().setBackground(Color.black);
@@ -404,407 +269,59 @@ public class w700_fe
 		front_end.pack();
 		front_end.setVisible(true);
 	}
-
-	static public void fatal(String op, String err) {
-		JOptionPane.showMessageDialog(front_end,
-			new JLabel(err),
-			op + " Error", JOptionPane.ERROR_MESSAGE);
-		System.exit(1);
-	}
-
-	static public void warning(String op, String err) {
-		JOptionPane.showMessageDialog(front_end,
-			new JLabel(err),
-			op + " Warning", JOptionPane.WARNING_MESSAGE);
-	}
-}
-
-class Wang700_Properties extends Properties
-{
-	static final long serialVersionUID = 311000000014L;
-	static final int OPTION_APPLY = 0;
-	static final int OPTION_SAVE = 1;
-	static final int OPTION_CANCEL = 2;
-	static final int OPTION_NONE = 3;
-	private String _cfg;
-	private JOptionPane _prefs;
-	private Object[] _btns;
-
-	JCheckBox _sp1_cb;
-	JCheckBox _rem_cb;
-	JRadioButton _f_rb1;
-	JRadioButton _f_rb2;
-	JRadioButton _f_rb3;
-	ButtonGroup _f_bg;
-	JLabel _f_lb;
-	JTextArea _home_tx;
-	JTextArea _host_tx;
-	JTextArea _port_tx;
-	JPanel _home_pn;
-	JPanel _host_pn;
-	JPanel _port_pn;
-	JPanel _dia_pn;
-	
-	private int doDialog() {
-		Dialog dlg = _prefs.createDialog(null, "Set Wang700 Options");
-		dlg.setVisible(true);
-		Object res = _prefs.getValue();
-		if (_btns[OPTION_APPLY].equals(res)) return OPTION_APPLY;
-		if (_btns[OPTION_SAVE].equals(res)) return OPTION_SAVE;
-		if (_btns[OPTION_CANCEL].equals(res)) return OPTION_CANCEL;
-		return OPTION_NONE;
-	}
-
-	public Wang700_Properties() {
-		_cfg = System.getProperty("user.home") + "/.wang700.rc";
-		try {
-			FileInputStream cfg = new FileInputStream(_cfg);
-			load(cfg);
-			cfg.close();
-		} catch (Exception e) {
-			//w700_fe.warning("Load Setup", e.getMessage());
-			// set defaults later, just leave all empty...
-			// save, and force existence of file?
-		}
-		processDefaults();
-
-		// Edit Properties...
-		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
-		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
-		_f_rb1.setActionCommand("Panaplex9seg.ttf");
-		_f_rb2 = new JRadioButton("Nixie Tubes");
-		_f_rb2.setActionCommand("NixieZM1336.ttf");
-		_f_rb3 = new JRadioButton("(not set)");
-		_f_rb3.setActionCommand("nothing");
-		_f_rb3.setEnabled(false);
-		_f_bg = new ButtonGroup();
-		_f_bg.add(_f_rb1);
-		_f_bg.add(_f_rb2);
-		_f_bg.add(_f_rb3);
-		_f_lb = new JLabel("Display style:");
-		_home_tx = new JTextArea();
-		_home_tx.setPreferredSize(new Dimension(200, 20));
-		_home_pn = new JPanel();
-		_home_pn.add(new JLabel("Home:"));
-		_home_pn.add(_home_tx);
-		_rem_cb = new JCheckBox("Use remote server");
-		_host_tx = new JTextArea();
-		_host_tx.setPreferredSize(new Dimension(200, 20));
-		_host_pn = new JPanel();
-		_host_pn.add(new JLabel("Remote host:"));
-		_host_pn.add(_host_tx);
-		_port_tx = new JTextArea();
-		_port_tx.setPreferredSize(new Dimension(50, 20));
-		_port_pn = new JPanel();
-		_port_pn.add(new JLabel("Remote port:"));
-		_port_pn.add(_port_tx);
-		_dia_pn = new JPanel();
-		GridBagLayout gridbag = new GridBagLayout();
-		_dia_pn.setLayout(gridbag);
-		GridBagConstraints s = new GridBagConstraints();
-		s.fill = GridBagConstraints.NONE;
-		s.gridx = 1;
-		s.gridy = 1;
-		s.weightx = 1;
-		s.weighty = 1;
-		s.gridwidth = 1;
-		s.gridheight = 1;
-		s.insets.left = 0;
-		s.insets.right = 0;
-		s.anchor = GridBagConstraints.WEST;
-		gridbag.setConstraints(_sp1_cb, s);
-		_dia_pn.add(_sp1_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_lb, s);
-		_dia_pn.add(_f_lb);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb1, s);
-		_dia_pn.add(_f_rb1);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb2, s);
-		_dia_pn.add(_f_rb2);
-		s.gridy += 1;
-		gridbag.setConstraints(_f_rb3, s);
-		_dia_pn.add(_f_rb3);
-		s.gridy += 1;
-		gridbag.setConstraints(_home_pn, s);
-		_dia_pn.add(_home_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_rem_cb, s);
-		_dia_pn.add(_rem_cb);
-		s.gridy += 1;
-		gridbag.setConstraints(_host_pn, s);
-		_dia_pn.add(_host_pn);
-		s.gridy += 1;
-		gridbag.setConstraints(_port_pn, s);
-		_dia_pn.add(_port_pn);
-
-		_btns = new Object[3];
-		_btns[OPTION_APPLY] = "Apply";
-		_btns[OPTION_SAVE] = "Save";
-		_btns[OPTION_CANCEL] = "Cancel";
-
-		_prefs = new JOptionPane(_dia_pn, JOptionPane.QUESTION_MESSAGE,
-				JOptionPane.YES_NO_CANCEL_OPTION, w700_fe._icon, _btns);
-	}
-
-	public void processDefaults() {
-		// setup defaults for everything...
-		String s;
-		s = getProperty("wang700_special1");
-		if (s == null || s.length() == 0) {
-			setProperty("wang700_special1", "false");
-		}
-		s = getProperty("wang700_displayfont");
-		if (s == null || s.length() == 0) {
-			setProperty("wang700_displayfont", "NixieZM1336.ttf");
-		}
-		s = getProperty("wang700_home");
-		if (s == null || s.length() == 0) {
-			setProperty("wang700_home", "~/Wang700Files");
-		}
-		s = getProperty("wang700_remote");
-		if (s == null || s.length() == 0) {
-			setProperty("wang700_remote", "false");
-		}
-//	do we have defaults for these?
-//		s = getProperty("wang700_host");
-//		if (s == null || s.length() == 0) {
-//			setProperty("wang700_host", "localhost");
-//		}
-//		s = getProperty("wang700_port");
-//		if (s == null || s.length() == 0) {
-//			setProperty("wang700_port", "10311");
-//		}
-
-		// process (obsolete?) env vars...
-		s = System.getenv("WANG700HOME");
-		if (s != null) {
-			setProperty("wang700_home", s);
-		}
-		s = System.getenv("WANG700_FONT");
-		if (s != null) {
-			setProperty("wang700_displayfont", s);
-		}
-		s = System.getenv("WANG700_HOST");
-		if (s != null) {
-			setProperty("wang700_host", s);
-		}
-		s = System.getenv("WANG700_PORT");
-		if (s != null) {
-			setProperty("wang700_port", s);
-		}
-
-		// special processing for any required...
-		s = getProperty("wang700_home");
-		if (s.startsWith("~/")) {
-			s = System.getProperty("user.home") + s.substring(1);
-			setProperty("wang700_home", s);
-		}
-		// save?
-	}
-
-	public int getInteger(String prop) {
-		try {
-			return Integer.valueOf(getProperty(prop));
-		} catch (Exception e) {
-			return 0;
-		}
-	}
-
-	public boolean getBoolean(String prop) {
-		try {
-			return Boolean.valueOf(getProperty(prop));
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	public void save() {
-		try {
-			FileOutputStream cfg = new FileOutputStream(_cfg);
-			store(cfg, "Saved by Wang700");
-			cfg.close();
-		} catch (Exception e) {
-			w700_fe.warning("Save Setup", e.getMessage());
-		}
-	}
-
-	public boolean editPreferences() {
-		_sp1_cb.setSelected(getBoolean("wang700_special1"));
-		String f = getProperty("wang700_displayfont");
-		if (f.equals(_f_rb1.getActionCommand())) {
-			_f_rb1.setSelected(true);
-		} else if (f.equals(_f_rb2.getActionCommand())) {
-			_f_rb2.setSelected(true);
-		} else {
-			_f_rb3.setText(f);
-			_f_rb3.setActionCommand(f);
-			_f_rb3.setEnabled(true);
-			_f_rb3.setSelected(true);
-			// Need something user-editable...
-		}
-		_rem_cb.setSelected(getBoolean("wang700_remote"));
-		_home_tx.setText(getProperty("wang700_home"));
-		_host_tx.setText(getProperty("wang700_host"));
-		_port_tx.setText(getProperty("wang700_port"));
-
-		int ret = doDialog();
-		if (ret != OPTION_APPLY && ret != OPTION_SAVE) return false;
-
-		// TBD: change parameters and restart?
-		// TBD: do validation?
-		ButtonModel bm = _f_bg.getSelection();
-		setProperty("wang700_displayfont", bm.getActionCommand());
-		setProperty("wang700_special1", Boolean.toString(_sp1_cb.isSelected()));
-		setProperty("wang700_home", _home_tx.getText());
-		setProperty("wang700_remote", Boolean.toString(_rem_cb.isSelected()));
-		setProperty("wang700_host", _host_tx.getText());
-		setProperty("wang700_port", _port_tx.getText());
-		processDefaults();
-
-		if (ret == OPTION_SAVE) {
-			save();
-		}
-		return true;
-	}
-}
-
-class Wang700_ErrLight extends JPanel {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-	static final long serialVersionUID = 311457692038L;
-
-	GridBagLayout gridbag = new GridBagLayout();
-	Wang700_Lamp pan;
-
-	private class Wang700_Lamp extends JPanel
-	{
-		static final long serialVersionUID = 311457692138L;
-
-		public void paint(Graphics g) {
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.addRenderingHints(new RenderingHints(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON));
-			super.paint(g2d);
-			Dimension d = getSize();
-			if (_on) {
-				g2d.setColor(_Key.neon);
-				g2d.fillOval(0, 0, d.width - 1, d.height - 1);
-				g2d.setColor(_Key.neon2);
-				g2d.setStroke(new BasicStroke((float)3.0));
-				g2d.drawOval(1, 1, d.width - 3, d.height - 3);
-				g2d.setStroke(new BasicStroke((float)1.0));
-			} else {
-				g2d.setColor(_Key.empty);
-				g2d.fillOval(0, 0, d.width - 1, d.height - 1);
-			}
-			g2d.setColor(_Key.white2);
-			g2d.drawArc(1, 1, d.width - 2, d.height - 2, 80, 110);
-		}
-
-		public Wang700_Lamp() {
-			_on = false;
-		}
-
-		public void setOn(boolean on) {
-			if (on != _on) {
-				_on = on;
-				repaint();
-			}
-		}
-
-		private boolean _on;
-
-	}
-
-	public Wang700_ErrLight(String label) {
-		GridBagConstraints s = new GridBagConstraints();
-
-		setLayout(gridbag);
-		//setPreferredSize(new Dimension(30, 35));
-		setOpaque(false);
-
-		s.fill = GridBagConstraints.NONE;
-		s.gridx = 0;
-		s.gridy = 0;
-		s.weightx = 0;
-		s.weighty = 0;
-		s.gridwidth = 1;
-		s.gridheight = 1;
-		s.insets.left = 0;
-		s.insets.right = 0;
-		s.anchor = GridBagConstraints.CENTER;
-
-		JLabel lab = new JLabel("<HTML><CENTER>"+label+"</CENTER></HTML>");
-		lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-		lab.setPreferredSize(new Dimension(30, 20));
-		lab.setForeground(Color.white);
-		lab.setOpaque(false);
-		s.gridx = 0;
-		s.gridy = 0;
-		s.insets.left = 1;
-		s.insets.right = 0;
-		gridbag.setConstraints(lab, s);
-		add(lab);
-
-		pan = new Wang700_Lamp();
-		pan.setPreferredSize(new Dimension(20, 20));
-		pan.setOpaque(true);
-		pan.setBackground(Color.black);
-		s.gridy = 1;
-		s.insets.left = 0;
-		s.insets.right = 8;
-		gridbag.setConstraints(pan, s);
-		add(pan);
-	}
-
-	public void setOn(boolean on) {
-		pan.setOn(on);
-	}
-}
-
-class Wang700_SimError
-		implements Runnable
-{
-	BufferedReader _fin;
-
-	public Wang700_SimError(BufferedReader f) {
-		_fin = f;
-		Thread t = new Thread(this);
-		t.start();
-	}
-
-	public void run() {
-		String s;
-		while (true) {
-			try {
-				s = _fin.readLine();
-			} catch (IOException ee) {
-				// System.err.println("Broken pipe for SimError!");
-				return;
-			}
-			if (s == null) {
-				return;
-			}
-			System.err.println(s);
-			System.err.flush();
-		}
-	}
 }
 
 class Wang700_SimInput
-		implements Runnable, WindowListener, ActionListener
+		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-	Wang700_Display _dspx;
-	Wang700_Display _dspy;
-	Wang700_Tape _tape;
-	Wang700_Model711 _m711;
-	Wang700_Model730 _m730;
-	private Wang700_Help _help;
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
+	private JMenuItem _mi701;
+	private JMenuItem _mi702;
+	private JMenuItem _mi711;
+	private JMenuItem _mi712;
+	private JMenuItem _miNone;
+	private JMenu _mu;
+	public JMenu getOutputMenu() { return _mu; }
 
-	InputStream _fin;
+	private void disposeDevice() {
+		if (Wang700.CN24 instanceof Wang_Plotter) {
+			_mi712.setText(Wang_Plotter.getName() +
+				" (not installed)");
+			Wang700.CN24.onOff(false);
+		} else if (Wang700.CN24 instanceof Wang_OutputWriter) {
+			_mi701.setText(Wang_OutputWriter.getName() +
+				" (not installed)");
+			Wang700.CN24.onOff(false);
+		} else if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) {
+			_mi702.setText(Wang_PlottingOutputWriter.getName() +
+				" (not installed)");
+			Wang700.CN24.onOff(false);
+		} else if (Wang700.CN24 instanceof Wang_InputOutputWriter) {
+			_mi711.setText(Wang_InputOutputWriter.getName() +
+				" (not installed)");
+			Wang700.CN24.onOff(false);
+		}
+	}
+
+	private void setupDevice() {
+		Wang700.CN24.getFrame().addWindowListener(this);
+		String model = "";
+		if (Wang700.CN24 instanceof Wang_Plotter) {
+			model = Wang_Plotter.getModel();
+		} else if (Wang700.CN24 instanceof Wang_OutputWriter) {
+			model = Wang_OutputWriter.getModel();
+		} else if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) {
+			model = Wang_PlottingOutputWriter.getModel();
+		} else if (Wang700.CN24 instanceof Wang_InputOutputWriter) {
+			model = Wang_InputOutputWriter.getModel();
+		}
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				new Wang700_Properties(),
+				"wang700_cn24_device",
+				model);
+		} catch(Exception ee) {}
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
@@ -812,121 +329,135 @@ class Wang700_SimInput
 			return;
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
-		if (m.getMnemonic() == KeyEvent.VK_O) {
-			_m711.onOff(!_m711.onOff());
+		if (m.getMnemonic() == KeyEvent.VK_1) {
+			if (!(Wang700.CN24 instanceof Wang_OutputWriter)) {
+				disposeDevice();
+				Wang700.CN24 = new Wang_OutputWriter();
+				_mi701.setText(Wang_OutputWriter.getName() +
+						" (installed)");
+				setupDevice();
+			} else {
+				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+			}
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_2) {
+			if (!(Wang700.CN24 instanceof Wang_PlottingOutputWriter)) {
+				disposeDevice();
+				Wang700.CN24 = new Wang_PlottingOutputWriter();
+				_mi702.setText(Wang_PlottingOutputWriter.getName() +
+						" (installed)");
+				setupDevice();
+			} else {
+				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+			}
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_3) {
+			if (!(Wang700.CN24 instanceof Wang_InputOutputWriter)) {
+				disposeDevice();
+				Wang700.CN24 = new Wang_InputOutputWriter();
+				_mi711.setText(Wang_InputOutputWriter.getName() +
+						" (installed)");
+				setupDevice();
+			} else {
+				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+			}
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_4) {
+			if (!(Wang700.CN24 instanceof Wang_Plotter)) {
+				disposeDevice();
+				Wang700.CN24 = new Wang_Plotter();
+				_mi712.setText(Wang_Plotter.getName() +
+						" (installed)");
+				setupDevice();
+			} else {
+				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+			}
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_0) {
+			disposeDevice();
+			try { // if this fails, oh well.
+				Wang_UI.getProperties().setAndSaveProperty(
+					new Wang700_Properties(),
+					"wang700_cn24_device",
+					"");
+			} catch(Exception ee) {}
+			Wang700.CN24 = null;
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_D) {
-			_m730.pickFile(m);
+			Wang700.M730.pickFile(m);
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_COPY) {
+			// might try to figure out where mouse pointer is???
+			Wang700.DispX.copy();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_H) {
-			_help.toggle();
+			Wang700.Help.toggle();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_A) {
-			_help.showAbout();
+			Wang700.Help.showAbout();
  			return;
  		}
 		if (m.getMnemonic() == KeyEvent.VK_E) {
-			boolean changed = w700_fe._props.editPreferences();
+			Wang700_Properties props = (Wang700_Properties)Wang_UI.getProperties();
+			boolean changed = props.editPreferences();
 			if (changed) {
 				// Apply properties...
-				w700_fe._dir = new File(w700_fe._props.getProperty("wang700_home"));
-				w700_fe._dir.mkdir();
-				_dspx.setProperties(w700_fe._props);
-				_dspy.setProperties(w700_fe._props);
-				// <others>.setProperties(w700_fe._props);
+				Wang_UI.setDir(props.getProperty("wang700_home"));
+				Wang700.DispX.setProperties(props);
+				Wang700.DispY.setProperties(props);
+				// <others>.setProperties(props);
 			}
+			return;
 		}
 	}
 
-	public Wang700_SimInput(InputStream f,
-			Wang700_Display dspx, Wang700_Display dspy,
-			Wang700_Help help,
-			Wang700_Tape tape,
-			Wang700_Model711 cn24,
-			Wang700_Model730 m730) {
-		_dspx = dspx;
-		_dspy = dspy;
-		_tape = tape;
-		_m711 = cn24;
-		_help = help;
-		_m711.getFrame().addWindowListener(this);
-		_m730 = m730;
-		_fin = f;
-
-		if (f != null) {
-			Thread t = new Thread(this);
-			t.start();
+	public Wang700_SimInput(boolean test, boolean dbg, boolean stop) {
+		if (Wang700.CN24 != null) {
+			Wang700.CN24.getFrame().addWindowListener(this);
 		}
-	}
 
-	// this really should be set aside in a neutral class, which is given
-	// access to display, tape, printer, etc...
-	public void run() {
-		int n = 0;
-		byte[] b = new byte[2];
+		_mu = new JMenu("Output Device...");
+		// todo: make this a radio-button sub-menu
+		String status = " (not installed)";
+		if (Wang700.CN24 instanceof Wang_OutputWriter) status = " (installed)";
+		_mi701 = new JMenuItem(Wang_OutputWriter.getName() + status,
+					KeyEvent.VK_1);
+		_mi701.addActionListener(this);
+		_mu.add(_mi701);
+		status = " (not installed)";
+		if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) status = " (installed)";
+		_mi702 = new JMenuItem(Wang_PlottingOutputWriter.getName() + status,
+					KeyEvent.VK_2);
+		_mi702.addActionListener(this);
+		_mu.add(_mi702);
+		status = " (not installed)";
+		if (Wang700.CN24 instanceof Wang_InputOutputWriter) status = " (installed)";
+		_mi711 = new JMenuItem(Wang_InputOutputWriter.getName() + status,
+					KeyEvent.VK_3);
+		_mi711.addActionListener(this);
+		_mu.add(_mi711);
+		status = " (not installed)";
+		if (Wang700.CN24 instanceof Wang_Plotter) status = " (installed)";
+		_mi712 = new JMenuItem(Wang_Plotter.getName() + status,
+					KeyEvent.VK_4);
+		_mi712.addActionListener(this);
+		_mu.add(_mi712);
+		_miNone = new JMenuItem("None",
+					KeyEvent.VK_0);
+		_miNone.addActionListener(this);
+		_mu.add(_miNone);
 
-		while (true) {
-			try {
-				n = _fin.read(b);
-			} catch (IOException ee) {
-				// System.err.println("Broken pipe for SimInput!");
-				return;
-			}
-			if (n == 0) {
-				continue;
-			}
-			if (n < 0) {
-				//System.err.println("simulator shutdown");
-				System.exit(1);
-			}
-if (n > 2) System.err.println("too much? "+n);
-			if ((b[1] & 0x00ff) == 0xf0) {
-				// fatal error, message follows...
-				byte[] m = new byte[1024];
-				try {
-					_fin.read(m);
-					String err = new String(m);
-					System.err.println(err);
-				} catch (IOException ee) {
-				}
-				System.exit(1);
-			} else if ((b[1] & 0xfc) == 0x00) {
-				// there will be 16 total sent...
-				// and they are in order: 0-15...
-				byte[] m = new byte[32];
-				try {
-					n = _fin.read(m);
-				} catch (IOException ee) {
-				}
-if (n != 32) System.err.println("too little? "+n);
-				if ((b[1] & 0x02) != 0) {
-					_dspy.do_display(m);
-				} else {
-					_dspx.do_display(m);
-				}
-			} else if ((b[1] & 0xfe) == 0x04) {
-				_dspx.do_indicators(b);
-			} else if ((b[1] & 0xfe) == 0x06) {
-				_dspx.do_blanking();
-				_dspy.do_blanking();
-			} else if ((b[1] & ~1) == 0x08) {
-				System.err.println("invalid printer output");
-			} else if ((b[1]  & ~3) == 0x0c) {
-				_tape.do_tape(b);
-			} else if ((b[1] & 0x0ff) == 0x7f) {
-				_m711.reset();
-				_m730.reset();
-				//etc...
-			} else if (b[1] == 0x10) {
-				_m711.do_cn24(b);
-			} else if ((b[1] & ~0x1f) == 0x20) {
-				_m730.do_dev(b);
-			} else {
-				System.err.format("Unexpected traffic (%d) %02x %02x\n", n, b[1], b[0]);
-			}
+		if (!test) {
+			Wang700.Core = new Wang700_Simulator(dbg, stop);
+			Wang_UI.setCore(Wang700.Core);
 		}
 	}
 
@@ -938,390 +469,39 @@ if (n != 32) System.err.println("too little? "+n);
 	public void windowDeactivated(WindowEvent e) { }
 
 	public void windowClosing(WindowEvent e) {
-		if (e.getWindow() == _m711.getFrame()) {
-			_m711.onOff(false);
+		if (Wang700.CN24 != null && e.getWindow() == Wang700.CN24.getFrame()) {
+			Wang700.CN24.onOff(false);
 			return;
 		}
 	}
 }
 
-class Wang700_Tape extends JComponent
-{
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-	static final long serialVersionUID = 311457692039L;
-	java.io.RandomAccessFile _tf;
-	java.io.OutputStream _fout;
-	byte[] bb = new byte[2];
-	byte[] b1 = new byte[1];
-	boolean _wr;
-	boolean _end;
-	boolean _ready;
-	boolean _tape_on;
-	boolean _eot;
-	boolean _prot;
-	int _index;
-	JLabel _window;
-	File _file;
-	JLabel _cassette;
-
-	public Wang700_Tape(OutputStream fout) {
-		_fout = fout;
-		Font font;
-		_file = null;
-		_index = 0;
-		_end = false;
-		_wr = false;
-		_ready = false;
-		_tape_on = false;
-		_eot = false;
-		_prot = false;
-		_tf = null;
-		tape_open();
-
-		setLayout(new FlowLayout());
-
-		Border lb;
-		JLayeredPane jp = new JLayeredPane();
-		jp.setOpaque(true);
-		jp.setPreferredSize(new Dimension(300, 200));
-
-		java.net.URL url;
-		ImageIcon ic;
-		JLabel cs;
-
-		int layer = 1;
-
-		JLabel cass = new JLabel("<HTML><BR>" +
-	"<FONT STYLE=\"font-family: serif; font-size: 150%; font-weight: bold;\">" +
-	"WANG </FONT>" +
-	"<FONT STYLE=\"font-family: sans-serif;\">700 SERIES</FONT><BR>" +
-	"<FONT STYLE=\"font-family: sans-serif; font-size: 75%;\">" +
-	"ADVANCED PROGRAMMING CALCULATOR</FONT></HTML>",
-			SwingConstants.CENTER);
-		lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		cass.setBorder(lb);
-		cass.setVerticalAlignment(SwingConstants.TOP);
-		cass.setHorizontalAlignment(SwingConstants.CENTER);
-		cass.setForeground(Color.black);
-		cass.setBackground(_Key.ivory);
-		cass.setOpaque(true);
-		font = null;
-		font = new Font("Serif", Font.PLAIN, 14);
-		cass.setPreferredSize(new Dimension(300, 200));
-		cass.setBounds(0, 0, 300, 200);
-		cass.setFont(font);
-		jp.add(cass, new Integer(layer), layer);
-		++layer;
-
-		url = w700_fe.class.getResource("icons/cassette_none_gry.png");
-		ic = new ImageIcon(url);
-		cs = new JLabel(ic);
-		cs.setBounds(50, 75, 201, 100);
-		jp.add(cs, new Integer(layer), layer);
-		++layer;
-
-		url = w700_fe.class.getResource("icons/cassette_tape_data.png");
-		ic = new ImageIcon(url);
-		_cassette = new JLabel(ic);
-		_cassette.setBounds(50, 75, 201, 100);
-		_cassette.setVisible(false);
-		jp.add(_cassette, new Integer(layer), layer);
-		++layer;
-
-		_window = new JLabel("Tape Source/Dest");
-		lb = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
-		_window.setBorder(lb);
-		_window.setVerticalAlignment(SwingConstants.BOTTOM);
-		_window.setHorizontalAlignment(SwingConstants.LEFT);
-		_window.setForeground(Color.black);
-		_window.setBackground(_Key.aqua);
-		_window.setOpaque(true);
-		font = null;
-		font = new Font("Sans-serif", Font.PLAIN, 12);
-		_window.setPreferredSize(new Dimension(200, 100));
-		_window.setBounds(50, 75, 200, 100);
-		_window.setFont(font);
-		update_tape();
-		jp.add(_window, new Integer(layer), layer);
-		++layer;
-
-		add(jp);
-	}
-
-	private void update_tape() {
-		String txt;
-		if (_file == null) {
-			txt = new String("<HTML><FONT SIZE=+2>(no tape)</FONT></HTML>");
-		} else {
-			_cassette.setVisible(true);
-			String eot;
-			String prot;
-			if (_eot) {
-				eot = new String(" (end)");
-			} else {
-				eot = new String("");
-			}
-			if (_prot) {
-				prot = new String(" <B>(R/O)</B>");
-			} else {
-				prot = new String("");
-			}
-			txt = new String("<HTML><B>Tape Name:</B>" + prot + "<BR>" +
-				_file.getName() + "<BR>" +
-				"<B>File #</B> " + _index + eot +
-				"</HTML>");
-		}
-		_window.setText(txt);
-		repaint();
-	}
-
-	private void pick_file() {
-		tape_close();
-		SuffFileChooser ch = new SuffFileChooser("Mount Tape",
-						"wng", "Wang program files");
-		int rv = ch.showDialog(this);
-		if (rv == JFileChooser.APPROVE_OPTION) {
-			_file = ch.getSelectedFile();
-			_prot = ch.isProtected();
-			if (_file.exists() && !_file.canWrite()) {
-				_prot = true;
-			}
-		} else {
-			_file = null;
-			_prot = false;
-		}
-		tape_open();
-	}
-
-	private void tape_open() {
-		if (_file == null) {
-			_eot = false;
-			_index = 0;
-			return;
-		}
-		String mode = "rw";
-		if (_prot) mode = "r";
-		try {
-			_tf = new RandomAccessFile(_file.getAbsolutePath(), mode);
-		} catch (FileNotFoundException ee) {
-			// can't happen?
-			w700_fe.warning(_file.getAbsolutePath(), ee.getMessage());
-			_file = null;
-			_prot = false;
-			return;
-		}
-		// not needed?
-		try {
-			_tf.seek(0);
-		} catch (IOException ee) {
-			// can't happen?
-		}
-		_eot = false;
-		_index = 0;
-	}
-
-	private int tape_skipone() {
-		int nb = 0;
-		int n = 1;
-		b1[0] = 0;
-		while (n == 1 && (b1[0] & 0x00ff) != 0x5c) {
-			try {
-				n = _tf.read(b1);
-//System.err.println(_index + ": at " + _tf.getFilePointer() + " got " + b1[0]);
-			} catch (IOException ee) {
-				// close? _tf = null?
-				n = 0;
-			}
-			if (n == 1) {
-				++nb;
-			}
-		}
-		if (n == 1) { // must have seen END PROG...
-			// gobble next byte, don't care what it was (for now).
-			try {
-				n = _tf.read(b1);
-			} catch (IOException ee) {
-			}
-		}
-		if (nb > 0) {
-			++_index;
-			return 1;
-		}
-		_eot = true;
-		return 0;
-	}
-
-	private void tape_position(int newidx) {
-		if (_file == null) return;
-		if (newidx < 0) return;
-		if (newidx == _index) return;	// should not happen
-		// TBD: change position of file I/O
-		if (newidx < _index) {
-			try {
-				_tf.seek(0);
-			} catch (IOException ee) {
-				// can't happen?
-			}
-			_index = 0;
-			_eot = false;
-		}
-		while (_index < newidx && tape_skipone() == 1);
-		// assert: _index == newidx
-	}
-
-	public boolean do_button(_Key btn) {
-		// this kills any in-progress operations...
-		_tape_on = false;
-		if (btn.code == _Key.TAPE_READY) {
-			if (_file == null) {
-				_ready = false;
-				return true;
-			}
-			_ready = btn.state;
-			return false;
-		}
-		_ready = false;
-		if (btn.code == _Key.TAPE_REW) {
-			tape_position(_index - 1);
-		} else if (btn.code == _Key.TAPE_FF) {
-			tape_position(_index + 1);
-		} else if (btn.code == _Key.TAPE_EJECT) {
-			_cassette.setVisible(false);
-			pick_file();
-		}
-		update_tape();
-		return true;	// reset button OFF - i.e. momentary only
-	}
-
-	private void send_word() {
-		try {
-			_fout.write(bb);
-			_fout.flush();
-		} catch (IOException ee) {
-		}
-	}
-
-	private void tape_close() {
-		if (_tf != null) {
-			try {
-				_tf.close();
-			} catch (IOException ee) {
-			}
-			_end = false;
-			_tf = null;
-		}
-	}
-
-	private void tape_read() {
-		int n = 0;
-		if (_tf == null || _end || !_tape_on || !_ready) {
-			bb[0] = 0;
-			bb[1] = 0x0e;
-			return;
-		}
-		try {
-			n = _tf.read(b1);
-		} catch (IOException ee) {
-			// close? _tf = null?
-			n = 0;
-		}
-		if (n != 1) {
-			bb[0] = 0;
-			bb[1] = 0x0e;
-			_end = true;
-			_eot = true;
-		} else {
-			bb[0] = b1[0];
-			bb[1] = 0x0c;
-		}
-	}
-
-	private void tape_write(byte[] b) {
-		if (_prot) return;
-		try {
-			_tf.write(b[0]);
-		} catch (IOException ee) {
-			// can't happen?
-		}
-	}
-
-	public void do_tape(byte[] b) {
-		if (b[1] == 0x0d) {		// tape on - read
-			if (b[0] == 0) { // tape-on
-				if (_ready) _tape_on = true;
-				_end = false;
-				_wr = false; // redundant
-			} else { // request for next byte
-				tape_read();
-				if ((bb[0] & 0x00ff) == 0x5c) { // END PROG
-					// there is always one more byte..
-					tape_read();
-					// might be old image... treat EOF same...
-					if ((bb[1] & 0x00ff) == 0x0e) {	// saw EOF
-						bb[0] = (byte)0x5c;
-						bb[1] = 0x0c;
-					}
-					if ((bb[0] & 0x00ff) != 0x5c) {
-						bb[0] = 0;
-						bb[1] = 0x0e;
-					}
-					++_index; // display updated later...
-					_end = true;
-				}
-				send_word();
-			}
-			return;
-		} else if (b[1] == 0x0f) {	// tape on - write
-			if (_ready) _tape_on = true;
-			_wr = true;
-			_end = false;
-		} else if (b[1] == 0x0e) {	// tape off
-			if (_wr && !_end && _ready) {
-				// did not just write END PROG, so need
-				// to mark end of tape "file".
-				// use 0x5c 0xff to mean "invisible" END PROG
-				b[1] = 0x0c;
-				b[0] = (byte)0x5c;
-				tape_write(b);
-				b[0] = (byte)0xff;
-				tape_write(b);
-				++_index;
-			}
-			_tape_on = false;
-			_wr = false;
-			_end = false;
-			update_tape();
-			//if (_ready) _tf.flush(); // not needed anyway?
-		} else if (b[1] == 0x0c) {	// tape write
-			if (!_ready) return;
-			tape_write(b);
-			// only if last byte before tape-off is END PROG...
-			_end = ((b[0] & 0x00ff) == 0x5c); // END PROG
-			if (_end) {
-				tape_write(b); // write 0x5c 0x5c - true END PROG
-				++_index; // display updated later..
-			}
-		} else {
-			System.err.println("invalid tape command");
-		}
-	}
-}
-
-class Wang700_Model730 {
+class Wang700_Model730 implements Wang_CN36_Type2 {
 	private int _cmd;
 	private int _adr;
 	private boolean _wr;
 	private int _len;
 	private int _idx;
-	private Wang700_Keyboard _kbd;
 	java.io.RandomAccessFile _f;
 	File _file;
 	byte[] _buf;
 
-	public Wang700_Model730(Wang700_Keyboard kbd) {
+	public JMenuItem getMenu(int key) {
+		String status = "not mounted";
+		if (_file != null) {
+			status = _file.getName();
+		}
+		return new JMenuItem("630 Disk - " + status, key);
+	}
+
+	public Wang700_Model730() {
 		reset();
-		_kbd = kbd;
 		_buf = new byte[256]; // largest transfer
+		_file = Wang_UI.getProperties().getFile("wang700_730_image",
+							true, Wang_UI.getDir());
+		if (_file != null) {
+			disk_open();
+		}
 	}
 
 	private void disk_close() {
@@ -1370,8 +550,12 @@ class Wang700_Model730 {
 		disk_close();
 
 		SuffFileChooser ch = new SuffFileChooser("Mount",
-						"wng", "Wang program files");
-		int rv = ch.showDialog(_kbd);
+					Wang_UI.getProperties().getProperty("wang700_disk_file_suffix"),
+					"Wang disk image files", Wang_UI.getDir());
+		if (_file != null) {
+			ch.setSelectedFile(_file);
+		}
+		int rv = ch.showDialog(Wang700.Kbd);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
 			m.setText("730 Disk - " + _file.getName());
@@ -1383,35 +567,35 @@ class Wang700_Model730 {
 		disk_open();
 	}
 
-	public void do_dev(byte[] b) {
-		int res;
-//System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-		if (_cmd == 0 && (b[1] & 0x0f) == 1) { // ACK when no command
-			return;
+	public void do_ack(int iob) {
+		// only respond to ACK if in a command already
+		// and don't respond to an ACK of an ACK
+		if (_cmd > 4 && !_wr) {
+			do_dev(iob, 0);
 		}
+	}
+
+	public void do_dev(int iob, int c) {
+		int res;
 		++_cmd;
 //System.err.println("dev 2 ["+_cmd+"] "+b[0]);
-		boolean dat = ((b[1] & 0x10) != 0);
+		boolean dat = ((iob & 1) != 0);
 		if (_cmd <= 4 && dat || _cmd > 4 && !dat) {
 System.err.println("sync error");
 			return;
 		}
-		int bb;
 //try{
 // Thread.currentThread().sleep(50);
 //}
 //catch(InterruptedException ie){
 //}
-		// unless we know otherwise, just ACK with a "0"...
-		bb = ((b[1] & 0xf0) << 8) | (_cmd & 0x0ff); // temp! debug
 		if (_cmd < 4) {
 			_adr <<= 8;
-			_adr |= (b[0] & 0x00ff);
-			bb |= 0x0100;
+			_adr |= (c & 0x00ff);
+			Wang700.Core.ackIO(iob);
 		} else if (_cmd == 4) {
-			_wr = ((b[0] & 0x80) != 0);
-			_len = (b[0] & 0x7f);
-			bb |= 0x0100;
+			_wr = ((c & 0x80) != 0);
+			_len = (c & 0x7f);
 			if (_len == 0) {
 				_len = 64;
 			} else if (_len > 1) {
@@ -1426,32 +610,32 @@ System.err.println("sync error");
 			_idx = 0;
 			if (!_wr) {
 				res = disk_read(_len);
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
+				Wang700.Core.replyIO(iob, res);
 //System.err.println("rd result "+res+" ("+_len+")");
+			} else {
+				Wang700.Core.ackIO(iob);
 			}
 		} else {
 			if (_idx < _len) {
 				if (_wr) {
-					bb |= 0x0100;
-					_buf[_idx] = b[0];
+					_buf[_idx] = (byte)c;
+					Wang700.Core.ackIO(iob);
 				} else {
-					bb = (bb & 0xff00) | (_buf[_idx] & 0x00ff);
+					Wang700.Core.replyIO(iob, _buf[_idx]);
 				}
 			} else {
 				if (_wr) {
-					bb |= 0x0100;
 					res = disk_write(_len);
+					Wang700.Core.replyIO(iob, res);
 				} else {
-					res = 0; // something else?
+					Wang700.Core.ackIO(iob);
 				}
-				bb = (bb & 0xff00) | (res & 0x00ff); // result code
 				_cmd = 0;
 //System.err.println("result "+res+" ("+_idx+")");
 			}
 			++_idx;
 		}
 //System.err.printf("got %02x%02x put %04x\n", b[1], b[0], bb);
-		_kbd.do_keycode(bb);
 	}
 
 	public void reset() {
@@ -1464,807 +648,72 @@ System.err.println("sync error");
 	}
 }
 
-class SuffFileFilter extends javax.swing.filechooser.FileFilter {
-	private String _sfx;
-	private String _dsc;
-
-	private String getExtension(File f) {
-		String ext = null;
-		String s = f.getName();
-		int i = s.lastIndexOf('.');
-
-		if (i > 0 &&  i < s.length() - 1) {
-			ext = s.substring(i+1).toLowerCase();
-		}
-		return ext;
-	}
-
-	public SuffFileFilter(String suffix, String desc) {
-		_sfx = suffix;
-		_dsc = desc;
-	}
-
-	public boolean accept(File f) {
-		if (f.isDirectory()) return true;
-		String extension = getExtension(f);
-		if (extension != null &&
-				extension.equals(_sfx)) {
-			return true;
-		}
-		return false;
-	}
-
-	public String getDescription() {
-		return _dsc;
-	}
-}
-
-class SuffFileChooser extends JFileChooser {
-	static final long serialVersionUID = 311457692041L;
-	private String _sfx;
-	private String _btn;
-	private class TapeProt extends JComponent {
-		static final long serialVersionUID = 31170769203L;
-		public Checkbox btn;
-		public TapeProt(String b) {
-			btn = new Checkbox(b);
-			setLayout(new FlowLayout());
-			add(btn);
-		}
-	}
-	private TapeProt _prot;
-	public SuffFileChooser(String btn, String sfx, String dsc) {
-		super(w700_fe._dir);
-		SuffFileFilter f = new SuffFileFilter(sfx, dsc);
-		setFileFilter(f);
-		_btn = btn;
-		setApproveButtonText(btn);
-		setApproveButtonToolTipText(btn);
-		setDialogTitle(btn);
-		setDialogType(JFileChooser.SAVE_DIALOG);
-		_sfx = "." + sfx;
-		_prot = new TapeProt("Protect");
-		setAccessory(_prot);
-	}
-	public int showDialog(Component frame) {
-		int rv = super.showDialog(frame, _btn);
-		if (rv == JFileChooser.APPROVE_OPTION) {
-			if (getSelectedFile().getName().endsWith(_sfx)) {
-				return rv;
-			}
-			File f = new File(getSelectedFile().getAbsolutePath().concat(_sfx));
-			setSelectedFile(f);
-		}
-		return rv;
-	}
-	public boolean isProtected() {
-		return _prot.btn.getState();
-	}
-}
-
-class Wang700_Model711
-	implements ActionListener, ComponentListener
-{
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-	private byte[] cn24_xlate;
-	private String[] cn24_spcl;
-
-	public void reset() {
-		// anything?
-	}
-
-	private void setup_xlate() {
-		cn24_xlate = new byte[256];
-		cn24_xlate[0x00] = '-';
-		cn24_xlate[0x01] = 'y';
-		cn24_xlate[0x02] = ' ';
-		cn24_xlate[0x03] = '\b';
-		cn24_xlate[0x04] = 'q';
-		cn24_xlate[0x05] = 'p';
-		cn24_xlate[0x06] = '=';
-		cn24_xlate[0x07] = 'j';
-		// cn24_xlate[0x08] = ' ';	// no op
-		cn24_xlate[0x09] = '/';
-		//cn24_xlate[0x0a] = ' ';	// no op
-		//cn24_xlate[0x0b] = ' ';	// no op
-		cn24_xlate[0x0c] = ',';
-		cn24_xlate[0x0d] = ';';
-		cn24_xlate[0x0e] = 'f';
-		cn24_xlate[0x0f] = 'g';
-
-		cn24_xlate[0x10] = 'w';
-		cn24_xlate[0x11] = 's';
-		//cn24_xlate[0x12] = '';	// shift dn
-		//cn24_xlate[0x13] = '';	// shift up
-		cn24_xlate[0x14] = 'i';
-		cn24_xlate[0x15] = '\'';
-		cn24_xlate[0x16] = '.';
-		cn24_xlate[0x17] = '\001';	// 1/2...
-		cn24_xlate[0x18] = '\n';
-		cn24_xlate[0x19] = 'o';
-		cn24_xlate[0x1a] = '\n';
-		//cn24_xlate[0x1b] = '\n';	// rev index
-		cn24_xlate[0x1c] = 'a';
-		cn24_xlate[0x1d] = 'r';
-		cn24_xlate[0x1e] = 'v';
-		cn24_xlate[0x1f] = 'm';
-
-		cn24_xlate[0x20] = 'b';
-		cn24_xlate[0x21] = 'h';
-		//cn24_xlate[0x22] = '+';	// step x+
-		//cn24_xlate[0x23] = '+';	// step x-
-		cn24_xlate[0x24] = 'k';
-		cn24_xlate[0x25] = 'e';
-		cn24_xlate[0x26] = 'n';
-		cn24_xlate[0x27] = 't';
-		//cn24_xlate[0x28] = '';	// print mode
-		cn24_xlate[0x29] = 'l';
-		//cn24_xlate[0x2a] = '+';	// step y+
-		//cn24_xlate[0x2b] = '+';	// step y-
-		cn24_xlate[0x2c] = 'c';
-		cn24_xlate[0x2d] = 'd';
-		cn24_xlate[0x2e] = 'u';
-		cn24_xlate[0x2f] = 'x';
-
-		cn24_xlate[0x30] = '9';
-		cn24_xlate[0x31] = '0';
-		//cn24_xlate[0x32] = '';	// step x+y+
-		//cn24_xlate[0x33] = '';	// step x-y+
-		cn24_xlate[0x34] = '6';
-		cn24_xlate[0x35] = '5';
-		cn24_xlate[0x36] = '2';
-		cn24_xlate[0x37] = 'z';
-		//cn24_xlate[0x38] = '';	// plot mode
-		cn24_xlate[0x39] = '4';
-		//cn24_xlate[0x3a] = '';	// step x+y-
-		//cn24_xlate[0x3b] = '';	// step x-y-
-		cn24_xlate[0x3c] = '8';
-		cn24_xlate[0x3d] = '7';
-		cn24_xlate[0x3e] = '3';
-		cn24_xlate[0x3f] = '1';
-
-		// shifted versions...
-		cn24_xlate[0x40] = '_';
-		cn24_xlate[0x41] = 'Y';
-		cn24_xlate[0x42] = ' ';
-		cn24_xlate[0x43] = '\b';
-		cn24_xlate[0x44] = 'Q';
-		cn24_xlate[0x45] = 'P';
-		cn24_xlate[0x46] = '+';
-		cn24_xlate[0x47] = 'J';
-		cn24_xlate[0x49] = '?';
-		cn24_xlate[0x4c] = ',';
-		cn24_xlate[0x4d] = ':';
-		cn24_xlate[0x4e] = 'F';
-		cn24_xlate[0x4f] = 'G';
-
-		cn24_xlate[0x50] = 'W';
-		cn24_xlate[0x51] = 'S';
-		cn24_xlate[0x54] = 'I';
-		cn24_xlate[0x55] = '"';
-		cn24_xlate[0x56] = '.';
-		cn24_xlate[0x57] = '\002';	// 1/4
-		cn24_xlate[0x58] = '\n';
-		cn24_xlate[0x59] = 'O';
-		cn24_xlate[0x5a] = '\n';
-		//cn24_xlate[0x5b] = '\n';	// rev index
-		cn24_xlate[0x5c] = 'A';
-		cn24_xlate[0x5d] = 'R';
-		cn24_xlate[0x5e] = 'V';
-		cn24_xlate[0x5f] = 'M';
-
-		cn24_xlate[0x60] = 'B';
-		cn24_xlate[0x61] = 'H';
-		cn24_xlate[0x64] = 'K';
-		cn24_xlate[0x65] = 'E';
-		cn24_xlate[0x66] = 'N';
-		cn24_xlate[0x67] = 'T';
-		cn24_xlate[0x69] = 'L';
-		cn24_xlate[0x6c] = 'C';
-		cn24_xlate[0x6d] = 'D';
-		cn24_xlate[0x6e] = 'U';
-		cn24_xlate[0x6f] = 'X';
-
-		cn24_xlate[0x70] = '(';
-		cn24_xlate[0x71] = ')';
-		cn24_xlate[0x74] = '\003';	// cent
-		cn24_xlate[0x75] = '%';
-		cn24_xlate[0x76] = '@';
-		cn24_xlate[0x77] = 'Z';
-		cn24_xlate[0x79] = '$';
-		cn24_xlate[0x7c] = '*';
-		cn24_xlate[0x7d] = '&';
-		cn24_xlate[0x7e] = '#';
-		cn24_xlate[0x7f] = '!';
-
-		cn24_spcl = new String[32];
-		cn24_spcl[0x01] = "\u00BD";
-		cn24_spcl[0x02] = "\u00BC";
-		cn24_spcl[0x03] = "\u00A2";
-	}
-	private JFrame _frame;
-	private PlotTextArea _text;
-	private PlotListArea _list;
-	private JScrollPane _scroll;
-
-	private int _xoff, _yoff, _eop;
-	private boolean _onoff;
-	boolean _hasGraphic;
-	int _fx, _fy, _fa;
-	double _gx, _gy;
-
-	Wang700_Keyboard _kbd;
-
-	private void clear() {
-		_text.setText("");
-		_eop = 0;
-		_text.setCaretPosition(_eop);
-		_plot = false;
-		_shifted = false;
-		_x = _y = 0;
-		_text.clear();
-		_hasGraphic = false;
-	}
-
-	String _footer;
-
-	public Wang700_Model711(Wang700_Keyboard kbd) {
-		setup_xlate();
-
-		_kbd = kbd;
-		_onoff = false;
-
-		_frame = new JFrame("Wang 711 Output Writer");
-		_frame.setLayout(new FlowLayout());
-		_text = new PlotTextArea();
-		_text.setFont(new Font("Monospaced", Font.PLAIN, 10));
-
-		_list = new PlotListArea();
-		_list.setFont(new Font("Monospaced", Font.PLAIN, 12));
-		_list.setLineWrap(false);
-
-		// setting this messes up horiz scrollbar...
-		//_text.setPreferredSize(new Dimension(60 * _fx, 32 * _fy));
-		// doing this prevents "auto warp" when printing...
-		//_text.setEditable(false);
-
-		clear();
-
-		FontMetrics fm = _text.getFontMetrics(_text.getFont());
-		_fa = fm.getAscent();
-		_fx = fm.charWidth('M');
-		_fy = fm.getHeight();
-		_gx = (12.0 * _fx) / 100.0; // 12 cpi into 1/100th in.
-		_gy = (6.0 * _fy) / 100.0; // 6 lpi into 1/100th in.
-
-		_scroll = new JScrollPane(_text);
-		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		_scroll.setPreferredSize(new Dimension(96 * _fx, 32 * _fy));
-		_frame.add(_scroll);
-
-		JMenuBar mb = new JMenuBar();
-		JMenu mu;
-		mu = new JMenu("File");
-		mb.add(mu);
-		JMenuItem mi;
-		mi = new JMenuItem("Print", KeyEvent.VK_P);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Print Listing", KeyEvent.VK_L);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Save", KeyEvent.VK_S);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Tear Off", KeyEvent.VK_T);
-		mi.addActionListener(this);
-		mu.add(mi);
-
-		_frame.setJMenuBar(mb);
-		_frame.pack();	// set size according to content...
-
-		Dimension fdim = _frame.getSize();
-		Dimension sdim = _scroll.getSize();
-		_xoff = fdim.width - sdim.width;
-		_yoff = fdim.height - sdim.height;
-		
-		_frame.addComponentListener(this);
-	}
-
-	private void save711(File file) {
-		if (_hasGraphic) {
-			java.awt.image.BufferedImage i =
-				new java.awt.image.BufferedImage(_text.getWidth(),
-								_text.getHeight(),
-					java.awt.image.BufferedImage.TYPE_BYTE_BINARY);
-			_text.paint(i.getGraphics());
-			try {
-				javax.imageio.ImageIO.write(i, "png", file);
-			} catch (IOException ee) {
-				System.err.println("error writing 711 PNG");
-			}
-		} else {
-			FileOutputStream fo;
-			try {
-				fo = new FileOutputStream(file);
-			} catch (FileNotFoundException ee) {
-				System.err.println("chosen 711 file not found?");
-				return;
-			}
-			try {
-				fo.write(_text.getText().getBytes());
-				fo.write('\n');
-				fo.close();
-			} catch (IOException ee) {
-				System.err.println("error writing 711 TXT");
-			}
-		}
-	}
-
-	public void actionPerformed(ActionEvent e) {
-		if (!(e.getSource() instanceof JMenuItem)) {
-			System.err.println("unknown 711 event source type");
-			return;
-		}
-		JMenuItem m = (JMenuItem)e.getSource();
-		if (m.getMnemonic() == KeyEvent.VK_T) {
-			clear();
-			return;
-		}
-		if (m.getMnemonic() == KeyEvent.VK_S) {
-			String sfx, dsc;
-			if (_hasGraphic) {
-				sfx = "png";
-				dsc = "PNG image files";
-			} else {
-				sfx = "txt";
-				dsc = "Text files";
-			}
-			SuffFileChooser ch = new SuffFileChooser("Save", sfx, dsc);
-			int rv = ch.showDialog(_frame);
-			if (rv == JFileChooser.APPROVE_OPTION) {
-				save711(ch.getSelectedFile());
-			}
-			return;
-		}
-		if (m.getMnemonic() == KeyEvent.VK_P) {
-			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-			aset.add(OrientationRequested.LANDSCAPE);
-			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
-				(float)0.75, (float)0.5, (float)7.0, (float)10.0, MediaPrintableArea.INCH));
-			PrinterJob pj = PrinterJob.getPrinterJob();
-			pj.setPrintable(_text);
-			boolean print = pj.printDialog(aset);
-			if (print) {
-				java.util.Date dt = new java.util.Date();
-				_footer = new String("Wang 701/702/711 OutputWriter - " +
-					w700_fe._timestamp.format(dt));
-				try {
-					pj.print(aset);
-				} catch (PrinterException ee) { 
-					System.out.println("print failed");
-				}
-			}
-			return;
-		}
-		if (m.getMnemonic() == KeyEvent.VK_L) {
-			_list.setText(_text.getText());
-			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-			aset.add(OrientationRequested.LANDSCAPE);
-			aset.add(new javax.print.attribute.standard.MediaPrintableArea(
-				(float)0.25, (float)0.25, (float)8.0, (float)10.5, MediaPrintableArea.INCH));
-			PrinterJob pj = PrinterJob.getPrinterJob();
-			pj.setPrintable(_list);
-			boolean print = pj.printDialog(aset);
-			if (print) {
-				java.util.Date dt = new java.util.Date();
-				_footer = new String("Wang 700 Program Listing - " +
-					w700_fe._timestamp.format(dt));
-				try {
-					pj.print(aset);
-				} catch (PrinterException ee) {
-					System.out.println("print failed");
-				}
-			}
-			return;
-		}
-
-		System.err.println("711 menu " + e.getActionCommand() +
-						" not implemented yet");
-	}
-
-	public JFrame getFrame() { return _frame; }
-
-	public void componentHidden(ComponentEvent e) { }
-	public void componentMoved(ComponentEvent e) { }
-	public void componentShown(ComponentEvent e) { }
-
-	public void componentResized(ComponentEvent e) {
-		if (e.getComponent() == _frame) {
-			Dimension fdim = _frame.getSize(); 
-			_scroll.setSize(fdim.width - _xoff, fdim.height - _yoff);
-			_scroll.setPreferredSize(_scroll.getSize());
-			_frame.setSize(fdim.width, fdim.height); // redundant?
-			_frame.setPreferredSize(_frame.getSize());
-		}
-	}
-
-	private boolean _shifted;
-	private boolean _plot;
-	private int _x, _y;
-	private int _dx, _dy;
-
-	class PlotListArea extends JTextArea
-			implements Printable {
-		static final long serialVersionUID = 311857692040L;
-
-		public PlotListArea() {
-			super();
-		}
-
-		public int print(Graphics g, PageFormat pf, int pageIndex) {
-			double x0 = pf.getImageableX();
-			double y0 = pf.getImageableY();
-			double w0 = pf.getImageableWidth();
-			double h0 = pf.getImageableHeight();
-			int pg = 0;
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.translate(x0, y0);
-			g2d.setFont(_text.getFont());
-
-			int did = 0;
-			int y = 0;
-			int x = 0;
-			int off = 0;
-			String s;
-			g2d.setColor(Color.white);
-			g2d.fillRect(0, 0, (int)w0, (int)h0);
-			g2d.setColor(Color.black);
-			int l = g2d.getFont().getSize();
-			while (pg <= pageIndex) {
-				if (off != 0) {
-					off += 1; // skip nl, we hope...
-				}
-				try {
-					s = getText(off, 15);
-				} catch(javax.swing.text.BadLocationException ee) {
-//System.err.println("BadLocationException "+off);
-					break;
-				}
-				if (!s.startsWith("\n")) { // not blank line...
-					if (pg == pageIndex) {
-						++did;
-						g2d.drawString(s, y * 188, x * l + (int)y0 + 36);
-//} else {
-//System.err.println("not my page? " + pg + " ? " + pageIndex);
-					}
-					off += 15;
-				}
-				++x;
-				if (x >= 40) {
-					x = 0;
-					++y;
-					if (y >= 4) {
-						y = 0;
-						++pg;
-					}
-				}
-			}
-			if (did > 0) {
-				pg = pageIndex + 1; // 1-based
-				s = new String("Page " + pg +
-					" - " + _footer);
-				g2d.drawString(s, 0, (41 + 1) * l + (int)y0 + 36);
-				return Printable.PAGE_EXISTS;
-			} else {
-//System.err.println("NO_SUCH_PAGE "+pg);
-				return Printable.NO_SUCH_PAGE;
-			}
-		}
-	}
-
-	class PlotTextArea extends JTextArea
-			implements Printable {
-		static final long serialVersionUID = 311457692040L;
-		class plot {
-			plot(String s_, int x_, int y_) {
-				s = s_;
-				x = x_;
-				y = y_;
-			}
-			public String s;
-			public int x;
-			public int y;
-		}
-
-		public void clear() {
-			_nplots = 0;
-			_xplots = 0;
-			//_plotArray.dispose();
-			_plotArray = null;
-			_x = _y = 0;
-		}
-
-		private plot[] _plotArray;
-		private int _nplots;
-		private int _xplots;
-
-		private void addPlot(String s, int x, int y) {
-			int n = _xplots++;
-			if (_xplots > _nplots) {
-				int o = _nplots;
-				_nplots += 256;
-				plot[] p = new plot[_nplots];
-				if (o > 0) {
-					System.arraycopy(_plotArray, 0, p, 0, o);
-				}
-				_plotArray = p;
-			}
-			_plotArray[n] = new plot(s, x, y);
-		}
-
-		public void paint(Graphics g) {
-			super.paint(g);
-			int x;
-			for (x = 0; x < _xplots; ++x) {
-				double xx, yy;
-				xx = (_plotArray[x].x * _gx) + 0.5;
-				yy = (_plotArray[x].y * _gy) + 0.5 + _fa;
-				g.drawString(_plotArray[x].s, (int)xx, (int)yy);
-			}
-		}
-
-		public int print(Graphics g, PageFormat pf, int pageIndex) {
-			double x0 = pf.getImageableX();
-			double y0 = pf.getImageableY();
-			double w0 = pf.getImageableWidth();
-			double h0 = pf.getImageableHeight();
-			int pg = 0;
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.translate(x0, y0);
-
-			FontMetrics fm = _text.getFontMetrics(_text.getFont());
-			// 156 chars platten width of IBM Selectric...
-			double nf = _text.getFont().getSize() * (w0 / 156.0) /
-							fm.charWidth('M');
-			g2d.setFont(_text.getFont().deriveFont((float)nf));
-
-			int did = 0;
-			String s;
-			g2d.setColor(Color.white);
-			g2d.fillRect(0, 0, (int)w0, (int)h0);
-			g2d.setColor(Color.black);
-			int l = g2d.getFont().getSize();
-			double gx = (w0 / 1300.0);
-			double gy = (l / (100.0 / 6.0));
-			int lpp = 60; // (int)(h0 / l);
-			int max = getLineCount();
-			int i = 0;
-			while (pg <= pageIndex) {
-				int ln;
-				for (ln = 0; ln < lpp; ++ln) {
-					int nn = ln + pg * lpp;
-					if (nn >= max) break;
-					try {
-						int ls = getLineStartOffset(nn);
-						int ll = getLineEndOffset(nn) - ls;
-						s = getText(ls, ll);
-					} catch(javax.swing.text.BadLocationException ee) {
-						break;
-					}
-					if (pg == pageIndex) {
-						++did;
-						if (s.length() > 0) { // not blank line...
-							g2d.drawString(s, 0, ln * l + l);
-						}
-					}
-				}
-				if (pg == pageIndex) {
-					int ps = (int)(h0 * pg);
-					int pe = (int)(ps + h0);
-					for (i = 0; i < _xplots; ++i) {
-						double xx, yy;
-						// convert 1/100ths to points...
-						xx = (_plotArray[i].x * gx) + 0.5;
-						yy = (_plotArray[i].y * gy) + 0.5;
-						if (yy >= ps && yy < pe) {
-							++did;
-							g2d.drawString(_plotArray[i].s,
-								(int)xx, (int)yy - ps + l);
-						}
-					}
-				}
-				++pg;
-			}
-			if (did > 0) {
-				s = new String("Page " + pg +
-					" - " + _footer);
-				g2d.drawString(s, 0, (lpp + 1) * l + l);
-				return Printable.PAGE_EXISTS;
-			} else {
-				return Printable.NO_SUCH_PAGE;
-			}
-		}
-	}
-
-	private void index() {
-		_y += 14;
-	}
-
-	private void revindex() {
-		_y -= 14;
-		if (_y < 0) _y = 0;
-	}
-
-	private void space() {
-		_x += 10;
-		if (_x >= 1300) _x = 1299;
-	}
-
-	private void bkspace() {
-		_x -= 10;
-		if (_x < 0) _x = 0;
-	}
-
-	public void do_cn24(byte[] b) {
-		if ((b[0] & 0x0f) == 0x08) { // control characters...
-			switch((b[0] & 0x30) >> 4) {
-			case 0: // nothing
-				break;
-			case 1:	// return+index handled below...
-				_x = 0;
-				if (_plot) return;
-				index();
-				break;
-			case 2:	// print mode
-				_plot = false;	// cleanup?
-				return;
-			case 3:	// plot mode
-				_plot = true;
-				_dx = _dy = 0;
-				return;
-			}
-		} else if ((b[0] & 0x06) == 0x02) {
-			switch((b[0] & 0x30) >> 4) {
-			case 0: // space/bspace or nothing
-				if (_plot) return;
-				if ((b[0] & 1) == 0) {
-					space();
-				} else {
-					bkspace();
-				}
-				break;
-			case 1:	// index/rev or shift...
-				if ((b[0] & 0x0e) == 0x02) {
-					_shifted = ((b[0] & 1) != 0);
-					return;
-				}
-				if (_plot) return;
-				if ((b[0] & 1) == 0) {
-					index();
-				} else {
-					revindex();
-				}
-				break;
-			case 2:	// stepping
-			case 3:	// stepping
-				if (!_plot) return;
-				switch(b[0] & 0x19) {
-				case 0x00:
-					_dx += 1;
-					break;
-				case 0x01:
-					_dx -= 1;
-					break;
-				case 0x08:
-					_dy += 1;
-					break;
-				case 0x09:
-					_dy -= 1;
-					break;
-				case 0x10:
-					_dx += 1;
-					_dy += 1;
-					break;
-				case 0x11:
-					_dx -= 1;
-					_dy += 1;
-					break;
-				case 0x18:
-					_dx += 1;
-					_dy -= 1;
-					break;
-				case 0x19:
-					_dx -= 1;
-					_dy -= 1;
-					break;
-				}
-				return;
-			}
-		}
-		byte p;
-		if (_shifted) {
-			p = cn24_xlate[b[0] + 0x40];
-		} else {
-			p = cn24_xlate[b[0]];
-		}
-		byte[] bb;
-		String s;
-		if (p == 0) {
-			s = new String("<"+b[0]+">");
-		} else if (p < 0x07) {
-			s = cn24_spcl[p];
-		} else {
-			bb = new byte[1];
-			bb[0] = p;
-			s = new String(bb);
-		}
-		if (_plot) {
-			_x += _dx;
-			if (_x < 0) _x = 0;
-			if (_x >= 1300) _x = 1299; // 13 in. platten
-			_y += _dy;
-			if (_y < 0) _y = 0;
-			_hasGraphic = true;
-			_text.addPlot(s, _x, _y);
-			_text.repaint();
-			//_text.setCaretPosition(_eop); // to what?
-			// todo: need to get JScrollPane to update...
-		} else {
-			_text.append(s);
-			_eop += s.length();
-			_text.setCaretPosition(_eop);
-		}
-		// "auto raise"...
-		onOff(true);
-	}
-
-	public boolean onOff() {
-		return _onoff;
-	}
-
-	public void onOff(boolean on) {
-		if (_onoff == on) return;
-		_onoff = on;
-		_frame.setVisible(_onoff);
-	}
-}
-
-class Wang700_Display extends JComponent
+class Wang700_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
 
 	byte[] disp_a;
-	byte[] disp_b;
+	short[] disp_b;
 	JLabel disp;
 	byte _dpc;
 	byte _gap;
 
-	Wang700_ErrLight pe;
-	Wang700_ErrLight me;
-	boolean flashing;
-	boolean state;
-	boolean ismain;
-	Wang700_Display _other;
+	private Wang_ErrorLight pe;
+	private Wang_ErrorLight me;
+	private boolean flashing;
+	private boolean state;
+	private boolean ismain;
+	private Wang700_Display _other;
 	javax.swing.Timer timer;
+
+	public Wang_ErrorLight getOv() { return pe; }
+	public Wang_ErrorLight getErr() { return me; }
 
 	private void flasher() {
 		if (!flashing) {
 			state = false;
-			disp.setForeground(_Key.neon);
+			disp.setForeground(Wang_Colors.neon);
 			return;
 		}
 		state = !state;
 		if (state) {
-			disp.setForeground(_Key.neon2);
+			disp.setForeground(Wang_Colors.neon2);
 		} else {
-			disp.setForeground(_Key.neon);
+			disp.setForeground(Wang_Colors.neon);
 		}
+	}
+
+	private static void setClipboard(String str) {
+		StringSelection ss = new StringSelection(str);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+	}
+
+	public void copy() {
+		// e.g. "+0.0000000000+00"
+		// e.g. "+0.0000000000   "
+		String s = disp.getText();
+		String e = null;
+		s = s.replaceAll(" ","");
+		s = s.replaceAll("\004","");	// half-width gap
+		s = s.replaceAll("\005","1");	// special "1"
+		s = s.replace("\006",".");	// special "."
+		if (s.length() > 13) {
+			e = s.substring(13); // keep "+"
+			if (e.equals("+00")) e = null;
+			s = s.substring(0,13);
+		}
+		s = s.replaceAll("0*$", ""); // cut trailing zeroes
+		if (s.length() == 0) s = "0";
+		s = s.replaceAll("\\.$", ""); // cut trailing decimalpoint
+		s = s.replaceAll("^\\+", ""); // cut + sign
+		if (e != null) {
+			s = s + "e" + e;
+		}
+		setClipboard(s);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -2278,22 +727,22 @@ class Wang700_Display extends JComponent
 		}
 	}
 
-	public Wang700_Display(Wang700_Display other) {
+	public Wang700_Display(Wang_Display other) {
 		String blank = "--- Wang 700 ----";
 		disp_a = new byte[18];
-		disp_b = new byte[18];
+		disp_b = new short[18];
 		flashing = false;
 		state = false;
 		ismain = (other != null);
-		_other = other;
+		_other = (Wang700_Display)other;
 		if (ismain) {
 			timer = new Timer(100, this);
 		}
 
 		setLayout(new FlowLayout());
 		disp = new JLabel(blank, SwingConstants.LEFT);
-		disp.setForeground(_Key.neon);
-		disp.setBackground(_Key.empty);
+		disp.setForeground(Wang_Colors.neon);
+		disp.setBackground(Wang_Colors.empty);
 		disp.setOpaque(true);
 
 		disp.setPreferredSize(new Dimension(560, 75));
@@ -2302,19 +751,20 @@ class Wang700_Display extends JComponent
 		add(disp);
 
 		if (ismain) {
-			pe = new Wang700_ErrLight("Prog<BR>Error");
+			pe = new Wang_ErrorLight("Prog<BR>Error");
 			pe.setOn(false);
-			me = new Wang700_ErrLight("Mach<BR>Error");
+			me = new Wang_ErrorLight("Mach<BR>Error");
 			me.setOn(false);
 		}
 
 	}
 
-	public void setProperties(Wang700_Properties prop) {
+	public void setProperties(Wang_Properties p) {
+		Wang700_Properties prop = (Wang700_Properties)p;
 		// TODO: reconfig/redraw display...
 		String f = prop.getProperty("wang700_displayfont");
 		Font font = null;
-		java.io.InputStream ttf = w700_fe.class.getResourceAsStream(f);
+		java.io.InputStream ttf = this.getClass().getResourceAsStream(f);
 		if (ttf != null) {
 			try {
 				font = Font.createFont(Font.TRUETYPE_FONT, ttf);
@@ -2357,22 +807,28 @@ class Wang700_Display extends JComponent
 			flasher();
 		}
 	}
-	public void do_indicators(byte[] b) {
-		// assert(ismain)
-		if ((b[0] & 0x2) != 0) {
+
+	public void setErr(byte on) {
+		if (on != 0) {
 			me.setOn(true);
 			setFlashing(true);
 		} else {
 			me.setOn(false);
+			if (!pe.isOn()) {
+				setFlashing(false);
+			}
 		}
-		if ((b[0] & 0x1) != 0) {
+	}
+
+	public void setOv(byte on) {
+		if (on != 0) {
 			pe.setOn(true);
 			setFlashing(true);
 		} else {
 			pe.setOn(false);
-		}
-		if ((b[0] & 0x3) == 0) {
-			setFlashing(false);
+			if (!me.isOn()) {
+				setFlashing(false);
+			}
 		}
 	}
 
@@ -2386,7 +842,7 @@ class Wang700_Display extends JComponent
 
 	// this really should be set aside in a neutral class, which is given
 	// access to display, tape, printer, etc...
-	public void do_display(byte[] m) {
+	public void do_display(short[] m) {
 		int ds;
 		int dc;
 		int dp;
@@ -2397,8 +853,8 @@ class Wang700_Display extends JComponent
 		// m[] is columns 0-15...
 		String s;
 		// first check FXD/FLD...
-		dc = m[30] & 0x0f;
-		boolean fxd = ((m[31] & 0x01) == 0);
+		dc = m[15] & 0x0f;
+		boolean fxd = ((m[15] & 0x0100) == 0);
 		if (dc == 15) {
 			dp = 18; // infinity
 		} else if (fxd) { // FXD
@@ -2409,7 +865,7 @@ class Wang700_Display extends JComponent
 		ds = 0;
 		dx = 0;
 		// sign always goes straight into place...
-		disp_a[ds] = sign_chr[m[dx * 2 + 0] & 0x0f];
+		disp_a[ds] = sign_chr[m[dx] & 0x0f];
 		++dx;
 		do {
 			if (ds == dp) {
@@ -2417,7 +873,7 @@ class Wang700_Display extends JComponent
 				disp_a[ds] = _dpc;
 			}
 			++ds;
-			dc = m[dx * 2 + 0] & 0x0f;
+			dc = m[dx] & 0x0f;
 			disp_a[ds] = disp_chr[dc];
 			++dx;
 		} while (dx < 13);
@@ -2425,11 +881,11 @@ class Wang700_Display extends JComponent
 		disp_a[ds] = _gap;
 		if (fxd) {
 			++ds;
-			disp_a[ds] = sign_chr[m[26] & 0x0f];
+			disp_a[ds] = sign_chr[m[13] & 0x0f];
 			++ds;
-			disp_a[ds] = disp_chr[m[28] & 0x0f];
+			disp_a[ds] = disp_chr[m[14] & 0x0f];
 			++ds;
-			disp_a[ds] = disp_chr[m[30] & 0x0f];
+			disp_a[ds] = disp_chr[m[15] & 0x0f];
 		}
 		while (ds < 17) {
 			++ds;
@@ -2442,7 +898,7 @@ class Wang700_Display extends JComponent
 }
  
 class Wang700_Help extends JComponent
-	implements ActionListener, WindowListener, ComponentListener, HyperlinkListener
+	implements Wang_Help, ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
 	static final long serialVersionUID = 311857692031L;
 	private JFrame _frame;
@@ -2474,7 +930,7 @@ class Wang700_Help extends JComponent
 		try {
 			_text = new JEditorPane(url);
 		} catch (IOException ee) {
-			w700_fe.fatal("Help Setup", ee.getMessage());
+			Wang_UI.fatal("Help Setup", ee.getMessage());
 		}
 		_text.setEditable(false);
 		_text.setFont(new Font("Sans-serif", Font.PLAIN, 12));
@@ -2521,7 +977,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.52 $ $Date: 2013/01/24 23:54:45 $<BR>"+
+			"$Revision: 1.53 $ $Date: 2013/12/08 03:06:16 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -2637,42 +1093,48 @@ class Wang700_Help extends JComponent
 	}
 }
 
-class Wang700_Keyboard extends JComponent
-	implements ActionListener, KeyListener, WindowListener, ComponentListener
+class Wang700_Keyboard extends Wang_Keyboard
+	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
 	GridBagLayout gridbag = new GridBagLayout();
 	int _nkbds;
-	Wang700_Keyboards[] _kbds;
+	Wang_Keyboards[] _kbds;
 	int _row;
 	int _col;
 	int _meta;
 	int _mode0;
+	int _mode0r;
 	boolean _run;
-	OutputStream _fout;
-	Wang700_Tape _tape;
+
+	public int getMode0(boolean clear) {
+		int code = _mode0;
+		if (clear) _mode0 &= ~_mode0r; // STEP is reset on read
+		return code;
+	}
+	public int getMode1(boolean clear) { return 0; }
 
 	// never called for MODE0 switches...
-	private void setToggle(boolean on, _Key key, JButton btn) {
+	private void setToggle(boolean on, Wang_Keys key, JButton btn) {
 		if (key.state == on) return;
-		if (key.getType() == _Key.METAP) {
+		if (key.getType() == Wang_Keys.METAP) {
 			_meta &= ~key.getMode();
-		} else if (key.getType() == _Key.MODE0) {
+		} else if (key.getType() == Wang_Keys.MODE0) {
 			_mode0 &= ~key.getMask();
 		}
 		if (on) {
-			if (key.getType() == _Key.METAP) {
+			if (key.getType() == Wang_Keys.METAP) {
 				_meta |= key.getMode();
-				btn.setIcon(_Key.toggle_on);
+				btn.setIcon(Wang_Keys.toggle_on);
 			} else {
 				btn.setBackground(key.altcolor);
 			}
 		} else {
-			if (key.getType() == _Key.METAP) {
-				btn.setIcon(_Key.toggle_off);
+			if (key.getType() == Wang_Keys.METAP) {
+				btn.setIcon(Wang_Keys.toggle_off);
 			} else {
 				btn.setBackground(key.color);
 			}
@@ -2697,14 +1159,14 @@ class Wang700_Keyboard extends JComponent
 
 	private void set_group_mode0(int g, int y, int x, boolean alt) {
 		int z;
-		_Key key = _kbds[y]._keys[x];
+		Wang_Keys key = _kbds[y]._keys[x];
 		int mode = key.getMode();
 		int numon = 0;
 		boolean couldbe = (alt && (mode == 0 || (mode & 4) != 0));
 		for (z = 0; z < _kbds[y]._keys.length; ++z) {
 			if (z == x) continue;
 			if (_kbds[y]._keys[z] == null) continue;
-			_Key key2 = _kbds[y]._keys[z];
+			Wang_Keys key2 = _kbds[y]._keys[z];
 			int tg = key2.getGroup();
 			if (tg != g) continue;
 			// might check event modifiers to see if multiple-downs allowed...
@@ -2735,33 +1197,13 @@ class Wang700_Keyboard extends JComponent
 		}
 	}
 
-	public void do_keycode(int code) {
-		if (_fout == null) {
-			int t = code >> 8;
-			int h = (code >> 4) & 0x0f;
-			int l = code & 0x0f;
-			System.err.format("%d %02d %02d (%04x)\n", t, h, l, code);
-		} else {
-			byte[] b = new byte[2];
-			b[0] = (byte)(code & 0x0ff);
-			b[1] = (byte)(code >> 8);
-			try {
-				_fout.write(b);
-				_fout.flush();	// why?
-			} catch (IOException ee) {
-				System.err.println("Broken pipe for keyboard!");
-				_fout = null;
-			}
-		}
-	}
-
 	private void do_button(int y, int x, boolean alt) {
 		int code = _kbds[y]._keys[x].getCode();
 		int type = _kbds[y]._keys[x].getType();
 		int g = _kbds[y]._keys[x].getGroup();
 		if (_kbds[y]._keys[x].isTAPE()) {
 			set_group(g, y, x);
-			boolean st = _tape.do_button(_kbds[y]._keys[x]);
+			boolean st = Wang700.Tape.do_button(_kbds[y]._keys[x]);
 			if (st) {
 				setToggle(!_kbds[y]._keys[x].state,
 					_kbds[y]._keys[x], _kbds[y]._buttons[x]);
@@ -2769,7 +1211,7 @@ class Wang700_Keyboard extends JComponent
 			return;
 		}
 		if (g != 0) {
-			if (type == _Key.MODE0) {
+			if (type == Wang_Keys.MODE0) {
 				set_group_mode0(g, y, x, alt);
 			} else {
 				set_group(g, y, x);
@@ -2779,118 +1221,39 @@ class Wang700_Keyboard extends JComponent
 			return;
 		}
 		// _mode0, _meta were already updated above...
-		if (type == _Key.MODE0) {
-			code = _Key.MODE0 | _mode0;
+		if (type == Wang_Keys.MODE0) {
+			code = Wang_Keys.MODE0 | _mode0;
 			if (g == 0) {
 				// did not previously update things...
 				// not a toggle...
 				code |= _kbds[y]._keys[x].getMode();
 			}
 		}
-		if (type == _Key.SPCL) {
-			code |= _Key.SPCL;
+		if (type == Wang_Keys.SPCL) {
+			code |= Wang_Keys.SPCL;
 			if (_run && (_mode0 & 4) != 0) {
 				code += 4;
 			}
 		}
-		if (type == _Key.META) {
+		if (type == Wang_Keys.META) {
 			code &= 0x00f;
 			code |= (_meta << 4);
 		}
-		do_keycode(code);
+		Wang700.Core.pressKey(code);
 	}
 
-	JFrame _frame;
-	JEditorPane _text;
-	JScrollPane _scroll;
-	int _xoff, _yoff;
-
-	public Wang700_Keyboard(OutputStream fo, Wang700_ErrLight pe, Wang700_ErrLight me,
-				Wang700_Tape tape) {
+	public Wang700_Keyboard() {
 		int x;
-		_tape = tape;
-		_kbds = new Wang700_Keyboards[num_kbds];
+		_kbds = new Wang_Keyboards[num_kbds];
 		_nkbds = 0;
 		_row = 0;
 		_col = 0;
 		_meta = 0;
-		_fout = fo;
-
-		java.net.URL url = w700_fe.class.getResource("docs/wang700.html");
-
-		_frame = new JFrame("Wang 700 Help");
-		// TBD icon or not
-		_frame.setLayout(new FlowLayout());
-		try {
-			_text = new JEditorPane(url);
-		} catch (IOException ee) {
-		}
-		//_text.setLineWrap(true);
-		_text.setEditable(false);
-		_text.setFont(new Font("Sans-serif", Font.PLAIN, 12));
-		int z = _text.getFont().getSize();
-		_text.setPreferredSize(new Dimension(60 * z, 32 * z));
-
-		_scroll = new JScrollPane(_text);
-		_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		_scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		//_scroll.getViewport().setBackground(_Key.empty);
-
-		JMenuBar mb = new JMenuBar();
-		JMenu mu;
-		mu = new JMenu("Topic");
-		mb.add(mu);
-		JMenuItem mi;
-		mi = new JMenuItem("Basic Operation", KeyEvent.VK_B);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Using the Calculator", KeyEvent.VK_U);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Sample Programs", KeyEvent.VK_A);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Using the Tape Drive", KeyEvent.VK_D);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("How to Program", KeyEvent.VK_P);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Programming Techniques", KeyEvent.VK_T);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Programming Functions", KeyEvent.VK_F);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Program Codes", KeyEvent.VK_C);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Functions by Code", KeyEvent.VK_K);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("About the Simulator", KeyEvent.VK_S);
-		mi.addActionListener(this);
-		mu.add(mi);
-		mi = new JMenuItem("Known Bugs or Problems", KeyEvent.VK_G);
-		mi.addActionListener(this);
-		mu.add(mi);
-
-		_frame.setJMenuBar(mb);
-		_frame.add(_scroll);
-		_frame.pack();
-		Dimension fdim = _frame.getSize();
-		Dimension sdim = _scroll.getSize();
-		_xoff = fdim.width - sdim.width;
-		_yoff = fdim.height - sdim.height;
-		
-		//_frame.setVisible(true);
-		_frame.addWindowListener(this);
-		_frame.addComponentListener(this);
 
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JPanel pan;
-		Wang700_Keyboards kbd;
+		Wang_Keyboards kbd;
 
 		s.fill = GridBagConstraints.NONE;
 		s.gridx = 0;
@@ -2925,7 +1288,7 @@ class Wang700_Keyboard extends JComponent
 		_col = 0;
 		_row += 1;
 
-		kbd = new Wang700_Keyboard_meta(pe, me);
+		kbd = new Wang700_Keyboard_meta();
 		for (x = 0; x < kbd._nkeys; ++x) {
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
@@ -2966,68 +1329,104 @@ class Wang700_Keyboard extends JComponent
 		// setTransferHandler(TransferHandler newHandler) 
 	}
 
+	private static String getClipboard() {
+		Transferable t = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+		try {
+			if (t != null && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+				String text = (String)t.getTransferData(DataFlavor.stringFlavor);
+				return text;
+			}
+		} catch (UnsupportedFlavorException e) {
+		} catch (IOException e) {
+		}
+		return null;
+	}
+
+	private void paste() {
+		String s = getClipboard();
+		// even strip off trailing manitissa '0'...
+		try {
+			Double d = Double.valueOf(s);
+			// format(%.12g) ensures no more than 12 digits.
+			// however, decimal point makes 13, if present...
+			// and will cause error.
+			// The exponent will not error-out on overflow.
+			s = String.format("%.12g", d);
+			s = s.replaceAll("^0", ""); // trim leading zero...
+			int i = s.indexOf('e');
+			if (i < 0 && s.length() > 12) {
+				s = s.substring(0, 12);
+			} else if (i > 12) {
+				s = s.substring(0, 12) + s.substring(i);
+			}
+		} catch (NumberFormatException e) {
+			// give some indication
+			s = "";
+		}
+		// Let Wang700_Core buffer up input...
+		char[] keys = s.toCharArray();
+		int x = 0;
+		do_key('\b');
+		while (x < keys.length) {
+			char c = keys[x++];
+			do_key(c);
+		}
+	}
+
 	public void keyTyped(KeyEvent e) {
 //System.err.println("key pressed "+e.getKeyCode()+" "+e.getKeyChar());
+if (e.isActionKey()) {
+System.err.println("action");
+}
 		char c = e.getKeyChar();
+		do_key(c);
+	}
+
+	public void keyPressed(KeyEvent e) { }
+	public void keyReleased(KeyEvent e) { }
+
+	private void do_key(char c) {
 		if (c >= '0' && c <= '9') {
-			do_keycode(0x70 + (c - '0'));
+			Wang700.Core.pressKey(0x70 + (c - '0'));
+		} else if (c == 'e' || c == 'E') {
+			Wang700.Core.pressKey(0x7a);
+		} else if (c == '.') {
+			Wang700.Core.pressKey(0x7c);
+		} else if (c == '-') {
+			Wang700.Core.pressKey(0x7b);
+		} else if (c == '\b') {
+			Wang700.Core.pressKey(0x7f);
+//		} else if (c == 't' || c == 'T') {
+//			Wang700.Core.pressKey(0x0010 | _defreg);
+//		} else if (c == '+') {
+//			Wang700.Core.pressKey(0x0020 | _defreg);
+//		} else if (c == '_') {
+//			Wang700.Core.pressKey(0x0030 | _defreg);
+//		} else if (c == '*') {
+//			Wang700.Core.pressKey(0x0040 | _defreg);
+//		} else if (c == '/') {
+//			Wang700.Core.pressKey(0x0050 | _defreg);
+//		} else if (c == 's' || c == 'S') {
+//			Wang700.Core.pressKey(0x0060 | _defreg);
+//		} else if (c == 'r' || c == 'R') {
+//			Wang700.Core.pressKey(0x0070 | _defreg);
+//		} else if (c == 'i' || c == 'I') {
+//			Wang700.Core.pressKey(0x00fb);
+//		} else if (c == 'x' || c == 'X') {
+//			Wang700.Core.pressKey(0x00e0 | _defreg);
+		} else if (c == '%') {
+			Wang700.Core.debugIntr();
 		}
-		if (c == 'e' || c == 'E') {
-			do_keycode(0x7a);
-		}
-		if (c == '.') {
-			do_keycode(0x7c);
-		}
-		if (c == '-') {
-			do_keycode(0x7b);
-		}
-		if (c == '\b') {
-			do_keycode(0x7f);
-		}
-	}
-
-	public void keyPressed(KeyEvent e) {
-	}
-
-	public void keyReleased(KeyEvent e) {
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
-			java.net.URL url = null;
-			// should use a table to lookup url?
-			if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = w700_fe.class.getResource("docs/wang700.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_U) {
-				url = w700_fe.class.getResource("docs/wang700calc.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_D) {
-				url = w700_fe.class.getResource("docs/wang700tape.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_A) {
-				url = w700_fe.class.getResource("docs/wang700samp.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_P) {
-				url = w700_fe.class.getResource("docs/wang700prog.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_F) {
-				url = w700_fe.class.getResource("docs/wang700func.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_T) {
-				url = w700_fe.class.getResource("docs/wang700tech.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_C) {
-				url = w700_fe.class.getResource("docs/wang700codes.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_K) {
-				url = w700_fe.class.getResource("docs/wang700bycode.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_S) {
-				url = w700_fe.class.getResource("docs/wang700sim.html");
-			} else if (m.getMnemonic() == KeyEvent.VK_G) {
-				url = w700_fe.class.getResource("docs/wang700bugs.html");
-			} else {
-				System.err.println("help menu " + e.getActionCommand() +
-						" not implemented yet");
+			if (m.getMnemonic() == KeyEvent.VK_PASTE) {
+				paste();
 				return;
 			}
-			try {
-				_text.setPage(url);
-			} catch (IOException ee) {
-			}
+			System.err.println("Unknown menu event on keyboard");
 			return;
 		}
 		// must be a button, find out which
@@ -3056,242 +1455,18 @@ class Wang700_Keyboard extends JComponent
 	public void componentMoved(ComponentEvent e) { }
 	public void componentShown(ComponentEvent e) { }
 
-	public void componentResized(ComponentEvent e) {
-		if (e.getComponent() == _frame) {
-			Dimension fdim = _frame.getSize(); 
-			_scroll.setSize(fdim.width - _xoff, fdim.height - _yoff);
-			_scroll.setPreferredSize(_scroll.getSize());
-			_frame.setSize(fdim.width, fdim.height); // redundant?
-			_frame.setPreferredSize(_frame.getSize());
-		}
-	}
+	public void componentResized(ComponentEvent e) { }
 }
 
-class Wang700_Keyboards extends JComponent
+class Wang700_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
-	static final long serialVersionUID = 311457692034L;
-	public Wang700_Keyboards() { }
-
-	int _nkeys;
-	_Key[] _keys;
-	JButton[] _buttons;
-// private:
-	GridBagLayout gridbag = new GridBagLayout();
-	int _row;
-	int _col;
-
-	void addButton(GridBagConstraints c, int lx, int ly, int px, int py,
-						String icon, _Key key) {
-		final Insets inset = new Insets(2,2,2,2);
-		final Dimension dim = new Dimension(50, 50);
-		JButton butt;
-
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		java.net.URL url = w700_fe.class.getResource(icon);
-		ImageIcon ic = new ImageIcon(url);
-		butt = new JButton(ic);
-		butt.setBackground(key.color);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-		// butt.setHorizontalAlignment(SwingConstants.CENTER); // didn't help...
-
-		if (ly < 0) {
-			ly = -ly;
-			dim.height = 50;
-		} else {
-			dim.height = 50 * ly;
-		}
-		dim.width = 50 * lx;
-		butt.setPreferredSize(dim);
-		butt.setMargin(inset);
-
-		c.gridwidth = lx;
-		c.gridheight = ly;
-		c.gridx = _col + px;
-		c.gridy = _row + py;
-		gridbag.setConstraints(butt, c);
-
-		add(butt);
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-
-	void addPushButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, String botlab, Color alt, boolean init, _Key key) {
-		final Dimension dim = new Dimension(15, 30);
-		//final Insets inset = new Insets(2,2,2,2);
-		JButton butt;
-		if (alt != null) {
-			key.altcolor = alt;
-		}
-
-		butt = new JButton();
-
-		butt.setPreferredSize(dim);
-		if (init) {
-			butt.setBackground(key.altcolor);
-		} else {
-			butt.setBackground(key.color);
-		}
-		key.state = init;
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = ly; // stupid warnings
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = 1;
-
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			c.anchor = GridBagConstraints.SOUTH;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		c.anchor = GridBagConstraints.CENTER;
-		c.gridx = _col + px;
-		c.gridy = _row + 1;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
-
-		if (botlab.length() > 0) {
-		}
-
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-
-	void addToggleButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab,
-				boolean init, _Key key) {
-		final Dimension dim = new Dimension(15, 30);
-		//final Insets inset = new Insets(2,2,2,2);
-		JButton butt;
-		if (init) {
-			butt = new JButton(_Key.toggle_on);
-		} else {
-			butt = new JButton(_Key.toggle_off);
-		}
-
-		butt.setPreferredSize(dim);
-		key.state = init;
-		butt.setOpaque(false);
-		butt.setFocusPainted(false);
-		butt.setBorderPainted(false);
-		butt.setBackground(Color.black);
-
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = ly; // stupid warnings
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = 1;
-
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			c.anchor = GridBagConstraints.SOUTH;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		c.anchor = GridBagConstraints.CENTER;
-		c.gridx = _col + px;
-		c.gridy = _row + 1;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
-
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-
-	void addTapeButton(GridBagConstraints c, int lx, int ly, int px, int py,
-				String toplab, Color alt, _Key key) {
-		final Dimension dim = new Dimension(60, 30);
-		JButton butt;
-		if (alt != null) {
-			key.altcolor = alt;
-		}
-
-		butt = new JButton();
-
-		butt.setPreferredSize(dim);
-		butt.setBackground(key.color);
-		Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-		butt.setBorder(lb);
-		butt.setOpaque(true);
-
-		c.insets.top = 0;
-		c.insets.bottom = 0;
-		c.insets.left = ly; // stupid warnings
-		c.insets.left = py; // stupid warnings
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		c.anchor = GridBagConstraints.CENTER;
-
-		JLabel lab ;
-		if (toplab.length() > 0) {
-			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
-			lab.setFont(new Font("Sans-serif", Font.PLAIN, 12));
-			lab.setForeground(Color.white);
-			lab.setOpaque(false);
-			c.insets.left = 0;
-			c.insets.right = 0;
-			c.gridx = _col + px;
-			c.gridy = _row + 0;
-			gridbag.setConstraints(lab, c);
-			add(lab);
-		}
-
-		c.gridx = _col + px;
-		c.gridy = _row + 1;
-		c.insets.left = lx;
-		c.insets.right = lx;
-		gridbag.setConstraints(butt, c);
-		add(butt);
-
-		_buttons[_nkeys] = butt;
-		_keys[_nkeys] = key;
-		++_nkeys;
-	}
-}
-
-class Wang700_Keyboard_main extends Wang700_Keyboards
-{
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
 	public Wang700_Keyboard_main() {
 		_buttons = new JButton[num_keys];
-		_keys = new _Key[num_keys];
+		_keys = new Wang_Keys[num_keys];
 		_nkeys = 0;
 		_row = 0;
 		_col = 0;
@@ -3328,26 +1503,26 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 //		++_col;
 
 		addButton(c,1, 1, 0, 0, "icons/wr_a.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(4,12)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(4,12)));
 		addButton(c,1, 1, 0, 1, "icons/wr.gif",
-			new _Key(_Key.blue1,_Key.PROG_CODE(4,11)));
+			new Wang_Keys(Wang_Colors.blue1,Wang_Keys.PROG_CODE(4,11)));
 		addButton(c,1, 1, 0, 2, "icons/int_x.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,8)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,8)));
 		addButton(c,1, 1, 0, 3, "icons/e10x.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,13)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,13)));
 		addButton(c,1, 1, 0, 4, "icons/ex.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,14)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,14)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/end_a.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(4,13)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(4,13)));
 		addButton(c,1, 1, 0, 1, "icons/inv.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,15)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,15)));
 		addButton(c,1, 1, 0, 2, "icons/abs_x.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,7)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,7)));
 		addButton(c,1, 1, 0, 3, "icons/log10x.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,10)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,10)));
 		addButton(c,1, 1, 0, 4, "icons/logex.gif",
-			new _Key(_Key.blue1, _Key.PROG_CODE(6,11)));
+			new Wang_Keys(Wang_Colors.blue1, Wang_Keys.PROG_CODE(6,11)));
 		++_col;
 
 		s.gridx = _col;
@@ -3359,46 +1534,46 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, "icons/re_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,5)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,5)));
 		addButton(c,1, 1, 0, 1, "icons/st_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,4)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,4)));
 		addButton(c,1, 1, 0, 2, "icons/re_res.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,14)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,14)));
 		addButton(c,1, 1, 0, 3, "icons/pi.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(6,9)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(6,9)));
 		addButton(c,1, 1, 0, 4, "icons/xchg_xy.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(6,6)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(6,6)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/xchg_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,6)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,6)));
 		addButton(c,1, 1, 0, 1, "icons/div_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,3)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,3)));
 		addButton(c,1, 1, 0, 2, "icons/mult_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,2)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,2)));
 		addButton(c,1, 1, 0, 3, "icons/minus_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,1)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,1)));
 		addButton(c,1, 1, 0, 4, "icons/plus_ind.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,0)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,0)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/xchg_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,6)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,6)));
 		addButton(c,1, 1, 0, 1, "icons/div_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,3)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,3)));
 		addButton(c,1, 1, 0, 2, "icons/mult_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,2)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,2)));
 		addButton(c,1, 1, 0, 3, "icons/minus_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,1)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,1)));
 		addButton(c,1, 1, 0, 4, "icons/plus_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,0)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,0)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/re_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,5)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,5)));
 		addButton(c,1, 1, 0, 1, "icons/st_dir.gif",
-			new _Key(_Key.green1, _Key.PROG_CODE(4,4)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.PROG_CODE(4,4)));
 		addButton(c,1, 1, 0, 2, "icons/y_to_x.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(6,5)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(6,5)));
 		addButton(c,1, 2, 0, 3, "icons/x_to_y.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(6,4)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(6,4)));
 		++_col;
 
 		s.gridx = _col;
@@ -3410,48 +1585,48 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, "icons/chg_sign.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,11)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,11)));
 		addButton(c,1, 1, 0, 1, "icons/div.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(6,3)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(6,3)));
 		addButton(c,1, 1, 0, 2, "icons/mult.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(6,2)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(6,2)));
 		addButton(c,1, 1, 0, 3, "icons/minus.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(6,1)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(6,1)));
 		addButton(c,1, 1, 0, 4, "icons/plus.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(6,0)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(6,0)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/sqrt.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(6,12)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(6,12)));
 		addButton(c,1, 1, 0, 1, "icons/seven.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,7)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,7)));
 		addButton(c,1, 1, 0, 2, "icons/four.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,4)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,4)));
 		addButton(c,1, 1, 0, 3, "icons/one.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,1)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,1)));
 		addButton(c,1, 1, 0, 4, "icons/zero.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,0)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,0)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/x2.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(7,13)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(7,13)));
 		addButton(c,1, 1, 0, 1, "icons/eight.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,8)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,8)));
 		addButton(c,1, 1, 0, 2, "icons/five.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,5)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,5)));
 		addButton(c,1, 1, 0, 3, "icons/two.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,2)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,2)));
 		addButton(c,1, 1, 0, 4, "icons/dp.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,12)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,12)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/clear_x.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,15)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,15)));
 		addButton(c,1, 1, 0, 1, "icons/nine.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,9)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,9)));
 		addButton(c,1, 1, 0, 2, "icons/six.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,6)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,6)));
 		addButton(c,1, 1, 0, 3, "icons/three.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,3)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,3)));
 		addButton(c,1, 1, 0, 4, "icons/set_exp.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(7,10)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(7,10)));
 		++_col;
 
 		s.gridx = _col;
@@ -3463,60 +1638,61 @@ class Wang700_Keyboard_main extends Wang700_Keyboards
 		++_col;
 
 		addButton(c,1, 1, 0, 0, "icons/ld_prog.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,13)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,13)));
 		addButton(c,1, 1, 0, 1, "icons/end_prog.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,12)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,12)));
 		addButton(c,1, 1, 0, 2, "icons/stop.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,15)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,15)));
 		addButton(c,1, 2, 0, 3, "icons/go.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(5,14)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(5,14)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/skip_err.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,10)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,10)));
 		addButton(c,1, 1, 0, 1, "icons/skip_ge.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,7)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,7)));
 		addButton(c,1, 1, 0, 2, "icons/skip_eq.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,9)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,9)));
 		addButton(c,1, 1, 0, 3, "icons/skip_lt.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,8)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,8)));
 		addButton(c,2, 1, 0, 4, "icons/search.gif",
-			new _Key(_Key.white1, _Key.PROG_CODE(4,7)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.PROG_CODE(4,7)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/mark.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(4,8)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(4,8)));
 		addButton(c,1, 1, 0, 1, "icons/return.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(5,11)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(5,11)));
 		addButton(c,1, 1, 0, 2, "icons/group1.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(4,9)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(4,9)));
 		addButton(c,1, 1, 0, 3, "icons/group2.gif",
-			new _Key(_Key.pink1, _Key.PROG_CODE(4,10)));
+			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(4,10)));
 		++_col;
 		addButton(c,1, 1, 0, 0, "icons/prime.gif",
-			new _Key(_Key.white1, _Key.SPCL_KEY(0)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
 		addButton(c,1, 1, 0, 1, "icons/set_pc.gif",
-			new _Key(_Key.green1, _Key.SPCL_KEY(2)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
 		addButton(c,1, 1, 0, 2, "icons/verif_prog.gif",
-			new _Key(_Key.green1, _Key.SPCL_KEY(1)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
 		addButton(c,1, 1, 0, 3, "icons/rec_prog.gif",
-			new _Key(_Key.green1, _Key.SPCL_KEY(3)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
 		addButton(c,1, 1, 0, 4, "icons/step.gif",
-			new _Key(_Key.green1, _Key.MODE0_CHG(8,8)));
+			new Wang_Keys(Wang_Colors.green1, Wang_Keys.MODE0_CHG(8,8)));
 		++_col;
 
 		_col = 0;
 		_row += 5;
+		setBackground(Color.black);
 	}
 }
 
-class Wang700_Keyboard_meta extends Wang700_Keyboards
+class Wang700_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
-	public Wang700_Keyboard_meta(Wang700_ErrLight pe, Wang700_ErrLight me) {
+	public Wang700_Keyboard_meta() {
 		_buttons = new JButton[num_keys];
-		_keys = new _Key[num_keys];
+		_keys = new Wang_Keys[num_keys];
 		_nkeys = 0;
 		_row = 0;
 		_col = 0;
@@ -3546,13 +1722,13 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 //		++_col;
 
 		addToggleButton(c, 4, 1, 0, 1,"80", false,
-			new _Key(_Key.white1, _Key.GROUP(2,_Key.META_PRE(15,8))));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(2,Wang_Keys.META_PRE(15,8))));
 		addToggleButton(c, 4, 1, 1, 1,"40", false,
-			new _Key(_Key.white1, _Key.GROUP(3,_Key.META_PRE(15,4))));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(3,Wang_Keys.META_PRE(15,4))));
 		addToggleButton(c, 4, 1, 2, 1,"20", false,
-			new _Key(_Key.white1, _Key.GROUP(4,_Key.META_PRE(15,2))));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(4,Wang_Keys.META_PRE(15,2))));
 		addToggleButton(c, 4, 1, 3, 1,"10", false,
-			new _Key(_Key.white1, _Key.GROUP(5,_Key.META_PRE(15,1))));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(5,Wang_Keys.META_PRE(15,1))));
 		_col += 4;
 
 		// need to reset after pushbuttons!
@@ -3572,37 +1748,37 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 
 		c.anchor = GridBagConstraints.SOUTH;
 		addButton(c,1, -2, 0, 0, "icons/k00.gif",
-			new _Key(_Key.white1, _Key.META_KEY(0)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(0)));
 		addButton(c,1, -2, 1, 0, "icons/k01.gif",
-			new _Key(_Key.white1, _Key.META_KEY(1)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(1)));
 		addButton(c,1, -2, 2, 0, "icons/k02.gif",
-			new _Key(_Key.white1, _Key.META_KEY(2)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(2)));
 		addButton(c,1, -2, 3, 0, "icons/k03.gif",
-			new _Key(_Key.white1, _Key.META_KEY(3)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(3)));
 		addButton(c,1, -2, 4, 0, "icons/k04.gif",
-			new _Key(_Key.white1, _Key.META_KEY(4)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(4)));
 		addButton(c,1, -2, 5, 0, "icons/k05.gif",
-			new _Key(_Key.white1, _Key.META_KEY(5)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(5)));
 		addButton(c,1, -2, 6, 0, "icons/k06.gif",
-			new _Key(_Key.white1, _Key.META_KEY(6)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(6)));
 		addButton(c,1, -2, 7, 0, "icons/k07.gif",
-			new _Key(_Key.white1, _Key.META_KEY(7)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(7)));
 		addButton(c,1, -2, 8, 0, "icons/k08.gif",
-			new _Key(_Key.white1, _Key.META_KEY(8)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(8)));
 		addButton(c,1, -2, 9, 0, "icons/k09.gif",
-			new _Key(_Key.white1, _Key.META_KEY(9)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(9)));
 		addButton(c,1, -2, 10, 0, "icons/k10.gif",
-			new _Key(_Key.white1, _Key.META_KEY(10)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(10)));
 		addButton(c,1, -2, 11, 0, "icons/k11.gif",
-			new _Key(_Key.white1, _Key.META_KEY(11)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(11)));
 		addButton(c,1, -2, 12, 0, "icons/k12.gif",
-			new _Key(_Key.white1, _Key.META_KEY(12)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(12)));
 		addButton(c,1, -2, 13, 0, "icons/k13.gif",
-			new _Key(_Key.white1, _Key.META_KEY(13)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(13)));
 		addButton(c,1, -2, 14, 0, "icons/k14.gif",
-			new _Key(_Key.white1, _Key.META_KEY(14)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(14)));
 		addButton(c,1, -2, 15, 0, "icons/k15.gif",
-			new _Key(_Key.white1, _Key.META_KEY(15)));
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.META_KEY(15)));
 		_col += 16;
 
 		c.gridx = _col;
@@ -3621,33 +1797,39 @@ class Wang700_Keyboard_meta extends Wang700_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 2;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(pe, c);
-		add(pe);
+		gridbag.setConstraints(Wang700.DispX.getOv(), c);
+		add(Wang700.DispX.getOv());
 		++_col;
 		c.gridx = _col;
 		c.gridy = _row;
 		c.gridwidth = 1;
 		c.gridheight = 2;
 		c.anchor = GridBagConstraints.NORTH;
-		gridbag.setConstraints(me, c);
-		add(me);
+		gridbag.setConstraints(Wang700.DispX.getErr(), c);
+		add(Wang700.DispX.getErr());
 
 		++_col;
 		_col = 0;
 		_row += 2;
 
+		setBackground(Color.black);
 	}
 }
 
-class Wang700_Keyboard_stick extends Wang700_Keyboards
+class Wang700_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.52 2013/01/24 23:54:45 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.53 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
+	static public Wang_Keys getEject() {
+		return new Wang_Keys(Wang_Colors.ivory,
+				Wang_Keys.GROUP(6,Wang_Keys.TAPE_EJECT));
+	}
+
 	public Wang700_Keyboard_stick() {
 		_buttons = new JButton[num_keys];
-		_keys = new _Key[num_keys];
+		_keys = new Wang_Keys[num_keys];
 		_nkeys = 0;
 		_row = 0;
 		_col = 0;
@@ -3699,14 +1881,14 @@ class Wang700_Keyboard_stick extends Wang700_Keyboards
 		add(pan);
 		++_col;
 
-		addPushButton(c, 12, 1, 0, 0,"Run","",_Key.white2, true,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,0))));
-		addPushButton(c, 12, 1, 1, 0,"Learn","",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,4))));
-		addPushButton(c, 12, 1, 2, 0,"Learn and<BR>Print","",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,6))));
-		addPushButton(c, 12, 1, 3, 0,"List<BR>Program","",_Key.white2, false,
-			new _Key(_Key.white1, _Key.GROUP(1,_Key.MODE0_CHG(6,2))));
+		addPushButton(c, 12, 1, 0, 0,"Run","",Wang_Colors.white2, true,
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(1,Wang_Keys.MODE0_CHG(6,0))));
+		addPushButton(c, 12, 1, 1, 0,"Learn","",Wang_Colors.white2, false,
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(1,Wang_Keys.MODE0_CHG(6,4))));
+		addPushButton(c, 12, 1, 2, 0,"Learn and<BR>Print","",Wang_Colors.white2, false,
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(1,Wang_Keys.MODE0_CHG(6,6))));
+		addPushButton(c, 12, 1, 3, 0,"List<BR>Program","",Wang_Colors.white2, false,
+			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(1,Wang_Keys.MODE0_CHG(6,2))));
 		_col += 4;
 
 		c.gridx = _col;
@@ -3719,17 +1901,17 @@ class Wang700_Keyboard_stick extends Wang700_Keyboards
 		add(pan);
 		++_col;
 
-		addTapeButton(c, 5, 1, 0, 0, "RELEASE", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_EJECT)));
+		addTapeButton(c, 5, 1, 0, 0, "RELEASE", Wang_Colors.white2,
+			Wang700.Tape.ejectKey());
 
-		addTapeButton(c, 5, 1, 1, 0, "FORWARD", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_FF)));
+		addTapeButton(c, 5, 1, 1, 0, "FORWARD", Wang_Colors.white2,
+			new Wang_Keys(Wang_Colors.ivory, Wang_Keys.GROUP(6,Wang_Keys.TAPE_FF)));
 
-		addTapeButton(c, 5, 1, 2, 0, "TAPE READY", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_READY)));
+		addTapeButton(c, 5, 1, 2, 0, "TAPE READY", Wang_Colors.white2,
+			new Wang_Keys(Wang_Colors.ivory, Wang_Keys.GROUP(6,Wang_Keys.TAPE_READY)));
 
-		addTapeButton(c, 5, 1, 3, 0, "REWIND", _Key.white2,
-			new _Key(_Key.ivory, _Key.GROUP(6,_Key.TAPE_REW)));
+		addTapeButton(c, 5, 1, 3, 0, "REWIND", Wang_Colors.white2,
+			new Wang_Keys(Wang_Colors.ivory, Wang_Keys.GROUP(6,Wang_Keys.TAPE_REW)));
 		_col += 4;
 
 		c.gridx = _col;
@@ -3745,5 +1927,6 @@ class Wang700_Keyboard_stick extends Wang700_Keyboards
 		_col = 0;
 		_row += 1;
 
+		setBackground(Color.black);
 	}
 }

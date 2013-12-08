@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Keyboards.java,v 1.1 2013/11/30 17:51:45 drmiller Exp $
+// $Id: Wang_Keyboards.java,v 1.2 2013/12/08 03:06:16 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.border.*;
 
 class Wang_Keyboards extends JPanel
 {
-	final String ident = "$Id: Wang_Keyboards.java,v 1.1 2013/11/30 17:51:45 drmiller Exp $";
+	final String ident = "$Id: Wang_Keyboards.java,v 1.2 2013/12/08 03:06:16 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang_Keyboards() { }
 
@@ -45,7 +45,12 @@ class Wang_Keyboards extends JPanel
 		// butt.setHorizontalAlignment(SwingConstants.CENTER); // didn't help...
 
 		dim.width = 50 * lx;
-		dim.height = 50 * ly;
+		if (ly < 0) {
+			ly = -ly;
+			dim.height = 50;
+		} else {
+			dim.height = 50 * ly;
+		}
 		butt.setPreferredSize(dim);
 		butt.setMargin(inset);
 
@@ -180,6 +185,59 @@ class Wang_Keyboards extends JPanel
 		}
 
 		key.button = butt;
+		_buttons[_nkeys] = butt;
+		_keys[_nkeys] = key;
+		++_nkeys;
+	}
+
+	void addToggleButton(GridBagConstraints c, int lx, int ly, int px, int py,
+			String toplab,
+			boolean init, Wang_Keys key) {
+		final Dimension dim = new Dimension(15, 30);
+		JButton butt;
+		if (init) {
+			butt = new JButton(Wang_Keys.toggle_on);
+		} else {
+			butt = new JButton(Wang_Keys.toggle_off);
+		}
+		butt.setPreferredSize(dim);
+		key.state = init;
+		butt.setOpaque(false);
+		butt.setFocusPainted(false);
+		butt.setBorderPainted(false);
+		butt.setBackground(Color.black);
+
+
+		c.insets.top = 0;
+		c.insets.bottom = 0;
+		c.insets.left = ly; // stupid warnings
+		c.insets.left = py; // stupid warnings
+		c.gridheight = 1;
+		c.gridwidth = 1;
+
+		JLabel lab;
+		if (toplab.length() > 0) {
+			lab = new JLabel("<HTML><CENTER>"+toplab+"</CENTER></HTML>");
+			lab.setFont(new Font("Sans-serif", Font.PLAIN, 8));
+			lab.setForeground(Color.white);
+			lab.setOpaque(false);
+			c.insets.left = 0;
+			c.insets.right = 0;
+			c.gridx = _col + px;
+			c.gridy = _row + 0;
+			c.anchor = GridBagConstraints.SOUTH;
+			gridbag.setConstraints(lab, c);
+			add(lab);
+		}
+
+		c.anchor = GridBagConstraints.CENTER;
+		c.gridx = _col + px;
+		c.gridy = _row + 1;
+		c.insets.left = lx;
+		c.insets.right = lx;
+		gridbag.setConstraints(butt, c);
+		add(butt);
+
 		_buttons[_nkeys] = butt;
 		_keys[_nkeys] = key;
 		++_nkeys;

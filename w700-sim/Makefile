@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.31 2013/01/24 23:54:45 drmiller Exp $
+# $Id: Makefile,v 1.32 2013/12/08 03:06:16 drmiller Exp $
 
 include Makefile.ship
 
@@ -20,11 +20,10 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS))
 WICONS = $(subst .png,.ico,$(PNGS))
 
-ROM = ROM720C.txt
 EXE = w700-sim
 
-xinetd: $(EXE) $(ROM)
-	cp $(EXE) $(ROM) /usr/local/bin/wang
+w700ucode2rom: w700ucode2rom.c loaducode_txt.o
+	$(CC) $(CFLAGS) -o $@ w700ucode2rom.c loaducode_txt.o
 
 clobber: clean
 	rm -f *.class $(EXE) w700_fe w700-dasm Manifest.txt *.jar *.tgz
