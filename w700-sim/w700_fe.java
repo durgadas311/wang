@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $
+// $Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.awt.datatransfer.StringSelection;
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -274,7 +274,7 @@ public class w700_fe
 class Wang700_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	private JMenuItem _mi701;
 	private JMenuItem _mi702;
 	private JMenuItem _mi711;
@@ -651,7 +651,7 @@ System.err.println("sync error");
 class Wang700_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -702,10 +702,10 @@ class Wang700_Display extends Wang_Display
 		s = s.replaceAll("\005","1");	// special "1"
 		s = s.replace("\006",".");	// special "."
 		s = s.replace("\007",".");	// zero-width "."
-		if (s.length() > 13) {
-			e = s.substring(13); // keep "+"
+		if (s.length() > 14) {
+			e = s.substring(14); // keep "+"
 			if (e.equals("+00")) e = null;
-			s = s.substring(0,13);
+			s = s.substring(0,14);
 		}
 		s = s.replaceAll("0*$", ""); // cut trailing zeroes
 		if (s.length() == 0) s = "0";
@@ -978,7 +978,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.56 $ $Date: 2013/12/09 22:39:41 $<BR>"+
+			"$Revision: 1.57 $ $Date: 2013/12/09 23:36:15 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1097,7 +1097,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1351,18 +1351,39 @@ class Wang700_Keyboard extends Wang_Keyboard
 		// even strip off trailing manitissa '0'...
 		try {
 			Double d = Double.valueOf(s);
-			// format(%.12g) ensures no more than 12 digits.
-			// however, decimal point makes 13, if present...
-			// and will cause error.
+			// format(%.13g) ensures no more than 13 digits.
 			// The exponent will not error-out on overflow.
-			s = String.format("%.12g", d);
-			s = s.replaceAll("^0", ""); // trim leading zero...
+			s = String.format("%.13g", d);
+			s = s.replaceAll("^0*", ""); // trim leading zero...
 			int i = s.indexOf('e');
-			if (i < 0 && s.length() > 12) {
-				s = s.substring(0, 12);
-			} else if (i > 12) {
-				s = s.substring(0, 12) + s.substring(i);
+			String exp = new String();
+			String mant;
+			if (i < 0) {
+				mant = s;
+				if (mant.length() > 13) {
+					mant = mant.substring(0, 13);
+				}
+			} else {
+				if (i > 13) {
+					mant = s.substring(0, 13);
+				} else {
+					mant = s.substring(0, i);
+				}
+				mant = mant.replaceAll("0*$", "");
+				// The 700 is different about scientific notation,
+				// it forces the mantissa to be < 1. So, have to adjust
+				// the exponent accordingly.
+				Integer ei = Integer.valueOf(s.substring(i + 1).replaceAll("^[+]", ""));
+				ei += 1;
+				ei = ei % 100;
+				exp = "e" + Integer.toString(ei);
 			}
+			mant = mant.replaceAll("0*$", "");
+			mant = mant.replaceAll("[.]$", "");
+			if (mant.length() == 0) {
+				mant = "0";
+			}
+			s = mant + exp;
 		} catch (NumberFormatException e) {
 			// give some indication
 			s = "";
@@ -1464,7 +1485,7 @@ System.err.println("action");
 
 class Wang700_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -1690,7 +1711,7 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 
 class Wang700_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -1822,7 +1843,7 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 
 class Wang700_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.56 2013/12/09 22:39:41 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.57 2013/12/09 23:36:15 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
