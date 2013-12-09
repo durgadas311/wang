@@ -1,5 +1,22 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.4 2013/12/09 17:04:26 drmiller Exp $
+# $Id: INSTALL,v 1.5 2013/12/09 17:11:41 drmiller Exp $
+
+export INSTALLPATH=${HOME}/wang700apc
+
+# path might have blanks!!!
+pgm="${0}"
+if [[ -L "${pgm}" ]]; then
+	pgm=$(readlink "${pgm}")
+fi
+cwd="${pgm%/*}"
+if [[ ! "${cwd}" -ef "${INSTALLPATH}" ]]; then
+	echo "Moving ${cwd}..."
+	rm -rf "${INSTALLPATH}"
+	cp -r "${cwd}" "${INSTALLPATH}"
+	exec "${INSTALLPATH}/${0##*/}"
+	exit 1
+fi
+cd "${INSTALLPATH}"
 
 if [[ -d progs ]]; then
 	mkdir -p ~/Wang700Files
