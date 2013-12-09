@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Properties.java,v 1.2 2013/12/05 22:31:57 drmiller Exp $
+// $Id: Wang1200_Properties.java,v 1.3 2013/12/09 17:47:47 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -117,7 +117,7 @@ class Wang1200_Properties extends Wang_Properties
 		// setup defaults for everything...
 		String s;
 		s = getProperty("wang1200_home");
-		boolean home_set = (s == null || s.length() == 0);
+		boolean home_set = (s != null && s.length() != 0);
 		if (!home_set) {
 			setProperty("wang1200_home", "~/Wang1200Files");
 		}
