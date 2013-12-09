@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.8 2013/12/05 22:31:57 drmiller Exp $
+# $Id: INSTALL,v 1.9 2013/12/09 17:04:26 drmiller Exp $
 
 export INSTALLPATH=${HOME}/wang600apc
 
@@ -22,11 +22,13 @@ if [[ -d progs ]]; then
 	mkdir -p ~/Wang600Files
 	cp -v progs/* ~/Wang600Files
 fi
+base="wang600"
+title="Wang600"
 if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 	echo "installing GNOME desktop shortcut..."
 	export WANG600PATH="${INSTALLPATH}"
-	cat wang600.desktop.tmplt | while read line; do
+	cat ${base}.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
-	done >~/Desktop/Wang600.desktop
+	done >~/Desktop/${title}.desktop
 fi
 echo "Ready to launch ${PWD}/run"

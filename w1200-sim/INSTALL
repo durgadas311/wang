@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.4 2013/12/04 23:03:25 drmiller Exp $
+# $Id: INSTALL,v 1.5 2013/12/09 17:04:26 drmiller Exp $
 
 export INSTALLPATH=${HOME}/wang1200wps
 
@@ -29,6 +29,6 @@ if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 	export WANG1200PATH="${INSTALLPATH}"
 	cat ${base}.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
-	done >~/Desktop/${base}.desktop
+	done >~/Desktop/${title}.desktop
 fi
 echo "Ready to launch ${PWD}/run"
