@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.33 2013/12/09 15:36:32 drmiller Exp $
+# $Id: Makefile,v 1.34 2013/12/09 16:38:36 drmiller Exp $
 
 include Makefile.ship
 
@@ -30,7 +30,7 @@ $(ROM): ROM720C.txt w700ucode2rom
 	mv ROM720C.rom $@
 
 clobber: clean
-	rm -f *.class $(EXE) w700_fe w700-dasm Manifest.txt *.jar *.tgz
+	rm -f *.class w700_fe w700-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
 
 rom.diff: $(ROM)
@@ -57,11 +57,11 @@ packages: $(PACKAGES)
 
 temp_dest: all $(ICNS) wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar $(EXE) run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang700.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) $(TMPDEST)/icons
-#	cp $(ROM) $(TMPDEST)
+	cp $(ROM) $(TMPDEST)
 #	mkdir -p $(TMPDEST)/progs
 #	cp progs/*.wng $(TMPDEST)/progs
 
@@ -69,12 +69,8 @@ wang700apc.tgz: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
 	rm -rf $(TMPDIR)
 
-$(EXE).osx: $(EXE)
-	ssh $(MACOSX) cd $(SUBPATH)\; make clean update w700-sim
-	scp $(MACOSX):$(SUBPATH)/$(EXE) $(EXE).osx
-
 # Need better way to estimate size of image...
-wang700apc.dmg: all icns $(EXE).osx wang700.jar
+wang700apc.dmg: all icns wang700.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=74k count=17
 	hformat -l WANG700APC $@
@@ -88,7 +84,6 @@ wang700apc.dmg: all icns $(EXE).osx wang700.jar
 	hcopy -r wang700.jar run :MacOS
 	hcopy -r icons/wang700-*x*.icns :Resources
 	hcd MacOS
-	hcopy -r $(EXE).osx :$(EXE)
 	hcd
 	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
 	hcopy -r README.osx :README.html

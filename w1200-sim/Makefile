@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.23 2013/12/09 15:42:51 drmiller Exp $
+# $Id: Makefile,v 1.24 2013/12/09 16:38:36 drmiller Exp $
 
 include Makefile.ship
 
@@ -76,7 +76,7 @@ wang1200wps.dmg: all icns wang1200.jar
 	hcd
 	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
 	hcopy -r README :README.html
-	hcopy -r examples/*.wng :Wang1200Files
+	hcopy -r examples/*.wpt :Wang1200Files
 	humount $@
 
 install: temp_dest
