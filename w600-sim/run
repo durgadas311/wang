@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: run,v 1.4 2012/02/19 21:23:58 drmiller Exp $
+# $Id: run,v 1.5 2013/12/09 22:22:33 drmiller Exp $
 
 pgm=${0}
 if [[ -L ${pgm} ]]; then
@@ -8,8 +8,5 @@ fi
 cd ${pgm%/*}
 
 opts=""
-if [[ ${WANG600_HOST:-not-set} != "not-set" ]]; then
-	opts="-w"
-fi
 
 exec java -jar wang600.jar ${opts}

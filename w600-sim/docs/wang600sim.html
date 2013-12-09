@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.20 2013/11/24 19:06:43 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.21 2013/12/09 22:22:33 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -28,13 +28,6 @@ The corresponding parameter names in the rc file are listed in square brackets.
 	is used.
 <DT>Home<DD>[wang600_home]
 	Path to wang600 files. Default: ~/Wang600Files.
-<DT>Use remote server<DD>[wang600_remote]
-	(deprecated) Enables using a remote host to run the simulator
-	back-end. Default: false (off).
-<DT>Remote host<DD>[wang600_host]
-	(deprecated) Hostname of back-end server, see <B>-w</B> option. 
-<DT>Remote port<DD>[wang600_port]
-	(deprecated) Port to use for connecting to back-end server, see <B>-w</B> option. 
 </DL>
 
 Other parameters (maintained by the calculator, not typically user-controlled),
@@ -45,8 +38,12 @@ that are not exposed in the "Preferences" dialog, are:
 	tape drive when the calculator was last used. Default: none.
 <DT>Last ROM image<DD>[wang600_rom_image] The expansion ROM image file that was
 	installed when the calculator was last used. Default: none.
-<DT>Last Disk image<DD>[wang600_rom_image] The expansion Model 630 disk image file that was
+<DT>Last Disk image<DD>[wang600_disk_image] The expansion Model 630 disk image file that was
 	installed when the calculator was last used. Default: none.
+<DT>Last Output device<DD>[wang600_cn24_device]
+	The Output device that was installed when the calculator was last used.
+	Uses values such as "601" or "612".
+	Default: none.
 <DT>Tape file suffix<DD>[wang600_tape_file_suffix] Default: "w6t".
 <DT>ROM file suffix<DD>[wang600_rom_file_suffix] Expansion ROM files, Default: "w6x".
 <DT>Disk (Model 630) file suffix<DD>[wang600_disk_file_suffix] Default: "w6d".
@@ -83,7 +80,7 @@ java -jar wang600.jar -i
 console before the calculator is initialized. Type the command "go" to start
 the calulator (other commands allow tracing, setting break points, etc).
 
-<P>Pressing "%" in the calculator window will pause the simulation and print 
+<P>Typing Ctrl-D in the calculator window will pause the simulation and print 
 a command prompt. The command "help" will display available debug commands.
 
 <P>In order to use the debugging console, the simulator must have been started
@@ -155,8 +152,7 @@ By default, the display uses a TrueType font designed from the Panaplex 9-segmen
 array used in the Wang 600. The font is named "Panaplex9seg.ttf".
 An alternate font, "NixieZM1336.ttf", is also present which is a
 facsimily of the ZM1336 Nixie tubes used in the Wang 500 and
-Wang 700 Series. This font may be selected with the environment variable
-WANG600_FONT=NixieZM1336.ttf.
+Wang 700 Series.
 
 <P>These fonts provide the characters '0' - '9' and 'A' - 'F' which
 authentically replicate
@@ -298,12 +294,12 @@ sending anything to the calculator. Unlike the real hardware, the calculator is
 allowed to run normally in LOCAL mode.
 I/O mode is when the device is under full control of the calulator.
 
-<P>The calculator command Group&NBSP;2 04&NBSP;12 places the device in the "input mode", where the calulator is forced into LEARN mode and characters typed in the device window
+<P>The calculator command Group&nbsp;2 04&nbsp;12 places the device in the "input mode", where the calulator is forced into LEARN mode and characters typed in the device window
 are stored in the program memory of the calculator. Typically, a sequence of characters
-are preceded by the ALPHA code and ended with an END&NBSP;ALPHA code.
+are preceded by the ALPHA code and ended with an END&nbsp;ALPHA code.
 Press the GO button to end input mode.
 
-<P>The calculator command Group&NBSP;2 04&NBSP;13 places the device in the "type mode", where characters typed in the devuice window are printed but not sent to the calculator.
+<P>The calculator command Group&nbsp;2 04&nbsp;13 places the device in the "type mode", where characters typed in the devuice window are printed but not sent to the calculator.
 The calculator remains in the RUN mode, but is waiting for the GO command from the device
 in order to be released.
 

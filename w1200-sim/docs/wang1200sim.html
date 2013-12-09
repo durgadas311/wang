@@ -1,15 +1,61 @@
 <HTML>
-<!-- $Id: wang1200sim.html,v 1.4 2012/01/30 12:37:14 drmiller Exp $ -->
+<!-- $Id: wang1200sim.html,v 1.5 2013/12/09 22:22:33 drmiller Exp $ -->
 <H2>Running Environment</H2>
 
-<P>The simulator recognizes the following environment variables:
+<P>The simulator configuration is controlled by the "rc" file "~/.wang1200.rc".
+This file is normally configured through the "System"/"Setup" menu items,
+but may also be editted manually if necessary (beware of mispelling paramters).
+The following parameters on the setup window control certain aspects of the system.
+The corresponding parameter names in the rc file are listed in square brackets.
 
 <DL>
-<DT>WANG1200HOME<DD>Path to wang1200 files, default is ~/Wang1200Files.
-<DT>WANG1200_FONT<DD>Font to use for display. Default is Panaplex9seg.ttf.
-<DT>WANG1200_HOST<DD>Hostname of back-end server, see <B>-w</B> option. 
-<DT>WANG1200_PORT<DD>Port to use for connecting to back-end server, see <B>-w</B> option. 
+<DT>Home<DD>[wang1200_home]
+	Path to wang1200 files. Default: ~/Wang1200Files.
+<DT>Chars/Inch<DD>[wang1200_page_cpi]
+	Affects size of font used to print documents (native, "real" printer).
+	If not zero, used with size of printed page to compute font metrics
+	to achieve desired number of characters per inch.
+	These four settings may work against each other, but the smallest
+	font that conforms to all setting will be used.
+	Default: 10.
+<DT>Chars/Line<DD>[wang1200_page_cpl]
+	Affects size of font used to print documents.
+	If not zero, used with size of printed page to compute font metrics
+	to achieve desired number of characters per line.
+	Default: 0.
+<DT>Lines/Inch<DD>[wang1200_page_lpi]
+	Affects size of font used to print documents.
+	If not zero, used with size of printed page to compute font metrics
+	to achieve desired number of lines per inch.
+	Default: 6.
+<DT>Lines/Page<DD>[wang1200_page_lpp]
+	Affects size of font used to print documents.
+	If not zero, used with size of printed page to compute font metrics
+	to achieve desired number of lines per page.
+	Default: 0.
+<DT>Enable footers<DD>[wang1200_page_footers]
+	Whether a footer will be printed on each page of document.
+	Default: false (no footer).
+<DT>Footer Text<DD>[wang1200_page_footertext]
+	Text to print on document footer, in addition to page number and date/time.
+	Default "Wang 1200 Output".
 </DL>
+
+Other parameters (maintained by the system, not typically user-controlled),
+that are not exposed in the "Preferences" dialog, are:
+
+<DL>
+<DT>Left Tape image<DD>[wang1200_left_tape_image]
+	The tape image file last used in the Left Tape Drive.
+	Default: none.
+<DT>Right Tape image<DD>[wang1200_right_tape_image]
+	The tape image file last used in the Right Tape Drive.
+	Default: none.
+<DT>Tape file suffix<DD>[wang1200_tape_file_suffix]
+	Suffix used for files that contain tape images.
+	Default: "wpt".
+</DL>
+
 
 <P>The simulator is normally started with the following command:
 
@@ -17,36 +63,38 @@
 java -jar wang1200.jar
 </PRE>
 
-<P>which starts up the GUI front-end. This will attempt to run the command:
-<UL><PRE>
-./w1200-sim -b
-</PRE></UL>
-<P>which will start up the simulator back-end.
+<P>which starts up the simulator in normal mode.
 
 </UL>
 
-<P>An alternative is to run the GUI as a client to the back-end on a
-remote host. In this case, the simulator is started with:
+<P>An alternative is to run the simulator with debugging enabled.
 
 <UL><PRE>
-java -jar wang1200.jar -w [ &lt;host&gt; &lt;port&gt; ]
-</PRE>
-
-<P>The &lt;host&gt; and &lt;port&gt; arguments are not needed if the environment
-variables have been set.
-The remote &lt;host&gt; must be listening on the correct &lt;port&gt; number and
-should start up the back-end using the command:
-<UL><PRE>
-/path/to/sim/w1200-sim -b -w
+java -jar wang600.jar -i
 </PRE></UL>
-<P>and may require other options, for example to get the path to the
-microcode image.
-</UL>
+
+<P>Or the option "-I" (capital "I") causes the program to stop in the debug
+console before the calculator is initialized. Type the command "go" to start
+the calulator (other commands allow tracing, setting break points, etc).
+
+<P>Pressing "%" in the calculator window will pause the simulation and print
+a command prompt. The command "help" will display available debug commands.
+
+<P>In order to use the debugging console, the simulator must have been started
+from a "terminal window" that is still active (all debug interaction will
+take place there, i.e. using stdin/out). Note, desktop icons often do not
+retain a terminal window after starting the program.
 
 <H2>About The Simulator</H2>
 
 <P>The Wang 1200 Word Processing simulator takes various liberties in order
 to allow operation on a modern computer.
+
+<P>One such is that the original system qwas constantly executing instructions
+while waiting for commands or typing. The simulator cannot consume 100% CPU on
+the host computer, so it must recognize the main idle loop and perform a
+sleep in order to lessen the CPU consumption. Note, however, that the
+simulator is still running but simply not spinning at full speed.
 
 <H3>Typewriter</H3>
 
@@ -108,11 +156,11 @@ which provide some feedback from the system.
 locked the typewriter keyboard. Currently, this does not actually prevent
 typing.
 
-<H3>The Paper Menu</H3>
+<H3>The System Menu</H3>
 
 <P>The contents of the typing window may be Saved, Printed, or Torn Off (erased).
 
-<P>For printing, there is also a menu item for Print Setup that allows
+<P>For printing, there is also a menu item for Setup that allows
 specifying desired pitch (Characters per Inch, Lines per Inch) and
 page/line size, as well as text to print in an optional footer.
 If any of the pitch or size numbers are set to zero, that setting

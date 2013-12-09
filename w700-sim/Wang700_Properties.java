@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang700_Properties.java,v 1.1 2013/12/08 03:06:16 drmiller Exp $
+// $Id: Wang700_Properties.java,v 1.2 2013/12/09 22:22:33 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -102,10 +102,6 @@ class Wang700_Properties extends Wang_Properties
 		s = getProperty("wang700_disk_file_suffix");
 		if (s == null || s.length() == 0) {
 			setProperty("wang700_disk_file_suffix", "w7d");
-		}
-		s = getProperty("wang700_remote");
-		if (s == null || s.length() == 0) {
-			setProperty("wang700_remote", "false");
 		}
 
 		// process (obsolete?) env vars...
