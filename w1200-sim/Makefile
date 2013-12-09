@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.22 2013/12/04 23:03:25 drmiller Exp $
+# $Id: Makefile,v 1.23 2013/12/09 15:42:51 drmiller Exp $
 
 include Makefile.ship
 
@@ -32,7 +32,7 @@ tar:
 		w1200-sim/INSTALL w1200-sim/run w1200-sim/txt2wng \
 		w1200-sim/examples/*.wpt \
 		w1200-sim/$(ROM) w1200-sim/icons/*.gif \
-		w1200-sim/icons/*.png \
+		w1200-sim/icons/*.png common/icons/*.png \
 		w1200-sim/docs/*.html w1200-sim/docs/*.gif
 #		w1200-sim/docs/*.pdf
 

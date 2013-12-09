@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.63 2013/11/18 15:48:31 drmiller Exp $
+# $Id: Makefile,v 1.64 2013/12/09 15:42:51 drmiller Exp $
 
 include Makefile.ship
 
@@ -34,7 +34,8 @@ tar:
 		w600-sim/Makefile.ship w600-sim/*.java common/*.java \
 		w600-sim/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
-		w600-sim/icons/*.png common/fonts/*.ttf	\
+		w600-sim/icons/*.png common/icons/*.png	\
+		common/fonts/*.ttf	\
 		w600-sim/progs/*.w6* w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar packages wpcc.tgz

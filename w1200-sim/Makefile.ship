@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.4 2013/12/04 14:23:56 drmiller Exp $
+# $Id: Makefile.ship,v 1.5 2013/12/09 15:42:51 drmiller Exp $
 
 EXAMPLES = $(wildcard examples/*.txt)
 EX = $(EXAMPLES:.txt=.wpt)
@@ -38,6 +38,7 @@ W1200_CLASSES = \
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTDEST =
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
+COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
 
@@ -73,7 +74,8 @@ SHIP_DOCS = $(filter-out docs/wang1200arch.html,$(wildcard docs/*.html))
 
 wang1200.jar: w1200_fe.class txt2wng.class Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
-		$(addprefix -C ../common/fonts ,$(FONTS))
+		$(addprefix -C ../common/fonts ,$(FONTS)) \
+		$(addprefix -C ../common ,$(COMMON_ICONS))
 
 examples/%.wpt: examples/%.txt txt2wng.class
 	java txt2wng $<
