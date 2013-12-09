@@ -1,5 +1,5 @@
 // Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.6 2013/11/18 23:31:37 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.7 2013/12/09 15:22:35 drmiller Exp $
 
 import java.io.*;
 import java.util.Arrays;
@@ -342,10 +342,12 @@ new DbgFunc() {
 						if (n > 0) {
 							System.out.write(Arrays.copyOfRange(buf, 0, n));
 						} else if (n < 0) {
+//System.err.println("out.read(buf) returned < 0");
 							out.close();
 							out = null;
 						}
 					} catch(Exception ee) {
+//System.err.println("out.read(buf) exception: " + ee.getMessage());
 						out.close();
 						out = null;
 					}
