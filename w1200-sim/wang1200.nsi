@@ -26,6 +26,3 @@ Section "Uninstall"
 	Delete $INSTDIR\uninstall.exe
 	RMDir $INSTDIR
 SectionEnd
-Function ".onInstSuccess"
-	MessageBox MB_OK "This program requires environment vairables WANG1200_HOST and WANG1200_PORT be set up"
-FunctionEnd

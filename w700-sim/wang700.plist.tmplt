@@ -23,14 +23,5 @@
 	<string>WNG7</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>LSEnvironment</key>
-	<dict>
-		<key>WANG700HOME</key>
-		<string>~/Wang700Files</string>
-		<key>WANG700_HOST</key>
-		<string>not-set</string>
-		<key>WANG700_PORT</key>
-		<string>20311</string>
-	</dict>
 </dict>
 </plist>

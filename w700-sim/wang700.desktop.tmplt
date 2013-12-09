@@ -4,6 +4,6 @@ GenericName=Wang 700 Advanced Programming Calculator
 Name=Wang700
 Exec=${WANG700PATH}/run
 Icon=${WANG700PATH}/icons/wang700-48x48.png
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Qt;Gnome;Applications;

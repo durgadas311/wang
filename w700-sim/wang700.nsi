@@ -14,7 +14,7 @@ Section "Wang 700 Simulator"
 	CreateShortCut "$DESKTOP\Wang700.lnk" "$INSTDIR\Wang700.bat" "" \
 		"$INSTDIR\wang700-48x48.ico" 0 SW_SHOWMINIMIZED
 	# SetOutPath $WANG700HOME
-	# File /r "progs\*.wng"
+	# File /r "progs\*.w7*"
 	WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 Section "Uninstall"
@@ -25,6 +25,3 @@ Section "Uninstall"
 	Delete $INSTDIR\uninstall.exe
 	RMDir $INSTDIR
 SectionEnd
-Function ".onInstSuccess"
-	MessageBox MB_OK "This program requires environment vairables WANG700_HOST and WANG700_PORT be set up"
-FunctionEnd
