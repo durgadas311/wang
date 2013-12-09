@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.32 2013/12/08 03:06:16 drmiller Exp $
+# $Id: Makefile,v 1.33 2013/12/09 15:36:32 drmiller Exp $
 
 include Makefile.ship
 
@@ -25,6 +25,10 @@ EXE = w700-sim
 w700ucode2rom: w700ucode2rom.c loaducode_txt.o
 	$(CC) $(CFLAGS) -o $@ w700ucode2rom.c loaducode_txt.o
 
+$(ROM): ROM720C.txt w700ucode2rom
+	./w700ucode2rom ROM720C.txt
+	mv ROM720C.rom $@
+
 clobber: clean
 	rm -f *.class $(EXE) w700_fe w700-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
@@ -36,10 +40,10 @@ tar: rom.diff wang700.jar
 	cd ..;\
 	tar -czv --transform 's/.ship$$//' \
 		-f w700-sim/$(SRCTAR) \
-		w700-sim/*.[ch] w700-sim/Makefile.ship w700-sim/*.java \
-		common/*.[ch] \
+		w700-sim/Makefile.ship w700-sim/*.java \
+		common/icons/*.png \
 		w700-sim/README w700-sim/LICENSE \
-		w700-sim/README.{internals,gui} \
+		w700-sim/README.gui \
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 

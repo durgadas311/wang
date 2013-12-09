@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ident "$Id: w700ucode2rom.c,v 1.1 2013/12/08 03:06:16 drmiller Exp $"
+#ident "$Id: w700ucode2rom.c,v 1.2 2013/12/09 15:36:32 drmiller Exp $"
 
 #include "w700_ucode.h"
 
@@ -61,4 +61,5 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	close(fd);
+	return 0;
 }

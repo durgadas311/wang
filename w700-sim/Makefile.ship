@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.2 2013/12/08 03:06:16 drmiller Exp $
+# $Id: Makefile.ship,v 1.3 2013/12/09 15:36:32 drmiller Exp $
 
 COPTS =
 
@@ -8,6 +8,7 @@ CFLAGS += -D__wang700__ -I../common -I.
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)
 FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
+COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
 ROM = wang720c.rom
@@ -77,6 +78,7 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
-wang700.jar: w700_fe.class Manifest.txt
+wang700.jar: w700_fe.class Manifest.txt $(ROM)
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
-		$(addprefix -C ../common/fonts ,$(FONTS))
+		$(addprefix -C ../common/fonts ,$(FONTS)) \
+		$(addprefix -C ../common ,$(COMMON_ICONS))

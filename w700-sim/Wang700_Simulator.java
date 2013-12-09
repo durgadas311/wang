@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.1 2013/12/08 03:06:16 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.2 2013/12/09 15:36:32 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.1 2013/12/08 03:06:16 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.2 2013/12/09 15:36:32 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -92,7 +92,7 @@ class Wang700_Simulator
 			// "LE", i.e. "jl" in byte[0]
 			jl = (byte)((instr[0] >> 1) & 0x07);
 			jh = (byte)((instr[0] >> 4) & 0x07);
-			jad = (((instr[1] & 0x00ff) << 1) | (instr[0] & 1));
+			jad = (((instr[1] & 0x00ff) << 1) | ((instr[0] >> 7) & 1));
 			st = (byte)(instr[2] & 0x0f);
 			kk = (byte)((instr[2] >> 4) & 0x0f);
 			mop = (byte)(instr[3] & 0x0f);
@@ -366,7 +366,6 @@ class Wang700_Simulator
 			if (uu.aop == 7) {
 				alu += ",CC] >> SC";
 			} else {
-				alu += " ->[Zo";
 				if (uu.aop < 5) {
 					alu += ",CC";
 					switch (uu.aop) {
@@ -394,8 +393,8 @@ class Wang700_Simulator
 			// P4-5
 			String mp45 = null;
 			switch(uu.mop) {
-			case 10: mp45 = "KB<0>=Din"; break;
-			case 11: mp45 = "Dot=KB<0>"; break;
+			case 10: mp45 = "KB<0>=Dot"; break;
+			case 11: mp45 = "Din=KB<0>"; break;
 			case 12:
 				mp45 = "TMR=1,";
 				mp45 += ((uu.bi & 1) != 0 ? "WR" : "RD");
@@ -453,7 +452,7 @@ class Wang700_Simulator
 			case 5:	opA = "RA,RB = mem(LMN)"; break;
 			case 6:	opA = "KB<0>=RBS"; break;
 			case 7:	break; // done at P5-6
-			case 8:	opA = "{8}"; break;
+			case 8:	break;
 			case 9:
 				if (uu.aop == 7) {
 					opA = "Q=SC";
@@ -670,6 +669,7 @@ class Wang700_Simulator
 
 	public void chgMode0() {
 		good = 0;
+		do_blanking();
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
@@ -798,61 +798,80 @@ class Wang700_Simulator
 	long ti_repc;
 	byte ti_bit;
 
-	private int do_repc() {
-		return ti_bit;
+	private boolean do_repc() {
+		return (cycles < ti_repc);
 	}
-	private int do_sigc() {
-		--ti_sigc;
-		ti_bit = (byte)(ti_last & 1);
-		ti_last >>= 1;
-		ti_repc = cycles + 97;	// very sensitive...
-		return do_repc();
-	}
-	private int do_bitc() {
-		--ti_bitc;
-		ti_data <<= 1;
-		if ((ti_data & 0x200) != 0) {
-			ti_last = 0x05;	// lsb first out...
-		} else {
-			ti_last = 0x01;	// lsb first out...
+	private boolean do_sigc() {
+		// can only arrive here if cycles >= ti_repc...
+		while (ti_sigc > 0) {
+			--ti_sigc;
+			ti_bit = (byte)(ti_last & 1);
+			ti_last >>= 1;
+			// must maintain real-time aspect...
+			ti_repc += 390;	// very sensitive? 390/391
+			if (do_repc()) {
+				return true;
+			}
 		}
-		ti_sigc = 4;
-		return do_sigc();
+		return false;
+	}
+	private boolean do_bitc() {
+		if (ti_bitc > 0) {
+			--ti_bitc;
+			ti_data <<= 1;
+			if ((ti_data & 0x200) != 0) {
+				ti_last = 0x07;	// lsb first out...
+			} else {
+				ti_last = 0x01;	// lsb first out...
+			}
+			ti_sigc = 4;
+			if (do_sigc()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private int tape_read() {
 		// wait for TD 0->1
-		// delay 56 cycles
-		// wait 220 cycles (sample TD for end of loop)
-		// [15,15,6] ^= DL	; compute parity?
-		// CY = 0 - DL		; CY = bit0
-		// [15,15,5] <<= 1	; make space
-		// [15,15,5] += CY	; insert new bit
-		// ACC += 1		; count bits
-		// wait up to 256 cycles for TD 0->1
+		// delay 815 cycles
+		// sample for 170 cycles (sample TD at end of loop)
+		// delay 353 cycles
+		// wait up to 800? cycles for TD 0->1
 		//         __    __
-		// "1" = _|  |__|  |_
+		// "1" = _|  |__|  |_ (each "bit" is 390/391 cycles)
 		//         __
 		// "0" = _|  |_______
 		//
-		if (cycles < ti_repc) {
-			return do_repc();
+		if (do_repc()) {
+			return ti_bit;
 		}
-		if (ti_sigc > 0) {
-			return do_sigc();
+		// might have been a lot of elapsed time since last call,
+		// so have to account for the extra, possibly skipping bits...
+		// i.e. must keep "real time" representation of bit stream.
+		// This is because the '700 uses delay loops that do not call
+		// tape_read().
+		if (do_sigc()) {
+			return ti_bit;
 		}
-		if (ti_bitc > 0) {
-			return do_bitc();
+		if (do_bitc()) {
+			return ti_bit;
 		}
 		int ti = Wang700.Tape.tape_play();
 		if (ti < 0) { // EOF
-			ti_repc = cycles + 700;	// expects at least 650?
-			ti_bit = 0;
-			return do_repc();
+			ti_bit = 0; // "dead air"...
+			// relative or absolute?
+			//ti_repc += 1000; // how long is needed?
+			ti_repc = cycles + 1000; // how long is needed?
+			return ti_bit;
+		} else {
+			ti_data = (ti << 1) | even_parity8((byte)ti);
+			ti_bitc = 9;
+			if (do_bitc()) { // must always return true?
+				return ti_bit;
+			}
 		}
-		ti_data = (ti << 1) | even_parity8((byte)ti);
-		ti_bitc = 9;
-		return do_bitc();
+		return 0; // run-out the clock...
 	}
 
 	private void tape_on(int wr) {
@@ -862,7 +881,7 @@ class Wang700_Simulator
 			ti_last = 0;
 			ti_sigc = 0;
 			ti_bitc = 0;
-			ti_repc = 0;
+			ti_repc = cycles + 10; // how much time before it starts looking?
 		}
 	}
 
@@ -996,7 +1015,7 @@ class Wang700_Simulator
 
 	private void refresh(boolean canSleep) {
 		short x = (short)(((s & 2) << 7) | (n << 4) | rb);
-		short y = (short)(((s & 1) << 8) | (n << 4) | ra);
+		short y = (short)((((s & 1) ^ 1) << 8) | (n << 4) | ra);
 		if (dispx[n] != x) {
 			dispx[n] = x;
 			good = 0;
@@ -1009,7 +1028,11 @@ class Wang700_Simulator
 			lastx = 0;
 			++good;
 			Wang700.DispX.do_display(dispx);
-			Wang700.DispY.do_display(dispy);
+			// do not refresh Y when LEARN (or LEARN AND PRINT)
+			// (assumes display got blanked previously)
+			if ((Wang700.Kbd.getMode0(false) & D12_LRN_L_P) == 0) {
+				Wang700.DispY.do_display(dispy);
+			}
 		} else {
 			if (good > 4) {
 				if (canSleep) {
@@ -1047,7 +1070,7 @@ class Wang700_Simulator
 				cycles += 431;
 			}
 			refresh(cylimit == Long.MAX_VALUE);
-		// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
+		// 5ed: begin alpha-stop display-refresh delay loop... short-cut to 4ae...
 		} else if (pc == 0x5ed) {	// alpha-stop refresh routine...
 			if (trace) { // can only be if _dbg != null
 				_dbg.warp("Alpha-Stop", 0x4ae, 531);
