@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.34 2013/12/09 16:38:36 drmiller Exp $
+# $Id: Makefile,v 1.35 2013/12/10 01:46:34 drmiller Exp $
 
 include Makefile.ship
 
@@ -106,6 +106,7 @@ www: _FRC_
 	mkdir -p /http/durgadas.com/wang700/wang700docs
 	cp docs/*.html docs/*.gif /http/durgadas.com/wang700/wang700docs
 	cp www/wang700* /http/durgadas.com/wang700
+	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w700-sim
 
 reicon:
 	cvs -q update icons

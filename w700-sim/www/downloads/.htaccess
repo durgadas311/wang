@@ -1,0 +1,8 @@
+HeaderName header.html
+ReadmeName footer.html
+IndexIgnore header.html footer.html
+IndexOrderDefault Descending Date
+AddDescription "Wang 700 Programmable Calculator simulator, OSX" wang700apc.dmg
+AddDescription "Wang 700 Programmable Calculator simulator, Windows" wang700apc.exe
+AddDescription "Wang 700 Programmable Calculator simulator, Linux" wang700apc.tgz
+AddDescription "Wang 700 Programmable Calculator simulator (full source)" w700-sim.tgz

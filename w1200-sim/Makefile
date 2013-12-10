@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 2013/12/09 16:38:36 drmiller Exp $
+# $Id: Makefile,v 1.25 2013/12/10 01:43:56 drmiller Exp $
 
 include Makefile.ship
 
@@ -89,6 +89,7 @@ www: _FRC_
 	mkdir -p /http/durgadas.com/wang1200/wang1200docs
 	cp docs/*.html docs/*.gif /http/durgadas.com/wang1200/wang1200docs
 	cp www/wang1200* /http/durgadas.com/wang1200
+	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w1200-sim
 
 icns: $(ICNS)
 

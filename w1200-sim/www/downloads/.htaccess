@@ -1,0 +1,8 @@
+HeaderName header.html
+ReadmeName footer.html
+IndexIgnore header.html footer.html
+IndexOrderDefault Descending Date
+AddDescription "Wang 1200 Word Processing System simulator, OSX" wang1200wps.dmg
+AddDescription "Wang 1200 Word Processing System simulator, Windows" wang1200wps.exe
+AddDescription "Wang 1200 Word Processing System simulator, Linux" wang1200wps.tgz
+AddDescription "Wang 1200 Word Processing System simulator (full source)" w1200-sim.tgz
