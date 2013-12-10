@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.3 2013/12/09 22:22:33 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.4 2013/12/10 15:14:17 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -111,12 +111,29 @@ convenience, some real keyboard shortcuts are allowed.
 
 <P><UL><TABLE BORDER>
 <TR><TH>Key</TH><TH>Meaning</TH></TR>
-<TR><TD>0-9</TD><TD>E0-E9</TD></TR>
-<TR><TD>.</TD><TD>E10 (decimal point)</TD></TR>
-<TR><TD>e E</TD><TD>E11 (SET EXP)</TD></TR>
-<TR><TD>&#8211;</TD><TD>E12 (CHANGE SIGN)</TD></TR>
-<TR><TD>Backspace</TD><TD>E15 (CLEAR X)</TD></TR>
+<TR><TD>0-9</TD><TD>07&nbsp;00 .. 07&nbsp;09</TD></TR>
+<TR><TD>.</TD><TD>07&nbsp;12 (decimal point)</TD></TR>
+<TR><TD>e E</TD><TD>07&nbsp;10 (SET EXP)</TD></TR>
+<TR><TD>&#8211;</TD><TD>07&nbsp;11 (CHANGE SIGN)</TD></TR>
+<TR><TD>Backspace</TD><TD>07&nbsp;15 (CLEAR X)</TD></TR>
+<TR><TD>s S</TD><TD>STORE DIR xx (or &#8593; for Y)</TD></TR>
+<TR><TD>r R</TD><TD>RECALL DIR xx (or &#8595; for Y)</TD></TR>
+<TR><TD>x X</TD><TD>
+	<TABLE ALIGN=LEFT><TR><TD STYLE="line-height: 35%">&#8594;<BR>&#8592;</TD></TR></TABLE>
+	DIRECT xx (or &#8593;&#8595; for Y)</TD></TR>
+<TR><TD>+</TD><TD>+ DIRECT xx (or + for Y)</TD></TR>
+<TR><TD>_ (underscore)</TD><TD>&#8211; DIRECT xx (or &#8211; for Y)</TD></TR>
+<TR><TD>*</TD><TD>&#215; DIRECT xx (or &#215; for Y)</TD></TR>
+<TR><TD>/</TD><TD>&divide; DIRECT xx (or &divide; for Y)</TD></TR>
+<TR><TD>&#8592;</TD><TD>default register (xx) &#8211;1 {15..00,Y}</TD></TR>
+<TR><TD>&#8594;</TD><TD>default register (xx) +1 {00..15,Y}</TD></TR>
 </TABLE></UL>
+
+<P>When switching the default register, the current default register will be
+highlighted gray.
+Initially, the default register is Y and no key will not be highlighted.
+(whenever Y is selected, no key will not be highlighted.)
+
 
 <H3>Display</H3>
 
