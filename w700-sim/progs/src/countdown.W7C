@@ -1,0 +1,17 @@
+#include "wang700.h"
+
+#define counter	14
+
+LABEL(loop)
+
+BEGIN()
+	ST_DIR(counter)
+MARK(loop)
+	SK_IF_XN0()
+	END_PROG()
+	E(1)
+	SUB_DIR(counter)
+	RE_DIR(counter)
+	PAUSE()
+	SEARCH(loop)
+END()
