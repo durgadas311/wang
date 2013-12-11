@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.7 2013/02/10 19:48:41 drmiller Exp $
+# $Id: Make.rules.user,v 1.8 2013/12/11 20:17:25 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -6,26 +6,32 @@ WPCCINC = $(WPCC)/include
 WPCCLIB = $(WPCC)/lib
 WPCCBIN = $(WPCC)/bin
 
-W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T_LDSCRIPT)
+W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T6_LDSCRIPT)
 W6TLIBS =
+W7TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T7_LDSCRIPT)
+W7TLIBS =
 W6XLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(X_LDSCRIPT) -Wl,-q
 W6XLIBS =
 W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
+W7CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
 
-T_LDSCRIPT = wang600raw.ld
+T7_LDSCRIPT = wang700raw.ld
+T6_LDSCRIPT = wang600raw.ld
 X_LDSCRIPT = wang600rawrom.ld
 
 OBJCOPY = objcopy
 READELF = readelf
 AWK = awk
-CPP = $(WPCCBIN)/w6cpp
+CPP = false	# prevent accidental (mis-)use
+W6CPP = $(WPCCBIN)/w6cpp
+W7CPP = $(WPCCBIN)/w7cpp
 
 %.w6t: %.w6c
 	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $< $(W6TLIBS)
 
 %.w6t: %.W6C
-	$(CPP) $< > $*.wpe
+	$(W6CPP) $< > $*.wpe
 	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $*.wpe $(W6TLIBS)
 	@rm -f $*.wpe
@@ -34,12 +40,30 @@ CPP = $(WPCCBIN)/w6cpp
 	$(CC) -x c -c $(W6CCFLAGS) -o $@ $<
 
 %.w6o: %.W6C
-	$(CPP) $< > $*.wpe
+	$(W6CPP) $< > $*.wpe
 	$(CC) -x c -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
+%.w7t: %.w7c
+	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $@ $< $(W7TLIBS)
+
+%.w7t: %.W7C
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $@ $*.wpe $(W7TLIBS)
+	@rm -f $*.wpe
+
+%.w7o: %.w7c
+	$(CC) -x c -c $(W7CCFLAGS) -o $@ $<
+
+%.w7o: %.W7C
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x c -c $(W7CCFLAGS) -o $@ $*.wpe
+	@rm -f $*.wpe
+
 #################################
-# For making XROM images...
+# For making XROM images... 600 only.
 .PRECIOUS: %.w6r
 
 %.w6s: %.w6r
