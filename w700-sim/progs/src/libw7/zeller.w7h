@@ -1,0 +1,11 @@
+#ifndef _libw7_zeller_w7h_
+#define _libw7_zeller_w7h_
+
+FEXTERNAL(zeller)
+
+RES_REG(month, 0)
+RES_REG(day, 1)
+RES_REG(year, 2)
+RES_REG(temp, 3)
+
+#endif // _libw7_zeller_w7h_

@@ -1,0 +1,20 @@
+
+#include "wang700.h"
+#include "random.w7h"
+
+FLABEL(rand)
+
+BEGIN()
+MARK(rand)
+	ENTER(1)
+	ADD_DIR(seed)
+	RE_DIR(seed)
+	POW10(7)
+	LOG_E_X()
+	MULT_DIR(seed)
+	RE_DIR(seed)
+	INT()
+	SUB_DIR(seed)
+	RE_DIR(seed)
+	RETURN()
+END()

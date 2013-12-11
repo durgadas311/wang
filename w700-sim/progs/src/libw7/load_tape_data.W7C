@@ -1,0 +1,32 @@
+#include "wang700.h"
+#include "load_tape_data.w7h"
+
+LABEL(load_tape_data)
+LLABEL(bad)
+
+// Assumes tape image contains a single-register first block with number of
+// data items, second block contains data items. Loads data items into
+// registers 16...(16+N-1). Returns R15=number of registers, R00=last reg used.
+// Assumed image format is output from "w6tape2data"
+BEGIN()
+MARK(load_tape_data)
+	ST_DIR(reg_off)	// offset where to load data
+	ENTER(0)	// must be 0?
+	//LOAD_REGS()	// load tape date at register 0
+	RE_DIR(top_reg)	// num registers
+	ST_DIR(num_regs)
+	RE_DIR(reg_off)
+	ADD_DIR(top_reg)	// now is "next top register"
+	ENTER(1)
+	SUB_DIR(top_reg)	// now is "top register"
+	RE_Y_DIR(top_reg)
+	ENTER_LAST_REGNO()
+	SK_IF_LT() SEARCH(bad)
+	RE_DIR(top_reg)
+	//LOAD_REGS()	// load tape date at register N..0
+	RETURN()
+
+MARK(bad)
+	ENTER(-1)
+	RETURN()
+END()

@@ -1,0 +1,23 @@
+
+#include "wang700.h"
+#include "libw7/zeller.w7h"
+
+BEGIN()
+	ST_DIR(month)
+	WRITE(0x40)
+	ALPHA_STRING(" Month\r");
+	CLR_X()
+	STOP()
+	ST_DIR(day)
+	WRITE(0x40)
+	ALPHA_STRING(" Day\r");
+	CLR_X()
+	STOP()
+	ST_DIR(year)
+	WRITE(0x40)
+	ALPHA_STRING(" Year\r");
+	FCALL(zeller)
+	WRITE(0x40)
+	ALPHA_STRING(" Day-of-week\r\r");
+	END_PROG()
+END()

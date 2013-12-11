@@ -1,0 +1,16 @@
+
+#include "wang700.h"
+
+RES_REG(temp, 15)
+
+BEGIN()
+	ST_DIR(temp)
+	ENTER(32)
+	SUB_DIR(temp)
+	ENTER(5)
+	MULT_DIR(temp)
+	ENTER(9)
+	DIV_DIR(temp)
+	RE_DIR(temp)
+	END_PROG()
+END()

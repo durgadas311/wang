@@ -1,6 +1,6 @@
 #include "wang700.h"
 
-#define counter	14
+RES_REG(counter,14)
 
 LABEL(loop)
 

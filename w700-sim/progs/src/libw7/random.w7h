@@ -1,0 +1,9 @@
+/* ../random.wng */
+#ifndef _libw7_random_w7h_
+#define _libw7_random_w7h_
+
+FEXTERNAL(rand)
+
+RES_REG(seed, 7)
+
+#endif // _libw7_random_w7h_
