@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.8 2013/12/11 20:17:25 drmiller Exp $
+# $Id: Make.rules.user,v 1.9 2013/12/14 16:33:16 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -25,6 +25,7 @@ AWK = awk
 CPP = false	# prevent accidental (mis-)use
 W6CPP = $(WPCCBIN)/w6cpp
 W7CPP = $(WPCCBIN)/w7cpp
+W7LDFIX = $(WPCCBIN)/w7ldfix
 
 %.w6t: %.w6c
 	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
@@ -46,13 +47,17 @@ W7CPP = $(WPCCBIN)/w7cpp
 
 %.w7t: %.w7c
 	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
-		-o $@ $< $(W7TLIBS)
+		-o $*.w7$$ $< $(W7TLIBS)
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$
 
 %.w7t: %.W7C
 	$(W7CPP) $< > $*.wpe
 	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
-		-o $@ $*.wpe $(W7TLIBS)
+		-o $*.w7$$ $*.wpe $(W7TLIBS)
 	@rm -f $*.wpe
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$
 
 %.w7o: %.w7c
 	$(CC) -x c -c $(W7CCFLAGS) -o $@ $<

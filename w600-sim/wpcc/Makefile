@@ -1,7 +1,7 @@
 CFLAGS += -I../../common -g
 
 BINS = w6cpp w6dis w6lst w6data2tape w6verify \
-	w7cpp w7dis w7lst w7data2tape w7verify
+	w7cpp w7dis w7lst w7data2tape w7verify w7ldfix
 INCS = wang600.h wang600internals.h wang600opcodes.s \
 	wang700.h wang700internals.h wang700opcodes.s
 LDS = wang600.ld wang600raw.ld wang600rawrom.ld wang600rom.ld \

@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.2 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.3 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -58,7 +58,8 @@ asm(	".section .wang700code, \"a\";"
 					".byte ((" #b1 ") << 4) | (" #b0 ");"	\
 					".popsection");
 
-#define _oplongreg(op,reg)	_opcode(op) _bytecode(_longreg_ ##reg)
+#define _oplongreg(op,reg)	_bytecode(0xe0 | (_op_ ##op & 0x0f)); \
+				_bytecode(_longreg_ ##reg)
 
 /***************************************************************************/
 
@@ -144,14 +145,19 @@ asm(	".section .wang700code, \"a\";"
 					".global _subr_" #label ";" \
 					".popsection");
 
-// reg must be stored in BCD... todo: handle >100 case
-// (((reg / 100) << 4) | (reg % 100))
+// Does not prevent conflicts. Programmer must ensure "reg" has no
+// conflicting uses (including program code) in the same program.
+// Does not allocarte any space, simply sets up reference to the register
+// number by the given label.
 #define RES_REG(label,reg)	asm(\
 					".type _longreg_" #label " STT_OBJECT;" \
 					".global _longreg_" #label ";" \
-					".set _longreg_" #label ",(((" #reg " / 10) << 4) | (" #reg " % 10))");
+					".set _longreg_" #label "," #reg );
 
-// Reserve an un-initialize long register
+// Reserve an un-initialize long register. This prevents conflicts
+// between all UREG() definitions, and will not overwrite program code.
+// However, RES_REG() can still conflict. This actually allocates "empty" space
+// for the register data.
 #define UREG(name)		_longreg(name)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
@@ -160,9 +166,15 @@ asm(	".section .wang700code, \"a\";"
 #define ALPHA_STRING(str)	asm(".error \"run w7cpp preprocessor for ALPHA_STRING()\"");
 #define ALPHA_PLOT(str)		asm(".error \"run w7cpp preprocessor for ALPHA_PLOT()\"");
 
-#define ENTER_LAST_REGNO()	_bytecode(0x70+last_regno_100) \
-				_bytecode(0x70+last_regno_10) \
-				_bytecode(0x70+last_regno_1)
+// Enter into X the register number associated with the symbol <label>
+#define ENTER_REGNO(label)	_bytecode(0xed) \
+				_bytecode(0xed) \
+				_bytecode(_longreg_ #label )
+
+// Enter into X the highest register number not occupied by program code
+#define ENTER_LAST_REGNO()	_bytecode(0xed) \
+				_bytecode(0xed) \
+				_bytecode(__last_regno)
 
 // Pseudo constructs for embedding data (future plan)
 #define NAME(prog_name)		asm(".pushsection .wang700name,\"a\",@note;" \

@@ -6,6 +6,68 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+char *op[16][16] = {
+[4] = {
+	"+DIR", "-DIR", "\u00D7DIR", "\u00F7DIR", "ST DIR", "RE DIR", "EX DIR",
+	"SEARCH",
+	"MARK",
+	"GRP1",
+	"GRP2",
+	"WRITE",
+	"WRITE ALPHA",
+	"END ALPHA",
+	"ST Y DIR", "RE Y DIR"
+},
+[5] = {
+	"+IND", "-IND", "\u00D7IND", "\u00F7IND", "ST IND", "RE IND", "EX IND",
+	"SK IF Y\u2265X",
+	"SK IF Y<X",
+	"SK IF Y=X",
+	"SK IF ERR",
+	"RETURN",
+	"END PROG",
+	"LOAD PROG",
+	"GO", "STOP"
+},
+[6] = {
+	"+", "-", "\u00D7", "\u00F7", "ST", "RE", "EX",
+	"|X|",
+	"INT",
+	"\u03C0",
+	"log10X",
+	"logX",
+	"\u221AX",
+	"10\u207F",
+	"e\u207F",
+	"1/X"
+},
+[7] = {
+	"E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
+	"SET EXP",
+	"CHANGE SIGN",
+	".",
+	"X\u00B2",
+	"RE RES",
+	"CLEAR X"
+},
+};
+
+static char *decode(uint8_t a, uint8_t b) {
+	static char buf[128];
+
+	buf[0] = '\0';
+	if (a < 4) {
+		sprintf(buf, "CALL %02d-%02d", a, b);
+	} else if (a == 12) {
+		if (b < 7 || b > 13) {
+			sprintf(buf, "%s+100", op[4][b]);
+		}
+	} else if (a < 8) {
+		sprintf(buf, "%s", op[a][b]);
+	}
+	return buf;
+}
+
 void dump(uint8_t *buf, int len) {
 	int step = 0;
 	uint8_t *s = buf;
@@ -16,7 +78,7 @@ void dump(uint8_t *buf, int len) {
 		uint8_t b = c & 0x0f;
 		++s;
 		--n;
-		printf(" %04d  %02d %02d\n", step, a, b);
+		printf(" %04d  %02d %02d  %s\n", step, a, b, decode(a, b));
 		++step;
 	}
 }
