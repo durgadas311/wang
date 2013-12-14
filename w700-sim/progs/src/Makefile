@@ -5,7 +5,7 @@ DATAS = $(wildcard *.data)
 PROGS = $(subst .w7c,.w7t,$(subst .W7C,.w7t,$(SRCS)))
 DATAT = $(subst .data,.w7t,$(DATAS))
 #SUBDIRS = libw7 libplot tests
-SUBDIRS = libw7
+SUBDIRS = libw7 test
 
 #W7TLDFLAGS += -Llibw7 -Llibplot
 #W7TLIBS += -lw7 -lplot
