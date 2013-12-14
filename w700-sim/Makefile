@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.35 2013/12/10 01:46:34 drmiller Exp $
+# $Id: Makefile,v 1.36 2013/12/14 02:36:09 drmiller Exp $
 
 include Makefile.ship
 
@@ -44,6 +44,7 @@ tar: rom.diff wang700.jar
 		common/icons/*.png \
 		w700-sim/README w700-sim/LICENSE \
 		w700-sim/README.gui \
+		w700-sim/progs/*.w7* \
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
@@ -62,8 +63,8 @@ temp_dest: all $(ICNS) wang700.jar
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) $(TMPDEST)/icons
 	cp $(ROM) $(TMPDEST)
-#	mkdir -p $(TMPDEST)/progs
-#	cp progs/*.wng $(TMPDEST)/progs
+	mkdir -p $(TMPDEST)/progs
+	cp progs/*.w7* $(TMPDEST)/progs
 
 wang700apc.tgz: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
@@ -87,10 +88,8 @@ wang700apc.dmg: all icns wang700.jar
 	hcd
 	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
 	hcopy -r README.osx :README.html
+	hcopy progs/*.w7* :Wang700Files
 	humount $@
-	rm -f $(EXE).osx
-#	[cwd=MacOS] hcopy -r $(ROM) :$(ROM)
-#	[cdw=/] hcopy progs/*.wng :Wang700Files
 
 wang700apc.exe: all winicons wang700.jar wang700.nsi
 	makensis wang700.nsi

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.64 2013/12/09 15:42:51 drmiller Exp $
+# $Id: Makefile,v 1.65 2013/12/14 02:36:09 drmiller Exp $
 
 include Makefile.ship
 
@@ -89,9 +89,10 @@ install: temp_dest
 
 wpcc.tgz: _FRC_
 	rm -rf temp_wpcc
-	mkdir -p temp_wpcc/wpcc/examples
+	mkdir -p temp_wpcc/wpcc/examples{600,700}
 	cp wpcc/Make* wpcc/README* wpcc/*.[chs] wpcc/*.ld temp_wpcc/wpcc
-	make -C progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples
+	make -C progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples600
+	make -C ../w700-sim/progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples700
 	tar -czvf $@ -C temp_wpcc wpcc
 	rm -rf temp_wpcc
 
