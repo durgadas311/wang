@@ -35,8 +35,8 @@ $(SUBDIRS): __FRC__
 install: $(PROGS) $(ROMS) $(DATAT)
 	cp $(PROGS) $(ROMS) $(DATAT) ~/Wang700Files/
 
-ship: $(PROGS) $(ROMS) $(DATAT)
-	cp $(PROGS) $(ROMS) $(DATAT) ..
+ship: $(PROGS) $(DATAT)
+	cp $(PROGS) $(DATAT) ..
 
 # TODO: use "make... export" in subdirs, too
 export: __FRC__
