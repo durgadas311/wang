@@ -1,6 +1,6 @@
-Wang 600 programs may be written in source code form and compiled using
-these tools.  Each program must #include "wang600.h" and also should
-wrap the code section in BEGIN() and END().
+Wang 600 and 700 programs may be written in source code form and compiled using
+these tools.  Each program must #include "wang600.h" (or "wang700.h", but not both)
+and also should wrap the code section in BEGIN() and END().
 
 Use of this facility requires GNU Compiler tools, and probably Linux (unless GCC
 is available for your platform).
@@ -19,6 +19,15 @@ The sample Makefile targets/actions use the following program file name suffixes
 	w6s	Intermediate file for building Expansion ROM images.
 		Contains symbol definitions, used to link user programs
 		against (for use with) this ROM image.
+	W7C	Wang 700 Program module to be pre-processed by w7cpp
+	w7c	Program module not requiring pre-processing
+	w7h	Program header file (include) - usually defines the interface
+	w7e	Intermediate file already pre-processed
+	w7o	Object file (to be linked/loaded)
+	w7$	Tape image file, ready to load via tape drive
+	w7t	Tape image file, ready to load via tape drive
+	data	Numerical data for converting to tape images.
+		Each line contains one floating point number, in ASCII.
 
 Some special macros allow for abstraction of statement labels and extended
 register assignment. These are:
@@ -47,12 +56,24 @@ EXTERNAL(name)	Declares that 'name' is a statement label that exists in
 FEXTERNAL(name)	Declares that 'name' is a function subroutine that exists
 		in a different module.
 
-RES_REG(label,reg)	(Experimental?)
-		Reserves a long register (?)
+RES_REG(label,reg)
+		Reserves a long register. Used mainly for Wang 700 code
+		since all registers are accessed the same way (600 has the
+		16 dedicated registers that are accessed by short instructions).
 
 UREG(name)	Declares that 'name' is an extended register that is not
 		initialized as part of the program load. The register will
 		be assigned from unused program steps. See also IREG_DATA().
+
+ENTER_LAST_REGNO()
+		Insert E0-E9 codes to enter the number of the last
+		long register that was unused by program code (i.e.
+		number of "free" registers for use, e.g., through
+		indirection (0 - ENTER_LAST_REGNO()).
+
+ENTER_REGNO(label)
+		Insert E0-E9 codes to enter the number of the register
+		known by 'label' (RES_REG, UREG, IREG_DATA).
 
 When a program is linked, a special statement label is generated followed by
 an END PROG code. The programmer should not place END PROG codes in the source files.
@@ -61,6 +82,7 @@ END PROG code.
 
 
 w6cpp:	Convenience pre-processor for wang program source code.
+w7cpp:
 
 	The preprocessor supports the following "macros" which allow a
 	more convenient entry of program sequences, and convert native
@@ -113,12 +135,6 @@ w6cpp:	Convenience pre-processor for wang program source code.
 		ignores '+'. Other characters will result in compile
 		errors. 'number' should not be quoted.
 
-	ENTER_LAST_REGNO()	(Not actually processed by w6cpp)
-		Insert E0-E9 codes to enter the number of the last
-		long register that was unused by program code (i.e.
-		number of "free" registers for use, e.g., through
-		indirection (0 - ENTER_LAST_REGNO()).
-
 	IREG_DATA(reg,number)
 
 		Creates an extended register that initially contains
@@ -148,8 +164,8 @@ w6cpp:	Convenience pre-processor for wang program source code.
 
 	Note, register data can prevent proper operation of a SEARCH end_prog
 	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
-	To reduce this possibility, end_prog is defined as the label 14 14, which
-	is a value less-likely found in a register.
+	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
+	which is a value less-likely found in a register.
 
 Programming statements:
 
@@ -229,6 +245,127 @@ J_IF_EQ()	Jump if reg 0 == display
 J_IF_GE()	Jump if reg 0 >= display
 J_IF_LT()	Jump if reg 0 < display
 JUMP(reg)	Add contents of 'reg' to program counter
+
+In general, these directly correspond to Wang 700 commands.
+
+E(digit)	The codes E0 - E15 may be produced this way. This includes
+		entering the digits 0-9 into X.
+SET_EXP()	Shorthand for E(10)
+CHANGE_SIGN()	Shorthand for E(11)
+DP()		Decimal Point. Shorthand for E(12)
+X_2()		Shorthand for E(13)
+RE_RES()	Recall Residue. Shorthand for E(14)
+CLR_X()		Shorthand for E(15)
+
+ADD_DIR(longreg)	Add X to register
+SUB_DIR(longreg)	Subtract X from register
+MULT_DIR(longreg)	Multiply register by X
+DIV_DIR(longreg)	Divide register by X
+ST_DIR(longreg)		Store X in register
+RE_DIR(longreg)		Recall X from register
+EXCHG_DIR(longreg)	Exchange X with register
+SEARCH(label)		Go To 'label'. 'label' should be declared with LABEL(),
+			EXTERNAL(), or the F* or L* variants.
+MARK(label)		Define 'label'. ('label' must be declared as above)
+GROUP1(func)		I/O functions.
+GROUP2(func)		I/O functions.
+WRITE(func)		I/O functions, or formatted printing of display (or blanks)
+			to OutputWriters.
+WRITE_ALPHA(func)	For 2-step ALPHA commands. Use ALPHA_STRING or
+			ALPHA_PLOT for printing characters to OutputWriters.
+END_ALPHA(func)		Usually automatically generated by ALPHA_STRING or
+			ALPHA_PLOT.
+ST_Y_DIR(longreg)	Store Y in register
+RE_Y_DIR(longreg)	Recall Y from register
+
+ADD_IND(longreg)	Add X to register (Y)
+SUB_IND(longreg)	Subtract X from register (Y)
+MULT_IND(longreg)	Multiply register (Y) by X
+DIV_IND(longreg)	Divide register (Y) by X
+ST_IND(longreg)		Store X in register (Y)
+RE_IND(longreg)		Recall X from register (Y)
+EXCHG_IND(longreg)	Exchange X with register (Y)
+SK_IF_GE()		Skip if Y >= X
+SK_IF_LT()		Skip if Y < X
+SK_IF_EQ()		Skip if Y == X
+SK_IF_ERR()		Skip if Error
+RETURN()
+END_PROG()		SEARCH(end_prog), not actual END PROG
+LOAD_PROG()
+GO()
+STOP()
+
+ADD_Y()			Add X to Y
+SUB_Y()			Subtract X from Y
+MULT_Y()		Multiply Y by X
+DIV_Y()			Divide Y by X
+ST_Y()			Store X into Y
+RE_Y()			Recall Y into X
+EXCHG_Y()		Exchange X and Y
+ABS()			Absolute value of X
+INT()			Integer value of X
+PI()			Pi in X
+LOG_10_X()		Base-10 Log of X
+LOG_E_X()		Natural Log of X
+SQRT()			Square Root of X
+E10_X()			Base-10 Exponent of X
+E_X()			Natural Exponent of X
+INV()			1/X
+
+ADD_DIR100(longreg)	Add X to register+100
+SUB_DIR100(longreg)	Subtract X from register+100
+MULT_DIR100(longreg)	Multiply register+100 by X
+DIV_DIR100(longreg)	Divide register+100 by X
+ST_DIR100(longreg)	Store X in register+100
+RE_DIR100(longreg)	Recall X from register+100
+EXCHG_DIR100(longreg)	Exchange X with register+100
+ST_Y_DIR100(longreg)	Store Y in register+100
+RE_Y_DIR100(longreg)	Recall Y from register+100
+
+Some helpful shorthands for WRITE_ALPHA commands:
+
+POW10(n)	Multiply X by 10^n
+POW_10(n)	Divide X by 10^n
+SK_IF_YP()	Skip if Y is Positive
+SK_IF_Y0()	Skip if Y is Zero
+SK_IF_YM()	Skip if Y is Negative (Minus)
+SK_IF_YN0()	Skip if Y is Not Zero
+SK_IF_XP()	Skip if X is Positive
+SK_IF_X0()	Skip if X is Zero
+SK_IF_XM()	Skip if X is Negative (Minus)
+SK_IF_XN0()	Skip if X is Not Zero
+PAUSE()		Approximately 3/4 second pause
+D180PI()	180/Pi to X
+DPI180()	Pi/180 to X
+
+Compiling:
+
+Typical sequence is (sample makefile rules):
+
+(See /usr/local/wpcc/include/Make.rules.user)
+
+myprog.w6t: myprog.W6C
+        w6cpp myprog.WPC >myprog.wpe
+        gcc -x c $(W6TLDFLAGS) $(W6CCFLAGS) -I. -o $@ myprog.wpe
+        @rm -f myprog.wpe
+
+Typically, a programmer would just include /usr/local/wpcc/include/Make.rules.user
+and then setup dependencies for the appropriate file extensions:
+
+	include /usr/local/wpcc/include/Make.rules.user
+	...
+	myfoo.w7t: myfoo.W7C mybar.w7o
+
+TODO: create a shell script to hide the essoterric gcc syntax.
+
+NOTE: Wang 700 compiles require post-processing (of the final link stage)
+to handle the special requirements of register numbers (must be BCD and
+may require command changes if >= 100). See Make.rules.user for details.
+
+See the example programs for examples of how to use both the programming
+language and the Makefiles.
+
+See "README.ld" if you are interested in the internal workings of the "compiler".
 
 Compiling:
 

@@ -40,3 +40,9 @@ final type of image. A program may be linked with a library (i.e. "static linkin
 or may be linked against a ROM image (sort of "dynamic linking"). Note, however,
 that there is no way for the Wang 600 to ensure that a program linked against
 a ROM image is being run with the correct ROM image installed.
+
+Similare sections are used for Wang 700 programs, although "call" does not apply.
+Also, the Wang 700 did not support Expansion ROMs and so no provisions are made
+for linking programs or modules into an Expansion ROM image.
+
+TODO: Support combining programs (and data) into a Model 630/730 Disk image.
