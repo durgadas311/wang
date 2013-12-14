@@ -1,0 +1,24 @@
+#include "wang700.h"
+
+LLABEL(not)
+
+BEGIN()
+
+	SK_IF_GE()
+	SEARCH(not)
+	EXCHG_Y()
+	WRITE(0x99)
+	EXCHG_Y()
+	ALPHA_STRING(" Y .GE. X ")
+	WRITE(0x99)
+	ALPHA_STRING("\r")
+	END_PROG()
+MARK(not)
+	EXCHG_Y()
+	WRITE(0x99)
+	EXCHG_Y()
+	ALPHA_STRING(" Y .LT. X ")
+	WRITE(0x99)
+	ALPHA_STRING("\r")
+	END_PROG()
+END()
