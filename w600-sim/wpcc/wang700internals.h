@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.1 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.2 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -144,10 +144,12 @@ asm(	".section .wang700code, \"a\";"
 					".global _subr_" #label ";" \
 					".popsection");
 
+// reg must be stored in BCD... todo: handle >100 case
+// (((reg / 100) << 4) | (reg % 100))
 #define RES_REG(label,reg)	asm(\
 					".type _longreg_" #label " STT_OBJECT;" \
 					".global _longreg_" #label ";" \
-					".set _longreg_" #label "," #reg);
+					".set _longreg_" #label ",(((" #reg " / 10) << 4) | (" #reg " % 10))");
 
 // Reserve an un-initialize long register
 #define UREG(name)		_longreg(name)
