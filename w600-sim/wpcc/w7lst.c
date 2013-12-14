@@ -56,8 +56,9 @@ static char *decode(uint8_t a, uint8_t b) {
 	static char buf[128];
 
 	buf[0] = '\0';
+	// detect DIRECT codes and list register number differently?
 	if (a < 4) {
-		sprintf(buf, "CALL %02d-%02d", a, b);
+		sprintf(buf, "SR %02d%02d", a, b);
 	} else if (a == 12) {
 		if (b < 7 || b > 13) {
 			sprintf(buf, "%s+100", op[4][b]);
