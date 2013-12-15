@@ -85,6 +85,7 @@ MARK(try_point1)
 
 MARK(lose)
 	RE_DIR(blank)
+	RE_Y_DIR(blank)
 	PAUSE()
 	RE_DIR(bet)
 	SUB_DIR(bank)
