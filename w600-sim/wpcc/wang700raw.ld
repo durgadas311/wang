@@ -62,7 +62,11 @@ SECTIONS
 	} >code = 0x5f5f5f5f
 
 	/* register data is interleaved, so must align on 16-bytes */
-	__curr = (__curr + 15) & 0xfffffff0;
+	/* need to avoid alignment if no data... */
+	/* seems as though alignment is controlled by .wang700data anyway? */
+	//__curr = (__curr + 15) & 0xfffffff0;
+	// "AT" seems to do nothing at all, alignment is only controlled
+	// by 'as' directives in the ".wang700data" section itself.
 	.wang700prog : AT (__curr) {
 		*(.wang700data);
 		/* must ensure register data doesn't mess up SEARCH end_prog */
@@ -71,7 +75,7 @@ SECTIONS
 		__curr = .;
 	} >code = 0x5f5f5f5f
 
-	/* only if needed? how? not for ROM images... */
+	/* only if needed? how? */
 	.wang700prog : AT (__curr) {
 		BYTE(0x48);
 		BYTE(end_prog);
