@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.3 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.4 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -39,6 +39,8 @@ asm(	".section .wang700code, \"a\";"
 					".byte 0;"	\
 					".popsection");
 
+// This is still "align 8" because we need to interfleave the data later
+// and want it packed for now.
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(".pushsection .wang700regs,\"a\";" \
 					".subsection 0;" \

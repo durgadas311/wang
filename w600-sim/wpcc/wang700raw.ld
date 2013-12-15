@@ -42,18 +42,18 @@ SECTIONS
 		*(.wang700dummy);
 		__reg_base = .;
 	} >dummy
+	/* register data is interleaved, so must align on 16-bytes */
+	/* however, registers are number as if 8-bytes each... */
+	__reg_base = (__reg_base + 15) & 0xfffffff0;
 	__reg_base = __reg_base - __org_dummy;
-	__reg_base = (__reg_base + 7) / 8;
-	__reg_base = 248 - __reg_base;
+	__reg_base = __reg_base / 8;
+	__reg_base = 247 - __reg_base;
 	.wang700regs (NOLOAD) : {
 		. = __reg_base;
 		PROVIDE(longreg_base = .);
 		*(.wang700regs);
 		__last_reg = __reg_base - (. - __reg_base);
 	} >regs
-	PROVIDE(last_regno_100 = (__last_reg / 100));
-	PROVIDE(last_regno_10 = (__last_reg / 10) % 10);
-	PROVIDE(last_regno_1 = (__last_reg % 10));
 
 	__curr = 0x0000;
 	.wang700prog : AT (__curr) {
@@ -61,10 +61,12 @@ SECTIONS
 		__curr = .;
 	} >code = 0x5f5f5f5f
 
-	__curr = (__curr + 7) & 0xfffffff8;
+	/* register data is interleaved, so must align on 16-bytes */
+	__curr = (__curr + 15) & 0xfffffff0;
 	.wang700prog : AT (__curr) {
 		*(.wang700data);
 		/* must ensure register data doesn't mess up SEARCH end_prog */
+		/* unfortunately, this byte is always inserted even if no data */
 		BYTE(0); /* a better value? */
 		__curr = .;
 	} >code = 0x5f5f5f5f
