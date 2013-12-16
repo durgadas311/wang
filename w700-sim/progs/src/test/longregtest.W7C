@@ -1,0 +1,27 @@
+#include "wang700.h"
+
+RES_REG(test0,0)
+
+IREG_DATA(test1,3.1415926)
+IREG_DATA(test2,1.1111111111111e11)
+IREG_DATA(test3,"ffffffffffffffff")
+
+UREG(test4)
+UREG(test5)
+
+BEGIN()
+	RE_DIR(test1)
+	PAUSE()
+	RE_DIR(test2)
+	PAUSE()
+	RE_DIR(test3)
+	PAUSE()
+	ENTER(2)
+	SQRT()
+	ST_DIR(test4)
+	E_X()
+	ST_DIR(test5)
+	ENTER_LAST_REGNO()
+	ST_DIR(test0)
+	END_PROG()
+END()

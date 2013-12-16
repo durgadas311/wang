@@ -25,7 +25,6 @@ RES_REG(temp2, 14)
 RES_REG(temp, 15)
 
 IREG_DATA(blank,"ffffffffffffffff")
-IREG_DATA(blank2,"ffffffffffffffff") // temp fix for interleaved register data
 
 BEGIN()
 	ST_DIR(seed)
