@@ -7,16 +7,18 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.5 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.6 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
 	".pushsection .wang700regs,\"a\";"
-	".subsection 0;"
+	".subsection 0;"	// initialized registers go here
+	".align 2;"
 	".type longreg_base STT_OBJECT;"
 	"longreg_base:;"
-	".subsection 1;"
-	".byte 0;"
+	".subsection 1;"	// uninitialized registers go here
+	".align 2;"
+	".byte 0, 0;"		// skip over postamble...
 	".section .wang700data,\"a\";" \
 	".align 16;" \
 	".popsection"
@@ -34,19 +36,21 @@ asm(	".section .wang700code, \"a\";"
 #define _oplabel(prefix,label)	asm(".byte (" # prefix # label "),(" # label ")"); \
 					_shadow_code(2)
 
+// Uninitialized registers are "allocated" here.
 #define _longreg(reg)		asm(".pushsection .wang700regs,1,\"a\";" \
 					".type _longreg_" #reg " STT_OBJECT;"	\
 					".global _longreg_" #reg ";"	\
-					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
+					".set _longreg_" #reg ",longreg_base+(longreg_base-.)-1;" \
 					".byte 0;"	\
 					".popsection");
 
+// Initialized registers are "allocated" here.
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				asm(".pushsection .wang700regs,\"a\";" \
 					".subsection 0;" \
 					".type _longreg_" #reg " STT_OBJECT;" \
 					".global _longreg_" #reg ";" \
-					".set _longreg_" #reg ",longreg_base+(longreg_base-.);" \
+					".set _longreg_" #reg ",longreg_base+(longreg_base-.)-1;" \
 					".byte 0;"	\
 					".section .wang700data,\"a\";" \
 					".byte ((" #b15 ") << 4) | (" #b14 ");"	\
@@ -163,19 +167,19 @@ asm(	".section .wang700code, \"a\";"
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run w7cpp preprocessor for ENTER()\"");
-#define IREG_DATA(reg,num)	asm(".error \"run w7cpp preprocessor for IREG_DATA()\"");
+#define IREG_DATA(name,val)	asm(".error \"run w7cpp preprocessor for IREG_DATA()\"");
 #define ALPHA_STRING(str)	asm(".error \"run w7cpp preprocessor for ALPHA_STRING()\"");
 #define ALPHA_PLOT(str)		asm(".error \"run w7cpp preprocessor for ALPHA_PLOT()\"");
 
 // Enter into X the register number associated with the symbol <label>
-#define ENTER_REGNO(label)	_bytecode(0xed) \
+#define ENTER_REGNO(name)	_bytecode(0xed) \
 				_bytecode(0xed) \
-				_bytecode(_longreg_ #label )
+				_bytecode(_longreg_ #name )
 
 // Enter into X the highest register number not occupied by program code
 #define ENTER_LAST_REGNO()	_bytecode(0xed) \
 				_bytecode(0xed) \
-				_bytecode(__last_regno)
+				_bytecode(__last_reg)
 
 // Pseudo constructs for embedding data (future plan)
 #define NAME(prog_name)		asm(".pushsection .wang700name,\"a\",@note;" \

@@ -12,7 +12,7 @@ int w7_do_data_d(double d, uint8_t out[16]) {
 	// decimal point is forced/assume to be first, so must adjust
 	// and fix string later (just remove DP after adjusting exponent).
 	// Note, DP is ignored so only need to adjust exponent.
-	sprintf(buf + 1, "%18.12e", d * 10);
+	sprintf(buf + 1, "%17.11e", d * 10);
 	e = buf + 1;
 	if (*e != '-') {
 		--e;

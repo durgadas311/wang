@@ -41,18 +41,21 @@ SECTIONS
 		__org_dummy = .;
 		*(.wang700dummy);
 		__reg_base = .;
+		/* this includes all program code, but not the postamble... */
+		/* must arrange for uninitialized registers to skip over postamble */
 	} >dummy
 	/* register data is interleaved, so must align on 16-bytes */
 	/* however, registers are number as if 8-bytes each... */
 	__reg_base = (__reg_base + 15) & 0xfffffff0;
 	__reg_base = __reg_base - __org_dummy;
 	__reg_base = __reg_base / 8;
-	__reg_base = 247 - __reg_base;
+	__reg_base = 248 - __reg_base;
 	.wang700regs (NOLOAD) : {
 		. = __reg_base;
 		PROVIDE(longreg_base = .);
 		*(.wang700regs);
-		__last_reg = __reg_base - (. - __reg_base);
+		__last_reg = __reg_base - (. - __reg_base) - 1;
+		/* last register is always odd */
 	} >regs
 
 	__curr = 0x0000;
@@ -64,23 +67,34 @@ SECTIONS
 	/* register data is interleaved, so must align on 16-bytes */
 	/* need to avoid alignment if no data... */
 	/* seems as though alignment is controlled by .wang700data anyway? */
-	//__curr = (__curr + 15) & 0xfffffff0;
-	// "AT" seems to do nothing at all, alignment is only controlled
-	// by 'as' directives in the ".wang700data" section itself.
+	/*__curr = (__curr + 15) & 0xfffffff0; */
+	/* "AT" seems to do nothing at all, alignment is only controlled */
+	/* by 'as' directives in the ".wang700data" section itself. */
 	.wang700prog : AT (__curr) {
 		*(.wang700data);
+		__init_regs = (. - __curr) / 8;
 		/* must ensure register data doesn't mess up SEARCH end_prog */
-		/* unfortunately, this byte is always inserted even if no data */
-		BYTE(0); /* a better value? */
+		BYTE(_op_STOP);
+		/* must make certain an even number of registers are allocated */
+		. = ((. + 15) & 0xfffffff0);
+		__init_space = (. - __curr) / 8;
 		__curr = .;
-	} >code = 0x5f5f5f5f
+	} >code = 0x00000000
+	/* for some reason, can't control the fill byte above. Still uses 5f... */
 
 	/* only if needed? how? */
+	/* this will occupy 2 (interleaved) registers after any initialized ones... */
+	/*
+	 * since this always "wastes" 16 bytes, we add info about register data
+	 * that needs interleaving here.
+	 */
 	.wang700prog : AT (__curr) {
-		BYTE(0x48);
+		BYTE(__init_regs);
+		BYTE(__init_space);
+		BYTE(_op_MARK);
 		BYTE(end_prog);
-		BYTE(0x5c);
-		BYTE(0x5c);
+		BYTE(_op_END_PROG);
+		BYTE(_op_END_PROG);
 		__curr = .;
 	} >code = 0x5f5f5f5f
 	_prog_len = __curr;
