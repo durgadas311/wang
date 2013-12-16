@@ -1,6 +1,6 @@
 /*
  *	Copyright (c) 2013 Douglas Miller
- *	$Id: w7ldfix.c,v 1.3 2013/12/16 16:06:44 drmiller Exp $
+ *	$Id: w7ldfix.c,v 1.4 2013/12/16 16:39:45 drmiller Exp $
  *
  * Do post-ld processing (fixup) of Wang 700 Register addresses.
  * Direct references must be semi-BCD, plus add ability to enter
@@ -24,11 +24,13 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "wang700opcodes.h"
+
 static void w7reginterlace(uint8_t *buf, int len) {
 	extern void w7interlacepair(uint8_t *out, uint8_t *reg1, uint8_t *reg2);
-	//                             MARK  STOP  END PROG...
-	static uint8_t postamble[] = { 0x48, 0x5f, 0x5c, 0x5c };
-	static uint8_t fill[] = { 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f };
+	static uint8_t postamble[] = { _op_MARK, _op_STOP, _op_END_PROG, _op_END_PROG };
+	static uint8_t fill[] = { _op_STOP, _op_STOP, _op_STOP, _op_STOP,
+				_op_STOP, _op_STOP, _op_STOP, _op_STOP };
 	if (len <= sizeof(postamble) + 2) {
 		// can't recognize image...
 		// (actually must be much larger than this, too)
@@ -54,24 +56,26 @@ static void w7reginterlace(uint8_t *buf, int len) {
 static void w7ldfixup(uint8_t *buf, int len) {
 	uint8_t *end = buf + len;
 	while (buf < end) {
-		if (len >= 3 && buf[0] == 0xed && buf[1] == 0xed) {
+		if (len >= 3 && buf[0] == _tag_last_reg && buf[1] == _tag_last_reg) {
 			int reg = buf[2];
-			buf[0] = 0x70 | (reg / 100);
-			buf[1] = 0x70 | ((reg / 10) % 10);
-			buf[2] = 0x70 | (reg % 10);
+			buf[0] = _pre_E | (reg / 100);
+			buf[1] = _pre_E | ((reg / 10) % 10);
+			buf[2] = _pre_E | (reg % 10);
 			buf += 3;
-		} else if (len >= 2 && (buf[0] & 0xf0) == 0xe0 ) {
+		} else if (len >= 2 && (buf[0] & _mask_DIR) == _tag_reg_dir ) {
 			int reg = buf[1];
 			if (reg >= 100) {
-				buf[0] = 0xc0 | (buf[0] & 0x0f);
+				buf[0] = _pre_DIR100 | (buf[0] & _mask_DIROP);
 				reg -= 100;
 			} else {
-				buf[0] = 0x40 | (buf[0] & 0x0f);
+				buf[0] = _pre_DIR | (buf[0] & _mask_DIROP);
 			}
 			buf[1] = ((reg / 10) << 4) | (reg % 10);
 			buf += 2;
-		} else if (len >= 2 && (buf[0] & ~0x8f) == 0x40) {
-			if (buf[0] == 0x4d || (buf[0] > 0xc6 && buf[0] < 0xce)) {
+		} else if (len >= 2 && (buf[0] & ~_mask_2STEP) == _id_2STEP) {
+			if (buf[0] == _op_END_ALPHA ||
+					(buf[0] > _op_EXCHG_DIR100 &&
+					buf[0] < _op_ST_Y_DIR100)) {
 				buf += 1;
 			} else {
 				// need to track WRITE_ALPHA .. END_ALPHA?

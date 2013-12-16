@@ -33,8 +33,11 @@ w7lst: w7lst.c
 w7verify: w7verify.c
 	$(CC) $(CFLAGS) -std=c99 w7verify.c -o w7verify
 
-w7ldfix: w7ldfix.c w7interlacepair.o
-	$(CC) $(CFLAGS) -std=c99 w7ldfix.c w7interlacepair.o -o w7ldfix
+w7ldfix: w7ldfix.c w7interlacepair.o wang700opcodes.h wang700opcodes.o
+	$(CC) $(CFLAGS) -std=c99 w7ldfix.c w7interlacepair.o wang700opcodes.o -o w7ldfix
+
+wang700opcodes.h: wang700opcodes.s
+	sed -e 's/^\.type/#define/' -e 's/STT_OBJECT;.*,//' <$^ >$@
 
 install: $(BINS) $(INCS) $(LDS)
 	mkdir -p /usr/local/wpcc/{bin,lib,include}

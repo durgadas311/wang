@@ -67,6 +67,7 @@
 .type _op_SUBR_3_14 STT_OBJECT; .global _op_SUBR_3_14; .set _op_SUBR_3_14,0x3e
 .type _op_SUBR_3_15 STT_OBJECT; .global _op_SUBR_3_15; .set _op_SUBR_3_15,0x3f
 
+.type _pre_E STT_OBJECT; .global _pre_E; .set _pre_E,0x70
 .type _op_E0 STT_OBJECT; .global _op_E0; .set _op_E0,0x70
 .type _op_E1 STT_OBJECT; .global _op_E1; .set _op_E1,0x71
 .type _op_E2 STT_OBJECT; .global _op_E2; .set _op_E2,0x72
@@ -90,6 +91,12 @@
 .type _op_RE_RES STT_OBJECT; .global _op_RE_RES; .set _op_RE_RES,_op_E14
 .type _op_CLR_X STT_OBJECT; .global _op_CLR_X; .set _op_CLR_X,_op_E15
 
+.type _mask_2STEP STT_OBJECT; .global _mask_2STEP; .set _mask_2STEP,0x70
+.type _id_2STEP STT_OBJECT; .global _id_2STEP; .set _id_2STEP,0x40
+
+.type _mask_DIR STT_OBJECT; .global _mask_DIR; .set _mask_DIR,0xf0
+.type _pre_DIR STT_OBJECT; .global _pre_DIR; .set _pre_DIR,0x40
+.type _mask_DIROP STT_OBJECT; .global _mask_DIROP; .set _mask_DIROP,0x0f
 .type _op_ADD_DIR STT_OBJECT; .global _op_ADD_DIR; .set _op_ADD_DIR,0x40
 .type _op_SUB_DIR STT_OBJECT; .global _op_SUB_DIR; .set _op_SUB_DIR,0x41
 .type _op_MULT_DIR STT_OBJECT; .global _op_MULT_DIR; .set _op_MULT_DIR,0x42
@@ -141,6 +148,7 @@
 .type _op_E_X STT_OBJECT; .global _op_E_X; .set _op_E_X,0x6e
 .type _op_INV STT_OBJECT; .global _op_INV; .set _op_INV,0x6f
 
+.type _pre_DIR100 STT_OBJECT; .global _pre_DIR100; .set _pre_DIR100,0xc0
 .type _op_ADD_DIR100 STT_OBJECT; .global _op_ADD_DIR100; .set _op_ADD_DIR100,0xc0
 .type _op_SUB_DIR100 STT_OBJECT; .global _op_SUB_DIR100; .set _op_SUB_DIR100,0xc1
 .type _op_MULT_DIR100 STT_OBJECT; .global _op_MULT_DIR100; .set _op_MULT_DIR100,0xc2
@@ -179,3 +187,6 @@
 .type res_label24 STT_OBJECT; .global res_label24; .set res_label24,0x59
 .type res_label25 STT_OBJECT; .global res_label25; .set res_label25,0x5a
 .type res_label26 STT_OBJECT; .global res_label26; .set res_label26,0x5b
+
+.type _tag_last_reg STT_OBJECT; .global _tag_last_reg; .set _tag_last_reg,0xed
+.type _tag_reg_dir STT_OBJECT; .global _tag_reg_dir; .set _tag_reg_dir,0xe0
