@@ -71,13 +71,15 @@ SECTIONS
 	/* "AT" seems to do nothing at all, alignment is only controlled */
 	/* by 'as' directives in the ".wang700data" section itself. */
 	.wang700prog : AT (__curr) {
+		/* __start_regs is defined AFTER (auto) section alignment */
 		*(.wang700data);
-		__init_regs = (. - __curr) / 8;
-		/* must ensure register data doesn't mess up SEARCH end_prog */
-		BYTE(_op_STOP);
 		/* must make certain an even number of registers are allocated */
+		/* it seems that ld forces a minimum size == alignment, so
+		 * one register takes 16 bytes, filled with STOP commands.
+		 * must handle that in post-processing.
+		 */
 		. = ((. + 15) & 0xfffffff0);
-		__init_space = (. - __curr) / 8;
+		__init_space = ABSOLUTE(. - __start_regs) / 8;
 		__curr = .;
 	} >code = 0x00000000
 	/* for some reason, can't control the fill byte above. Still uses 5f... */
@@ -89,7 +91,8 @@ SECTIONS
 	 * that needs interleaving here.
 	 */
 	.wang700prog : AT (__curr) {
-		BYTE(__init_regs);
+		/* must ensure register data doesn't mess up SEARCH end_prog */
+		BYTE(_op_GO);	/* this is never used as a label */
 		BYTE(__init_space);
 		BYTE(_op_MARK);
 		BYTE(end_prog);

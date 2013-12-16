@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.6 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.7 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -19,8 +19,10 @@ asm(	".section .wang700code, \"a\";"
 	".subsection 1;"	// uninitialized registers go here
 	".align 2;"
 	".byte 0, 0;"		// skip over postamble...
-	".section .wang700data,\"a\";" \
-	".align 16;" \
+	".section .wang700data,\"a\";"
+	".align 16;"
+	".global __start_regs;"
+	".set __start_regs,.;"
 	".popsection"
 );
 

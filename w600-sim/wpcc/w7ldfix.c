@@ -1,6 +1,6 @@
 /*
  *	Copyright (c) 2013 Douglas Miller
- *	$Id: w7ldfix.c,v 1.2 2013/12/16 00:10:37 drmiller Exp $
+ *	$Id: w7ldfix.c,v 1.3 2013/12/16 16:06:44 drmiller Exp $
  *
  * Do post-ld processing (fixup) of Wang 700 Register addresses.
  * Direct references must be semi-BCD, plus add ability to enter
@@ -18,14 +18,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 
 static void w7reginterlace(uint8_t *buf, int len) {
+	extern void w7interlacepair(uint8_t *out, uint8_t *reg1, uint8_t *reg2);
 	//                             MARK  STOP  END PROG...
 	static uint8_t postamble[] = { 0x48, 0x5f, 0x5c, 0x5c };
+	static uint8_t fill[] = { 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f };
 	if (len <= sizeof(postamble) + 2) {
 		// can't recognize image...
 		// (actually must be much larger than this, too)
@@ -38,31 +41,13 @@ static void w7reginterlace(uint8_t *buf, int len) {
 		return;
 	}
 	post -= 2;
-	uint8_t num_regs = post[0];
-	uint8_t total_space = (num_regs + 1) & ~1;	// also in post[1]?
+	// post[0] is label proctector...
+	uint8_t total_space = post[1];
 	uint8_t *regs = post - total_space * 8;
-	int reg = 1;
 	while (regs < post) {
-		uint8_t new_pair[16];
-		int x;
-		for (x = 0; x < 8; ++x) {
-			uint8_t a1 = ((regs[x] >> 4) & 0x0f);
-			uint8_t a2 = (regs[x] & 0x0f);
-			uint8_t b1;
-			uint8_t b2;
-			if (reg + 1 > num_regs) {
-				b1 = 0;
-				b2 = 0;
-			} else {
-				b1 = ((regs[x + 8] >> 4) & 0x0f);
-				b2 = (regs[x + 8] & 0x0f);
-			}
-			new_pair[x * 2 + 0] = (b1 << 4) | (a1);
-			new_pair[x * 2 + 1] = (b2 << 4) | (a2);
-		}
-		memcpy(regs, new_pair, sizeof(new_pair));
-		regs += sizeof(new_pair);
-		reg += 2;
+		int padding = (memcmp(&regs[8], fill, 8) == 0);
+		w7interlacepair(&regs[0], &regs[0], padding ? NULL : &regs[8]);
+		regs += 16;
 	}
 }
 
