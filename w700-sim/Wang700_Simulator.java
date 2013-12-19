@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.3 2013/12/19 22:34:33 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.4 2013/12/19 22:35:18 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.3 2013/12/19 22:34:33 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.4 2013/12/19 22:35:18 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -1332,7 +1332,7 @@ if (_dbg != null) {
 				key = keyCodes.remove();
 			}
 			if (key >= 0) {
-System.err.format("Key pressed %02x\n", key);
+//System.err.format("Key pressed %02x\n", key);
 				kbd = 1;
 				ka = (byte)((key >> 4) & 0x0f);
 				kb = (byte)(key & 0x0f);
