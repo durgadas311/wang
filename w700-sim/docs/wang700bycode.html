@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700bycode.html,v 1.7 2013/12/11 14:40:35 drmiller Exp $ -->
+<!-- $Id: wang700bycode.html,v 1.8 2013/12/19 22:34:33 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -179,22 +179,22 @@ td.tag {text-align: center;}
 <TD CLASS="key">CLEAR X</TD></TR>
 
 <TR><TH>08</TH>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD>
-<TD CLASS="key">?</TD></TR>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">(I/O)</TD></TR>
 
 <TR><TH>09</TH>
 <TD CLASS="key">?</TD>
@@ -420,6 +420,54 @@ td.tag {text-align: center;}
 <TR>
 	<TD>Send next code to "device 5". In program, issues XS=0, then XS=5 with data, then program stops (press GO to continue).
 	(does device generate GO?)
+	</TD></TR>
+</TABLE>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>08&nbsp;00 through 08&nbsp;15 (I/O) - Random-Access Device I/O</TH></TR>
+<TR>
+	<TD COLSPAN=2>
+	Perform block read/write between device address in Y and program memory step in X.
+	User must compute equivalent program step number from register number when
+	transferring register data.
+	</TD></TR>
+<TR>	<TD>08&nbsp;00 through 08&nbsp;07</TD>
+	<TD>page-in blocks of program steps from "device 2".
+	"Source" address is in Y (integer portion, 0 - 16M).
+	In X is the starting program step number
+	(integer portion, 0000 - 1983).
+	Length determined by 'xx':
+	<TABLE BORDER>
+	<TR><TH>00</TH><TH>01</TH><TH>02</TH><TH>03</TH>
+		<TH>04</TH><TH>05</TH><TH>06</TH><TH>07</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>(nothing)</TD></TR>
+	</TABLE>
+	</TD></TR>
+<TR>	<TD>08&nbsp;08 through 08&nbsp;15</TD>
+	<TD>page-out blocks of program steps to "device 2".
+	"Destination" address is in Y (integer portion, 0 - 16M).
+	In X is the starting program step number
+	(integer portion, 0000 - 1983).
+	Length determined 'xx':
+	<TABLE BORDER>
+	<TR><TH>08</TH><TH>09</TH><TH>10</TH><TH>11</TH>
+		<TH>12</TH><TH>13</TH><TH>14</TH><TH>15</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>(nothing)</TD></TR>
+	</TABLE>
 	</TD></TR>
 </TABLE>
 

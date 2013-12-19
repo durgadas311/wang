@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.6 2013/12/19 22:34:33 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.5 2013/12/06 20:54:06 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.6 2013/12/19 22:34:33 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -773,6 +773,13 @@ class Wang600_Simulator
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
 		// do some validation on iob?
+		if (rep == Wang_InputDevice.GO) {
+			rep = 0x83; // GO
+		} else if (rep == Wang_InputDevice.START) {
+			rep = 0x92; // ALPHA
+		} else if (rep == Wang_InputDevice.END) {
+			rep = 0x22; // end alpha
+		}
 		pressKey(rep);
 	}
 

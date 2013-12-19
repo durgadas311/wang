@@ -90,14 +90,16 @@
 #define _SUBR(x,y)	_opcode(SUBR_ ## x ## _ ## y)
 #define _ALPHA(code)	_opcode(WRITE_ALPHA) _bytecode(code)
 
-// exist on 700?
-//#define KTRACE_ON()	ALPHA(PRINT)
-//#define KTRACE_OFF()	ALPHA(ALPHA)
-//#define PTRACE_ON()	ALPHA(LOG_E_X)
-//#define PTRACE_OFF()	ALPHA(E_X)
-//#define LOAD_REGS()	ALPHA(RECALL)
-//#define REC_REGS()	ALPHA(STORE)
-//#define JUMP(reg)	INDIR(E(reg))
+/* undocumented random I/O commands */
+#define IOLEN1		0
+#define IOLEN8		1
+#define IOLEN16		2
+#define IOLEN32		3
+#define IOLEN64		4
+#define IOLEN128	5
+#define IOLEN256	6
+#define RANDREAD(len)	_bytecode(0x80 | len)
+#define RANDWRITE(len)	_bytecode(0x88 | len)
 
 #define POW10(n)	_ALPHA(0x7 ## n)
 #define POW_10(n)	_ALPHA(0x4 ## n)

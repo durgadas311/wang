@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputDevice.java,v 1.3 2013/11/08 21:12:28 drmiller Exp $
+// $Id: Wang_InputDevice.java,v 1.4 2013/12/19 22:34:33 drmiller Exp $
 
 
 // e.g. Group 1/2 Devices attached to a Wang "CN-36" port (Input only)
@@ -7,6 +7,11 @@ interface Wang_InputDevice
 {
 	static String Model = "00";
 	static String Description = "Unknown";
+
+	// Let core translate to proper codes
+	public static int GO = 0x0f00;
+	public static int START = 0x0f01;
+	public static int END = 0x0f02;
 
 	// General-purpose device reset. Issued when IOB is set to 0,
 	// either at PRIME or the end of an I/O sequence. For Group 1/2

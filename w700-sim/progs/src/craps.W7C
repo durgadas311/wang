@@ -1,6 +1,6 @@
 #include "wang700.h"
+#include "libw7/random.w7h"
 
-FLLABEL(rand)
 FLLABEL(roll_dice)
 LLABEL(new_game)
 LLABEL(lose)
@@ -16,7 +16,6 @@ LLABEL(new_game4)
 LLABEL(try_point1)
 
 
-RES_REG(seed, 7)
 RES_REG(compare, 0)
 RES_REG(bank, 1)
 RES_REG(bet, 2)
@@ -134,16 +133,4 @@ MARK(roll_dice)
 	RE_DIR(roll)
 	RETURN()
 
-MARK(rand)
-	ENTER(1)
-	ADD_DIR(seed)
-	RE_DIR(seed)
-	POW10(7)
-	LOG_E_X()
-	MULT_DIR(seed)
-	RE_DIR(seed)
-	INT()
-	SUB_DIR(seed)
-	RE_DIR(seed)
-	RETURN()
 END()

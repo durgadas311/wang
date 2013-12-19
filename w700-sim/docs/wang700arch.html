@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.22 2011/11/06 22:14:03 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.23 2013/12/19 22:34:33 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -528,15 +528,16 @@ The stack is not guarded against overflow, with entries being pushed off the end
 and lost.
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>System State (0x7df - 0x7d0 upper)</TH></TR>
+<TR><TH COLSPAN=2>System State (0x7df - 0x7d0 upper, 0x7cf lower)</TH></TR>
+<TR><TD>0x7cf</TD><TD>DIR+100 (08)</TD></TR>
 <TR><TD>0x7d0</TD><TD>P.C. Hi</TD></TR>
 <TR><TD>0x7d1</TD><TD>P.C. Med</TD></TR>
 <TR><TD>0x7d2</TD><TD>P.C. Lo</TD></TR>
 <TR><TD>0x7d3</TD><TD>Prefix State</TD></TR>
 <TR><TD>0x7d4</TD><TD></TD></TR>
 <TR><TD>0x7d5</TD><TD>Number Entry State</TD></TR>
-<TR><TD>0x7d6</TD><TD></TD></TR>
-<TR><TD>0x7d7</TD><TD></TD></TR>
+<TR><TD>0x7d6</TD><TD>Low nibble of direct command (if Prefix State is 08)</TD></TR>
+<TR><TD>0x7d7</TD><TD>Low nibble of I/O command (if Prefix State is 04)</TD></TR>
 <TR><TD>0x7d8</TD><TD></TD></TR>
 <TR><TD>0x7d9</TD><TD></TD></TR>
 <TR><TD>0x7da</TD><TD></TD></TR>
@@ -551,13 +552,14 @@ and lost.
 <DT><B>Prefix State</B><DD>
 <TABLE BORDER>
 <TR><TD>00 = no prefix</TD></TR>
-<TR><TD>04 = WRITE (/ALPHA), MARK</TD></TR>
+<TR><TD>04 = I/O, MARK</TD></TR>
 <TR><TD>08 = Direct (incl 12 xx)</TD></TR>
-<TR><TD>12 = Search</TD></TR>
+<TR><TD>12 = SEARCH</TD></TR>
+<TR><TD>01 = Running (OR'ed with above)</TD></TR>
 </TABLE>
 <DT><B>0x7cf lower: Aux State</B><DD>
 <TABLE BORDER>
-<TR><TD>08 = Direct+100 (12 xx)</TD></TR>
+<TR><TD>08 = Direct+100 (any 12 xx prefix)</TD></TR>
 </TABLE>
 <DT><B>Number Entry State</B><DD>
 <TABLE BORDER>

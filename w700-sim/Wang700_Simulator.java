@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.2 2013/12/09 15:36:32 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.3 2013/12/19 22:34:33 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.2 2013/12/09 15:36:32 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.3 2013/12/19 22:34:33 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -43,6 +43,7 @@ class Wang700_Simulator
 	// simulator (no direct h/w relation)
 	int jam;
 	int next;
+	int last;
 	int pc;
 	long cycles;
 	long cylimit;
@@ -698,6 +699,13 @@ class Wang700_Simulator
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
 		// do some validation on iob?
+		if (rep == Wang_InputDevice.GO) {
+			rep = 0x5e; // GO
+		} else if (rep == Wang_InputDevice.START) {
+			rep = 0x4c; // WRITE ALPHA
+		} else if (rep == Wang_InputDevice.END) {
+			rep = 0x4d; // END ALPHA
+		}
 		pressKey(rep);
 	}
 
@@ -889,22 +897,32 @@ class Wang700_Simulator
 		Wang700.Tape.tape_off(0);
 	}
 
+	private void dev_reset() {
+		_cn36 = null;
+		if (Wang700.CN24 != null) {
+			Wang700.CN24.reset();
+		}
+		Wang700.M730.reset();
+		Wang_UI.resetCN36();
+	}
+
 	private void dev_out() {
 		byte c = (byte)((gioa << 4) | giob);
-		if (iob == 0) {
-			_cn36 = null;
-			if (Wang700.CN24 != null) {
-				Wang700.CN24.reset();
-			}
-			Wang700.M730.reset();
-			Wang_UI.resetCN36();
-		} else if (iob == 1) { // CN24 output only, 6 bits
+		if (iob == 1) { // CN24 output only, 6 bits
 			c &= 0x3f;
 			if (Wang700.CN24 != null) {
 				Wang700.CN24.do_cn24(c);
 			}
 		} else if (iob == 2 || iob == 3) { // CN36 Model 630
+try {
 			Wang700.M730.do_dev(iob, c);
+} catch (Exception ee) {
+if (_dbg != null) {
+	System.err.println(ee.getMessage());
+	run_sim = false;
+	return;
+}
+}
 		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
 			if (_cn36 != null) {
 				// All known devices are ACK only
@@ -1030,7 +1048,8 @@ class Wang700_Simulator
 			Wang700.DispX.do_display(dispx);
 			// do not refresh Y when LEARN (or LEARN AND PRINT)
 			// (assumes display got blanked previously)
-			if ((Wang700.Kbd.getMode0(false) & D12_LRN_L_P) == 0) {
+			if ((Wang700.Kbd.getMode0(false) & D12_LRN_L_P) == 0 &&
+					(_cn36 == null || _cn36.getGLRN() == 0)) {
 				Wang700.DispY.do_display(dispy);
 			}
 		} else {
@@ -1228,7 +1247,12 @@ class Wang700_Simulator
 
 		// P5-6
 		switch(uu.mop) {
-		case 7: iob = (byte)(kb & 0x07); break;
+		case 7:
+			iob = (byte)(kb & 0x07);
+			if (iob == 0) {
+				dev_reset();
+			}
+			break;
 		case 14: gioa = ka; giob = kb; dev_out(); break;
 		}
 
@@ -1308,8 +1332,7 @@ class Wang700_Simulator
 				key = keyCodes.remove();
 			}
 			if (key >= 0) {
-//fprintf(stderr,"%03x: chk pe\n", pc, key);
-//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+System.err.format("Key pressed %02x\n", key);
 				kbd = 1;
 				ka = (byte)((key >> 4) & 0x0f);
 				kb = (byte)(key & 0x0f);
@@ -1364,6 +1387,7 @@ class Wang700_Simulator
 			}
 		}
 
+		last = pc;
 		pc = next;
 		return ret;
 	}
@@ -1374,7 +1398,7 @@ class Wang700_Simulator
 		int rc = 0;
 		do {
 			if (debug && !run_sim) {
-				System.out.format("break at %03x %d\n", pc, cycles);
+				System.out.format("break at %03x (from %03x) %d\n", pc, last, cycles);
 				while (debug && !run_sim) {
 					rc = _dbg.command();
 					if (rc != 0) {

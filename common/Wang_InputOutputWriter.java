@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.17 2013/11/30 17:51:45 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.18 2013/12/19 22:34:33 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.17 2013/11/30 17:51:45 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.18 2013/12/19 22:34:33 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -67,7 +67,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.17 $ $Date: 2013/11/30 17:51:45 $<BR>"+
+			"$Revision: 1.18 $ $Date: 2013/12/19 22:34:33 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -101,15 +101,18 @@ class Wang_InputOutputWriter extends IBM_Selectric
 				// TODO: must release GLRN first... timing...
 				_glrn = 0;
 				// might have to notify Simulator?
-				sendCode((byte)0x83);
+				if (!_input) return;
+				Wang_UI.getCore().replyIO(5, GO);
 				return;
 			}
 			if (butt.getMnemonic() == KeyEvent.VK_E) {
-				sendCode((byte)0x22);
+				if (!_input) return;
+				Wang_UI.getCore().replyIO(5, END);
 				return;
 			}
 			if (butt.getMnemonic() == KeyEvent.VK_A) {
-				sendCode((byte)0x92);
+				if (!_input) return;
+				Wang_UI.getCore().replyIO(5, START);
 				return;
 			}
 			if (butt.getMnemonic() == KeyEvent.VK_L) {
