@@ -101,6 +101,17 @@
 #define GROUP1(func)	_opcode(GROUP1) _bytecode(func)
 #define GROUP2(func)	_opcode(GROUP2) _bytecode(func)
 
+/* random I/O commands */
+#define IOLEN1		0
+#define IOLEN8		1
+#define IOLEN16		2
+#define IOLEN32		3
+#define IOLEN64		4
+#define IOLEN128	5
+#define IOLEN256	6
+#define RANDREAD(len)	_opcode(IO) _bytecode(0xd0 | len)
+#define RANDWRITE(len)	_opcode(IO) _bytecode(0xd8 | len)
+
 #define J_IF_E()	IO(_op_f0)
 #define J_IF_NE()	IO(_op_F0)
 
