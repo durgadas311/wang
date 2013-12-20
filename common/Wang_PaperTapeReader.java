@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PaperTapeReader.java,v 1.2 2013/12/20 17:04:22 drmiller Exp $
+// $Id: Wang_PaperTapeReader.java,v 1.3 2013/12/20 17:56:19 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_PaperTapeReader
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.2 2013/12/20 17:04:22 drmiller Exp $";
+	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.3 2013/12/20 17:56:19 drmiller Exp $";
 
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";
@@ -18,8 +18,8 @@ class Wang_PaperTapeReader
 
 	String _prop;
 	String _mountLabel;
-	String _pickLabel;
-	String _fileType;
+	String[] _pickLabel;
+	String[] _fileType;
 	File _file;
 	Component _comp;
 
@@ -206,8 +206,8 @@ class Wang_PaperTapeReader
 
 		_input = false;
 		_mountLabel = "Mount Tape";
-		_pickLabel = "Wang Data files";
-		_fileType = "wdf";
+		_pickLabel = new String[]{"Wang Data files","Text Files"};
+		_fileType = new String[]{"wdf","txt"};
 		_prop = prop;
 		_comp = comp;
 		_file = Wang_UI.getProperties().getFile(_prop, true, Wang_UI.getDir());
