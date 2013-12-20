@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.4 2013/12/20 17:04:22 drmiller Exp $
+# $Id: Makefile.ship,v 1.5 2013/12/20 18:02:40 drmiller Exp $
 
 COPTS =
 
@@ -12,6 +12,7 @@ COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
 ROM = wang720c.rom
+SPCL = plotter_chrgen.dat
 
 COMMON_CLASSES = \
 		SuffFileFilter.class \
@@ -81,5 +82,6 @@ SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
 wang700.jar: w700_fe.class Manifest.txt $(ROM)
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
+		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS))
