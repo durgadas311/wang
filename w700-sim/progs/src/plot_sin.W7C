@@ -1,0 +1,59 @@
+#include "wang700.h"
+
+#include "libplot/plotter.w7h"
+
+FEXTERNAL(setup_point)
+FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_Xaxis)
+
+// Use full 1000x1000 plotter "window"
+BEGIN()
+	ENTER(0)
+	ST_DIR(startX)
+	ENTER(360)	// make sure we plot the last point
+	ST_DIR(maxX)
+	ENTER(5)
+	ST_DIR(stepX)
+	ENTER(2.5)	// scaling in X
+	ST_DIR(scaleX)
+	ENTER(450)	// scaling in Y
+	ST_DIR(scaleY)
+	ENTER(50)	// translation in X
+	ST_DIR(tranX)
+	ENTER(500)	// translation in Y
+	ST_DIR(tranY)
+	FCALL(plotter)
+
+	ENTER(1)
+	FCALL(plot_chrsize)
+	ENTER(90)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currY)
+	FCALL(plot_Xaxis)
+
+	ENTER(-1)
+	ST_DIR(startX)
+	ENTER(1)
+	ST_DIR(maxX)
+	ENTER(1)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currX)
+	FCALL(plot_Yaxis)
+
+	ENTER(2)
+	FCALL(plot_chrsize)
+	ENTER(0)
+	ST_DIR(convX)
+	ENTER(-1.05)
+	ST_DIR(convY)
+	FCALL(setup_point)
+	FCALL(plot_moveto)
+	ALPHA_PLOT("Y = SIN{X}")
+	END_PROG()
+
+//MARK(GRAPHING_FUNCTION)
+//	SIN()
+//	RETURN()
+END()

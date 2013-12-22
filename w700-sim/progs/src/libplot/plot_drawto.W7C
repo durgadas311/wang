@@ -1,0 +1,13 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+FLABEL(plot_drawto)
+
+BEGIN()
+MARK(plot_drawto)
+	RE_Y_DIR(plotY)
+	RE_DIR(plotX)
+	ALPHA_PLOT("\%")	// draw from current to X,Y
+	RETURN()
+END()

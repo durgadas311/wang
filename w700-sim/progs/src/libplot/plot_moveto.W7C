@@ -1,0 +1,13 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+FLABEL(plot_moveto)
+
+BEGIN()
+MARK(plot_moveto)
+	RE_Y_DIR(plotY)
+	RE_DIR(plotX)
+	ALPHA_PLOT("\/")	// move to X,Y without drawing
+	RETURN()
+END()

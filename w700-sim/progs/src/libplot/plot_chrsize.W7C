@@ -1,0 +1,26 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+// Labels:
+FLABEL(plot_chrsize)
+
+BEGIN()
+MARK(plot_chrsize)
+	ST_DIR(plotX)	// X
+	ENTER(0)
+	ST_DIR(plotY)	// Y
+	RE_Y_DIR(plotY)
+	RE_DIR(plotX)
+	ALPHA_PLOT("\z")	// char size
+	ENTER(1.3)
+	ST_DIR(plotY)	// Y
+	ENTER(6)
+	MULT_DIR(plotX)	// X
+	RE_DIR(plotX)
+	MULT_DIR(plotY)	// Y = 1.3 * X...
+	RE_Y_DIR(plotY)
+	RE_DIR(plotX)
+	ALPHA_PLOT("\s")	// set char spacing
+	RETURN()
+END()

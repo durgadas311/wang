@@ -1,0 +1,64 @@
+#include "wang700.h"
+
+#include "plotter.w7h"	// get out interface to the world
+
+FLABEL(plot_data)
+FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_drawto)
+FEXTERNAL(setup_point)
+FEXTERNAL(plot_home)
+
+// Labels:
+LLABEL(done)
+LLABEL(loop1)
+LLABEL(loop2)
+LLABEL(loop3)
+
+BEGIN()
+MARK(plot_data)
+	// do first point as "move", not "plot"
+	FCALL(plot_home)
+	RE_DIR(startX)
+	ST_DIR(currX)
+	GROUP1(0x00)	// read a number from paper tape
+	SK_IF_ERR() SEARCH(loop1)
+MARK(done)
+	RETURN()
+
+MARK(loop1)
+	FCALL(setup_point) // last should be (0,0)
+	FCALL(plot_moveto)
+	ENTER(1)
+	ADD_DIR(currX)
+	// could check limits here, for completeness, but nothing was drawn...
+MARK(loop3)
+	RE_DIR(currX)
+	ST_DIR(convX)
+	RE_DIR(startX)
+	SUB_DIR(convX) // data idx "0", not actual register number
+	GROUP1(0x00)	// read a number from paper tape
+	SK_IF_ERR() SEARCH(loop2)
+	SEARCH(done)
+
+MARK(loop2)
+	FCALL(setup_point)
+	FCALL(plot_drawto)
+	RE_DIR(maxX)
+	ST_DIR(temp1)
+	ENTER(1)
+	ADD_DIR(currX)
+	RE_DIR(currX)
+	SUB_DIR(temp1)
+	RE_DIR(temp1)
+	SK_IF_XP() RETURN() GO()
+	SEARCH(loop3)
+
+// Need to trap End Of Tape from 703: SR 0000...
+//MARK(end_tape)
+_MARK(0)
+	RE_DIR(currX)
+	ST_DIR(maxX)
+	ENTER(0)
+	INV()	// set overflow error condition
+	RETURN()
+END()

@@ -1,0 +1,44 @@
+#include "wang700.h"
+
+// Local Labels:
+FLLABEL(test_alpha)
+
+#include "libplot/plotter.w7h"
+
+BEGIN()
+	FCALL(plot_home)
+	ENTER(10)
+	ST_DIR(plotX)
+	ST_DIR(plotY)
+	FCALL(plot_moveto)
+	ENTER(1)
+	FCALL(plot_chrsize)
+	FCALL(test_alpha)
+
+	FCALL(plot_home)
+	ENTER(10)
+	ST_DIR(plotX)
+	ENTER(20)
+	ST_DIR(plotY)
+	FCALL(plot_moveto)
+	ENTER(2)
+	FCALL(plot_chrsize)
+	FCALL(test_alpha)
+
+	FCALL(plot_home)
+	ENTER(10)
+	ST_DIR(plotX)
+	ENTER(50)
+	ST_DIR(plotY)
+	FCALL(plot_moveto)
+	ENTER(3)
+	FCALL(plot_chrsize)
+	FCALL(test_alpha)
+
+	END_PROG()
+
+MARK(test_alpha)
+	ALPHA_PLOT("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+}?={,:'.");
+	RETURN()
+
+END()

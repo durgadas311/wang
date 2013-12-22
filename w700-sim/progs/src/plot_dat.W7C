@@ -1,0 +1,52 @@
+#include "wang700.h"
+
+#include "libplot/plotter.w7h"
+
+BEGIN()
+	ENTER(1e99)	// infinity
+	ST_DIR(maxX)
+	ENTER(5)	// scaling in X
+	ST_DIR(scaleX)
+	ENTER(10)	// scaling in Y
+	ST_DIR(scaleY)
+	ENTER(40)	// translation in X
+	ST_DIR(tranX)
+	ENTER(200)	// translation in Y
+	ST_DIR(tranY)
+	FCALL(plot_data)
+
+	RE_DIR(maxX)
+	ST_DIR(temp1)
+	RE_DIR(startX)
+	SUB_DIR(temp1)
+	RE_DIR(temp1)
+	ST_DIR(maxX)
+	ENTER(0)
+	ST_DIR(startX)
+	ENTER(8)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currY)
+	FCALL(plot_Xaxis)
+
+	ENTER(-15)
+	ST_DIR(startX)
+	ENTER(6)	// make sure we plot the last point
+	ST_DIR(maxX)
+	ENTER(5)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currX)
+	FCALL(plot_Yaxis)
+
+	ENTER(2)
+	FCALL(plot_chrsize)
+	ENTER(0)
+	ST_DIR(convX)
+	ENTER(-17)
+	ST_DIR(convY)
+	FCALL(setup_point)
+	FCALL(plot_moveto)
+	ALPHA_PLOT("OUTDOOR TEMP, DEG C")
+	END_PROG()
+END()

@@ -1,0 +1,45 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+// Labels:
+FLABEL(setup_point)
+
+BEGIN()
+MARK(setup_point)
+	// input point is (convX,convY), output is (plotX,plotY)
+	// scale/translate point and compute relative change from last point
+	RE_DIR(scaleX)
+	MULT_DIR(convX) // scale X
+	ENTER(0.5)
+	ADD_DIR(convX)
+	RE_DIR(convX)
+	INT()
+	ST_DIR(convX)
+	ST_DIR(plotX)
+	RE_DIR(tranX)
+	ADD_DIR(plotX) // translate X
+	RE_DIR(lastX)
+	RE_Y_DIR(plotX)
+	ST_Y_DIR(lastX)
+	SUB_Y()
+	ST_Y_DIR(plotX) // delta to last
+
+	RE_DIR(scaleY)
+	MULT_DIR(convY) // scale Y
+	ENTER(0.5)
+	ADD_DIR(convY)
+	RE_DIR(convY)
+	INT()
+	ST_DIR(convY)
+	ST_DIR(plotY)
+	RE_DIR(tranY)
+	ADD_DIR(plotY) // translate Y
+	RE_DIR(lastY)
+	RE_Y_DIR(plotY)
+	ST_Y_DIR(lastY)
+	SUB_Y()
+	ST_Y_DIR(plotY) // delta to last
+
+	RETURN()
+END()

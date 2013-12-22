@@ -1,0 +1,43 @@
+// $Id: plotter.w7h,v 1.1 2013/12/22 16:13:41 drmiller Exp $
+
+#ifndef _libplot_plotter_h_
+#define _libplot_plotter_h_
+
+///// Input param registers:
+RES_REG(startX, 16)
+RES_REG(maxX, 17)
+RES_REG(stepX, 18)
+
+RES_REG(tranX, 19)
+RES_REG(tranY, 20)
+RES_REG(scaleX, 21)
+RES_REG(scaleY, 22)
+#define plotter_unused_reg()	E(2) E(3)	// crude...
+
+RES_REG(convY, 15)	// internal use
+RES_REG(convX, 14)	// internal use
+RES_REG(lastY, 13)	// internal use
+RES_REG(lastX, 12)	// internal use
+RES_REG(currX, 11)
+RES_REG(currY, 10)
+
+RES_REG(plotY, 0)	// system designated - volatile
+RES_REG(plotX, 1)	// system designated - volatile
+RES_REG(temp1, 2)	// volatile
+RES_REG(temp2, 3)	// volatile
+RES_REG(temp3, 4)	// volatile
+RES_REG(temp4, 5)	// volatile
+RES_REG(temp5, 6)	// volatile
+RES_REG(temp6, 7)	// volatile
+RES_REG(temp7, 8)	// volatile
+RES_REG(temp8, 9)	// volatile
+
+FEXTERNAL(plotter)
+FEXTERNAL(grapher)
+FEXTERNAL(plot_data)
+
+// Need to fix this, and make for SR
+//RES_EXTERN(GRAPHING_FUNCTION,0)
+//RES_EXTERN(GRAPHING_PLOT,1)
+
+#endif // _libplot_plotter_h_

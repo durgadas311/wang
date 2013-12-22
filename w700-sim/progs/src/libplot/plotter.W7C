@@ -1,0 +1,44 @@
+#include "wang700.h"
+
+#include "plotter.w7h"	// get out interface to the world
+
+FLABEL(plotter)
+FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_drawto)
+FEXTERNAL(setup_point)
+
+// Labels:
+LLABEL(loop4)
+
+BEGIN()
+MARK(plotter)
+	// do first point as "move", not "plot"
+	FCALL(plot_home)
+	RE_DIR(startX)
+	ST_DIR(currX)
+	ST_DIR(convX)
+//	FCALL(GRAPHING_FUNCTION)
+	ST_DIR(convY)
+	FCALL(setup_point)
+	FCALL(plot_moveto)
+	RE_DIR(stepX)
+	ADD_DIR(currX)
+	// could check limits here, for completeness, but nothing was drawn...
+MARK(loop4)
+	RE_DIR(currX)
+	ST_DIR(convX)
+// Need to fix this...
+//	FCALL(GRAPHING_FUNCTION)
+	ST_DIR(convY)
+	FCALL(setup_point)
+	FCALL(plot_drawto)
+	RE_DIR(maxX)
+	ST_DIR(temp1)
+	RE_DIR(stepX)
+	ADD_DIR(currX)
+	RE_DIR(currX)
+	SUB_DIR(temp1)
+	RE_DIR(temp1)
+	SK_IF_XP() RETURN() GO()
+	SEARCH(loop4)
+END()

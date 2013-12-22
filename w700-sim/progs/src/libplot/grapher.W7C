@@ -1,0 +1,42 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+FLABEL(grapher)
+FEXTERNAL(setup_point)
+
+// Labels:
+LLABEL(loop2)
+
+BEGIN()
+MARK(grapher)
+	ENTER(0)
+	ST_Y()
+	ALPHA_STRING("|\r")	// set carriage to known position (0,0)
+	RE_DIR(startX)
+	ST_DIR(currX)
+	ST_DIR(convX)
+//	FCALL(GRAPHING_FUNCTION)
+	ST_DIR(convY)
+	FCALL(setup_point)
+//	FCALL(GRAPHING_PLOT)
+	RE_DIR(stepX)
+	ADD_DIR(currX)
+MARK(loop2)
+	RE_DIR(currX)
+	ST_DIR(convX)
+// Need to fix this...
+//	FCALL(GRAPHING_FUNCTION)
+	ST_DIR(convY)
+	FCALL(setup_point)
+//	FCALL(GRAPHING_PLOT)
+	RE_DIR(maxX)
+	ST_DIR(temp1)
+	RE_DIR(stepX)
+	ADD_DIR(currX)
+	RE_DIR(currX)
+	SUB_DIR(temp1)
+	RE_DIR(temp1)
+	SK_IF_XP() RETURN() GO()
+	SEARCH(loop2)
+END()

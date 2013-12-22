@@ -1,0 +1,14 @@
+#include "wang700.h"
+
+#include "plotter.w7h"
+
+FLABEL(plot_home)
+
+BEGIN()
+MARK(plot_home)
+	// The following is somewhat inefficient... X,Y may not be 0.
+	ENTER(0)
+	ST_Y()
+	ALPHA_PLOT("\h")	// home pen
+	RETURN()
+END()
