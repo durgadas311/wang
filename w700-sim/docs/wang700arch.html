@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.23 2013/12/19 22:34:33 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.24 2013/12/22 16:09:13 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -865,7 +865,9 @@ The devices and/or operators orchestrated the interaction.
 
 <UL>
 <LI>The calculator outputs xx&nbsp;xx
-	with IOB=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) and suspends normal operation
+	with IOB=100 (GROUP&nbsp;1) or 101 (GROUP&nbsp;2) in "keyboard mode" (not running a program),
+	or IOB=110 (GROUP&nbsp;1) or 111 (GROUP&nbsp;2) if running a program,
+	and suspends normal operation
 	(<B>ostb</B> activated)
 	<UL>
 	<LI>Device sees <B>ostb</B> and interprets byte
@@ -879,7 +881,7 @@ The devices and/or operators orchestrated the interaction.
 	<LI>Calculator sees KBD and processes input, which resets KBD and <B>iack</B>
 	</UL>
 <LI>The device de-asserts Learn if previously asserted
-<LI>The device sends GO
+<LI>The device sends GO (or a subroutine call code)
 	<UL>
 	<LI>(same protocol as above, for all bytes sent)
 	</UL>

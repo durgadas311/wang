@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.7 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.8 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -21,8 +21,6 @@ asm(	".section .wang700code, \"a\";"
 	".byte 0, 0;"		// skip over postamble...
 	".section .wang700data,\"a\";"
 	".align 16;"
-	".global __start_regs;"
-	".set __start_regs,.;"
 	".popsection"
 );
 
@@ -35,8 +33,7 @@ asm(	".section .wang700code, \"a\";"
 
 #define _opcode(op)		asm(".byte (_op_" # op ")" ); _shadow_code(1)
 
-#define _oplabel(prefix,label)	asm(".byte (" # prefix # label "),(" # label ")"); \
-					_shadow_code(2)
+#define _opsearch(label)	_opcode(SEARCH); _bytecode(label); _shadow_code(2)
 
 // Uninitialized registers are "allocated" here.
 #define _longreg(reg)		asm(".pushsection .wang700regs,1,\"a\";" \
@@ -78,10 +75,6 @@ asm(	".section .wang700code, \"a\";"
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					".set " #label ", res_label" #const ";" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					".global _search_" #label ";" \
-					".set _search_" #label ", 0x80;" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
@@ -89,19 +82,12 @@ asm(	".section .wang700code, \"a\";"
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					".global _search_" #label ";" \
-					"_search_" #label ":;" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
 #define LLABEL(label)		asm(".pushsection .wang700label,\"a\";" \
 					".type " #label " STT_OBJECT;" \
 					#label ":  .byte 0;" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					"_search_" #label ":;" \
 					".popsection");
 
 // Define a label for use with FCALL/MARK
@@ -109,10 +95,6 @@ asm(	".section .wang700code, \"a\";"
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					#label ":  .byte 0;" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					".global _search_" #label ";" \
-					"_search_" #label ":;" \
 					".section .wang700subr,\"a\";" \
 					".type _subr_" #label " STT_OBJECT;" \
 					".global _subr_" #label ";" \
@@ -123,9 +105,6 @@ asm(	".section .wang700code, \"a\";"
 #define FLLABEL(label)		asm(".pushsection .wang700flabel,\"a\";" \
 					".type " #label " STT_OBJECT;" \
 					#label ":  .byte 0;" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					"_search_" #label ":;" \
 					".section .wang700subr,\"a\";" \
 					".type _subr_" #label " STT_OBJECT;" \
 					"_subr_" #label ":  .byte 0;" \
@@ -135,18 +114,12 @@ asm(	".section .wang700code, \"a\";"
 #define EXTERNAL(label)		asm(".pushsection .wang700label,\"a\";" \
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					".global _search_" #label ";" \
 					".popsection");
 
 // A label from another module for use with FCALL
 #define FEXTERNAL(label)	asm(".pushsection .wang700flabel,\"a\";" \
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
-					".section .wang700search,\"a\";" \
-					".type _search_" #label " STT_OBJECT;" \
-					".global _search_" #label ";" \
 					".section .wang700subr,\"a\";" \
 					".type _subr_" #label " STT_OBJECT;" \
 					".global _subr_" #label ";" \

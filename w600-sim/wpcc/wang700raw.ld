@@ -2,9 +2,8 @@ OUTPUT_FORMAT(binary);
 
 MEMORY {
 	labels     : ORIGIN = 0x60, LENGTH = 0x100 /* must not use END PROG */
-	flabels    : ORIGIN = 0x00, LENGTH = 0x40
-	search     : ORIGIN = 0x47, LENGTH = 1
-	subr       : ORIGIN = 0x00, LENGTH = 0x40
+	flabels    : ORIGIN = 0x10, LENGTH = 0x30	/* leave some "reserved" */
+	subr       : ORIGIN = 0x10, LENGTH = 0x30
 	regs       : ORIGIN = 0x00, LENGTH = 0xffff
 	hdr        : ORIGIN = 0x00, LENGTH = 0x10
 	code       : ORIGIN = 0x00, LENGTH = 0x07c0 /* 0x000-0x7bf */
@@ -19,18 +18,13 @@ SECTIONS
 	/DISCARD/ : { *(.bss) }
 	.wang700build-id (NOLOAD) : { *(.note.gnu.build-id) }
 
-	/* some files might use rom_*labels/rom_search/rom_call... */
 	.wang700label (NOLOAD) : {
 		*(.wang700label);
 	} >labels
-	PROVIDE(_search_end_prog = 0x47);
 	PROVIDE(end_prog = 0x5f); /* hard-code to avoid conflict with reg data */
 	.wang700flabels (NOLOAD) : {
 		*(.wang700flabel);
 	} >flabels
-	.wang700search (NOLOAD) : {
-		*(.wang700search);
-	} >search
 	.wang700subr (NOLOAD) : {
 		*(.wang700subr);
 	} >subr
@@ -71,7 +65,13 @@ SECTIONS
 	/* "AT" seems to do nothing at all, alignment is only controlled */
 	/* by 'as' directives in the ".wang700data" section itself. */
 	.wang700prog : AT (__curr) {
-		/* __start_regs is defined AFTER (auto) section alignment */
+		/*
+		 * section will auto-align, but we can't define __start_regs in modules
+		 * without multiple defginition errors here. So, do the same alignment when
+		 * computing __start_regs here.
+		 *
+		 */
+		__start_regs = ((. + 15) & 0xfffffff0);
 		*(.wang700data);
 		/* must make certain an even number of registers are allocated */
 		/* it seems that ld forces a minimum size == alignment, so

@@ -25,7 +25,7 @@
 #define RE_DIR(longreg)		_oplongreg(RE_DIR,longreg)
 #define EXCHG_DIR(longreg)	_oplongreg(EXCHG_DIR,longreg)
 #define _SEARCH(label)		_opcode(SEARCH) _bytecode(label)
-#define SEARCH(label)		_oplabel(_search_,label)
+#define SEARCH(label)		_opsearch(label)
 #define _MARK(label)		_opcode(MARK) _bytecode(label)
 #define MARK(label)		_opcode(MARK) _bytecode(label)
 #define GROUP1(func)		_opcode(GROUP1) _bytecode(func)
@@ -49,7 +49,7 @@
 #define SK_IF_ERR()		_opcode(SK_IF_ERR)
 #define RETURN()		_opcode(RETURN)
 /* NOTE: not actual END PROG, but SEARCH to end_prog */
-#define END_PROG()		_oplabel(_search_,end_prog)
+#define END_PROG()		_opsearch(end_prog)
 #define LOAD_PROG()		_opcode(LOAD_PROG)
 #define GO()			_opcode(GO)
 #define STOP()			_opcode(STOP)

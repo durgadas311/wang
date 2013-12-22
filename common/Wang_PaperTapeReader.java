@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PaperTapeReader.java,v 1.3 2013/12/20 17:56:19 drmiller Exp $
+// $Id: Wang_PaperTapeReader.java,v 1.4 2013/12/22 16:09:13 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_PaperTapeReader
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.3 2013/12/20 17:56:19 drmiller Exp $";
+	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.4 2013/12/22 16:09:13 drmiller Exp $";
 
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";
@@ -22,6 +22,7 @@ class Wang_PaperTapeReader
 	String[] _fileType;
 	File _file;
 	Component _comp;
+	int _iob;
 
 	boolean _input;	// send to Wang vs. skip (00-00 vs. 00-07)
 	boolean _end;
@@ -36,6 +37,7 @@ class Wang_PaperTapeReader
 
 	public void reset() {
 		_input = false;
+		_iob = 0;
 	}
 
 	private void tape_close() {
@@ -106,7 +108,9 @@ class Wang_PaperTapeReader
 			//unless we allow mounting a tape later...
 			return false;
 		}
-		if (iob != 4) return false;
+		// currently, don't care if running program or not...
+		if ((iob & 0x05) != 4) return false;
+		_iob = iob;
 		if (c == 0x00) {
 			_input = true;
 			// arrange to read number and send GO
@@ -163,7 +167,7 @@ class Wang_PaperTapeReader
 			b = CHG_SIGN;
 		}
 		if (b > 0) {
-			Wang_UI.getCore().replyIO(4, b);
+			Wang_UI.getCore().replyIO(_iob, b);
 			getByte();
 		}
 	}
@@ -177,10 +181,10 @@ class Wang_PaperTapeReader
 			if (isNumeric()) {
 				sendNum();
 			} else if (_end) {
-				Wang_UI.getCore().replyIO(4, EOT);
+				Wang_UI.getCore().replyIO(_iob, EOT);
 				_input = false;
 			} else {
-				Wang_UI.getCore().replyIO(4, GO);
+				Wang_UI.getCore().replyIO(_iob, GO);
 				_input = false;
 			}
 		}
