@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.9 2013/12/14 16:33:16 drmiller Exp $
+# $Id: Make.rules.user,v 1.10 2013/12/24 14:28:59 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -8,8 +8,10 @@ WPCCBIN = $(WPCC)/bin
 
 W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T6_LDSCRIPT)
 W6TLIBS =
+W6TLDEPS =
 W7TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T7_LDSCRIPT)
 W7TLIBS =
+W7TLDEPS =
 W6XLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(X_LDSCRIPT) -Wl,-q
 W6XLIBS =
 W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
@@ -27,11 +29,11 @@ W6CPP = $(WPCCBIN)/w6cpp
 W7CPP = $(WPCCBIN)/w7cpp
 W7LDFIX = $(WPCCBIN)/w7ldfix
 
-%.w6t: %.w6c
+%.w6t: %.w6c $(W6TLDEPS)
 	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $< $(W6TLIBS)
 
-%.w6t: %.W6C
+%.w6t: %.W6C $(W6TLDEPS)
 	$(W6CPP) $< > $*.wpe
 	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $*.wpe $(W6TLIBS)
@@ -45,13 +47,13 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	$(CC) -x c -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
-%.w7t: %.w7c
+%.w7t: %.w7c $(W7TLDEPS)
 	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7$$ $< $(W7TLIBS)
 	$(W7LDFIX) $*.w7$$
 	@rm -f $*.w7$$
 
-%.w7t: %.W7C
+%.w7t: %.W7C $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
 	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7$$ $*.wpe $(W7TLIBS)
