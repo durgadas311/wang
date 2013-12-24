@@ -9,23 +9,33 @@ FEXTERNAL(setup_point)
 FEXTERNAL(plot_home)
 
 // Labels:
-LLABEL(done)
 LLABEL(loop1)
 LLABEL(loop2)
 LLABEL(loop3)
+LLABEL(done)
 
 BEGIN()
 MARK(plot_data)
 	// do first point as "move", not "plot"
+	ENTER(0)
+	ST_DIR(lastX)
+	ST_DIR(lastY)
 	FCALL(plot_home)
 	RE_DIR(startX)
 	ST_DIR(currX)
+	ENTER(0)
+	ST_DIR(convX)
 	GROUP1(0x00)	// read a number from paper tape
 	SK_IF_ERR() SEARCH(loop1)
 MARK(done)
+	RE_DIR(currX)
+	ST_DIR(maxX)
 	RETURN()
 
 MARK(loop1)
+	ST_DIR(convY)
+	ST_DIR(maxY)	// first point is both min and max...
+	ST_DIR(minY)
 	FCALL(setup_point) // last should be (0,0)
 	FCALL(plot_moveto)
 	ENTER(1)
@@ -39,26 +49,26 @@ MARK(loop3)
 	GROUP1(0x00)	// read a number from paper tape
 	SK_IF_ERR() SEARCH(loop2)
 	SEARCH(done)
-
 MARK(loop2)
+	ST_DIR(convY)
+
+	// track min/max...
+	RE_Y_DIR(maxY)
+	SK_IF_GE() ST_DIR(maxY)
+	RE_Y_DIR(minY)
+	SK_IF_LT() ST_DIR(minY)
+
 	FCALL(setup_point)
 	FCALL(plot_drawto)
-	RE_DIR(maxX)
-	ST_DIR(temp1)
 	ENTER(1)
 	ADD_DIR(currX)
-	RE_DIR(currX)
-	SUB_DIR(temp1)
-	RE_DIR(temp1)
-	SK_IF_XP() RETURN() GO()
 	SEARCH(loop3)
 
 // Need to trap End Of Tape from 703: SR 0000...
 //MARK(end_tape)
 _MARK(0)
-	RE_DIR(currX)
-	ST_DIR(maxX)
 	ENTER(0)
-	INV()	// set overflow error condition
+	INV()
 	RETURN()
+
 END()

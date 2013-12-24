@@ -1,0 +1,57 @@
+#include "wang700.h"
+
+LLABEL(loop)
+
+RES_REG(startIX, 15)
+RES_REG(currX, 14)
+RES_REG(mytemp1, 13)
+RES_REG(mytemp2, 12)
+
+BEGIN()
+	ENTER(0)
+	ST_DIR(startIX)
+
+	ALPHA_STRING("Outdoor Temp, Deg. C\r")
+
+	ALPHA_STRING("Sample  Time  Temp\r");
+	ALPHA_STRING("------  ----  -------\r");
+MARK(loop)
+	GROUP1(0x00)
+	ST_DIR(currX)
+
+	RE_DIR(startIX)
+	WRITE(0x30)
+	WRITE(0xc3)
+
+	RE_DIR(startIX)
+	ST_DIR(mytemp1)
+	ENTER(15)
+	MULT_DIR(mytemp1)
+	ENTER(60)
+	DIV_DIR(mytemp1)
+	RE_DIR(mytemp1)
+	INT()
+	ST_DIR(mytemp2)
+	SUB_DIR(mytemp1)
+	ENTER(60)
+	MULT_DIR(mytemp1)
+	RE_DIR(mytemp2)
+	POW10(2)
+	ADD_DIR(mytemp1)
+	RE_DIR(mytemp1)
+	WRITE(0x40)
+
+	RE_DIR(currX)
+	WRITE(0x43)
+	ALPHA_STRING("\r")
+
+	ENTER(1)
+	ADD_DIR(startIX)
+	SEARCH(loop)
+
+// can't really RETURN from this, it was called from "keyboard mode"
+_MARK(0)
+	ALPHA_STRING("END OF DATA\r")
+	END_PROG()
+END()
+

@@ -7,12 +7,13 @@ SUBDIRS = libw7 libplot test
 
 W7TLDFLAGS += -Llibw7 -Llibplot
 W7TLIBS += -lw7 -lplot
+W7TLDEPS += libw7/libw7.a libplot/libplot.a
 
 all: $(SUBDIRS) $(PROGS)
 
 zeller.w7t: zeller.W7C libw7/libw7.a
 
-#plot_dat.w7t: plot_dat.W7C libw7/libw7.a libplot/libplot.a
+plot_dat.w7t: plot_dat.W7C libw7/libw7.a libplot/libplot.a
 
 #plot_sin.w7t: plot_sin.W7C libw7/libw7.a libplot/libplot.a
 
@@ -20,9 +21,8 @@ plot_alpha.w7t: plot_alpha.W7C libw7/libw7.a libplot/libplot.a
 
 #graph_sin.w7t: graph_sin.W7C libw7/libw7.a libplot/libplot.a
 
-libw7/libw7.a: libw7
-
-libplot/libplot.a: libplot
+%.a: __FRC__
+	$(MAKE) -C $(dir $@)
 
 $(SUBDIRS): __FRC__
 	$(MAKE) -C $@

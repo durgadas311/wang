@@ -3,8 +3,6 @@
 #include "libplot/plotter.w7h"
 
 BEGIN()
-	ENTER(1e99)	// infinity
-	ST_DIR(maxX)
 	ENTER(5)	// scaling in X
 	ST_DIR(scaleX)
 	ENTER(10)	// scaling in Y
@@ -13,14 +11,17 @@ BEGIN()
 	ST_DIR(tranX)
 	ENTER(200)	// translation in Y
 	ST_DIR(tranY)
-	FCALL(plot_data)
 
-	RE_DIR(maxX)
-	ST_DIR(temp1)
+	ENTER(0)
+	ST_DIR(startX)
+	FCALL(plot_data)	// sets maxX, minY, maxY for us...
+
+	RE_Y_DIR(maxX)
 	RE_DIR(startX)
-	SUB_DIR(temp1)
-	RE_DIR(temp1)
-	ST_DIR(maxX)
+	SUB_Y()
+	ENTER(1)
+	ADD_Y()
+	ST_Y_DIR(maxX)
 	ENTER(0)
 	ST_DIR(startX)
 	ENTER(8)
@@ -29,10 +30,32 @@ BEGIN()
 	ST_DIR(currY)
 	FCALL(plot_Xaxis)
 
-	ENTER(-15)
-	ST_DIR(startX)
-	ENTER(6)	// make sure we plot the last point
-	ST_DIR(maxX)
+	RE_Y_DIR(minY)
+	ENTER(5)	// 4.999999999...
+	SK_IF_YP() CHANGE_SIGN() GO()
+	ADD_Y()
+	ENTER(5)
+	DIV_Y()
+	EXCHG_Y()
+	INT()
+	EXCHG_Y()
+	MULT_Y()	// X still has 5
+	ST_Y_DIR(startX)
+	// make sure we plot the last point
+	RE_Y_DIR(maxY)
+	ENTER(5)	// 4.999999999...
+	SK_IF_YP() CHANGE_SIGN() GO()
+	ADD_Y()
+	ENTER(5)
+	DIV_Y()
+	EXCHG_Y()
+	INT()
+	EXCHG_Y()
+	MULT_Y()	// X still has 5
+	ENTER(1)
+	SK_IF_YP() CHANGE_SIGN() GO()
+	ADD_Y()
+	ST_Y_DIR(maxX)
 	ENTER(5)
 	ST_DIR(stepX)
 	ENTER(0)

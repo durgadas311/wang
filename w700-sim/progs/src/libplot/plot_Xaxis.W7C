@@ -19,11 +19,11 @@ MARK(plot_Xaxis)
 	FCALL(plot_chrsize) // so we know label offsets...
 	// X,Y still contain plot coords...
 	RE_DIR(plotX)
-	ST_DIR(temp8) // hope no one trashes this...
+	ST_DIR(temp6) // hope no one trashes this...
 	ENTER(3)
-	MULT_DIR(temp8)	// label width
+	MULT_DIR(temp6)	// label width
 	RE_DIR(plotY)
-	ST_DIR(temp7)
+	ST_DIR(temp5)
 
 	// do first point as "move", not "plot"
 	FCALL(plot_home)
@@ -78,10 +78,10 @@ MARK(plot_tic)
 	ENTER(-5)	// scale?
 	ST_DIR(plotY)
 	FCALL(plot_drawto)
-	RE_DIR(temp8)
+	RE_DIR(temp6)
 	CHANGE_SIGN()
 	ST_DIR(plotX)
-	RE_DIR(temp7)
+	RE_DIR(temp5)
 	CHANGE_SIGN()
 	ST_DIR(plotY)
 	FCALL(plot_moveto)
