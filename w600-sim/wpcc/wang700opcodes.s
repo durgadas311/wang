@@ -159,7 +159,6 @@
 .type _op_ST_Y_DIR100 STT_OBJECT; .global _op_ST_Y_DIR100; .set _op_ST_Y_DIR100,0xce
 .type _op_RE_Y_DIR100 STT_OBJECT; .global _op_RE_Y_DIR100; .set _op_RE_Y_DIR100,0xcf
 
-
 .type res_label0 STT_OBJECT; .global res_label0; .set res_label0,0x40
 .type res_label1 STT_OBJECT; .global res_label1; .set res_label1,0x41
 .type res_label2 STT_OBJECT; .global res_label2; .set res_label2,0x42
@@ -187,6 +186,23 @@
 .type res_label24 STT_OBJECT; .global res_label24; .set res_label24,0x59
 .type res_label25 STT_OBJECT; .global res_label25; .set res_label25,0x5a
 .type res_label26 STT_OBJECT; .global res_label26; .set res_label26,0x5b
+
+.type res_flabel0 STT_OBJECT; .global res_flabel0; .set res_flabel0,0x00
+.type res_flabel1 STT_OBJECT; .global res_flabel1; .set res_flabel1,0x01
+.type res_flabel2 STT_OBJECT; .global res_flabel2; .set res_flabel2,0x02
+.type res_flabel3 STT_OBJECT; .global res_flabel3; .set res_flabel3,0x03
+.type res_flabel4 STT_OBJECT; .global res_flabel4; .set res_flabel4,0x04
+.type res_flabel5 STT_OBJECT; .global res_flabel5; .set res_flabel5,0x05
+.type res_flabel6 STT_OBJECT; .global res_flabel6; .set res_flabel6,0x06
+.type res_flabel7 STT_OBJECT; .global res_flabel7; .set res_flabel7,0x07
+.type res_flabel8 STT_OBJECT; .global res_flabel8; .set res_flabel8,0x08
+.type res_flabel9 STT_OBJECT; .global res_flabel9; .set res_flabel9,0x09
+.type res_flabel10 STT_OBJECT; .global res_flabel10; .set res_flabel10,0x0a
+.type res_flabel11 STT_OBJECT; .global res_flabel11; .set res_flabel11,0x0b
+.type res_flabel12 STT_OBJECT; .global res_flabel12; .set res_flabel12,0x0c
+.type res_flabel13 STT_OBJECT; .global res_flabel13; .set res_flabel13,0x0d
+.type res_flabel14 STT_OBJECT; .global res_flabel14; .set res_flabel14,0x0e
+.type res_flabel15 STT_OBJECT; .global res_flabel15; .set res_flabel15,0x0f
 
 .type _tag_last_reg STT_OBJECT; .global _tag_last_reg; .set _tag_last_reg,0xed
 .type _tag_reg_dir STT_OBJECT; .global _tag_reg_dir; .set _tag_reg_dir,0xe0

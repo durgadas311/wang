@@ -37,7 +37,11 @@ w7ldfix: w7ldfix.c w7interlacepair.o wang700opcodes.h wang700opcodes.o
 	$(CC) $(CFLAGS) -std=c99 w7ldfix.c w7interlacepair.o wang700opcodes.o -o w7ldfix
 
 wang700opcodes.h: wang700opcodes.s
-	sed -e 's/^\.type/#define/' -e 's/STT_OBJECT;.*,//' <$^ >$@
+	@echo -e "/* generated from wang700opcodes.s - used by C utilities */"\
+		"\n#ifndef __wang700opcodes_h__"\
+		"\n#define __wang700opcodes_h__" >$@
+	sed -e 's/^\.type/#define/' -e 's/STT_OBJECT;.*,//' <$^ >>$@
+	@echo -e "#endif /* __wang700opcodes_h__ */" >>$@
 
 install: $(BINS) $(INCS) $(LDS)
 	mkdir -p /usr/local/wpcc/{bin,lib,include}

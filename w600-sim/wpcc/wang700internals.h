@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.8 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.9 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -75,6 +75,17 @@ asm(	".section .wang700code, \"a\";"
 					".type " #label " STT_OBJECT;" \
 					".global " #label ";" \
 					".set " #label ", res_label" #const ";" \
+					".popsection");
+
+#define RES_FEXTERN(label, const)	\
+				asm(".pushsection .wang700flabel,\"a\";" \
+					".type " #label " STT_OBJECT;" \
+					".global " #label ";" \
+					".set " #label ", res_flabel" #const ";" \
+					".section .wang700subr,\"a\";" \
+					".type _subr_" #label " STT_OBJECT;" \
+					".global _subr_" #label ";" \
+					".set _subr_" #label ", res_flabel" #const ";" \
 					".popsection");
 
 // Define a label for use with SEARCH/MARK
