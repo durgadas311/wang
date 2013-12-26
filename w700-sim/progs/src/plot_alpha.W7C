@@ -1,9 +1,9 @@
 #include "wang700.h"
 
+#include "libplot/plotter.w7h"
+
 // Local Labels:
 FLLABEL(test_alpha)
-
-#include "libplot/plotter.w7h"
 
 BEGIN()
 	FCALL(plot_home)

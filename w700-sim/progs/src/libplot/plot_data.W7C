@@ -14,6 +14,8 @@ LLABEL(loop2)
 LLABEL(loop3)
 LLABEL(done)
 
+RES_FEXTERN(PAPERTAPE_END, 0)	// dictated by peripheral hardware...
+
 BEGIN()
 MARK(plot_data)
 	// do first point as "move", not "plot"
@@ -65,8 +67,7 @@ MARK(loop2)
 	SEARCH(loop3)
 
 // Need to trap End Of Tape from 703: SR 0000...
-//MARK(end_tape)
-_MARK(0)
+MARK(PAPERTAPE_END)
 	ENTER(0)
 	INV()
 	RETURN()

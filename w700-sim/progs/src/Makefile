@@ -11,16 +11,6 @@ W7TLDEPS += libw7/libw7.a libplot/libplot.a
 
 all: $(SUBDIRS) $(PROGS)
 
-zeller.w7t: zeller.W7C libw7/libw7.a
-
-plot_dat.w7t: plot_dat.W7C libw7/libw7.a libplot/libplot.a
-
-#plot_sin.w7t: plot_sin.W7C libw7/libw7.a libplot/libplot.a
-
-plot_alpha.w7t: plot_alpha.W7C libw7/libw7.a libplot/libplot.a
-
-#graph_sin.w7t: graph_sin.W7C libw7/libw7.a libplot/libplot.a
-
 %.a: __FRC__
 	$(MAKE) -C $(dir $@)
 

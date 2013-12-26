@@ -1,0 +1,105 @@
+#include "wang700.h"
+
+#include "libplot/plotter.w7h"
+
+// are these needed?
+FEXTERNAL(setup_point)
+FEXTERNAL(plot_moveto)
+FEXTERNAL(plot_Xaxis)
+
+FLLABEL(charging)
+FLLABEL(discharging)
+
+// Use full 1000x1000 plotter "window"
+BEGIN()
+	ENTER(0)
+	ST_DIR(startX)
+	ENTER(360)	// make sure we plot the last point
+	ST_DIR(maxX)
+	ENTER(5)
+	ST_DIR(stepX)
+	ENTER(2.5)	// scaling in X
+	ST_DIR(scaleX)
+	ENTER(450)	// scaling in Y
+	ST_DIR(scaleY)
+	ENTER(50)	// translation in X
+	ST_DIR(tranX)
+	ENTER(100)	// translation in Y
+	ST_DIR(tranY)
+	FCALL(plotter)
+
+	ENTER(1)
+	FCALL(plot_chrsize)
+	ENTER(90)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currY)
+	FCALL(plot_Xaxis)
+
+	ENTER(0)
+	ST_DIR(startX)
+	ENTER(1)
+	ST_DIR(maxX)
+	ENTER(1)
+	ST_DIR(stepX)
+	ENTER(0)
+	ST_DIR(currX)
+	FCALL(plot_Yaxis)
+
+	ENTER(2)
+	FCALL(plot_chrsize)
+	ENTER(0)
+	ST_DIR(convX)
+	ENTER(-0.111)	// 50 = P * 450 + 100
+	ST_DIR(convY)
+	FCALL(setup_point)
+	FCALL(plot_moveto)
+	ALPHA_PLOT("Y = CHARGE/DISCHARGE RC=75")
+	END_PROG()
+
+MARK(charging)
+	// Vt = 1 - e ^ (-t/RC)
+	// RC = 75
+	CHANGE_SIGN()
+	EXCHG_Y()
+	ENTER(75)
+	DIV_Y()
+	ENTER(1)
+	EXCHG_Y()
+	E_X()
+	SUB_Y()
+	EXCHG_Y()
+	RETURN()
+
+// X = time, Y = V(charging) @ t=180
+MARK(discharging)
+	// Vt = Vc * (e ^ (-t/RC))
+	// RC = 75
+	ST_Y_DIR(temp5)
+	CHANGE_SIGN()
+	EXCHG_Y()
+	ENTER(75)
+	DIV_Y()
+	EXCHG_Y()
+	RE_Y_DIR(temp5)
+	E_X()
+	MULT_Y()
+	EXCHG_Y()
+	RETURN()
+
+MARK(GRAPHING_FUNCTION)
+	EXCHG_Y()
+	ENTER(180)
+	EXCHG_Y()
+	SK_IF_LT() SEARCH(charging)
+	// assuming currX is what was passed in...
+	FCALL(charging) // get value as of switch point... (180)
+	ST_DIR(temp6)
+	RE_Y_DIR(currX)
+	ENTER(180)
+	SUB_Y()
+	RE_DIR(temp6)
+	EXCHG_Y()
+	SEARCH(discharging)
+
+END()
