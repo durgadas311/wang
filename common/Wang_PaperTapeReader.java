@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PaperTapeReader.java,v 1.4 2013/12/22 16:09:13 drmiller Exp $
+// $Id: Wang_PaperTapeReader.java,v 1.5 2013/12/27 16:28:55 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_PaperTapeReader
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.4 2013/12/22 16:09:13 drmiller Exp $";
+	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.5 2013/12/27 16:28:55 drmiller Exp $";
 
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";
@@ -22,8 +22,8 @@ class Wang_PaperTapeReader
 	String[] _fileType;
 	File _file;
 	Component _comp;
-	int _iob;
 
+	int _iob;
 	boolean _input;	// send to Wang vs. skip (00-00 vs. 00-07)
 	boolean _end;
 	int _currByte;	// -1 for none (BOT or EOT)
@@ -73,8 +73,8 @@ class Wang_PaperTapeReader
 		} catch(Exception ee) {
 		}
 		if (b < 0) {
-			_currByte = -1;
 			_end = true;
+			_currByte = -1;
 		} else {
 			_currByte = (b & 0x0ff);
 		}
@@ -180,10 +180,15 @@ class Wang_PaperTapeReader
 		if (_input) {
 			if (isNumeric()) {
 				sendNum();
-			} else if (_end) {
-				Wang_UI.getCore().replyIO(_iob, EOT);
-				_input = false;
 			} else {
+				// Not sure if both should be sent, but without
+				// the GO a program can't continue after EOT so
+				// for the sake of programmability we add it here.
+				// (a RETURN from the EOT subroutine goes back to
+				// keyboard mode, not running the program)
+				if (_end) {
+					Wang_UI.getCore().replyIO(_iob, EOT);
+				}
 				Wang_UI.getCore().replyIO(_iob, GO);
 				_input = false;
 			}
