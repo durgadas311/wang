@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.4 2013/12/10 15:14:17 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.5 2013/12/27 16:26:57 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -76,7 +76,7 @@ retain a terminal window after starting the program.
 <H2>Wang 700 Simulator</H2>
 
 <P>Currently, the simulator microcode image is incomplete.
-Not all functions work.
+Some functions may not work, or may not work correctly.
 
 <H2>Wang 700 Simulator Differences</H2>
 
@@ -92,7 +92,8 @@ for more information.
 
 <P>One notable difference in in "keyboard locking". There were situations
 (mainly I/O commands) where the calculator keyboard (with the exception of PRIME and
-debug keys) were disabled. This is not currently implemented, which means it is possible to interfere
+debug keys) were disabled. This is not currently implemented,
+which means it is possible to interfere
 with certain operations (again, typically I/O) by pressing calculator keys during
 those operations.
 
@@ -183,8 +184,7 @@ mantissa and exponent on the Wang 700's.
 <P>Files are organized by suffix. Currently, all program image files
 have the <B>.w7t</B> suffix (for Wang 700 Tape images).
 All <B>.w7t</B> files are raw binary program codes and registers,
-with a program record ending in two END&nbsp;PROG codes (0x5c 0x5c),
-and a register image (ALPHA STORE) ending with 0x5c 0xff.
+with a program record ending in two END&nbsp;PROG codes (0x5c 0x5c).
 Model 730 Disk images have the suffix <B>.w7d</B>.
 
 <H3>Tape Operation</H3>
@@ -206,51 +206,21 @@ to allow choosing a file to use as a tape image.
 inside a file to the next, or previous, program image. Since most files
 will have only one program image, these are not normally used.
 
-<H3>Printer Operation</H3>
-
-Like the original hardware, the printer must be "On" in order to
-print. In Run mode, attempts to print (or List Program, etc) will hang
-with a blank display (just like the original hardware) until either the
-printer is turned on or PRIME is pressed. Programs that
-attempt to print will simply stop without printing anything.
-
-<P>Since there is no physical printer, the printed output is put in a
-window where it may be viewed.  In addition, this window allows Copy
-operations (e.g. Cut-n-Paste) to extract the contents (or a portion of
-it).  In addition, a menu option "Save" may be used to save the current
-contents to a file.  A menu option "Tear Off" will clear the print window
-and discard all current contents.  The window is only visible when the
-printer is "On", and if the window is closed then the printer is turned
-off. The contents of the window is not removed when the printer is off.
-
-<P>The menu option "Print" will send the re-formatted output to the
-default printer. The "paper strip" will be formatted on a landscape page
-in four columns of 40 lines each, per page.
-
-<H3>Expansion ROM</H3>
-
-The expansion ROMs are handled as files, similar to the Tape unit.
-Selecting the ROM item from the "Devices" menu will pop-up a file
-selection dialog, the chosen file will be downloaded to the simulator
-and placed in the ROM memory. Up to 2048 steps may be loaded.
-The file is formatted like other program images, the first byte is
-loaded into the highest address, the next is loaded into the next lower
-address, etc.
-
 <H3>701 OutputWriter</H3>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output only, with standard spacing.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Output Device..."
+sub-menu also makes it visible.
 The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
 
 <H3>702 Plotting OutputWriter</H3>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output along with micro-spacing which allows plotting.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
@@ -262,7 +232,7 @@ the carriage, and will eventually provide setup of paper size, margins, etc.
 
 <H3>711 Input/OutputWriter</H3>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output as well as input from the keyboard.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
@@ -289,7 +259,7 @@ in order to be released.
 
 <H3>712 Flatbed Plotter</H3>
 
-This device is capable of vector (line) plotting as well as (drawn) text from a limited
+<P>This device is capable of vector (line) plotting as well as (drawn) text from a limited
 character set.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Plotting to this device causes the "output window" to become visible.
@@ -302,7 +272,7 @@ Future enhancements will include control over the paper size.
 
 <H3>730 Fixed/Removable Disk</H3>
 
-This device is simulated by a single file that supports the entire
+<P>This device is simulated by a single file that supports the entire
 16M address range of the device protocol. So there is not a separate removable
 disk, but simply a single image that may be read/written as a whole.
 Selecting the "730 Disk" option from the "Devices" menu will pop-up
@@ -310,6 +280,34 @@ a file selection dialog from which a image may be selected to use as
 the disk. The file will be expanded as needed by writes. The file may
 also be "sparse", if writes are made beyond the current end of file.
 Unwritten portions of the file will read back as zero.
+
+<H3>703 Paper Tape Reader</H3>
+
+<P>This device is referred to in Wang documentation as the "Paper Tape Editor".
+It can extract numeric data from "standard" 8-level ASCII paper tapes.
+The original device apparently was capable of printing the paper tape contents
+on an OutputWriter, however details of that are not known and that feature is not
+(currently) emulated.
+
+<P>File images used with this device are either "Text" (.txt) or "Wang Data File"
+(.wdf). The simplest form is one number per line with no other text.
+
+<P>Invoking GROUP&nbsp;1 00&nbsp;00 will cause one numeric value to be scanned from tape.
+non-numeric characters are skipped, then the numeric entry codes are sent until
+a non-numeric code is encountered. Note, scientific notation was apparently not supported,
+and is not emulated.
+
+<P>Invoking GROUP&nbsp;1 00&nbsp;07 will cause the device to skip all characters until a
+Carriage Return is seen.
+The emulation looks for the Unix end-of-line character (line feed).
+
+<P>Also, it was not clear from the brochure exactly how "End Of Tape" was handle.
+This emulation sends both "SR&nbsp;0000" and "GO" on end of tape, as that seems to be required
+if the tape is being handled entirely under program control (because the calculator was
+essentially stopped while waiting for the Group I/O operation,
+the SR&nbsp;0000 would RETURN to the stopped state and the program would not continue
+without the GO).
+
 
 <H3>Simulator Internals</H3>
 

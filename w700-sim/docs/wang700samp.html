@@ -1,0 +1,126 @@
+<HTML>
+<!-- $Id: wang700samp.html,v 1.1 2013/12/27 16:26:57 drmiller Exp $ -->
+
+<H2>Sample Programs</H2>
+
+See "Using the Tape Drive" for instructions on how to load programs,
+and to verify the program loaded correctly.
+
+<H3>countdown.w7t - Count Down timer</H3>
+
+VERIFY PROG: 214
+
+<P>USE: Enter a number and press GO. This display will count down that number until 0.
+
+<P>This program demonstrates basic use of WRITE ALPHA 1/X (Pause) and program loops.
+
+<H3>celsius.w7t - Convert Degrees Fahrenheit to Celsius</H3>
+
+VERIFY PROG: 175
+
+<P>USE: Enter degrees Fahrenheit and press GO. The display will show the
+equivalent degrees Celsius.
+
+<P>This program demonstrates how to do basic math calculations
+using registers.
+
+<H3>hello.w7t - Simple Example of the Model 701 OutputWriter</H3>
+
+VERIFY PROG: 208
+
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (701, 702, or 711).
+<LI> Press GO
+<P>The OutputWriter window should appear with the
+text "Hello World!" printed on it.
+
+<P>This program demonstrates how to print a text string to the OutputWriter.
+
+<H3>craps.w7t - Game of Craps</H3>
+
+VERIFY PROG: 2454
+
+<P>USE: Optionally enter a random number (use decimal places), then press GO.
+The number 500 should appear on the Y display. This is your bank.
+Enter a bet and press GO. The first dice roll will appear for 1.4 second.
+If it is a win, the display will flash for 0.7 second and then you will see
+your new bank and can enter a new bet. If it is a lose, the display will blank
+for 0.7 second and then you will see your updated bank and can bet again.
+If the number is a "point" then it is placed in Y,
+and X will show repeated dice rolls for 0.7 second each,
+and the appropriate action taken (win, lose, repeat).
+
+<P>This program demonstrates use of the random number generator and simple game
+simulation. It also shows use of "special effects" like making the display
+flash without aborting the program, and making the display blank.
+
+<H3>zeller.w7t - Compute day-of-week for give date</H3>
+
+VERIFY PROG: 1483
+
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (701, 702, or 711).
+<LI> Enter month (1-12)
+<LI> Press GO (The OutputWriter window should appear, may need to raise calculator window to continue)
+<LI> Enter day (1-31)
+<LI> Press GO
+<LI> Enter year (4 digit)
+<LI> Press GO
+<P>The OutputWriter window should appear with the entered values and result.
+
+<H3>plot_RC.w7t - Draw a graph on the 712 Flatbed Plotter</H3>
+
+VERIFY PROG: 5131
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 712 Flatbed Plotter.
+<LI> Press GO
+<P> The graph of a capacitor circuit charge/discharge,
+with axii and labeling, will appear on the plotter window.
+
+<H3>plot_dat.w7t - Plots data samples from a "paper tape" file</H3>
+
+VERIFY PROG: 5185
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 712 Flatbed Plotter.
+<LI>If not already done, use the Devices -> 703 Paper Tape Reader menu to
+install (or rewind) the paper tape image "temperature.txt".
+<LI> Press GO
+<P>The graph of the temperature data, with axii and labeling, will appear on the
+plotter window.
+
+<P>Data file image is "plain text". The Wang "Paper Tape Editor", as it was called,
+took standard 8-level ASCII code on paper tape. Image files are thus plain (ASCII) text,
+formated as lines of numeric data.
+
+<H3>list_dat.w7t - Lists datapoints from a paper tape file</H3>
+
+VERIFY PROG: 1464
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect one of the OutputWriter models (701, 702, or 711).
+<LI>If not already done, use the Devices -> 703 Paper Tape Reader menu to
+install (or rewind) the paper tape image "temperature.txt".
+<LI> Press GO
+<P>A tabular list of the datapoints in the tape image will be printed.
+
+<H3>plot_alpha.w7t - Demonstrates the character set of the 712 Plotter</H3>
+
+VERIFY PROG: 1288
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 712 Flatbed Plotter.
+<LI> Press GO
+<P> The complete character set, in three different sizes, will be drawn on the
+plotter.
+
+<H2>Source Code</H2>
+
+The above programs (and data) are available in "source" format in the "wpcc.tgz" package.
+
+</HTML>

@@ -1,0 +1,105 @@
+<HTML>
+<!-- $Id: wang700calc.html,v 1.1 2013/12/27 16:26:57 drmiller Exp $ -->
+
+<H2>Using the Wang 700 as a Calculator</H2>
+
+<H3>Display Functions</H3>
+
+The logarithmic and root functions (keys on the left-most keypad and above number-entry keypad)
+are all performed on the current value of the X display. No other registers are altered by
+these functions.
+
+<TABLE>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Function</TH></TR>
+<TR><TD>1/X</TD><TD>Compute the Inverse of the display</TD></TR>
+<TR><TD>LOG<SUB>e</SUB>X</TD><TD>Compute the Natural Logarithm of the display</TD></TR>
+<TR><TD>LOG<SUB>10</SUB>X</TD><TD>Compute the Base-10 Logarithm of the display</TD></TR>
+<TR><TD>e<SUP>x</SUP></TD><TD>Compute the Natural Exponent of the display</TD></TR>
+<TR><TD>10<SUP>x</SUP></TD><TD>Compute the Base-10 Exponent of the display</TD></TR>
+<TR><TD>X<SUP>2</SUP></TD><TD>Compute the Square of the display</TD></TR>
+<TR><TD>INT X</TD><TD>Truncate the display to an integer</TD></TR>
+<TR><TD>&#8730;X</TD><TD>Compute the Square Root of the display</TD></TR>
+<TR><TD>|X|</TD><TD>Compute the Absolute value of the display</TD></TR>
+</TABLE>
+
+<H3>Register-Display Functions</H3>
+
+General math functions (add, subtract, multiply, divide), and moving data around,
+are all done between the X display and a register or Y display.
+
+<P>The register operations available are:
+
+<TABLE>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Function</TH></TR>
+<TR><TD>STORE (or &#8593;)</TD><TD>Copy X display value into register</TD></TR>
+<TR><TD>RECALL (or &#8595;)</TD><TD>Copy register value into X display</TD></TR>
+<TR><TD>+</TD><TD>Add X display to register</TD></TR>
+<TR><TD>-</TD><TD>Subtract X display from register</TD></TR>
+<TR><TD>&#215;=</TD><TD>Multiply register by X display</TD></TR>
+<TR><TD>&divide;=</TD><TD>Divide register by X display</TD></TR>
+<TR><TD>&#8593;&#8595;=</TD><TD>Exchange register with X display</TD></TR>
+</TABLE>
+
+<P>The target register is selected based on the address keywords
+INDIR (indirect, using Y display),
+DIR or DIRECT (second key code is register number), or none (implied) as Y display.
+
+<P>For DIRECT addressing, register numbers may be entered using the toggle switches
+and keys 00 through 15.
+Note, register numbers are effectively interpreted as decimal so using the keys
+10 through 15 is not recommended.
+The toggle switches are used to form the first digit of the register number,
+normally 0-9, in binary.
+Special codes exist for accessing registers above 99, but do not have dedicated keys.
+In the case of accessing register above 99, the first digit may range above 9 in
+order to access register above 199. For example, register 243 may be accessed using
+the "DIR+100" codes and register "number" 14&nbsp;03 (143 + 100 = 243).
+
+<H3>Calculator Example</H3>
+
+As an example, consider converting degrees Fahrenheit into degrees Celsius. The basic formula is:
+
+<PRE>
+C = (F - 32) * 5 / 9
+</PRE>
+
+<P>Note, the calculator has no concept of precedence or parenthesis,
+so the calculation must be performed in
+a deliberate order so that precedence is maintained.
+The first part to perform is the <KBD>F - 32</KBD>.
+Next, that result is multiplied by 5.
+Finally, that result is divided by 9.
+Note, an alternate order is
+to compute <KBD>5 / 9</KBD> (and possibly store it someplace more permanent)
+and then multiply by that pre-computed value.
+For simplicity in example, the first approach is used.
+
+<P>So, the steps required to convert 70 degrees Fahrenheit into degrees Celsius would be:
+
+<TABLE BORDER>
+<TR><TH ALIGN=LEFT>Key</TH><TH ALIGN=LEFT>Display, after pressing key</TH></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>7</TD><TD>+.000000000000</TD></TR>
+<TR>			<TD>+7</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>0</TD><TD>+.000000000000</TD></TR>
+<TR>			<TD>+70</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>&#8593;</TD><TD>+70.0000000000</TD></TR>
+<TR>			<TD>+70.0000000000</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>3</TD><TD>+70.0000000000</TD></TR>
+<TR>			<TD>+3</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>2</TD><TD>+70.0000000000</TD></TR>
+<TR>			<TD>+32</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>-</TD><TD>+38.0000000000</TD></TR>
+<TR>			<TD>+32.0000000000</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>5</TD><TD>+38.0000000000</TD></TR>
+<TR>			<TD>+5</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>&#215;</TD><TD>+190.000000000</TD></TR>
+<TR>			<TD>+5.00000000000</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>9</TD><TD>+190.000000000</TD></TR>
+<TR>			<TD>+9</TD></TR>
+<TR><TD ROWSPAN=2 ALIGN=CENTER>&divide;</TD><TD>+21.1111111111</TD></TR>
+<TR>			<TD>+9.00000000000</TD></TR>
+</TABLE>
+
+<P>So, the answer is that 70 degrees Fahrenheit equals (approximately) 21 degrees Celsius.
+
+</HTML>
