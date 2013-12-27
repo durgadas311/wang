@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.66 2013/12/27 16:41:01 drmiller Exp $
+# $Id: Makefile,v 1.67 2013/12/27 20:52:38 drmiller Exp $
 
 include Makefile.ship
 
@@ -36,7 +36,8 @@ tar:
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/icons/*.png	\
 		common/fonts/*.ttf	\
-		w600-sim/progs/*.w6* w600-sim/docs/*.html w600-sim/docs/*.gif
+		w600-sim/progs/*.w6* w600-sim/progs/*.txt \
+		w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar packages wpcc.tgz
 	mv -v $(SRCTAR) $(PACKAGES) wpcc.tgz /http/durgadas.com/sebhc/w600-sim
@@ -49,7 +50,7 @@ temp_dest: all wang600.jar
 	cp wang600.jar run edit INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/edit $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/progs
-	cp progs/*.w6* $(TMPDEST)/progs
+	cp progs/*.w6* progs/*.txt $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang600-*x*.png $(TMPDEST)/icons
 

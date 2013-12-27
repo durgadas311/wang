@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.36 2013/12/14 02:36:09 drmiller Exp $
+# $Id: Makefile,v 1.37 2013/12/27 20:52:52 drmiller Exp $
 
 include Makefile.ship
 
@@ -36,7 +36,7 @@ clobber: clean
 rom.diff: $(ROM)
 	-cvs diff -u -r 1.1 $(ROM) >rom.diff
 
-tar: rom.diff wang700.jar
+tar: wang700.jar
 	cd ..;\
 	tar -czv --transform 's/.ship$$//' \
 		-f w700-sim/$(SRCTAR) \
@@ -44,7 +44,7 @@ tar: rom.diff wang700.jar
 		common/icons/*.png \
 		w700-sim/README w700-sim/LICENSE \
 		w700-sim/README.gui \
-		w700-sim/progs/*.w7* \
+		w700-sim/progs/*.w7* w700-sim/progs/*.txt \
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
@@ -64,7 +64,7 @@ temp_dest: all $(ICNS) wang700.jar
 	cp $(PNGS) $(TMPDEST)/icons
 	cp $(ROM) $(TMPDEST)
 	mkdir -p $(TMPDEST)/progs
-	cp progs/*.w7* $(TMPDEST)/progs
+	cp progs/*.w7* progs/*.txt $(TMPDEST)/progs
 
 wang700apc.tgz: temp_dest
 	tar -czvf wang700apc.tgz -C $(TMPDIR) $(INSNAME)
