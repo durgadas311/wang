@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.21 2013/12/20 18:02:40 drmiller Exp $
+# $Id: Makefile.ship,v 1.22 2013/12/27 16:27:34 drmiller Exp $
 
 COPTS =
 
@@ -29,6 +29,7 @@ COMMON_CLASSES = \
 		IBM_Selectric.class \
 		Wang_Plotter.class \
 		Wang_InputOutputWriter.class \
+		Wang_PaperTapeReader.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
 		Wang_CN36_Type2.class \

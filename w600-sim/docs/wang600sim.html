@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.21 2013/12/09 22:22:33 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.22 2013/12/27 16:27:34 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -326,6 +326,33 @@ a file selection dialog from which a image may be selected to use as
 the disk. The file will be expanded as needed by writes. The file may
 also be "sparse", if writes are made beyond the current end of file.
 Unwritten portions of the file will read back as zero.
+
+<H3>603 Paper Tape Reader</H3>
+
+<P>This device is referred to in Wang documentation as the "Paper Tape Editor".
+It can extract numeric data from "standard" 8-level ASCII paper tapes.
+The original device apparently was capable of printing the paper tape contents
+on an OutputWriter, however details of that are not known and that feature is not
+(currently) emulated.
+
+<P>File images used with this device are either "Text" (.txt) or "Wang Data File"
+(.wdf). The simplest form is one number per line with no other text.
+
+<P>Invoking GROUP&nbsp;1 00&nbsp;00 will cause one numeric value to be scanned from tape.
+non-numeric characters are skipped, then the numeric entry codes are sent until
+a non-numeric code is encountered. Note, scientific notation was apparently not supported,
+and is not emulated.
+
+<P>Invoking GROUP&nbsp;1 00&nbsp;07 will cause the device to skip all characters until a
+Carriage Return is seen.
+The emulation looks for the Unix end-of-line character (line feed).
+
+<P>Also, it was not clear from the brochure exactly how "End Of Tape" was handle.
+This emulation sends both "f(0)" and "GO" on end of tape, as that seems to be required
+if the tape is being handled entirely under program control (because the calculator was
+essentially stopped while waiting for the Group I/O operation,
+the f(0) would RETURN to the stopped state and the program would not continue
+without the GO).
 
 <H3>614 Mark-Sense Card Reader</H3>
 
