@@ -1,9 +1,9 @@
 include /usr/local/wpcc/include/Make.rules.user
 
 SRCS = $(wildcard *.w6c *.W6C)
-DATAS = $(wildcard *.data)
+DATAS = $(wildcard *.txt)
 PROGS = $(subst .w6c,.w6t,$(subst .W6C,.w6t,$(SRCS)))
-DATAT = $(subst .data,.w6t,$(DATAS))
+DATAT = $(subst .txt,.w6t,$(DATAS))
 SUBDIRS = libw6 libplot tests
 ROMS = libplot.w6x
 
@@ -35,7 +35,7 @@ zeller.w6t: zeller.W6C libw6/libw6.a
 
 #graph_sin.w6t: graph_sin.W6C libw6/libw6.a libplot/libplot.a
 
-%.w6t: %.data
+%.w6t: %.txt
 	$(WPCCBIN)/w6data2tape <$< >$@
 
 libw6/libw6.a: libw6
