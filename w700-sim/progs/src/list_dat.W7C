@@ -1,11 +1,15 @@
 #include "wang700.h"
 
 LLABEL(loop)
+LLABEL(not_done)
+LLABEL(done)
 
 RES_REG(startIX, 15)
 RES_REG(currX, 14)
 RES_REG(mytemp1, 13)
 RES_REG(mytemp2, 12)
+
+RES_FEXTERN(PAPERTAPE_END, 0)	// dictated by hardware
 
 BEGIN()
 	ENTER(0)
@@ -17,6 +21,9 @@ BEGIN()
 	ALPHA_STRING("------  ----  -------\r");
 MARK(loop)
 	GROUP1(0x00)
+	SK_IF_ERR() SEARCH(not_done)
+	SEARCH(done)
+MARK(not_done)
 	ST_DIR(currX)
 
 	RE_DIR(startIX)
@@ -49,9 +56,13 @@ MARK(loop)
 	ADD_DIR(startIX)
 	SEARCH(loop)
 
-// can't really RETURN from this, it was called from "keyboard mode"
-_MARK(0)
+MARK(done)
 	ALPHA_STRING("END OF DATA\r")
 	END_PROG()
+
+MARK(PAPERTAPE_END)
+	ENTER(0)
+	INV()
+	RETURN()
 END()
 
