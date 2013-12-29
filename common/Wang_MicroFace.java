@@ -1,14 +1,15 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.2 2013/12/29 00:23:07 drmiller Exp $
+// $Id: Wang_MicroFace.java,v 1.3 2013/12/29 16:53:13 drmiller Exp $
 
 import java.awt.*;
+import java.io.*;
 import javax.swing.*;
 import java.util.Arrays;
 
 class Wang_MicroFace
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.2 2013/12/29 00:23:07 drmiller Exp $";
+	final String ident = "$Id: Wang_MicroFace.java,v 1.3 2013/12/29 16:53:13 drmiller Exp $";
 
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";
@@ -17,6 +18,8 @@ class Wang_MicroFace
 
 	String _prop;
 	Component _comp;
+	String[] _shell;
+	boolean _cygwin; // yuk
 
 	String[] _intfs = new String[16];
 
@@ -39,13 +42,16 @@ class Wang_MicroFace
 		_iob = 0;
 	}
 
-	private void execute(int num) {
+	private boolean execute(int num) {
 		// fork/exec command in _intfs[n]...
 		// capturing stdout... (and...?)
+		_sample = null;
+		String failed = null;
 		int x = -1;
 		try {
-			ProcessBuilder cmd = 
-				new ProcessBuilder("sh", "-c", _intfs[num]);
+			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
+			args[_shell.length] = _intfs[num];
+			ProcessBuilder cmd = new ProcessBuilder(args);
 			cmd.redirectErrorStream(true);
 			// eventually want:
 			//cmd.redirectError(cmd.Redirect.INHERIT);
@@ -72,15 +78,26 @@ class Wang_MicroFace
 				}
 			}
 			x = proc.waitFor();
+			if (_cygwin && x == 1) { x = 0; } // todo: investigate this
+			if (x != 0) {
+				failed = "Exited " + Integer.toString(x);
+				if (_sample != null) {
+					failed += "\n" + _sample;
+				}
+			}
 		} catch(Exception ee) {
 			x = 1;
+			failed = ee.getMessage();
 		}
 		if (x == 0) {
+			_input = true;
 			_sampix = 0;
 			do_ack(_iob);
+			return true;
 		} else {
 			// does the user already know it failed?
-			System.err.format("GROUP 1 07 %02d failed\n", num);
+			System.err.format("GROUP 1 07 %02d failed: %s\n", num, failed);
+			return false;
 		}
 	}
 
@@ -97,10 +114,11 @@ class Wang_MicroFace
 		// At this point, we are handling the I/O...
 		c &= 0x0f;
 		if (_intfs[c].length() > 0) {
-			_input = true;
-			execute(c);
+			if (execute(c)) {
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	public void pickFile(JMenuItem m) {
@@ -197,7 +215,35 @@ try {
 	}
 
 	public Wang_MicroFace(String prop, Component comp) {
-		//super(Wang_UI.getSeries() + Model, Description);
+		_cygwin = false;
+		boolean windows = (System.getProperty("os.name").indexOf("Windows") >= 0);
+		String sh = System.getenv("SHELL");
+		if (sh == null) {
+			if (windows) {
+				_shell = new String[]{ "cmd.exe", "/c" };
+			} else {
+				// what else to do?
+				_shell = new String[]{ "sh", "-c" };
+			}
+		} else {
+			// try to interpret it? for now, assume *nix...
+			// including cygwin, so turn off "windows"...
+			if (windows) { // assume cygwin...
+				File shell = new File("c:\\cygwin64\\bin\\bash.exe");
+				if (!shell.exists()) {
+					shell = new File("c:\\cygwin32\\bin\\bash.exe");
+				}
+				if (!shell.exists()) {
+					shell = new File("c:\\cygwin\\bin\\bash.exe");
+				}
+				_shell = new String[]{ shell.getAbsolutePath(),
+							"--login", "-i", "-c" };
+				_cygwin = true;
+				windows = false;
+			} else {
+				_shell = new String[]{ sh, "-c" };
+			}
+		}
 
 		_panels = new JPanel[16];
 		_texts = new JTextArea[16];
@@ -237,11 +283,21 @@ try {
 				++n;
 			}
 		}
-		// "demo" mode...
 		if (n == 0) {
-			_intfs[13] = "echo $RANDOM";
-			_intfs[14] = "date +%H%M%S";
-			_intfs[15] = "date +%m%d%y";
+			// "demo" mode...
+			if (windows) {
+				// both of these spew unwanted text, but should
+				// be ignored.
+				_intfs[13] = "echo %RANDOM%";	// random number 0-32767
+				// ugh, no seconds... HH:MM, and 12-hour clock...
+				_intfs[14] = "time /t & echo 00";
+				_intfs[15] = "date /t";	// ugh, 4-digit year... MM/DD/YYYY
+			} else {
+				_intfs[12] = "date +%s";	// seconds since epoch
+				_intfs[13] = "echo $RANDOM";	// random number 0-32767
+				_intfs[14] = "date +%H%M%S";	// time HHMMSS
+				_intfs[15] = "date +%m%d%y";	// date MMDDYY
+			}
 		}
 		// todo: share code with Wang_Properties...
 		setupDialog(_dia_pn, Wang_UI.getIcon());
