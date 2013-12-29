@@ -1,15 +1,13 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.3 2013/12/29 16:53:13 drmiller Exp $
+// $Id: Wang_MicroFace.java,v 1.4 2013/12/29 19:09:03 drmiller Exp $
 
 import java.awt.*;
-import java.io.*;
 import javax.swing.*;
-import java.util.Arrays;
 
 class Wang_MicroFace
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.3 2013/12/29 16:53:13 drmiller Exp $";
+	final String ident = "$Id: Wang_MicroFace.java,v 1.4 2013/12/29 19:09:03 drmiller Exp $";
 
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";
@@ -45,58 +43,17 @@ class Wang_MicroFace
 	private boolean execute(int num) {
 		// fork/exec command in _intfs[n]...
 		// capturing stdout... (and...?)
-		_sample = null;
-		String failed = null;
-		int x = -1;
-		try {
-			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
-			args[_shell.length] = _intfs[num];
-			ProcessBuilder cmd = new ProcessBuilder(args);
-			cmd.redirectErrorStream(true);
-			// eventually want:
-			//cmd.redirectError(cmd.Redirect.INHERIT);
-			//cmd.redirectOutput(cmd.Redirect.INHERIT);
-			// but instead have to get stream and copy to stdout...
-			// yuk!
-			Process proc = cmd.start();
-			java.io.InputStream out = proc.getInputStream();
-			byte[] buf = new byte[256];
-			while (out != null) {
-				try {
-					int n = out.read(buf);
-					if (n > 0) {
-						_sample = new String(Arrays.copyOfRange(buf, 0, n));
-					} else if (n < 0) {
-						out.close();
-						out = null;
-						proc.destroy();
-					}
-				} catch(Exception ee) {
-					out.close();
-					out = null;
-					proc.destroy();
-				}
-			}
-			x = proc.waitFor();
-			if (_cygwin && x == 1) { x = 0; } // todo: investigate this
-			if (x != 0) {
-				failed = "Exited " + Integer.toString(x);
-				if (_sample != null) {
-					failed += "\n" + _sample;
-				}
-			}
-		} catch(Exception ee) {
-			x = 1;
-			failed = ee.getMessage();
-		}
+		String[] out = new String[2];
+		int x = Wang_UI.runCommand(_intfs[num], out);
 		if (x == 0) {
 			_input = true;
+			_sample = out[0];
 			_sampix = 0;
 			do_ack(_iob);
 			return true;
 		} else {
 			// does the user already know it failed?
-			System.err.format("GROUP 1 07 %02d failed: %s\n", num, failed);
+			System.err.format("GROUP 1 07 %02d failed: (%d) %s\n", num, x, out[1]);
 			return false;
 		}
 	}
@@ -215,36 +172,6 @@ try {
 	}
 
 	public Wang_MicroFace(String prop, Component comp) {
-		_cygwin = false;
-		boolean windows = (System.getProperty("os.name").indexOf("Windows") >= 0);
-		String sh = System.getenv("SHELL");
-		if (sh == null) {
-			if (windows) {
-				_shell = new String[]{ "cmd.exe", "/c" };
-			} else {
-				// what else to do?
-				_shell = new String[]{ "sh", "-c" };
-			}
-		} else {
-			// try to interpret it? for now, assume *nix...
-			// including cygwin, so turn off "windows"...
-			if (windows) { // assume cygwin...
-				File shell = new File("c:\\cygwin64\\bin\\bash.exe");
-				if (!shell.exists()) {
-					shell = new File("c:\\cygwin32\\bin\\bash.exe");
-				}
-				if (!shell.exists()) {
-					shell = new File("c:\\cygwin\\bin\\bash.exe");
-				}
-				_shell = new String[]{ shell.getAbsolutePath(),
-							"--login", "-i", "-c" };
-				_cygwin = true;
-				windows = false;
-			} else {
-				_shell = new String[]{ sh, "-c" };
-			}
-		}
-
 		_panels = new JPanel[16];
 		_texts = new JTextArea[16];
 		_dia_pn = new JPanel();
@@ -285,7 +212,7 @@ try {
 		}
 		if (n == 0) {
 			// "demo" mode...
-			if (windows) {
+			if (Wang_UI.isWindows()) {
 				// both of these spew unwanted text, but should
 				// be ignored.
 				_intfs[13] = "echo %RANDOM%";	// random number 0-32767

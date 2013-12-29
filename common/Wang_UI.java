@@ -1,12 +1,13 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.7 2013/12/02 21:41:04 drmiller Exp $
+// $Id: Wang_UI.java,v 1.8 2013/12/29 19:09:03 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
+import java.util.Arrays;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.7 2013/12/02 21:41:04 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.8 2013/12/29 19:09:03 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -24,6 +25,126 @@ public class Wang_UI
 //		_props = props;
 //		_icon = icon;
 //	}
+
+	static private boolean _cygwin;
+	static private String[] _shell;
+	static private boolean _windows;
+
+	public static void Initialize() {
+		_cygwin = false;
+		_windows = (System.getProperty("os.name").indexOf("Windows") >= 0);
+		if (_windows) {
+			File shell = new File("c:\\cygwin64\\bin\\bash.exe");
+			if (!shell.exists()) {
+				shell = new File("c:\\cygwin32\\bin\\bash.exe");
+			}
+			if (!shell.exists()) {
+				shell = new File("c:\\cygwin\\bin\\bash.exe");
+			}
+			if (shell.exists()) {
+				_shell = new String[]{ shell.getAbsolutePath(),
+						"--login", "-i", "-c" };
+				_cygwin = true;
+				_windows = false; // for all intents and purposes?
+			} else {
+				_shell = new String[]{ "cmd.exe", "/c" };
+			}
+		} else {
+			String sh = System.getenv("SHELL");
+			if (sh == null) {
+				// what else to do?
+				_shell = new String[]{ "sh", "-c" };
+			} else {
+				_shell = new String[]{ sh, "-c" };
+			}
+		}
+	}
+
+	public static int runCommand(String cmd) {
+		int x = -1;
+		try {
+			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
+			args[_shell.length] = cmd;
+			ProcessBuilder pcmd = new ProcessBuilder(args);
+			pcmd.redirectErrorStream(true);
+			// eventually want:
+			//cmd.redirectError(pcmd.Redirect.INHERIT);
+			//cmd.redirectOutput(pcmd.Redirect.INHERIT);
+			// but instead have to get stream and copy to stdout...
+			// yuk!
+			Process proc = pcmd.start();
+			java.io.InputStream outf = proc.getInputStream();
+			byte[] buf = new byte[256];
+			while (outf != null) {
+				try {
+					int n = outf.read(buf);
+					if (n > 0) {
+						System.out.write(Arrays.copyOfRange(buf, 0, n));
+					} else if (n < 0) {
+						outf.close();
+						outf = null;
+						proc.destroy();
+					}
+				} catch(Exception ee) {
+					outf.close();
+					outf = null;
+					proc.destroy();
+				}
+			}
+			x = proc.waitFor();
+			if (_cygwin && x == 1) { x = 0; } // todo: investigate this
+		} catch(Exception ee) {
+			x = 1;
+		}
+		return x;
+	}
+
+	public static int runCommand(String cmd, String[] out) {
+		out[0] = new String();
+		out[1] = new String();
+		int x = -1;
+		try {
+			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
+			args[_shell.length] = cmd;
+			ProcessBuilder pcmd = new ProcessBuilder(args);
+			pcmd.redirectErrorStream(true);
+			// eventually want:
+			//cmd.redirectError(pcmd.Redirect.INHERIT);
+			//cmd.redirectOutput(pcmd.Redirect.INHERIT);
+			// but instead have to get stream and copy to stdout...
+			// yuk!
+			Process proc = pcmd.start();
+			java.io.InputStream outf = proc.getInputStream();
+			byte[] buf = new byte[256];
+			while (outf != null) {
+				try {
+					int n = outf.read(buf);
+					if (n > 0) {
+						out[0] += new String(Arrays.copyOfRange(buf, 0, n));
+					} else if (n < 0) {
+						outf.close();
+						outf = null;
+						proc.destroy();
+					}
+				} catch(Exception ee) {
+					outf.close();
+					outf = null;
+					proc.destroy();
+				}
+			}
+			x = proc.waitFor();
+			if (_cygwin && x == 1) { x = 0; } // todo: investigate this
+			if (x != 0) {
+				out[1] += "Exited " + Integer.toString(x);
+			}
+		} catch(Exception ee) {
+			x = 1;
+			out[1] += ee.toString();
+		}
+		return x;
+	}
+
+	public static boolean isWindows() { return _windows; }
 
 	public static Wang_Properties getProperties() { return _props; }
 
