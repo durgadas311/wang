@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.24 2013/12/29 03:16:19 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.25 2013/12/29 19:14:56 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -383,10 +383,12 @@ the numeric value to the calculator, and avoids problems with the CHANGE SIGN co
 sometimes affecting the previous number, not the next one being entered.
 An alternative is to always code a CLEAR X before the GROUP 1 command.
 
-<P>Several example "devices" are present by default, however they are based on Unix/Linux
-commands and won't work on Windows. These default commands are:
+<P>Several example "devices" are present by default, and attempts are made to provide
+equivalents on Windows (CYGWIN is preferred). These default commands are:
 
 <P><TABLE BORDER>
+<TR><TH>Device</TH><TH>Unix command</TH><TH>Number returned</TH></TR>
+<TR><TD>07 12</TD><TD>date +%s</TD><TD>Seconds since "epoch"</TD></TR>
 <TR><TD>07 13</TD><TD>echo $RANDOM</TD><TD>A pseudo-random number 0-32767</TD></TR>
 <TR><TD>07 14</TD><TD>date +%H%M%S</TD><TD>current time, HHMMSS</TD></TR>
 <TR><TD>07 15</TD><TD>date +%m%d%y</TD><TD>current date, MMDDYY</TD></TR>
