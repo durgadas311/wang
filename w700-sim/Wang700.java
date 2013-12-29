@@ -4,6 +4,7 @@ class Wang700 {
 	public static Wang_TapeDrive Tape;
 	public static Wang_OutputDevice CN24;
 	public static Wang_PaperTapeReader M703;
+	public static Wang_MicroFace M705;
 	public static Wang_CN36_Type2 M730;
 	public static Wang_Keyboard Kbd;
 	public static Wang_Help Help;
