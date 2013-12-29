@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.5 2013/12/27 16:26:57 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.6 2013/12/29 03:07:58 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -38,6 +38,13 @@ that are not exposed in the "Preferences" dialog, are:
 <DT>Last Disk image<DD>[wang700_disk_image]
 	The expansion Model 730 disk image file that was
 	installed when the calculator was last used. Default: none.
+<DT>Last Paper Tape image<DD>[wang700_703_image]
+	The Paper Tape image file that was mounted when the calculator was last used.
+<DT>Last Paper Tape image<DD>[wang700_705_xx]
+	(Where 'xx' is 0 to 15)
+	The "Micro Face" device (native command) that was last setup for the
+	given device number. These properties may be edited in the
+	"Devices" -> "705 Micro Face" menu.
 <DT>Last Output device<DD>[wang700_cn24_device]
 	The Output device that was installed when the calculator was last used.
 	Uses values such as "701" or "712".
@@ -308,6 +315,38 @@ essentially stopped while waiting for the Group I/O operation,
 the SR&nbsp;0000 would RETURN to the stopped state and the program would not continue
 without the GO).
 
+<H3>705 Micro Face</H3>
+
+<P>This device was a general-purpose electronic interface to any hardware that
+could generate BCD data, enabling real-time sampling of external data.
+It was limited to a maximum of 7 digits plus sign bit,
+and less if a decimal point was added somewhere. It supported scientific notation only
+as far as the program could decode certain digits as exponent (the device was not
+capable of using the SET EXP function of the calculator). Up to 16 devices were supported,
+allowing for sampling of 16 different data points.
+
+<P>Invoking GROUP&nbsp;1 07&nbsp;xx will cause external device 'xx' (00-15) to be
+activated and one sample read. The emulation has no "TTL fan-out" limitations, so
+the number of devices is not limited to 10. For the purposes of emulation, an "external
+device" is any arbitrary command to be executed on the native computer. The command
+must produce a single numeric value on it's stdout, although the emulation does not limit
+that to 7 digits. It is recommended that the sign be appended to the string, for
+example "55-" to represent negative fifty five.
+This is the way the original hardware presented
+the numeric value to the calculator, and avoids problems with the CHANGE SIGN code
+sometimes affecting the previous number, not the next one being entered.
+An alternative is to always code a CLEAR X before the GROUP 1 command.
+
+<P>Several example "devices" are present by default, however they are based on Unix/Linux
+commands and won't work on Windows. These default commands are:
+
+<P><TABLE BORDER>
+<TR><TD>07 13</TD><TD>echo $RANDOM</TD><TD>A pseudo-random number 0-32767</TD></TR>
+<TR><TD>07 14</TD><TD>date +%H%M%S</TD><TD>current time, HHMMSS</TD></TR>
+<TR><TD>07 15</TD><TD>date +%m%d%y</TD><TD>current date, MMDDYY</TD></TR>
+</TABLE>
+
+<P>"Devices" (commands) are setup through the "705 Micro Face" item in the "Devices" menu.
 
 <H3>Simulator Internals</H3>
 
