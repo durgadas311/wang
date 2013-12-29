@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.1 2013/12/29 00:00:41 drmiller Exp $
+// $Id: Wang_MicroFace.java,v 1.2 2013/12/29 00:23:07 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 class Wang_MicroFace
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.1 2013/12/29 00:00:41 drmiller Exp $";
+	final String ident = "$Id: Wang_MicroFace.java,v 1.2 2013/12/29 00:23:07 drmiller Exp $";
 
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";
@@ -122,16 +122,22 @@ class Wang_MicroFace
 
 		if (_btns[OPTION_APPLY].equals(res) ||
 				_btns[OPTION_SAVE].equals(res)) {
+try {
+			Wang_Properties temp = Wang_UI.getProperties().getClass().newInstance();
 			for (int x = 0; x < 16; ++x) {
+				String p = _prop + Integer.toString(x);
 				if (_texts[x].getText().length() > 0) {
 					_intfs[x] = _texts[x].getText();
+					temp.setProperty(p, _intfs[x]);
 				} else {
 					_intfs[x] = null;
+					temp.remove(p);
 				}
 			}
 			if (_btns[OPTION_SAVE].equals(res)) {
-				// todo: save properties...
+				temp.save();
 			}
+} catch (Exception ee) {}
 		}
 	}
 
