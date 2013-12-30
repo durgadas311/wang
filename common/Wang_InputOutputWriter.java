@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.18 2013/12/19 22:34:33 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.19 2013/12/30 22:07:28 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.18 2013/12/19 22:34:33 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.19 2013/12/30 22:07:28 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -18,6 +18,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	// Group 2 04 13 = Type (echo back to OutputWriter) (!GLRN)
 
 	private int _glrn;
+	private JFrame _frame;
 
 	public void reset() {
 		_glrn = 0;
@@ -28,15 +29,24 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		super.getPaper().removeKeyListener(this);
 	}
 
+	public void onOff(boolean on) {
+		// need to trap when we're "disconnected", shut off, etc.
+		_frame.setVisible(on);
+		super.onOff(on);
+	}
+
 	public boolean start_cn36(int iob, int c) {
-		if (iob != 5) return false;
+		// don't care about run vs. keyboard modes?
+		// how would this work from a running program?!
+		// especially if GLRN is asserted...
+		if ((iob & ~0x2) != 5) return false;
 		if (c == 0x4c) {
 			_glrn = 1;
 			_input = true;
 			_indOUTPUT.setOn(false);
 			_indINPUT.setOn(true);
 			super.getPaper().addKeyListener(this);
-			super.onOff(true);
+			onOff(true);
 			return true;
 		}
 		if (c == 0x4d) {
@@ -45,7 +55,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			_indOUTPUT.setOn(false);
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
-			super.onOff(true);
+			onOff(true);
 			return true;
 		}
 		return false;
@@ -67,7 +77,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.18 $ $Date: 2013/12/19 22:34:33 $<BR>"+
+			"$Revision: 1.19 $ $Date: 2013/12/30 22:07:28 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -128,7 +138,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 					butt.setIcon(_togR);
 					_indOUTPUT.setOn(false);
 					super.getPaper().addKeyListener(this);
-					super.onOff(true);
+					onOff(true);
 				}
 				return;
 			}
@@ -374,16 +384,16 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 		// now create control panel...
 
-		JFrame frame = new JFrame();
-		frame.add(new ControlPanel(this));
-		frame.getContentPane().setBackground(Color.black);
-		frame.pack();
-		frame.addKeyListener(new ProxyKeyHandler(this));
+		_frame = new JFrame();
+		_frame.add(new ControlPanel(this));
+		_frame.getContentPane().setBackground(Color.black);
+		_frame.pack();
+		_frame.addKeyListener(new ProxyKeyHandler(this));
 
 		Wang_UI.registerCN36(this);
 
 		// Not initially...
-		frame.setVisible(true);
+		//_frame.setVisible(true);
 	}
 
 	static public String getModel() {
