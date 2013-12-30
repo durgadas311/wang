@@ -1,0 +1,113 @@
+<HTML>
+<HEAD>
+<!-- $Id: wang700func.html,v 1.1 2013/12/30 20:53:08 drmiller Exp $ -->
+<STYLE TYPE="text/css">
+td {text-align: center;}
+</STYLE>
+</HEAD>
+<BODY>
+
+<H2>Wang 700 Programming Functions</H2>
+
+This is an explanation of advance programming codes, some of which
+are undocumented in Wang manuals.  Most of these codes are used only
+in programs, although many of them work from the keyboard in Run mode.
+
+<P><TABLE BORDER>
+<TR><TH>Key Sequence</TH><TH>Code</TH><TH>Function</TH></TR>
+
+<TR><TH COLSPAN=3>"Write Alpha" Codes</TH></TR>
+<TR><TD>WRITE&nbsp;ALPHA 1/X</TD><TD>04&nbsp;12, 06&nbsp;15</TD><TD>0.75 second pause</TD></TR>
+
+<TR><TD>WRITE&nbsp;ALPHA 0-9</TD><TD>04&nbsp;12, 07&nbsp;xx</TD><TD>X &#215;= 10<SUP>xx</SUP>("0" means 10)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA (**)</TD><TD>04&nbsp;12, 04&nbsp;xx</TD><TD>X &divide;= 10<SUP>xx</SUP>("0" means 10)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA GO</TD><TD>04&nbsp;12, 05&nbsp;14</TD><TD>X = 180 &divide; &#960;</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA STOP</TD><TD>04&nbsp;12, 05&nbsp;15</TD><TD>X = &#960; &divide; 180</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA GROUP2</TD><TD>04&nbsp;12, 04&nbsp;10</TD><TD>Skip if Y positive (Y &#8805; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA WRITE</TD><TD>04&nbsp;12, 04&nbsp;11</TD><TD>Skip if Y zero (Y = 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA SKIP&nbsp;IF&nbsp;ERROR</TD><TD>04&nbsp;12, 05&nbsp;10</TD><TD>Skip if Y negative (Y &lt; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA RETURN</TD><TD>04&nbsp;12, 05&nbsp;11</TD><TD>Skip if Y not zero (Y &#8800; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA LOG<SUB>10</SUB>X</TD><TD>04&nbsp;12, 06&nbsp;10</TD><TD>Skip if X positive (X &#8805; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA LOG<SUB>e</SUB>X</TD><TD>04&nbsp;12, 06&nbsp;11</TD><TD>Skip if X zero (X = 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA SET&nbsp;EXP</TD><TD>04&nbsp;12, 07&nbsp;10</TD><TD>Skip if X negative (X &lt; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA CHANGE&nbsp;SIGN</TD><TD>04&nbsp;12, 07&nbsp;11</TD><TD>Skip if X not zero (X &#8800; 0)</TD></TR>
+
+<TR><TH COLSPAN=3>Program Control</TH></TR>
+
+<TR><TD>MARK mm</TD><TD>04&nbsp;08, mm&nbsp;mm</TD><TD>Set Label mm mm</TD></TR>
+<TR><TD>SEARCH mm</TD><TD>04&nbsp;07, mm&nbsp;mm</TD><TD>Goto Label (MARK, mm mm)</TD></TR>
+<TR><TD>*</TD><TD>00&nbsp;00 - 03&nbsp;15</TD><TD>Search+Return (Call) function (MARK, ff ff)</TD></TR>
+
+<TR><TH COLSPAN=3>I/O Codes</TH></TR>
+
+<TR><TD>WRITE xy*</TD><TD>04&nbsp;11, xx&nbsp;yy<BR>xx: 00-09<BR>yy: 00-15</TD><TD>
+					Print X to "Output Writer"<BR>
+					xx = integer places<BR>yy = decimal places</TD></TR>
+<TR><TD>WRITE y*</TD><TD>04&nbsp;11, 12&nbsp;yy</TD><TD>Print yy blanks to "Output Writer"</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA cc*...END&nbsp;ALPHA</TD><TD>04&nbsp;12, cc&nbsp;cc ... 04&nbsp;13</TD><TD>Prints string to OutputWriter<BR>
+			until END&nbsp;ALPHA encountered<BR>cc&nbsp;cc must be 00&nbsp;00 - 03&nbsp;15 (print character), or<BR>
+			08&nbsp;00 - 11&nbsp;15 plot corresponding character 00&nbsp;00 - 03&nbsp;15
+			based on display X and Y</TD></TR>
+<TR><TD>*</TD><TD>08&nbsp;yy</TD><TD>Page in/out blocks of program steps<BR>
+			to/from "Fixed/Removable Disk". Display Y is
+			disk address, X is program step. 'yy' determines
+			in/out and number of steps.
+
+<TABLE BORDER>
+<TR>	<TD>08&nbsp;00 through 08&nbsp;07</TD>
+	<TD>page-in blocks of program steps from "device 2".
+	"Source" address is in Y (integer portion, 0 - 16M).
+	In X is the starting program step number
+	(integer portion, 0000 - 1983).
+	Length determined by 'xx':
+	<TABLE BORDER>
+	<TR><TH>00</TH><TH>01</TH><TH>02</TH><TH>03</TH>
+		<TH>04</TH><TH>05</TH><TH>06</TH><TH>07</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>(nothing)</TD></TR>
+	</TABLE>
+	</TD></TR>
+<TR>	<TD>08&nbsp;08 through 08&nbsp;15</TD>
+	<TD>page-out blocks of program steps to "device 2".
+	"Destination" address is in Y (integer portion, 0 - 16M).
+	In X is the starting program step number
+	(integer portion, 0000 - 1983).
+	Length determined 'xx':
+	<TABLE BORDER>
+	<TR><TH>08</TH><TH>09</TH><TH>10</TH><TH>11</TH>
+		<TH>12</TH><TH>13</TH><TH>14</TH><TH>15</TH></TR>
+	<TR><TD>1 step</TD>
+		<TD>8 steps</TD>
+		<TD>16 steps</TD>
+		<TD>32 steps</TD>
+		<TD>64 steps</TD>
+		<TD>128 steps</TD>
+		<TD>256 steps</TD>
+		<TD>(nothing)</TD></TR>
+	</TABLE>
+	</TD></TR>
+</TABLE>
+</TD></TR>
+
+<TR><TD>GROUP1 xx*</TD><TD>04&nbsp;09, xx&nbsp;xx</TD><TD>Output 'xx' to "device 4"
+			(keyboard mode) or "device 6" (running program) and stop.<BR>
+			Device then takes over and issues GO when done.</TD></TR>
+<TR><TD>GROUP2 xx*</TD><TD>04&nbsp;10, xx&nbsp;xx</TD><TD>Output 'xx' to "device 5"
+			(keyboard mode) or "device 7" (running program) and stop.<BR>
+			Device then takes over and issues GO when done.</TD></TR>
+
+</TABLE>
+
+<P>* Requires use of toggle switches in combination with keys 00-15 to form code.
+
+<P>** Requires either use of toggle switches in combination with keys 00-15 to form code,
+      or knowledge of which key generates desired code.
+
+</BODY>
+</HTML>

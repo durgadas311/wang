@@ -1,0 +1,131 @@
+<HTML>
+<!-- $Id: wang700tech.html,v 1.1 2013/12/30 20:53:08 drmiller Exp $ -->
+
+<H2>Wang 700 Programming Techniques</H2>
+
+In general, any key that can be used in Run mode may be entered into a program and
+used to perform the same function there. Exceptions are the keys PRIME, SET P.C.,
+VERIFY PROG, RECORD PROG, and STEP. These all directly affect the calculator
+and cannot be used in a program.
+
+<P>Unless otherwise directed by program codes, the execution of a program continues
+through the steps in numerical order.
+
+<H3>Example program: convert Fahrenheit to Celsius</H3>
+
+Here is a simple program to convert degrees
+Fahrenheit to degrees Celsius. The basic formula being used is:
+
+<PRE>
+C = (F - 32) * 5 / 9
+</PRE>
+
+<P>The program will assume that the user entered the degrees F before pressing GO.
+The following program will perform the conversion.
+Not, the "01 05" is a direct register number, and the code is entered by
+setting the "10" toggle switch ON (all others OFF) and pressing the 05 key.
+Since no other special codes are being entered in this program, the toggle
+switches need only be setup once and whenever the "01 05" code needs to be
+entered simply press the 05 key.
+
+<PRE>
+STORE DIRECT
+01 05
+3
+2
+- DIRECT
+01 05
+5
+&#215; DIRECT
+01 05
+9
+&divide; DIRECT
+01 05
+RECALL DIRECT
+01 05
+END PROG
+</PRE>
+
+<P>Note, the above keys (except for END PROG) are the same ones that would be used
+to perform the conversion manually, using the Wang 700 as a simple calculator.
+
+<P>Place the calculator in Learn mode (or Learn and Print) and enter the above codes.
+If you used Learn and Print, or List Program after entering it, you should have
+the following listing on the printer:
+
+<PRE>
+ 0000   04 04  
+ 000l   0l 05  
+ 0002   07 03  
+ 0003   07 02  
+ 0004   04 0l  
+ 0005   0l 05  
+ 0006   07 05  
+ 0007   04 02  
+ 0008   0l 05  
+ 0009   07 09  
+ 00l0   04 03  
+ 00ll   0l 05  
+ 00l2   04 05  
+ 00l3   0l 05  
+</PRE>
+
+<P>Note, the END&nbsp;PROG code is not printed by the List Program function.
+
+<P>Now go back to Run mode, press PRIME, enter a number of degrees Fahrenheit, and press GO.
+You should see in the display the number converted to degrees Celsius.
+
+<P>This program is included with the distribution. You should be able to
+load it using the tape drive. It is named "celsius.w7t".
+
+<P>This example uses the DIRECT register access functions, however it is possible to
+use the X and Y display registers together in math operations, and that
+can simplify a program.
+
+<H3>Changing Program execution Sequence</H3>
+
+Branching (Goto) is accomplished with the SEARCH command.
+SEARCH is followed by an arbitrary code that corresponds to
+a previously MARK'ed step using the same code. For example,
+SEARCH 07&nbsp;00 will cause the program to continue execution at
+step(s) after the MARK 07&nbsp;00 in the program.
+
+<P>Subroutine calls are made by using codes 00&nbsp;00 through 03&nbsp;15,
+and require use of the toggle switches and keys 00 to 15.
+Executing one of these codes will cause a "call" (Search-and-Return) to
+the step MARK'ed with the same code.
+For example, 00&nbsp;00 will make a subroutine
+call to MARK 00&nbsp;00.
+A subroutine ends with a RETURN code, which causes the program
+to resume at the step after the call. Note, a complex
+subroutine may have multiple exit points, each with its own RETURN.
+
+<P>In addition, there are "Skip" codes that test some condition and
+then skip the next two program steps if that condition is true.
+Note, 2 programs steps is the number required for a SEARCH command.
+If less than 2 steps are required,
+the remaining may be filled with GO commands.
+The basic skip commands compare the X and Y display, or test the Program Error
+state.
+
+<P><TABLE BORDER>
+<TR><TD>SKIP<BR>IF<BR>ERROR</TD><TD>Skip the next 2 steps if the Program Error condition is true. This also clears the error condition.</TD>
+<TR><TD>SKIP<BR>IF<BR>Y&#8805;X</TD><TD>Skip the next 2 steps if Y is greater than or equal to X</TD>
+<TR><TD>SKIP<BR>IF<BR>Y=X</TD><TD>Skip the next 2 steps if Y is equal to X</TD>
+<TR><TD>SKIP<BR>IF<BR>Y&lt;X</TD><TD>Skip the next 2 steps if Y is less than X</TD>
+</TABLE>
+
+<P>There are additional jump codes:
+
+<P><TABLE BORDER>
+<TR><TD>WRITE&nbsp;ALPHA<BR>GROUP2</TD><TD>Skip the next 2 steps if Y positive (Y &#8805; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>WRITE</TD><TD>Skip the next 2 steps if Y zero (Y = 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>SKIP&nbsp;IF&nbsp;ERROR</TD><TD>Skip the next 2 steps if Y negative (Y &lt; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>RETURN</TD><TD>Skip the next 2 steps if Y not zero (Y &#8800; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>LOG<SUB>10</SUB>X</TD><TD>Skip the next 2 steps if X positive (X &#8805; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>LOG<SUB>e</SUB>X</TD><TD>Skip the next 2 steps if X zero (X = 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>SET&nbsp;EXP</TD><TD>Skip the next 2 steps if X negative (X &lt; 0)</TD></TR>
+<TR><TD>WRITE&nbsp;ALPHA<BR>CHANGE&nbsp;SIGN</TD><TD>Skip the next 2 steps if X not zero (X &#8800; 0)</TD></TR>
+</TABLE>
+
+</HTML>

@@ -1,0 +1,87 @@
+<HTML>
+<!-- $Id: wang700prog.html,v 1.1 2013/12/30 20:53:08 drmiller Exp $ -->
+
+<H2>Programming the Wang 700</H2>
+
+Programs may be entered into the calculator memory in the "Learn",
+or "Learn and Print" modes.
+In Learn and Print mode, each program step entered will be printed.
+The printer must be "On" to use Learn and Print.
+
+<P>Each key pressed in Learn mode will be entered into the current program
+step, and the program step (Program Counter, or P.C.) will advance to the
+next step.  Pressing PRIME will return to step 0000. The "Set P.C." key
+may be used to go directly to any program step.  Press Set P.C. followed
+by 4 digits to select a program step.  This calculator has 1984 program
+steps, numbered 0000 through 1983.
+
+<H3>Listing a Program</H3>
+
+A program may be listed by going to "List Program" mode and pressing "GO"
+(actually, almost any key will start the listing).
+One of the "OutputWriter" devices must be connected.
+The program listing will continue until an END&nbsp;PROG code is
+encountered (not printed). In addition, the calculator will stop listing
+every 1000 steps (if you forgot to put an END&nbsp;PROG in your program,
+or your program is longer than 1000 steps).
+
+<P>Program editing functions (S.M., INS, B.S., DEL) are activated by
+"Run-Learn" mode, where noth Run and Learn buttons are depressed.
+This mode functions nearly identically to Learn mode, except for the
+different functions assigned the PRIME, SET P.C., VERIFY PROG, and RECORD PROG
+keys.
+
+<P><B>Simulator Notes:</B>
+<UL>
+<LI>An OutputWriter device is connected using the "Devices" -> "Output Device..."
+menu.
+<LI>Run-Learn mode is entered by clicking Run down, then holding (your native keyboard)
+Shift key down while clicking Learn down (either order may be used).
+<LI>A program listing may be saved to a file
+by using the Save menu option in the printer window.  Note, a program
+listing cannot be loaded back into the calculator, only tape image files
+may be loaded.
+<UL>
+
+<H3>Running a Program</H3>
+
+A program may be run by going to "Run" mode (depressing the Run
+bushbutton) and pressing "GO".  The display will normally be blank during
+program execution, however a program may use the codes "WRITE ALPHA 1/X"
+to pause for 0.75 second, allowing the current
+display contents to be seen.
+
+<P>Also, programs may use the STOP code to cause the program
+to stop. The user must press GO to continue running the program. This
+technique is often used to let the user enter variables for the program.
+It is common to CLEAR&nbsp;X before the STOP, in order to make the
+request for input obvious.  Alternatively, a special, meaningful, value
+may be in the display (e.g. parameter number being requested).
+
+<P>A program will also stop when it encounters an END PROG code. however,
+the program cannot be resumed after that (only started over at beginning),
+as the program counter is reset to 0000.
+
+<P>Also note, having more than one END&nbsp;PROG code in a program can
+be a problem. Not the least of which is for the List Program mode,
+but also for recording programs to tape.  Normally, if a program has
+multiple exit points they will all be branches to a single END&nbsp;PROG,
+and that is at the physical end of all program codes. (See SEARCH/MARK
+in Programming Techniques).  In other words, there should not be any
+program codes after an END&nbsp;PROG. This also includes any extended register
+data that might be stored in the program. In addition, the INS and DEL
+functions for editing programs will depend on a single END&nbsp;PROG code,
+at the end of all valid code.
+
+<P>Also note that one of the extended registers has same number as the
+END&nbsp;PROG code (05&nbsp;12).  Accessing this register directly
+in a program will confuse List Program and the tape functions (and
+INS/DEL). This also applies to any "two step"
+program code that might have 05&nbsp;12 as the second code.
+
+<H3>Debugging a Program</H3>
+
+<P>Nothing is known about how debugging was done on the Wang 700 Series.
+There do not appear to be any trace facilities.
+
+</HTML>
