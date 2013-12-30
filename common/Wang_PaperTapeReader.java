@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PaperTapeReader.java,v 1.5 2013/12/27 16:28:55 drmiller Exp $
+// $Id: Wang_PaperTapeReader.java,v 1.6 2013/12/30 22:07:00 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,13 +8,13 @@ import javax.swing.*;
 class Wang_PaperTapeReader
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.5 2013/12/27 16:28:55 drmiller Exp $";
+	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.6 2013/12/30 22:07:00 drmiller Exp $";
 
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";
 
-	// Group 2 00 00 = skip non-num, tread numeric until non-numeric, GO
-	// Group 2 00 07 = skip until CR, GO
+	// Group 1 00 00 = skip non-num, tread numeric until non-numeric, GO
+	// Group 1 00 07 = skip until CR, GO
 
 	String _prop;
 	String _mountLabel;
