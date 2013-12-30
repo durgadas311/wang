@@ -52,7 +52,7 @@ char *op[16][16] = {
 },
 // WRITE_ALPHA prefixed codes...
 [12] = {
-	"\u00D7 1e-0", "\u00D7 1e-1", "\u00D7 1e-2", "\u00D7 1e-3", "\u00D7 1e-4",
+	"\u00D7 1e-10","\u00D7 1e-1", "\u00D7 1e-2", "\u00D7 1e-3", "\u00D7 1e-4",
 	"\u00D7 1e-5", "\u00D7 1e-6", "\u00D7 1e-7", "\u00D7 1e-8", "\u00D7 1e-9",
 	"SK IF Y+",
 	"SK IF Y=0",
@@ -82,7 +82,7 @@ char *op[16][16] = {
 	"PAUSE"
 },
 [15] = {
-	"\u00D7 1e0", "\u00D7 1e1", "\u00D7 1e2", "\u00D7 1e3", "\u00D7 1e4",
+	"\u00D7 1e10","\u00D7 1e1", "\u00D7 1e2", "\u00D7 1e3", "\u00D7 1e4",
 	"\u00D7 1e5", "\u00D7 1e6", "\u00D7 1e7", "\u00D7 1e8", "\u00D7 1e9",
 	"SK IF X-",
 	"SK IF X\u22600",
@@ -108,7 +108,11 @@ static char *decode(uint8_t a, uint8_t b) {
 				if (op[a + 8][b] == NULL) {
 					sprintf(buf, "?? %02d%02d", a, b);
 				} else {
-					sprintf(buf, "%s", op[a + 8][b]);
+					if (a == 4 && b == 13) { // END ALPHA
+						sprintf(buf, "%s", op[a + 8][b]);
+					} else {
+						sprintf(buf, "%s // %s", op[a][b], op[a + 8][b]);
+					}
 				}
 				reg = 0;
 			} else if (a < 12) {
