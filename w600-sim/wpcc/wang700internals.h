@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.9 $ \"");
+asm(".ident \"Wang 700 Compiler over GCC $Revision: 1.10 $ \"");
 
 asm(	".section .wang700code, \"a\";"
 	".include \"wang700opcodes.s\";"
@@ -39,6 +39,15 @@ asm(	".section .wang700code, \"a\";"
 #define _longreg(reg)		asm(".pushsection .wang700regs,1,\"a\";" \
 					".type _longreg_" #reg " STT_OBJECT;"	\
 					".global _longreg_" #reg ";"	\
+					".set _longreg_" #reg ",longreg_base+(longreg_base-.)-1;" \
+					".byte 0;"	\
+					".popsection");
+#define _longregs(reg,num)		asm(".pushsection .wang700regs,1,\"a\";" \
+					".type _longreg_" #reg " STT_OBJECT;"	\
+					".global _longreg_" #reg ";"	\
+					".rept (" #num "-1);"		\
+					".byte 0;"	\
+					".endr;"	\
 					".set _longreg_" #reg ",longreg_base+(longreg_base-.)-1;" \
 					".byte 0;"	\
 					".popsection");
@@ -151,6 +160,8 @@ asm(	".section .wang700code, \"a\";"
 // for the register data.
 #define UREG(name)		_longreg(name)
 
+#define UREGS(name, num)	_longregs(name,num)
+
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		asm(".error \"run w7cpp preprocessor for ENTER()\"");
 #define IREG_DATA(name,val)	asm(".error \"run w7cpp preprocessor for IREG_DATA()\"");
@@ -160,7 +171,7 @@ asm(	".section .wang700code, \"a\";"
 // Enter into X the register number associated with the symbol <label>
 #define ENTER_REGNO(name)	_bytecode(0xed) \
 				_bytecode(0xed) \
-				_bytecode(_longreg_ #name )
+				_bytecode(_longreg_ ##name )
 
 // Enter into X the highest register number not occupied by program code
 #define ENTER_LAST_REGNO()	_bytecode(0xed) \
