@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.8 2013/12/29 19:09:03 drmiller Exp $
+// $Id: Wang_UI.java,v 1.9 2013/12/31 15:32:34 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.8 2013/12/29 19:09:03 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.9 2013/12/31 15:32:34 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -60,18 +60,24 @@ public class Wang_UI
 		}
 	}
 
+	// run command using same stdio as calling process...
 	public static int runCommand(String cmd) {
 		int x = -1;
 		try {
 			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
 			args[_shell.length] = cmd;
 			ProcessBuilder pcmd = new ProcessBuilder(args);
+			// eventually want: (but need Java 7)
+			//pcmd.inheritIO();
+			// instead have to get stream and copy to stdout...
+			// yuk! plus can't handle stdin. would require 3 threads
+			// to connect stdin, stdout, stderr between new process
+			// and Runtime.
+			// Could append/prepend shell redirection for "/dev/tty"
+			// but that does not work on Windows. Also does not work
+			// for stdin (for some reason). Things like "more" just
+			// seem to get EOF.
 			pcmd.redirectErrorStream(true);
-			// eventually want:
-			//cmd.redirectError(pcmd.Redirect.INHERIT);
-			//cmd.redirectOutput(pcmd.Redirect.INHERIT);
-			// but instead have to get stream and copy to stdout...
-			// yuk!
 			Process proc = pcmd.start();
 			java.io.InputStream outf = proc.getInputStream();
 			byte[] buf = new byte[256];
@@ -83,7 +89,9 @@ public class Wang_UI
 					} else if (n < 0) {
 						outf.close();
 						outf = null;
-						proc.destroy();
+						// do not destroy on EOF, process might
+						// otherwise exit normally.
+						//proc.destroy();
 					}
 				} catch(Exception ee) {
 					outf.close();
@@ -91,6 +99,7 @@ public class Wang_UI
 					proc.destroy();
 				}
 			}
+
 			x = proc.waitFor();
 			if (_cygwin && x == 1) { x = 0; } // todo: investigate this
 		} catch(Exception ee) {
@@ -99,6 +108,11 @@ public class Wang_UI
 		return x;
 	}
 
+	// run command with stdout+stderr collected in "out[0]".
+	// Also, on failure additional error messages may be appended to "out[1]".
+	// "out" must have been initialized to (at least) new String[2] before call.
+	// This is intended for short-running, deterministic, commands producing
+	// little (or no) output. Does not support interactive commands (stdin).
 	public static int runCommand(String cmd, String[] out) {
 		out[0] = new String();
 		out[1] = new String();
@@ -107,16 +121,15 @@ public class Wang_UI
 			String[] args = Arrays.copyOf(_shell, _shell.length + 1);
 			args[_shell.length] = cmd;
 			ProcessBuilder pcmd = new ProcessBuilder(args);
+			// should keep stderr separate, but that requires an
+			// additional thread in order to allow asynchronous operation
+			// of stdout/stderr.
 			pcmd.redirectErrorStream(true);
-			// eventually want:
-			//cmd.redirectError(pcmd.Redirect.INHERIT);
-			//cmd.redirectOutput(pcmd.Redirect.INHERIT);
-			// but instead have to get stream and copy to stdout...
-			// yuk!
 			Process proc = pcmd.start();
 			java.io.InputStream outf = proc.getInputStream();
 			byte[] buf = new byte[256];
 			while (outf != null) {
+				// assume both close/fail together...
 				try {
 					int n = outf.read(buf);
 					if (n > 0) {
@@ -124,9 +137,14 @@ public class Wang_UI
 					} else if (n < 0) {
 						outf.close();
 						outf = null;
-						proc.destroy();
+						// destroying process here (EOF) causes
+						// return value to be non-zero...
+						// even if process just exited normally.
+						//proc.destroy();
 					}
 				} catch(Exception ee) {
+					// this indicates severe system fault,
+					// so go ahead and destroy process.
 					outf.close();
 					outf = null;
 					proc.destroy();
