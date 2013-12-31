@@ -1,0 +1,79 @@
+#include "wang700.h"
+
+#include "libplot/plotter.w7h"
+
+UREGS(distro,10)
+UREG(nsamp)
+UREG(index)
+
+LLABEL(loop1)
+LLABEL(loop2)
+
+BEGIN()
+
+	ST_DIR(nsamp)
+	ENTER_REGNO(distro)
+	ST_DIR(temp6)
+	ST_Y()
+	ENTER(10)
+	ADD_Y()
+	ST_Y_DIR(temp5)
+	RE_Y_DIR(temp6)
+	// clear array distro[]
+MARK(loop1)
+	CLR_X()
+	ST_IND()
+	ENTER(1)
+	ADD_Y()
+	RE_DIR(temp5)
+	SK_IF_GE() SEARCH(loop1)
+
+	// now take samples
+	RE_DIR(nsamp)
+	ST_DIR(temp4)
+MARK(loop2)
+	CLR_X()
+	GROUP1(0x7d)	// this device is 0-32767 random gen
+	ST_Y()
+	ENTER(3276.8)
+	DIV_Y()	// should give us 0-9[.99]
+	EXCHG_Y()
+	INT()
+	EXCHG_Y()
+	ENTER_REGNO(distro)
+	ADD_Y()
+	ENTER(1)
+	ADD_IND()	// count one in that range
+
+	SUB_DIR(temp4)
+	RE_DIR(temp4)
+	SK_IF_XM() SEARCH(loop2)
+
+	// collected enough samples, now graph it
+	ENTER(0)
+	ST_DIR(startX)
+	ENTER(9)
+	ST_DIR(maxX)
+	ENTER(1)
+	ST_DIR(stepX)
+	ENTER(50)
+	ST_DIR(scaleX)
+	RE_Y_DIR(nsamp)
+	ENTER(5000)
+	EXCHG_Y()
+	DIV_Y()
+	ST_Y_DIR(scaleY)
+	ENTER(50)
+	ST_DIR(tranX)
+	ST_DIR(tranY)
+	FCALL(plotter)
+	END_PROG()
+
+MARK(GRAPHING_FUNCTION)
+	ST_Y()
+	ENTER_REGNO(distro)
+	ADD_Y()
+	RE_IND()
+	RETURN()
+
+END()
