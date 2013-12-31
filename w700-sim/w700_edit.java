@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w600_edit.java,v 1.4 2013/12/31 23:52:00 drmiller Exp $
+// $Id: w700_edit.java,v 1.1 2013/12/31 23:52:00 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,21 +7,21 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
 
-public class w600_edit
+public class w700_edit
 {
-	final String ident = "$Id: w600_edit.java,v 1.4 2013/12/31 23:52:00 drmiller Exp $";
+	final String ident = "$Id: w700_edit.java,v 1.1 2013/12/31 23:52:00 drmiller Exp $";
 
 	public static void main(String[] args) {
-		Wang_UI.setProperties(new Wang600_Properties());
+		Wang_UI.setProperties(new Wang700_Properties());
 		//Wang_UI.setIcon(new ImageIcon(img));
-		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
-		Wang_UI.setSeries("6");
+		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang700_home"));
+		Wang_UI.setSeries("7");
 
-		JFrame frame = new JFrame("Wang 600-Series Card Editor");
+		JFrame frame = new JFrame("Wang 700-Series Card Editor");
 		frame.setLayout(new FlowLayout());
 
 		Wang_MarkSenseCard card;
-		Wang_InstructionDecoder deco = new Wang600_InstrDecoder();
+		Wang_InstructionDecoder deco = new Wang700_InstrDecoder();
 		if (args.length > 0) {
 			card = new Wang_MarkSenseCard(deco, args[0]);
 		} else {
@@ -35,7 +35,7 @@ public class w600_edit
 		scroll.setPreferredSize(new Dimension(512,800));
 		frame.add(scroll);
 
-		Wang614_Help help = new Wang614_Help();
+		Wang714_Help help = new Wang714_Help();
 
 		JMenuBar mb = new JMenuBar();
 		mb.add(card.getMenu());
@@ -51,10 +51,10 @@ public class w600_edit
 	}
 }
 
-class Wang614_Help extends JComponent
+class Wang714_Help extends JComponent
 	implements ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
-	static final long serialVersionUID = 311857692031L;
+	static final long serialVersionUID = 311857792031L;
 	private JFrame _frame;
 	private JEditorPane _text;
 	private JScrollPane _scroll;
@@ -66,7 +66,7 @@ class Wang614_Help extends JComponent
 
 	public JMenu getMenu() { return _menu; }
 
-	public Wang614_Help() {
+	public Wang714_Help() {
 		_help = new JMenuItem("Show Help", KeyEvent.VK_H);;
 		_help.addActionListener(this);
 		_about = new JMenuItem("About", KeyEvent.VK_A);
@@ -76,8 +76,8 @@ class Wang614_Help extends JComponent
 		_menu.add(_help);
 		_menu.add(_about);
 
-		java.net.URL url = this.getClass().getResource("docs/wang614.html");
-		_frame = new JFrame("Wang 614 Editor Help");
+		java.net.URL url = this.getClass().getResource("docs/wang714.html");
+		_frame = new JFrame("Wang 714 Editor Help");
 		_frame.setLayout(new FlowLayout());
 		try {
 			_text = new JEditorPane(url);
@@ -104,21 +104,6 @@ class Wang614_Help extends JComponent
 		mi = new JMenuItem("Basic Operation", KeyEvent.VK_B);
 		mi.addActionListener(this);
 		mu.add(mi);
-//		mi = new JMenuItem("Using the Calculator", KeyEvent.VK_U);
-//		mi.addActionListener(this);
-//		mu.add(mi);
-//		mi = new JMenuItem("Sample Programs", KeyEvent.VK_A);
-//		mi.addActionListener(this);
-//		mu.add(mi);
-//		mi = new JMenuItem("Using the Tape Drive", KeyEvent.VK_D);
-//		mi.addActionListener(this);
-//		mu.add(mi);
-//		mi = new JMenuItem("How to Program", KeyEvent.VK_P);
-//		mi.addActionListener(this);
-//		mu.add(mi);
-//		mi = new JMenuItem("Programming Techniques", KeyEvent.VK_T);
-//		mi.addActionListener(this);
-//		mu.add(mi);
 
 		_frame.setJMenuBar(mb);
 		_frame.add(_scroll);
@@ -134,18 +119,18 @@ class Wang614_Help extends JComponent
 	}
 
 	public void showAbout() {
-		java.net.URL url = this.getClass().getResource("icons/wang614.png");
+		java.net.URL url = this.getClass().getResource("icons/wang714.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
-			"Wang 614 Mark Sense Card Editor<BR>"+
-			"$Revision: 1.4 $ $Date: 2013/12/31 23:52:00 $<BR>"+
+			"Wang 714 Mark Sense Card Editor<BR>"+
+			"$Revision: 1.1 $ $Date: 2013/12/31 23:52:00 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
 			"Developed by Douglas Miller<BR>"+
-			"http://wang600.durgadas.com<BR>"+
+			"http://wang700.durgadas.com<BR>"+
 			"</CENTER></HTML>");
 		JOptionPane.showMessageDialog(null, lab,
-			"About: Wang 614 Editor", JOptionPane.PLAIN_MESSAGE);
+			"About: Wang 714 Editor", JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public void toggle() {
@@ -202,19 +187,7 @@ class Wang614_Help extends JComponent
 			} else if (m.getMnemonic() == KeyEvent.VK_A) {
 				showAbout();
 			} else if (m.getMnemonic() == KeyEvent.VK_B) {
-				url = this.getClass().getResource("docs/wang614.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_U) {
-//				url = this.getClass().getResource("docs/wang600calc.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_D) {
-//				url = this.getClass().getResource("docs/wang600tape.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_A) {
-//				url = this.getClass().getResource("docs/wang600samp.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_P) {
-//				url = this.getClass().getResource("docs/wang600prog.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_F) {
-//				url = this.getClass().getResource("docs/wang600func.html");
-//			} else if (m.getMnemonic() == KeyEvent.VK_T) {
-//				url = this.getClass().getResource("docs/wang600tech.html");
+				url = this.getClass().getResource("docs/wang714.html");
 			} else {
 				System.err.println("help menu " + e.getActionCommand() +
 						" not implemented yet");
@@ -235,7 +208,7 @@ class Wang614_Help extends JComponent
 				String doc = r.getURL().getFile();
 				if (r.getURL().getProtocol().compareTo("jar") == 0) {
 					// ugh! must be a better way...
-					doc = doc.replaceFirst("/wang600\\.jar!/","/");
+					doc = doc.replaceFirst("/wang700\\.jar!/","/");
 					doc = doc.replaceFirst("file:","");
 				}
 				try {

@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.6 2013/12/29 00:00:41 drmiller Exp $
+# $Id: Makefile.ship,v 1.7 2013/12/31 23:52:00 drmiller Exp $
 
 COPTS =
 
@@ -51,6 +51,15 @@ W700_CLASSES = \
 		Wang700_Properties.class \
 		Wang700_Simulator.class
 
+COMMON_W714_CLASSES = \
+		Wang_Properties.class \
+		Wang_UI.class \
+		SuffFileFilter.class \
+		SuffFileChooser.class \
+		Wang_InstructionDecoder.class \
+		Wang700_InstrDecoder.class \
+		Wang_MarkSenseCard.class
+
 DASM = dw700.o loaducode_txt.o
 
 all: w700_fe.class
@@ -62,6 +71,9 @@ w700-dasm: wang-dasm.o $(DASM)
 
 w700_fe.class: w700_fe.java $(COMMON_CLASSES) $(W700_CLASSES)
 	javac w700_fe.java
+
+w700_edit.class: w700_edit.java $(COMMON_W714_CLASSES)
+	javac w700_edit.java
 
 .SUFFIXES: .class .java
 
@@ -81,7 +93,7 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
-wang700.jar: w700_fe.class Manifest.txt $(ROM)
+wang700.jar: w700_fe.class w700_edit.class Manifest.txt $(ROM)
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \

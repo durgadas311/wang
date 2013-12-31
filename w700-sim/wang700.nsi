@@ -10,6 +10,7 @@ Section "Wang 700 Simulator"
 	SetOutPath $INSTDIR
 	File "wang700.jar"
 	File "Wang700.bat"
+	File "Wang714.bat"
 	File /r "icons\*.ico"
 	CreateShortCut "$DESKTOP\Wang700.lnk" "$INSTDIR\Wang700.bat" "" \
 		"$INSTDIR\wang700-48x48.ico" 0 SW_SHOWMINIMIZED

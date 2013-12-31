@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.10 2013/11/14 21:06:18 drmiller Exp $
+// $Id: Wang_MarkSenseCard.java,v 1.11 2013/12/31 23:52:00 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -36,25 +36,6 @@ class Wang_MarkSenseCard extends JLabel
 
 	public JMenu getMenu() { return _menu; }
 
-	final String[] pr_16 = {
-		"E", "T", "+", "-", "\u00D7", "\u00F7", "ST", "RE",
-		"*", "*", "f", "F", "A", "B", "C", "D", ""
-	};
-	final String[] pr_17 = {
-		"0", "1", "2", "3", "4", "5", "6", "7",
-		"8", "9", "10", "11", "12", "13", "14", "15", ""
-	};
-	final String[] pr_18 = {
-		"S", "RE", "W", "GO", "Jo", "J+", "SN", "CS",
-		"TN", "RD", "LN", "e\u207F", "x\u00B2", "\u221AX", "LP", "1/x",
-		"  ", ""
-	};
-	final String[] pr_19 = {
-		"M", "ST", "\u03B1", "SP", "J\u00F8", "Je", "S\u00B9", "C\u00B9",
-		"T\u00B9", "DR", "LG", "10\u207F", "I", "|x|", "EP", "RT",
-		"", ""
-	};
-
 	double _bit_spacing = 38.4;
 	double _bit_start = 168.0; // not including SKIP
 	double _row_spacing = 28.8;
@@ -62,6 +43,8 @@ class Wang_MarkSenseCard extends JLabel
 	int _bit_width = 20;
 	int _bit_height = 10;
 	int _rows_per_card = 40;
+
+	private Wang_InstructionDecoder _decoder;
 
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
@@ -100,14 +83,7 @@ class Wang_MarkSenseCard extends JLabel
 			byte c = _code[cx];
 			int h = (c >> 4) & 0x0f;
 			int l = (c & 0x0f);
-			String t = pr_16[h];
-			if (h == 8) {
-				t += pr_18[l];
-			} else if (h == 9) {
-				t += pr_19[l];
-			} else {
-				t += pr_17[l];
-			}
+			String t = _decoder.decode(h, l);
 			g2d.drawString(t, 30, (int)Math.round(ry));
 		}
 
@@ -120,8 +96,11 @@ class Wang_MarkSenseCard extends JLabel
 		g2d.setTransform(orig);
 	}
 
-	public Wang_MarkSenseCard(String pgm) {
+	public Wang_MarkSenseCard(Wang_InstructionDecoder deco, String pgm) {
 		super();
+
+		_decoder = deco;
+
 		_image = new ImageIcon(getClass().getResource("icons/Wang_MarkSenseCard.png"));
 		setIcon(_image);
 		setBackground(Color.black);

@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.23 2013/12/29 00:00:41 drmiller Exp $
+# $Id: Makefile.ship,v 1.24 2013/12/31 23:52:00 drmiller Exp $
 
 COPTS =
 
@@ -52,6 +52,8 @@ COMMON_W614_CLASSES = \
 		Wang_UI.class \
 		SuffFileFilter.class \
 		SuffFileChooser.class \
+		Wang_InstructionDecoder.class \
+		Wang600_InstrDecoder.class \
 		Wang_MarkSenseCard.class
 
 FONTDIR = $(shell if [[ -d ~/.fonts ]]; then echo ~/.fonts; elif [[ -d ~/Library/Fonts ]]; then echo ~/Library/Fonts; fi)

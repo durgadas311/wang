@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.67 2013/12/27 20:52:38 drmiller Exp $
+# $Id: Makefile,v 1.68 2013/12/31 23:52:00 drmiller Exp $
 
 include Makefile.ship
 
@@ -76,7 +76,7 @@ wang600apc.dmg: all icns wang600.jar
 	hcd
 	hcopy -r Uninstall-wang600.sh :Uninstall-wang600
 	hcopy -r README.osx :README.html
-	hcopy -r progs/*.w6* :Wang600Files
+	hcopy -r progs/*.w6* progs/*.txt :Wang600Files
 	humount $@
 
 wang600apc.exe: all winicons wang600.jar wang600.nsi

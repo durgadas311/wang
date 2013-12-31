@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.37 2013/12/27 20:52:52 drmiller Exp $
+# $Id: Makefile,v 1.38 2013/12/31 23:52:00 drmiller Exp $
 
 include Makefile.ship
 
@@ -58,7 +58,7 @@ packages: $(PACKAGES)
 
 temp_dest: all $(ICNS) wang700.jar
 	mkdir -p $(TMPDEST)
-	cp wang700.jar run INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
+	cp wang700.jar run edit INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) $(TMPDEST)/icons
@@ -82,13 +82,13 @@ wang700apc.dmg: all icns wang700.jar
 	hcd Contents
 	hcopy -r wang700.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang700.jar run :MacOS
+	hcopy -r wang700.jar run edit :MacOS
 	hcopy -r icons/wang700-*x*.icns :Resources
 	hcd MacOS
 	hcd
 	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
 	hcopy -r README.osx :README.html
-	hcopy progs/*.w7* :Wang700Files
+	hcopy progs/*.w7* progs/*.txt :Wang700Files
 	humount $@
 
 wang700apc.exe: all winicons wang700.jar wang700.nsi
