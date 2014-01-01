@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.10 2013/12/24 14:28:59 drmiller Exp $
+# $Id: Make.rules.user,v 1.11 2014/01/01 16:57:43 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -30,43 +30,43 @@ W7CPP = $(WPCCBIN)/w7cpp
 W7LDFIX = $(WPCCBIN)/w7ldfix
 
 %.w6t: %.w6c $(W6TLDEPS)
-	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
+	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $< $(W6TLIBS)
 
 %.w6t: %.W6C $(W6TLDEPS)
 	$(W6CPP) $< > $*.wpe
-	$(CC) -x c $(W6TLDFLAGS) $(W6CCFLAGS) \
+	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $@ $*.wpe $(W6TLIBS)
 	@rm -f $*.wpe
 
 %.w6o: %.w6c
-	$(CC) -x c -c $(W6CCFLAGS) -o $@ $<
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $<
 
 %.w6o: %.W6C
 	$(W6CPP) $< > $*.wpe
-	$(CC) -x c -c $(W6CCFLAGS) -o $@ $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
 %.w7t: %.w7c $(W7TLDEPS)
-	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
+	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7$$ $< $(W7TLIBS)
 	$(W7LDFIX) $*.w7$$
 	@rm -f $*.w7$$
 
 %.w7t: %.W7C $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
-	$(CC) -x c $(W7TLDFLAGS) $(W7CCFLAGS) \
+	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7$$ $*.wpe $(W7TLIBS)
 	@rm -f $*.wpe
 	$(W7LDFIX) $*.w7$$
 	@rm -f $*.w7$$
 
 %.w7o: %.w7c
-	$(CC) -x c -c $(W7CCFLAGS) -o $@ $<
+	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $<
 
 %.w7o: %.W7C
 	$(W7CPP) $< > $*.wpe
-	$(CC) -x c -c $(W7CCFLAGS) -o $@ $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
 #################################

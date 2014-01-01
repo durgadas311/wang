@@ -58,8 +58,8 @@ void do_enter(char *s) {
 		} else {
 			printf("ENTER(%c)\n", x);
 		}
-
 	}
+	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 }
 
 void do_data(char *l, char *s) {
@@ -76,6 +76,7 @@ void do_data(char *l, char *s) {
 		printf(",%d", reg[x]);
 	}
 	printf(");\n");
+	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 }
 
 void do_data_string(char *l, char *s) {
@@ -96,6 +97,7 @@ void do_data_string(char *l, char *s) {
 		++x;
 	}
 	printf(");\n");
+	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 }
 
 void do_alpha(char *s, unsigned char *xlat) {
@@ -219,6 +221,7 @@ void do_alpha(char *s, unsigned char *xlat) {
 			printf("_bytecode(0x12);\n");
 		}
 		printf("_opcode(END_ALPHA);\n");
+		fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 	}
 }
 
@@ -236,8 +239,6 @@ int main(int argc, char **argv) {
 			exit(1);
 		}
 		__file__ = argv[1];
-		fprintf(stdout, "#line 1 \"%s\"\n", argv[1]);
-		fprintf(stdout, "asm(\".file \\\"%s\\\" ; .line 1\\n\");\n", argv[1]);
 	}
 	while (fgets(buf, sizeof(buf), fp) != NULL) {
 		++__line__;
