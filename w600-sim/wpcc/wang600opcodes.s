@@ -1,3 +1,4 @@
+.type _pre_E STT_OBJECT; .global _pre_E; .set _pre_E,0x00
 .type _op_E0 STT_OBJECT; .global _op_E0; .set _op_E0,0x00
 .type _op_E1 STT_OBJECT; .global _op_E1; .set _op_E1,0x01
 .type _op_E2 STT_OBJECT; .global _op_E2; .set _op_E2,0x02
@@ -307,3 +308,10 @@
 .type res_label28 STT_OBJECT; .global res_label28; .set res_label28,0xfd
 .type res_label29 STT_OBJECT; .global res_label29; .set res_label29,0xfe
 .type res_label30 STT_OBJECT; .global res_label30; .set res_label30,0xff
+
+.type res_flabel0 STT_OBJECT; .global res_flabel0; .set res_flabel0,0xa0
+.type res_flabel1 STT_OBJECT; .global res_flabel1; .set res_flabel1,0xa1
+.type res_flabel2 STT_OBJECT; .global res_flabel2; .set res_flabel2,0xa2
+.type res_flabel3 STT_OBJECT; .global res_flabel3; .set res_flabel3,0xa3
+
+.type _tag_last_reg STT_OBJECT; .global _tag_last_reg; .set _tag_last_reg,0xf8

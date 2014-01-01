@@ -1,6 +1,6 @@
 /*
  *	Copyright (c) 2013 Douglas Miller
- *	$Id: w7ldfix.c,v 1.4 2013/12/16 16:39:45 drmiller Exp $
+ *	$Id: w7ldfix.c,v 1.5 2014/01/01 18:00:21 drmiller Exp $
  *
  * Do post-ld processing (fixup) of Wang 700 Register addresses.
  * Direct references must be semi-BCD, plus add ability to enter
@@ -56,6 +56,7 @@ static void w7reginterlace(uint8_t *buf, int len) {
 static void w7ldfixup(uint8_t *buf, int len) {
 	uint8_t *end = buf + len;
 	while (buf < end) {
+		len = end - buf;
 		if (len >= 3 && buf[0] == _tag_last_reg && buf[1] == _tag_last_reg) {
 			int reg = buf[2];
 			buf[0] = _pre_E | (reg / 100);

@@ -2,7 +2,7 @@ OUTPUT_FORMAT(binary);
 
 MEMORY {
 	labels     : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
-	flabels    : ORIGIN = 0xa0, LENGTH = 0x20 /* for ROM use 0xc0 */
+	flabels    : ORIGIN = 0xa4, LENGTH = 0x1c /* leave some "reserved" */
 	search     : ORIGIN = 0x80, LENGTH = 1
 	call       : ORIGIN = 0xf7, LENGTH = 1
 	subr       : ORIGIN = 0xa0, LENGTH = 0x20
@@ -61,9 +61,6 @@ SECTIONS
 		*(.wang600regs);
 		__last_reg = __reg_base - (. - __reg_base);
 	} >regs
-	PROVIDE(last_regno_100 = (__last_reg / 100));
-	PROVIDE(last_regno_10 = (__last_reg / 10) % 10);
-	PROVIDE(last_regno_1 = (__last_reg % 10));
 
 	__curr = 0x0000;
 	.wang600prog : AT (__curr) {
@@ -71,20 +68,21 @@ SECTIONS
 		__curr = .;
 	} >code = 0x93939393
 
+	/* it appears to actually be ".align 8" that aligns this... */
 	__curr = (__curr + 7) & 0xfffffff8;
 	.wang600prog : AT (__curr) {
 		*(.wang600data);
-		/* must ensure register data doesn't mess up SEARCH end_prog */
-		BYTE(0); /* a better value? */
 		__curr = .;
 	} >code = 0x93939393
 
 	/* only if needed? how? not for ROM images... */
 	.wang600prog : AT (__curr) {
-		BYTE(0x90);
+		/* must ensure register data doesn't mess up SEARCH end_prog */
+		BYTE(0); /* a better value? */
+		BYTE(_op_MARK);
 		BYTE(end_prog);
-		BYTE(0x9e);
-		BYTE(0x9e);
+		BYTE(_op_END_PROG);
+		BYTE(_op_END_PROG);
 		__curr = .;
 	} >code = 0x93939393
 	_prog_len = __curr;

@@ -2,7 +2,7 @@
 
 MEMORY {
 	labels     : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
-	flabels    : ORIGIN = 0xa0, LENGTH = 0x20 /* for ROM use 0xc0 */
+	flabels    : ORIGIN = 0xa4, LENGTH = 0x1c /* leave some "reserved" */
 	search     : ORIGIN = 0x80, LENGTH = 1
 	call       : ORIGIN = 0xf7, LENGTH = 1
 	subr       : ORIGIN = 0xa0, LENGTH = 1

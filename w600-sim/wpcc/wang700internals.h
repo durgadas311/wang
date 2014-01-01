@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-.ident "Wang 700 Compiler over GCC $Revision: 1.11 $ "
+.ident "Wang 700 Compiler over GCC $Revision: 1.12 $ "
 
 .section .wang700code, "a"
 	.include "wang700opcodes.s"
@@ -52,7 +52,8 @@
 					.byte 0;	\
 				.popsection
 
-// Initialized registers are "allocated" here.
+// Initialized registers are "allocated" here. This data must be post-processed
+// into viable register images, as the Wang 700 interleaves pairs of registers.
 #define _regdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
 				.pushsection .wang700regs,"a"; \
 					.subsection 0; \

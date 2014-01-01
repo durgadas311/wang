@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-.ident "Wang 600 Compiler over GCC $Revision: 1.13 $ "
+.ident "Wang 600 Compiler over GCC $Revision: 1.14 $ "
 
 .section .wang600code, "a";
 	.include "wang600opcodes.s";
@@ -35,6 +35,16 @@
 #define _longreg(reg)		.pushsection .wang600regs,1,"a"; \
 					.type _longreg_ ##reg STT_OBJECT;	\
 					.global _longreg_ ##reg ;	\
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
+					.byte 0;	\
+				.popsection
+
+#define _longregs(reg,num)	.pushsection .wang600regs,1,"a"; \
+					.type _longreg_ ##reg STT_OBJECT;	\
+					.global _longreg_ ##reg ;	\
+					.rept (num-1);			\
+					.byte 0;			\
+					.endr;				\
 					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
 					.byte 0;	\
 				.popsection
@@ -78,6 +88,25 @@
 					.type _call_ ##label STT_OBJECT; \
 					.global _call_ ##label ; \
 					.set _call_ ##label , 0xf7; \
+				.popsection
+
+#define RES_FEXTERN(flabel, const)	\
+				.pushsection .wang600flabel,"a"; \
+					.type flabel STT_OBJECT; \
+					.global flabel ; \
+					.set flabel , res_flabel ##const ; \
+				.section .wang600search,"a"; \
+					.type _search_ ##flabel STT_OBJECT; \
+					.global _search_ ##flabel ; \
+					.set _search_ ##flabel , 0x80; \
+				.section .wang600call,"a"; \
+					.type _call_ ##flabel STT_OBJECT; \
+					.global _call_ ##flabel ; \
+					.set _call_ ##flabel , 0xf7; \
+				.section .wang600subr,"a"; \
+					.type _subr_ ##flabel STT_OBJECT; \
+					.global _subr_ ##flabel ; \
+					.set _subr_ ##flabel , res_flabel ##const; \
 				.popsection
 
 // Define a label for use with SEARCH/MARK
@@ -176,15 +205,24 @@
 // Reserve an un-initialize long register
 #define UREG(name)		_longreg(name)
 
+// Reserve an array of "num" longregs
+#define UREGS(name,num)		_longregs(name,num)
+
 /* These should be pre-rpocessed and never exist when gcc invoked */
 #define ENTER(num)		.error "run w6cpp preprocessor for ENTER()"
 #define IREG_DATA(reg,num)	.error "run w6cpp preprocessor for IREG_DATA()"
 #define ALPHA_STRING(str)	.error "run w6cpp preprocessor for ALPHA_STRING()"
 #define ALPHA_PLOT(str)		.error "run w6cpp preprocessor for ALPHA_PLOT()"
 
-#define ENTER_LAST_REGNO()	_bytecode(last_regno_100); \
-				_bytecode(last_regno_10); \
-				_bytecode(last_regno_1)
+// This forces us to post-process Wang600 programs now...
+#define ENTER_REGNO(name)	_bytecode(0xf8); \
+				_bytecode(0xf8); \
+				_bytecode(_longreg_ ##name )
+
+// since we have to post-process, might as well simplify this too
+#define ENTER_LAST_REGNO()	_bytecode(0xf8); \
+				_bytecode(0xf8); \
+				_bytecode(__last_reg)
 
 // Pseudo constructs for embedding data (future plan)
 #define NAME(prog_name)		.pushsection .wang600name,"a",@note; \

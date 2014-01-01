@@ -1,11 +1,10 @@
 CFLAGS += -I../../common -g
 
-BINS = w6cpp w6dis w6lst w6data2tape w6verify \
+BINS = w6cpp w6dis w6lst w6data2tape w6verify w6ldfix \
 	w7cpp w7dis w7lst w7data2tape w7verify w7ldfix
 INCS = wang600.h wang600internals.h wang600opcodes.s \
 	wang700.h wang700internals.h wang700opcodes.s
-LDS = wang600.ld wang600raw.ld wang600rawrom.ld wang600rom.ld \
-	wang700raw.ld
+LDS = wang600raw.ld wang600rawrom.ld wang700raw.ld
 
 all: $(BINS)
 
@@ -21,6 +20,9 @@ w6lst: w6lst.c
 w6verify: w6verify.c
 	$(CC) $(CFLAGS) -std=c99 w6verify.c -o w6verify
 
+w6ldfix: w6ldfix.c wang600opcodes.h
+	$(CC) $(CFLAGS) -std=c99 w6ldfix.c -o $@
+
 w7cpp: w7cpp.c w7cpp_data.o
 	$(CC) $(CFLAGS) w7cpp.c -o w7cpp w7cpp_data.o
 
@@ -33,8 +35,15 @@ w7lst: w7lst.c
 w7verify: w7verify.c
 	$(CC) $(CFLAGS) -std=c99 w7verify.c -o w7verify
 
-w7ldfix: w7ldfix.c w7interlacepair.o wang700opcodes.h wang700opcodes.o
-	$(CC) $(CFLAGS) -std=c99 w7ldfix.c w7interlacepair.o wang700opcodes.o -o w7ldfix
+w7ldfix: w7ldfix.c w7interlacepair.o wang700opcodes.h
+	$(CC) $(CFLAGS) -std=c99 w7ldfix.c w7interlacepair.o -o $@
+
+wang600opcodes.h: wang600opcodes.s
+	@echo -e "/* generated from wang600opcodes.s - used by C utilities */"\
+		"\n#ifndef __wang600opcodes_h__"\
+		"\n#define __wang600opcodes_h__" >$@
+	sed -e 's/^\.type/#define/' -e 's/STT_OBJECT;.*,//' <$^ >>$@
+	@echo -e "#endif /* __wang600opcodes_h__ */" >>$@
 
 wang700opcodes.h: wang700opcodes.s
 	@echo -e "/* generated from wang700opcodes.s - used by C utilities */"\
