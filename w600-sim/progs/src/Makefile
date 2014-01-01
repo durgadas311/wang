@@ -9,23 +9,30 @@ ROMS = libplot.w6x
 
 W6TLDFLAGS += -Llibw6 -Llibplot
 W6TLIBS += -lw6 -lplot
+W6TLDEPS += libw6/libw6.a libplot/libplot.a
 
 all: $(SUBDIRS) $(ROMS) $(PROGS) $(DATAT)
 
 plot_sin.w6t: plot_sin.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
-		-o $@ $<
+		-o $(basename $@).w6$$ $<
+	$(W6LDFIX) $(basename $@).w6$$
+	@rm -f $(basename $@).w6$$
 
 plot_dat.w6t: plot_dat.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
-		-o $@ $< -lw6
+		-o $(basename $@).w6$$ $< -lw6
+	$(W6LDFIX) $(basename $@).w6$$
+	@rm -f $(basename $@).w6$$
 
 graph_sin.w6t: graph_sin.w6o libplot.w6s libplot.w6x
 	$(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
 		-Wl,--just-symbols=libplot.w6s \
-		-o $@ $<
+		-o $(basename $@).w6$$ $<
+	$(W6LDFIX) $(basename $@).w6$$
+	@rm -f $(basename $@).w6$$
 
 zeller.w6t: zeller.W6C libw6/libw6.a
 
