@@ -1,15 +1,12 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_Teletype.java,v 1.1 2014/01/02 20:16:52 drmiller Exp $
+// $Id: Wang_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_Teletype.java,v 1.1 2014/01/02 20:16:52 drmiller Exp $";
+	final String ident = "$Id: Wang_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $";
 
 	public static final String Model = "07";
 	public static final String Description = "Teletype";
@@ -25,6 +22,11 @@ class Wang_Teletype extends ASR33_Teletype
 	// Accept all "OutputWriter" text from calculator.
 
 	private int _glrn;
+	private int _iob;
+	private int _bytes;
+	private boolean _cr;	// last character was CR...
+	boolean _input;
+	private byte _shifted = (byte)0x12;	// default to (start with) Shift Down
 
 	public void reset() {
 		_glrn = 0;
@@ -34,12 +36,119 @@ class Wang_Teletype extends ASR33_Teletype
 	public void onOff(boolean on) {
 	}
 
+	private void xOn() {
+		// start the paper tape reader...
+	}
+
+	private void xOff() {
+		// stop the paper tape reader...
+	}
+
+	private InputProxy _inp;
+
+	private class InputProxy implements Runnable {
+		private ASR33_Teletype _tty;
+		public InputProxy(ASR33_Teletype tty) {
+			_tty = tty;
+			Thread t = new Thread(this);
+			t.start();
+		}
+
+		public void run() {	// look for input, only when input enabled...?
+			while(_input) {
+				int b = _tty.ttyGet();
+				if (b < 0) { // do GO now? This is really a disconnect, not user
+					break;
+				}
+				if (b == 0x01) { // ^A == Resume (GO)
+					xOff();
+					Wang_UI.getCore().replyIO(_iob, GO);
+					_input = false;
+					// quit thread now???
+					continue;
+				}
+				if (_glrn != 0) {
+					if (b == 0x15) { // ^U == WRITE ALPHA
+						sendCode(START);
+						continue;
+					} else if (b == 0x16) { // ^V == END ALPHA
+						sendCode(END);
+						continue;
+					} else if (b == 0x08) { // ^H == Shift-Up
+						sendCode(SHIFTUP);
+						continue;
+					} else if (b == 0x0c) { // ^L == Shift-Down
+						sendCode(SHIFTDN);
+						continue;
+					}
+					if (_cr && b == 0x0a) { // ignore LF imm after CR
+						continue;
+					}
+					// See if character converts...
+					byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate((byte)b);
+					if (tr != null) {
+						if (tr[0] != _shifted) {
+							sendCode(tr[0]);
+							_shifted = tr[0];
+						}
+						sendCode(tr[1]); // ignored in TYPE mode?
+						ttyPrint((char)b);
+						continue;
+					}
+				} else {
+					if (b >= '0' && b <= '9') {
+						sendCode(E0 + (b - '0'));
+						ttyPrint((char)b);
+						continue;
+					} else if (b == '.') {
+						sendCode(DP);
+						ttyPrint((char)b);
+						continue;
+					} else if (b == '-') {
+						sendCode(CHG_SIGN);
+						ttyPrint((char)b);
+						continue;
+					} else if (b == '^') {
+						sendCode(SET_EXP);
+						ttyPrint((char)b);
+						continue;
+					} else if (b == '_') { // back-arrow on old TTYs...
+						sendCode(CLR_DSP);
+						ttyPrint((char)b);
+						continue;
+					} else if (b == 0x02) { // ^B == SR 0000
+						xOff();
+						sendCode(SR0);
+						continue;
+					} else if (b == 0x03) { // ^C == SR 0001
+						xOff();
+						sendCode(SR1);
+						continue;
+					} else if (b == 0x04) { // ^D == SR 0002
+						xOff();
+						sendCode(SR2);
+						continue;
+					}
+				}
+				// if still here, error... decide fate...
+				if (_bytes > 0) {
+					xOff();
+					Wang_UI.getCore().replyIO(_iob, GO);
+					_input = false;
+					// quit thread now???
+					continue;
+				}
+			}
+		}
+	}
+
 	public boolean start_cn36(int iob, int c) {
 		// don't care about run vs. keyboard modes?
 		// how would this work from a running program?!
 		// especially if GLRN is asserted...
 		if ((iob & ~0x3) != 4) return false; // group 1 or 2
 		if ((c & ~0x0f) != 0xf0) return false; // 15 xx
+		_iob = iob;
 		switch(c & 0x0f) {
 		case 0:
 			xOn();
@@ -48,7 +157,7 @@ class Wang_Teletype extends ASR33_Teletype
 		case 2:
 		case 3:
 		case 4:
-			do_cn24_direct('0' + (c & 0x0f));
+			ttyPrint((char)('0' + (c & 0x0f)));
 			break;
 		default:
 			break;
@@ -57,6 +166,8 @@ class Wang_Teletype extends ASR33_Teletype
 			_glrn = 1;
 		}
 		_input = true;
+		_bytes = 0;
+		_inp = new InputProxy(this);
 		return true;
 	}
 
@@ -76,7 +187,7 @@ class Wang_Teletype extends ASR33_Teletype
 		java.net.URL url = this.getClass().getResource("icons/wang607.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.1 $ $Date: 2014/01/02 20:16:52 $<BR>"+
+			"$Revision: 1.2 $ $Date: 2014/01/03 01:21:44 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -87,35 +198,23 @@ class Wang_Teletype extends ASR33_Teletype
 			"About: Wang " + getModel() + " Emulation", JOptionPane.PLAIN_MESSAGE);
 	}
 
-	boolean _input;
-
 //	private void sendACK() {
 //		Wang_UI.getCore().ackIO(5);
 //	}
 
-	private void sendCode(byte b) {
+	private void sendCode(int code) {
 		if (!_input) return;
-		Wang_UI.getCore().replyIO(5, (b & 0x0ff));
-	}
-
-	private byte _shifted = (byte)0x12;	// default to (start with) Shift Down
-
-	public void keyTyped(KeyEvent e) {
-		char c = e.getKeyChar();
-		e.consume(); // prevent JTextArea from seeing it
-		byte b = (byte)c;
-		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
-		if (tr[0] != _shifted) {
-			sendCode(tr[0]);
-			_shifted = tr[0];
-			do_cn24(tr[0]);
-		}
-		sendCode(tr[1]); // ignored in TYPE mode?
-		do_cn24(tr[1]);
+		Wang_UI.getCore().replyIO(_iob, code);
+		++_bytes;
+		_cr = (code == 0x18);	// Selectric RETURN+INDEX code...
 	}
 
 	public Wang_Teletype() {
 		_input = false;
+		_bytes = 0;
+		_glrn = 0;
+		_iob = 0;
+		_cr = false;
 
 		Wang_UI.registerCN36(this);
 	}

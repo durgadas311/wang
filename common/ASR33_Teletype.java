@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.1 2014/01/02 20:16:52 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.io.*;
 class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.1 2014/01/02 20:16:52 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $";
 
 	private boolean _shifted;	// not used
 	private boolean _punch;
@@ -18,6 +18,29 @@ class ASR33_Teletype
 	private Socket _remote;
 	private OutputStream _out;
 	private InputStream _in;
+
+	public Component getComponent() { return null; }
+	public JFrame getFrame() { return null; }
+	public void onOff(boolean on) {
+		// drop connection?
+	}
+	public boolean onOff() {
+		// return (_remote != null) ?
+		return false;
+	}
+
+	public int ttyGet() {
+		// might need to support multiple TTYs, but
+		// still only one character at time.
+		if (_in == null) {
+			return -1;
+		}
+		int b = -1;
+		try {
+			b = _in.read();
+		} catch (Exception ee) {}
+		return b;
+	}
 
 	private void subscribe(Socket s) {
 		// Right now only one connection allowed
@@ -34,11 +57,11 @@ class ASR33_Teletype
 		_remote = s;
 	}
 
-	private void ttyPrint(char c) {
+	public void ttyPrint(char c) {
 		// Need more than just "toupper()" as the tty forces
 		// all characters 96-127 into 64-95.
-		if (c < ' ' && c != '\n' && c != '\r' && c != '\b') return;
-		int b = (int)c;
+		if (c < ' ' && c != '\n' && c != '\r') return;
+		int b = c;
 		if (b > 0x7f) return;
 		if (b > 0x5f) {
 			b -= 32;
@@ -54,9 +77,11 @@ class ASR33_Teletype
 			try {
 				_out.write(b);
 			} catch(IOException e) {
-				_out.close();
-				_in.close();
-				_remote.close();
+				try {
+					_out.close();
+					_in.close();
+					_remote.close();
+				} catch(IOException ee) {}
 				_remote = null;
 			}
 		}
@@ -89,10 +114,11 @@ class ASR33_Teletype
 		try {
 			int p = 10707;	// use Series... 10607 or 10707...
 			InetAddress ia;
-			ia = InetAddress.getLocalHost();
+			//ia = InetAddress.getLocalHost();
+			ia = InetAddress.getByName("127.0.0.1");
 			_ss = new ServerSocket(p, 1, ia);
 		} catch(Exception e) {
-			Wang_UI.warn(getName(), "Can't listen on socket");
+			Wang_UI.warning("ASR33_Teletype", e.toString());
 			_ss = null;
 		}
 		if (_ss != null) {
@@ -212,7 +238,6 @@ class ASR33_Teletype
 	}
 
 	public void run() {
-		int x;
 		Socket s;
 		while (true) {
 			try {
@@ -230,5 +255,10 @@ class ASR33_Teletype
 			}
 			_ss.close();
 		} catch(IOException e) { }
+		_ss = null;
+		_remote = null;
+		_in = null;
+		_out = null;
+		Wang_UI.warning("ASR33_Teletype", "Exiting in error");
 	}
 }
