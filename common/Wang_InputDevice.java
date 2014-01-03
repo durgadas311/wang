@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputDevice.java,v 1.6 2014/01/03 01:21:44 drmiller Exp $
+// $Id: Wang_InputDevice.java,v 1.7 2014/01/03 23:48:40 drmiller Exp $
 
 
 // e.g. Group 1/2 Devices attached to a Wang "CN-36" port (Input only)
@@ -25,13 +25,13 @@ interface Wang_InputDevice
 	public static int E9 = 0x0f0d;		// Digit Entry, 9
 	public static int DP = 0x0f0e;		// Decimal Point
 	public static int CHG_SIGN = 0x0f0f;	// Change Sign
-	public static int SR0 = 0x0f10;		// Search-Return 0000
-	public static int SR1 = 0x0f11;		// Search-Return 0001
-	public static int SR2 = 0x0f12;		// Search-Return 0002
-	public static int SHIFTUP = 0x0f20;
-	public static int SHIFTDN = 0x0f21;
-	public static int SET_EXP = 0x0f22;
-	public static int CLR_DSP = 0x0f23;
+	public static int SET_EXP = 0x0f10;
+	public static int CLR_DSP = 0x0f11;
+	public static int SR0 = 0x0f20;		// Search-Return 0000
+	public static int SR1 = 0x0f21;		// Search-Return 0001
+	public static int SR2 = 0x0f22;		// Search-Return 0002
+	// support all? many?
+	public static int SREND = 0x0f30;
 
 	// General-purpose device reset. Issued when IOB is set to 0,
 	// either at PRIME or the end of an I/O sequence. For Group 1/2

@@ -1,15 +1,15 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
 import java.net.*;
 import java.io.*;
 
-class ASR33_Teletype
+abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.2 2014/01/03 01:21:44 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $";
 
 	private boolean _shifted;	// not used
 	private boolean _punch;
@@ -38,7 +38,16 @@ class ASR33_Teletype
 		int b = -1;
 		try {
 			b = _in.read();
+			// The TTY never generated "lower case" (etc), so fold...
+			if (b > 0x7f) {
+				b = 0x00ff; // RUBOUT - ignored
+			} else if (b >= 0x60) {
+				b -= 32;
+			}
 		} catch (Exception ee) {}
+		if (b < 0) {
+			tearDown();
+		}
 		return b;
 	}
 
@@ -55,6 +64,21 @@ class ASR33_Teletype
 			return;
 		}
 		_remote = s;
+		newConnection(s);
+	}
+
+	private void tearDown() {
+		if (_remote != null) {
+			try {
+				_out.close();
+				_in.close();
+				_remote.close();
+			} catch(Exception ee) {}
+			_in = null;
+			_out = null;
+			_remote = null;
+			newConnection(null);
+		}
 	}
 
 	public void ttyPrint(char c) {
@@ -77,12 +101,7 @@ class ASR33_Teletype
 			try {
 				_out.write(b);
 			} catch(IOException e) {
-				try {
-					_out.close();
-					_in.close();
-					_remote.close();
-				} catch(IOException ee) {}
-				_remote = null;
+				tearDown();
 			}
 		}
 	}
@@ -230,12 +249,14 @@ class ASR33_Teletype
 		}
 		if (printable) {
 			String s;
-			s = Wang_UI.getCharConv().tiltrotateToAscii(b, _shifted);
+			s = Wang_UI.getCharConv().tiltrotateToAsciiTty(b, _shifted);
 			if (s != null) {
 				ttyPrint(s);
 			}
 		}
 	}
+
+	abstract public void newConnection(Socket s);
 
 	public void run() {
 		Socket s;
@@ -247,12 +268,8 @@ class ASR33_Teletype
 			}
 			subscribe(s);
 		}
+		tearDown();
 		try {
-			if (_remote != null) {
-				_out.close();
-				_in.close();
-				_remote.close();
-			}
 			_ss.close();
 		} catch(IOException e) { }
 		_ss = null;
