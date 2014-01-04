@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,72 +9,119 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $";
 
-	private boolean _shifted;	// not used
+	private boolean _on;
+	private boolean _shifted;
 	private boolean _punch;
 
+	Thread _th;
 	private ServerSocket _ss;
 	private Socket _remote;
 	private OutputStream _out;
-	private InputStream _in;
 
 	public Component getComponent() { return null; }
 	public JFrame getFrame() { return null; }
 	public void onOff(boolean on) {
-		// drop connection?
+		_on = on;
+		if (on) {
+			// "_on" allows new connections, anything else?
+			// but this case is not used.
+		} else {
+			// this object is about to be destroyed
+			// let thread tear-down...
+			if (_th != null) {
+				// _th.interrupt(); does not seem to do anything,
+				// but forcing the ServerSocket closed does terminate
+				// the accept().
+				try { _ss.close(); } catch (Exception ee) {}
+				_th = null;
+			}
+		}
 	}
 	public boolean onOff() {
 		// return (_remote != null) ?
-		return false;
+		return _on;
 	}
+
+	ConnectionProxy _cp;
+	int _currByte;
 
 	public int ttyGet() {
 		// might need to support multiple TTYs, but
 		// still only one character at time.
-		if (_in == null) {
-			return -1;
-		}
 		int b = -1;
-		try {
-			b = _in.read();
-			// The TTY never generated "lower case" (etc), so fold...
-			if (b > 0x7f) {
-				b = 0x00ff; // RUBOUT - ignored
-			} else if (b >= 0x60) {
-				b -= 32;
+		synchronized(_cp) {
+			try {
+				_cp.wait();
+				b = _currByte;
+			} catch (Exception ee) {
+				// assume all is dead?
+				b = -1;
 			}
-		} catch (Exception ee) {}
-		if (b < 0) {
-			tearDown();
+		}
+		// The TTY never generated "lower case" (etc), so fold...
+		if (b > 0x7f) {
+			b = 0x00ff; // RUBOUT - ignored
+		} else if (b >= 0x60) {
+			b -= 32;
 		}
 		return b;
 	}
 
+	abstract public void newConnection(Socket s);
+	abstract public void ctrlChar(char c);
+
+	private class ConnectionProxy implements Runnable {
+		private InputStream _in;
+		public ConnectionProxy(Socket s) throws Exception {
+			_in = s.getInputStream();
+			Thread t = new Thread(this);
+			t.start();
+		}
+
+		public void run() {
+			int b = 0;
+			while (b >= 0) {
+				try {
+					b = _in.read();
+				} catch (Exception ee) {
+					b = -1;
+				}
+				_currByte = b;
+				synchronized(this) {
+					notifyAll();
+				}
+			}
+			// already did notifyAll()...
+			_currByte = -1;
+			tearDown();
+		}
+	}
+
 	private void subscribe(Socket s) {
 		// Right now only one connection allowed
-		if (_remote != null) {
+		if (!_on || _remote != null) {
 			try { s.close(); } catch(IOException e) { }
 			return;
 		}
 		try {
+			_cp = new ConnectionProxy(s);
 			_out = s.getOutputStream();
-			_in = s.getInputStream();
-		} catch (IOException e) {
+		} catch (Exception ee) {
+			try { s.close(); } catch(IOException e) { }
 			return;
 		}
 		_remote = s;
 		newConnection(s);
 	}
 
-	private void tearDown() {
+	private synchronized void tearDown() {
 		if (_remote != null) {
 			try {
 				_out.close();
-				_in.close();
 				_remote.close();
 			} catch(Exception ee) {}
-			_in = null;
 			_out = null;
 			_remote = null;
 			newConnection(null);
@@ -126,26 +173,6 @@ abstract class ASR33_Teletype
 	public void setPaper(double w, double h) {
 	}
 
-	public ASR33_Teletype() {
-		_shifted = false;
-		_punch = false;
-		_remote = null;
-		try {
-			int p = 10707;	// use Series... 10607 or 10707...
-			InetAddress ia;
-			//ia = InetAddress.getLocalHost();
-			ia = InetAddress.getByName("127.0.0.1");
-			_ss = new ServerSocket(p, 1, ia);
-		} catch(Exception e) {
-			Wang_UI.warning("ASR33_Teletype", e.toString());
-			_ss = null;
-		}
-		if (_ss != null) {
-			Thread t = new Thread(this);
-			t.start();
-		}
-	}
-
 	public void do_bell() {
 	}
 
@@ -162,13 +189,13 @@ abstract class ASR33_Teletype
 	}
 
 	public void do_settab() {
-		// PUN on (a.k.a DC1)
-		_punch = true;
+		// PUN on (a.k.a DC2 or ^R)
+		ctrlChar('\022');
 	}
 
 	public void do_clrtab() {
-		// PUN off (a.k.a DC3)
-		_punch = false;
+		// PUN off (a.k.a DC4 or ^T)
+		ctrlChar('\024');
 	}
 
 	public void do_tab() {
@@ -256,14 +283,35 @@ abstract class ASR33_Teletype
 		}
 	}
 
-	abstract public void newConnection(Socket s);
+	public ASR33_Teletype() {
+		_shifted = false;
+		_punch = false;
+		_remote = null;
+		_on = true;
+		_th = null;
+		try {
+			int p = 10707;	// use Series... 10607 or 10707...
+			InetAddress ia;
+			//ia = InetAddress.getLocalHost();
+			ia = InetAddress.getByName("127.0.0.1");
+			_ss = new ServerSocket(p, 1, ia);
+		} catch(Exception e) {
+			Wang_UI.warning("ASR33_Teletype", e.toString());
+			_ss = null;
+		}
+		if (_ss != null) {
+			_th = new Thread(this);
+			_th.start();
+		}
+	}
 
 	public void run() {
 		Socket s;
-		while (true) {
+		while (_on) {
 			try {
 				s = _ss.accept();
 			} catch(IOException e) {
+				// e.g. java.net.SocketException: Socket closed
 				break;
 			}
 			subscribe(s);
@@ -273,9 +321,8 @@ abstract class ASR33_Teletype
 			_ss.close();
 		} catch(IOException e) { }
 		_ss = null;
-		_remote = null;
-		_in = null;
-		_out = null;
-		Wang_UI.warning("ASR33_Teletype", "Exiting in error");
+		if (_on) {
+			Wang_UI.warning("ASR33_Teletype", "Exiting in error");
+		}
 	}
 }

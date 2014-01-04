@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $
+// $Id: Wang_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $
 
 import java.io.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.net.*;
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_InputDevice, ActionListener
 {
-	final String ident = "$Id: Wang_Teletype.java,v 1.3 2014/01/03 23:48:40 drmiller Exp $";
+	final String ident = "$Id: Wang_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $";
 
 	public static final String Model = "07";
 	public static final String Description = "Teletype";
@@ -31,9 +31,9 @@ class Wang_Teletype extends ASR33_Teletype
 
 	static public JMenu getMenu() {
 		if (_mu == null) {
-			String status = " (unknown)";
+			String status = "(unknown)";
 			_mu = new JMenu(getName() + "...");
-			_miRdr = new JMenuItem("Reader" + status, KeyEvent.VK_R);
+			_miRdr = new JMenuItem("Reader - " + status, KeyEvent.VK_R);
 			_mu.add(_miRdr);
 			JMenu mu = new JMenu("Punch...");
 			_miPunS = new JMenuItem("Save", KeyEvent.VK_S);
@@ -47,14 +47,25 @@ class Wang_Teletype extends ASR33_Teletype
 	}
 
 	String _propBase;
-	String _mountLabel;
 	String[] _pickLabel;
 	String[] _fileType;
-	File _file;
+	File _rfile;
+	File _pfile;
 	boolean _xOn;
+	boolean _pOn;
 
 	boolean _end;
 	InputStream _fin;
+	OutputStream _fout;
+
+	public void ttyPrint(char c) {
+		if (_pOn && _fout != null) {
+			try {
+				_fout.write(c);
+			} catch (Exception ee) {}
+		}
+		super.ttyPrint(c);
+	}
 
 	private int getRdrByte() {
 		if (_fin == null) {
@@ -89,21 +100,48 @@ class Wang_Teletype extends ASR33_Teletype
 
 	private void tape_open() {
 		_end = false;
-		if (_file == null) {
+		if (_rfile == null) {
 			return;
 		}
 		try {
-			_fin = new FileInputStream(_file);
+			_fin = new FileInputStream(_rfile);
 		} catch (Exception ee) {}
+	}
+
+	private void setupPun() {
+		if (_pfile == null) {
+			_pfile = new File(Wang_UI.getDir(), "707Punch.txt");
+		}
+		try {
+			_pfile.delete();
+			_pfile.createNewFile();
+			_fout = new FileOutputStream(_pfile);
+		} catch (Exception ee) {
+
+			_fout = null;
+		}
+	}
+
+	private void renamePun(File saved) {
+		if (_fout != null) {
+			try {
+				_fout.close();
+			} catch (Exception ee) {}
+			if (_pfile.renameTo(saved)) {
+			} else {
+				// anything? save contents?
+			}
+		}
+		setupPun();
 	}
 
 	private void setupRdr() {
 		String status = " (not mounted)";
-		if (_file != null) {
-			status = _file.getName();
+		if (_rfile != null) {
+			status = _rfile.getName();
 			tape_open();
 		}
-		_miRdr.setText("Reader" + status);
+		_miRdr.setText("Reader - " + status);
 	}
 
 	private int _glrn;
@@ -128,10 +166,29 @@ class Wang_Teletype extends ASR33_Teletype
 		}
 	}
 
+	public void ctrlChar(char c) {
+		if (c == '\022') { // Punch On
+			_pOn = true;
+		} else if (c == '\024') { // Punch Off
+			_pOn = false;
+		}
+	}
+
 	private void xOn() {
 		// start the paper tape reader...
 		_xOn = true;
 		// need to wakeup InputProxy... how?
+		// If this only happens at the start of a GROUP I/O session,
+		// and the InputProxy is started after this, all is well.
+		// A calculator program can't send an X ON and expect good
+		// things since the paper tape would (likely) start sending
+		// before the GROUP I/O command is executed.
+		// If a user types X ON during a session, that might work
+		// as long as the InputProxy sets up _xOn before reaching the
+		// lop of it's loop.
+		// However, if InputProxy is always "live" (in order to detect
+		// TTY disconnect) then we have a problem. Might be forced to
+		// use Java Selectable Channels (which can supposedly be woken).
 	}
 
 	private void xOff() {
@@ -140,31 +197,35 @@ class Wang_Teletype extends ASR33_Teletype
 
 	private void pickRdrFile() {
 		tape_close();
-		SuffFileChooser ch = new SuffFileChooser(_mountLabel,
+		SuffFileChooser ch = new SuffFileChooser("Mount Reader",
 			_fileType, _pickLabel, Wang_UI.getDir());
-		if (_file != null) {
-			ch.setSelectedFile(_file);
+		if (_rfile != null) {
+			ch.setSelectedFile(_rfile);
 		}
 		int rv = ch.showDialog(null);
 		if (rv == JFileChooser.APPROVE_OPTION) {
-			_file = ch.getSelectedFile();
+			_rfile = ch.getSelectedFile();
 		} else {
-			_file = null;
+			_rfile = null;
 		}
 		try { // if this fails, oh well.
 			Wang_UI.getProperties().setAndSaveProperty(
 				Wang_UI.getProperties().getClass().newInstance(),
 				_propBase + "rdr_image",
-				_file == null ? "" : _file.getName());
+				_rfile == null ? "" : _rfile.getName());
 		} catch(Exception ee) {}
 		setupRdr();
 	}
 
-	private void truncPun() {
-	}
-
 	private void saveTruncPun() {
-		truncPun();
+		SuffFileChooser ch = new SuffFileChooser("Save Punch",
+			_fileType, _pickLabel, Wang_UI.getDir());
+		int rv = ch.showDialog(null);
+		if (rv == JFileChooser.APPROVE_OPTION) {
+			// check if file exists? or other safety mechanism?
+			File file = ch.getSelectedFile();
+			renamePun(file);
+		}
 	}
 
 	private InputProxy _inp;
@@ -187,7 +248,7 @@ class Wang_Teletype extends ASR33_Teletype
 
 		public void run() {	// look for input, only when input enabled...?
 			_running = true;
-			while(_input) {
+			while (_input) {
 				int b;
 				if (_xOn) {
 					b = getRdrByte();
@@ -207,6 +268,7 @@ class Wang_Teletype extends ASR33_Teletype
 						break;
 					}
 				}
+				// echo all characters?
 				if (b == 0x00ff) { // RUB ignored
 					continue;
 				}
@@ -331,7 +393,7 @@ class Wang_Teletype extends ASR33_Teletype
 		java.net.URL url = this.getClass().getResource("icons/wang607.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.3 $ $Date: 2014/01/03 23:48:40 $<BR>"+
+			"$Revision: 1.4 $ $Date: 2014/01/04 22:26:32 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -359,16 +421,18 @@ class Wang_Teletype extends ASR33_Teletype
 		_glrn = 0;
 		_iob = 0;
 		_cr = false;
+		_xOn = false;
+		_pOn = false;
 		_inp = new InputProxy(this);
 
 		_propBase = propBase;
-		_mountLabel = "Mount Tape";
 		_pickLabel = new String[]{"Wang Data files","Text Files"};
 		_fileType = new String[]{"wdf","txt"};
-		_file = Wang_UI.getProperties().getFile(_propBase + "rdr_image", true, Wang_UI.getDir());
+		_rfile = Wang_UI.getProperties().getFile(_propBase + "rdr_image", true, Wang_UI.getDir());
 		getMenu(); // setup now in case not already done...
 
 		setupRdr();
+		setupPun();
 		_miRdr.addActionListener(this);
 		_miPunS.addActionListener(this);
 		_miPunT.addActionListener(this);
@@ -387,7 +451,7 @@ class Wang_Teletype extends ASR33_Teletype
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_T) {
-			truncPun();
+			setupPun();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_S) {
