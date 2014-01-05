@@ -1,0 +1,25 @@
+#include "wang700.h"
+
+RES_REG(temp, 15)
+
+LLABEL(loop)
+
+BEGIN()
+	ALPHA_TTY("Converts Fahrenheit to Celcius\r")
+MARK(loop)
+	ALPHA_TTY("Enter Fahrenheit: ")
+	CLR_X()
+	GROUP1(0xf5)
+	ST_Y()
+	ENTER(32)
+	SUB_Y()
+	ENTER(5)
+	MULT_Y()
+	ENTER(9)
+	DIV_Y()
+	ALPHA_TTY("Celsius = ")
+	RE_Y()
+	WRITE(0x31)
+	ALPHA_TTY("\r\r")
+	SEARCH(loop)
+END()
