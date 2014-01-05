@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $
+// $Id: Wang_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $
 
 import java.io.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.net.*;
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_InputDevice, ActionListener
 {
-	final String ident = "$Id: Wang_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $";
+	final String ident = "$Id: Wang_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $";
 
 	public static final String Model = "07";
 	public static final String Description = "Teletype";
@@ -46,7 +46,6 @@ class Wang_Teletype extends ASR33_Teletype
 		return _mu;
 	}
 
-	String _propBase;
 	String[] _pickLabel;
 	String[] _fileType;
 	File _rfile;
@@ -163,6 +162,7 @@ class Wang_Teletype extends ASR33_Teletype
 		if (!on) {
 			_input = false;
 			_inp = null;
+			Wang_UI.deregisterCN36(this);
 		}
 		super.onOff(on);
 		if (_mu != null) {
@@ -411,7 +411,7 @@ class Wang_Teletype extends ASR33_Teletype
 		java.net.URL url = this.getClass().getResource("icons/wang607.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.6 $ $Date: 2014/01/05 15:51:24 $<BR>"+
+			"$Revision: 1.7 $ $Date: 2014/01/05 21:23:51 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -430,11 +430,15 @@ class Wang_Teletype extends ASR33_Teletype
 	}
 
 	public void newConnection(Socket s) {
-		_mu.setEnabled(s != null);
+		boolean start = (s != null);
+		_mu.setEnabled(start);
+		if (start && _input) {
+			_inp.restart();
+		}
 	}
 
 	public Wang_Teletype(String propBase) {
-		super(Integer.valueOf("10" + getModel()));
+		super(propBase, Integer.valueOf("10" + getModel()));
 
 		_input = false;
 		_bytes = 0;
@@ -445,7 +449,6 @@ class Wang_Teletype extends ASR33_Teletype
 		_pOn = false;
 		_inp = new InputProxy(this);
 
-		_propBase = propBase;
 		_pickLabel = new String[]{"Wang Data files","Text Files"};
 		_fileType = new String[]{"wdf","txt"};
 		_rfile = Wang_UI.getProperties().getFile(_propBase + "rdr_image", true, Wang_UI.getDir());

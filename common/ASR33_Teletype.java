@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,9 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $";
+
+	String _propBase;
 
 	private boolean _on;
 	private boolean _shifted;
@@ -86,7 +88,7 @@ abstract class ASR33_Teletype
 		//static private final int SE = 240;
 		static private final int EOR = 239;
 
-		private boolean _debug = true;
+		private boolean _debug = false;
 		private int _state = -1; // -1: not telnet (that we know, yet),
 					 // 0: outside of telnet protocol (i.e. normal)
 
@@ -149,12 +151,15 @@ abstract class ASR33_Teletype
 			while (b >= 0) {
 				try {
 					b = _in.read();
+//System.err.format("Socket recv %02x\n", b);
 				} catch (Exception ee) {
 					b = -1;
 				}
 				if (doTelnet(b)) {
 					continue;
 				}
+				// why does telnet send a NUL after CR???
+				if (b == 0) continue;
 				if (inputEnabled()) {
 					_currByte = b;
 					synchronized(this) {
@@ -356,22 +361,44 @@ abstract class ASR33_Teletype
 		}
 	}
 
-	public ASR33_Teletype(int port) {
+	public ASR33_Teletype(String propBase, int port) {
 		_shifted = false;
 		_crPrint = false;
 		_remote = null;
 		_on = true;
 		_th = null;
-		try {
-			InetAddress ia;
-			//ia = InetAddress.getLocalHost();
-			ia = InetAddress.getByName("127.0.0.1");
-			_ss = new ServerSocket(port, 1, ia);
-		} catch(Exception e) {
-			Wang_UI.warning("ASR33_Teletype", e.toString());
-			_ss = null;
+		_propBase = propBase;
+		boolean done = false;
+		boolean newDone = false;
+		InetAddress ia;
+		String host = Wang_UI.getProperties().getProperty(_propBase + "host");
+		if (host == null) {
+			host = "";
+		}
+		String gotHost = host;
+		while (!done) {
+			done = newDone;
+			try {
+				if (gotHost.length() == 0) {
+					ia = InetAddress.getLocalHost();
+				} else {
+					ia = InetAddress.getByName(gotHost);
+				}
+				_ss = new ServerSocket(port, 1, ia);
+				done = true;
+			} catch(Exception e) {
+//System.err.println("host=" + gotHost + " port=" + port + " " + e.toString());
+				_ss = null;
+			}
+			if (_ss == null) {
+				newDone = true;
+				gotHost = "127.0.0.1";
+			}
 		}
 		if (_ss != null) {
+			if (!host.equals(gotHost)) {
+				Wang_UI.warning("ASR33_Teletype", "Falling back to host " + gotHost);
+			}
 			_th = new Thread(this);
 			_th.start();
 		}
