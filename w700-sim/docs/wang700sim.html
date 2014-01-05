@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.9 2013/12/31 23:52:00 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.10 2014/01/05 16:53:25 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -45,6 +45,8 @@ that are not exposed in the "Preferences" dialog, are:
 	The "Micro Face" device (native command) that was last setup for the
 	given device number. These properties may be edited in the
 	"Devices" -> "705 Micro Face" menu.
+<DT>Last Paper Tape image<DD>[wang700_707_rdr_image]
+	The Paper Tape image file that was mounted when the Model 706/707 was last used.
 <DT>Last Output device<DD>[wang700_cn24_device]
 	The Output device that was installed when the calculator was last used.
 	Uses values such as "701" or "712".
@@ -213,7 +215,7 @@ to allow choosing a file to use as a tape image.
 inside a file to the next, or previous, program image. Since most files
 will have only one program image, these are not normally used.
 
-<H3>701 OutputWriter</H3>
+<A ID="model701"><H3>701 OutputWriter</H3></A>
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output only, with standard spacing.
@@ -225,7 +227,7 @@ The output may be consumed in the same way as for the built-in printer,
 from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
 
-<H3>702 Plotting OutputWriter</H3>
+<A ID="model702"><H3>702 Plotting OutputWriter</H3></A>
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output along with micro-spacing which allows plotting.
@@ -237,7 +239,7 @@ from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Typewriter" menu that provides a "Home" function for
 the carriage, and will eventually provide setup of paper size, margins, etc.
 
-<H3>711 Input/OutputWriter</H3>
+<A ID="model711"><H3>711 Input/OutputWriter</H3></A>
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output as well as input from the keyboard.
@@ -264,7 +266,7 @@ Press the GO button to end input mode.
 The calculator remains in the RUN mode, but is waiting for the GO command from the device
 in order to be released.
 
-<H3>712 Flatbed Plotter</H3>
+<A ID="model712"><H3>712 Flatbed Plotter</H3></A>
 
 <P>This device is capable of vector (line) plotting as well as (drawn) text from a limited
 character set.
@@ -277,7 +279,7 @@ There is also a "Plotter" menu that allows setting the plot area, pen color,
 and returning the plot carriage to the "home" position.
 Future enhancements will include control over the paper size.
 
-<H3>730 Fixed/Removable Disk</H3>
+<A ID="model730"><H3>730 Fixed/Removable Disk</H3></A>
 
 <P>This device is simulated by a single file that supports the entire
 16M address range of the device protocol. So there is not a separate removable
@@ -288,7 +290,7 @@ the disk. The file will be expanded as needed by writes. The file may
 also be "sparse", if writes are made beyond the current end of file.
 Unwritten portions of the file will read back as zero.
 
-<H3>703 Paper Tape Reader</H3>
+<A ID="model703"><H3>703 Paper Tape Reader</H3></A>
 
 <P>This device is referred to in Wang documentation as the "Paper Tape Editor".
 It can extract numeric data from "standard" 8-level ASCII paper tapes.
@@ -315,7 +317,7 @@ essentially stopped while waiting for the Group I/O operation,
 the SR&nbsp;0000 would RETURN to the stopped state and the program would not continue
 without the GO).
 
-<H3>705 Micro Face</H3>
+<A ID="model705"><H3>705 Micro Face</H3></A>
 
 <P>This device was a general-purpose electronic interface to any hardware that
 could generate BCD data, enabling real-time sampling of external data.
@@ -350,7 +352,52 @@ equivalents on Windows (CYGWIN is preferred). These default commands are:
 
 <P>"Devices" (commands) are setup through the "705 Micro Face" item in the "Devices" menu.
 
-<H3>714 Mark-Sense Card Reader</H3>
+<A ID="model707"><H3>706/707 Teletype</H3></A>
+
+<P>This peripheral consisted of Model 707 components that provided an ASCII/TTY/Remote
+interface to the calculator and an unmodified ASR33 Teletype designated Model 706.
+The emulation provides the Model 707 functionality (with additions described below)
+and the Model 706 functionality is provided by a simple socket/port text client
+such as "telnet".
+
+<P>An ASR33 Teletype integrated the keyboard, print unit, paper tape punch,
+and paper tape reader. This emulation places the paper tape functionality
+in with the Model 707 code and leaves the keyboard and print unit to the
+chosen client. If a client supports session logging and playback, then the
+paper tape functionality in the Model 707 might be redundant. But since
+most "telnet" clients, and simple I/O through a socket, do not support such
+features this functionality is kept in with the Model 707 code.
+
+<P>The client connects to the Model 707 using the host configured (default
+is the localhost IP 127.0.0.1) using port 10707. The Model 707 must be "installed"
+(using the "Devices" -> "Output Device..." menu) in order for a client connection
+to succeed. Although the Model 707 hardware supported more than one Model 706,
+this emulation does not (currently) support multiple clients connected at the same time.
+Note, such support would require a change to paper tape handling, as each client
+would expect independent control of their own paper tape "hardware".
+
+<P>If using "telnet" as a client, the user should turn off "LINEMODE".
+This is typically done by entering command mode using the assign
+client escape character (often Ctrl-]), and entering the command "mode character".
+This mode is also known as "character-by-character" mode and includes
+having the server (Model 707) perform the "echo" functionality.
+The emulation does not currently assume a client is "telnet" and so
+does not attempt to force this configuration. most telent clients support
+some sort of "telnetrc" file, which may be used to set "mode character",
+however that would force character mode for all connections to that host
+by telnet, not just connections to the Model 707 (since telnet is rarely
+used anymore for "login connections", this may not be a problem).
+
+<P>The paper tape functions are controlled through the "Devices" -> "707 Teletye..."
+sub-menu, which is only enabled while a client is connected. This better emulates
+the true hardware locality of the ASR33 Teletype. A file image for the paper tape
+reader may be selected, and the paper tape punch image may be saved or torn-off (and discarded).
+There is always a file available to the punch, it is named "707Punch.txt".
+"Saving" consists of renaming that file and creating a new, empty, punch image.
+This file will be truncated (empty) whenever the "Tear Off" or "Save" options
+are used (with the exception of "Canceling a Save" does not alter the punch image).
+
+<A ID="model714"><H3>714 Mark-Sense Card Reader</H3></A>
 
 While support for the actual card reader is pending, there is
 a novelty program that allows one to "edit" a program image

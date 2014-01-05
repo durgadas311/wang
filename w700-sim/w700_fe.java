@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $
+// $Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.awt.datatransfer.StringSelection;
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -208,6 +208,8 @@ public class w700_fe
 			Wang700.CN24 = new Wang_InputOutputWriter();
 		} else if (cn24 != null && cn24.equals(Wang_Plotter.getModel())) {
 			Wang700.CN24 = new Wang_Plotter();
+		} else if (cn24 != null && cn24.equals(Wang_Teletype.getModel())) {
+			Wang700.CN24 = new Wang_Teletype("wang700_707_");
 		}
 		// Must be after Keyboard created.
 		Wang700.M730 = new Wang700_Model730();
@@ -236,6 +238,8 @@ public class w700_fe
 		mi = Wang700.M705.getMenu(KeyEvent.VK_M);
 		mi.addActionListener(inp);
 		mu.add(mi);
+
+		mu.add(Wang_Teletype.getMenu()); // TTY sub-menu, when active
 
 		mu = new JMenu("Edit");
 		mb.add(mu);
@@ -283,11 +287,12 @@ public class w700_fe
 class Wang700_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	private JMenuItem _mi701;
 	private JMenuItem _mi702;
 	private JMenuItem _mi711;
 	private JMenuItem _mi712;
+	private JMenuItem _mi707;
 	private JMenuItem _miNone;
 	private JMenu _mu;
 	public JMenu getOutputMenu() { return _mu; }
@@ -309,11 +314,15 @@ class Wang700_SimInput
 			_mi711.setText(Wang_InputOutputWriter.getName() +
 				" (not installed)");
 			Wang700.CN24.onOff(false);
+		} else if (Wang700.CN24 instanceof Wang_Teletype) {
+			_mi707.setText(Wang_Teletype.getName() +
+				" (not installed)");
+			Wang700.CN24.onOff(false);
 		}
 	}
 
 	private void setupDevice() {
-		Wang700.CN24.getFrame().addWindowListener(this);
+		if (Wang700.CN24.getFrame() != null) Wang700.CN24.getFrame().addWindowListener(this);
 		String model = "";
 		if (Wang700.CN24 instanceof Wang_Plotter) {
 			model = Wang_Plotter.getModel();
@@ -323,6 +332,8 @@ class Wang700_SimInput
 			model = Wang_PlottingOutputWriter.getModel();
 		} else if (Wang700.CN24 instanceof Wang_InputOutputWriter) {
 			model = Wang_InputOutputWriter.getModel();
+		} else if (Wang700.CN24 instanceof Wang_Teletype) {
+			model = Wang_Teletype.getModel();
 		}
 		try { // if this fails, oh well.
 			Wang_UI.getProperties().setAndSaveProperty(
@@ -386,6 +397,18 @@ class Wang700_SimInput
 			}
 			return;
 		}
+		if (m.getMnemonic() == KeyEvent.VK_5) {
+			if (!(Wang700.CN24 instanceof Wang_Teletype)) {
+				disposeDevice();
+				Wang700.CN24 = new Wang_Teletype("wang700_707_");
+				_mi707.setText(Wang_Teletype.getName() +
+						" (installed)");
+				setupDevice();
+			} else {
+				// no on/off here for this device...
+			}
+			return;
+		}
 		if (m.getMnemonic() == KeyEvent.VK_0) {
 			disposeDevice();
 			try { // if this fails, oh well.
@@ -438,7 +461,7 @@ class Wang700_SimInput
 
 	public Wang700_SimInput(boolean test, boolean dbg, boolean stop) {
 		if (Wang700.CN24 != null) {
-			Wang700.CN24.getFrame().addWindowListener(this);
+			if (Wang700.CN24.getFrame() != null) Wang700.CN24.getFrame().addWindowListener(this);
 		}
 
 		_mu = new JMenu("Output Device...");
@@ -467,6 +490,12 @@ class Wang700_SimInput
 					KeyEvent.VK_4);
 		_mi712.addActionListener(this);
 		_mu.add(_mi712);
+		status = " (not installed)";
+		if (Wang700.CN24 instanceof Wang_Teletype) status = " (installed)";
+		_mi707 = new JMenuItem(Wang_Teletype.getName() + status,
+					KeyEvent.VK_5);
+		_mi707.addActionListener(this);
+		_mu.add(_mi707);
 		_miNone = new JMenuItem("None",
 					KeyEvent.VK_0);
 		_miNone.addActionListener(this);
@@ -674,7 +703,7 @@ System.err.println("sync error");
 class Wang700_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -1022,7 +1051,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.64 $ $Date: 2013/12/30 20:53:08 $<BR>"+
+			"$Revision: 1.65 $ $Date: 2014/01/05 16:53:25 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1155,7 +1184,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1576,7 +1605,7 @@ System.err.println("action");
 
 class Wang700_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -1802,7 +1831,7 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 
 class Wang700_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -1934,7 +1963,7 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 
 class Wang700_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.64 2013/12/30 20:53:08 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.65 2014/01/05 16:53:25 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
