@@ -1,8 +1,14 @@
+#ifdef TTY
+EXMAP(EX_PUNON, 0x0a)
+EXMAP(EX_PUNOFF, 0x0b)
+#endif
 
 MAP('-', 0x00|NONZERO)
 MAP('y', 0x01)
 MAP(' ', 0x02)
+#ifndef TTY
 MAP('\b', 0x03)
+#endif
 MAP('q', 0x04)
 MAP('p', 0x05)
 MAP('=', 0x06)
@@ -23,11 +29,15 @@ MAP('s', 0x11)
 MAP('i', 0x14)
 MAP('\'', 0x15)
 MAP('.', 0x16)
+#ifndef TTY
 SPMAP('[', 0x17)      // 1/2...
+#endif
 MAP('\r', 0x18)		// return-index
 MAP('o', 0x19)
 MAP('\n', 0x1a)		// index
+#ifndef TTY
 MAP('\v', 0x1b)		// rev index
+#endif
 MAP('a', 0x1c)
 MAP('r', 0x1d)
 MAP('v', 0x1e)
@@ -42,7 +52,11 @@ MAP('e', 0x25)
 MAP('n', 0x26)
 MAP('t', 0x27)
 //MAP('', 0x28)        // print mode
+#ifdef TTY
+MAP('1', 0x29)
+#else
 MAP('l', 0x29)
+#endif
 //MAP('+', 0x2a)       // step y+
 //MAP('+', 0x2b)       // step y-
 MAP('c', 0x2c)
@@ -65,10 +79,16 @@ MAP('4', 0x39)
 MAP('8', 0x3c)
 MAP('7', 0x3d)
 MAP('3', 0x3e)
+#ifdef TTY
+MAP('l', 0x3f)
+#else
 MAP('1', 0x3f)
+#endif
 
 // shifted versions...
+#ifndef TTY
 MAP('_', 0x00|SHIFT|NONZERO)
+#endif
 MAP('Y', 0x01|SHIFT)
 MAP(' ', 0x02|SHIFT)
 //MAP('\b', 0x03|SHIFT)
@@ -87,7 +107,9 @@ MAP('S', 0x11|SHIFT)
 MAP('I', 0x14|SHIFT)
 MAP('"', 0x15|SHIFT)
 MAP('.', 0x16|SHIFT)
+#ifndef TTY
 SPMAP('{', 0x17|SHIFT)      // 1/4
+#endif
 //MAP('\n', 0x18|SHIFT)
 MAP('O', 0x19|SHIFT)
 //MAP('\n', 0x1a|SHIFT)
@@ -103,7 +125,11 @@ MAP('K', 0x24|SHIFT)
 MAP('E', 0x25|SHIFT)
 MAP('N', 0x26|SHIFT)
 MAP('T', 0x27|SHIFT)
+#ifdef TTY
+MAP('!', 0x17|SHIFT)
+#else
 MAP('L', 0x29|SHIFT)
+#endif
 MAP('C', 0x2c|SHIFT)
 MAP('D', 0x2d|SHIFT)
 MAP('U', 0x2e|SHIFT)
@@ -111,7 +137,9 @@ MAP('X', 0x2f|SHIFT)
 
 MAP('(', 0x30|SHIFT)
 MAP(')', 0x31|SHIFT)
+#ifndef TTY
 SPMAP('^', 0x34|SHIFT)      // cent
+#endif
 MAP('%', 0x35|SHIFT)
 MAP('@', 0x36|SHIFT)
 MAP('Z', 0x37|SHIFT)
@@ -119,4 +147,8 @@ MAP('$', 0x39|SHIFT)
 MAP('*', 0x3c|SHIFT)
 MAP('&', 0x3d|SHIFT)
 MAP('#', 0x3e|SHIFT)
+#ifdef TTY
+MAP('L', 0x3f|SHIFT)
+#else
 MAP('!', 0x3f|SHIFT)
+#endif
