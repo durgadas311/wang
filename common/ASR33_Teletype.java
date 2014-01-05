@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.8 2014/01/05 21:36:25 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.7 2014/01/05 21:23:51 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.8 2014/01/05 21:36:25 drmiller Exp $";
 
 	String _propBase;
 
@@ -240,6 +240,9 @@ abstract class ASR33_Teletype
 	public void setProperties(Wang_Properties p) {
 		// might be paper tape image file - one for reader, one for punch
 		// also might change listening host/port...
+		// Need to drop all connections and destroy ServerSocket, and
+		// recreate it... only do that if it changes...
+		// For now, require user to de-install 707 and re-install.
 	}
 
 	public void reset() {
