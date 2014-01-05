@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $
+// $Id: Wang_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $
 
 import java.io.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.net.*;
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_InputDevice, ActionListener
 {
-	final String ident = "$Id: Wang_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $";
+	final String ident = "$Id: Wang_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $";
 
 	public static final String Model = "07";
 	public static final String Description = "Teletype";
@@ -110,7 +110,7 @@ class Wang_Teletype extends ASR33_Teletype
 
 	private void setupPun() {
 		if (_pfile == null) {
-			_pfile = new File(Wang_UI.getDir(), "707Punch.txt");
+			_pfile = new File(Wang_UI.getDir(), getModel() + "Punch.txt");
 		}
 		try {
 			_pfile.delete();
@@ -150,6 +150,8 @@ class Wang_Teletype extends ASR33_Teletype
 	private boolean _cr;	// last character was CR...
 	boolean _input;
 
+	public boolean inputEnabled() { return _input; }
+
 	public void reset() {
 		_glrn = 0;
 		_input = false;
@@ -177,6 +179,7 @@ class Wang_Teletype extends ASR33_Teletype
 	private void xOn() {
 		// start the paper tape reader...
 		_xOn = true;
+		ttyPrint('\021');	// ^Q
 		// need to wakeup InputProxy... how?
 		// If this only happens at the start of a GROUP I/O session,
 		// and the InputProxy is started after this, all is well.
@@ -193,6 +196,8 @@ class Wang_Teletype extends ASR33_Teletype
 
 	private void xOff() {
 		// stop the paper tape reader...
+		_xOn = false;
+		ttyPrint('\023');	// ^S
 	}
 
 	private void pickRdrFile() {
@@ -261,17 +266,34 @@ class Wang_Teletype extends ASR33_Teletype
 					// is blocked when the calculator sends
 					// an X ON, as those are mutually exclusive
 					// operating modes of the calculator.
-					// This thread shold never be running while
+					// This thread should never be running while
 					// the calculator is printing to OutputWriter.
 					b = _tty.ttyGet();
 					if (b < 0) { // i.e. disconnect
 						break;
 					}
 				}
-				// echo all characters?
+				// echo all characters? echoed chars might also
+				// be punched, so echo everything and let the
+				// ttyPrint() methods strip out anything.
+
+				// ctrlChar() will echo, so do these first.
+				if (b >= 0x11 && b <= 0x14) { // ^Q..^T
+					ctrlChar((char)b);
+				}
+
+				// echo character. User should assume no echo means
+				// the calculator is not in an input mode.
+				// If ttyGet (ConnectionProxy) can detect that
+				// it could echo BEL.
+				ttyPrint((char)b);
+
 				if (b == 0x00ff) { // RUB ignored
 					continue;
 				}
+				// X ON, X OFF, PUN ON, PUN OFF from keyboard or reader
+				// should also be supported.
+
 				if (b == 0x01) { // ^A == Resume (GO)
 					xOff();
 					_glrn = 0;
@@ -296,29 +318,23 @@ class Wang_Teletype extends ASR33_Teletype
 					if (tr != null) {
 						// no shifting automatically (?)
 						sendCode(tr[1]);
-						ttyPrint((char)b);
 						continue;
 					}
 				} else {
 					if (b >= '0' && b <= '9') {
 						sendCode(E0 + (b - '0'));
-						ttyPrint((char)b);
 						continue;
 					} else if (b == '.') {
 						sendCode(DP);
-						ttyPrint((char)b);
 						continue;
 					} else if (b == '-') {
 						sendCode(CHG_SIGN);
-						ttyPrint((char)b);
 						continue;
 					} else if (b == '^') {
 						sendCode(SET_EXP);
-						ttyPrint((char)b);
 						continue;
 					} else if (b == '_') { // back-arrow on old TTYs...
 						sendCode(CLR_DSP);
-						ttyPrint((char)b);
 						continue;
 					} else if (b == 0x02) { // ^B == SR 0000
 						xOff();
@@ -393,7 +409,7 @@ class Wang_Teletype extends ASR33_Teletype
 		java.net.URL url = this.getClass().getResource("icons/wang607.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.4 $ $Date: 2014/01/04 22:26:32 $<BR>"+
+			"$Revision: 1.5 $ $Date: 2014/01/05 00:38:40 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -416,6 +432,8 @@ class Wang_Teletype extends ASR33_Teletype
 	}
 
 	public Wang_Teletype(String propBase) {
+		super(Integer.valueOf("10" + getModel()));
+
 		_input = false;
 		_bytes = 0;
 		_glrn = 0;

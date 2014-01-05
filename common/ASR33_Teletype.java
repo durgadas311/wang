@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,11 +9,10 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.4 2014/01/04 22:26:32 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $";
 
 	private boolean _on;
 	private boolean _shifted;
-	private boolean _punch;
 
 	Thread _th;
 	private ServerSocket _ss;
@@ -60,7 +59,7 @@ abstract class ASR33_Teletype
 				b = -1;
 			}
 		}
-		// The TTY never generated "lower case" (etc), so fold...
+		// The TTY keyboard never generated "lower case" (etc), so fold...
 		if (b > 0x7f) {
 			b = 0x00ff; // RUBOUT - ignored
 		} else if (b >= 0x60) {
@@ -70,6 +69,10 @@ abstract class ASR33_Teletype
 	}
 
 	abstract public void newConnection(Socket s);
+
+	abstract public boolean inputEnabled();
+
+	// character has not been (otherwise) sent to TTY/PUN
 	abstract public void ctrlChar(char c);
 
 	private class ConnectionProxy implements Runnable {
@@ -88,9 +91,13 @@ abstract class ASR33_Teletype
 				} catch (Exception ee) {
 					b = -1;
 				}
-				_currByte = b;
-				synchronized(this) {
-					notifyAll();
+				if (inputEnabled()) {
+					_currByte = b;
+					synchronized(this) {
+						notifyAll();
+					}
+				} else {
+					ttyPrint('\007'); // BEL
 				}
 			}
 			// already did notifyAll()...
@@ -128,25 +135,26 @@ abstract class ASR33_Teletype
 		}
 	}
 
+	private boolean _crPrint;
+
 	public void ttyPrint(char c) {
 		// Need more than just "toupper()" as the tty forces
 		// all characters 96-127 into 64-95.
-		if (c < ' ' && c != '\n' && c != '\r') return;
+		if (c < ' ' && c != '\n' && c != '\r' && c != '\007') return;
+		if (_crPrint && c == '\n') return;
+		_crPrint = (c == '\r');
 		int b = c;
 		if (b > 0x7f) return;
 		if (b > 0x5f) {
 			b -= 32;
 		}
 
-		// technically, the TTYs each have their own punch/reader,
-		// but using telnet as the "tty" thwarts that idea.
-		// right now we only support one TTY anyway.
-		if (_punch) {
-			// write to file...
-		}
 		if (_remote != null) {
 			try {
 				_out.write(b);
+				if (_crPrint) {
+					_out.write('\n');
+				}
 			} catch(IOException e) {
 				tearDown();
 			}
@@ -167,7 +175,6 @@ abstract class ASR33_Teletype
 
 	public void reset() {
 		_shifted = false;
-		_punch = false;
 	}
 
 	public void setPaper(double w, double h) {
@@ -190,11 +197,13 @@ abstract class ASR33_Teletype
 
 	public void do_settab() {
 		// PUN on (a.k.a DC2 or ^R)
+		// has not been printed...
 		ctrlChar('\022');
 	}
 
 	public void do_clrtab() {
 		// PUN off (a.k.a DC4 or ^T)
+		// has not been printed...
 		ctrlChar('\024');
 	}
 
@@ -283,18 +292,17 @@ abstract class ASR33_Teletype
 		}
 	}
 
-	public ASR33_Teletype() {
+	public ASR33_Teletype(int port) {
 		_shifted = false;
-		_punch = false;
+		_crPrint = false;
 		_remote = null;
 		_on = true;
 		_th = null;
 		try {
-			int p = 10707;	// use Series... 10607 or 10707...
 			InetAddress ia;
 			//ia = InetAddress.getLocalHost();
 			ia = InetAddress.getByName("127.0.0.1");
-			_ss = new ServerSocket(p, 1, ia);
+			_ss = new ServerSocket(port, 1, ia);
 		} catch(Exception e) {
 			Wang_UI.warning("ASR33_Teletype", e.toString());
 			_ss = null;
