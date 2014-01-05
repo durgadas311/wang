@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.9 2013/12/31 15:32:34 drmiller Exp $
+// $Id: Wang_UI.java,v 1.10 2014/01/05 21:23:19 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.9 2013/12/31 15:32:34 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.10 2014/01/05 21:23:19 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -226,7 +226,6 @@ public class Wang_UI
 		return res;
 	}
 
-	// need de-register?
 	static public void registerCN36(Wang_InputDevice dev) {
 		Wang_InputDevice[] newdevs;
 		if (_cn36 == null) {
@@ -237,6 +236,30 @@ public class Wang_UI
 			newdevs = new Wang_InputDevice[oldnum + 1];	
 			System.arraycopy(_cn36, 0, newdevs, 0, oldnum);
 			newdevs[oldnum] = dev;
+		}
+		_cn36 = newdevs;
+	}
+	static public void deregisterCN36(Wang_InputDevice dev) {
+		int ix = -1;
+		if (_cn36 != null) {
+			for (int x = 0; x < _cn36.length; ++x) {
+				if (_cn36[x].equals(dev)) {
+					ix = x;
+					break;
+				}
+			}
+		}
+		if (ix < 0) {
+			return;
+		}
+		Wang_InputDevice[] newdevs;
+		int oldnum = _cn36.length;
+		newdevs = new Wang_InputDevice[oldnum - 1];
+		if (ix > 0) {
+			System.arraycopy(_cn36, 0, newdevs, 0, ix);
+		}
+		if (ix < oldnum - 1) {
+			System.arraycopy(_cn36, ix + 1, newdevs, ix, oldnum - 1 - ix);
 		}
 		_cn36 = newdevs;
 	}
