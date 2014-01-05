@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $
+// $Id: ASR33_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.5 2014/01/05 00:38:40 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.6 2014/01/05 15:51:24 drmiller Exp $";
 
 	private boolean _on;
 	private boolean _shifted;
@@ -77,10 +77,71 @@ abstract class ASR33_Teletype
 
 	private class ConnectionProxy implements Runnable {
 		private InputStream _in;
+		static private final int IAC = 255;
+		static private final int WILL = 251;
+		static private final int WONT = 252;
+		static private final int DO = 253;
+		static private final int DONT = 254;
+		static private final int SB = 250;
+		//static private final int SE = 240;
+		static private final int EOR = 239;
+
+		private boolean _debug = true;
+		private int _state = -1; // -1: not telnet (that we know, yet),
+					 // 0: outside of telnet protocol (i.e. normal)
+
 		public ConnectionProxy(Socket s) throws Exception {
 			_in = s.getInputStream();
 			Thread t = new Thread(this);
 			t.start();
+		}
+
+		private boolean doTelnet(int b) {
+			if (b < 0) return false;
+//System.err.format("Socket recv %03d\n", b);
+			switch (_state) {
+			case IAC:
+				if (b == IAC) {
+					break;
+				} else if (b == EOR) {
+					if (_debug) System.err.format("EOR\n", b);
+					b = 0;
+				}
+				_state = b;
+				break;
+			case WILL:
+				if (_debug) System.err.format("IAC WILL %d\n", b);
+				_state = 0;
+				break;
+			case WONT:
+				if (_debug) System.err.format("IAC WONT %d\n", b);
+				_state = 0;
+				break;
+			case DO:
+				if (_debug) System.err.format("IAC DO %d\n", b);
+				_state = 0;
+				break;
+			case DONT:
+				if (_debug) System.err.format("IAC DONT %d\n", b);
+				_state = 0;
+				break;
+			case SB:
+				if (_debug) System.err.format("IAC DONT %d\n", b);
+				_state = 0;
+				break;
+			case 0: // not in Telnet protocol...
+			case -1: // not yet in Telnet protocol...
+				if (b != IAC) {
+					return false;
+				}
+				_state = IAC;
+				break;
+			default:
+				System.err.format("IAC %d ???\n", _state);
+				_state = 0; // not the right reaction...
+				break;
+			}
+			return true;
 		}
 
 		public void run() {
@@ -90,6 +151,9 @@ abstract class ASR33_Teletype
 					b = _in.read();
 				} catch (Exception ee) {
 					b = -1;
+				}
+				if (doTelnet(b)) {
+					continue;
 				}
 				if (inputEnabled()) {
 					_currByte = b;
@@ -177,10 +241,10 @@ abstract class ASR33_Teletype
 		_shifted = false;
 	}
 
-	public void setPaper(double w, double h) {
-	}
+	public void setPaper(double w, double h) { if (w + h == 0.0) {} }
 
 	public void do_bell() {
+		ttyPrint('\007');
 	}
 
 	public void do_shift_up() {
