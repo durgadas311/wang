@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-.ident "Wang 700 Compiler over GCC $Revision: 1.12 $ "
+.ident "Wang 700 Compiler over GCC $Revision: 1.13 $ "
 
 .section .wang700code, "a"
 	.include "wang700opcodes.s"
@@ -168,6 +168,7 @@
 #define IREG_DATA(name,val)	.error "run w7cpp preprocessor for IREG_DATA()"
 #define ALPHA_STRING(str)	.error "run w7cpp preprocessor for ALPHA_STRING()"
 #define ALPHA_PLOT(str)		.error "run w7cpp preprocessor for ALPHA_PLOT()"
+#define ALPHA_TTY(str)		.error "run w7cpp preprocessor for ALPHA_TTY()"
 
 // Enter into X the register number associated with the symbol <label>
 #define ENTER_REGNO(name)	_bytecode(0xed); \

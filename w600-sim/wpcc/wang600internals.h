@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-.ident "Wang 600 Compiler over GCC $Revision: 1.14 $ "
+.ident "Wang 600 Compiler over GCC $Revision: 1.15 $ "
 
 .section .wang600code, "a";
 	.include "wang600opcodes.s";
@@ -213,6 +213,7 @@
 #define IREG_DATA(reg,num)	.error "run w6cpp preprocessor for IREG_DATA()"
 #define ALPHA_STRING(str)	.error "run w6cpp preprocessor for ALPHA_STRING()"
 #define ALPHA_PLOT(str)		.error "run w6cpp preprocessor for ALPHA_PLOT()"
+#define ALPHA_TTY(str)		.error "run w6cpp preprocessor for ALPHA_TTY()"
 
 // This forces us to post-process Wang600 programs now...
 #define ENTER_REGNO(name)	_bytecode(0xf8); \

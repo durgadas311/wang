@@ -8,6 +8,9 @@
 #define EX_CHRSPC	'\004'
 #define EX_HOME		'\005'
 
+#define EX_PUNON	'\006'
+#define EX_PUNOFF	'\007'
+
 #define MAP(c,t)	[c] = t,	// normal characters
 #define REMAP(c,t)	MAP(c,t)	// overlap conversion (e.g. force uppercase)
 #define SPMAP(c,t)	MAP(c,t)	// special (non-standard)
@@ -21,6 +24,11 @@
 unsigned char xlat_plot[256] = {
 #include "xlat_plotter_x.h"
 };
+#define TTY
+unsigned char xlat_tty[256] = {
+#include "xlat_outputwriter_x.h"
+};
+#undef TTY
 unsigned char xlat_ow[256] = {
 #include "xlat_outputwriter_x.h"
 };
@@ -114,6 +122,8 @@ void do_alpha(char *s, unsigned char *xlat) {
 			case 'b': x = '\b'; break;
 			case 'r': x = '\r'; break;
 			case 'v': x = '\v'; break;
+			case 'p': x = EX_PUNON; break;
+			case 'q': x = EX_PUNOFF; break;
 			case '%':	// plotter command for draw
 				x = EX_PLOT;
 				plot = 1;
@@ -249,6 +259,11 @@ int main(int argc, char **argv) {
 		x = sscanf(t, "ALPHA_PLOT(\"%[^\"]\")", str);
 		if (x == 1) {
 			do_alpha(str, xlat_plot);
+			continue;
+		}
+		x = sscanf(t, "ALPHA_TTY(\"%[^\"]\")", str);
+		if (x == 1) {
+			do_alpha(str, xlat_tty);
 			continue;
 		}
 		x = sscanf(t, "ENTER(%[^)])", str);
