@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600samp.html,v 1.12 2014/01/01 18:03:18 drmiller Exp $ -->
+<!-- $Id: wang600samp.html,v 1.13 2014/01/06 13:57:19 drmiller Exp $ -->
 
 <H2>Sample Programs</H2>
 
@@ -191,6 +191,21 @@ install the ROM image "libplot.w6x".
 <LI> Press GO
 <P> The complete character set, in three different sizes, will be drawn on the
 plotter.
+
+<H3>example607.w6t - Demonstrates one way to use the Model 607 Teletype</H3>
+
+VERIFY PROG: 897
+
+<P>
+<LI>If not already done, use the Devices -> Output Devices menu to
+connect the 607 Teletype.
+<LI>Using "telnet", or some other suitable client, connect to the Wang 700 simulation.
+<LI>Press GO.  An introduction and prompt for data should appear on the "telnet" session.
+<LI>From the "telnet" session, type a number and press "Enter" (Return).
+<LI>The equivalent temperature in Celsius, and a new prompt, should be printed.
+<P>The program repeats indefinitely, until PRIME is pressed on the calculator.
+If the client disconnects, the program will still be running and a new client can
+be connected (although in that case the prompt is not re-printed).
 
 <H3>libplot.w6x - Expansion ROM image for plotting/graphing routines</H3>
 
