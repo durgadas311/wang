@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.9 2014/01/06 13:57:19 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.10 2014/01/06 19:11:29 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.9 2014/01/06 13:57:19 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.10 2014/01/06 19:11:29 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -909,8 +909,8 @@ class Wang600_Simulator
 	}
 	private int do_bitc() {
 		--ti_bitc;
-		ti_data <<= 1;
-		if ((ti_data & 0x400) != 0) {
+		int mask = (1 << ti_bitc);
+		if ((ti_data & mask) != 0) {
 			ti_last = 0x05;	// lsb first out...
 		} else {
 			ti_last = 0x01;	// lsb first out...
@@ -949,12 +949,30 @@ class Wang600_Simulator
 			ti_bit = 0;
 			return do_repc();
 		}
-		int x = ((ti >> 4) & 0x0f);
-		ti_data = (x << 1) | odd_parity[x];
-		x = (ti & 0x0f);
-		ti_data <<= 5;
-		ti_data |= (x << 1) | odd_parity[x];
-		ti_bitc = 10;
+		if ((ti & 0x00ff00) != 0) {
+			byte b1 = (byte)((ti >> 8) & 0x0ff);
+			byte b2 = (byte)(ti & 0x0ff);
+			int x = ((b1 >> 4) & 0x0f);
+			ti_data = (x << 1) | odd_parity[x];
+			x = (b1 & 0x0f);
+			ti_data <<= 5;
+			ti_data |= (x << 1) | odd_parity[x];
+
+			x = ((b2 >> 4) & 0x0f);
+			ti_data = (x << 1) | odd_parity[x];
+			x = (b2 & 0x0f);
+			ti_data <<= 5;
+			ti_data |= (x << 1) | odd_parity[x];
+
+			ti_bitc = 20;
+		} else {
+			int x = ((ti >> 4) & 0x0f);
+			ti_data = (x << 1) | odd_parity[x];
+			x = (ti & 0x0f);
+			ti_data <<= 5;
+			ti_data |= (x << 1) | odd_parity[x];
+			ti_bitc = 10;
+		}
 		return do_bitc();
 	}
 

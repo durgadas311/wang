@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.7 2014/01/05 16:53:25 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.8 2014/01/06 19:11:07 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.7 2014/01/05 16:53:25 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.8 2014/01/06 19:11:07 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -840,8 +840,8 @@ class Wang700_Simulator
 	private boolean do_bitc() {
 		if (ti_bitc > 0) {
 			--ti_bitc;
-			ti_data <<= 1;
-			if ((ti_data & 0x200) != 0) {
+			int mask = (1 << ti_bitc);
+			if ((ti_data & mask) != 0) {
 				ti_last = 0x07;	// lsb first out...
 			} else {
 				ti_last = 0x01;	// lsb first out...
@@ -887,8 +887,16 @@ class Wang700_Simulator
 			ti_repc = cycles + 1000; // how long is needed?
 			return ti_bit;
 		} else {
-			ti_data = (ti << 1) | even_parity8((byte)ti);
-			ti_bitc = 9;
+			if ((ti & 0x00ff00) != 0) {
+				byte b1 = (byte)((ti >> 8) & 0x0ff);
+				byte b2 = (byte)(ti & 0x0ff);
+				ti_data = ((b1 << 1) | even_parity8(b1)) << 9;
+				ti_data |= (b2 << 1) | even_parity8(b2);
+				ti_bitc = 18;
+			} else {
+				ti_data = (ti << 1) | even_parity8((byte)ti);
+				ti_bitc = 9;
+			}
 			if (do_bitc()) { // must always return true?
 				return ti_bit;
 			}
