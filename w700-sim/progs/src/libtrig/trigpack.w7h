@@ -3,8 +3,8 @@
 
 RES_REG(ans,0)
 RES_REG(input,1)
-RES_REG(temp2,2)
-RES_REG(temp3,3)
+RES_REG(trigtemp2,2)
+RES_REG(trigtemp3,3)
 RES_REG(bad_reg,248)	// residual?
 
 #endif /* __libtrig_trigpack_w7h__ */

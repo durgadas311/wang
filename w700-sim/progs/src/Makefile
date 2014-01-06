@@ -3,11 +3,11 @@ include /usr/local/wpcc/include/Make.rules.user
 SRCS = $(wildcard *.w7c *.W7C)
 DATAS = $(wildcard *.txt)
 PROGS = $(subst .w7c,.w7t,$(subst .W7C,.w7t,$(SRCS)))
-SUBDIRS = libw7 libplot test
+SUBDIRS = libw7 libplot libtrig test
 
-W7TLDFLAGS += -Llibw7 -Llibplot
-W7TLIBS += -lw7 -lplot
-W7TLDEPS += libw7/libw7.a libplot/libplot.a
+W7TLDFLAGS += -Llibw7 -Llibplot -Llibtrig
+W7TLIBS += -lw7 -lplot -ltrig
+W7TLDEPS += libw7/libw7.a libplot/libplot.a libtrig/libtrig.a
 
 all: $(SUBDIRS) $(PROGS)
 
