@@ -1,0 +1,13 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+LABEL(trig_end)
+
+BEGIN()
+
+MARK(trig_end)
+	RE_Y_DIR(bad_reg)
+	RETURN()
+
+END()

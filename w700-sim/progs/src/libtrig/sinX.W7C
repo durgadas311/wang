@@ -1,0 +1,18 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+FEXTERNAL(cosX)
+
+FLABEL(sinX)
+
+BEGIN()
+
+MARK(sinX)
+	ST_Y()
+	ENTER(90)
+	SUB_Y()
+	RE_Y()
+	SEARCH(cosX)
+
+END()

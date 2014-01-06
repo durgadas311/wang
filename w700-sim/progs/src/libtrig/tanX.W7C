@@ -1,0 +1,21 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+FEXTERNAL(sinX)
+FEXTERNAL(cosX)
+
+FLABEL(tanX)
+
+BEGIN()
+
+MARK(tanX)
+	ST_DIR(input)
+	FCALL(sinX)
+	EXCHG_DIR(input)
+	FCALL(cosX)
+	DIV_DIR(input)
+	RE_DIR(input)
+	RETURN()
+
+END()

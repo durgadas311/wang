@@ -1,0 +1,58 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+EXTERNAL(trig_end)
+
+FLABEL(cosX)
+LLABEL(loop)
+
+BEGIN()
+
+MARK(cosX)
+	ST_Y()
+	ENTER(360)
+	DIV_Y()
+	RE_Y()
+	INT()
+	SUB_Y()
+	ENTER(4)
+	MULT_Y()
+	RE_Y()
+	INT()
+	SUB_Y()
+	ALPHA(SQRT)	// "cosine test" // What does this do???
+	PI()
+	MULT_Y()
+	ENTER(2)
+	DIV_Y()
+	RE_Y()
+	X_2()
+	ST_DIR(temp3)
+	ENTER(16)
+	ST_Y()
+	ENTER(1)
+	ST_DIR(ans)
+MARK(loop)
+	RE_DIR(temp3)
+	MULT_DIR(ans)
+	RE_Y()
+	DIV_DIR(ans)
+	ENTER(1)
+	SUB_Y()
+	RE_Y()
+	CHANGE_SIGN()
+	DIV_DIR(ans)
+	ENTER(1)
+	SUB_Y()
+	ADD_DIR(ans)
+	SK_IF_Y0() SEARCH(loop)
+	RE_Y_DIR(ans)
+	ENTER(.5e-11)
+	SUB_Y()
+	SUB_Y()
+	RE_Y()
+	ALPHA(END_PROG) // "set sign" // What does this do???
+	SEARCH(trig_end)
+
+END()
