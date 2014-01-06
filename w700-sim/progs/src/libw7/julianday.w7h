@@ -1,0 +1,10 @@
+#ifndef __libw7_julianday_w7h__
+#define __libw7_julianday_w7h__
+
+FEXTERNAL(julian_day)
+
+RES_REG(jd_day,5)
+RES_REG(jd_month,6)
+RES_REG(jd_year,7)
+
+#endif /* __libw7_julianday_w7h__ */

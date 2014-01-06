@@ -1,3 +1,6 @@
+/*
+ * Contributed by David Stokes
+ */
 #include "wang700.h"
 
 #include "trigpack.w7h"

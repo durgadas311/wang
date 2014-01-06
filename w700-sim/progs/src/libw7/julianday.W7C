@@ -1,0 +1,91 @@
+/*
+ * contributed by David Stokes
+ */
+#include "wang700.h"
+
+FLABEL(julian_day)
+
+#include "julianday.w7h"
+
+RES_REG(jd_temp8,8)
+RES_REG(jd_temp10,10)
+RES_REG(jd_temp11,11)
+RES_REG(jd_temp12,12)
+
+BEGIN()
+
+MARK(julian_day)	// "start"
+	ENTER(0)
+	ST_DIR(jd_temp8)
+	ENTER(14)
+	ST_Y()
+	RE_DIR(jd_month)	// "month"
+	SUB_Y()
+	ENTER(12)
+	DIV_Y()
+	RE_Y()
+	INT()
+	ST_DIR(jd_temp10)	// "a"
+	ENTER(4800)
+	ST_Y()
+	RE_DIR(jd_temp10)
+	SUB_Y()
+	RE_DIR(jd_year)
+	ADD_Y()
+	RE_Y()
+	ST_DIR(jd_temp11)	// "y"
+	ENTER(12)
+	ST_Y()
+	RE_DIR(jd_temp10)
+	MULT_Y()
+	RE_DIR(jd_month)
+	ADD_Y()
+	ENTER(3)
+	SUB_Y()
+	RE_Y()
+	ST_DIR(jd_temp12)	// "m"
+	ST_Y()
+	ENTER(153)
+	MULT_Y()
+	ENTER(2)
+	ADD_Y()
+	ENTER(5)
+	DIV_Y()
+	RE_Y()
+	INT()
+	ADD_DIR(jd_temp8)
+	RE_DIR(jd_temp11)
+	ST_Y()
+	ENTER(365)
+	MULT_Y()
+	RE_Y()
+	ADD_DIR(jd_temp8)
+	RE_DIR(jd_temp11)
+	ST_Y()
+	ENTER(4)
+	DIV_Y()
+	RE_Y()
+	INT()
+	ADD_DIR(jd_temp8)
+	RE_DIR(jd_temp11)
+	ST_Y()
+	ENTER(100)
+	DIV_Y()
+	RE_Y()
+	INT()
+	SUB_DIR(jd_temp8)
+	RE_DIR(jd_temp11)
+	ST_Y()
+	ENTER(400)
+	DIV_Y()
+	RE_Y()
+	INT()
+	ADD_DIR(jd_temp8)
+	ENTER(32045)
+	SUB_DIR(jd_temp8)
+	RE_DIR(jd_day)
+	ADD_DIR(jd_temp8)
+	RE_DIR(jd_temp8)	// "julian day number"
+	RETURN()
+
+END()
