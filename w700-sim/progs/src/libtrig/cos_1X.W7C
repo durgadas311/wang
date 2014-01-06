@@ -1,0 +1,21 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+EXTERNAL(trig_end)
+FEXTERNAL(tan_1X)
+FEXTERNAL(com_1X)
+
+BEGIN()
+
+MARK(cos_1X)
+	FCALL(com_1X)
+	FCALL(tan_1X)
+	ST_Y()
+	ENTER(90)
+	EXCHG_Y()
+	SUB_Y()
+	RE_Y()
+	SEARCH(trig_end)
+
+END()

@@ -1,0 +1,37 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+EXTERNAL(trig_end)
+
+FLABEL(com_1X)
+LLABEL(not1)
+
+BEGIN()
+
+MARK(com_1X)
+	ST_DIR(trigtemp3)
+	MULT_Y()
+	ST_Y()
+	ENTER(1)
+	SK_IF_EQ() SEARCH(not1)
+	RE_DIR(trigtemp3)
+	SET_EXP()
+	E(2)
+	E(0)
+	SEARCH(trig_end)
+
+MARK(not1)
+	RE_Y()
+	X_2()
+	CHANGE_SIGN()
+	ST_Y()
+	ENTER(1)
+	ADD_Y()
+	RE_Y()
+	SQRT()
+	DIV_DIR(trigtemp3)
+	RE_DIR(trigtemp3)
+	SEARCH(trig_end)
+
+END()

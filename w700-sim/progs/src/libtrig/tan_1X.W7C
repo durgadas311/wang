@@ -1,0 +1,62 @@
+#include "wang700.h"
+
+#include "trigpack.w7h"
+
+EXTERNAL(trig_end)
+
+FLABEL(tan_1X)
+LLABEL(loop)
+
+BEGIN()
+
+MARK(tan_1X)
+	ALPHA(CLR_X)	// "arc tan 90 test" // What does this do???
+	ST_Y()
+	ENTER(.5)
+	SK_IF_GE() ALPHA(X_2)	// "arc tan 45 test" // What does this do???
+	ENTER(1)
+	ADD_Y()
+	ST_Y_DIR(ans)
+	ENTER(2)
+	SUB_Y()
+	RE_DIR(ans)
+	DIV_Y()
+	RE_Y()
+	ST_Y_DIR(input)
+	MULT_Y()
+	ST_Y_DIR(ans)
+	ENTER(1)
+	ST_DIR(trigtemp3)
+	ENTER(15)
+	ST_Y()
+	ENTER(8)
+	ST_DIR(trigtemp2)
+MARK(loop)
+	RE_DIR(ans)
+	MULT_DIR(trigtemp3)
+	RE_DIR(trigtemp2)
+	MULT_DIR(trigtemp2)
+	EXCHG_DIR(trigtemp2)
+	MULT_DIR(trigtemp3)
+	RE_Y()
+	ADD_DIR(trigtemp3)
+	ENTER(2)
+	SUB_Y()
+	ENTER(1)
+	SUB_DIR(trigtemp2)
+	EXCHG_DIR(trigtemp3)
+	DIV_DIR(trigtemp3)
+	RE_DIR(trigtemp2)
+	SK_IF_X0() SEARCH(loop)
+	RE_Y_DIR(input)
+	RE_DIR(trigtemp3)
+	MULT_Y()
+	D180PI()
+	MULT_Y()
+	ENTER(45)
+	ALPHA(E10_X) // What does this do???
+	RE_Y()
+	ALPHA(END_PROG)	// What does this do???
+	SEARCH(end_trig)
+
+END()
