@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang600_Properties.java,v 1.3 2013/12/09 22:22:33 drmiller Exp $
+// $Id: Wang600_Properties.java,v 1.4 2014/01/06 01:10:10 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -18,6 +18,8 @@ class Wang600_Properties extends Wang_Properties
 	JLabel _f_lb;
 	JTextArea _home_tx;
 	JPanel _home_pn;
+	JTextArea _607host_tx;
+	JPanel _607host_pn;
 	JPanel _dia_pn;
 
 	public Wang600_Properties() {
@@ -49,6 +51,11 @@ class Wang600_Properties extends Wang_Properties
 		_home_pn = new JPanel();
 		_home_pn.add(new JLabel("Home:"));
 		_home_pn.add(_home_tx);
+		_607host_tx = new JTextArea();
+		_607host_tx.setPreferredSize(new Dimension(200, 20));
+		_607host_pn = new JPanel();
+		_607host_pn.add(new JLabel("Teletype Host:"));
+		_607host_pn.add(_607host_tx);
 		_dia_pn = new JPanel();
 		GridBagLayout gridbag = new GridBagLayout();
 		_dia_pn.setLayout(gridbag);
@@ -86,6 +93,9 @@ class Wang600_Properties extends Wang_Properties
 		s.gridy += 1;
 		gridbag.setConstraints(_home_pn, s);
 		_dia_pn.add(_home_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_607host_pn, s);
+		_dia_pn.add(_607host_pn);
 
 		setupDialog(_dia_pn, Wang_UI.getIcon());
 	}
@@ -161,6 +171,7 @@ class Wang600_Properties extends Wang_Properties
 			// Need something user-editable...
 		}
 		_home_tx.setText(getProperty("wang600_home"));
+		_607host_tx.setText(getProperty("wang600_607_host"));
 
 		int ret = doDialog();
 		if (ret != OPTION_APPLY && ret != OPTION_SAVE) return false;
@@ -173,6 +184,7 @@ class Wang600_Properties extends Wang_Properties
 		setProperty("wang600_centerDP", Boolean.toString(_cdp_cb.isSelected()));
 		setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
 		setProperty("wang600_home", _home_tx.getText());
+		setProperty("wang600_607_host", _607host_tx.getText());
 		processDefaults();
 
 		if (ret == OPTION_SAVE) {

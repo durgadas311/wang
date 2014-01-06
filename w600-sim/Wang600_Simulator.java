@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.7 2013/12/20 17:04:22 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.8 2014/01/06 01:10:10 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.7 2013/12/20 17:04:22 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.8 2014/01/06 01:10:10 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -787,6 +787,12 @@ class Wang600_Simulator
 			rep = 0x0c; // Change Sign (make negative)
 		} else if (rep >= Wang_InputDevice.E0 && rep <= Wang_InputDevice.E9) {
 			rep = 0x00 | (rep - Wang_InputDevice.E0); // Digit
+		} else if (rep == Wang_InputDevice.SET_EXP) {
+			rep = 0x0b;
+		} else if (rep == Wang_InputDevice.CLR_DSP) {
+			rep = 0x0f;
+		} else if (rep >= Wang_InputDevice.SR0 && rep < Wang_InputDevice.SREND) {
+			rep = 0xa0 | (rep - Wang_InputDevice.SR0);
 		}
 		pressKey(rep);
 	}
