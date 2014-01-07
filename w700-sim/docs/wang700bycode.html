@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700bycode.html,v 1.10 2014/01/07 20:41:22 drmiller Exp $ -->
+<!-- $Id: wang700bycode.html,v 1.11 2014/01/07 20:55:16 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -400,12 +400,16 @@ td.tag {text-align: center;}
 	<TD>SKIP if Y &#8800; 0</TD></TR>
 <TR>	<TD>05&nbsp;12</TD>
 	<TD>END PROG</TD>
-	<TD>X = |X|, ???</TD></TR>
+	<TD>
+X = |X|, ???
+	</TD></TR>
 <TR>	<TD>05&nbsp;13</TD>
 	<TD>LOAD PROG</TD>
-	<TD>set MSD of X mantissa to 0<BR>
-	effectively making X zero<BR>
-	(strange behavior)</TD></TR>
+	<TD>
+MSD(X) = 0<BR>
+effectively making X zero<BR>
+(strange behavior)
+	</TD></TR>
 <TR>	<TD>05&nbsp;14</TD>
 	<TD>GO</TD>
 	<TD>180/&#960;</TD></TR>
@@ -443,7 +447,11 @@ if (MSD(X) was odd) Y = |Y| - X
 	<TD>SKIP if X &#8800; 0</TD></TR>
 <TR>	<TD>07&nbsp;12</TD>
 	<TD>.</TD>
-	<TD>Y = |Y|, X = 1?</TD></TR>
+	<TD>
+Y = |Y|<BR>
+if (MSD(X) is odd) ENTER(1)<BR>
+else MSD(X) = 1
+</TD></TR>
 <TR>	<TD>07&nbsp;13</TD>
 	<TD>X<SUP>2</SUP></TD>
 	<TD></TD></TR>
@@ -462,7 +470,7 @@ if (MSD(X) was odd) Y = |Y| - X
 	number of (blank-filled) integer places, second is number of decimal places.
 	00&nbsp;xx is for scientific notation, also xx&nbsp;11 through xx&nbsp;15.
 	</TD></TR>
-<TR>	<TD>12 xx</TD>
+<TR>	<TD>12&nbsp;xx</TD>
 	<TD>Print field of xx blanks to OutputWriter.
 	</TD></TR>
 </TABLE>
@@ -470,16 +478,24 @@ if (MSD(X) was odd) Y = |Y| - X
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>GROUP 1 prefix</TH></TR>
 <TR>
-	<TD>Send next code to "device 4". In program, issues XS=0, then XS=4 with data, then program stops (press GO to continue).
-	(does device generate GO?)
+	<TD>
+	Send next code to "device 4".
+	In program, issues XS=0,
+	then XS=6 with data,
+	then program stops (device issues GO to continue).
+	From keyboard, issues XS=4 instead of 6.
 	</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>GROUP 2 prefix</TH></TR>
 <TR>
-	<TD>Send next code to "device 5". In program, issues XS=0, then XS=5 with data, then program stops (press GO to continue).
-	(does device generate GO?)
+	<TD>
+	Send next code to "device 5".
+	In program, issues XS=0,
+	then XS=7 with data,
+	then program stops (device issues GO to continue).
+	From keyboard, issues XS=5 instead of 7.
 	</TD></TR>
 </TABLE>
 
