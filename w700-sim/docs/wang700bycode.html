@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700bycode.html,v 1.9 2013/12/30 20:53:08 drmiller Exp $ -->
+<!-- $Id: wang700bycode.html,v 1.10 2014/01/07 20:41:22 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -347,52 +347,112 @@ td.tag {text-align: center;}
 </TABLE>
 
 <P><TABLE BORDER>
-<TR><TH COLSPAN=2>WRITE ALPHA prefix</TH></TR>
-<TR><TD>00&nbsp;00 through 03&nbsp;15</TD>
+<TR><TH COLSPAN=3>WRITE ALPHA prefix</TH></TR>
+<TR><TD>00&nbsp;00<BR>
+	through<BR>
+	03&nbsp;15</TD>
+	<TD>(various)</TD>
 	<TD>Print character to OutputWriter.
 	</TD></TR>
-<TR><TD>08&nbsp;00 through 11&nbsp;15</TD>
+<TR><TD>08&nbsp;00<BR>
+	through<BR>
+	11&nbsp;15</TD>
+	<TD>(various)</TD>
 	<TD>Plot character 00&nbsp;00 through 03&nbsp;15 to OutputWriter.
 	</TD></TR>
-<TR>	<TD>07&nbsp;00 through 07&nbsp;09</TD>
+<TR>	<TD>07&nbsp;00<BR>
+	through<BR>
+	07&nbsp;09</TD>
+	<TD>0 through 9</TD>
 	<TD>Multiply X by 10<SUP>xx</SUP> (00 = 10)
 	</TD></TR>
-<TR>	<TD>04&nbsp;00 through 04&nbsp;09</TD>
+<TR>	<TD>04&nbsp;00<BR>
+	through<BR>
+	04&nbsp;09</TD>
+	<TD>(various)</TD>
 	<TD>Divide X by 10<SUP>xx</SUP> (00 = 10)
 	</TD></TR>
+
 <TR>	<TD>04&nbsp;10</TD>
-	<TD>SKIP if Y positive
-	</TD></TR>
+	<TD>GROUP 2</TD>
+	<TD>SKIP if Y positive</TD></TR>
 <TR>	<TD>04&nbsp;11</TD>
-	<TD>SKIP if Y = 0
-	</TD></TR>
+	<TD>WRITE</TD>
+	<TD>SKIP if Y = 0</TD></TR>
+<TR>	<TD>04&nbsp;12</TD>
+	<TD>WRITE ALPHA</TD>
+	<TD>(cancel WRITE ALPHA?)</TD></TR>
+<TR>	<TD>04&nbsp;13</TD>
+	<TD>END ALPHA</TD>
+	<TD>end WRITE ALPHA</TD></TR>
+<TR>	<TD>04&nbsp;14</TD>
+	<TD>(store Y direct)</TD>
+	<TD>180/&#960;</TD></TR>
+<TR>	<TD>04&nbsp;15</TD>
+	<TD>(recall Y direct)</TD>
+	<TD>&#960;/180</TD></TR>
+
 <TR>	<TD>05&nbsp;10</TD>
-	<TD>SKIP if Y negative
-	</TD></TR>
+	<TD>SKIP IF ERROR</TD>
+	<TD>SKIP if Y negative</TD></TR>
 <TR>	<TD>05&nbsp;11</TD>
-	<TD>SKIP if Y &#8800; 0
-	</TD></TR>
-<TR>	<TD>06&nbsp;10</TD>
-	<TD>SKIP if X positive
-	</TD></TR>
-<TR>	<TD>06&nbsp;11</TD>
-	<TD>SKIP if X = 0
-	</TD></TR>
-<TR>	<TD>07&nbsp;10</TD>
-	<TD>SKIP if X negative
-	</TD></TR>
-<TR>	<TD>07&nbsp;11</TD>
-	<TD>SKIP if X &#8800; 0
-	</TD></TR>
-<TR>	<TD>06&nbsp;15</TD>
-	<TD>Pause
-	</TD></TR>
+	<TD>RETURN</TD>
+	<TD>SKIP if Y &#8800; 0</TD></TR>
+<TR>	<TD>05&nbsp;12</TD>
+	<TD>END PROG</TD>
+	<TD>X = |X|, ???</TD></TR>
+<TR>	<TD>05&nbsp;13</TD>
+	<TD>LOAD PROG</TD>
+	<TD>set MSD of X mantissa to 0<BR>
+	effectively making X zero<BR>
+	(strange behavior)</TD></TR>
 <TR>	<TD>05&nbsp;14</TD>
-	<TD>180/&#960;
-	</TD></TR>
+	<TD>GO</TD>
+	<TD>180/&#960;</TD></TR>
 <TR>	<TD>05&nbsp;15</TD>
-	<TD>&#960;/180
-	</TD></TR>
+	<TD>STOP</TD>
+	<TD>&#960;/180</TD></TR>
+
+<TR>	<TD>06&nbsp;10</TD>
+	<TD>LOG<SUB>10</SUB>X</TD>
+	<TD>SKIP if X positive</TD></TR>
+<TR>	<TD>06&nbsp;11</TD>
+	<TD>LOG<SUB>e</SUB>X</TD>
+	<TD>SKIP if X = 0</TD></TR>
+<TR>	<TD>06&nbsp;12</TD>
+	<TD>&#8730;X</TD>
+	<TD>
+MSD(X) = 1<BR>
+if (MSD(X) was odd) Y = |Y| - X
+</TD></TR>
+<TR>	<TD>06&nbsp;13</TD>
+	<TD>10<SUP>X</SUP></TD>
+	<TD>Y = Y + X?</TD></TR>
+<TR>	<TD>06&nbsp;14</TD>
+	<TD>e<SUP>X</SUP></TD>
+	<TD></TD></TR>
+<TR>	<TD>06&nbsp;15</TD>
+	<TD>1/X</TD>
+	<TD>Pause</TD></TR>
+
+<TR>	<TD>07&nbsp;10</TD>
+	<TD>SET EXP</TD>
+	<TD>SKIP if X negative</TD></TR>
+<TR>	<TD>07&nbsp;11</TD>
+	<TD>CHANGE SIGN</TD>
+	<TD>SKIP if X &#8800; 0</TD></TR>
+<TR>	<TD>07&nbsp;12</TD>
+	<TD>.</TD>
+	<TD>Y = |Y|, X = 1?</TD></TR>
+<TR>	<TD>07&nbsp;13</TD>
+	<TD>X<SUP>2</SUP></TD>
+	<TD></TD></TR>
+<TR>	<TD>07&nbsp;14</TD>
+	<TD>RECALL RESIDUE</TD>
+	<TD></TD></TR>
+<TR>	<TD>07&nbsp;15</TD>
+	<TD>CLEAR X</TD>
+	<TD>X = |X|; if X > 1 then X = 1/X</TD></TR>
 </TABLE>
 
 <P><TABLE BORDER>
