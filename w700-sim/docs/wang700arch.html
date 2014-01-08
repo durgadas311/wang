@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.25 2014/01/08 19:44:05 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.26 2014/01/08 21:33:31 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -878,13 +878,13 @@ The following codes are used:
 					I/O 00&nbsp;xx thru 09&nbsp;xx<BR>
 					I/O 12&nbsp;xx</TD></TR>
 <TR><TD>01X</TD><TD>Model 730 Disk</TD><TD>I/O 13&nbsp;xx</TD></TR>
-<TR><TD>100</TD><TD ROWSPAN=2>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx</TD></TR>
-<TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx</TD></TR>
-<TR><TD>110</TD><TD COLSPAN=2 ROWSPAN=2>Future Expansion</TD></TR>
-<TR><TD>111</TD></TR>
+<TR><TD>100</TD><TD ROWSPAN=4>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx from Keyboard</TD></TR>
+<TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx from Keyboard</TD></TR>
+<TR><TD>110</TD><TD>GROUP&nbsp;1 xx&nbsp;xx in Program</TD></TR>
+<TR><TD>111</TD><TD>GROUP&nbsp;2 xx&nbsp;xx in Program</TD></TR>
 </TABLE></UL>
 
-<H5>Devices 100 and 101</H5>
+<H5>Devices 100 and 101 (110 and 111)</H5>
 
 <P>The "Group I/O" peripherals were fairly limited. The devices generally
 responded to a byte code from the calculator, and then asserted Learn
@@ -1017,8 +1017,8 @@ by sending a dummy "keyboard code".
 	<TD>13</TD><TD>0xa0</TD><TD>Write 128 bytes (steps)</TD></TR>
 <TR><TD>06</TD><TD>0x40</TD><TD>Read 256 bytes (steps)</TD>
 	<TD>14</TD><TD>0xc0</TD><TD>Write 256 bytes (steps)</TD></TR>
-<TR><TD>07</TD><TD>0x00</TD><TD>Read 64 bytes (steps)</TD>
-	<TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
+<TR><TD>07</TD><TD>0x00</TD><TD>(nothing)</TD>
+	<TD>15</TD><TD>0x80</TD><TD>(nothing)</TD></TR>
 </TABLE></UL>
 
 <P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 730
