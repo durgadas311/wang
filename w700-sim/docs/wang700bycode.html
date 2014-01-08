@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700bycode.html,v 1.11 2014/01/07 20:55:16 drmiller Exp $ -->
+<!-- $Id: wang700bycode.html,v 1.12 2014/01/08 19:44:06 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10;}
 td.sym {width: 50; height: 50; text-align: center; }
@@ -348,6 +348,7 @@ td.tag {text-align: center;}
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=3>WRITE ALPHA prefix</TH></TR>
+<TR><TH>Code(s)</TH><TH>Key(s)</TH><TH>Function</TH></TR>
 <TR><TD>00&nbsp;00<BR>
 	through<BR>
 	03&nbsp;15</TD>
@@ -365,6 +366,18 @@ td.tag {text-align: center;}
 	07&nbsp;09</TD>
 	<TD>0 through 9</TD>
 	<TD>Multiply X by 10<SUP>xx</SUP> (00 = 10)
+	</TD></TR>
+<TR>	<TD>06&nbsp;00<BR>
+	through<BR>
+	06&nbsp;09</TD>
+	<TD>(various)</TD>
+	<TD>(duplicate) X &#215;= 10<SUP>xx</SUP>
+	</TD></TR>
+<TR>	<TD>05&nbsp;00<BR>
+	through<BR>
+	05&nbsp;09</TD>
+	<TD>(various)</TD>
+	<TD>(duplicate) X &divide;= 10<SUP>xx</SUP>
 	</TD></TR>
 <TR>	<TD>04&nbsp;00<BR>
 	through<BR>
@@ -387,10 +400,10 @@ td.tag {text-align: center;}
 	<TD>end WRITE ALPHA</TD></TR>
 <TR>	<TD>04&nbsp;14</TD>
 	<TD>(store Y direct)</TD>
-	<TD>180/&#960;</TD></TR>
+	<TD>(duplicate) 180/&#960;</TD></TR>
 <TR>	<TD>04&nbsp;15</TD>
 	<TD>(recall Y direct)</TD>
-	<TD>&#960;/180</TD></TR>
+	<TD>(duplicate) &#960;/180</TD></TR>
 
 <TR>	<TD>05&nbsp;10</TD>
 	<TD>SKIP IF ERROR</TD>
@@ -401,14 +414,12 @@ td.tag {text-align: center;}
 <TR>	<TD>05&nbsp;12</TD>
 	<TD>END PROG</TD>
 	<TD>
-X = |X|, ???
+<PRE>SIGN(X) = "saved sign"</PRE>
 	</TD></TR>
 <TR>	<TD>05&nbsp;13</TD>
 	<TD>LOAD PROG</TD>
 	<TD>
-MSD(X) = 0<BR>
-effectively making X zero<BR>
-(strange behavior)
+<PRE>X = "quadrant" &#164;</PRE>
 	</TD></TR>
 <TR>	<TD>05&nbsp;14</TD>
 	<TD>GO</TD>
@@ -426,15 +437,37 @@ effectively making X zero<BR>
 <TR>	<TD>06&nbsp;12</TD>
 	<TD>&#8730;X</TD>
 	<TD>
-MSD(X) = 1<BR>
-if (MSD(X) was odd) Y = |Y| - X
-</TD></TR>
+<PRE>
+quad = X &#164;
+"saved sign" = (quad == 1,2)
+Y = |Y|
+X = 1
+if (quad == 1,3) Y = Y - 1
+</PRE>
+	</TD></TR>
 <TR>	<TD>06&nbsp;13</TD>
 	<TD>10<SUP>X</SUP></TD>
-	<TD>Y = Y + X?</TD></TR>
+	<TD>
+<PRE>
+if ("other state 10" == "other state 13") then
+    if ("other state 10" != 0) then
+        X = 90 &#164;
+        Y = -Y
+    endif
+    Y = Y + X
+endif
+</PRE>
+	</TD></TR>
 <TR>	<TD>06&nbsp;14</TD>
 	<TD>e<SUP>X</SUP></TD>
-	<TD></TD></TR>
+	<TD>
+<PRE>"quadrant" = QUADRANT(X,Y)</PRE>
+<CENTER><P><TABLE BORDER>
+<TR><TD ALIGN=CENTER>1<BR>X- Y+</TD><TD ALIGN=CENTER>0<BR>X+ Y+</TD></TR>
+<TR><TD ALIGN=CENTER>2<BR>X- Y-</TD><TD ALIGN=CENTER>3<BR>X+ Y-</TD></TR>
+</TABLE>
+</CENTER>
+	</TD></TR>
 <TR>	<TD>06&nbsp;15</TD>
 	<TD>1/X</TD>
 	<TD>Pause</TD></TR>
@@ -446,22 +479,44 @@ if (MSD(X) was odd) Y = |Y| - X
 	<TD>CHANGE SIGN</TD>
 	<TD>SKIP if X &#8800; 0</TD></TR>
 <TR>	<TD>07&nbsp;12</TD>
-	<TD>.</TD>
+	<TD>. (decimal point)</TD>
 	<TD>
-Y = |Y|<BR>
-if (MSD(X) is odd) ENTER(1)<BR>
-else MSD(X) = 1
-</TD></TR>
+<PRE>
+quad = X &#164;
+"saved sign" = (quad == 1,2)
+Y = |Y|
+X = 1
+if (quad == 1,3) ENTER(1)
+</PRE>
+[just an uninteresting fall-through decoding?]
+	</TD></TR>
 <TR>	<TD>07&nbsp;13</TD>
 	<TD>X<SUP>2</SUP></TD>
-	<TD></TD></TR>
+	<TD><PRE>invert "other state 10"</PRE></TD></TR>
 <TR>	<TD>07&nbsp;14</TD>
 	<TD>RECALL RESIDUE</TD>
-	<TD></TD></TR>
+	<TD>(duplicate?) compute quadrant</TD></TR>
 <TR>	<TD>07&nbsp;15</TD>
 	<TD>CLEAR X</TD>
-	<TD>X = |X|; if X > 1 then X = 1/X</TD></TR>
+	<TD>
+<PRE>
+"saved sign" = SIGN(X)
+X = |X|
+Y = |Y|
+if (X >= 1) then
+    invert "other state 13"
+    X = 1/X
+endif
+</PRE>
+	</TD></TR>
 </TABLE>
+
+<P>&#164; The most-significant digit of the X mantissa is accessed directly
+(exponent and mantissa are not considered).
+The X register must have compatible contents prior to executing these codes.
+For example, prior to WRITE&nbsp;ALPHA 10<SUP>X</SUP> the X register must have a
+two-digit integer (i.e. some whole number 10..99). Other codes typically require a
+single-digit number (1..9).
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>WRITE prefix</TH></TR>

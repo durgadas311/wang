@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700arch.html,v 1.24 2013/12/22 16:09:13 drmiller Exp $ -->
+<!-- $Id: wang700arch.html,v 1.25 2014/01/08 19:44:05 drmiller Exp $ -->
 <STYLE TYPE="text/css">
 td.key {width: 50; height: 50; text-align: center; font-size: 10; }
 td.num { text-align: center; }
@@ -538,12 +538,12 @@ and lost.
 <TR><TD>0x7d5</TD><TD>Number Entry State</TD></TR>
 <TR><TD>0x7d6</TD><TD>Low nibble of direct command (if Prefix State is 08)</TD></TR>
 <TR><TD>0x7d7</TD><TD>Low nibble of I/O command (if Prefix State is 04)</TD></TR>
-<TR><TD>0x7d8</TD><TD></TD></TR>
+<TR><TD>0x7d8</TD><TD>Extended Math State</TD></TR>
 <TR><TD>0x7d9</TD><TD></TD></TR>
-<TR><TD>0x7da</TD><TD></TD></TR>
+<TR><TD>0x7da</TD><TD>other state 10</TD></TR>
 <TR><TD>0x7db</TD><TD></TD></TR>
 <TR><TD>0x7dc</TD><TD></TD></TR>
-<TR><TD>0x7dd</TD><TD></TD></TR>
+<TR><TD>0x7dd</TD><TD>other state 13</TD></TR>
 <TR><TD>0x7de</TD><TD></TD></TR>
 <TR><TD>0x7df</TD><TD></TD></TR>
 </TABLE>
@@ -570,6 +570,36 @@ and lost.
 <TR><TD>04 = decimal, non-zero</TD></TR>
 <TR><TD>05 = decimal, leading zero</TD></TR>
 <TR><TD>06 = Set P.C.</TD></TR>
+</TABLE>
+<DT><B>Extended Math State</B><DD>
+<TABLE BORDER>
+<TR><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR><TD>Sign</TD>
+	<TD>?</TD>
+		<TD COLSPAN=2>Quadrant
+		<P><TABLE BORDER>
+		<TR><TD ALIGN=CENTER>1<BR>X- Y+</TD><TD ALIGN=CENTER>0<BR>X+ Y+</TD></TR>
+		<TR><TD ALIGN=CENTER>2<BR>X- Y-</TD><TD ALIGN=CENTER>3<BR>X+ Y-</TD></TR>
+		</TABLE>
+		</TD></TR>
+</TABLE>
+<DT><B>other state 10</B><DD>
+<TABLE BORDER>
+<TR><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR><TD>?</TD>
+	<TD>state</TD>
+	<TD>?</TD>
+	<TD>?</TD>
+</TR>
+</TABLE>
+<DT><B>other state 13</B><DD>
+<TABLE BORDER>
+<TR><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
+<TR><TD>?</TD>
+	<TD>state</TD>
+	<TD>?</TD>
+	<TD>?</TD>
+</TR>
 </TABLE>
 </DL>
 
