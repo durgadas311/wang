@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.8 2014/01/06 19:11:07 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.9 2014/01/08 20:41:23 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.8 2014/01/06 19:11:07 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.9 2014/01/08 20:41:23 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -912,6 +912,11 @@ class Wang700_Simulator
 			ti_sigc = 0;
 			ti_bitc = 0;
 			ti_repc = cycles + 10; // how much time before it starts looking?
+		} else {
+			to_last = 0;
+			to_data = 0;
+			to_bitc = 0;
+			to_sigc = 0;
 		}
 	}
 

@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.10 2014/01/06 19:11:29 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.11 2014/01/08 20:41:23 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.10 2014/01/06 19:11:29 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.11 2014/01/08 20:41:23 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -984,6 +984,13 @@ class Wang600_Simulator
 			ti_sigc = 0;
 			ti_bitc = 0;
 			ti_repc = 0;
+		} else {
+			to_last = 0;
+			to_data = 0;
+			to_byte = 0;
+			to_nibc = 0;
+			to_bitc = 0;
+			to_sigc = 0;
 		}
 	}
 
