@@ -23,8 +23,8 @@ MARK(cosX)
 	MULT_Y()
 	RE_Y()
 	INT()
-	SUB_Y()
-	ALPHA(SQRT)	// "cosine test" // What does this do???
+	SUB_Y()		// X has "quadrant" (0-3), Y has fraction of 90 degrees
+	ALPHA(SQRT)	// "cosine test": save sign for result and normalize X,Y
 	PI()
 	MULT_Y()
 	ENTER(2)
@@ -55,7 +55,7 @@ MARK(loop)
 	SUB_Y()
 	SUB_Y()
 	RE_Y()
-	ALPHA(END_PROG) // "set sign" // What does this do???
+	ALPHA(END_PROG) // "set sign": retrieve previously saved sign
 	SEARCH(trig_end)
 
 END()
