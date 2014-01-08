@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.17 2014/01/06 19:12:45 drmiller Exp $
+// $Id: Wang_TapeDrive.java,v 1.18 2014/01/08 20:38:56 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.17 2014/01/06 19:12:45 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.18 2014/01/08 20:38:56 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;
@@ -384,12 +384,17 @@ class Wang_TapeDrive extends JComponent
 		}
 	}
 
+	private byte _last_rec_byte;
+	private int _num_rec_bytes;
+
 	public void tape_on(int wr) {
 		if (wr == 0) { // tape on - read
 			if (_ready) _tape_on = true;
 			_end = false;
 			_wr = false; // redundant
 		} else {
+			_last_rec_byte = 0;
+			_num_rec_bytes = 0;
 			if (_ready) _tape_on = true;
 			_wr = true;
 			_end = false;
@@ -400,13 +405,23 @@ class Wang_TapeDrive extends JComponent
 
 	public void tape_off(int wr) {
 		// should not happen on Wang1200...
-		if (_recordMark != 0 && _wr && !_end && _ready) {
-			// did not just write END PROG, so need
-			// to mark end of tape "file".
-			// use _recordMark 0xff to mean "invisible" END PROG
+		// but might happen many times without a matching tape_on()
+		// (e.g. every time PRIME is pressed)
+		if (_recordMark != 0 && _wr && _ready && _num_rec_bytes > 0) {
+			_num_rec_bytes = 0;
+			// always write at least this... this is either the
+			// first or second "_recordMark"
 			tape_write(_recordMark);
-			tape_write((byte)0xff);
-			++_index;
+			// only if last byte before tape-off was END PROG...
+			_end = ((_last_rec_byte & 0x00ff) ==
+					(_recordMark & 0x00ff)); // END PROG
+			if (!_end) {
+				// did not just write END PROG, so need
+				// to mark end of tape "file".
+				// use _recordMark 0xff to mean "invisible" END PROG
+				tape_write((byte)0xff);
+			}
+			++_index; // display updated later..
 		}
 		_tape_on = false;
 		_wr = (wr != 0);
@@ -512,6 +527,7 @@ class Wang_TapeDrive extends JComponent
 
 	public void tape_record(int byt) {
 		if (!_ready) return;
+		++_num_rec_bytes;
 		tape_write((byte)byt);
 		if (_recordLen > 0) {
 			++_bytc;
@@ -522,12 +538,7 @@ class Wang_TapeDrive extends JComponent
 				update_tape();
 			}
 		} else if (_recordMark != 0) {
-			// only if last byte before tape-off is END PROG...
-			_end = ((byt & 0x00ff) == (_recordMark & 0x00ff)); // END PROG
-			if (_end) {
-				tape_write((byte)byt); // write _recordMark _recordMark - true END PROG
-				++_index; // display updated later..
-			}
+			_last_rec_byte = (byte)byt;
 		}
 	}
 }
