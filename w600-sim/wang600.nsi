@@ -16,6 +16,8 @@ Section "Wang 600 Simulator"
 		"$INSTDIR\wang600-48x48.ico" 0 SW_SHOWMINIMIZED
 	SetOutPath $WANG600HOME
 	File /r "progs\*.w6*"
+	File /r "progs\*.txt*"
+	File /r "progs\*.wfl*"
 	WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 Section "Uninstall"

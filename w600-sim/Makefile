@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.68 2013/12/31 23:52:00 drmiller Exp $
+# $Id: Makefile,v 1.69 2014/01/09 23:06:03 drmiller Exp $
 
 include Makefile.ship
 
@@ -36,7 +36,7 @@ tar:
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/icons/*.png	\
 		common/fonts/*.ttf	\
-		w600-sim/progs/*.w6* w600-sim/progs/*.txt \
+		w600-sim/progs/*.w6* w600-sim/progs/*.wfl w600-sim/progs/*.txt \
 		w600-sim/docs/*.html w600-sim/docs/*.gif
 
 ship: tar packages wpcc.tgz
@@ -50,7 +50,7 @@ temp_dest: all wang600.jar
 	cp wang600.jar run edit INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/edit $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/progs
-	cp progs/*.w6* progs/*.txt $(TMPDEST)/progs
+	cp progs/*.w6* progs/*.txt progs/*.wfl $(TMPDEST)/progs
 	mkdir -p $(TMPDEST)/icons
 	cp icons/wang600-*x*.png $(TMPDEST)/icons
 
@@ -76,7 +76,7 @@ wang600apc.dmg: all icns wang600.jar
 	hcd
 	hcopy -r Uninstall-wang600.sh :Uninstall-wang600
 	hcopy -r README.osx :README.html
-	hcopy -r progs/*.w6* progs/*.txt :Wang600Files
+	hcopy -r progs/*.w6* progs/*.txt progs/*.wfl :Wang600Files
 	humount $@
 
 wang600apc.exe: all winicons wang600.jar wang600.nsi
