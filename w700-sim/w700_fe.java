@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $
+// $Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.awt.datatransfer.StringSelection;
 
 public class w700_fe
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 
 	private static JFrame front_end;
 
@@ -293,7 +293,7 @@ public class w700_fe
 class Wang700_SimInput
 		implements WindowListener, ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	private JMenuItem _mi701;
 	private JMenuItem _mi702;
 	private JMenuItem _mi711;
@@ -709,7 +709,7 @@ System.err.println("sync error");
 class Wang700_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
@@ -1057,7 +1057,7 @@ class Wang700_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 700 Advanced Programming Calculator<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.66 $ $Date: 2014/01/09 00:45:42 $<BR>"+
+			"$Revision: 1.67 $ $Date: 2014/01/09 17:44:55 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1190,7 +1190,7 @@ class Wang700_Help extends JComponent
 class Wang700_Keyboard extends Wang_Keyboard
 	implements ActionListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
@@ -1618,7 +1618,7 @@ System.err.println("action");
 
 class Wang700_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
@@ -1844,7 +1844,7 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 
 class Wang700_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
@@ -1868,24 +1868,24 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 
 		setLayout(gridbag);
 
-//		c.gridx = _col;
-//		c.gridy = _row;
-//		c.gridwidth = 1;
-//		c.gridheight = 2;
-//		pan = new JPanel();
-//		pan.setPreferredSize(new Dimension(1, 50));
-//		pan.setOpaque(false);
-//		gridbag.setConstraints(pan, c);
-//		add(pan);
-//		++_col;
+		c.gridx = _col;
+		c.gridy = _row;
+		c.gridwidth = 1;
+		c.gridheight = 2;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(29, 50));
+		pan.setOpaque(false);
+		gridbag.setConstraints(pan, c);
+		add(pan);
+		++_col;
 
-		addToggleButton(c, 4, 1, 0, 1,"80", false,
+		addToggleButton(c, 1, 1, 0, 1,"80", false,
 			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(2,Wang_Keys.META_PRE(15,8))));
-		addToggleButton(c, 4, 1, 1, 1,"40", false,
+		addToggleButton(c, 1, 1, 1, 1,"40", false,
 			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(3,Wang_Keys.META_PRE(15,4))));
-		addToggleButton(c, 4, 1, 2, 1,"20", false,
+		addToggleButton(c, 1, 1, 2, 1,"20", false,
 			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(4,Wang_Keys.META_PRE(15,2))));
-		addToggleButton(c, 4, 1, 3, 1,"10", false,
+		addToggleButton(c, 1, 1, 3, 1,"10", false,
 			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(5,Wang_Keys.META_PRE(15,1))));
 		_col += 4;
 
@@ -1898,7 +1898,7 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 		c.gridwidth = 1;
 		c.gridheight = 2;
 		pan = new JPanel();
-		pan.setPreferredSize(new Dimension(20, 50));
+		pan.setPreferredSize(new Dimension(15, 50));
 		pan.setOpaque(false);
 		gridbag.setConstraints(pan, c);
 		add(pan);
@@ -1976,7 +1976,7 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 
 class Wang700_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.66 2014/01/09 00:45:42 drmiller Exp $";
+	final String ident = "$Id: w700_fe.java,v 1.67 2014/01/09 17:44:55 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
