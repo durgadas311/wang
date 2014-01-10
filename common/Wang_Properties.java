@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.5 2013/12/05 22:31:57 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.6 2014/01/10 14:14:58 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -78,7 +78,7 @@ class Wang_Properties extends Properties
 	File getFile(String prop, boolean must_exist, File dir) {
 		File f = null;
 		String s = getProperty(prop);
-		if (s != null) {
+		if (s != null && s.length() > 0) {
 			if (dir != null) {
 				s = dir + "/" + s;
 			}
