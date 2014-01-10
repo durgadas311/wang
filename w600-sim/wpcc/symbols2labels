@@ -1,0 +1,60 @@
+#!/bin/sh
+
+if [[ ${#} -ne 2 ]]; then
+	echo "Usage: $0 <section> <objfile>" >&2
+	exit 1
+fi
+
+f=${2##*/}
+f=${f%.*}
+
+objdump -j ${1} -t ${2} | sed -e 's/^/0x/' | awk --non-decimal-data -v name="${f}" \
+'BEGIN{min=255;max=0;}
+$2=="g"{
+	f=$1+0;
+	fc[f]=$6;
+	if (f<min) min=f;
+	if (f>max) max=f;
+}
+END{
+	b=int(min/16);
+	b=b*16;
+	e=int((max+15)/16);
+	e=e*16;
+	if (b >= 208) {
+		tag="SHIFT 4\\v 8\\v";
+	} else if (b >= 192) {
+		tag="4\\v 8\\v";
+	} else if (b >= 176) {
+		tag="SHIFT f(x)\\v";
+	} else if (b >= 160) {
+		tag="f(x)\\v";
+	} else if (b >= 48) {
+		tag="\\v\\s \\v\\s \\^\\s \\^\\s";
+	} else if (b >= 32) {
+		tag="\\v\\s \\v\\s \\^\\s \\v\\s";
+	} else if (b >= 16) {
+		tag="\\v\\s \\v\\s \\v\\s \\^\\s";
+	} else {
+		tag="\\v\\s \\v\\s \\v\\s \\v\\s";
+	}
+	while (b < e) {
+		if ((b % 16) == 0) {
+			printf "%s # left header %02x\n", tag, b;
+		}
+		if (b in fc) {
+			l=fc[b];
+			n=gsub(/_/," ",l);
+			if (n > 0) {
+				printf "<HTML>%s</HTML>", l;
+			} else {
+				printf "%s", l;
+			}
+		}
+		printf " # %02x\n", b;
+		++b;
+		if ((b % 16) == 0) {
+			printf "%s # right header %02x\n", name, b-1;
+		}
+	}
+}'

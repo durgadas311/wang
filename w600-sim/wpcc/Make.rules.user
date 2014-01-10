@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.12 2014/01/01 18:00:21 drmiller Exp $
+# $Id: Make.rules.user,v 1.13 2014/01/10 17:24:17 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -6,20 +6,24 @@ WPCCINC = $(WPCC)/include
 WPCCLIB = $(WPCC)/lib
 WPCCBIN = $(WPCC)/bin
 
-W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T6_LDSCRIPT)
+W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T6_LDSCRIPT) $(W6LDADD)
 W6TLIBS =
 W6TLDEPS =
-W7TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T7_LDSCRIPT)
+W7TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T7_LDSCRIPT) $(W7LDADD)
 W7TLIBS =
 W7TLDEPS =
 W6XLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(X_LDSCRIPT) -Wl,-q
 W6XLIBS =
 W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
 W7CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
+W6OLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(O6_LDSCRIPT) -Wl,-q $(W6LDADD)
+W7OLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(O7_LDSCRIPT) -Wl,-q $(W7LDADD)
 
 T7_LDSCRIPT = wang700raw.ld
 T6_LDSCRIPT = wang600raw.ld
 X_LDSCRIPT = wang600rawrom.ld
+O7_LDSCRIPT = wang700elf.ld
+O6_LDSCRIPT = wang600elf.ld
 
 OBJCOPY = objcopy
 READELF = readelf
@@ -66,6 +70,17 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	$(W7LDFIX) $*.w7$$
 	@rm -f $*.w7$$
 
+%.wfl: %.W7C $(W7TLDEPS)
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp $(W7OLDFLAGS) $(W7CCFLAGS) \
+		-o $*.w7r $*.wpe $(W7TLIBS)
+	@rm -f $*.wpe
+	$(WPCCBIN)/symbols2labels .wang700flabels $*.w7r >$@
+	$(OBJCOPY) -j .wang700prog -O binary $*.w7r $*.w7$$
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$
+	@rm -f $*.w7r
+
 %.w7o: %.w7c
 	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $<
 
@@ -86,6 +101,9 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 
 %.w6x: %.w6r
 	$(OBJCOPY) -j .wang600rom -O binary $< $@
+
+%.wfl: %.w6r
+	$(WPCCBIN)/symbols2labels .wang600flabels $< >$@
 
 ###%.w6r: %/%.a
 # for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
