@@ -60,6 +60,6 @@ MARK(loop)
 	ALPHA(E10_X)	// Use saved states to un-normalize result
 	RE_Y()
 	ALPHA(END_PROG)	// apply saved sign
-	SEARCH(end_trig)
+	SEARCH(trig_end)
 
 END()

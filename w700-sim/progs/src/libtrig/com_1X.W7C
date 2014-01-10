@@ -7,12 +7,12 @@
 
 EXTERNAL(trig_end)
 
-FLABEL(com_1X)
+FLABEL(__com_1X)
 LLABEL(not1)
 
 BEGIN()
 
-MARK(com_1X)
+MARK(__com_1X)
 	ST_DIR(trigtemp3)
 	MULT_Y()
 	ST_Y()
