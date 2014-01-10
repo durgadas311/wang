@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_FunctionLabelBar.java,v 1.3 2014/01/09 23:01:19 drmiller Exp $
+// $Id: Wang_FunctionLabelBar.java,v 1.4 2014/01/10 14:15:27 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,26 +8,23 @@ import java.awt.event.*;
 
 // file format:
 //
-// [fn set: 0,1,2,3]
-//     [f0 label]
-//     ...
-//     [f15 label]
-// [fn set, labels...]
+// [fnleft label]
+// [f0 label]
+// ...
+// [f15 label]
+// [fnright label]
+// ...repeat once...
 //
-// Blanks lines before "fn set", or after "f15 label", are ignored.
+// Blanks lines before/after set are ignored. Supported character escapes:
 //
-// Label text may contain HTML.
+//	\^	Up arrow
+//	\v	Down arrow
+//	\s	Hard space (e.g. &nbsp;)
 //
-// For 500/600, fn set translates:
-//   val  func            settings
-//    0 = f(x)            f(x)
-//    1 = F(x)     a.k.a. SHIFT f(x)
-//    2 = ROM f(x) a.k.a. [8]+[4]
-//    3 = ROM F(x) a.k.a. SHIFT [8]+[4]
+// Escapes withing an HTML label are translated to HTML equivalents. If label
+// is not HTML (does not begin with '<') then the translations are unicode.
 //
-// (For 700, 0-3 are toggle switch settings)
-//
-// Todo: 1) support arbitrary (0-15) "fn set" (for use as SEARCH labels).
+// Todo: 1) [n/a] support arbitrary (0-15) "fn set" (for use as SEARCH labels).
 //       2) dynamically alter labels when switch settings change.
 //       3) associate label files with program images and load automatically.
 //       4) generate label file from symtab of linked program (wpcc).
@@ -120,28 +117,42 @@ class Wang_FunctionLabelBar extends JPanel
 			return;
 		}
 		int lno = 0;
+		BufferedReader in = null;
 		try {
-			BufferedReader in = new BufferedReader(new
+			in = new BufferedReader(new
 				InputStreamReader(new FileInputStream(file)));
 			int x = -1; // am between label sections
 			int z = 0;
-			while (z <= 4) {
+			while (z < 4) {
 				String s = in.readLine();
 				if (s == null) break;
 				++lno;
-				if (s.length() > 0 && s.charAt(0) == '#') continue;
+				s = s.replaceFirst("^#.*", "");
+				// need to avoid stripping out HTML &# sequences...
+				// how? for now, require blank before hash.
+				s = s.replaceFirst("\\s\\s*#.*", "");
+				if (s.length() > 0 && s.charAt(0) == '<') {
+					s = s.replaceAll("\\\\\\^", "&#8593;");
+					s = s.replaceAll("\\\\v", "&#8595;");
+					s = s.replaceAll("\\\\s", "&nbsp;");
+				} else {
+					s = s.replaceAll("\\\\\\^", "\u2191");
+					s = s.replaceAll("\\\\v", "\u2193");
+					s = s.replaceAll("\\\\s", " ");
+				}
+//System.err.format("using %d %d %s\n", z, x, s);
 				if (x < 0) {
 					if (s.length() == 0) continue;
 					corners[z].setText(s);
-					z += 2;
 					x = 0;
 					continue;
 				} else if (x >= 16) {
-					corners[z - 1].setText(s);
+					corners[z + 1].setText(s);
+					z += 2;
 					x = -1;
 					continue;
 				}
-				if (z == 2) {
+				if (z == 0) {
 					f[x].setText(s);
 				} else {
 					F[x].setText(s);
@@ -150,10 +161,16 @@ class Wang_FunctionLabelBar extends JPanel
 			}
 			currLabel = file;
 		} catch (Exception ee) {
-			// Warning?
-System.err.println("Line " + lno + ": " + ee.toString());
-			return;
+			// pop-up warning?
+//System.err.println("Line " + lno + ": " + ee.toString());
+			Wang_UI.warning("Load Key Labels",
+				"Line " + lno + ": " + ee.toString());
 		}
+		try { // ug, "finally" makes this easier?
+			if (in != null) {
+				in.close();
+			}
+		} catch (Exception ee) {}
 	}
 
 	private void pickLabelFile() {
