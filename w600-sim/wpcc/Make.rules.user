@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.13 2014/01/10 17:24:17 drmiller Exp $
+# $Id: Make.rules.user,v 1.14 2014/01/10 23:01:23 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -35,12 +35,6 @@ W7CPP = $(WPCCBIN)/w7cpp
 W7LDFIX = $(WPCCBIN)/w7ldfix
 
 %.w6t: %.w6c $(W6TLDEPS)
-	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
-		-o $*.w6$$ $< $(W6TLIBS)
-	$(W6LDFIX) $*.w6$$
-	@rm -f $*.w6$$
-
-%.w6t: %.W6C $(W6TLDEPS)
 	$(W6CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
 		-o $*.w6$$ $*.wpe $(W6TLIBS)
@@ -49,20 +43,11 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	@rm -f $*.w6$$
 
 %.w6o: %.w6c
-	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $<
-
-%.w6o: %.W6C
 	$(W6CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
 %.w7t: %.w7c $(W7TLDEPS)
-	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
-		-o $*.w7$$ $< $(W7TLIBS)
-	$(W7LDFIX) $*.w7$$
-	@rm -f $*.w7$$
-
-%.w7t: %.W7C $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7$$ $*.wpe $(W7TLIBS)
@@ -70,7 +55,13 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	$(W7LDFIX) $*.w7$$
 	@rm -f $*.w7$$
 
-%.wfl: %.W7C $(W7TLDEPS)
+%.w7o: %.w7c
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+# experimental
+%.wfl: %.w7c $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp $(W7OLDFLAGS) $(W7CCFLAGS) \
 		-o $*.w7r $*.wpe $(W7TLIBS)
@@ -81,15 +72,36 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	@rm -f $*.w7$$
 	@rm -f $*.w7r
 
-%.w7o: %.w7c
-	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $<
+####################################
+############ DEPRECATED ############
+
+%.w6t: %.W6C $(W6TLDEPS)
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $*.w6$$ $*.wpe $(W6TLIBS)
+	@rm -f $*.wpe
+	$(W6LDFIX) $*.w6$$
+	@rm -f $*.w6$$
+
+%.w6o: %.W6C
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+%.w7t: %.W7C $(W7TLDEPS)
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $*.w7$$ $*.wpe $(W7TLIBS)
+	@rm -f $*.wpe
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$
 
 %.w7o: %.W7C
 	$(W7CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
 
-#################################
+######################################
 # For making XROM images... 600 only.
 .PRECIOUS: %.w6r
 
