@@ -1,8 +1,8 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.w6c *.W6C)
+SRCS = $(wildcard *.w6c)
 DATAS = $(wildcard *.txt)
-PROGS = $(subst .w6c,.w6t,$(subst .W6C,.w6t,$(SRCS)))
+PROGS = $(subst .w6c,.w6t,$(SRCS))
 DATAT = $(subst .txt,.w6t,$(DATAS))
 SUBDIRS = libw6 libplot tests
 ROMS = libplot.w6x
@@ -34,13 +34,13 @@ graph_sin.w6t: graph_sin.w6o libplot.w6s libplot.w6x
 	$(W6LDFIX) $(basename $@).w6$$
 	@rm -f $(basename $@).w6$$
 
-zeller.w6t: zeller.W6C libw6/libw6.a
+zeller.w6t: zeller.w6c libw6/libw6.a
 
-#plot_dat.w6t: plot_dat.W6C libw6/libw6.a libplot/libplot.a
+#plot_dat.w6t: plot_dat.w6c libw6/libw6.a libplot/libplot.a
 
-#plot_sin.w6t: plot_sin.W6C libw6/libw6.a libplot/libplot.a
+#plot_sin.w6t: plot_sin.w6c libw6/libw6.a libplot/libplot.a
 
-#graph_sin.w6t: graph_sin.W6C libw6/libw6.a libplot/libplot.a
+#graph_sin.w6t: graph_sin.w6c libw6/libw6.a libplot/libplot.a
 
 %.w6t: %.txt
 	$(WPCCBIN)/w6data2tape <$< >$@
@@ -64,7 +64,7 @@ export: __FRC__
 	cp Make* $(SRCS) $(DATAS) $(DEST)
 	for d in $(SUBDIRS); do \
 		mkdir -p $(DEST)/$$d; \
-		cp $$d/Make* $$d/*.W6C $(DEST)/$$d; \
+		cp $$d/Make* $$d/*.w6c $(DEST)/$$d; \
 	done
 
 .PHONEY: __FRC__

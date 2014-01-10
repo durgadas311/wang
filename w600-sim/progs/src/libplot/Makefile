@@ -1,7 +1,7 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.W6C)
-OBJS = $(subst .W6C,.w6o,$(SRCS))
+SRCS = $(wildcard *.w6c)
+OBJS = $(subst .w6c,.w6o,$(SRCS))
 
 LIBS = libplot.a
 
