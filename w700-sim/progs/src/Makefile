@@ -1,8 +1,8 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.w7c *.W7C)
+SRCS = $(wildcard *.w7c)
 DATAS = $(wildcard *.txt)
-PROGS = $(subst .w7c,.w7t,$(subst .W7C,.w7t,$(SRCS)))
+PROGS = $(subst .w7c,.w7t,$(SRCS))
 SUBDIRS = libw7 libplot libtrig test
 
 W7LDADD += -Llibw7 -Llibplot -Llibtrig
@@ -29,7 +29,7 @@ export: __FRC__
 	cp Make* $(SRCS) $(DATAS) $(DEST)
 	for d in $(SUBDIRS); do \
 		mkdir -p $(DEST)/$$d; \
-		cp $$d/Make* $$d/*.W7C $(DEST)/$$d; \
+		cp $$d/Make* $$d/*.w7c $(DEST)/$$d; \
 	done
 
 .PHONEY: __FRC__

@@ -1,7 +1,7 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.W7C)
-OBJS = $(subst .W7C,.w7o,$(SRCS))
+SRCS = $(wildcard *.w7c)
+OBJS = $(subst .w7c,.w7o,$(SRCS))
 
 LIBS = libw7.a
 
