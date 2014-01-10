@@ -1,5 +1,7 @@
-<HTML>&#8595;&nbsp; &#8595;&nbsp; &#8595;&nbsp; &#8595;&nbsp;</HTML>
+# blank lines before any row are OK...
 
+\v\s \v\s \v\s \v\s	# toggle switches = 00
+# SR xx00 is intentionally left blank
 
 sin
 cos
@@ -14,9 +16,12 @@ tan
 
 
 
-
+# SR xx15 is intentionally left blank
 <HTML><DIV STYLE="font-size: 10pt;">Trig Pack</DIV></HTML>
-<HTML>&#8595;&nbsp; &#8595;&nbsp; &#8593;&nbsp; &#8593;&nbsp;</HTML>
+
+# blank lines between rows are OK...
+
+\v\s \v\s \^\s \^\s # toggle switchs = 03
 f(0)
 f(1)
 f(2)
@@ -34,3 +39,7 @@ f(13)
 f(14)
 f(15)
 <HTML><DIV STYLE="font-size: 10pt;">custom<BR>encoding</DIV></HTML>
+
+# blank lines after rows are OK...
+
+

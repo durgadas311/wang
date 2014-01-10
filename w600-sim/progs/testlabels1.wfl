@@ -1,5 +1,7 @@
-<HTML><DIV STYLE="font-size: 10pt;">SHIFT f(x)</DIV></HTML>
+# blank lines before any row are OK...
 
+<HTML><DIV STYLE="font-size: 10pt;">SHIFT f(x)\v</DIV></HTML>	# Program functions F0-F15
+# F0 is intentionally left blank
 
 sin
 cos
@@ -14,9 +16,12 @@ tan
 
 
 
-
+# F15 is intentionally left blank
 Trig Pack
-<HTML><DIV STYLE="font-size: 10pt;">SHIFT<BR>4&#8595; 8&#8595;</DIV></HTML>
+
+# blank lines between rows are OK...
+
+<HTML><DIV STYLE="font-size: 10pt;">SHIFT 4\v 8\v</DIV></HTML>	# ROM functions C0-C15
 f(0)
 f(1)
 f(2)
@@ -34,3 +39,6 @@ f(13)
 f(14)
 f(15)
 <HTML><DIV STYLE="font-size: 10pt;">custom<BR>encoding</DIV></HTML>
+
+# blank lines after rows are OK...
+
