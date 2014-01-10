@@ -153,6 +153,7 @@ static char *decode(uint8_t a, uint8_t b) {
 		sprintf(buf, "SR %02d%02d", a, b);
 	} else if (a == 12) {
 		if (b < 7 || b > 13) {
+			reg = b + 1;
 			sprintf(buf, "%s+100", op[4][b]);
 		}
 	} else if (a < 8) {
