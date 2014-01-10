@@ -10,7 +10,7 @@ f=${f%.*}
 
 objdump -j ${1} -t ${2} | sed -e 's/^/0x/' | awk --non-decimal-data -v name="${f}" \
 'BEGIN{min=255;max=0;}
-$2=="g"{
+$2=="g"&&$6!~/^__/{
 	f=$1+0;
 	fc[f]=$6;
 	if (f<min) min=f;
@@ -46,7 +46,7 @@ END{
 			l=fc[b];
 			n=gsub(/_/," ",l);
 			if (n > 0) {
-				printf "<HTML>%s</HTML>", l;
+				printf "<HTML><CENTER>%s</HTML>", l;
 			} else {
 				printf "%s", l;
 			}
