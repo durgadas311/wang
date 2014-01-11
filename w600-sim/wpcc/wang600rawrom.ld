@@ -27,11 +27,14 @@ SECTIONS
 	.wang600build-id (NOLOAD) : { *(.note.gnu.build-id) }
 
 	/* some files might use rom_*labels/rom_search/rom_call... */
+	.wang600plabel : AT(0x6000) {
+		*(.wang600label.*);
+	} >labels
 	.wang600label : AT(0x1000) {
 		*(.wang600label);
 	} >rom_labels
 	.wang600flabels : AT(0x2000) {
-		*(.wang600flabel);
+		*(.wang600flabel*);
 	} >rom_flabels
 	.wang600search : AT(0x3000) {
 		*(.wang600search);
@@ -40,7 +43,7 @@ SECTIONS
 		*(.wang600call);
 	} >rom_call
 	.wang600subr  : AT(0x5000) {
-		*(.wang600subr);
+		*(.wang600subr*);
 	} >rom_subr
 
 	/DISCARD/ : { *(.wang600dummy); }

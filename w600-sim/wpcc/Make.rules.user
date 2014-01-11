@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.15 2014/01/11 17:18:07 drmiller Exp $
+# $Id: Make.rules.user,v 1.16 2014/01/11 19:46:26 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -126,6 +126,6 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 
 ###%.w6r: %/%.a
 # for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
-%.w6r: %/*.w6o
+%.w6r: %.w6o %/*.w6o
 	$(CC) $(W6CCFLAGS) $(W6XLDFLAGS) \
 		-o $@ $^

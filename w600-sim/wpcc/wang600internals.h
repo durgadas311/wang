@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-.ident "Wang 600 Compiler over GCC $Revision: 1.16 $ "
+.ident "Wang 600 Compiler over GCC $Revision: 1.17 $ "
 
 .section .wang600code, "a";
 	.include "wang600opcodes.s";
@@ -83,7 +83,7 @@
 				.pushsection .wang600flabel.__hardcode_f0,"a"; \
 					.type flabel STT_OBJECT; \
 					.global flabel ; \
-					label : .byte 0; \
+					flabel : .byte 0; \
 				.section .wang600search,"a"; \
 					.type _search_ ##flabel STT_OBJECT; \
 					.global _search_ ##flabel ; \
@@ -95,7 +95,7 @@
 				.section .wang600subr.__hardcode_f0,"a"; \
 					.type _subr_ ##flabel STT_OBJECT; \
 					.global _subr_ ##flabel ; \
-					_subr_ ##label :  .byte 0; \
+					_subr_ ##flabel :  .byte 0; \
 				.popsection
 
 // Define a label for use with SEARCH/MARK
@@ -188,6 +188,40 @@
 
 #define FORDERED(label, tag)	FEXTERNAL(label); \
 				.print #label; .print #tag
+
+#define ROM_EXTERNAL(label)	\
+				.pushsection .wang600label. ##label,"a"; \
+					.type label STT_OBJECT; \
+					.global label ; \
+					label : .byte 0; \
+				.section .wang600search,"a"; \
+					.type _search_ ##label STT_OBJECT; \
+					.global _search_ ##label ; \
+					.set _search_ ##label , 0x80; \
+				.section .wang600call,"a"; \
+					.type _call_ ##label STT_OBJECT; \
+					.global _call_ ##label ; \
+					.set _call_ ##label , 0xf7; \
+				.popsection
+
+#define ROM_FEXTERNAL(flabel)	\
+				.pushsection .wang600flabel. ##flabel,"a"; \
+					.type flabel STT_OBJECT; \
+					.global flabel ; \
+					flabel : .byte 0; \
+				.section .wang600search,"a"; \
+					.type _search_ ##flabel STT_OBJECT; \
+					.global _search_ ##flabel ; \
+					.set _search_ ##flabel , 0x80; \
+				.section .wang600call,"a"; \
+					.type _call_ ##flabel STT_OBJECT; \
+					.global _call_ ##flabel ; \
+					.set _call_ ##flabel , 0xf7; \
+				.section .wang600subr. ##flabel,"a"; \
+					.type _subr_ ##flabel STT_OBJECT; \
+					.global _subr_ ##flabel ; \
+					_subr_ ##flabel :  .byte 0; \
+				.popsection
 
 #define RES_REG(label,reg)	\
 					.type _longreg_ ##label STT_OBJECT; \
