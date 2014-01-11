@@ -1,0 +1,107 @@
+<HTML>
+
+<H3>WPCC: Wang Programmable Calculator Compiler</H3>
+
+<P>This package supports both
+<A HREF="wang600.html">Wang 600</A> and
+<A HREF="wang700.html">Wang 700</A> 
+architectures.
+Each program must #include "wang600.h" or "wang700.h", which determines the
+architecture being compiled for.
+
+<P>Use of this facility requires GNU Compiler tools, and probably Linux (unless GCC
+is available for your platform).
+
+<P>The sample Makefile targets/actions use the following common program file name suffixes:
+
+<DL>
+<DT>data<DD>Numerical data for converting to tape images (Wang 600 only).
+		Each line contains one floating point number, in ASCII.
+<DT>txt<DD>Text (and numerical) data for the model 607/707 Teletype, ASCII.
+<DT>wfl<DD>Function Key Label file, used to load text into the
+		"strip" underneath the function keys 00-15.
+</DL>
+
+<P>Other suffixes are described under their respective architectures.
+
+<P>Some special macros allow for abstraction of statement labels and extended
+register assignment. These are:
+
+<DL>
+<DT>LABEL(name)<DD>Declares that 'name' will be used as a statement label.
+		There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>LLABEL(name)<DD>Declares that 'name' will be used as a statement label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>FLABEL(name)<DD>Declares that 'name' will be used as a function subroutine
+		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>FLLABEL(name)<DD>Declares that 'name' will be used as a function subroutine label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
+		a different module and will be linked at a later stage.
+
+<DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
+		in a different module.
+
+<DT>RES_REG(label,reg)<DD>
+		Reserves a long register. Used mainly for Wang 700 code
+		since all registers are accessed the same way (600 has the
+		16 dedicated registers that are accessed by short instructions).
+
+<DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
+		initialized as part of the program load. The register will
+		be assigned from unused program steps. See also IREG_DATA().
+
+<DT>ENTER_LAST_REGNO()<DD>
+		Insert E0-E9 codes to enter the number of the last
+		long register that was unused by program code (i.e.
+		number of "free" registers for use, e.g., through
+		indirection (0 - ENTER_LAST_REGNO()).
+
+<DT>ENTER_REGNO(label)<DD>
+		Insert E0-E9 codes to enter the number of the register
+		known by 'label' (RES_REG, UREG, IREG_DATA).
+</DL>
+
+<H4>Compiling:</H4>
+
+<P>Typical sequence is (sample makefile rules):
+
+<P>(See /usr/local/wpcc/include/Make.rules.user)
+
+<PRE>
+myprog.w6t: myprog.w6c
+        w6cpp myprog.WPC >myprog.wpe
+        gcc -x c $(W6TLDFLAGS) $(W6CCFLAGS) -I. -o $@ myprog.wpe
+        @rm -f myprog.wpe
+</PRE>
+
+<P>Typically, a programmer would just include /usr/local/wpcc/include/Make.rules.user
+and then setup dependencies for the appropriate file extensions:
+
+<PRE>
+	include /usr/local/wpcc/include/Make.rules.user
+	...
+	myfoo.w7t: myfoo.W7C mybar.w7o
+</PRE>
+
+<P>TODO: create a shell script to hide the essoterric gcc syntax.
+
+<P>NOTE: Wang 700 compiles require post-processing (of the final link stage)
+to handle the special requirements of register numbers (must be BCD and
+may require command changes if >= 100). See Make.rules.user for details.
+
+<P>See the example programs for examples of how to use both the programming
+language and the Makefiles.
+
+<P>See "README.ld" if you are interested in the internal workings of the "compiler".
+</HTML>

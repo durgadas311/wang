@@ -1,0 +1,262 @@
+<H3>Wang 700 Compiling</H3>
+
+<P>Wang 700 programs may be written in source code form and compiled using
+these tools.  Each program must #include "wang600.h" (or "wang700.h", but not both)
+and also should wrap the code section in BEGIN() and END().
+
+<P>Use of this facility requires GNU Compiler tools, and probably Linux (unless GCC
+is available for your platform).
+
+<P>The sample Makefile targets/actions use the following program file name suffixes:
+
+<DL>
+<DT>w7c<DD>Program module not requiring pre-processing
+<DT>w7h<DD>Program header file (include) - usually defines the interface
+<DT>w7e<DD>Intermediate file already pre-processed
+<DT>w7o<DD>Object file (to be linked/loaded)
+<DT>w7$<DD>Tape image file, ready to load via tape drive
+<DT>w7t<DD>Tape image file, ready to load via tape drive
+<DT>txt<DD>Text data for Model 707 Teletype, ASCII.
+</DL>
+
+<P>Some special macros allow for abstraction of statement labels and extended
+register assignment. These are:
+
+<DL>
+<DT>LABEL(name)<DD>Declares that 'name' will be used as a statement label.
+		There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>LLABEL(name)<DD>Declares that 'name' will be used as a statement label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>FLABEL(name)<DD>Declares that 'name' will be used as a function subroutine
+		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>FLLABEL(name)<DD>Declares that 'name' will be used as a function subroutine label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
+		a different module and will be linked at a later stage.
+
+<DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
+		in a different module.
+
+<DT>RES_REG(label,reg)<DD>
+		Reserves a long register. Used mainly for Wang 700 code
+		since all registers are accessed the same way (600 has the
+		16 dedicated registers that are accessed by short instructions).
+
+<DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
+		initialized as part of the program load. The register will
+		be assigned from unused program steps. See also IREG_DATA().
+
+<DT>ENTER_LAST_REGNO()<DD>
+		Insert E0-E9 codes to enter the number of the last
+		long register that was unused by program code (i.e.
+		number of "free" registers for use, e.g., through
+		indirection (0 - ENTER_LAST_REGNO()).
+
+<DT>ENTER_REGNO(label)<DD>
+		Insert E0-E9 codes to enter the number of the register
+		known by 'label' (RES_REG, UREG, IREG_DATA).
+</DL>
+
+<P>When a program is linked, a special statement label is generated followed by
+an END PROG code. The programmer should not place END PROG codes in the source files.
+Note, the END_PROG() macro produces a SEARCH(end_prog) and not an actual
+END PROG code.
+
+
+<P>w7cpp:	Convenience pre-processor for wang program source code.
+
+<P>The preprocessor supports the following "macros" which allow a
+	more convenient entry of program sequences, and convert native
+	expression of text into the Wang encoding.
+
+<DL>
+<DT>ALPHA_STRING("string")
+<DT>ALPHA_PLOT("string")
+<DT>ALPHA_TTY("string")
+
+<DD>	Converts 'string' into a Wang 700 "alpha" sequence
+		that will output the desired text. Characters are
+		converted to IBM Selectric tilt/rotate codes, or
+		the modified tilt/rotate coding used on the plotter.
+		The sequence includes WRITE ALPHA and END ALPHA,
+		plus any shift up/down codes required. The case
+		is assumed to be un-shifted at the beginning of the
+		string. 'string' should be in double quotes.
+
+<P>	Special characters:
+
+<DL>
+<DT>	\r	return+index
+<DT>	\n	index
+<DT>	\ooo	any octal character code (tile-rotate + plot bit)
+
+<P>	Output Writer Only:
+<DT>	\v	reverse-index
+<DT>	\[	1/2
+<DT>	\{	1/4
+<DT>	\^	(cent)
+<DT>	\b	backspace
+
+<P>	Plotter Only:
+<DT>	\%	plot (draw) line
+<DT>	\/	move pen only
+<DT>	\h	home pen to origin
+<DT>	\z	set character size
+<DT>	\s	set character spacing
+<DT>	|x	plot character 'x'
+</DL>
+
+<P>	Note: ALPHA_PLOT uses a subtly different character decoder.
+		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
+		Also, ALPHA_PLOT does not translate non-supported Selectric
+		punctuation and special characters, including 1/2, 1/4, and cent.
+<P>
+<DT>ENTER(number)
+
+<DD>	Converts 'number' into a Wang 600 sequence that
+		results in the number being entered on the display.
+		Converts digits and decimal point to their respective
+		command code, '-' to CHG SIGN, 'e' to SET EXP, and
+		ignores '+'. Other characters will result in compile
+		errors. 'number' should not be quoted.
+<P>
+<DT>IREG_DATA(reg,number)
+
+<DD>	Creates an extended register that initially contains
+		the value 'number'. The register may be accessed with
+		RECALL(reg) and STORE(reg) statements.
+<P>
+<DT>IREG_DATA(reg,"string")
+
+<DD>	Creates an extended register that initially contains
+		the value derived from 'string', which must be a 16-digit
+		hexadecimal string with the left-most digit representing
+		the value for the left-most digit on the display.
+		The affects of RECALL on such a string is left to the
+		user to discover. For example,
+
+<PRE>IREG_DATA(blank,"fffffffffffff00a")</PRE>
+<P>
+<P>	Will result in an apparently-blank display when the
+		program step RECALL(blank) is executed.
+
+<P>	All IREG_DATA registers are placed after the main program, but
+		before the MARK end_prog END PROG sequence that is automatically
+		appended to every program. This ensures they are loaded with
+		the program from tape. UREG (un-initialized registers) are
+		allocated after the END PROG and are not part of the program
+		image.
+</DL>
+
+<P>Note, register data can prevent proper operation of a SEARCH end_prog
+	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
+	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
+	which is a value less-likely found in a register.
+
+<P>Programming statements:
+
+<P>In general, these directly correspond to Wang 700 commands.
+
+<DL>
+<DT>E(digit)<DD>The codes E0 - E15 may be produced this way. This includes
+		entering the digits 0-9 into X.
+<DT>SET_EXP()<DD>Shorthand for E(10)
+<DT>CHANGE_SIGN()<DD>Shorthand for E(11)
+<DT>DP()<DD>	Decimal Point. Shorthand for E(12)
+<DT>X_2()<DD>	Shorthand for E(13)
+<DT>RE_RES()<DD>Recall Residue. Shorthand for E(14)
+<DT>CLR_X()<DD>	Shorthand for E(15)
+
+<DT>ADD_DIR(longreg)<DD>Add X to register
+<DT>SUB_DIR(longreg)<DD>Subtract X from register
+<DT>MULT_DIR(longreg)<DD>Multiply register by X
+<DT>DIV_DIR(longreg)<DD>Divide register by X
+<DT>ST_DIR(longreg)<DD>	Store X in register
+<DT>RE_DIR(longreg)<DD>	Recall X from register
+<DT>EXCHG_DIR(longreg)<DD>Exchange X with register
+<DT>SEARCH(label)<DD>	Go To 'label'. 'label' should be declared with LABEL(),
+			EXTERNAL(), or the F* or L* variants.
+<DT>MARK(label)	<DD>Define 'label'. ('label' must be declared as above)
+<DT>GROUP1(func)<DD>	I/O functions.
+<DT>GROUP2(func)<DD>	I/O functions.
+<DT>WRITE(func)<DD>	I/O functions, or formatted printing of display (or blanks)
+			to OutputWriters.
+<DT>WRITE_ALPHA(func)<DD>For 2-step ALPHA commands. Use ALPHA_STRING or
+			ALPHA_PLOT for printing characters to OutputWriters.
+<DT>END_ALPHA(func)<DD>	Usually automatically generated by ALPHA_STRING or
+			ALPHA_PLOT.
+<DT>ST_Y_DIR(longreg)<DD>Store Y in register
+<DT>RE_Y_DIR(longreg)<DD>Recall Y from register
+<P>
+<DT>ADD_IND(longreg)<DD>Add X to register (Y)
+<DT>SUB_IND(longreg)<DD>Subtract X from register (Y)
+<DT>MULT_IND(longreg)<DD>Multiply register (Y) by X
+<DT>DIV_IND(longreg)<DD>Divide register (Y) by X
+<DT>ST_IND(longreg)<DD>	Store X in register (Y)
+<DT>RE_IND(longreg)<DD>	Recall X from register (Y)
+<DT>EXCHG_IND(longreg)<DD>Exchange X with register (Y)
+<DT>SK_IF_GE()<DD>	Skip if Y >= X
+<DT>SK_IF_LT()<DD>	Skip if Y < X
+<DT>SK_IF_EQ()<DD>	Skip if Y == X
+<DT>SK_IF_ERR()<DD>	Skip if Error
+<DT>RETURN()
+<DT>END_PROG()<DD>	SEARCH(end_prog), not actual END PROG
+<DT>LOAD_PROG()
+<DT>GO()
+<DT>STOP()
+<P>
+<DT>ADD_Y()<DD>		Add X to Y
+<DT>SUB_Y()<DD>		Subtract X from Y
+<DT>MULT_Y()<DD>	Multiply Y by X
+<DT>DIV_Y()<DD>		Divide Y by X
+<DT>ST_Y()<DD>		Store X into Y
+<DT>RE_Y()<DD>		Recall Y into X
+<DT>EXCHG_Y()<DD>	Exchange X and Y
+<DT>ABS()<DD>		Absolute value of X
+<DT>INT()<DD>		Integer value of X
+<DT>PI()<DD>		Pi in X
+<DT>LOG_10_X()<DD>	Base-10 Log of X
+<DT>LOG_E_X()<DD>	Natural Log of X
+<DT>SQRT()<DD>		Square Root of X
+<DT>E10_X()<DD>		Base-10 Exponent of X
+<DT>E_X()<DD>		Natural Exponent of X
+<DT>INV()<DD>		1/X
+<P>
+<DT>ADD_DIR100(longreg)<DD>Add X to register+100
+<DT>SUB_DIR100(longreg)<DD>Subtract X from register+100
+<DT>MULT_DIR100(longreg)<DD>Multiply register+100 by X
+<DT>DIV_DIR100(longreg)<DD>Divide register+100 by X
+<DT>ST_DIR100(longreg)<DD>Store X in register+100
+<DT>RE_DIR100(longreg)<DD>Recall X from register+100
+<DT>EXCHG_DIR100(longreg)<DD>Exchange X with register+100
+<DT>ST_Y_DIR100(longreg)<DD>Store Y in register+100
+<DT>RE_Y_DIR100(longreg)<DD>Recall Y from register+100
+<P>
+Some helpful shorthands for WRITE_ALPHA commands:
+<P>
+<DT>POW10(n)<DD>Multiply X by 10^n
+<DT>POW_10(n)<DD>Divide X by 10^n
+<DT>SK_IF_YP()<DD>Skip if Y is Positive
+<DT>SK_IF_Y0()<DD>Skip if Y is Zero
+<DT>SK_IF_YM()<DD>Skip if Y is Negative (Minus)
+<DT>SK_IF_YN0()<DD>Skip if Y is Not Zero
+<DT>SK_IF_XP()<DD>Skip if X is Positive
+<DT>SK_IF_X0()<DD>Skip if X is Zero
+<DT>SK_IF_XM()<DD>Skip if X is Negative (Minus)
+<DT>SK_IF_XN0()<DD>Skip if X is Not Zero
+<DT>PAUSE()<DD>Approximately 3/4 second pause
+<DT>D180PI()<DD>180/Pi to X
+<DT>DPI180()<DD>Pi/180 to X
+</DL>
+
+</HTML>

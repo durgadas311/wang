@@ -1,0 +1,267 @@
+<HTML>
+<H3>Wang 600 Compiling</H3>
+
+<P>Wang 600 and 700 programs may be written in source code form and compiled using
+these tools.  Each program must #include "wang600.h"
+and also should wrap the code section in BEGIN() and END().
+
+<P>Use of this facility requires GNU Compiler tools, and probably Linux (unless GCC
+is available for your platform).
+
+<P>The sample Makefile targets/actions use the following program file name suffixes:
+
+<DL>
+<DT>w6c<DD>Program module
+<DT>w6h<DD>Program header file (include) - usually defines the interface
+<DT>w6e<DD>Intermediate file already pre-processed
+<DT>w6o<DD>Object file (to be linked/loaded)
+<DT>w6t<DD>Tape image file, ready to load via tape drive
+<DT>w6x<DD>Expansion ROM image file, ready to install
+<DT>w6r<DD>Intermediate file for building Expansion ROM images.
+		Contains relocation information.
+<DT>w6s<DD>Intermediate file for building Expansion ROM images.
+		Contains symbol definitions, used to link user programs
+		against (for use with) this ROM image.
+<DT>data<DD>Numerical data for converting to tape images.
+		Each line contains one floating point number, in ASCII.
+<DT>txt<DD>Text for use with model 607 Teletype, ASCII.
+</DL>
+
+<P>Some special macros allow for abstraction of statement labels and extended
+register assignment. These are:
+
+<DL>
+<DT>LABEL(name)<DD>Declares that 'name' will be used as a statement label.
+		There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>LLABEL(name)<DD>Declares that 'name' will be used as a statement label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>FLABEL(name)<DD>Declares that 'name' will be used as a function subroutine
+		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
+		'name' is global/external and must be unique among all
+		source modules.
+
+<DT>FLLABEL(name)<DD>Declares that 'name' will be used as a function subroutine label, but
+		only within this source module ('name' need not be unique
+		with respect to other modules).
+
+<DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
+		a different module and will be linked at a later stage.
+
+<DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
+		in a different module.
+
+<DT>RES_REG(label,reg)<DD>
+		Reserves a long register. Used mainly for Wang 700 code
+		since all registers are accessed the same way (600 has the
+		16 dedicated registers that are accessed by short instructions).
+
+<DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
+		initialized as part of the program load. The register will
+		be assigned from unused program steps. See also IREG_DATA().
+
+<DT>ENTER_LAST_REGNO()<DD>
+		Insert E0-E9 codes to enter the number of the last
+		long register that was unused by program code (i.e.
+		number of "free" registers for use, e.g., through
+		indirection (0 - ENTER_LAST_REGNO()).
+
+<DT>ENTER_REGNO(label)<DD>
+		Insert E0-E9 codes to enter the number of the register
+		known by 'label' (RES_REG, UREG, IREG_DATA).
+</DL>
+
+<P>When a program is linked, a special statement label is generated followed by
+an END PROG code. The programmer should not place END PROG codes in the source files.
+Note, the END_PROG() macro produces a SEARCH(end_prog) and not an actual
+END PROG code.
+
+
+<P>w6cpp:	Convenience pre-processor for wang program source code.
+
+<P>The preprocessor supports the following "macros" which allow a
+	more convenient entry of program sequences, and convert native
+	expression of text into the Wang encoding.
+
+<P>
+<DT>ALPHA_STRING("string")
+<DT>ALPHA_PLOT("string")
+<DT>ALPHA_TTY("string")
+
+<DD>	Converts 'string' into a Wang 600 "alpha" sequence
+		that will output the desired text. Characters are
+		converted to IBM Selectric tilt/rotate codes, or
+		the modified tilt/rotate coding used on the plotter or Teletype.
+		The sequence includes ALPHA and ALPHA END (02 02),
+		plus any shift up/down codes required. The case
+		is assumed to be un-shifted at the beginning of the
+		string. 'string' should be in double quotes.
+
+<P>	Special character escapes:
+<DL>
+<DT>	\r<DD>return+index
+<DT>	\n<DD>index
+<DT>	\ooo<DD>any octal character code (tile-rotate + plot bit)
+</DL>
+
+<P>	Output Writer Only:
+<DL>
+<DT>	\v<DD>reverse-index
+<DT>	\[<DD>1/2
+<DT>	\{<DD>1/4
+<DT>	\^<DD>(cent)
+<DT>	\b<DD>backspace
+</DL>
+
+<P>	Plotter Only:
+<DL>
+<DT>	\%<DD>plot (draw) line
+<DT>	\/<DD>move pen only
+<DT>	\h<DD>home pen to origin
+<DT>	\z<DD>set character size
+<DT>	\s<DD>set character spacing
+<DT>	|x<DD>plot character 'x'
+</DL>
+
+<P>	Teletype Only:
+<DL>
+<DT>	\p<DD>Punch On (DC2)
+<DT>	\q<DD>Punch Off (DC4)
+</DL>
+
+<P>	Note: ALPHA_PLOT uses a subtly different character decoder.
+		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
+		Also, ALPHA_PLOT does not translate non-supported Selectric
+		punctuation and special characters, including 1/2, 1/4, and cent.
+
+<P>	Similarly, ALPHA_TTY changes '1', '!', 'L', and 'l' and does
+		not support Slectric special characters.
+<P>
+<DT>ENTER(number)
+
+<DD>	Converts 'number' into a Wang 600 sequence that
+		results in the number being entered on the display.
+		Converts digits and decimal point to their respective
+		command code, '-' to CHG SIGN, 'e' to SET EXP, and
+		ignores '+'. Other characters will result in compile
+		errors. 'number' should not be quoted.
+<P>
+<DT>IREG_DATA(reg,number)
+
+<DD>	Creates an extended register that initially contains
+		the value 'number'. The register may be accessed with
+		RECALL(reg) and STORE(reg) statements.
+<P>
+<DT>IREG_DATA(reg,"string")
+
+<DD>	Creates an extended register that initially contains
+		the value derived from 'string', which must be a 16-digit
+		hexadecimal string with the left-most digit representing
+		the value for the left-most digit on the display.
+		The affects of RECALL on such a string is left to the
+		user to discover. For example,
+<P>
+<PRE>IREG_DATA(blank,"fffffffffffff00a")</PRE>
+
+<P>	Will result in an apparently-blank display when the
+		program step RECALL(blank) is executed.
+
+<P>	All IREG_DATA registers are placed after the main program, but
+		before the MARK end_prog END PROG sequence that is automatically
+		appended to every program. This ensures they are loaded with
+		the program from tape. UREG (un-initialized registers) are
+		allocated after the END PROG and are not part of the program
+		image.
+</DL>
+
+<P>Note, register data can prevent proper operation of a SEARCH end_prog
+	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
+	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
+	which is a value less-likely found in a register.
+
+<P>Programming statements:
+
+<P>In general, these directly correspond to Wang 600 commands.
+
+<DL>
+<DT>E(digit)<DD>The codes E0 - E15 may be produced this way
+<DT>DP()<DD>	Shorthand for E(10)
+<DT>SET_EXP()<DD>Shorthand for E(11)
+<DT>CHANGE_SIGN()<DD>Shorthand for E(12)
+<DT>CLEAR()<DD>	Shorthand for E(14)
+<DT>CLR_DISP()<DD>Shorthand for E(15)
+<P>
+<DT>T(reg)<DD>	Total register 0-15
+<DT>ADD(reg)<DD>Add display to register 0-15
+<DT>SUB(reg)<DD>Subtract display from register 0-15
+<DT>MULT(reg)<DD>Multiply register 0-15 by display
+<DT>DIV(reg)<DD>Divide register 0-15 by display
+<DT>ST(reg)<DD>	Store display in register 0-15
+<DT>RE(reg)<DD>	Recall display from register 0-15
+<P>
+<DT>SEARCH(label)<DD>'label' should be declared with LABEL(), EXTERNAL(), or the F* variants.
+<DT>RECALL(longreg)<DD>'longreg' should be declared with either UREG() or IREG_DATA()
+<DT>PRINT(dp,tag)<DD>Print using precision 'dp' and letter 'tag'. 'dp' is a numberic value,
+		'tag' may use constants tag_X, ... tag_M. Also, 'dp' constants exist
+		for scientific notation (dp_sci) and blank (paper advance) (dp_blank).
+<DT>GO()<DD>
+<DT>J_IF_0()<DD>Jump if zero
+<DT>J_IF_P()<DD>Jump if plus
+<DT>SIN()<DD>
+<DT>COS()<DD>
+<DT>TAN()<DD>
+<DT>RAD_DEG()<DD>Convert from radians to degrees
+<DT>LOG_E_X()<DD>Log base 'e'
+<DT>E_X()<DD>	'e' to the X
+<DT>X_2()<DD>	X squared
+<DT>SQRT()<DD>	Square root of X
+<DT>LOAD_PROG()<DD>
+<DT>INV()<DD>	1/X
+<P>
+<DT>MARK(label)<DD>Assign label to program step ('label' must be declared as above)
+<DT>STORE(longreg)<DD>'longreg' must be declared as described above
+<DT>ALPHA(cmd)<DD>
+<DT>STOP()<DD>
+<DT>J_IF_N0()<DD>Jump if not zero (letter enn followed by zero)
+<DT>J_IF_ERR()<DD>Jump if error
+<DT>SIN_1()<DD>	Arc sine
+<DT>COS_1()<DD>	Arc cosine
+<DT>TAN_1()<DD>	Arc tangent
+<DT>DEG_RAD()<DD>Convert from degrees to radians
+<DT>LOG_10_X()<DD>Log base 10
+<DT>E10_X()<DD>	10 to the X
+<DT>INT()<DD>	Integer
+<DT>ABS()<DD>	Absolute value
+<DT>END_PROG()<DD>SEARCH(end_prog), not actual END PROG
+<DT>RETURN()<DD>
+<P>
+<DT>IO(func)<DD>Issue I/O (func TBD)
+<DT>INDIR(regop)<DD>Indirect command of T(), ADD(), ...
+<DT>GROUP1(func)<DD>Group 1 I/O (func TBD)
+<DT>GROUP2(func)<DD>Group 2 I/O (func TBD)
+<P>
+Some extended functionality not directly accessible on the keyboard:
+<P>
+<DT>EXCHG(reg)<DD>Exchange display and register 0-15
+<DT>CALL(label)<DD>Subroutine call to any label
+<DT>J_IF_E()<DD>"literal compare" reg 0 == display
+<DT>J_IF_NE()<DD>"literal compare" reg 0 != display
+<DT>KTRACE_ON()<DD>Keyboard trace ON (ALPHA PRINT)
+<DT>KTRACE_OFF()<DD>Keyboard trace OFF
+<DT>PTRACE_ON()<DD>Program trace ON (ALPHA LOG_E_X)
+<DT>PTRACE_OFF()<DD>Program trace OFF
+<DT>PAUSE()<DD>	1/2 second pause
+<DT>PI()<DD>	Value of pi
+<DT>POW10(n)<DD>Multiply display by 10^n
+<DT>POW_10(n)<DD>Multiply display by 10^-n
+<DT>J_IF_EQ()<DD>Jump if reg 0 == display
+<DT>J_IF_GE()<DD>Jump if reg 0 >= display
+<DT>J_IF_LT()<DD>Jump if reg 0 < display
+<DT>JUMP(reg)<DD>Add contents of 'reg' to program counter
+</DL>
+
+</HTML>
