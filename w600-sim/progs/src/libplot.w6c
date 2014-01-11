@@ -1,0 +1,6 @@
+#include "wang600.h"
+
+// For creating a ROM...
+
+ROM_EXTERNAL(GRAPHING_FUNCTION)
+ROM_EXTERNAL(GRAPHING_PLOT)

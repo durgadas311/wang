@@ -5,6 +5,9 @@
 FLABEL(grapher)
 EXTERNAL(setup_point)
 
+EXTERNAL(GRAPHING_FUNCTION)
+EXTERNAL(GRAPHING_PLOT)
+
 // Labels:
 LABEL(loop2)
 

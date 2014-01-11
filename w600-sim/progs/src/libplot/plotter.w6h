@@ -1,4 +1,4 @@
-// $Id: plotter.w6h,v 1.7 2013/02/11 00:08:17 drmiller Exp $
+// $Id: plotter.w6h,v 1.8 2014/01/11 19:59:43 drmiller Exp $
 
 #ifndef _libplot_plotter_h_
 #define _libplot_plotter_h_
@@ -31,12 +31,5 @@ RES_REG(scaleY, 22)
 #define temp6	7	// volatile
 #define temp7	8	// volatile
 #define temp8	9	// volatile
-
-FEXTERNAL(plotter)
-FEXTERNAL(grapher)
-FEXTERNAL(plot_data)
-
-RES_EXTERN(GRAPHING_FUNCTION,0)
-RES_EXTERN(GRAPHING_PLOT,1)
 
 #endif // _libplot_plotter_h_

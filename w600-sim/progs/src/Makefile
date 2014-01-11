@@ -1,6 +1,7 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.w6c)
+RSRCS = libplot.w6c
+SRCS = $(filter-out $(RSRCS),$(wildcard *.w6c))
 DATAS = $(wildcard *.txt)
 PROGS = $(subst .w6c,.w6t,$(SRCS))
 DATAT = $(subst .txt,.w6t,$(DATAS))

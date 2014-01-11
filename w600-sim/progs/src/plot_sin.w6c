@@ -6,6 +6,8 @@ EXTERNAL(setup_point)
 FEXTERNAL(plot_moveto)
 FEXTERNAL(plot_Xaxis)
 
+// linked with ROM, don't declare GRAPHING_FUNCTION again
+
 // Use full 1000x1000 plotter "window"
 BEGIN()
 	CLEAR()

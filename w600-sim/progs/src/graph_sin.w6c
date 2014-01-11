@@ -4,6 +4,8 @@
 
 EXTERNAL(setup_point)
 
+// linked with ROM, don't declare GRAPHING_FUNCTION GRAPHING_PLOT again...
+
 BEGIN()
 	CLEAR()
 	ENTER(0)

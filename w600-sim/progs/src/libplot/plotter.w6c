@@ -7,6 +7,9 @@ FEXTERNAL(plot_moveto)
 FEXTERNAL(plot_drawto)
 EXTERNAL(setup_point)
 
+EXTERNAL(GRAPHING_FUNCTION)
+EXTERNAL(GRAPHING_PLOT)
+
 // Labels:
 LABEL(loop4)
 
