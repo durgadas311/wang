@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-.ident "Wang 700 Compiler over GCC $Revision: 1.13 $ "
+.ident "Wang 700 Compiler over GCC $Revision: 1.14 $ "
 
 .section .wang700code, "a"
 	.include "wang700opcodes.s"
@@ -80,22 +80,19 @@
 #define BEGIN()
 #define END()
 
-#define RES_EXTERN(label, const)	\
-				.pushsection .wang700label,"a"; \
-					.type label STT_OBJECT; \
-					.global label; \
-					.set label, res_label ##const ; \
-				.popsection
+#define RES_EXTERN(label, const)	.error "RES_EXTERN() is deprecated"
+#define RES_FEXTERN(label, const)	.error "RES_FEXTERN() is deprecated"
 
-#define RES_FEXTERN(label, const)	\
-				.pushsection .wang700flabel,"a"; \
+// need way to error-check, both here and link time.
+#define HW_FIXED_SR0(label) 	\
+				.pushsection .wang700flabel.__hardcode_sr0,"a"; \
 					.type label STT_OBJECT; \
 					.global label ; \
-					.set label, res_flabel ##const ; \
-				.section .wang700subr,"a"; \
+					label : .byte 0;\
+				.section .wang700subr.__hardcode_sr0,"a"; \
 					.type _subr_ ##label STT_OBJECT; \
 					.global _subr_ ##label ; \
-					.set _subr_ ##label , res_flabel ##const ; \
+					_subr_ ##label : .byte 0;\
 				.popsection
 
 // Define a label for use with SEARCH/MARK
@@ -112,11 +109,11 @@
 				.popsection
 
 // Define a label for use with FCALL/MARK
-#define FLABEL(label)		.pushsection .wang700flabel,"a"; \
+#define FLABEL(label)		.pushsection .wang700flabel. ##label,"a"; \
 					.type label STT_OBJECT; \
 					.global label ; \
 					label :  .byte 0; \
-				.section .wang700subr,"a"; \
+				.section .wang700subr. ##label,"a"; \
 					.type _subr_ ##label STT_OBJECT; \
 					.global _subr_ ##label ; \
 					_subr_ ##label :  .byte 0; \
@@ -145,6 +142,9 @@
 					.type _subr_ ##label STT_OBJECT; \
 					.global _subr_ ##label ; \
 				.popsection
+
+#define FORDERED(label, tag)	FEXTERNAL(label); \
+				.print #label; .print #tag
 
 // Does not prevent conflicts. Programmer must ensure "reg" has no
 // conflicting uses (including program code) in the same program.

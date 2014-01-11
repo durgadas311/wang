@@ -33,7 +33,12 @@ SECTIONS
 	PROVIDE(_search_end_prog = 0x80);
 	PROVIDE(end_prog = 0xee); /* hard-code to avoid conflict with reg data */
 	.wang600flabels (NOLOAD) : {
-		*(.wang600flabel);
+
+		*(.wang600flabel.__hardcode_f0)
+		ASSERT(. < 2, "multiple HW_FIXED_F0");
+		INCLUDE fnordering1.ld
+
+		*(.wang600flabel*);
 	} >flabels
 	.wang600search (NOLOAD) : {
 		*(.wang600search);
@@ -42,7 +47,11 @@ SECTIONS
 		*(.wang600call);
 	} >call
 	.wang600subr (NOLOAD) : {
-		*(.wang600subr);
+
+		*(.wang600subr.__hardcode_f0)
+		INCLUDE fnordering2.ld
+
+		*(.wang600subr*);
 	} >subr
 	/* need program code length in order to compute register base,
 	 * but can't get program code length without relocating registers */

@@ -1,18 +1,56 @@
 #!/bin/sh
 
 if [[ ${#} -ne 2 ]]; then
-	echo "Usage: $0 <section> <objfile>" >&2
+	echo "Usage: $0 <pkgname> <arch>" >&2
+	echo "Where: <arch> is \"600\" or \"700\"" >&2
 	exit 1
 fi
 
-f=${2##*/}
-f=${f%.*}
+name="${1##*/}"
+name=${name%.*}
+arch="${2}"
+case ${arch} in
+600)	fb=160;;
+700)	fb=0;;
+*)	echo "<arch> must be \"600\" or \"700\"" >&2
+	exit 1
+	;;
+esac
+ld1file="fnordering1.ld"
+ld2file="fnordering2.ld"
 
-objdump -j ${1} -t ${2} | sed -e 's/^/0x/' | awk --non-decimal-data -v name="${f}" \
+# read pairs of lines, first is symbol name, second is label tag.
+# todo: detect number spaces, architecture.
+# TODO: handle case where HW_FIXED_SR0 (et al.) is used.
+x=0
+f=${fb}
+# ensure no cruft is left-over...
+echo -e "\t/* generated from ${name} */" > ${ld1file}
+echo -e "\t/* generated from ${name} */" > ${ld2file}
+while read line; do
+	if [[ ${x} -eq 0 ]]; then
+		sym="${line}"
+		x=1
+	else
+		# redirect each line individually, so that file is closed/flushed
+		# by the time 'ld' tries to read it.
+		echo -e "\t*(.wang${arch}flabel.${sym})" >> ${ld1file}
+		echo -e "\t*(.wang${arch}subr.${sym})" >> ${ld2file}
+
+		# this line goes to the labeling output... not timing sensitive
+		echo "${f} ${line}"
+		((f+=1))
+		x=0
+	fi
+done | awk -v name="${name}" \
 'BEGIN{min=255;max=0;}
-$2=="g"&&$6!~/^__/{
+{
 	f=$1+0;
-	fc[f]=$6;
+	ff=$2;
+	for (x=3; x<NF; ++x) {
+		ff=ff " " $x;
+	}
+	fc[f]=ff;
 	if (f<min) min=f;
 	if (f>max) max=f;
 }

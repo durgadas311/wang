@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.14 2014/01/10 23:01:23 drmiller Exp $
+# $Id: Make.rules.user,v 1.15 2014/01/11 17:18:07 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -61,16 +61,23 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	@rm -f $*.wpe
 
 # experimental
+%.wfl: %.w6c $(W6TLDEPS)
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -L. $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $*.w6$$ $*.wpe $(W6TLIBS) | \
+		$(WPCCBIN)/symbols2labels $* 600 >$@
+	@rm -f $*.wpe
+	$(W6LDFIX) $*.w6$$
+	@rm -f $*.w6$$ fnordering*.ld
+
 %.wfl: %.w7c $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
-	$(CC) -x assembler-with-cpp $(W7OLDFLAGS) $(W7CCFLAGS) \
-		-o $*.w7r $*.wpe $(W7TLIBS)
+	$(CC) -x assembler-with-cpp -L. $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $*.w7$$ $*.wpe $(W7TLIBS) | \
+		$(WPCCBIN)/symbols2labels $* 700 >$@
 	@rm -f $*.wpe
-	$(WPCCBIN)/symbols2labels .wang700flabels $*.w7r >$@
-	$(OBJCOPY) -j .wang700prog -O binary $*.w7r $*.w7$$
 	$(W7LDFIX) $*.w7$$
-	@rm -f $*.w7$$
-	@rm -f $*.w7r
+	@rm -f $*.w7$$ fnordering*.ld
 
 ####################################
 ############ DEPRECATED ############

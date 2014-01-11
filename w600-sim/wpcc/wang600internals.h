@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-.ident "Wang 600 Compiler over GCC $Revision: 1.15 $ "
+.ident "Wang 600 Compiler over GCC $Revision: 1.16 $ "
 
 .section .wang600code, "a";
 	.include "wang600opcodes.s";
@@ -75,26 +75,15 @@
 #define BEGIN()
 #define END()
 
-#define RES_EXTERN(label, const)	\
-				.pushsection .wang600label,"a"; \
-					.type label STT_OBJECT; \
-					.global label ; \
-					.set label , res_label ##const ; \
-				.section .wang600search,"a"; \
-					.type _search_ ##label STT_OBJECT; \
-					.global _search_ ##label ; \
-					.set _search_ ##label , 0x80; \
-				.section .wang600call,"a"; \
-					.type _call_ ##label STT_OBJECT; \
-					.global _call_ ##label ; \
-					.set _call_ ##label , 0xf7; \
-				.popsection
+#define RES_EXTERN(label, const)	.error "RES_EXTERN() is deprecated"
+#define RES_FEXTERN(label, const)	.error "RES_FEXTERN() is deprecated"
 
-#define RES_FEXTERN(flabel, const)	\
-				.pushsection .wang600flabel,"a"; \
+// need way to error-check, both here and link time.
+#define HW_FIXED_F0(flabel)	\
+				.pushsection .wang600flabel.__hardcode_f0,"a"; \
 					.type flabel STT_OBJECT; \
 					.global flabel ; \
-					.set flabel , res_flabel ##const ; \
+					label : .byte 0; \
 				.section .wang600search,"a"; \
 					.type _search_ ##flabel STT_OBJECT; \
 					.global _search_ ##flabel ; \
@@ -103,10 +92,10 @@
 					.type _call_ ##flabel STT_OBJECT; \
 					.global _call_ ##flabel ; \
 					.set _call_ ##flabel , 0xf7; \
-				.section .wang600subr,"a"; \
+				.section .wang600subr.__hardcode_f0,"a"; \
 					.type _subr_ ##flabel STT_OBJECT; \
 					.global _subr_ ##flabel ; \
-					.set _subr_ ##flabel , res_flabel ##const; \
+					_subr_ ##label :  .byte 0; \
 				.popsection
 
 // Define a label for use with SEARCH/MARK
@@ -137,7 +126,7 @@
 				.popsection
 
 // Define a label for use with FCALL/MARK
-#define FLABEL(label)		.pushsection .wang600flabel,"a"; \
+#define FLABEL(label)		.pushsection .wang600flabel. ##label,"a"; \
 					.type label STT_OBJECT; \
 					.global label ; \
 					label :  .byte 0; \
@@ -149,7 +138,7 @@
 					.type _call_ ##label STT_OBJECT; \
 					.global _call_ ##label ; \
 					_call_ ##label :; \
-				.section .wang600subr,"a"; \
+				.section .wang600subr. ##label,"a"; \
 					.type _subr_ ##label STT_OBJECT; \
 					.global _subr_ ##label ; \
 					_subr_ ##label :  .byte 0; \
@@ -196,6 +185,9 @@
 					.type _subr_ ##label STT_OBJECT; \
 					.global _subr_ ##label ; \
 				.popsection
+
+#define FORDERED(label, tag)	FEXTERNAL(label); \
+				.print #label; .print #tag
 
 #define RES_REG(label,reg)	\
 					.type _longreg_ ##label STT_OBJECT; \

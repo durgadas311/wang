@@ -23,10 +23,19 @@ SECTIONS
 	} >labels
 	PROVIDE(end_prog = 0x5f); /* hard-code to avoid conflict with reg data */
 	.wang700flabels (NOLOAD) : {
-		*(.wang700flabel);
+
+		*(.wang700flabel.__hardcode_sr0)
+		ASSERT(. < 2, "multiple HW_FIXED_SR0");
+		INCLUDE fnordering1.ld
+
+		*(.wang700flabel*);
 	} >flabels
 	.wang700subr (NOLOAD) : {
-		*(.wang700subr);
+
+		*(.wang700subr.__hardcode_sr0)
+		INCLUDE fnordering2.ld
+
+		*(.wang700subr*);
 	} >subr
 	/* need program code length in order to compute register base,
 	 * but can't get program code length without relocating registers */
