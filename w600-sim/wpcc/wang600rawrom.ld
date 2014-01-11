@@ -3,6 +3,7 @@
 MEMORY {
 	labels     : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
 	flabels    : ORIGIN = 0xa4, LENGTH = 0x1c /* leave some "reserved" */
+	xlabels    : ORIGIN = 0xe0, LENGTH = 0x0e /* must not use end_prog (14 14) */
 	search     : ORIGIN = 0x80, LENGTH = 1
 	call       : ORIGIN = 0xf7, LENGTH = 1
 	subr       : ORIGIN = 0xa0, LENGTH = 1
@@ -27,9 +28,12 @@ SECTIONS
 	.wang600build-id (NOLOAD) : { *(.note.gnu.build-id) }
 
 	/* some files might use rom_*labels/rom_search/rom_call... */
+
+	/* keep "ROM callbacks" in special place */
 	.wang600plabel : AT(0x6000) {
 		*(.wang600label.*);
-	} >labels
+	} >xlabels
+
 	.wang600label : AT(0x1000) {
 		*(.wang600label);
 	} >rom_labels
