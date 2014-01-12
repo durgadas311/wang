@@ -2,6 +2,8 @@
 
 #include "libplot/plotter.w7h"
 
+FLABEL(GRAPHING_FUNCTION)
+
 UREGS(distro,10)
 UREG(nsamp)
 UREG(index)

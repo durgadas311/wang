@@ -5,6 +5,9 @@
 FLABEL(grapher)
 FEXTERNAL(setup_point)
 
+FEXTERNAL(GRAPHING_FUNCTION)
+FEXTERNAL(GRAPHING_PLOT)
+
 // Labels:
 LLABEL(loop2)
 

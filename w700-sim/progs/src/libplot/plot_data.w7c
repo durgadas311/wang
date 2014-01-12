@@ -14,7 +14,7 @@ LLABEL(loop2)
 LLABEL(loop3)
 LLABEL(done)
 
-RES_FEXTERN(PAPERTAPE_END, 0)	// dictated by peripheral hardware...
+HW_FIXED_SR0(PAPERTAPE_END)	// dictated by peripheral hardware...
 
 BEGIN()
 MARK(plot_data)

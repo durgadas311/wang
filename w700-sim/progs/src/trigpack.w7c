@@ -1,0 +1,26 @@
+#include "wang700.h"
+
+// This just assembles the routines from libtrig into a pre-defined
+// function key ordering. First will be "0" (provided no other FORDERED
+// or HW_FIXED_SR* directives exist in modules being linked).
+
+//FORDERED(deg_rad, DEG RAD)
+//FORDERED(rad_deg, RAD DEG)
+FORDERED(sinX,sin)
+FORDERED(cosX, cos)
+FORDERED(tanX, tan)
+FORDERED(sin_1X, <HTML>sin<SUP>-1</SUP></HTML>)
+FORDERED(cos_1X, <HTML>cos<SUP>-1</SUP></HTML>)
+FORDERED(tan_1X, <HTML>tan<SUP>-1</SUP></HTML>)
+//FORDERED(to_polar, RECT POLAR)
+//FORDERED(to_rect, POLAR RECT)
+//FORDERED(sinhX, sinh)
+//FORDERED(coshX, cosh)
+//FORDERED(tanhX, tanh)
+//FORDERED(sinh_1X, <HTML>sinh<SUP>-1</SUP></HTML>)
+//FORDERED(cosh_1X, <HTML>cosh<SUP>-1</SUP></HTML>)
+//FORDERED(tanh_1X, <HTML>tanh<SUP>-1</SUP></HTML>)
+
+BEGIN()
+	// may not be needed...
+END()

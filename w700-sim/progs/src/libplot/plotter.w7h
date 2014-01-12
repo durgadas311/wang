@@ -1,4 +1,4 @@
-// $Id: plotter.w7h,v 1.3 2013/12/26 15:40:54 drmiller Exp $
+// $Id: plotter.w7h,v 1.4 2014/01/12 19:21:59 drmiller Exp $
 
 #ifndef _libplot_plotter_h_
 #define _libplot_plotter_h_
@@ -31,8 +31,5 @@ RES_REG(temp3, 4)	// volatile
 RES_REG(temp4, 5)	// volatile
 RES_REG(temp5, 6)	// volatile
 RES_REG(temp6, 7)	// volatile
-
-RES_FEXTERN(GRAPHING_FUNCTION, 14)
-RES_FEXTERN(GRAPHING_PLOT, 15)
 
 #endif // _libplot_plotter_h_

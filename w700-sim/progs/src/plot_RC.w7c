@@ -7,6 +7,8 @@ FEXTERNAL(setup_point)
 FEXTERNAL(plot_moveto)
 FEXTERNAL(plot_Xaxis)
 
+FLABEL(GRAPHING_FUNCTION)
+
 FLLABEL(charging)
 FLLABEL(discharging)
 

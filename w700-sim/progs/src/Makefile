@@ -1,8 +1,10 @@
 include /usr/local/wpcc/include/Make.rules.user
 
-SRCS = $(wildcard *.w7c)
+FPROGS = trigpack.wfl
+FSRCS = $(subst .wfl,.w7c,$(FPROGS))
+SRCS = $(filter-out $(FSRCS),$(wildcard *.w7c))
 DATAS = $(wildcard *.txt)
-PROGS = $(subst .w7c,.w7t,$(SRCS))
+PROGS = $(subst .w7c,.w7t,$(SRCS)) $(FPROGS)
 SUBDIRS = libw7 libplot libtrig test
 
 W7LDADD += -Llibw7 -Llibplot -Llibtrig

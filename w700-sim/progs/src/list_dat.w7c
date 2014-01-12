@@ -9,7 +9,7 @@ RES_REG(currX, 14)
 RES_REG(mytemp1, 13)
 RES_REG(mytemp2, 12)
 
-RES_FEXTERN(PAPERTAPE_END, 0)	// dictated by hardware
+HW_FIXED_SR0(PAPERTAPE_END)	// dictated by hardware
 
 BEGIN()
 	ENTER(0)
