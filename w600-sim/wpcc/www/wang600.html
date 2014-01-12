@@ -82,10 +82,10 @@ END PROG code.
 <DT>COS()<DD>
 <DT>TAN()<DD>
 <DT>RAD_DEG()<DD>Convert from radians to degrees
-<DT>LOG_E_X()<DD>Log base 'e'
-<DT>E_X()<DD>	'e' to the X
-<DT>X_2()<DD>	X squared
-<DT>SQRT()<DD>	Square root of X
+<DT>LOG_E_X()<DD>Log<SUB>e</SUB>X
+<DT>E_X()<DD>	e<SUP>X</SUP>
+<DT>X_2()<DD>	X<SUP>2</SUP>
+<DT>SQRT()<DD>	&#8730;X
 <DT>LOAD_PROG()<DD>
 <DT>INV()<DD>	1/X
 <P>
@@ -99,8 +99,8 @@ END PROG code.
 <DT>COS_1()<DD>	Arc cosine
 <DT>TAN_1()<DD>	Arc tangent
 <DT>DEG_RAD()<DD>Convert from degrees to radians
-<DT>LOG_10_X()<DD>Log base 10
-<DT>E10_X()<DD>	10 to the X
+<DT>LOG_10_X()<DD>Log<SUB>10</SUB>X
+<DT>E10_X()<DD>	10<SUP>X</SUP>
 <DT>INT()<DD>	Integer
 <DT>ABS()<DD>	Absolute value
 <DT>END_PROG()<DD>SEARCH(end_prog), not actual END PROG
@@ -115,19 +115,19 @@ Some extended functionality not directly accessible on the keyboard:
 <P>
 <DT>EXCHG(reg)<DD>Exchange display and register 0-15
 <DT>CALL(label)<DD>Subroutine call to any label
-<DT>J_IF_E()<DD>"literal compare" reg 0 == display
-<DT>J_IF_NE()<DD>"literal compare" reg 0 != display
+<DT>J_IF_E()<DD>"literal compare" reg 0 = display
+<DT>J_IF_NE()<DD>"literal compare" reg 0 &#8800; display
 <DT>KTRACE_ON()<DD>Keyboard trace ON (ALPHA PRINT)
 <DT>KTRACE_OFF()<DD>Keyboard trace OFF
 <DT>PTRACE_ON()<DD>Program trace ON (ALPHA LOG_E_X)
 <DT>PTRACE_OFF()<DD>Program trace OFF
 <DT>PAUSE()<DD>	1/2 second pause
-<DT>PI()<DD>	Value of pi
-<DT>POW10(n)<DD>Multiply display by 10^n
-<DT>POW_10(n)<DD>Multiply display by 10^-n
-<DT>J_IF_EQ()<DD>Jump if reg 0 == display
-<DT>J_IF_GE()<DD>Jump if reg 0 >= display
-<DT>J_IF_LT()<DD>Jump if reg 0 < display
+<DT>PI()<DD>	Value of &#960;
+<DT>POW10(n)<DD>Multiply display by 10<SUP>n</SUP>
+<DT>POW_10(n)<DD>Multiply display by 10<SUP>-n</SUP>
+<DT>J_IF_EQ()<DD>Jump if reg 0 = display
+<DT>J_IF_GE()<DD>Jump if reg 0 &#8805; display
+<DT>J_IF_LT()<DD>Jump if reg 0 &lt; display
 <DT>JUMP(reg)<DD>Add contents of 'reg' to program counter
 </DL>
 
@@ -179,7 +179,7 @@ and the "w6s" is preserved as the guide (symbol table) for
 linking to programs.
 <LI>Process the file "libplot.w6r" into "libplot.w6x" (which is the actual
 ROM image, loaded into the simulator).
-</DL>
+</UL>
 
 <P>Then, each user program that is written to use this ROM image will compile
 as follows:

@@ -79,9 +79,9 @@ END PROG code.
 <DT>ST_IND(longreg)<DD>	Store X in register (Y)
 <DT>RE_IND(longreg)<DD>	Recall X from register (Y)
 <DT>EXCHG_IND(longreg)<DD>Exchange X with register (Y)
-<DT>SK_IF_GE()<DD>	Skip if Y >= X
-<DT>SK_IF_LT()<DD>	Skip if Y < X
-<DT>SK_IF_EQ()<DD>	Skip if Y == X
+<DT>SK_IF_GE()<DD>	Skip if Y &#8805; X
+<DT>SK_IF_LT()<DD>	Skip if Y &lt; X
+<DT>SK_IF_EQ()<DD>	Skip if Y = X
 <DT>SK_IF_ERR()<DD>	Skip if Error
 <DT>RETURN()
 <DT>END_PROG()<DD>	SEARCH(end_prog), not actual END PROG
@@ -98,7 +98,7 @@ END PROG code.
 <DT>EXCHG_Y()<DD>	Exchange X and Y
 <DT>ABS()<DD>		Absolute value of X
 <DT>INT()<DD>		Integer value of X
-<DT>PI()<DD>		Pi in X
+<DT>PI()<DD>		&#960; in X
 <DT>LOG_10_X()<DD>	Base-10 Log of X
 <DT>LOG_E_X()<DD>	Natural Log of X
 <DT>SQRT()<DD>		Square Root of X
@@ -118,8 +118,8 @@ END PROG code.
 <P>
 Some helpful shorthands for WRITE_ALPHA commands:
 <P>
-<DT>POW10(n)<DD>Multiply X by 10^n
-<DT>POW_10(n)<DD>Divide X by 10^n
+<DT>POW10(n)<DD>Multiply X by 10<SUP>n</SUP>
+<DT>POW_10(n)<DD>Divide X by 10<SUP>n</SUP>
 <DT>SK_IF_YP()<DD>Skip if Y is Positive
 <DT>SK_IF_Y0()<DD>Skip if Y is Zero
 <DT>SK_IF_YM()<DD>Skip if Y is Negative (Minus)
@@ -129,8 +129,8 @@ Some helpful shorthands for WRITE_ALPHA commands:
 <DT>SK_IF_XM()<DD>Skip if X is Negative (Minus)
 <DT>SK_IF_XN0()<DD>Skip if X is Not Zero
 <DT>PAUSE()<DD>Approximately 3/4 second pause
-<DT>D180PI()<DD>180/Pi to X
-<DT>DPI180()<DD>Pi/180 to X
+<DT>D180PI()<DD>180/&#960; to X
+<DT>DPI180()<DD>&#960;/180 to X
 </DL>
 
 </HTML>
