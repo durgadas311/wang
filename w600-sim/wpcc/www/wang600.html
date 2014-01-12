@@ -215,4 +215,35 @@ plot_sin.w6t: plot_sin.w6o libplot.w6s libplot.w6x
 <P>Because of the complexity of dependencies, this rule has not been abstracted
 to an implicit rule (yet).
 
+<H3>Utilities</H3>
+
+<P>The following utilities are provided, both for building program images and for
+general use:
+
+<DL>
+<DT>w6lst<DD>List a program image, similar to the built-in list function on the
+buildt-in drum printer.
+<P>Example: w6lst foo.w6t
+
+<DT>w6verify<DD>Compute the VERIFY PROG value, using the same method as the
+VERIFY PROG function on the calculator. This allows computing the VERIFY PROG
+value without actually loading the image on the calculator (simulator).
+<P>Example: w6verify foo.w6t
+
+<DT>w6cpp<DD>The preprocessor (not to be confused with, and in addition to,
+the "C" preprocessor included with the GNU tools).
+<P>Synopsis: w6cpp &lt;<I>in-file</I> &gt;<I>out-file</I>
+
+<DT>w6data2tape<DD>Utility to convert an ASCII list of numbers (1 per line)
+into a tape image of register data. Such an image can be loaded using the
+Wang 600 ALPHA commands for loading registers from tape.
+<P>Synopsis: w6data2tape &lt;<I>in-file</I> &gt;tape-image</I>
+
+<DT>symbols2labels<DD>Shell script to convert output from FORDERED() directives
+into linkers scripts and function label file. Produces the two linker
+scripts (fnordering1.ld and fnordering2.ld) in the current directory.
+<P>Synopsis: symbols2labels <I>base-name</I> 600 &gt;<I>label-file</I>
+
+</DL>
+
 </HTML>

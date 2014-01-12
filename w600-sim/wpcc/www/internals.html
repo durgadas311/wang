@@ -1,0 +1,81 @@
+<H3>WPCC Internals</H3>
+
+<P>WPCC uses the GNU Preprocessor, Assembler, and Linker. It does not use the "C" compiler
+(or any other high-level language components). The provided make rules do, however,
+use the "gcc" wrapper for these components.
+
+<P>Most of the functionality is provided by a set of preprocessor macros that transform
+various tasks into assembler directives.
+These directives organize various bits of information in ELF sections that are
+later processed by a custom linker script into Wang program images.
+
+<P>The following sections are generated for Wang 600 code, with similar equivalents
+for the Wang 700:
+
+<DL>
+<DT>.wang600label
+<DD>	Abstract. Allocation of labels for nun-subroutine (non-f(x)) use.
+
+<DT>.wang600flabel
+<DD>	Abstract. Allocation of labels for subroutine (f(x)) use.
+
+<DT>.wang600data
+<DD>	Loaded. Register data. Aligned on 8-byte boundaries*.
+
+<DT>.wang600code
+<DD>	Loaded. Program codes, and references to labels and data (long registers).
+
+<DT>.wang600dummy
+<DD>	Abstract. Used to calculate end of program codes to facilitate
+	assignment of long register space. Each byte of program
+	code gets a "shadow" byte in this section.
+
+<DT>.wang600regs
+<DD>	Abstract. Allocation of labels for long (extended) registers.
+
+<DT>.wang600search
+<DT>.wang600call
+<DT>.wang600subr
+<DD>	Abstract. Used to delay assignment of actual SEARCH, CALL, and
+	f(x)/F(x) command codes until link time, when it is known whether
+	the target label is in ROM or RAM. The Wang 700 does not use these,
+	except for the "subr" section which is used to generate the actual
+	subroutine call code.
+</DL>
+<P>* The Wang 700 stores register in memory as pairs of registers with the
+data interlaced, high 4 bits belonging to one register and low 4 bits to the other.
+
+<P>In order to facilitate control over function ordering (assignment of function codes),
+the sections ".wang600flabel" and ".wang600subr" will have the name of the subroutine
+(the symbolic label assigned by the programmer) appended to the section name,
+for example ".wang600flabel.foo".
+
+<P>Special linker scripts process the above sections into executable Wang 600
+program codes. There are currently two linker scripts, T_LDSCRIPT (wang600raw.ld)
+for making Tape image programs, and X_LDSCRIPT (wang600rawrom.ld) for making
+Expansion ROM (library) images (The Wang 700 only has one linker script).
+
+<P>These linker scripts INCLUDE scripts names "fnordering1.ld" and
+"fnordering2.ld" in the processing of sections ".wang600flabel" and ".wang600subr"
+(respectively). The default copy of these files (in /usr/local/wpcc) are empty.
+If a compile involves function ordering (FORDERED() directives) then local
+versions of these files are created temporarely, for use in the link phase
+of the target program. The output produced by the FORDERED() directives is
+processed into linker scripts (and the function key label file).
+
+<P>Note, standard library "archives" (lib*.a) may be produced independent of the
+final type of image. A program may be linked with a library (i.e. "static linking")
+or may be linked against a ROM image (sort of like "dynamic linking"). Note, however,
+that there is no way for the Wang 600 to ensure that a program linked against
+a ROM image is being run with the correct ROM image installed.
+
+<P>Similar sections are used for Wang 700 programs, although "call" does not apply.
+Also, the Wang 700 did not support Expansion ROMs and so no provisions are made
+for linking programs or modules into an Expansion ROM image.
+
+<P>There is also a file "wang600opcodes.s" that is used to provide the opcode
+values for program codes. There are also a few miscellaneous constants defined
+there to aid in abstracting other utilities. This file is converted into a
+header file (wang600opcodes.h) automatically for use by C utilities.
+
+<P>TODO: Support combining programs (and data) into a Model 630/730 Disk image.
