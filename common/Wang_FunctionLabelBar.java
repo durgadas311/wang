@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_FunctionLabelBar.java,v 1.4 2014/01/10 14:15:27 drmiller Exp $
+// $Id: Wang_FunctionLabelBar.java,v 1.5 2014/01/12 19:29:43 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -118,11 +118,11 @@ class Wang_FunctionLabelBar extends JPanel
 		}
 		int lno = 0;
 		BufferedReader in = null;
+		int x = -1; // am between label sections
+		int z = 0;
 		try {
 			in = new BufferedReader(new
 				InputStreamReader(new FileInputStream(file)));
-			int x = -1; // am between label sections
-			int z = 0;
 			while (z < 4) {
 				String s = in.readLine();
 				if (s == null) break;
@@ -171,6 +171,23 @@ class Wang_FunctionLabelBar extends JPanel
 				in.close();
 			}
 		} catch (Exception ee) {}
+		while (z < 4) {
+			if (x < 0) {
+				corners[z].setText("");
+				x = 0;
+			}
+			while (x < 16) {
+				if (z == 0) {
+					f[x].setText("");
+				} else {
+					F[x].setText("");
+				}
+				++x;
+			}
+			corners[z + 1].setText("");
+			x = -1;
+			z += 2;
+		}
 	}
 
 	private void pickLabelFile() {
