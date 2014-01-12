@@ -2,7 +2,7 @@
 
 MEMORY {
 	labels     : ORIGIN = 0x00, LENGTH = 0x9e /* must not use END PROG */
-	flabels    : ORIGIN = 0xa4, LENGTH = 0x1c /* leave some "reserved" */
+	flabels    : ORIGIN = 0xa0, LENGTH = 0x20
 	xlabels    : ORIGIN = 0xe0, LENGTH = 0x0e /* must not use end_prog (14 14) */
 	search     : ORIGIN = 0x80, LENGTH = 1
 	call       : ORIGIN = 0xf7, LENGTH = 1

@@ -2,8 +2,8 @@
 
 MEMORY {
 	labels     : ORIGIN = 0x60, LENGTH = 0x100 /* must not use END PROG */
-	flabels    : ORIGIN = 0x10, LENGTH = 0x30	/* leave some "reserved" */
-	subr       : ORIGIN = 0x10, LENGTH = 0x30
+	flabels    : ORIGIN = 0x00, LENGTH = 0x40
+	subr       : ORIGIN = 0x00, LENGTH = 0x40
 	regs       : ORIGIN = 0x00, LENGTH = 0xffff
 	hdr        : ORIGIN = 0x00, LENGTH = 0x10
 	code       : ORIGIN = 0x00, LENGTH = 0x07c0 /* 0x000-0x7bf */

@@ -309,9 +309,4 @@
 .type res_label29 STT_OBJECT; .global res_label29; .set res_label29,0xfe
 .type res_label30 STT_OBJECT; .global res_label30; .set res_label30,0xff
 
-.type res_flabel0 STT_OBJECT; .global res_flabel0; .set res_flabel0,0xa0
-.type res_flabel1 STT_OBJECT; .global res_flabel1; .set res_flabel1,0xa1
-.type res_flabel2 STT_OBJECT; .global res_flabel2; .set res_flabel2,0xa2
-.type res_flabel3 STT_OBJECT; .global res_flabel3; .set res_flabel3,0xa3
-
 .type _tag_last_reg STT_OBJECT; .global _tag_last_reg; .set _tag_last_reg,0xf8
