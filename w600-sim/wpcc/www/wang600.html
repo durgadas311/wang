@@ -22,57 +22,26 @@ is available for your platform).
 <DT>w6s<DD>Intermediate file for building Expansion ROM images.
 		Contains symbol definitions, used to link user programs
 		against (for use with) this ROM image.
-<DT>data<DD>Numerical data for converting to tape images.
-		Each line contains one floating point number, in ASCII.
-<DT>txt<DD>Text for use with model 607 Teletype, ASCII.
+<DT>txt<DD>Text for use with model 607 Teletype or producing
+		tape data image files, ASCII.
 </DL>
 
-<P>Some special macros allow for abstraction of statement labels and extended
+<P>Some additional special macros allow for abstraction of statement labels and extended
 register assignment. These are:
 
 <DL>
-<DT>LABEL(name)<DD>Declares that 'name' will be used as a statement label.
-		There must be a MARK(name) once in the program.
-		'name' is global/external and must be unique among all
-		source modules.
-
-<DT>LLABEL(name)<DD>Declares that 'name' will be used as a statement label, but
-		only within this source module ('name' need not be unique
-		with respect to other modules).
-
-<DT>FLABEL(name)<DD>Declares that 'name' will be used as a function subroutine
-		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
-		'name' is global/external and must be unique among all
-		source modules.
-
-<DT>FLLABEL(name)<DD>Declares that 'name' will be used as a function subroutine label, but
-		only within this source module ('name' need not be unique
-		with respect to other modules).
-
-<DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
-		a different module and will be linked at a later stage.
-
-<DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
-		in a different module.
-
-<DT>RES_REG(label,reg)<DD>
-		Reserves a long register. Used mainly for Wang 700 code
-		since all registers are accessed the same way (600 has the
-		16 dedicated registers that are accessed by short instructions).
-
-<DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
-		initialized as part of the program load. The register will
-		be assigned from unused program steps. See also IREG_DATA().
-
-<DT>ENTER_LAST_REGNO()<DD>
-		Insert E0-E9 codes to enter the number of the last
-		long register that was unused by program code (i.e.
-		number of "free" registers for use, e.g., through
-		indirection (0 - ENTER_LAST_REGNO()).
-
-<DT>ENTER_REGNO(label)<DD>
-		Insert E0-E9 codes to enter the number of the register
-		known by 'label' (RES_REG, UREG, IREG_DATA).
+<DT>ROM_EXTERNAL(label)<DD>
+		Designate 'label' as residing in program memory, not ROM
+		(as is the default for all other labels defined, when
+		producing a ROM image).
+<DT>ROM_FEXTERNAL(flabel)<DD>
+		Designate function 'flabel' as residing in program memory, not ROM.
+<DT>HW_FIXED_F0(flabel)<DD>
+		Designate function 'flabel' as being assigned to "10 00",
+		(f0)
+		which is the subroutine hard-coded by the Model 607 Teletype
+		as the End Of Tape action. A "MARK(flabel)" must exist somewhere in
+		the source module.
 </DL>
 
 <P>When a program is linked, a special statement label is generated followed by
@@ -80,108 +49,6 @@ an END PROG code. The programmer should not place END PROG codes in the source f
 Note, the END_PROG() macro produces a SEARCH(end_prog) and not an actual
 END PROG code.
 
-
-<P>w6cpp:	Convenience pre-processor for wang program source code.
-
-<P>The preprocessor supports the following "macros" which allow a
-	more convenient entry of program sequences, and convert native
-	expression of text into the Wang encoding.
-
-<P>
-<DT>ALPHA_STRING("string")
-<DT>ALPHA_PLOT("string")
-<DT>ALPHA_TTY("string")
-
-<DD>	Converts 'string' into a Wang 600 "alpha" sequence
-		that will output the desired text. Characters are
-		converted to IBM Selectric tilt/rotate codes, or
-		the modified tilt/rotate coding used on the plotter or Teletype.
-		The sequence includes ALPHA and ALPHA END (02 02),
-		plus any shift up/down codes required. The case
-		is assumed to be un-shifted at the beginning of the
-		string. 'string' should be in double quotes.
-
-<P>	Special character escapes:
-<DL>
-<DT>	\r<DD>return+index
-<DT>	\n<DD>index
-<DT>	\ooo<DD>any octal character code (tile-rotate + plot bit)
-</DL>
-
-<P>	Output Writer Only:
-<DL>
-<DT>	\v<DD>reverse-index
-<DT>	\[<DD>1/2
-<DT>	\{<DD>1/4
-<DT>	\^<DD>(cent)
-<DT>	\b<DD>backspace
-</DL>
-
-<P>	Plotter Only:
-<DL>
-<DT>	\%<DD>plot (draw) line
-<DT>	\/<DD>move pen only
-<DT>	\h<DD>home pen to origin
-<DT>	\z<DD>set character size
-<DT>	\s<DD>set character spacing
-<DT>	|x<DD>plot character 'x'
-</DL>
-
-<P>	Teletype Only:
-<DL>
-<DT>	\p<DD>Punch On (DC2)
-<DT>	\q<DD>Punch Off (DC4)
-</DL>
-
-<P>	Note: ALPHA_PLOT uses a subtly different character decoder.
-		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
-		Also, ALPHA_PLOT does not translate non-supported Selectric
-		punctuation and special characters, including 1/2, 1/4, and cent.
-
-<P>	Similarly, ALPHA_TTY changes '1', '!', 'L', and 'l' and does
-		not support Slectric special characters.
-<P>
-<DT>ENTER(number)
-
-<DD>	Converts 'number' into a Wang 600 sequence that
-		results in the number being entered on the display.
-		Converts digits and decimal point to their respective
-		command code, '-' to CHG SIGN, 'e' to SET EXP, and
-		ignores '+'. Other characters will result in compile
-		errors. 'number' should not be quoted.
-<P>
-<DT>IREG_DATA(reg,number)
-
-<DD>	Creates an extended register that initially contains
-		the value 'number'. The register may be accessed with
-		RECALL(reg) and STORE(reg) statements.
-<P>
-<DT>IREG_DATA(reg,"string")
-
-<DD>	Creates an extended register that initially contains
-		the value derived from 'string', which must be a 16-digit
-		hexadecimal string with the left-most digit representing
-		the value for the left-most digit on the display.
-		The affects of RECALL on such a string is left to the
-		user to discover. For example,
-<P>
-<PRE>IREG_DATA(blank,"fffffffffffff00a")</PRE>
-
-<P>	Will result in an apparently-blank display when the
-		program step RECALL(blank) is executed.
-
-<P>	All IREG_DATA registers are placed after the main program, but
-		before the MARK end_prog END PROG sequence that is automatically
-		appended to every program. This ensures they are loaded with
-		the program from tape. UREG (un-initialized registers) are
-		allocated after the END PROG and are not part of the program
-		image.
-</DL>
-
-<P>Note, register data can prevent proper operation of a SEARCH end_prog
-	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
-	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
-	which is a value less-likely found in a register.
 
 <P>Programming statements:
 
@@ -263,5 +130,89 @@ Some extended functionality not directly accessible on the keyboard:
 <DT>J_IF_LT()<DD>Jump if reg 0 < display
 <DT>JUMP(reg)<DD>Add contents of 'reg' to program counter
 </DL>
+
+<H3>Compiling ROM Images</H3>
+
+<P>The first step to producing a rom image is to develope a set
+of subroutines. These subroutines should have well-defined
+(and documented) register usage.
+
+<P>The compiler scripts allow a module to be setup to run in
+either Program Memory or ROM, with the final target being decided at
+link time. This means a library of subroutines can be both linked in to
+ordinary programs and also used to build a ROM image that other programs access.
+
+<P>The second step is to create a stub module to act as a starting point
+for linking the ROM image. This module would typically contain only
+ROM_EXTERNAL() directives (if ROM callbacks are required) and
+FORDERED() directives (if the ROM will be used from the keyboard,
+as opposed to linking with other programs).`
+
+<P>There are make rules in the wpcc Make.rules.user file to aid in
+building a ROM image, or at least provide an example to clone. These rules
+make the following assumptions:
+
+<UL>
+<LI>There is only one library to include in the ROM.
+<LI>The library is in a subdirectory of one level.
+<LI>The name of the library subdirectory and the stub file are the same.
+</UL>
+
+<P>Given these assumptions, and referring to the example in the Wang 600
+sample programs, an example is:
+
+<UL>
+<LI>A library in "libplot/plibplot.a" (for reasons not discussed here,
+the make rules must use the "exploded" object files, not the archive,
+and so may re-compile all the object files if they were removed).
+<LI>A stub file named "libplot.w6c", which contains two ROM_EXTERNAL()
+directives to establish callbacks for user-supplied graphing functions.
+</UL>
+
+<P>Invoking the target "libplot.w6x" will result in the following actions:
+
+<UL>
+<LI>Generate all object files as needed, i.e. "libplot/*.w6o" and "libplot.w6o".
+<LI>Link all object files into two intermediate files, "libplot.w6r" and
+"libplot.w6s". The "w6r" file is used to produce the ROM image only,
+and the "w6s" is preserved as the guide (symbol table) for
+linking to programs.
+<LI>Process the file "libplot.w6r" into "libplot.w6x" (which is the actual
+ROM image, loaded into the simulator).
+</DL>
+
+<P>Then, each user program that is written to use this ROM image will compile
+as follows:
+
+<UL>
+<LI>List as dependencies it's own object file, plus the ROM "w6s" and "w6x" files
+(the latter does not actually affect building of the program, but is necessary in order
+to run the program and makes sure the ROM image symbol table is up to date).
+For example, "foo.w6t" would list "foo.w6o", "libplot.w6s", and "libplot.w6x"
+as dependencies.
+<LI>Compile (link) the object file using the
+<PRE>
+-Wl,--just-symbols=libplot.w6s
+</PRE>
+option. Remember to link with any libraries that <U>are not</U>
+represented by routines in thwe ROM image. In the sample programs
+this would be "-lw6" but <U>not</U> "-lplot".
+<LI>Run the post-processor on the program.
+</UL>
+
+<P>In the sample programs, the following rules are used (consult actual makefile
+for the latest changes):
+
+<PRE>
+plot_sin.w6t: plot_sin.w6o libplot.w6s libplot.w6x
+        $(CC) $(W6CCFLAGS) $(W6TLDFLAGS) \
+                -Wl,--just-symbols=libplot.w6s \
+                -o $(basename $@).w6$$ $<
+        $(W6LDFIX) $(basename $@).w6$$
+        @rm -f $(basename $@).w6$$
+</PRE>
+
+<P>Because of the complexity of dependencies, this rule has not been abstracted
+to an implicit rule (yet).
 
 </HTML>

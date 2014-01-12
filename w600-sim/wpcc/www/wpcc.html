@@ -15,9 +15,12 @@ is available for your platform).
 <P>The sample Makefile targets/actions use the following common program file name suffixes:
 
 <DL>
-<DT>data<DD>Numerical data for converting to tape images (Wang 600 only).
-		Each line contains one floating point number, in ASCII.
-<DT>txt<DD>Text (and numerical) data for the model 607/707 Teletype, ASCII.
+<DT>w?c<DD>(Where "?" is either "6" or "7") Source module code.
+<DT>w?t<DD>(Where "?" is either "6" or "7") Tape image, usable in the tape
+		drive of the respective simulator. This may contain
+		either program code or data (registers) if supported.
+<DT>txt<DD>Text (and numerical) data for the model 607/707 Teletype,
+		or other preprocessing into data images, ASCII.
 <DT>wfl<DD>Function Key Label file, used to load text into the
 		"strip" underneath the function keys 00-15.
 </DL>
@@ -48,18 +51,18 @@ register assignment. These are:
 
 <DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
 		a different module and will be linked at a later stage.
+		This is used to force inclusion of
+		the module containing the specified label.
 
 <DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
 		in a different module.
-
-<DT>RES_REG(label,reg)<DD>
-		Reserves a long register. Used mainly for Wang 700 code
-		since all registers are accessed the same way (600 has the
-		16 dedicated registers that are accessed by short instructions).
+		This is used to force inclusion of
+		the module containing the specified label.
 
 <DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
 		initialized as part of the program load. The register will
-		be assigned from unused program steps. See also IREG_DATA().
+		be assigned from unused program steps after the end
+		of the program code. See also the IREG_DATA() pre-processed macro.
 
 <DT>ENTER_LAST_REGNO()<DD>
 		Insert E0-E9 codes to enter the number of the last
@@ -69,39 +72,209 @@ register assignment. These are:
 
 <DT>ENTER_REGNO(label)<DD>
 		Insert E0-E9 codes to enter the number of the register
-		known by 'label' (RES_REG, UREG, IREG_DATA).
+		known by 'label' (from UREG, IREG_DATA).
+
+<DT>FORDERED(label,tag)<DD>
+		Used for making "foo.wfl" targets (Function Key Labels).
+		The function subroutine will be linked in the order it appears,
+		resulting in assignment of the function code corresponding to the
+		order, with the first code being the first available on
+		the given platform ("00 00" for Wang 700, "10 00" or "12 00" (ROM)
+		for the Wang 600.
+
+<DT>RES_REG(label,num)<DD>
+		Assigns a register number to 'label', without observing
+		possible conflicts. Register number is not automatically
+		assigned, and thus may conflict with other registers.
+		This is typically used to assign labels to low-numbered
+		registers, and automatically assigned registers will
+		not normally conflict.
 </DL>
+
+<P>The special preprocessors ("w6cpp" and "w7cpp")
+support the following "macros" which allow a
+more convenient entry of program sequences, and convert native
+expression of text into the Wang encoding.
+
+<P>
+<DT>ALPHA_STRING("string")
+<DT>ALPHA_PLOT("string")
+<DT>ALPHA_TTY("string")
+
+<DD>	Converts 'string' into a Wang "alpha" sequence
+		that will output the desired text. Characters are
+		converted to IBM Selectric tilt/rotate codes, or
+		the modified tilt/rotate coding used on the plotter or Teletype.
+		The sequence includes (WRITE) ALPHA and END ALPHA codes,
+		plus any shift up/down codes required. The case
+		is assumed to be un-shifted at the beginning of the
+		string. 'string' should be in double quotes.
+
+<P>	Special character escapes:
+<DL>
+<DT>	\r<DD>return+index
+<DT>	\n<DD>index
+<DT>	\ooo<DD>any octal character code (tile-rotate + plot bit)
+</DL>
+
+<P>	Output Writer Only:
+<DL>
+<DT>	\v<DD>reverse-index
+<DT>	\[<DD>1/2
+<DT>	\{<DD>1/4
+<DT>	\^<DD>(cent)
+<DT>	\b<DD>backspace
+</DL>
+
+<P>	Plotter Only:
+<DL>
+<DT>	\%<DD>plot (draw) line
+<DT>	\/<DD>move pen only
+<DT>	\h<DD>home pen to origin
+<DT>	\z<DD>set character size
+<DT>	\s<DD>set character spacing
+<DT>	|x<DD>plot character 'x'
+</DL>
+
+<P>	Teletype Only:
+<DL>
+<DT>	\p<DD>Punch On (DC2)
+<DT>	\q<DD>Punch Off (DC4)
+</DL>
+
+<P>	Note: ALPHA_PLOT uses a subtly different character decoder.
+		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
+		Also, ALPHA_PLOT does not translate non-supported Selectric
+		punctuation and special characters, including 1/2, 1/4, and cent.
+
+<P>	Similarly, ALPHA_TTY changes '1', '!', 'L', and 'l' and does
+		not support Selectric special characters.
+<P>
+<DT>ENTER(number)
+
+<DD>	Converts 'number' into a Wang digit-entry sequence that
+		results in the number being entered on the display.
+		Converts digits and decimal point to their respective
+		command code, '-' to CHG SIGN, 'e' to SET EXP, and
+		ignores '+'. Other characters will result in compile
+		errors. 'number' should not be quoted.
+<P>
+<DT>IREG_DATA(reg,number)
+
+<DD>	Creates an extended register that initially contains
+		the value 'number'. The register may be accessed with
+		RECALL(reg) and STORE(reg) statements (Wang 600)
+		or *_DIR(reg) and *_DIR100(reg) statements (Wang 700).
+<P>
+<DT>IREG_DATA(reg,"string")
+
+<DD>	Creates an extended register that initially contains
+		the value derived from 'string', which must be a 16-digit
+		hexadecimal string with the left-most digit representing
+		the value for the left-most digit on the display.
+		The affects of RECALL on such a string is left to the
+		user to discover. For example,
+<P>
+<PRE>IREG_DATA(blank,"fffffffffffff00a")</PRE>
+
+<P>	Will result in an apparently-blank display when the
+		program step RECALL(blank) is executed on the Wang 600.
+
+<P>	All IREG_DATA registers are placed after the main program, but
+		before the MARK end_prog END PROG sequence that is automatically
+		appended to every program. This ensures they are loaded with
+		the program from tape. UREG (un-initialized registers) are
+		allocated after the END PROG and are not part of the program
+		image.
+</DL>
+
+<P>Note, register data can prevent proper operation of a SEARCH end_prog
+	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
+	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
+	which is a value less-likely found in a register.
+
+<P>Other directives may be described under their respective architectures.
 
 <H4>Compiling:</H4>
 
-<P>Typical sequence is (sample makefile rules):
-
-<P>(See /usr/local/wpcc/include/Make.rules.user)
-
-<PRE>
-myprog.w6t: myprog.w6c
-        w6cpp myprog.WPC >myprog.wpe
-        gcc -x c $(W6TLDFLAGS) $(W6CCFLAGS) -I. -o $@ myprog.wpe
-        @rm -f myprog.wpe
-</PRE>
-
-<P>Typically, a programmer would just include /usr/local/wpcc/include/Make.rules.user
-and then setup dependencies for the appropriate file extensions:
+<P>Ideally one would use the implicit rules defined in
+/usr/local/wpcc/include/Make.rules.user to compile programs.
+Each sub-directory for programs would contain something equivalent to this:
 
 <PRE>
 	include /usr/local/wpcc/include/Make.rules.user
+
 	...
-	myfoo.w7t: myfoo.W7C mybar.w7o
+
+	all: myprog.w6t foo.w6t bar.w7t
 </PRE>
 
-<P>TODO: create a shell script to hide the essoterric gcc syntax.
+<P>Then, typing "<PRE>make</PRE>" would compile myprog.w6t, foo.w6t, and bar.w7t.
 
-<P>NOTE: Wang 700 compiles require post-processing (of the final link stage)
-to handle the special requirements of register numbers (must be BCD and
-may require command changes if >= 100). See Make.rules.user for details.
+<P>The following make variables may be used to affect dependencies:
+
+<DL>
+<DT>W6LDADD
+<DT>W7LDADD
+<DD>'ld' flags, typically search path like "-Lfoo-dir".
+<DT>W6TLIBS
+<DT>W7TLIBS
+<DD>(these should only be appended to) link flags, typically something like "-lfoo".
+<DT>W6TLDEPS
+<DT>W7TLDEPS
+<DD>(these should only be appended to) link dependencies,
+typically something like "foo-dir/foo.a".
+<DT>WPCCBIN
+<DT>WPCCLIB
+<DT>WPCCINC
+<DD>(do not modify) Locations of the wpcc system "bin", "lib", and "include" directoried.
+<DT>W6CPP
+<DT>W7CPP
+<DD>(do not modify) Pre-processor for source files.
+<DT>W6LDFIX
+<DT>W7LDFIX
+<DD>(do not modify) Post-processor for tape image files.
+</DL>
+
+<P>The following implicit make rules are defined:
+<DL>
+<DT>%.w6t: %.w6c $(W6TLDEPS)
+<DD>Run the "w6cpp" preprocessor on foo.w6c,
+compile (for assembler code, using C preprocessing)
+the result and link into foo.w6t.
+<DT>%.w6o: %.w6c
+<DD>Run the "w6cpp" preprocessor on foo.w6c,
+compile (for assembler code, using C preprocessing)
+leaving an ELF object file (linkable) module.
+<DT>%.w7t: %.w7c $(W7TLDEPS)
+<DD>Similar to rulse for "w6c", but using the "w7cpp" preprocessor.
+<DT>%.w7o: %.w7c
+<DD>Similar to corresponding "w6c" rule.
+<DT>%.wfl: %.w6c $(W6TLDEPS)
+<DD>Similar to the above rules, this produces two output files.
+"foo.wfl" is created as a function key label file for use on the simulators
+to polulate the Function Key labeling bar.
+It also produces "foo.w6t" as the executable program.
+This rule would be used for a source file that contained FORDERED() directives
+to produce a predictable association of functions to function key codes.
+<DT>%.wfl: %.w7c $(W7TLDEPS)
+<DD>Similar to the above rule, for the Wang 700.
+<DT>%.w6x: [...] %.w6o %/*.w6o
+<DD>This set of rules produces a Wang 600 ROM image from a library of subroutines.
+Consult the Wang 600 Compiler documentation, mentioned above, for more information.
 
 <P>See the example programs for examples of how to use both the programming
-language and the Makefiles.
+language and the Make rules.
 
-<P>See "README.ld" if you are interested in the internal workings of the "compiler".
+<P>For more information see <A HREF="internals.html">Internal Workings</A>
+documentation.
+
+<H3>Downloads</H3>
+
+<P>The wpcc package may be downloaded <A HREF="http://sebhc.durgadas.com/wang600/wpcc.tgz">here</A>.
+
+<P>See also <A HREF="http://wang600.durgadas.com">The Wang 600 Simulator</A>
+and <A HREF="http://wang700.durgadas.com">The Wang 700 Simulator</A>
+projects.
+
 </HTML>

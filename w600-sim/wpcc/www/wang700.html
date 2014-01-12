@@ -19,52 +19,16 @@ is available for your platform).
 <DT>txt<DD>Text data for Model 707 Teletype, ASCII.
 </DL>
 
-<P>Some special macros allow for abstraction of statement labels and extended
+<P>Some additional special macros allow for abstraction of statement labels and extended
 register assignment. These are:
 
 <DL>
-<DT>LABEL(name)<DD>Declares that 'name' will be used as a statement label.
-		There must be a MARK(name) once in the program.
-		'name' is global/external and must be unique among all
-		source modules.
-
-<DT>LLABEL(name)<DD>Declares that 'name' will be used as a statement label, but
-		only within this source module ('name' need not be unique
-		with respect to other modules).
-
-<DT>FLABEL(name)<DD>Declares that 'name' will be used as a function subroutine
-		(i.e. f(x) or F(x)). There must be a MARK(name) once in the program.
-		'name' is global/external and must be unique among all
-		source modules.
-
-<DT>FLLABEL(name)<DD>Declares that 'name' will be used as a function subroutine label, but
-		only within this source module ('name' need not be unique
-		with respect to other modules).
-
-<DT>EXTERNAL(name)<DD>Declares that 'name' is a statement label that exists in
-		a different module and will be linked at a later stage.
-
-<DT>FEXTERNAL(name)<DD>Declares that 'name' is a function subroutine that exists
-		in a different module.
-
-<DT>RES_REG(label,reg)<DD>
-		Reserves a long register. Used mainly for Wang 700 code
-		since all registers are accessed the same way (600 has the
-		16 dedicated registers that are accessed by short instructions).
-
-<DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
-		initialized as part of the program load. The register will
-		be assigned from unused program steps. See also IREG_DATA().
-
-<DT>ENTER_LAST_REGNO()<DD>
-		Insert E0-E9 codes to enter the number of the last
-		long register that was unused by program code (i.e.
-		number of "free" registers for use, e.g., through
-		indirection (0 - ENTER_LAST_REGNO()).
-
-<DT>ENTER_REGNO(label)<DD>
-		Insert E0-E9 codes to enter the number of the register
-		known by 'label' (RES_REG, UREG, IREG_DATA).
+<DT>HW_FIXED_SR0(flabel)<DD>
+		Designate function 'flabel' as being assigned to "00 00",
+		(SR 0000)
+		which is the subroutine hard-coded by the Model 707 Teletype
+		as the End Of Tape action. A "MARK(flabel)" must exist somewhere in
+		the source module.
 </DL>
 
 <P>When a program is linked, a special statement label is generated followed by
@@ -72,96 +36,6 @@ an END PROG code. The programmer should not place END PROG codes in the source f
 Note, the END_PROG() macro produces a SEARCH(end_prog) and not an actual
 END PROG code.
 
-
-<P>w7cpp:	Convenience pre-processor for wang program source code.
-
-<P>The preprocessor supports the following "macros" which allow a
-	more convenient entry of program sequences, and convert native
-	expression of text into the Wang encoding.
-
-<DL>
-<DT>ALPHA_STRING("string")
-<DT>ALPHA_PLOT("string")
-<DT>ALPHA_TTY("string")
-
-<DD>	Converts 'string' into a Wang 700 "alpha" sequence
-		that will output the desired text. Characters are
-		converted to IBM Selectric tilt/rotate codes, or
-		the modified tilt/rotate coding used on the plotter.
-		The sequence includes WRITE ALPHA and END ALPHA,
-		plus any shift up/down codes required. The case
-		is assumed to be un-shifted at the beginning of the
-		string. 'string' should be in double quotes.
-
-<P>	Special characters:
-
-<DL>
-<DT>	\r	return+index
-<DT>	\n	index
-<DT>	\ooo	any octal character code (tile-rotate + plot bit)
-
-<P>	Output Writer Only:
-<DT>	\v	reverse-index
-<DT>	\[	1/2
-<DT>	\{	1/4
-<DT>	\^	(cent)
-<DT>	\b	backspace
-
-<P>	Plotter Only:
-<DT>	\%	plot (draw) line
-<DT>	\/	move pen only
-<DT>	\h	home pen to origin
-<DT>	\z	set character size
-<DT>	\s	set character spacing
-<DT>	|x	plot character 'x'
-</DL>
-
-<P>	Note: ALPHA_PLOT uses a subtly different character decoder.
-		It affects interpretation of '/', '=', '1', 'L' and adds '{', '}'.
-		Also, ALPHA_PLOT does not translate non-supported Selectric
-		punctuation and special characters, including 1/2, 1/4, and cent.
-<P>
-<DT>ENTER(number)
-
-<DD>	Converts 'number' into a Wang 600 sequence that
-		results in the number being entered on the display.
-		Converts digits and decimal point to their respective
-		command code, '-' to CHG SIGN, 'e' to SET EXP, and
-		ignores '+'. Other characters will result in compile
-		errors. 'number' should not be quoted.
-<P>
-<DT>IREG_DATA(reg,number)
-
-<DD>	Creates an extended register that initially contains
-		the value 'number'. The register may be accessed with
-		RECALL(reg) and STORE(reg) statements.
-<P>
-<DT>IREG_DATA(reg,"string")
-
-<DD>	Creates an extended register that initially contains
-		the value derived from 'string', which must be a 16-digit
-		hexadecimal string with the left-most digit representing
-		the value for the left-most digit on the display.
-		The affects of RECALL on such a string is left to the
-		user to discover. For example,
-
-<PRE>IREG_DATA(blank,"fffffffffffff00a")</PRE>
-<P>
-<P>	Will result in an apparently-blank display when the
-		program step RECALL(blank) is executed.
-
-<P>	All IREG_DATA registers are placed after the main program, but
-		before the MARK end_prog END PROG sequence that is automatically
-		appended to every program. This ensures they are loaded with
-		the program from tape. UREG (un-initialized registers) are
-		allocated after the END PROG and are not part of the program
-		image.
-</DL>
-
-<P>Note, register data can prevent proper operation of a SEARCH end_prog
-	(i.e. END_PROG()), as that data could appear as though it were a MARK end_prog.
-	To reduce this possibility, end_prog is defined as a label (14 14 on the 600)
-	which is a value less-likely found in a register.
 
 <P>Programming statements:
 
