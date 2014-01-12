@@ -195,7 +195,23 @@ expression of text into the Wang encoding.
 
 <P>Other directives may be described under their respective architectures.
 
-<H4>Compiling:</H4>
+<H3>Compiling:</H3>
+
+<P>Compiler error messages can be cryptic. One common message is:
+
+<PRE>
+Error: invalid character '(' in mnemonic
+</PRE>
+
+<P>A common cause for this is a mis-spelled program code macro, or possibly
+directive. The line number should accurately point to the source line responsible.
+
+<P>Undefined or multiple defined symbols are also common. A common cause of undefined
+symbols is a missing *LABEL() directive or missing MARK(). Multple defined symbols are
+usually caused by conflicting symbols between linked modules, which could be caused by
+failure to use the "L" (local) form of *LABEL() directives.
+
+<H4>Makefiles</H4>
 
 <P>Ideally one would use the implicit rules defined in
 /usr/local/wpcc/include/Make.rules.user to compile programs.
