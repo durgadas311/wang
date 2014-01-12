@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.17 2014/01/12 15:40:45 drmiller Exp $
+# $Id: Make.rules.user,v 1.18 2014/01/12 16:39:17 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -46,6 +46,9 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	$(W6CPP) $< > $*.wpe
 	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $*.wpe
 	@rm -f $*.wpe
+
+%.w6t: %.txt
+	$(WPCCBIN)/w6data2tape <$< >$@
 
 %.w7t: %.w7c $(W7TLDEPS)
 	$(W7CPP) $< > $*.wpe
