@@ -1,0 +1,69 @@
+<HTML>
+<H3>Wang 607 Teletype Character Conversions</H3>
+
+<TABLE BORDER>
+<TR><TD COLSPAN=3>Teletype to 600 I/O Bus (600 placed in Learn Mode by Group 2 command)
+or 600 to Teletype when used as OutputWriter</TD></TR>
+<TR><TH>CHARACTER<BR>U.C. &nbsp; L.C.</TH>
+    <TH>TELETYPE ASCII CODE<BR>Upper Case &nbsp; Lower Case</TH>
+    <TH>SERIES 600<BR>CODE</TH>
+<TR><TH COLSPAN=3></TH></TR>
+<TR><TD ALIGN=CENTER>A</TD><TD>100 0001 &nbsp; Same    </TD><TD>01 12</TD></TR>
+<TR><TD ALIGN=CENTER>B</TD><TD>100 0010 &nbsp;         </TD><TD>02 00</TD></TR>
+<TR><TD ALIGN=CENTER>C</TD><TD>100 0011 &nbsp;         </TD><TD>02 12</TD></TR>
+<TR><TD ALIGN=CENTER>D</TD><TD>100 0100 &nbsp;         </TD><TD>02 13</TD></TR>
+<TR><TD ALIGN=CENTER>E</TD><TD>100 0101 &nbsp;         </TD><TD>02 05</TD></TR>
+<TR><TD ALIGN=CENTER>F</TD><TD>100 0110 &nbsp;         </TD><TD>00 14</TD></TR>
+<TR><TD ALIGN=CENTER>G</TD><TD>100 0111 &nbsp;         </TD><TD>00 15</TD></TR>
+<TR><TD ALIGN=CENTER>H</TD><TD>100 1000 &nbsp;         </TD><TD>02 01</TD></TR>
+<TR><TD ALIGN=CENTER>I</TD><TD>100 1001 &nbsp;         </TD><TD>01 04</TD></TR>
+<TR><TD ALIGN=CENTER>J</TD><TD>100 1010 &nbsp;         </TD><TD>00 07</TD></TR>
+<TR><TD ALIGN=CENTER>K</TD><TD>100 1011 &nbsp;         </TD><TD>02 04</TD></TR>
+<TR><TD ALIGN=CENTER>L</TD><TD>100 1100 &nbsp;         </TD><TD>03 15</TD></TR>
+<TR><TD ALIGN=CENTER>M</TD><TD>100 1101 &nbsp;         </TD><TD>01 15</TD></TR>
+<TR><TD ALIGN=CENTER>N</TD><TD>100 1110 &nbsp;         </TD><TD>02 06</TD></TR>
+<TR><TD ALIGN=CENTER>O</TD><TD>100 1111 &nbsp;         </TD><TD>01 09</TD></TR>
+<TR><TD ALIGN=CENTER>P</TD><TD>101 0000 &nbsp;         </TD><TD>00 05</TD></TR>
+<TR><TD ALIGN=CENTER>Q</TD><TD>101 0001 &nbsp;         </TD><TD>00 04</TD></TR>
+<TR><TD ALIGN=CENTER>R</TD><TD>101 0010 &nbsp;         </TD><TD>01 13</TD></TR>
+<TR><TD ALIGN=CENTER>S</TD><TD>101 0011 &nbsp;         </TD><TD>01 01</TD></TR>
+<TR><TD ALIGN=CENTER>T</TD><TD>101 0100 &nbsp;         </TD><TD>02 07</TD></TR>
+<TR><TD ALIGN=CENTER>U</TD><TD>101 0101 &nbsp;         </TD><TD>02 14</TD></TR>
+<TR><TD ALIGN=CENTER>V</TD><TD>101 0110 &nbsp;         </TD><TD>01 14</TD></TR>
+<TR><TD ALIGN=CENTER>W</TD><TD>101 0111 &nbsp;         </TD><TD>01 00</TD></TR>
+<TR><TD ALIGN=CENTER>X</TD><TD>101 1000 &nbsp;         </TD><TD>02 15</TD></TR>
+<TR><TD ALIGN=CENTER>Y</TD><TD>101 1001 &nbsp;         </TD><TD>00 01</TD></TR>
+<TR><TD ALIGN=CENTER>Z</TD><TD>101 1010 &nbsp;         </TD><TD>03 07</TD></TR>
+<TR><TD ALIGN=CENTER>1</TD><TD>011 0001 &nbsp;         </TD><TD>02 09</TD></TR>
+<TR><TD    >@ &nbsp; 2</TD><TD>100 0000 &nbsp; 011 0010</TD><TD>03 06</TD></TR>
+<TR><TD    ># &nbsp; 3</TD><TD>010 0011 &nbsp; 011 0011</TD><TD>03 14</TD></TR>
+<TR><TD    >$ &nbsp; 4</TD><TD>010 0100 &nbsp; 011 0100</TD><TD>03 09</TD></TR>
+<TR><TD    >% &nbsp; 5</TD><TD>010 0101 &nbsp; 011 0101</TD><TD>03 05</TD></TR>
+<TR><TD    >  &nbsp; 6</TD><TD>         &nbsp; 011 0110</TD><TD>03 04</TD></TR>
+<TR><TD    >&amp; &nbsp; 7</TD><TD>010 0110 &nbsp; 011 0111</TD><TD>03 13</TD></TR>
+<TR><TD    >* &nbsp; 8</TD><TD>010 1010 &nbsp; 011 1000</TD><TD>03 12</TD></TR>
+<TR><TD    >( &nbsp; 9</TD><TD>010 1000 &nbsp; 011 1001</TD><TD>03 00</TD></TR>
+<TR><TD    >) &nbsp; 0</TD><TD>010 1001 &nbsp; 011 0000</TD><TD>03 01</TD></TR>
+<TR><TD    >  &nbsp; -</TD><TD>         &nbsp; 010 1101</TD><TD>00 00</TD></TR>
+<TR><TD    >+ &nbsp; =</TD><TD>010 1011 &nbsp; 011 1101</TD><TD>00 06</TD></TR>
+<TR><TD    >: &nbsp; ;</TD><TD>011 1010 &nbsp; 011 1011</TD><TD>00 13</TD></TR>
+<TR><TD    >" &nbsp; '</TD><TD>010 0010 &nbsp; 010 0111</TD><TD>01 05</TD></TR>
+<TR><TD ALIGN=CENTER>,</TD><TD>010 1100 &nbsp; Same    </TD><TD>00 12</TD></TR>
+<TR><TD ALIGN=CENTER>.</TD><TD>010 1110 &nbsp; Same    </TD><TD>01 06</TD></TR>
+<TR><TD    >? &nbsp; /</TD><TD>011 1111 &nbsp; 010 1111</TD><TD>00 09</TD></TR>
+<TR><TD    >  &nbsp; !</TD><TD>         &nbsp; 010 0001</TD><TD>01 07</TD></TR>
+<TR><TD ALIGN=CENTER>SPACE     </TD><TD>010 0000 &nbsp; Same    </TD><TD>00 02</TD></TR>
+<TR><TD ALIGN=CENTER>INDEX (LF)</TD><TD>000 1010 &nbsp;         </TD><TD>01 10</TD></TR>
+<TR><TD ALIGN=CENTER>SHIFT UP (Ctrl-H)</TD><TD>000 1000 &nbsp;  </TD><TD>01 03</TD></TR>
+<TR><TD ALIGN=CENTER>SHIFT DOWN (Ctrl-L)</TD><TD>000 1100 &nbsp;</TD><TD>01 02</TD></TR>
+<TR><TD ALIGN=CENTER ROWSPAN=2>CR/LF</TD>
+		<TD STYLE="border-bottom: blank;">000 1101 &nbsp;         </TD><TD ROWSPAN=2>01 10</TD></TR>
+<TR>            <TD STYLE="border-top: blank;">000 1010 &nbsp;         </TD></TR>
+<TR><TD ALIGN=CENTER>PUNCH ON (Ctrl-R)</TD><TD>001 0010 &nbsp;</TD><TD>00 10</TD></TR>
+<TR><TD ALIGN=CENTER>PUNCH OFF (Ctrl-T)</TD><TD>001 0100 &nbsp;</TD><TD>00 11</TD></TR>
+<TR><TD ALIGN=CENTER>WRITE ALPHA (Ctrl-U)</TD><TD>001 0101 &nbsp;</TD><TD>09 02</TD></TR>
+<TR><TD ALIGN=CENTER>END ALPHA (Ctrl-V)</TD><TD>001 0110 &nbsp;</TD><TD>02 02</TD></TR>
+<TR><TD ALIGN=CENTER>RESUME (Ctrl-A)</TD><TD>000 0001 &nbsp;</TD><TD>08 03</TD></TR>
+</TABLE>
+
+</HTML>
