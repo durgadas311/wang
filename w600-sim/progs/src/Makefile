@@ -7,6 +7,8 @@ PROGS = $(subst .w6c,.w6t,$(SRCS))
 DATAT = $(subst .txt,.w6t,$(DATAS))
 SUBDIRS = libw6 libplot tests
 ROMS = libplot.w6x
+# might need to separate FLABS for ROM (implicit build) from RAM (explicit build)
+FLABS = libplot.wfl
 
 W6TLDFLAGS += -Llibw6 -Llibplot
 W6TLIBS += -lw6 -lplot
@@ -56,8 +58,8 @@ $(SUBDIRS): __FRC__
 install: $(PROGS) $(ROMS) $(DATAT)
 	cp $(PROGS) $(ROMS) $(DATAT) ~/Wang600Files/
 
-ship: $(PROGS) $(ROMS) $(DATAT) $(DATAS)
-	cp $(PROGS) $(ROMS) $(DATAT) $(DATAS) ..
+ship: $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS)
+	cp $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS) ..
 
 # TODO: use "make... export" in subdirs, too
 export: __FRC__

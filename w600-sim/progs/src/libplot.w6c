@@ -4,3 +4,13 @@
 
 ROM_EXTERNAL(GRAPHING_FUNCTION)
 ROM_EXTERNAL(GRAPHING_PLOT)
+
+FORDERED(grapher,plot 602)
+FORDERED(plotter,plot 612)
+FORDERED(plot_data,data 612)
+FORDERED(plot_chrsize, chrsize 612)
+FORDERED(plot_home, home 612)
+FORDERED(plot_moveto, move 612)
+FORDERED(plot_drawto, draw 612)
+FORDERED(plot_Xaxis, Xaxis 612)
+FORDERED(plot_Yaxis, Yaxis 612)
