@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.6 2014/01/10 14:14:58 drmiller Exp $
+// $Id: Wang_Properties.java,v 1.7 2014/01/13 17:06:53 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;
@@ -17,6 +17,12 @@ class Wang_Properties extends Properties
 	private String _cfg;
 	private JOptionPane _prefs;
 	private Object[] _btns;
+
+	boolean _exists = false;
+	boolean _changed = false;
+
+	public boolean isNew() { return !_exists; }
+	public boolean isDirty() { return _changed; }
 
 	int doDialog() {
 		Dialog dlg = _prefs.createDialog(null, "Set " + _name + " Options");
@@ -39,6 +45,7 @@ class Wang_Properties extends Properties
 	}
 
 	void initProperties(String name, String cfgFile) throws Exception {
+		_exists = false;
 		_name = name;
 		if (cfgFile.startsWith("~/")) {
 			_cfg = System.getProperty("user.home") + cfgFile.substring(1);
@@ -46,8 +53,11 @@ class Wang_Properties extends Properties
 			_cfg = cfgFile;
 		}
 		FileInputStream cfg = new FileInputStream(_cfg);
+		// an exception above prevents us getting here...
 		load(cfg);
 		cfg.close();
+		_exists = true;
+		_changed = false;
 		// save, and force existence of file if not exists?
 	}
 
@@ -96,6 +106,10 @@ class Wang_Properties extends Properties
 		setProperty(prop, value);
 		temp.setProperty(prop, value);
 		temp.save();
+		// 'temp' might not really be identical to this...
+		// but that is the current intent so mark everything in-sync...
+		_exists = true;
+		_changed = false;
 	}
 
 	// transfers some properties from the current set to the saved set.
@@ -111,5 +125,7 @@ class Wang_Properties extends Properties
 		FileOutputStream cfg = new FileOutputStream(_cfg);
 		store(cfg, "Saved by " + _name);
 		cfg.close();
+		_exists = true;
+		_changed = false;
 	}
 }
