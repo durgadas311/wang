@@ -1,0 +1,18 @@
+4\v 8\v # left header c0
+plot 602 # c0
+plot 612 # c1
+data 612 # c2
+chrsize 612 # c3
+home 612 # c4
+move 612 # c5
+draw 612 # c6
+Xaxis 612 # c7
+Yaxis 612 # c8
+ # c9
+ # ca
+ # cb
+ # cc
+ # cd
+ # ce
+ # cf
+libplot # right header cf
