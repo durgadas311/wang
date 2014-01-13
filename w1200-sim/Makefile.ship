@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.5 2013/12/09 15:42:51 drmiller Exp $
+# $Id: Makefile.ship,v 1.6 2014/01/13 17:48:17 drmiller Exp $
 
 EXAMPLES = $(wildcard examples/*.txt)
 EX = $(EXAMPLES:.txt=.wpt)
@@ -52,6 +52,9 @@ w1200_fe.class: w1200_fe.java $(COMMON_CLASSES) $(W1200_CLASSES)
 txt2wng.class: txt2wng.java Wang1200_TextToTape.class Wang_CharConverter.class
 	javac txt2wng.java
 
+w1200initProps.class: w1200initProps.java Wang_Properties.class Wang1200_Properties.class
+	javac w1200initProps.java
+
 .SUFFIXES: .class .java
 
 .java.class:
@@ -72,7 +75,7 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang1200arch.html,$(wildcard docs/*.html))
 
-wang1200.jar: w1200_fe.class txt2wng.class Manifest.txt
+wang1200.jar: w1200_fe.class txt2wng.class w1200initProps.class Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS))

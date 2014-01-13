@@ -1,8 +1,9 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Properties.java,v 1.3 2013/12/09 17:47:47 drmiller Exp $
+// $Id: Wang1200_Properties.java,v 1.4 2014/01/13 17:48:17 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
+import java.io.FileNotFoundException;
 
 class Wang1200_Properties extends Wang_Properties
 		implements Wang_PropertyEditor
@@ -28,7 +29,13 @@ class Wang1200_Properties extends Wang_Properties
 		try {
 			initProperties("Wang1200", "~/.wang1200.rc");
 		} catch (Exception e) {
-			Wang_UI.warning("Load Setup", e.getMessage());
+			if (e instanceof FileNotFoundException) {
+				// Don't complain about non-existent file,
+				// just work with in-memory properties.
+				// Still might not be possible to create...
+			} else {
+				Wang_UI.warning("Load Setup", e.getMessage());
+			}
 		}
 		processDefaults();
 
@@ -114,41 +121,50 @@ class Wang1200_Properties extends Wang_Properties
 	}
 
 	public void processDefaults() {
+		int changes = 0;
 		// setup defaults for everything...
 		String s;
 		s = getProperty("wang1200_home");
 		boolean home_set = (s != null && s.length() != 0);
 		if (!home_set) {
+			++changes;
 			setProperty("wang1200_home", "~/Wang1200Files");
 		}
 		s = getProperty("wang1200_page_cpi");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_cpi", "10.0");
 		}
 		s = getProperty("wang1200_page_cpl");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_cpl", "0.0");
 		}
 		s = getProperty("wang1200_page_lpi");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_lpi", "6.0");
 		}
 		s = getProperty("wang1200_page_lpp");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_lpp", "0.0");
 		}
 		s = getProperty("wang1200_page_footers");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_footers", Boolean.toString(false));
 		}
 		s = getProperty("wang1200_page_footertext");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_page_footertext", "Wang 1200 Output");
 		}
 
 		// non-settable properties (except for direct file edit)
 		s = getProperty("wang1200_tape_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang1200_tape_file_suffix", "wpt");
 		}
 
@@ -163,6 +179,9 @@ class Wang1200_Properties extends Wang_Properties
 		if (s.startsWith("~/")) {
 			s = System.getProperty("user.home") + s.substring(1);
 			setProperty("wang1200_home", s);
+		}
+		if (changes > 0) {
+			_changed = true;
 		}
 	}
 

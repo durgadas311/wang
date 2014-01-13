@@ -19,6 +19,7 @@ Section "Wang 700 Simulator"
 	File /r "progs\*.txt*"
 	File /r "progs\*.wfl*"
 	WriteUninstaller $INSTDIR\uninstall.exe
+	Exec java -cp $INSTDIR\wang700.jar w700initProps
 SectionEnd
 Section "Uninstall"
 	Delete $DESKTOP\Wang700.lnk

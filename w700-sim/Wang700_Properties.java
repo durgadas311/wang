@@ -1,8 +1,9 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang700_Properties.java,v 1.3 2014/01/05 21:36:25 drmiller Exp $
+// $Id: Wang700_Properties.java,v 1.4 2014/01/13 17:48:17 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
+import java.io.FileNotFoundException;
 
 class Wang700_Properties extends Wang_Properties
 		implements Wang_PropertyEditor
@@ -24,7 +25,13 @@ class Wang700_Properties extends Wang_Properties
 		try {
 			initProperties("Wang700", "~/.wang700.rc");
 		} catch (Exception e) {
-			Wang_UI.warning("Load Setup", e.getMessage());
+			if (e instanceof FileNotFoundException) {
+				// Don't complain about non-existent file,
+				// just work with in-memory properties.
+				// Still might not be possible to create...
+			} else {
+				Wang_UI.warning("Load Setup", e.getMessage());
+			}
 		}
 		processDefaults();
 
@@ -91,26 +98,32 @@ class Wang700_Properties extends Wang_Properties
 	}
 
 	public void processDefaults() {
+		int changes = 0;
 		// setup defaults for everything...
 		String s;
 		s = getProperty("wang700_special1");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang700_special1", "true");
 		}
 		s = getProperty("wang700_displayfont");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang700_displayfont", "NixieZM1336.ttf");
 		}
 		s = getProperty("wang700_home");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang700_home", "~/Wang700Files");
 		}
 		s = getProperty("wang700_tape_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang700_tape_file_suffix", "w7t");
 		}
 		s = getProperty("wang700_disk_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang700_disk_file_suffix", "w7d");
 		}
 
@@ -129,6 +142,9 @@ class Wang700_Properties extends Wang_Properties
 		if (s.startsWith("~/")) {
 			s = System.getProperty("user.home") + s.substring(1);
 			setProperty("wang700_home", s);
+		}
+		if (changes > 0) {
+			_changed = true;
 		}
 	}
 

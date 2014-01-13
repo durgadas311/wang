@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.5 2013/12/09 17:04:26 drmiller Exp $
+# $Id: INSTALL,v 1.6 2014/01/13 17:48:17 drmiller Exp $
 
 export INSTALLPATH=${HOME}/wang1200wps
 
@@ -31,4 +31,7 @@ if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
 		eval "echo \"${line}\""
 	done >~/Desktop/${title}.desktop
 fi
+
+java -cp wang1200.jar w1200initProps
+
 echo "Ready to launch ${PWD}/run"

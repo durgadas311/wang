@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.9 2014/01/09 00:45:42 drmiller Exp $
+# $Id: Makefile.ship,v 1.10 2014/01/13 17:48:17 drmiller Exp $
 
 COPTS =
 
@@ -78,6 +78,9 @@ w700_fe.class: w700_fe.java $(COMMON_CLASSES) $(W700_CLASSES)
 w700_edit.class: w700_edit.java $(COMMON_W714_CLASSES)
 	javac w700_edit.java
 
+w700initProps.class: w700initProps.java Wang_Properties.class Wang700_Properties.class
+	javac w700initProps.java
+
 .SUFFIXES: .class .java
 
 .java.class:
@@ -96,7 +99,7 @@ Manifest.txt:
 
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
-wang700.jar: w700_fe.class w700_edit.class Manifest.txt $(ROM)
+wang700.jar: w700_fe.class w700_edit.class w700initProps.class Manifest.txt $(ROM)
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \

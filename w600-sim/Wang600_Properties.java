@@ -1,7 +1,8 @@
 // Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang600_Properties.java,v 1.4 2014/01/06 01:10:10 drmiller Exp $
+// $Id: Wang600_Properties.java,v 1.5 2014/01/13 17:48:17 drmiller Exp $
 
 import java.awt.*;
+import java.io.FileNotFoundException;
 import javax.swing.*;
 
 class Wang600_Properties extends Wang_Properties
@@ -26,7 +27,13 @@ class Wang600_Properties extends Wang_Properties
 		try {
 			initProperties("Wang600", "~/.wang600.rc");
 		} catch (Exception e) {
-			Wang_UI.warning("Load Setup", e.getMessage());
+			if (e instanceof FileNotFoundException) {
+				// Don't complain about non-existent file,
+				// just work with in-memory properties.
+				// Still might not be possible to create...
+			} else {
+				Wang_UI.warning("Load Setup", e.getMessage());
+			}
 		}
 		processDefaults();
 
@@ -102,37 +109,46 @@ class Wang600_Properties extends Wang_Properties
 
 	public void processDefaults() {
 		// setup defaults for everything...
+		int changes = 0;
 		String s;
 		s = getProperty("wang600_digit12");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_digit12", "false");
 		}
 		s = getProperty("wang600_centerDP");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_centerDP", "false");
 		}
 		s = getProperty("wang600_special1");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_special1", "true");
 		}
 		s = getProperty("wang600_displayfont");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_displayfont", "Panaplex9seg.ttf");
 		}
 		s = getProperty("wang600_home");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_home", "~/Wang600Files");
 		}
 		s = getProperty("wang600_tape_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_tape_file_suffix", "w6t");
 		}
 		s = getProperty("wang600_rom_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_rom_file_suffix", "w6x");
 		}
 		s = getProperty("wang600_disk_file_suffix");
 		if (s == null || s.length() == 0) {
+			++changes;
 			setProperty("wang600_disk_file_suffix", "w6d");
 		}
 
@@ -151,6 +167,9 @@ class Wang600_Properties extends Wang_Properties
 		if (s.startsWith("~/")) {
 			s = System.getProperty("user.home") + s.substring(1);
 			setProperty("wang600_home", s);
+		}
+		if (changes > 0) {
+			_changed = true;
 		}
 	}
 
