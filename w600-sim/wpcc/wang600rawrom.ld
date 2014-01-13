@@ -38,6 +38,7 @@ SECTIONS
 		*(.wang600label);
 	} >rom_labels
 	.wang600flabels : AT(0x2000) {
+		INCLUDE fnordering1.ld
 		*(.wang600flabel*);
 	} >rom_flabels
 	.wang600search : AT(0x3000) {
@@ -47,6 +48,7 @@ SECTIONS
 		*(.wang600call);
 	} >rom_call
 	.wang600subr  : AT(0x5000) {
+		INCLUDE fnordering2.ld
 		*(.wang600subr*);
 	} >rom_subr
 

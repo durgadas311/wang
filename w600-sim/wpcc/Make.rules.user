@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.18 2014/01/12 16:39:17 drmiller Exp $
+# $Id: Make.rules.user,v 1.19 2014/01/13 14:13:42 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -125,7 +125,14 @@ W7LDFIX = $(WPCCBIN)/w7ldfix
 	$(OBJCOPY) -j .wang600rom -O binary $< $@
 
 ###%.w6r: %/%.a
-# for some reason --whole-archive doesn't work - perhaps 'ld' only looks for *.o
-%.w6r: %.w6o %/*.w6o
+# for some reason --whole-archive doesn't work -
+# perhaps 'ld' only looks for *.o (not *.w6o)
+%.w6r: %.w6c %/*.w6o
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $*.w6o $*.wpe | \
+		$(WPCCBIN)/symbols2labels $* ROM >$*.wfl
+	@rm -f $*.wpe
+	@if [[ ! -s $*.wfl ]]; then rm $*.wfl; fi
 	$(CC) $(W6CCFLAGS) $(W6XLDFLAGS) \
-		-o $@ $^
+		-o $@ $*.w6o $*/*.w6o
+	@rm -f fnordering*.ld

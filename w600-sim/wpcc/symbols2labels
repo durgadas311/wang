@@ -11,8 +11,9 @@ name=${name%.*}
 arch="${2}"
 case ${arch} in
 600)	fb=160;;
+ROM)	fb=192; arch="600";;
 700)	fb=0;;
-*)	echo "<arch> must be \"600\" or \"700\"" >&2
+*)	echo "<arch> must be \"600\", \"ROM\", or \"700\"" >&2
 	exit 1
 	;;
 esac
@@ -47,7 +48,7 @@ done | awk -v name="${name}" \
 {
 	f=$1+0;
 	ff=$2;
-	for (x=3; x<NF; ++x) {
+	for (x=3; x<=NF; ++x) {
 		ff=ff " " $x;
 	}
 	fc[f]=ff;
@@ -59,25 +60,25 @@ END{
 	b=b*16;
 	e=int((max+15)/16);
 	e=e*16;
-	if (b >= 208) {
-		tag="SHIFT 4\\v 8\\v";
-	} else if (b >= 192) {
-		tag="4\\v 8\\v";
-	} else if (b >= 176) {
-		tag="SHIFT f(x)\\v";
-	} else if (b >= 160) {
-		tag="f(x)\\v";
-	} else if (b >= 48) {
-		tag="\\v\\s \\v\\s \\^\\s \\^\\s";
-	} else if (b >= 32) {
-		tag="\\v\\s \\v\\s \\^\\s \\v\\s";
-	} else if (b >= 16) {
-		tag="\\v\\s \\v\\s \\v\\s \\^\\s";
-	} else {
-		tag="\\v\\s \\v\\s \\v\\s \\v\\s";
-	}
 	while (b < e) {
 		if ((b % 16) == 0) {
+			if (b >= 208) {
+				tag="SHIFT 4\\v 8\\v";
+			} else if (b >= 192) {
+				tag="4\\v 8\\v";
+			} else if (b >= 176) {
+				tag="SHIFT f(x)\\v";
+			} else if (b >= 160) {
+				tag="f(x)\\v";
+			} else if (b >= 48) {
+				tag="\\v\\s \\v\\s \\^\\s \\^\\s";
+			} else if (b >= 32) {
+				tag="\\v\\s \\v\\s \\^\\s \\v\\s";
+			} else if (b >= 16) {
+				tag="\\v\\s \\v\\s \\v\\s \\^\\s";
+			} else {
+				tag="\\v\\s \\v\\s \\v\\s \\v\\s";
+			}
 			printf "%s # left header %02x\n", tag, b;
 		}
 		if (b in fc) {
