@@ -19,7 +19,7 @@ Section "Wang 600 Simulator"
 	File /r "progs\*.txt*"
 	File /r "progs\*.wfl*"
 	WriteUninstaller $INSTDIR\uninstall.exe
-	Exec java -cp $INSTDIR\wang600.jar w600initProps
+	Exec 'java -cp $INSTDIR\wang600.jar w600initProps'
 SectionEnd
 Section "Uninstall"
 	Delete $DESKTOP\Wang600.lnk

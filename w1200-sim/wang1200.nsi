@@ -17,7 +17,7 @@ Section "Wang 1200 Simulator"
 	SetOutPath $WANG1200HOME
 	File /r "examples\*.wpt"
 	WriteUninstaller $INSTDIR\uninstall.exe
-	Exec java -cp $INSTDIR\wang1200.jar w1200initProps
+	Exec 'java -cp $INSTDIR\wang1200.jar w1200initProps'
 SectionEnd
 Section "Uninstall"
 	Delete $DESKTOP\Wang1200.lnk
