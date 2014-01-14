@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.10 2014/01/05 21:23:19 drmiller Exp $
+// $Id: Wang_UI.java,v 1.11 2014/01/14 19:04:13 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.10 2014/01/05 21:23:19 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.11 2014/01/14 19:04:13 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;
@@ -217,6 +217,12 @@ public class Wang_UI
 		JOptionPane.showMessageDialog(null,
 			new JLabel(err),
 			op + " Warning", JOptionPane.WARNING_MESSAGE);
+	}
+
+	static public void inform(String op, String err) {
+		JOptionPane.showMessageDialog(null,
+			new JLabel(err),
+			op + " Information", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	static public int confirm(String op, String err) {
