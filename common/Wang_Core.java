@@ -1,5 +1,5 @@
-// Copyright (c) 2013 Douglas Miller
-// $Id: Wang_Core.java,v 1.6 2013/12/02 21:41:04 drmiller Exp $
+// Copyright (c) 2013,2014 Douglas Miller
+// $Id: Wang_Core.java,v 1.7 2014/01/14 21:53:51 drmiller Exp $
 
 interface Wang_Core extends Runnable {
 	public void chgMode0();

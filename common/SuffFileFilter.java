@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: SuffFileFilter.java,v 1.2 2013/02/02 01:39:04 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: SuffFileFilter.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $
 
 import java.io.*;
 

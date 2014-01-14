@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_UI.java,v 1.11 2014/01/14 19:04:13 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_UI.java,v 1.12 2014/01/14 21:53:51 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Wang_UI
 {
-	final String ident = "$Id: Wang_UI.java,v 1.11 2014/01/14 19:04:13 drmiller Exp $";
+	final String ident = "$Id: Wang_UI.java,v 1.12 2014/01/14 21:53:51 drmiller Exp $";
 
 	private static ImageIcon _icon;
 	private static File _dir;

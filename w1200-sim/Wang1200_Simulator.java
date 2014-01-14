@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang1200_Simulator.java,v 1.6 2013/12/03 16:33:18 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang1200_Simulator.java,v 1.7 2014/01/14 21:53:51 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang1200_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang1200_Simulator.java,v 1.6 2013/12/03 16:33:18 drmiller Exp $";
+	final String ident = "$Id: Wang1200_Simulator.java,v 1.7 2014/01/14 21:53:51 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;

@@ -1,5 +1,5 @@
-// Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_Debugger.java,v 1.6 2013/11/18 23:31:37 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Debugger.java,v 1.7 2014/01/14 21:53:51 drmiller Exp $
 
 import java.io.*;
 

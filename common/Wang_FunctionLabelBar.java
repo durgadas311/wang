@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_FunctionLabelBar.java,v 1.5 2014/01/12 19:29:43 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_FunctionLabelBar.java,v 1.6 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;

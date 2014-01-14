@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Keyboards.java,v 1.2 2013/12/08 03:06:16 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Keyboards.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.border.*;
 
 class Wang_Keyboards extends JPanel
 {
-	final String ident = "$Id: Wang_Keyboards.java,v 1.2 2013/12/08 03:06:16 drmiller Exp $";
+	final String ident = "$Id: Wang_Keyboards.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang_Keyboards() { }
 

@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDrive.java,v 1.18 2014/01/08 20:38:56 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_TapeDrive.java,v 1.19 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.border.*;
 
 class Wang_TapeDrive extends JComponent
 {
-	final String ident = "$Id: Wang_TapeDrive.java,v 1.18 2014/01/08 20:38:56 drmiller Exp $";
+	final String ident = "$Id: Wang_TapeDrive.java,v 1.19 2014/01/14 21:53:51 drmiller Exp $";
 	static final long serialVersionUID = 311457692039L;
 	java.io.RandomAccessFile _tf;
 	boolean _wr;

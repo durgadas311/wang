@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang600_InstrDecoder.java,v 1.2 2014/01/14 21:53:51 drmiller Exp $
+
 class Wang600_InstrDecoder
 		implements Wang_InstructionDecoder {
 

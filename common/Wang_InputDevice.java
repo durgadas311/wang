@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_InputDevice.java,v 1.7 2014/01/03 23:48:40 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_InputDevice.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
 
 
 // e.g. Group 1/2 Devices attached to a Wang "CN-36" port (Input only)

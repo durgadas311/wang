@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.8 2014/01/05 21:36:25 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: ASR33_Teletype.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.8 2014/01/05 21:36:25 drmiller Exp $";
+	final String ident = "$Id: ASR33_Teletype.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $";
 
 	String _propBase;
 

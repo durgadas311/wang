@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang700.java,v 1.4 2014/01/14 21:53:51 drmiller Exp $
+
 class Wang700 {
 	public static Wang_Display DispY;
 	public static Wang_Display DispX;

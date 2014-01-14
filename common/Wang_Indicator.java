@@ -1,8 +1,11 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Indicator.java,v 1.2 2014/01/14 21:53:51 drmiller Exp $
+
 import java.awt.*;
 import javax.swing.*;
 
 class Wang_Indicator extends JLabel {
-	final String ident = "$Id: Wang_Indicator.java,v 1.1 2013/02/19 22:50:19 drmiller Exp $";
+	final String ident = "$Id: Wang_Indicator.java,v 1.2 2014/01/14 21:53:51 drmiller Exp $";
 	static final long serialVersionUID = 311611692038L;
 
 	JLabel lab;

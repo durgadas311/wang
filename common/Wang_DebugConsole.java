@@ -1,5 +1,5 @@
-// Copyright (c) 2011, 2013 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.8 2013/12/29 19:09:03 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_DebugConsole.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $
 
 import java.io.*;
 import java.util.Arrays;

@@ -1,5 +1,5 @@
-// Copyright (c) 2010, 2013 Douglas Miller
-// $Id: Wang_CharConverter.java,v 1.6 2014/01/03 23:48:40 drmiller Exp $
+// Copyright (c) 2010,2014 Douglas Miller
+// $Id: Wang_CharConverter.java,v 1.7 2014/01/14 21:53:51 drmiller Exp $
 
 import java.util.Arrays;
 

@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.4 2013/12/29 19:09:03 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_MicroFace.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.*;
 class Wang_MicroFace
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.4 2013/12/29 19:09:03 drmiller Exp $";
+	final String ident = "$Id: Wang_MicroFace.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $";
 
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";

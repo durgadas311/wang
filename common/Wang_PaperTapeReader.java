@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2013 Douglas Miller
-// $Id: Wang_PaperTapeReader.java,v 1.7 2014/01/03 23:48:40 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_PaperTapeReader.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 class Wang_PaperTapeReader
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.7 2014/01/03 23:48:40 drmiller Exp $";
+	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $";
 
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";

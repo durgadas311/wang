@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_PlottingOutputWriter.java,v 1.10 2013/12/06 21:21:58 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_PlottingOutputWriter.java,v 1.11 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.text.DefaultCaret;
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.10 2013/12/06 21:21:58 drmiller Exp $";
+	final String ident = "$Id: Wang_PlottingOutputWriter.java,v 1.11 2014/01/14 21:53:51 drmiller Exp $";
 
 	public static final String Model = "02";
 	public static final String Description = "Plotting Output Writer";
@@ -20,7 +20,7 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		java.net.URL url = this.getClass().getResource("icons/wang602.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.10 $ $Date: 2013/12/06 21:21:58 $<BR>"+
+			"$Revision: 1.11 $ $Date: 2014/01/14 21:53:51 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+

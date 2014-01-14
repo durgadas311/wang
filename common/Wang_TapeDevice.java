@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_TapeDevice.java,v 1.4 2013/12/01 20:57:47 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_TapeDevice.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
 
 interface Wang_TapeDevice {
 	public int tape_prot();

@@ -1,10 +1,10 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Colors.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Colors.java,v 1.4 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 
 class Wang_Colors {
-	final String ident = "$Id: Wang_Colors.java,v 1.3 2013/12/01 16:49:59 drmiller Exp $";
+	final String ident = "$Id: Wang_Colors.java,v 1.4 2014/01/14 21:53:51 drmiller Exp $";
 
 	static final Color orange1 = new Color(255, 210, 180, 255);
 	static final Color orange2 = new Color(255, 255, 100, 255); // illuminated key

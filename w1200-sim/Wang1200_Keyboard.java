@@ -1,5 +1,5 @@
-// Copyright (c) 2013 Douglas Miller
-// $Id: Wang1200_Keyboard.java,v 1.3 2013/12/04 14:23:56 drmiller Exp $
+// Copyright (c) 2013,2014 Douglas Miller
+// $Id: Wang1200_Keyboard.java,v 1.4 2014/01/14 21:53:51 drmiller Exp $
 
 abstract class Wang1200_Keyboard extends Wang_Keyboard
 {

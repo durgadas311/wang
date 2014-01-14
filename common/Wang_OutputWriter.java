@@ -1,12 +1,12 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_OutputWriter.java,v 1.14 2013/02/19 15:36:55 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_OutputWriter.java,v 1.15 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.event.*;
 import javax.swing.*;
 
 class Wang_OutputWriter extends IBM_Selectric
 {
-	final String ident = "$Id: Wang_OutputWriter.java,v 1.14 2013/02/19 15:36:55 drmiller Exp $";
+	final String ident = "$Id: Wang_OutputWriter.java,v 1.15 2014/01/14 21:53:51 drmiller Exp $";
 
 	public static final String Model = "01";
 	public static final String Description = "Output Writer";
@@ -15,7 +15,7 @@ class Wang_OutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang601.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.14 $ $Date: 2013/02/19 15:36:55 $<BR>"+
+			"$Revision: 1.15 $ $Date: 2014/01/14 21:53:51 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+

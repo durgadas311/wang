@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Plotter.java,v 1.29 2013/12/06 20:54:06 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Plotter.java,v 1.30 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,7 +13,7 @@ import java.awt.image.*;
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: Wang_Plotter.java,v 1.29 2013/12/06 20:54:06 drmiller Exp $";
+	final String ident = "$Id: Wang_Plotter.java,v 1.30 2014/01/14 21:53:51 drmiller Exp $";
 
 	public void setProperties(Wang_Properties p) { }
 
@@ -31,7 +31,7 @@ class Wang_Plotter extends Wang_Paper
 		java.net.URL url = this.getClass().getResource("icons/wang612.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.29 $ $Date: 2013/12/06 20:54:06 $<BR>"+
+			"$Revision: 1.30 $ $Date: 2014/01/14 21:53:51 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+

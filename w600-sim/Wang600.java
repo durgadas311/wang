@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang600.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
+
 class Wang600 {
 	public static Wang_Display Disp;
 	public static Wang_Printer Prt;

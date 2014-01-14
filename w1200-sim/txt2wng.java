@@ -1,5 +1,5 @@
-// Copyright (c) 2013 Douglas Miller
-// $Id: txt2wng.java,v 1.2 2013/12/04 14:00:49 drmiller Exp $ 
+// Copyright (c) 2013,2014 Douglas Miller
+// $Id: txt2wng.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $ 
 
 import java.io.*;
 

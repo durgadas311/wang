@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_CN36_Type2.java,v 1.2 2014/01/14 21:53:51 drmiller Exp $
+
 import javax.swing.*;
 
 interface Wang_CN36_Type2 {

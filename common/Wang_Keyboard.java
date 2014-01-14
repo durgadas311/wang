@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Keyboard.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
+
 import java.awt.event.*;
 import javax.swing.*;
 

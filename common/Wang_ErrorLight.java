@@ -1,11 +1,11 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_ErrorLight.java,v 1.2 2013/11/07 20:46:08 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_ErrorLight.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
 
 class Wang_ErrorLight extends JPanel {
-	final String ident = "$Id: Wang_ErrorLight.java,v 1.2 2013/11/07 20:46:08 drmiller Exp $";
+	final String ident = "$Id: Wang_ErrorLight.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 	GridBagLayout gridbag = new GridBagLayout();

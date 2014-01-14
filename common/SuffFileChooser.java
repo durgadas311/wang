@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: SuffFileChooser.java,v 1.3 2013/02/06 22:28:33 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: SuffFileChooser.java,v 1.4 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;

@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Properties.java,v 1.7 2014/01/13 17:06:53 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Properties.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
 
 import java.util.Properties;
 import javax.swing.*;

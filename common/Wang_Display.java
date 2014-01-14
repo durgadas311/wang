@@ -1,3 +1,6 @@
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Display.java,v 1.3 2014/01/14 21:53:51 drmiller Exp $
+
 import javax.swing.*;
 
 abstract class Wang_Display extends JComponent

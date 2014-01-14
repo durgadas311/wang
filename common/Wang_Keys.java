@@ -1,11 +1,11 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_Keys.java,v 1.4 2013/12/08 03:06:16 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_Keys.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
 
 class Wang_Keys {
-	final String ident = "$Id: Wang_Keys.java,v 1.4 2013/12/08 03:06:16 drmiller Exp $";
+	final String ident = "$Id: Wang_Keys.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $";
 
 	static final int SPCL = 0x0100;
 	static final int MODE0 = 0x0200;

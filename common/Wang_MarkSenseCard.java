@@ -1,5 +1,5 @@
-// Copyright (c) 2011,2012 Douglas Miller
-// $Id: Wang_MarkSenseCard.java,v 1.11 2013/12/31 23:52:00 drmiller Exp $
+// Copyright (c) 2011,2014 Douglas Miller
+// $Id: Wang_MarkSenseCard.java,v 1.12 2014/01/14 21:53:51 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
