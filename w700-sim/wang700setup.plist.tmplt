@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>java -cp wang700.jar w700initProps -g</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Wang 700 Programmable Calculator</string>
+	<key>CFBundleIconFile</key>
+	<string>setup.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.durgadas.wang700</string>
+	<key>CFBundleName</key>
+	<string>Wang700Setup</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1</string>
+	<key>CFBundleSignature</key>
+	<string>WNG7</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+</dict>
+</plist>

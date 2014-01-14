@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.39 2014/01/09 23:06:03 drmiller Exp $
+# $Id: Makefile,v 1.40 2014/01/14 19:04:36 drmiller Exp $
 
 include Makefile.ship
 
@@ -17,7 +17,7 @@ SRCTAR = w700-sim.tgz
 PNGS = $(wildcard icons/wang700-*x*.png)
 PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
-ICNS = $(subst .png,.icns,$(PNGS))
+ICNS = $(subst .png,.icns,$(PNGS) icons/setup.png)
 WICONS = $(subst .png,.ico,$(PNGS))
 
 EXE = w700-sim

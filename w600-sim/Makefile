@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.71 2014/01/13 01:32:24 drmiller Exp $
+# $Id: Makefile,v 1.72 2014/01/14 19:04:36 drmiller Exp $
 
 include Makefile.ship
 
@@ -14,7 +14,7 @@ SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 PNGS = $(wildcard icons/wang600-*x*.png)
 PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 # sips expected: 16, 32, 48, 128, 256, 512, or 1024
-ICNS = $(subst .png,.icns,$(PNGS))
+ICNS = $(subst .png,.icns,$(PNGS) icons/setup.png)
 WICONS = $(subst .png,.ico,$(PNGS))
 
 PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe

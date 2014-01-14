@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.10 2014/01/13 17:48:17 drmiller Exp $
+# $Id: Makefile.ship,v 1.11 2014/01/14 19:04:36 drmiller Exp $
 
 COPTS =
 
@@ -78,7 +78,8 @@ w700_fe.class: w700_fe.java $(COMMON_CLASSES) $(W700_CLASSES)
 w700_edit.class: w700_edit.java $(COMMON_W714_CLASSES)
 	javac w700_edit.java
 
-w700initProps.class: w700initProps.java Wang_Properties.class Wang700_Properties.class
+w700initProps.class: w700initProps.java \
+		Wang_UI.class Wang_Properties.class Wang700_Properties.class
 	javac w700initProps.java
 
 .SUFFIXES: .class .java
