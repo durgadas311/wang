@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang700_Simulator.java,v 1.10 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang700_Simulator.java,v 1.11 2014/01/15 16:57:36 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang700_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang700_Simulator.java,v 1.10 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: Wang700_Simulator.java,v 1.11 2014/01/15 16:57:36 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -1119,10 +1119,10 @@ if (_dbg != null) {
 		// 5ed: begin alpha-stop display-refresh delay loop... short-cut to 4ae...
 		} else if (pc == 0x5ed) {	// alpha-stop refresh routine...
 			if (trace) { // can only be if _dbg != null
-				_dbg.warp("Alpha-Stop", 0x4ae, 531);
+				_dbg.warp("Alpha-Stop", 0x4ae, 513);
 			} else {
 				next = 0x4ae;
-				cycles += 531;
+				cycles += 513;
 			}
 			refresh(false);
 		} else if (pc == 0x4af) {	// alpha-stop done... "return"...
@@ -1130,7 +1130,7 @@ if (_dbg != null) {
 				if (trace) { // can only be if _dbg != null
 					_dbg.warp("Alpha-Stop", -1, -1);
 				}
-				// observed 528385 cycles or about 0.727 second
+				// observed 528386 cycles or about 0.727 second
 				try {
 					Thread.sleep(727);
 				} catch(Exception ee) {
