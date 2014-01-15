@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: INSTALL,v 1.6 2014/01/13 17:48:17 drmiller Exp $
+# $Id: INSTALL,v 1.7 2014/01/15 23:20:04 drmiller Exp $
 
 export INSTALLPATH=${HOME}/wang700apc
 
@@ -25,8 +25,14 @@ fi
 base="wang700"
 title="Wang700"
 if [[ ( -d ~/.gnome || -d ~/.gnome2 ) && -d ~/Desktop ]]; then
-	echo "installing GNOME desktop shortcut..."
+	echo "installing GNOME desktop shortcuts..."
 	export WANG700PATH=${PWD}
+	cat ${base}.desktop.tmplt | while read line; do
+		eval "echo \"${line}\""
+	done >~/Desktop/${title}.desktop
+
+	base="wang700edit"
+	title="Wang714"
 	cat ${base}.desktop.tmplt | while read line; do
 		eval "echo \"${line}\""
 	done >~/Desktop/${title}.desktop

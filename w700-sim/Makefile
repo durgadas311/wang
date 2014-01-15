@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.40 2014/01/14 19:04:36 drmiller Exp $
+# $Id: Makefile,v 1.41 2014/01/15 23:20:04 drmiller Exp $
 
 include Makefile.ship
 
@@ -61,7 +61,7 @@ temp_dest: all $(ICNS) wang700.jar
 	cp wang700.jar run edit INSTALL UNINSTALL *.desktop.tmplt $(TMPDEST)
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
-	cp $(PNGS) $(TMPDEST)/icons
+	cp $(PNGS) ../common/icons/WangX14Edit.png $(TMPDEST)/icons
 	cp $(ROM) $(TMPDEST)
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.w7* progs/*.txt progs/*.wfl $(TMPDEST)/progs
@@ -71,20 +71,35 @@ wang700apc.tgz: temp_dest
 	rm -rf $(TMPDIR)
 
 # Need better way to estimate size of image...
-wang700apc.dmg: all icns wang700.jar
+wang700apc.dmg: all icns wang700.jar wang700setup.jar
 	rm -f $@
 	dd if=/dev/zero of=$@ bs=74k count=17
 	hformat -l WANG700APC $@
 	hmount $@
-	hmkdir Wang700.app Wang700Files
+	hmkdir Wang700.app Wang714.app Wang700Setup.app Wang700Files
 	hcd Wang700.app
 	hmkdir Contents
 	hcd Contents
 	hcopy -r wang700.plist.tmplt :Info.plist
 	hmkdir Resources MacOS
-	hcopy -r wang700.jar run edit :MacOS
+	hcopy -r wang700.jar run :MacOS
 	hcopy -r icons/wang700-*x*.icns :Resources
-	hcd MacOS
+	hcd
+	hcd Wang714.app
+	hmkdir Contents
+	hcd Contents
+	hcopy -r wang700edit.plist.tmplt :Info.plist
+	hmkdir Resources MacOS
+	hcopy -r edit :MacOS
+	hcopy -r ../common/icons/WangX14Edit-128x128.icns :Resources
+	hcd
+	hcd Wang700Setup.app
+	hmkdir Contents
+	hcd Contents
+	hcopy -r wang700setup.plist.tmplt :Info.plist
+	hmkdir Resources MacOS
+	hcopy -r wang700setup.jar init :MacOS
+	hcopy -r icons/setup.icns :Resources
 	hcd
 	hcopy -r Uninstall-wang700.sh :Uninstall-wang700
 	hcopy -r README.osx :README.html

@@ -12,8 +12,11 @@ Section "Wang 700 Simulator"
 	File "Wang700.bat"
 	File "Wang714.bat"
 	File /r "icons\*.ico"
+	File /r "..\common\icons\*.ico"
 	CreateShortCut "$DESKTOP\Wang700.lnk" "$INSTDIR\Wang700.bat" "" \
 		"$INSTDIR\wang700-48x48.ico" 0 SW_SHOWMINIMIZED
+	CreateShortCut "$DESKTOP\Wang714.lnk" "$INSTDIR\Wang714.bat" "" \
+		"$INSTDIR\WangX14Edit-128x128.ico" 0 SW_SHOWMINIMIZED
 	SetOutPath $WANG700HOME
 	File /r "progs\*.w7*"
 	File /r "progs\*.txt*"
@@ -23,6 +26,7 @@ Section "Wang 700 Simulator"
 SectionEnd
 Section "Uninstall"
 	Delete $DESKTOP\Wang700.lnk
+	Delete $DESKTOP\Wang714.lnk
 	Delete $INSTDIR\*.jar
 	Delete $INSTDIR\*.bat
 	Delete $INSTDIR\*.ico

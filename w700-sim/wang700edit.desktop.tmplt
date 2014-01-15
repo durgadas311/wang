@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+GenericName=Wang 700 Card Editor
+Name=Wang700Edit
+Exec=${WANG700PATH}/edit
+Icon=${WANG700PATH}/icons/WangX14Edit.png
+Terminal=false
+Type=Application
+Categories=Qt;Gnome;Applications;

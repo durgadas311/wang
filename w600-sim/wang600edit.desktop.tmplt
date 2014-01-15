@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+GenericName=Wang 600 Card Editor
+Name=Wang600Edit
+Exec=${WANG600PATH}/edit
+Icon=${WANG600PATH}/icons/WangX14Edit.png
+Terminal=false
+Type=Application
+Categories=Qt;Gnome;Applications;

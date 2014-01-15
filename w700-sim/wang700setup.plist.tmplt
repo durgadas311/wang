@@ -6,9 +6,9 @@
 	<array>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>java -cp wang700.jar w700initProps -g</string>
+	<string>init</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Wang 700 Programmable Calculator</string>
+	<string>Wang 700 Setup</string>
 	<key>CFBundleIconFile</key>
 	<string>setup.icns</string>
 	<key>CFBundleIdentifier</key>

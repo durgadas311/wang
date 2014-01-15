@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.28 2014/01/14 19:04:36 drmiller Exp $
+# $Id: Makefile.ship,v 1.29 2014/01/15 23:20:04 drmiller Exp $
 
 COPTS =
 
@@ -91,13 +91,17 @@ clean:
 
 jar: wang600.jar
 
-Manifest.txt:
-	echo "Main-Class: w600_fe" >$@
-
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
-wang600.jar: w600_fe.class w600_edit.class w600initProps.class Manifest.txt
+wang600.jar: w600_fe.class w600_edit.class w600initProps.class
+	echo -e "Main-Class: w600_fe\nSplashScreen-Image: icons/wang600.gif" >Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS))
+
+wang600setup.jar: w600initProps.class
+	echo "Main-Class: w600initProps" >Manifest.txt
+	jar cfm $@ Manifest.txt w600initProps.class \
+		Wang_UI.class Wang_Properties.class Wang600_Properties.class \
+		Wang_PropertyEditor.class icons/setup.icns 

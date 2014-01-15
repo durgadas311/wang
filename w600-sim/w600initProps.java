@@ -1,14 +1,15 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: w600initProps.java,v 1.2 2014/01/14 19:04:36 drmiller Exp $
+// $Id: w600initProps.java,v 1.3 2014/01/15 23:20:04 drmiller Exp $
 
 public class w600initProps
 {
-	final String ident = "$Id: w600initProps.java,v 1.2 2014/01/14 19:04:36 drmiller Exp $";
+	final String ident = "$Id: w600initProps.java,v 1.3 2014/01/15 23:20:04 drmiller Exp $";
 
 	public static void main(String[] args) {
 		boolean gui = (args.length > 0 && args[0].compareTo("-g") == 0);
 		if (gui) {
-			Wang_UI.Initialize();
+			// only needed if we use runCommand()...
+			// Wang_UI.Initialize();
 		}
 		String title = "Wang 600 Setup";
 		String err = null;

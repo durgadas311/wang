@@ -1,4 +1,9 @@
 <HTML>
+<P>The "Setup" item is intended to be run once, before installation/upgrade.
+It creates or updates the preferences file using defaults for new properties.
+Obsolete and existing properties are not changed, even if the old property
+setting might not be valid.
+
 <P>You may "drag-n-drop" the program icon to your desktop or dock.
 
 <P>You may also drag-n-drop the "Wang600Files" folder to your home directory,

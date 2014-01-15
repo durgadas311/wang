@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: w600_edit.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
+// $Id: w600_edit.java,v 1.6 2014/01/15 23:20:04 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,9 +9,16 @@ import java.io.*;
 
 public class w600_edit
 {
-	final String ident = "$Id: w600_edit.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w600_edit.java,v 1.6 2014/01/15 23:20:04 drmiller Exp $";
 
 	public static void main(String[] args) {
+		// only needed if we use runCommand()...
+		// Wang_UI.Initialize();
+
+		java.net.URL url = w600_edit.class.getResource("icons/WangX14Edit.png");
+		Image img = Toolkit.getDefaultToolkit().getImage(url);
+		Wang_UI.setIcon(new ImageIcon(img));
+
 		Wang_UI.setProperties(new Wang600_Properties());
 		//Wang_UI.setIcon(new ImageIcon(img));
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
@@ -19,6 +26,7 @@ public class w600_edit
 
 		JFrame frame = new JFrame("Wang 600-Series Card Editor");
 		frame.setLayout(new FlowLayout());
+		frame.setIconImage(img);
 
 		Wang_MarkSenseCard card;
 		Wang_InstructionDecoder deco = new Wang600_InstrDecoder();
@@ -137,7 +145,7 @@ class Wang614_Help extends JComponent
 		java.net.URL url = this.getClass().getResource("icons/wang614.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 614 Mark Sense Card Editor<BR>"+
-			"$Revision: 1.5 $ $Date: 2014/01/14 21:53:51 $<BR>"+
+			"$Revision: 1.6 $ $Date: 2014/01/15 23:20:04 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+

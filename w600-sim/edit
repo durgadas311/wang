@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: edit,v 1.2 2013/12/31 23:52:00 drmiller Exp $
+# $Id: edit,v 1.3 2014/01/15 23:20:04 drmiller Exp $
 
 pgm=${0}
 if [[ -L ${pgm} ]]; then
@@ -7,4 +7,10 @@ if [[ -L ${pgm} ]]; then
 fi
 cd ${pgm%/*}
 
-exec java -cp wang600.jar w600_edit "${@}"
+path="wang600.jar"
+macos="../../../Wang600.app/Contents/MacOS"
+if [[ ! -f ${path} && -f ${macos}/${path} ]]; then
+	path="${macos}/${path}"
+fi
+
+exec java -cp "${path}" w600_edit "${@}"

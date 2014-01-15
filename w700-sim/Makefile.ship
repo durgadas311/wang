@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.11 2014/01/14 19:04:36 drmiller Exp $
+# $Id: Makefile.ship,v 1.12 2014/01/15 23:20:04 drmiller Exp $
 
 COPTS =
 
@@ -95,13 +95,17 @@ clean:
 
 jar: wang700.jar
 
-Manifest.txt:
-	echo "Main-Class: w700_fe" >$@
-
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
-wang700.jar: w700_fe.class w700_edit.class w700initProps.class Manifest.txt $(ROM)
+wang700.jar: w700_fe.class w700_edit.class w700initProps.class $(ROM)
+	echo -e "Main-Class: w700_fe\nSplashScreen-Image: icons/wang700.gif" >Manifest.txt
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS))
+
+wang700setup.jar: w700initProps.class
+	echo "Main-Class: w700initProps" >Manifest.txt
+	jar cfm $@ Manifest.txt w700initProps.class \
+		Wang_UI.class Wang_Properties.class Wang700_Properties.class \
+		Wang_PropertyEditor.class icons/setup.icns

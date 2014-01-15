@@ -6,21 +6,21 @@
 	<array>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>init</string>
+	<string>edit</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Wang 600 Setup</string>
+	<string>Wang 700 Card Editor</string>
 	<key>CFBundleIconFile</key>
-	<string>setup.icns</string>
+	<string>WangX14Edit-128x128.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.durgadas.wang600</string>
+	<string>com.durgadas.wang700</string>
 	<key>CFBundleName</key>
-	<string>Wang600Setup</string>
+	<string>Wang700Edit</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1</string>
 	<key>CFBundleSignature</key>
-	<string>WNG6</string>
+	<string>WNG7</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 </dict>

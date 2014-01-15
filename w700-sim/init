@@ -1,0 +1,15 @@
+#!/bin/sh
+# $Id: init,v 1.1 2014/01/15 23:20:05 drmiller Exp $
+# Only used for MAC OSX - others don't have wang700setup.jar
+
+if [[ ${#} -eq 0 ]]; then
+	set -- -g
+fi
+
+pgm=${0}
+if [[ -L ${pgm} ]]; then
+        pgm=$(readlink ${pgm})
+fi
+cd ${pgm%/*}
+
+exec java -jar wang700setup.jar "${@}"

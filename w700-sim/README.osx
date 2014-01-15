@@ -1,4 +1,9 @@
 <HTML>
+<P>The "Setup" item is intended to be run once, before installation/upgrade.
+It creates or updates the preferences file using defaults for new properties.
+Obsolete and existing properties are not changed, even if the old property
+setting might not be valid.
+
 <P>You may "drag-n-drop" the program icon to your desktop or dock.
 
 <P>You may also drag-n-drop the "Wang700Files" folder to your home directory,
@@ -22,6 +27,4 @@ If you can acquire one, place it in
 ~/Desktop/Wang700.app/Contents/MacOS/ROM720C.txt (ascii)
 or
 ~/Desktop/Wang700.app/Contents/MacOS/wang700.rom (binary).
-As an alternative, you can connect to a server that runs the simulator back-end.
-Edit the environment variables WANG700_HOST and WANG700_PORT as needed.
 </HTML>
