@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.19 2014/01/13 14:13:42 drmiller Exp $
+# $Id: Make.rules.user,v 1.20 2014/01/15 15:54:50 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -17,13 +17,10 @@ W6XLIBS =
 W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
 W7CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
 W6OLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(O6_LDSCRIPT) -Wl,-q $(W6LDADD)
-W7OLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(O7_LDSCRIPT) -Wl,-q $(W7LDADD)
 
 T7_LDSCRIPT = wang700raw.ld
 T6_LDSCRIPT = wang600raw.ld
 X_LDSCRIPT = wang600rawrom.ld
-O7_LDSCRIPT = wang700elf.ld
-O6_LDSCRIPT = wang600elf.ld
 
 OBJCOPY = objcopy
 READELF = readelf
