@@ -1,7 +1,11 @@
 #!/bin/sh
-# $Id: init,v 1.1 2014/01/15 23:20:05 drmiller Exp $
+# $Id: init,v 1.2 2014/01/16 01:03:48 drmiller Exp $
 # Only used for MAC OSX - others don't have wang700setup.jar
 
+# Strip off args from App Open - yuk
+while [[ ${1} == -p* ]]; do
+	shift
+done
 if [[ ${#} -eq 0 ]]; then
 	set -- -g
 fi
