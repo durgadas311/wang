@@ -1,11 +1,13 @@
 #!/bin/sh
-# $Id: Uninstall-wang700.sh,v 1.1 2012/02/19 20:37:18 drmiller Exp $
+# $Id: Uninstall-wang700.sh,v 1.2 2014/01/16 13:00:08 drmiller Exp $
 
 # paths might contain blanks!
 cd "${HOME}"
 
-if [[ -d "${HOME}/Desktop/Wang700.app" ]]; then
-	echo "Removing Wang700 App..."
-	chmod -R u+w "${HOME}/Desktop/Wang700.app"
-	rm -rf "${HOME}/Desktop/Wang700.app"
-fi
+for app in Wang700.app Wang714.app; do
+	if [[ -d "${HOME}/Desktop/${app}" ]]; then
+		echo "Removing ${app}..."
+		chmod -R u+w "${HOME}/Desktop/${app}"
+		rm -rf "${HOME}/Desktop/${app}"
+	fi
+done

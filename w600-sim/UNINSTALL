@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: UNINSTALL,v 1.1 2012/02/19 01:56:46 drmiller Exp $
+# $Id: UNINSTALL,v 1.2 2014/01/16 13:00:08 drmiller Exp $
 
 export INSTALLPATH="${HOME}/wang600apc"
 
@@ -8,7 +8,9 @@ cd ${HOME}
 echo "Removing ${INSTALLPATH}..."
 rm -rf "${INSTALLPATH}"
 
-if [[ -f "${HOME}/Desktop/Wang600.desktop" ]]; then
-	echo "Removing GNOME desktop Wang600 shortcut..."
-	rm -f "${HOME}/Desktop/Wang600.desktop"
-fi
+for app in Wang600.desktop Wang614.desktop; do
+	if [[ -d "${HOME}/Desktop/${app}" ]]; then
+		echo "Removing GNOME shortcut ${app}..."
+		rm -rf "${HOME}/Desktop/${app}"
+	fi
+done
