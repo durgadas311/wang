@@ -1,8 +1,6 @@
-# $Id: Makefile.ship,v 1.29 2014/01/15 23:20:04 drmiller Exp $
+# $Id: Makefile.ship,v 1.30 2014/01/17 16:36:46 drmiller Exp $
 
 COPTS =
-
-VPATH = ../common
 
 ROM = wang600.rom
 
@@ -10,6 +8,7 @@ SPCL = plotter_chrgen.dat
 
 # Order is significant, until we setup dependencies
 COMMON_CLASSES = \
+		Wang_SplashScreen.class \
 		SuffFileFilter.class \
 		SuffFileChooser.class \
 		Wang_Colors.class \
@@ -78,13 +77,16 @@ w600initProps.class: w600initProps.java \
 		Wang_UI.class Wang_Properties.class Wang600_Properties.class
 	javac w600initProps.java
 
-.SUFFIXES: .class .java
+.PRECIOUS: %.class ../common/%.class
 
-.java.class:
+../common/%.class: ../common/%.java
 	javac $?
-	if [[ "$?" == "../common/"* ]]; then \
-		mv ../common/$(basename $@)*.class .; \
-	fi
+
+%.class: %.java
+	javac $?
+
+%.class: ../common/%.class
+	cp -v ../common/$**.class .
 
 clean:
 	rm -f *.o

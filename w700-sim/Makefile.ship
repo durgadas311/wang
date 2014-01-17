@@ -1,8 +1,6 @@
-# $Id: Makefile.ship,v 1.12 2014/01/15 23:20:04 drmiller Exp $
+# $Id: Makefile.ship,v 1.13 2014/01/17 16:36:46 drmiller Exp $
 
 COPTS =
-
-VPATH = ../common
 
 CFLAGS += -D__wang700__ -I../common -I.
 
@@ -15,6 +13,7 @@ ROM = wang720c.rom
 SPCL = plotter_chrgen.dat
 
 COMMON_CLASSES = \
+		Wang_SplashScreen.class \
 		SuffFileFilter.class \
 		SuffFileChooser.class \
 		Wang_Colors.class \
@@ -82,13 +81,16 @@ w700initProps.class: w700initProps.java \
 		Wang_UI.class Wang_Properties.class Wang700_Properties.class
 	javac w700initProps.java
 
-.SUFFIXES: .class .java
+.PRECIOUS: %.class ../common/%.class
 
-.java.class:
+../common/%.class: ../common/%.java
 	javac $?
-	if [[ "$?" == "../common/"* ]]; then \
-		mv ../common/$(basename $@)*.class .; \
-	fi
+
+%.class: %.java
+	javac $?
+
+%.class: ../common/%.class
+	cp -v ../common/$**.class .
 
 clean:
 	rm -f *.o
