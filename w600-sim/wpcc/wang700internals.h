@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang700internals_h__
 #define __wpcc_wang700internals_h__
 
-.ident "Wang 700 Compiler over GCC $Revision: 1.14 $ "
+.ident "Wang 700 Compiler over GCC $Revision: 1.15 $ "
 
 .section .wang700code, "a"
 	.include "wang700opcodes.s"
@@ -42,10 +42,10 @@
 					.byte 0;	\
 				.popsection
 
-#define _longregs(reg,num)	.pushsection .wang700regs,1,"a"; \
+#define _longregs(reg,numregs)	.pushsection .wang700regs,1,"a"; \
 					.type _longreg_ ##reg  STT_OBJECT;	\
 					.global _longreg_ ##reg ;	\
-					.rept (num-1);		\
+					.rept (numregs-1);		\
 					.byte 0;	\
 					.endr;	\
 					.set _longreg_ ##reg ,longreg_base+(longreg_base-.)-1; \
@@ -59,6 +59,40 @@
 					.subsection 0; \
 					.type _longreg_ ##reg  STT_OBJECT; \
 					.global _longreg_ ##reg ; \
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.)-1; \
+					.byte 0;	\
+				.section .wang700data,"a"; \
+					.byte (( b15 ) << 4) | ( b14 );	\
+					.byte (( b13 ) << 4) | ( b12 );	\
+					.byte (( b11 ) << 4) | ( b10 );	\
+					.byte (( b9 ) << 4) | ( b8 );	\
+					.byte (( b7 ) << 4) | ( b6 );	\
+					.byte (( b5 ) << 4) | ( b4 );	\
+					.byte (( b3 ) << 4) | ( b2 );	\
+					.byte (( b1 ) << 4) | ( b0 );	\
+				.popsection
+
+#define _llongreg(reg)		.pushsection .wang700regs,1,"a"; \
+					.type _longreg_ ##reg STT_OBJECT;	\
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.)-1; \
+					.byte 0;	\
+				.popsection
+
+#define _llongregs(reg,numregs)	.pushsection .wang700regs,1,"a"; \
+					.type _longreg_ ##reg  STT_OBJECT;	\
+					.rept (numregs-1);		\
+					.byte 0;	\
+					.endr;	\
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.)-1; \
+					.byte 0;	\
+				.popsection
+
+// Initialized registers are "allocated" here. This data must be post-processed
+// into viable register images, as the Wang 700 interleaves pairs of registers.
+#define _lregdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
+				.pushsection .wang700regs,"a"; \
+					.subsection 0; \
+					.type _longreg_ ##reg  STT_OBJECT; \
 					.set _longreg_ ##reg ,longreg_base+(longreg_base-.)-1; \
 					.byte 0;	\
 				.section .wang700data,"a"; \
@@ -146,29 +180,38 @@
 #define FORDERED(label, tag)	FEXTERNAL(label); \
 				.print #label; .print #tag
 
+#define REG_EXTERNAL(reg)	\
+				.pushsection .wang700regs,"a"; \
+					.type _longreg_ ##reg  STT_OBJECT; \
+					.global _longreg_ ##reg ; \
+				.popsection
+
 // Does not prevent conflicts. Programmer must ensure "reg" has no
 // conflicting uses (including program code) in the same program.
 // Does not allocarte any space, simply sets up reference to the register
 // number by the given label.
-#define RES_REG(label,reg)	\
-					.type _longreg_ ##label STT_OBJECT; \
-					.global _longreg_ ##label ; \
-					.set _longreg_ ##label , reg
+#define RES_REG(reg,regnum)	\
+					.type _longreg_ ##reg STT_OBJECT; \
+					.global _longreg_ ##reg ; \
+					.set _longreg_ ##reg , regnum
 
 // Reserve an un-initialize long register. This prevents conflicts
 // between all UREG() definitions, and will not overwrite program code.
 // However, RES_REG() can still conflict. This actually allocates "empty" space
 // for the register data.
 #define UREG(name)		_longreg(name)
+#define LUREG(name)		_llongreg(name)
 
 #define UREGS(name, num)	_longregs(name,num)
+#define LUREGS(name, num)	_llongregs(name,num)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
-#define ENTER(num)		.error "run w7cpp preprocessor for ENTER()"
-#define IREG_DATA(name,val)	.error "run w7cpp preprocessor for IREG_DATA()"
-#define ALPHA_STRING(str)	.error "run w7cpp preprocessor for ALPHA_STRING()"
-#define ALPHA_PLOT(str)		.error "run w7cpp preprocessor for ALPHA_PLOT()"
-#define ALPHA_TTY(str)		.error "run w7cpp preprocessor for ALPHA_TTY()"
+#define ENTER(num)		.error "run wpcpp preprocessor for ENTER()"
+#define IREG_DATA(reg,val)	.error "run wpcpp preprocessor for IREG_DATA()"
+#define LIREG_DATA(reg,val)	.error "run wpcpp preprocessor for LIREG_DATA()"
+#define ALPHA_STRING(str)	.error "run wpcpp preprocessor for ALPHA_STRING()"
+#define ALPHA_PLOT(str)		.error "run wpcpp preprocessor for ALPHA_PLOT()"
+#define ALPHA_TTY(str)		.error "run wpcpp preprocessor for ALPHA_TTY()"
 
 // Enter into X the register number associated with the symbol <label>
 #define ENTER_REGNO(name)	_bytecode(0xed); \

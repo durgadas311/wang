@@ -59,10 +59,22 @@ register assignment. These are:
 		This is used to force inclusion of
 		the module containing the specified label.
 
+<DT>REG_EXTERNAL(name)<DD>Declares that 'name' is an allocated register that exists
+		in a different module.
+		This is used to force inclusion of
+		the module containing (allocating) the specified register.
+
 <DT>UREG(name)<DD>Declares that 'name' is an extended register that is not
 		initialized as part of the program load. The register will
-		be assigned from unused program steps after the end
+		be assigned (allocated) from unused program steps after the end
 		of the program code. See also the IREG_DATA() pre-processed macro.
+
+<DT>LUREG(name)<DD>Declares that 'name' is a local extended register that is not
+		initialized as part of the program load. The register will
+		be assigned (allocated) from unused program steps after the end
+		of the program code. See also the LIREG_DATA() pre-processed macro.
+		Note, the allocated space (program steps) are not re-used by
+		any other module, and the 'name' is not visible in any other module.
 
 <DT>ENTER_LAST_REGNO()<DD>
 		Insert E0-E9 codes to enter the number of the last
@@ -186,6 +198,14 @@ expression of text into the Wang encoding.
 		the program from tape. UREG (un-initialized registers) are
 		allocated after the END PROG and are not part of the program
 		image.
+
+<P>
+<DT>LIREG_DATA(reg,"string")
+<DT>LIREG_DATA(reg,"string")
+<DD>		Similar to above versions, allocates initialized registers.
+		However, 'reg' is local to the source module.
+		Note, the allocated space (program steps) are not re-used by
+		any other module, and the 'name' is not visible in any other module.
 </DL>
 
 <P>Note, register data can prevent proper operation of a SEARCH end_prog
@@ -194,6 +214,19 @@ expression of text into the Wang encoding.
 	which is a value less-likely found in a register.
 
 <P>Other directives may be described under their respective architectures.
+
+<H3>Memory Layout:</H3>
+
+<P>Program memory is used as follows:
+
+<P><TABLE BORDER WIDTH=100>
+<TR><TD ALIGN=CENTER>Program steps from main and linked modules</TD></TR>
+<TR><TD ALIGN=CENTER>Initialized registers (aligned as required) from *IREG_DATA()</TD></TR>
+<TR><TD ALIGN=CENTER>END_PROG postample</TD></TR>
+<TR><TD ALIGN=CENTER>Uninitialized registers (aligned as required) from *UREG()</TD></TR>
+<TR><TD ALIGN=CENTER>(unused program steps - might have been assigned with RES_REG())</TD></TR>
+<TR><TD ALIGN=CENTER>(Wang 600: Dedicated registers, 00-15)</TD></TR>
+</TABLE>
 
 <H3>Compiling:</H3>
 

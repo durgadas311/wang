@@ -7,7 +7,7 @@
 #ifndef __wpcc_wang600internals_h__
 #define __wpcc_wang600internals_h__
 
-.ident "Wang 600 Compiler over GCC $Revision: 1.17 $ "
+.ident "Wang 600 Compiler over GCC $Revision: 1.18 $ "
 
 .section .wang600code, "a";
 	.include "wang600opcodes.s";
@@ -27,7 +27,7 @@
 #define _bytecode(__byte)	.byte (__byte); _shadow_code(1)
 
 #define _opcode(op)		.byte (_op_ ##op ); _shadow_code(1)
-#define _opreg(op,reg)		.byte (_op_ ##op ##reg ); _shadow_code(1)
+#define _opreg(op,regnum)	.byte (_op_ ##op ##regnum ); _shadow_code(1)
 
 #define _oplabel(prefix,label)	.byte ( ##prefix ##label ),( ##label ); \
 					_shadow_code(2)
@@ -39,10 +39,10 @@
 					.byte 0;	\
 				.popsection
 
-#define _longregs(reg,num)	.pushsection .wang600regs,1,"a"; \
+#define _longregs(reg,numregs)	.pushsection .wang600regs,1,"a"; \
 					.type _longreg_ ##reg STT_OBJECT;	\
 					.global _longreg_ ##reg ;	\
-					.rept (num-1);			\
+					.rept (numregs-1);			\
 					.byte 0;			\
 					.endr;				\
 					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
@@ -54,6 +54,39 @@
 					.subsection 0; \
 					.type _longreg_ ##reg STT_OBJECT; \
 					.global _longreg_ ##reg ; \
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
+					.byte 0;	\
+				.section .wang600data,"a"; \
+					.align 8;		\
+					.byte ((b15) << 4) | (b14);	\
+					.byte ((b13) << 4) | (b12);	\
+					.byte ((b11) << 4) | (b10);	\
+					.byte ((b9) << 4) | (b8);	\
+					.byte ((b7) << 4) | (b6);	\
+					.byte ((b5) << 4) | (b4);	\
+					.byte ((b3) << 4) | (b2);	\
+					.byte ((b1) << 4) | (b0);	\
+				.popsection
+
+#define _llongreg(reg)		.pushsection .wang600regs,1,"a"; \
+					.type _longreg_ ##reg STT_OBJECT;	\
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
+					.byte 0;	\
+				.popsection
+
+#define _llongregs(reg,numregs)	.pushsection .wang600regs,1,"a"; \
+					.type _longreg_ ##reg STT_OBJECT;	\
+					.rept (numregs-1);			\
+					.byte 0;			\
+					.endr;				\
+					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
+					.byte 0;	\
+				.popsection
+
+#define _lregdata(reg,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15)	\
+				.pushsection .wang600regs,"a"; \
+					.subsection 0; \
+					.type _longreg_ ##reg STT_OBJECT; \
 					.set _longreg_ ##reg ,longreg_base+(longreg_base-.); \
 					.byte 0;	\
 				.section .wang600data,"a"; \
@@ -223,23 +256,32 @@
 					_subr_ ##flabel :  .byte 0; \
 				.popsection
 
-#define RES_REG(label,reg)	\
-					.type _longreg_ ##label STT_OBJECT; \
-					.global _longreg_ ##label; \
-					.set _longreg_ ##label , reg
+#define REG_EXTERNAL(reg)	\
+				.pushsection .wang600regs,"a"; \
+					.type _longreg_ ##reg  STT_OBJECT; \
+					.global _longreg_ ##reg ; \
+				.popsection
+
+#define RES_REG(reg,regnum)	\
+					.type _longreg_ ##reg STT_OBJECT; \
+					.global _longreg_ ##reg; \
+					.set _longreg_ ##reg , regnum
 
 // Reserve an un-initialize long register
 #define UREG(name)		_longreg(name)
+#define LUREG(name)		_llongreg(name)
 
 // Reserve an array of "num" longregs
 #define UREGS(name,num)		_longregs(name,num)
+#define LUREGS(name,num)	_llongregs(name,num)
 
 /* These should be pre-rpocessed and never exist when gcc invoked */
-#define ENTER(num)		.error "run w6cpp preprocessor for ENTER()"
-#define IREG_DATA(reg,num)	.error "run w6cpp preprocessor for IREG_DATA()"
-#define ALPHA_STRING(str)	.error "run w6cpp preprocessor for ALPHA_STRING()"
-#define ALPHA_PLOT(str)		.error "run w6cpp preprocessor for ALPHA_PLOT()"
-#define ALPHA_TTY(str)		.error "run w6cpp preprocessor for ALPHA_TTY()"
+#define ENTER(num)		.error "run wpcpp preprocessor for ENTER()"
+#define IREG_DATA(reg,val)	.error "run wpcpp preprocessor for IREG_DATA()"
+#define LIREG_DATA(reg,val)	.error "run wpcpp preprocessor for LIREG_DATA()"
+#define ALPHA_STRING(str)	.error "run wpcpp preprocessor for ALPHA_STRING()"
+#define ALPHA_PLOT(str)		.error "run wpcpp preprocessor for ALPHA_PLOT()"
+#define ALPHA_TTY(str)		.error "run wpcpp preprocessor for ALPHA_TTY()"
 
 // This forces us to post-process Wang600 programs now...
 #define ENTER_REGNO(name)	_bytecode(0xf8); \

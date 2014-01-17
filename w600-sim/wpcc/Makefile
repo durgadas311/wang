@@ -5,7 +5,8 @@ BINS = wpcpp w6dis w6lst w6data2tape w6verify w6ldfix \
 	symbols2labels
 INCS = wang600.h wang600internals.h wang600opcodes.s \
 	wang700.h wang700internals.h wang700opcodes.s
-LDS = wang600raw.ld wang600rawrom.ld wang700raw.ld
+LDS = wang600raw.ld wang600rawrom.ld wang700raw.ld \
+	fnordering1.ld fnordering2.ld
 
 all: $(BINS)
 

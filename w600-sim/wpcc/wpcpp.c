@@ -75,7 +75,7 @@ void do_enter(char *s) {
 	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 }
 
-void do_data(char *l, char *s) {
+void do_data(char *l, char *s, int global) {
 	int x;
 	uint8_t reg[16];
 
@@ -90,7 +90,11 @@ void do_data(char *l, char *s) {
 	if (x != 0) {
 		return;
 	}
-	printf("\t_regdata(%s", l);
+	if (global) {
+		printf("\t_regdata(%s", l);
+	} else {
+		printf("\t_lregdata(%s", l);
+	}
 	for (x = 0; x < 16; ++x) {
 		printf(",%d", reg[x]);
 	}
@@ -98,9 +102,13 @@ void do_data(char *l, char *s) {
 	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
 }
 
-void do_data_string(char *l, char *s) {
+void do_data_string(char *l, char *s, int global) {
 	int x;
-	printf("\t_regdata(%s", l);
+	if (global) {
+		printf("\t_regdata(%s", l);
+	} else {
+		printf("\t_lregdata(%s", l);
+	}
 	x = 0;
 	while (*s && x < 16) {
 		int n = 0;
@@ -273,7 +281,7 @@ int main(int argc, char **argv) {
 			if (__series__ == 7) {
 				plot_bit = 0x80;	// value for Wang 700...
 			}
-			continue;
+			goto line_ok;
 		}
 		x = sscanf(t, "ALPHA_STRING(\"%[^\"]\")", str);
 		if (x == 1) {
@@ -302,15 +310,28 @@ int main(int argc, char **argv) {
 		x = sscanf(t, "IREG_DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
 		if (x == 2) {
 			if (__series__ < 0) goto no_arch;
-			do_data_string(lab, str);
+			do_data_string(lab, str, 1);
 			continue;
 		}
 		x = sscanf(t, "IREG_DATA(%[^,],%[^)])", lab, str);
 		if (x == 2) {
 			if (__series__ < 0) goto no_arch;
-			do_data(lab, str);
+			do_data(lab, str, 1);
 			continue;
 		}
+		x = sscanf(t, "LIREG_DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
+		if (x == 2) {
+			if (__series__ < 0) goto no_arch;
+			do_data_string(lab, str, 0);
+			continue;
+		}
+		x = sscanf(t, "LIREG_DATA(%[^,],%[^)])", lab, str);
+		if (x == 2) {
+			if (__series__ < 0) goto no_arch;
+			do_data(lab, str, 0);
+			continue;
+		}
+line_ok:
 		printf(buf);
 	}
 	return __error__;
