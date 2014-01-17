@@ -10,9 +10,20 @@ long verify_prog(uint8_t *buf, int len) {
 	uint8_t *s = buf;
 	int n = len;
 	long vp = 0;
+	int two_step = 0;
 	while (n > 0) {
+		// must ignore END_PROG except at very end...
 		uint8_t c = *s;
-		if (c == 0x5c) break;	// 700 does NOT count END PROG
+		if (two_step) {
+			if (two_step < 2 || (c & 0x70) >= 0x40) {
+				two_step = 0;
+			}
+		} else if (c == 0x5c) {
+			break;	// 700 does NOT count END PROG
+		} else if ((c & 0x70) == 0x40) {
+			// might be WRITE_ALPHA multi-step
+			two_step = 1 + (c == 0x4c);
+		}
 		uint8_t a = (c >> 4) & 0x0f;
 		uint8_t b = c & 0x0f;
 		vp += a + b;

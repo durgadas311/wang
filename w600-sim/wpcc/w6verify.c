@@ -17,6 +17,7 @@ long verify_prog(uint8_t *buf, int len) {
 		vp += a + b;
 		++s;
 		--n;
+		// 600 blindly stops after first END PROG regardless of context
 		if (c == 0x9e) break;
 	}
 	return vp;
