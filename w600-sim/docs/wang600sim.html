@@ -1,5 +1,5 @@
 <HTML>
-<!-- $Id: wang600sim.html,v 1.30 2014/01/14 17:05:50 drmiller Exp $ -->
+<!-- $Id: wang600sim.html,v 1.31 2014/01/17 18:20:03 drmiller Exp $ -->
 
 <H2>Running Environment</H2>
 
@@ -166,7 +166,7 @@ Initially, the default register is 15 (LEFT) and will not be highlighted.
 
 <H3>Display</H3>
 
-By default, the display uses a TrueType font designed from the Panaplex 9-segment display
+<P>By default, the display uses a TrueType font designed from the Panaplex 9-segment display
 array used in the Wang 600. The font is named "Panaplex9seg.ttf".
 An alternate font, "NixieZM1336.ttf", is also present which is a
 facsimily of the ZM1336 Nixie tubes used in the Wang 500 and
@@ -223,7 +223,7 @@ Model 630 Disk images have the suffix <B>.w6d</B>.
 
 <H3>Tape Operation</H3>
 
-The tape drive uses files on the local system. These files have raw
+<P>The tape drive uses files on the local system. These files have raw
 binary program codes only.  The files may have multiple program images,
 each terminated by an END PROG code, but the preferred method of operation
 is to put only one program image in a file.
@@ -242,7 +242,7 @@ will have only one program image, these are not normally used.
 
 <A ID="model600P"><H3>Printer Operation</H3></A>
 
-Like the original hardware, the printer must be "On" in order to
+<P>Like the original hardware, the printer must be "On" in order to
 print. In Run mode, attempts to print (or List Program, etc) will hang
 with a blank display (just like the original hardware) until either the
 printer is turned on or PRIME is pressed. Programs that
@@ -263,7 +263,7 @@ in four columns of 40 lines each, per page.
 
 <A ID="model600X"><H3>Expansion ROM</H3></A>
 
-The expansion ROMs are handled as files, similar to the Tape unit.
+<P>The expansion ROMs are handled as files, similar to the Tape unit.
 Selecting the ROM item from the "Devices" menu will pop-up a file
 selection dialog, the chosen file will be downloaded to the simulator
 and placed in the ROM memory. Up to 2048 steps may be loaded.
@@ -273,7 +273,7 @@ address, etc.
 
 <A ID="model601"><H3>601 OutputWriter</H3></A>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output only, with standard spacing.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
@@ -284,7 +284,7 @@ There is also a "Typewriter" menu will eventually provide setup of paper size, m
 
 <A ID="model602"><H3>602 Plotting OutputWriter</H3></A>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output along with micro-spacing which allows plotting.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
@@ -296,7 +296,14 @@ the carriage, and will eventually provide setup of paper size, margins, etc.
 
 <A ID="model611"><H3>611 Input/OutputWriter</H3></A>
 
-This peripheral was based on a modified IBM Selectric typewriter.
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
+</TABLE>
+
+<P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output as well as input from the keyboard.
 The device is "connected" through the "Devices"/"Output Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
@@ -347,6 +354,14 @@ Unwritten portions of the file will read back as zero.
 
 <A ID="model603"><H3>603 Paper Tape Reader</H3></A>
 
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
+<TR><TD COLSPAN=2>End Of Tape is signaled by S&amp;R&nbsp;00 and GO</TD></TR>
+</TABLE>
+
 <P>This device is referred to in Wang documentation as the "Paper Tape Editor".
 It can extract numeric data from "standard" 8-level ASCII paper tapes.
 The original device apparently was capable of printing the paper tape contents
@@ -373,6 +388,12 @@ the f(0) would RETURN to the stopped state and the program would not continue
 without the GO).
 
 <A ID="model605"><H3>605 Micro Face</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
+</TABLE>
 
 <P>This device was a general-purpose electronic interface to any hardware that
 could generate BCD data, enabling real-time sampling of external data.
@@ -408,6 +429,24 @@ equivalents on Windows (CYGWIN is preferred). These default commands are:
 <P>"Devices" (commands) are setup through the "605 Micro Face" item in the "Devices" menu.
 
 <A ID="model607"><H3>606/607 Teletype</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
+<TR><TD COLSPAN=2>Run Mode emits X&nbsp;OFF (Stop Tape) when exiting commands</TD></TR>
+</TABLE>
 
 <P>This peripheral consisted of Model 607 components that provided an ASCII/TTY/Remote
 interface to the calculator and an unmodified ASR33 Teletype designated Model 606.
@@ -457,7 +496,14 @@ are used (with the exception of "Canceling a Save" does not alter the punch imag
 
 <A ID="model614"><H3>614 Mark-Sense Card Reader</H3></A>
 
-While support for the actual card reader is pending, there is
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 04&nbsp;08</TD><TD>Read cards in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;08</TD><TD>Read cards in Learn Mode</TD></TR>
+</TABLE>
+
+<P>While support for the actual card reader is pending, there is
 a novelty program that allows one to "edit" a program image
 in a similar way that a stack of mark-sense cards were edited.
 This is provided in the wang600.jar file, and may be run
@@ -467,7 +513,7 @@ in the package directory (typically HOME/wang600apc).
 
 <H3>Simulator Internals</H3>
 
-The original Wang 600 microcode was constantly executing instructions
+<P>The original Wang 600 microcode was constantly executing instructions
 the entire time that the calculator was turned on. The simulator cannot
 afford to consume 100% CPU on the host system. One major area of
 consumption is the display refresh routines. To minimize system load,

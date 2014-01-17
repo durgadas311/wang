@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.15 2014/01/14 17:05:50 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.16 2014/01/17 18:20:03 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -156,7 +156,7 @@ Initially, the default register is Y and no key will not be highlighted.
 
 <H3>Display</H3>
 
-By default, the display uses a "Nixie Tubes" font,
+<P>By default, the display uses a "Nixie Tubes" font,
 named "NixieZM1336.ttf", designed from the
 ZM1336 Nixie tubes used in the Wang 700 Series.
 An alternate font, "Panaplex9seg.ttf", s also present which is a
@@ -207,7 +207,7 @@ Model 730 Disk images have the suffix <B>.w7d</B>.
 
 <H3>Tape Operation</H3>
 
-The tape drive uses files on the local system. These files have raw
+<P>The tape drive uses files on the local system. These files have raw
 binary program codes only.  The files may have multiple program images,
 each terminated by an END PROG code, but the preferred method of operation
 is to put only one program image in a file.
@@ -249,6 +249,13 @@ There is also a "Typewriter" menu that provides a "Home" function for
 the carriage, and will eventually provide setup of paper size, margins, etc.
 
 <A ID="model711"><H3>711 Input/OutputWriter</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
+</TABLE>
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output as well as input from the keyboard.
@@ -301,6 +308,14 @@ Unwritten portions of the file will read back as zero.
 
 <A ID="model703"><H3>703 Paper Tape Reader</H3></A>
 
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
+<TR><TD COLSPAN=2>End Of Tape is signaled by S&amp;R&nbsp;00 and GO</TD></TR>
+</TABLE>
+
 <P>This device is referred to in Wang documentation as the "Paper Tape Editor".
 It can extract numeric data from "standard" 8-level ASCII paper tapes.
 The original device apparently was capable of printing the paper tape contents
@@ -327,6 +342,12 @@ the SR&nbsp;0000 would RETURN to the stopped state and the program would not con
 without the GO).
 
 <A ID="model705"><H3>705 Micro Face</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
+</TABLE>
 
 <P>This device was a general-purpose electronic interface to any hardware that
 could generate BCD data, enabling real-time sampling of external data.
@@ -362,6 +383,24 @@ equivalents on Windows (CYGWIN is preferred). These default commands are:
 <P>"Devices" (commands) are setup through the "705 Micro Face" item in the "Devices" menu.
 
 <A ID="model707"><H3>706/707 Teletype</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp1 15&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 15&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
+<TR><TD COLSPAN=2>Run Mode emits X&nbsp;OFF (Stop Tape) when exiting commands</TD></TR>
+</TABLE>
 
 <P>This peripheral consisted of Model 707 components that provided an ASCII/TTY/Remote
 interface to the calculator and an unmodified ASR33 Teletype designated Model 706.
@@ -411,7 +450,14 @@ are used (with the exception of "Canceling a Save" does not alter the punch imag
 
 <A ID="model714"><H3>714 Mark-Sense Card Reader</H3></A>
 
-While support for the actual card reader is pending, there is
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp1 04&nbsp;08</TD><TD>Read cards in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp2 04&nbsp;08</TD><TD>Read cards in Learn Mode</TD></TR>
+</TABLE>
+
+<P>While support for the actual card reader is pending, there is
 a novelty program that allows one to "edit" a program image
 in a similar way that a stack of mark-sense cards were edited. 
 This is provided in the wang700.jar file, and may be run
@@ -421,7 +467,7 @@ in the package directory (typically HOME/wang700apc).
 
 <H3>Simulator Internals</H3>
 
-The original Wang 700 microcode was constantly executing instructions
+<P>The original Wang 700 microcode was constantly executing instructions
 the entire time that the calculator was turned on. The simulator cannot
 afford to consume 100% CPU on the host system. One major area of
 consumption is the display refresh routines. To minimize system load,
