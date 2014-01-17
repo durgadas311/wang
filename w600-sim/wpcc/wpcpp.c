@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #define EX_PLOT		'\001'
 #define EX_MOVE		'\002'
@@ -34,12 +35,14 @@ unsigned char xlat_ow[256] = {
 };
 
 #undef PLOT
-#define PLOT		0x40	// note, possible conflict with SHIFT
+unsigned int plot_bit = 0x40;	// value for Wang 600...
 
 char buf[256];
 char str[256];
 char lab[256];
 
+int __series__ = -1;
+int __error__ = 0;
 int __line__;
 char *__file__;
 
@@ -64,7 +67,9 @@ void do_enter(char *s) {
 			printf("DP()\n");
 		} else if (x == '+') {
 		} else {
-			printf("ENTER(%c)\n", x);
+			fprintf(stderr, "%s %d: Unrecognized character '%c' in ENTER()\n",
+					__file__, __line__, x);
+			__error__ = 1;
 		}
 	}
 	fprintf(stdout, ".file \"%s\" ; .line %d\n", __file__, __line__);
@@ -75,8 +80,14 @@ void do_data(char *l, char *s) {
 	uint8_t reg[16];
 
 	extern int w6_do_data(char *s, uint8_t out[16]);
+	extern int w7_do_data(char *s, uint8_t out[16]);
 
-	if (w6_do_data(s, reg) != 0) {
+	if (__series__ == 7) {
+		x = w7_do_data(s, reg);
+	} else {
+		x = w6_do_data(s, reg);
+	}
+	if (x != 0) {
 		return;
 	}
 	printf("\t_regdata(%s", l);
@@ -178,12 +189,14 @@ void do_alpha(char *s, unsigned char *xlat) {
 					s += 2;
 					break;
 				} else {
-					fprintf(stderr, "malformed octal character on line %d\n", __line__);
+					fprintf(stderr, "%s %d: malformed octal character\n", __file__, __line__);
+					__error__ = 1;
 				}
 				continue;
 				break;
 			default:
-				fprintf(stderr, "unknown character escape '\\%c' on line %d\n", x, __line__);
+				fprintf(stderr, "%s %d: unknown character escape '\\%c'\n", __file__, __line__, x);
+				__error__ = 1;
 				break;
 			}
 		}
@@ -205,7 +218,7 @@ void do_alpha(char *s, unsigned char *xlat) {
 		}
 		if (!start) {
 			start = 1;
-			printf("_opcode(ALPHA);\n");
+			printf("_opcode(WRITE_ALPHA);\n");
 		}
 		if (x >= 0) {
 			if ((c & SHIFT) && !shift) {
@@ -218,7 +231,7 @@ void do_alpha(char *s, unsigned char *xlat) {
 			}
 			c &= ~SHIFT;
 			if (plot) {
-				c |= PLOT;
+				c |= plot_bit;
 				plot = 0;
 			}
 		}
@@ -250,41 +263,58 @@ int main(int argc, char **argv) {
 		}
 		__file__ = argv[1];
 	}
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
+	while (__error__ == 0 && fgets(buf, sizeof(buf), fp) != NULL) {
 		++__line__;
 		t = buf;
 		while (isspace(*t)) ++t;
+		x = sscanf(t, "# include %*[\"<]wang%[67]00.h", str);
+		if (x == 1 && strlen(str) == 1) {
+			__series__ = str[0] - '0';
+			if (__series__ == 7) {
+				plot_bit = 0x80;	// value for Wang 700...
+			}
+			continue;
+		}
 		x = sscanf(t, "ALPHA_STRING(\"%[^\"]\")", str);
 		if (x == 1) {
+			if (__series__ < 0) goto no_arch;
 			do_alpha(str, xlat_ow);
 			continue;
 		}
 		x = sscanf(t, "ALPHA_PLOT(\"%[^\"]\")", str);
 		if (x == 1) {
+			if (__series__ < 0) goto no_arch;
 			do_alpha(str, xlat_plot);
 			continue;
 		}
 		x = sscanf(t, "ALPHA_TTY(\"%[^\"]\")", str);
 		if (x == 1) {
+			if (__series__ < 0) goto no_arch;
 			do_alpha(str, xlat_tty);
 			continue;
 		}
 		x = sscanf(t, "ENTER(%[^)])", str);
 		if (x == 1) {
+			if (__series__ < 0) goto no_arch;
 			do_enter(str);
 			continue;
 		}
 		x = sscanf(t, "IREG_DATA(%[^,],\"%[a-fA-F0-9]\")", lab, str);
 		if (x == 2) {
+			if (__series__ < 0) goto no_arch;
 			do_data_string(lab, str);
 			continue;
 		}
 		x = sscanf(t, "IREG_DATA(%[^,],%[^)])", lab, str);
 		if (x == 2) {
+			if (__series__ < 0) goto no_arch;
 			do_data(lab, str);
 			continue;
 		}
 		printf(buf);
 	}
-	return 0;
+	return __error__;
+no_arch:
+	fprintf(stderr, "%s: No #include of architecture header\n", __file__);
+	return 1;
 }

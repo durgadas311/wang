@@ -1,4 +1,4 @@
-# $Id: Make.rules.user,v 1.20 2014/01/15 15:54:50 drmiller Exp $
+# $Id: Make.rules.user,v 1.21 2014/01/17 13:35:54 drmiller Exp $
 
 WPCC ?= /usr/local/wpcc
 
@@ -26,9 +26,11 @@ OBJCOPY = objcopy
 READELF = readelf
 AWK = awk
 CPP = false	# prevent accidental (mis-)use
-W6CPP = $(WPCCBIN)/w6cpp
+WPCPP = $(WPCCBIN)/wpcpp
+
+W6CPP = $(WPCPP)
 W6LDFIX = $(WPCCBIN)/w6ldfix
-W7CPP = $(WPCCBIN)/w7cpp
+W7CPP = $(WPCPP)
 W7LDFIX = $(WPCCBIN)/w7ldfix
 
 %.w6t: %.w6c $(W6TLDEPS)

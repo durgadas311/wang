@@ -160,6 +160,7 @@
 .type _op_MARK STT_OBJECT; .global _op_MARK; .set _op_MARK,0x90
 .type _op_STORE STT_OBJECT; .global _op_STORE; .set _op_STORE,0x91
 .type _op_ALPHA STT_OBJECT; .global _op_ALPHA; .set _op_ALPHA,0x92
+.type _op_WRITE_ALPHA STT_OBJECT; .global _op_WRITE_ALPHA; .set _op_WRITE_ALPHA,0x92
 .type _op_END_ALPHA STT_OBJECT; .global _op_END_ALPHA; .set _op_END_ALPHA,_op_ADD2
 .type _op_STOP STT_OBJECT; .global _op_STOP; .set _op_STOP,0x93
 .type _op_J_IF_N0 STT_OBJECT; .global _op_J_IF_N0; .set _op_J_IF_N0,0x94
