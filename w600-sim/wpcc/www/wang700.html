@@ -17,6 +17,7 @@ is available for your platform).
 <DT>w7$<DD>Tape image file, ready to load via tape drive
 <DT>w7t<DD>Tape image file, ready to load via tape drive
 <DT>txt<DD>Text data for Model 707 Teletype, ASCII.
+</DD>
 </DL>
 
 <P>Some additional special macros allow for abstraction of statement labels and extended
@@ -29,6 +30,7 @@ register assignment. These are:
 		which is the subroutine hard-coded by the Model 707 Teletype
 		as the End Of Tape action. A "MARK(flabel)" must exist somewhere in
 		the source module.
+</DD>
 </DL>
 
 <P>When a program is linked, a special statement label is generated followed by
@@ -131,7 +133,28 @@ Some helpful shorthands for WRITE_ALPHA commands:
 <DT>PAUSE()<DD>Approximately 3/4 second pause
 <DT>D180PI()<DD>180/&#960; to X
 <DT>DPI180()<DD>&#960;/180 to X
+</DD>
 </DL>
+
+<H3>Memory Layout:</H3>
+
+<P>Program memory is used as follows:
+
+<P><TABLE BORDER>
+<TR><TH>Registers</TH><TH>Steps</TH><TH COLSPAN=2 ALIGN=CENTER>Use</TH></TR>
+<TR><TD>247...</TD><TD>0000...</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightblue">Program steps from main and linked modules</TD>
+	<TD ROWSPAN=3 BGCOLOR="pink">In tape image</TD></TR>
+<TR><TD>Multiple of<BR>2 registers</TD><TD>Multiples of<BR>16 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightgreen">Initialized registers (aligned as required) from *IREG_DATA()</TD></TR>
+<TR><TD>Consumes<BR>2 registers</TD><TD>Consumes<BR>16 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightblue">END_PROG postample</TD></TR>
+<TR><TD>Multiple of<BR>2 registers</TD><TD>Multiples of<BR>16 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightyellow">Uninitialized registers (aligned as required) from *UREG()</TD>
+	<TD ROWSPAN=2>Not in tape image</TD></TR>
+<TR><TD>&nbsp;&nbsp;...0</TD><TD>&nbsp;&nbsp;&nbsp;&nbsp;...1983</TD>
+	<TD ALIGN=CENTER>(unused program steps - might have been assigned with RES_REG())</TD></TR>
+</TABLE>
 
 <H3>Utilities</H3>
 
@@ -157,6 +180,7 @@ into linkers scripts and function label file. Produces the two linker
 scripts (fnordering1.ld and fnordering2.ld) in the current directory.
 <P>Synopsis: symbols2labels <I>base-name</I> 700 &gt;<I>label-file</I>
 
+</DD>
 </DL>
 
 </HTML>

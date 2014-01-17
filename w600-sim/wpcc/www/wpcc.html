@@ -23,6 +23,7 @@ is available for your platform).
 		or other preprocessing into data images, ASCII.
 <DT>wfl<DD>Function Key Label file, used to load text into the
 		"strip" underneath the function keys 00-15.
+</DD>
 </DL>
 
 <P>Other suffixes are described under their respective architectures.
@@ -101,6 +102,7 @@ register assignment. These are:
 		This is typically used to assign labels to low-numbered
 		registers, and automatically assigned registers will
 		not normally conflict.
+</DD>
 </DL>
 
 <P>The special preprocessors ("w6cpp" and "w7cpp")
@@ -127,6 +129,7 @@ expression of text into the Wang encoding.
 <DT>	\r<DD>return+index
 <DT>	\n<DD>index
 <DT>	\ooo<DD>any octal character code (tile-rotate + plot bit)
+</DD>
 </DL>
 
 <P>	Output Writer Only:
@@ -136,6 +139,7 @@ expression of text into the Wang encoding.
 <DT>	\{<DD>1/4
 <DT>	\^<DD>(cent)
 <DT>	\b<DD>backspace
+</DD>
 </DL>
 
 <P>	Plotter Only:
@@ -146,12 +150,14 @@ expression of text into the Wang encoding.
 <DT>	\z<DD>set character size
 <DT>	\s<DD>set character spacing
 <DT>	|x<DD>plot character 'x'
+</DD>
 </DL>
 
 <P>	Teletype Only:
 <DL>
 <DT>	\p<DD>Punch On (DC2)
 <DT>	\q<DD>Punch Off (DC4)
+</DD>
 </DL>
 
 <P>	Note: ALPHA_PLOT uses a subtly different character decoder.
@@ -206,6 +212,7 @@ expression of text into the Wang encoding.
 		However, 'reg' is local to the source module.
 		Note, the allocated space (program steps) are not re-used by
 		any other module, and the 'name' is not visible in any other module.
+</DD>
 </DL>
 
 <P>Note, register data can prevent proper operation of a SEARCH end_prog
@@ -214,19 +221,6 @@ expression of text into the Wang encoding.
 	which is a value less-likely found in a register.
 
 <P>Other directives may be described under their respective architectures.
-
-<H3>Memory Layout:</H3>
-
-<P>Program memory is used as follows:
-
-<P><TABLE BORDER WIDTH=100>
-<TR><TD ALIGN=CENTER>Program steps from main and linked modules</TD></TR>
-<TR><TD ALIGN=CENTER>Initialized registers (aligned as required) from *IREG_DATA()</TD></TR>
-<TR><TD ALIGN=CENTER>END_PROG postample</TD></TR>
-<TR><TD ALIGN=CENTER>Uninitialized registers (aligned as required) from *UREG()</TD></TR>
-<TR><TD ALIGN=CENTER>(unused program steps - might have been assigned with RES_REG())</TD></TR>
-<TR><TD ALIGN=CENTER>(Wang 600: Dedicated registers, 00-15)</TD></TR>
-</TABLE>
 
 <H3>Compiling:</H3>
 
@@ -283,6 +277,7 @@ typically something like "foo-dir/foo.a".
 <DT>W6LDFIX
 <DT>W7LDFIX
 <DD>(do not modify) Post-processor for tape image files.
+</DD>
 </DL>
 
 <P>The following implicit make rules are defined:

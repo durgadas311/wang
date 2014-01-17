@@ -24,6 +24,7 @@ is available for your platform).
 		against (for use with) this ROM image.
 <DT>txt<DD>Text for use with model 607 Teletype or producing
 		tape data image files, ASCII.
+</DD>
 </DL>
 
 <P>Some additional special macros allow for abstraction of statement labels and extended
@@ -42,6 +43,7 @@ register assignment. These are:
 		which is the subroutine hard-coded by the Model 607 Teletype
 		as the End Of Tape action. A "MARK(flabel)" must exist somewhere in
 		the source module.
+</DD>
 </DL>
 
 <P>When a program is linked, a special statement label is generated followed by
@@ -129,7 +131,33 @@ Some extended functionality not directly accessible on the keyboard:
 <DT>J_IF_GE()<DD>Jump if reg 0 &#8805; display
 <DT>J_IF_LT()<DD>Jump if reg 0 &lt; display
 <DT>JUMP(reg)<DD>Add contents of 'reg' to program counter
+</DD>
 </DL>
+
+<H3>Memory Layout:</H3>
+
+<P>Program memory is used as follows:
+
+<P><TABLE BORDER>
+<TR><TH>Registers</TH><TH>Steps</TH><TH COLSPAN=2 ALIGN=CENTER>Use</TH></TR>
+<TR><TD>246...</TD><TD>0000...</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightblue">Program steps from main and linked modules</TD>
+	<TD ROWSPAN=3 BGCOLOR="pink">In tape image</TD></TR>
+<TR><TD></TD><TD>Multiples of<BR>8 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightgreen">Initialized registers (aligned as required) from *IREG_DATA()</TD></TR>
+<TR><TD>Consumes<BR>1 register</TD><TD>Consumes<BR>8 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightblue">END_PROG postample</TD></TR>
+<TR><TD></TD><TD>Multiples of<BR>8 steps</TD>
+	<TD ALIGN=CENTER BGCOLOR="lightyellow">Uninitialized registers (aligned as required) from *UREG()</TD>
+	<TD ROWSPAN=3>Not in tape image *</TD></TR>
+<TR><TD>&nbsp;&nbsp;...16</TD><TD>&nbsp;...1847</TD>
+	<TD ALIGN=CENTER>(unused program steps - might have been assigned with RES_REG())</TD></TR>
+<TR><TD>15...0</TD><TD></TD>
+	<TD ALIGN=CENTER>Dedicated registers, 00-15</TD></TR>
+</TABLE>
+
+<P>* Note, tape images of register data may be created, and may be loaded into this space
+(including the dedicated registers).
 
 <H3>Compiling ROM Images</H3>
 
@@ -244,6 +272,7 @@ into linkers scripts and function label file. Produces the two linker
 scripts (fnordering1.ld and fnordering2.ld) in the current directory.
 <P>Synopsis: symbols2labels <I>base-name</I> 600 &gt;<I>label-file</I>
 
+</DD>
 </DL>
 
 </HTML>
