@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_FunctionLabelBar.java,v 1.6 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang_FunctionLabelBar.java,v 1.7 2014/01/17 23:02:55 drmiller Exp $
 
 import java.awt.*;
 import java.io.*;
@@ -50,21 +50,13 @@ class Wang_FunctionLabelBar extends JPanel
 	}
 
 	private int cnWidth(int x) {
-		int xw = 62;
+		int xw = 62;	// 62.5, so adjust odd members
 		if ((x & 1) == 1) {
-			xw -= leftNudge;
+			xw -= leftNudge - 1;
 		} else {
 			xw += leftNudge;
 		}
 		return xw;
-	}
-
-	private int cnPosition(int x) {
-		int xp = 26;
-		if ((x & 1) == 1) {
-			xp = fnPosition(16);
-		}
-		return xp;
 	}
 
 	// horizontal layout:
@@ -86,15 +78,6 @@ class Wang_FunctionLabelBar extends JPanel
 		for (int x = 0; x < 17; ++x) {
 			int xp = fnPosition(x);
 			g2d.drawLine(xp, 0, xp, 50);
-			if (x < 16) {
-				f[x].setLocation(xp, 0);
-				F[x].setLocation(xp, 25);
-			}
-		}
-		for (int x = 0; x < 4; ++x) {
-			int xp = cnPosition(x);
-			int yp = ((x / 2) * 25);
-			corners[x].setLocation(xp, yp);
 		}
 		g2d.drawLine(26, 25, 949, 25);
 		g2d.setColor(Wang_Colors.white3);
@@ -219,14 +202,12 @@ class Wang_FunctionLabelBar extends JPanel
 		}
 		setPreferredSize(new Dimension(975, 50));
 		setBackground(Wang_Colors.ivory);
-		addMouseListener(this);
+
 		for (int x = 0; x < 16; ++x) {
 			f[x] = new JLabel("", SwingConstants.CENTER);
 			f[x].setPreferredSize(dim);
-			add(f[x]);
 			F[x] = new JLabel("", SwingConstants.CENTER);
 			F[x].setPreferredSize(dim);
-			add(F[x]);
 		}
 		// +-------+   +------+
 		// |   0   |   |  1   |
@@ -237,10 +218,63 @@ class Wang_FunctionLabelBar extends JPanel
 			int xw = cnWidth(x);
 			corners[x] = new JLabel("", SwingConstants.CENTER);
 			corners[x].setPreferredSize(new Dimension(xw, 25));
-			add(corners[x]);
 		}
+
+		GridBagLayout gb = new GridBagLayout();
+		setLayout(gb);
+		GridBagConstraints s = new GridBagConstraints();
+		s.fill = GridBagConstraints.NONE;
+		s.gridx = 0;
+		s.gridy = 0;
+		s.weightx = 0;
+		s.weighty = 0;
+		s.gridwidth = 1;
+		s.gridheight = 1;
+		s.anchor = GridBagConstraints.NORTH;
+
+		JPanel pan;
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(25, 50));
+		pan.setOpaque(false);
+		s.gridheight = 2;
+		gb.setConstraints(pan, s);
+		add(pan);
+		pan = new JPanel();
+		pan.setPreferredSize(new Dimension(25, 50));
+		pan.setOpaque(false);
+		s.gridx += 18 + 1;
+		gb.setConstraints(pan, s);
+		add(pan);
+		s.gridheight = 1;
+
+		s.gridx = 1;
+		gb.setConstraints(corners[0], s);
+		add(corners[0]);
+		s.gridx += 1;
+		for (int x = 0; x < 16; ++x) {
+			gb.setConstraints(f[x], s);
+			add(f[x]);
+			s.gridx += 1;
+		}
+		gb.setConstraints(corners[1], s);
+		add(corners[1]);
+
+		s.gridy += 1;
+		s.gridx = 1;
+		gb.setConstraints(corners[2], s);
+		add(corners[2]);
+		s.gridx += 1;
+		for (int x = 0; x < 16; ++x) {
+			gb.setConstraints(F[x], s);
+			add(F[x]);
+			s.gridx += 1;
+		}
+		gb.setConstraints(corners[3], s);
+		add(corners[3]);
+
 		loadLabels(Wang_UI.getProperties().getFile("wang_function_labels",
 							true, Wang_UI.getDir()));
+		addMouseListener(this);
 	}
 
 	public void mouseClicked(MouseEvent e) {
