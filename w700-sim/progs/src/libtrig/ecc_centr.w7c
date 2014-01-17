@@ -1,0 +1,87 @@
+// convert eccentric bearings to centre
+// e in Y; Po in X
+// f0
+// f7 (ecc_centr)
+// Sei in Y; Pi in X
+// f0
+// SEARCH 2
+// read Pei in X (radians)
+// f15
+// read Pei in X (DMS)
+
+#include "wang700.h"
+
+FLABEL(ecc_centr)
+
+FEXTERNAL(polar_rect)
+FEXTERNAL(sin_rad)
+FEXTERNAL(rect_polar)
+
+LLABEL(LGO)
+LLABEL(L1)
+LLABEL(L2)
+LLABEL(L1500)
+FLLABEL(F0314)
+FLLABEL(F0313)
+
+UREG(R065)
+UREG(R064)
+UREG(R063)
+UREG(R062)
+
+BEGIN()
+
+MARK(ecc_centr)
+	ST_Y_DIR(R065)
+	ST_DIR(R064)
+MARK(LGO)
+	STOP()
+MARK(L1)
+	FCALL(F0314)
+	FCALL(polar_rect)
+	SUB_DIR(R063)
+	RE_DIR(R063)
+	FCALL(F0313)
+MARK(L2)
+	FCALL(F0314)
+	FCALL(sin_rad)
+	SEARCH(L1500)
+MARK(L1500)
+	MULT_Y()
+	RE_DIR(R063)
+	DIV_Y()
+	ST_Y_DIR(R063)
+	ENTER(1)
+	EXCHG_Y()
+	X_2()
+	SUB_Y()
+	RE_Y()
+	SQRT()
+	RE_Y_DIR(R063)
+	FCALL(F0313)
+
+MARK(F0314)
+	ST_Y_DIR(R063)
+	ST_DIR(R062)
+	ST_Y()
+	RE_DIR(R064)
+	SUB_Y()
+	RE_Y()
+	RE_Y_DIR(R065)
+	RETURN()
+
+MARK(F0313)
+	FCALL(rect_polar)
+	ADD_DIR(R062)
+	PI()
+	ST_Y()
+	ENTER(2)
+	MULT_Y()
+	RE_Y()
+	RE_Y_DIR(R062)
+	SK_IF_LT() SUB_Y() GO()
+	CLR_X()
+	EXCHG_Y()
+	SEARCH(LGO)
+
+END()

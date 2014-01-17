@@ -1,0 +1,17 @@
+// convert angle in GON to radians
+#include "wang700.h"
+
+FLABEL(gon_rad)
+
+BEGIN()
+
+MARK(gon_rad)
+	ST_Y()
+	PI()
+	MULT_Y()
+	ENTER(200)
+	DIV_Y()
+	RE_Y()
+	SEARCH(1515)
+
+END()

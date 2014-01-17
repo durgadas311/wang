@@ -1,0 +1,49 @@
+// convert rectangular coords to polar
+// X in X; Y in Y
+// f12
+// read Q in X (radians); R in Y
+
+#include "wang700.h"
+
+FLABEL(rect_polar)
+
+BEGIN()
+
+MARK(rect_polar)
+	SK_IF_Y0() SEARCH(1505)
+	SK_IF_XM() EXCHG_Y() RETURN()
+	CHANGE_SIGN()
+	ST_Y()
+	PI()
+	RETURN()
+MARK(1505)
+	SK_IF_X0() SEARCH(1504)
+	ENTER(1e-95)
+MARK(1504)
+	_ALPHA(E_X)
+	DIV_Y()
+	X_2()
+	ST_DIR(110)
+	RE_DIR(121)
+	X_2()
+	ADD_DIR(110)
+	RE_DIR(110)
+	EXCHG_Y()
+	SK_IF_XP() INV() CHANGE_SIGN()
+	FCALL(arctan_rad)	// SR0013?
+	ST_DIR(110)
+	PI()
+	ST_Y()
+	ENTER(2)
+	DIV_Y()
+	ENTER(1)
+	_ALPHA(LOAD_PROG)
+	MULT_Y()
+	RE_DIR(110)
+	ADD_Y()
+	RE_DIR(121)
+	SQRT()
+	EXCHG_Y()
+	RETURN
+
+END()

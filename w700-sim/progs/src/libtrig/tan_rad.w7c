@@ -1,0 +1,19 @@
+// tangent of angle in radians
+#include "wang700.h"
+
+FLABEL(tan_rad)
+
+BEGIN()
+
+MARK(tan_rad)
+	ST_Y_DIR(111)
+	ST_Y()
+	FCALL(sin_rad)
+	EXCHG_Y()
+	FCALL(cos_rad)
+	DIV_Y()
+	RE_Y()
+	RE_Y_DIR(111)
+	RETURN()
+
+END()

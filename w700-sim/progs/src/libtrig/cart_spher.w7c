@@ -1,0 +1,25 @@
+// convert 3D cartesian coordinates to spherical
+// X in X; Y in Y
+// f11
+// read alpha (radians) in X
+// Z in X
+// GO
+// read R in Y; beta (radians) in X
+
+#include "wang700.h"
+
+FLABEL(cart_spher)
+FEXTERNAL(intersect)
+FEXTERNAL(rect_polar)
+
+BEGIN()
+
+MARK(cart_spher)
+	FCALL(rect_polar)
+	STOP()
+	EXCHG_Y()
+	FCALL(rect_polar)
+	STOP()
+	SEARCH(intersect)	// intended?
+
+END()

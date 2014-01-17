@@ -1,0 +1,23 @@
+// convert polar coords to rectangular
+// Q (angle) in X
+// R (radius) in Y
+
+#include "wang700.h"
+
+FLABEL(polar_rect)
+
+BEGIN()
+
+MARK(polar_rect)
+	ST_DIR(111)
+	FCALL(cos_rad)
+	EXCHG_Y()
+	MULT_Y()
+	EXCHG_DIR(111)
+	FCALL(sin_rad)
+	MULT_DIR(111)
+	RE_Y()
+	RE_Y_DIR(111)
+	RETURN
+
+END()

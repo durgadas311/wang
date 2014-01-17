@@ -1,0 +1,30 @@
+// convert angle in degrees, minutes, seconds to radians
+
+#include "wang700.h"
+
+FLABEL(dms_rad)
+
+BEGIN()
+MARK(dms_rad)
+	ST_Y()
+	POW_10(4)
+	INT()
+	ST_DIR(120)
+	ENTER(60)
+	MULT_DIR(120)
+	RE_Y()
+	POW_10(6)
+	INT()
+	ADD_DIR(120)
+	ENTER(40)
+	EXCHG_DIR(120)
+	RE_DIR(120)
+	SUB_Y()
+	PI()
+	MULT_Y()
+	ENTER(648e6)
+	DIV_Y()
+	RE_Y()
+	SEARCH(1515)
+
+END()

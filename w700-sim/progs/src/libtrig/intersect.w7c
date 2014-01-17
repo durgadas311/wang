@@ -1,0 +1,62 @@
+// compute the intersection of two lines
+// f8 (initialize) X,Y = (1,1)
+// Y1 in Y; X1 in X
+// GO	X,Y = (2,2)
+// Y2 in Y; X2 in X
+// GO	X,Y = (2,1)
+// alpha1 in Y; alpha2 in X (radians)
+// GO
+// read intersecting point in (X,Y)
+
+#include "wang700.h"
+
+FLABEL(intersect)
+
+BEGIN()
+
+MARK(intersect)
+	ENTER(1)
+	ST_Y()
+	STOP()
+	ST_DIR(R062)
+	ST_Y_DIR(R063)
+	ENTER(2)
+	ST_Y()
+	STOP()
+	EXCHG_DIR(R062)
+	SUB_DIR(R062)
+	EXCHG_Y()
+	EXCHG_DIR(R063)
+	SUB_DIR(R063)
+	EXCHG_DIRR063)
+	EXCHG_Y()
+	EXCHG_DIR(R062)
+	FCALL(rect_polar)
+	ST_DIR(R064)
+	ST_Y_DIR(R065)
+	ENTER(1)
+	ST_Y()
+	ENTER(2)
+	ABS()
+	STOP()
+	SUB_DIR(R064)
+	EXCHG_Y()
+	SUB_Y()
+	EXCHG_DIR(R064)
+	FCALL(sin_rad)
+	EXCHG_Y()
+	CHANGE_SIGN()
+	FCALL(sin_rad)
+	DIV_Y()
+	RE_DIR(R065)
+	MULT_Y()
+	RE_DIR(R064)
+	FCALL(polar_rect)
+	ADD_DIR(R063)	// R062?
+	RE_DIR(R063)
+	ADD_Y()
+	RE_DIR(R062)
+	STOP()
+	SEARCH(travers)	// intended?
+
+END()

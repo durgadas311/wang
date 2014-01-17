@@ -1,0 +1,19 @@
+// cos of angle in radians
+#include "wang700.h"
+
+FLABEL(cos_rad)
+FEXTERNAL(sin_rad)
+
+BEGIN()
+
+MARK(cos_rad)
+	ST_Y()
+	ADD_Y()
+	PI()
+	ADD_Y()
+	ENTER(2)
+	DIV_Y()
+	RE_Y()
+	SEARCH(sin_rad)
+
+END()

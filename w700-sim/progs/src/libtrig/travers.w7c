@@ -1,0 +1,39 @@
+// compute the coordinates of traverse stations
+// Yo in Y; Xo in X
+// f9
+// !betao in X (DMS)
+// GO
+// Si in Y; alphai-1 in X
+// GO
+// read Yi in Y; Xi in X
+
+#include "wang700.h"
+
+FLABEL(travers)
+
+BEGIN()
+
+MARK(travers)
+	ST_DIR(1)
+	ST_Y_DIR(2)
+	STOP()
+	FCALL(dms_rad)
+	ST_DIR(0)
+	PI()
+	ADD_DIR(0)
+MARK(STOP)
+	STOP()
+	FCALL(dms_rad)
+	ADD_DIR(0)
+	PI()
+	SUB_DIR(0)
+	RE_DIR(0)
+	FCALL(polar_rect)
+	ADD_DIR(1)
+	RE_Y()
+	ADD_DIR(2)
+	RE_Y_DIR(2)
+	RE_DIR(1)
+	SEARCH(STOP)
+
+END()

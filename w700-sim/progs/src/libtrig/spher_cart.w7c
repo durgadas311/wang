@@ -1,0 +1,26 @@
+// convert spherical coords to 3D rectangular
+// Q (angle) in X
+// R (radius) in Y
+// beta in X
+// f6...
+// read Z from X
+// key alpha in X
+// GO...
+// read X,Y from X,Y
+
+#include "wang700.h"
+
+FLABEL(spher_cart)
+FEXTERNAL(cart_spher)
+
+BEGIN()
+
+MARK(spher_cart)
+	FCALL(polar_rect)
+	EXCHG_Y()
+	STOP()
+	FCALL(polar_rect)
+	STOP()
+	SEARCH(cart_spher) // intended?
+
+END()
