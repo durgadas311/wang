@@ -64,7 +64,7 @@ ship: $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS)
 # TODO: use "make... export" in subdirs, too
 export: __FRC__
 	mkdir -p $(DEST)
-	cp Make* $(SRCS) $(DATAS) $(DEST)
+	cp Make* $(SRCS) $(RSRCS) $(DATAS) $(DEST)
 	for d in $(SUBDIRS); do \
 		mkdir -p $(DEST)/$$d; \
 		cp $$d/Make* $$d/*.w6[ch] $(DEST)/$$d; \
