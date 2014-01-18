@@ -31,7 +31,7 @@ export: __FRC__
 	cp Make* $(SRCS) $(DATAS) $(DEST)
 	for d in $(SUBDIRS); do \
 		mkdir -p $(DEST)/$$d; \
-		cp $$d/Make* $$d/*.w7c $(DEST)/$$d; \
+		cp $$d/Make* $$d/*.w7[ch] $(DEST)/$$d; \
 	done
 
 .PHONEY: __FRC__
