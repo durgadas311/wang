@@ -28,7 +28,7 @@ ship: $(PROGS) $(DATAS)
 # TODO: use "make... export" in subdirs, too
 export: __FRC__
 	mkdir -p $(DEST)
-	cp Make* $(SRCS) $(DATAS) $(DEST)
+	cp Make* $(SRCS) $(FSRCS) $(DATAS) $(DEST)
 	for d in $(SUBDIRS); do \
 		mkdir -p $(DEST)/$$d; \
 		cp $$d/Make* $$d/*.w7[ch] $(DEST)/$$d; \
