@@ -95,6 +95,7 @@ clobber: clean
 export:
 	cp *.[sch] *.ld $(DEST)
 	cp *.cygwin $(DEST)
-	cp Make* symbols2labels $(DEST)
+	cp Make* symbols2labels README* $(DEST)
+	cp ../../common/xlat*.h $(DEST)
 	mkdir -p $(DEST)/www
 	cp www/*.html $(DEST)/www

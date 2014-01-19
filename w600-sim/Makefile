@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.73 2014/01/15 23:20:04 drmiller Exp $
+# $Id: Makefile,v 1.74 2014/01/19 03:48:50 drmiller Exp $
 
 include Makefile.ship
 
@@ -61,7 +61,7 @@ wang600apc.tgz: temp_dest
 # Need better way to estimate size of image...
 wang600apc.dmg: all icns wang600.jar wang600setup.jar
 	rm -f $@
-	dd if=/dev/zero of=$@ bs=64k count=18
+	dd if=/dev/zero of=$@ bs=64k count=19
 	hformat -l WANG600APC $@
 	hmount $@
 	hmkdir Wang600.app Wang614.app Wang600Setup.app Wang600Files
@@ -106,8 +106,7 @@ install: temp_dest
 wpcc.tgz: _FRC_
 	rm -rf temp_wpcc
 	mkdir -p temp_wpcc/wpcc/{www,examples{600,700}}
-	cp wpcc/Make* wpcc/README* wpcc/*.[chs] wpcc/*.ld temp_wpcc/wpcc
-	cp wpcc/www/*.html temp_wpcc/wpcc/www
+	$(MAKE) -C wpcc export DEST=${PWD}/temp_wpcc/wpcc
 	make -C progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples600
 	make -C ../w700-sim/progs/src export DEST=${PWD}/temp_wpcc/wpcc/examples700
 	tar -czvf $@ -C temp_wpcc wpcc
