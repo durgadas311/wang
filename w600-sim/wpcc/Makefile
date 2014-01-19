@@ -90,4 +90,11 @@ clean:
 	rm -f *.o
 
 clobber: clean
-	rm -f $(BINS)
+	rm -f $(BINS) wang?00opcodes.s.* wang?00opcodes.h
+
+export:
+	cp *.[sch] *.ld $(DEST)
+	cp *.cygwin $(DEST)
+	cp Make* symbols2labels $(DEST)
+	mkdir -p $(DEST)/www
+	cp www/*.html $(DEST)/www
