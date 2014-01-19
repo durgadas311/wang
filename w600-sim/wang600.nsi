@@ -18,9 +18,9 @@ Section "Wang 600 Simulator"
 	CreateShortCut "$DESKTOP\Wang614.lnk" "$INSTDIR\Wang614.bat" "" \
 		"$INSTDIR\WangX14Edit-128x128.ico" 0 SW_SHOWMINIMIZED
 	SetOutPath $WANG600HOME
-	File /r "progs\*.w6*"
-	File /r "progs\*.txt*"
-	File /r "progs\*.wfl*"
+	File "progs\*.w6*"
+	File "progs\*.txt*"
+	File "progs\*.wfl*"
 	WriteUninstaller $INSTDIR\uninstall.exe
 	Exec 'java -cp $INSTDIR\wang600.jar w600initProps'
 SectionEnd
