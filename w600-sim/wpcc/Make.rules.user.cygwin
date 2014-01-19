@@ -1,0 +1,116 @@
+# $Id: Make.rules.user.cygwin,v 1.1 2014/01/19 03:37:07 drmiller Exp $
+
+WPCC ?= /usr/local/wpcc
+
+WPCCINC = $(WPCC)/include
+WPCCLIB = $(WPCC)/lib
+WPCCBIN = $(WPCC)/bin
+
+W6TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T6_LDSCRIPT) $(W6LDADD)
+W6TLIBS =
+W6TLDEPS =
+W7TLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(T7_LDSCRIPT) $(W7LDADD)
+W7TLIBS =
+W7TLDEPS =
+W6XLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(X_LDSCRIPT) -Wl,-q
+W6XLIBS =
+W6CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
+W7CCFLAGS = -nostartfiles -nodefaultlibs -nostdlib -Wa,-I$(WPCCINC) -I$(WPCCINC)
+W6OLDFLAGS = -L$(WPCCLIB) -Wl,-T,$(O6_LDSCRIPT) -Wl,-q $(W6LDADD)
+
+T7_LDSCRIPT = wang700raw.ld
+T6_LDSCRIPT = wang600raw.ld
+X_LDSCRIPT = wang600rawrom.ld
+
+OBJCOPY = objcopy
+READELF = readelf
+AWK = awk
+CPP = false	# prevent accidental (mis-)use
+WPCPP = $(WPCCBIN)/wpcpp
+
+W6CPP = $(WPCPP)
+W6LDFIX = $(WPCCBIN)/w6ldfix
+W7CPP = $(WPCPP)
+W7LDFIX = $(WPCCBIN)/w7ldfix
+
+%.w6t: %.w6c $(W6TLDEPS)
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $*.w6f $*.wpe $(W6TLIBS)
+	@rm -f $*.wpe
+	$(OBJCOPY) -O binary -j .w6prog $*.w6f $*.w6$$
+	@rm -f $*.w6f
+	$(W6LDFIX) $*.w6$$
+	@rm -f $*.w6$$
+
+%.w6o: %.w6c
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+%.w6t: %.txt
+	$(WPCCBIN)/w6data2tape <$< >$@
+
+%.w7t: %.w7c $(W7TLDEPS)
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $*.w7f $*.wpe $(W7TLIBS)
+	@rm -f $*.wpe
+	$(OBJCOPY) -O binary -j .w7prog $*.w7f $*.w7$$
+	@rm -f $*.w7f
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$
+
+%.w7o: %.w7c
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W7CCFLAGS) -o $@ $*.wpe
+	@rm -f $*.wpe
+
+# experimental
+%.wfl: %.w6c $(W6TLDEPS)
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -L. $(W6TLDFLAGS) $(W6CCFLAGS) \
+		-o $*.w6f $*.wpe $(W6TLIBS) | \
+		$(WPCCBIN)/symbols2labels $* 600 >$@
+	@rm -f $*.wpe
+	$(OBJCOPY) -O binary -j .w6prog $*.w6f $*.w6$$
+	@rm -f $*.w6f
+	$(W6LDFIX) $*.w6$$
+	@rm -f $*.w6$$ fnordering*.ld
+
+%.wfl: %.w7c $(W7TLDEPS)
+	$(W7CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -L. $(W7TLDFLAGS) $(W7CCFLAGS) \
+		-o $*.w7f $*.wpe $(W7TLIBS) | \
+		$(WPCCBIN)/symbols2labels $* 700 >$@
+	$(OBJCOPY) -O binary -j .w7prog $*.w7f $*.w7$$
+	@rm -f $*.w7f
+	@rm -f $*.wpe
+	$(W7LDFIX) $*.w7$$
+	@rm -f $*.w7$$ fnordering*.ld
+
+######################################
+# For making XROM images... 600 only.
+.PRECIOUS: %.w6r
+
+%.w6s: %.w6r
+	@echo "Post-processing $< into $@..."
+	@$(READELF) -s $< | \
+		$(AWK) '/<corrupt>/{next;}$$5=="GLOBAL"{print ".globl " $$NF "; .set " $$NF ",0x" $$2; }' | \
+		$(AS) -o $@
+
+%.w6x: %.w6r
+	$(OBJCOPY) -j .wang600rom -O binary $< $@
+
+###%.w6r: %/%.a
+# for some reason --whole-archive doesn't work -
+# perhaps 'ld' only looks for *.o (not *.w6o)
+%.w6r: %.w6c %/*.w6o
+	$(W6CPP) $< > $*.wpe
+	$(CC) -x assembler-with-cpp -c $(W6CCFLAGS) -o $*.w6o $*.wpe | \
+		$(WPCCBIN)/symbols2labels $* ROM >$*.wfl
+	@rm -f $*.wpe
+	@if [[ ! -s $*.wfl ]]; then rm $*.wfl; fi
+	$(CC) $(W6CCFLAGS) $(W6XLDFLAGS) \
+		-o $@ $*.w6o $*/*.w6o
+	@rm -f fnordering*.ld
