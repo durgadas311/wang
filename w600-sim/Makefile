@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.74 2014/01/19 03:48:50 drmiller Exp $
+# $Id: Makefile,v 1.75 2014/01/25 23:50:35 drmiller Exp $
 
 include Makefile.ship
 
@@ -39,9 +39,25 @@ tar:
 		w600-sim/progs/*.w6* w600-sim/progs/*.wfl w600-sim/progs/*.txt \
 		w600-sim/docs/*.html w600-sim/docs/*.gif
 
-ship: tar packages wpcc.tgz
+ifeq ($(MAKECMDGOALS),ship)
+STATE = Rel
+else
+STATE = Exp
+endif
+
+Release.java: _FRC_
+	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
+ifeq ($(MAKECMDGOALS),ship)
+	@cvs commit -f -m. $@
+endif
+	@if ! grep -s -q 'State: $(STATE)' $@; then \
+		cvs admin -s $(STATE) $@; \
+		rm -f $@; \
+	fi
+	@cvs -Q update $@
+
+ship: tar packages wpcc.tgz www
 	mv -v $(SRCTAR) $(PACKAGES) wpcc.tgz /http/durgadas.com/sebhc/w600-sim
-	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w600-sim
 
 packages: $(PACKAGES)
 

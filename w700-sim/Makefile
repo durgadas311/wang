@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.41 2014/01/15 23:20:04 drmiller Exp $
+# $Id: Makefile,v 1.42 2014/01/25 23:52:27 drmiller Exp $
 
 include Makefile.ship
 
@@ -48,7 +48,24 @@ tar: wang700.jar
 		w700-sim/icons/*.gif common/fonts/*.ttf \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
-ship: tar packages
+ifeq ($(MAKECMDGOALS),ship)
+STATE = Rel
+else
+STATE = Exp
+endif
+
+Release.java: _FRC_
+	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
+ifeq ($(MAKECMDGOALS),ship)
+	@cvs commit -f -m. $@
+endif
+	@if ! grep -s -q 'State: $(STATE)' $@; then \
+		cvs admin -s $(STATE) $@; \
+		rm -f $@; \
+	fi
+	@cvs -Q update $@
+
+ship: tar packages www
 	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w700-sim
 
 update:

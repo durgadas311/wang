@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.13 2014/01/17 16:36:46 drmiller Exp $
+# $Id: Makefile.ship,v 1.14 2014/01/25 23:52:27 drmiller Exp $
 
 COPTS =
 
@@ -99,7 +99,7 @@ jar: wang700.jar
 
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
-wang700.jar: w700_fe.class w700_edit.class w700initProps.class $(ROM)
+wang700.jar: Release.java Release.class w700_fe.class w700_edit.class w700initProps.class $(ROM)
 	echo -e "Main-Class: w700_fe\nSplashScreen-Image: icons/wang700.gif" >Manifest.txt
 	jar cfm $@ Manifest.txt *.class $(ROM) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \

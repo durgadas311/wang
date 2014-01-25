@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: w700_edit.java,v 1.3 2014/01/15 23:20:05 drmiller Exp $
+// $Id: w700_edit.java,v 1.4 2014/01/25 23:52:27 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import java.io.*;
 
 public class w700_edit
 {
-	final String ident = "$Id: w700_edit.java,v 1.3 2014/01/15 23:20:05 drmiller Exp $";
+	final String ident = "$Id: w700_edit.java,v 1.4 2014/01/25 23:52:27 drmiller Exp $";
 
 	public static void main(String[] args) {
 		// only needed if we use runCommand()...
@@ -130,7 +130,7 @@ class Wang714_Help extends JComponent
 		java.net.URL url = this.getClass().getResource("icons/wang714.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 714 Mark Sense Card Editor<BR>"+
-			"$Revision: 1.3 $ $Date: 2014/01/15 23:20:05 $<BR>"+
+			Release.ident.replaceAll("\\$","")+"<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
