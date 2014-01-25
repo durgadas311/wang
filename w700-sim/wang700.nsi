@@ -18,9 +18,9 @@ Section "Wang 700 Simulator"
 	CreateShortCut "$DESKTOP\Wang714.lnk" "$INSTDIR\Wang714.bat" "" \
 		"$INSTDIR\WangX14Edit-128x128.ico" 0 SW_SHOWMINIMIZED
 	SetOutPath $WANG700HOME
-	File /r "progs\*.w7*"
-	File /r "progs\*.txt*"
-	File /r "progs\*.wfl*"
+	File "progs\*.w7*"
+	File "progs\*.txt*"
+	File "progs\*.wfl*"
 	WriteUninstaller $INSTDIR\uninstall.exe
 	Exec 'java -cp $INSTDIR\wang700.jar w700initProps'
 SectionEnd
