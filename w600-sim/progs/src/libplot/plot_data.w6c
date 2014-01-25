@@ -8,7 +8,7 @@ FEXTERNAL(plot_drawto)
 EXTERNAL(setup_point)
 
 // Labels:
-LABEL(loop3)
+LLABEL(loop3)
 
 BEGIN()
 MARK(plot_data)
