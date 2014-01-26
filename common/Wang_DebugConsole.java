@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_DebugConsole.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang_DebugConsole.java,v 1.10 2014/01/26 14:52:57 drmiller Exp $
 
 import java.io.*;
 import java.util.Arrays;
@@ -26,6 +26,7 @@ class Wang_DebugConsole
 	}
 
 	public Wang_DebugConsole(Wang_Debugger dbg) {
+		Wang_RunCommand.Initialize();
 		_dbg = dbg;
 		_in = new BufferedReader(new InputStreamReader(System.in));
 	}
@@ -324,7 +325,7 @@ new DbgFunc() {
 			return 0;
 		}
 		if (s.substring(0, 1).equals("!")) {
-			x = Wang_UI.runCommand(s.substring(1));
+			x = Wang_RunCommand.runCommand(s.substring(1));
 			if (x != 0) {
 				// does the user already know it failed?
 				System.out.println("! command failed");

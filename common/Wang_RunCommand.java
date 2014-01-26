@@ -1,18 +1,23 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_RunCommand.java,v 1.1 2014/01/26 14:19:02 drmiller Exp $
+// $Id: Wang_RunCommand.java,v 1.2 2014/01/26 14:52:57 drmiller Exp $
 
 import java.io.*;
 import java.util.Arrays;
 
 public class Wang_RunCommand
 {
-	final String ident = "$Id: Wang_RunCommand.java,v 1.1 2014/01/26 14:19:02 drmiller Exp $";
+	final String ident = "$Id: Wang_RunCommand.java,v 1.2 2014/01/26 14:52:57 drmiller Exp $";
 
+	static private boolean _init = false;
 	static private boolean _cygwin;
 	static private String[] _shell;
 	static private boolean _windows;
 
 	public static void Initialize() {
+		if (_init) {
+			return;
+		}
+		_init = true;
 		_cygwin = false;
 		_windows = (System.getProperty("os.name").indexOf("Windows") >= 0);
 		if (_windows) {

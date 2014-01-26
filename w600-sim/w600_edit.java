@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: w600_edit.java,v 1.7 2014/01/25 23:50:35 drmiller Exp $
+// $Id: w600_edit.java,v 1.8 2014/01/26 14:52:56 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,11 +9,9 @@ import java.io.*;
 
 public class w600_edit
 {
-	final String ident = "$Id: w600_edit.java,v 1.7 2014/01/25 23:50:35 drmiller Exp $";
+	final String ident = "$Id: w600_edit.java,v 1.8 2014/01/26 14:52:56 drmiller Exp $";
 
 	public static void main(String[] args) {
-		// only needed if we use runCommand()...
-		// Wang_UI.Initialize();
 
 		java.net.URL url = w600_edit.class.getResource("icons/WangX14Edit.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);

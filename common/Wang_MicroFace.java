@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang_MicroFace.java,v 1.6 2014/01/26 14:52:57 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ import javax.swing.*;
 class Wang_MicroFace
 		implements Wang_InputDevice
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: Wang_MicroFace.java,v 1.6 2014/01/26 14:52:57 drmiller Exp $";
 
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";
@@ -44,7 +44,7 @@ class Wang_MicroFace
 		// fork/exec command in _intfs[n]...
 		// capturing stdout... (and...?)
 		String[] out = new String[2];
-		int x = Wang_UI.runCommand(_intfs[num], out);
+		int x = Wang_RunCommand.runCommand(_intfs[num], out);
 		if (x == 0) {
 			_input = true;
 			_sample = out[0];
@@ -172,6 +172,7 @@ try {
 	}
 
 	public Wang_MicroFace(String prop, Component comp) {
+		Wang_RunCommand.Initialize();
 		_panels = new JPanel[16];
 		_texts = new JTextArea[16];
 		_dia_pn = new JPanel();
@@ -229,7 +230,7 @@ try {
 		// todo: share code with Wang_Properties...
 		setupDialog(_dia_pn, Wang_UI.getIcon());
 
-		Wang_UI.registerCN36(this);
+		Wang_CN36_Bus.registerCN36(this);
 	}
 
 	static public String getModel() {

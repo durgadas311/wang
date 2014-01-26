@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.20 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang_InputOutputWriter.java,v 1.21 2014/01/26 14:52:57 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +9,7 @@ import javax.swing.border.*;
 class Wang_InputOutputWriter extends IBM_Selectric
 		implements Wang_InputDevice, KeyListener
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.20 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.21 2014/01/26 14:52:57 drmiller Exp $";
 
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
@@ -77,7 +77,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.20 $ $Date: 2014/01/14 21:53:51 $<BR>"+
+			"$Revision: 1.21 $ $Date: 2014/01/26 14:52:57 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -390,7 +390,7 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		_frame.pack();
 		_frame.addKeyListener(new ProxyKeyHandler(this));
 
-		Wang_UI.registerCN36(this);
+		Wang_CN36_Bus.registerCN36(this);
 
 		// Not initially...
 		//_frame.setVisible(true);

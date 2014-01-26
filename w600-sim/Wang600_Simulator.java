@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang600_Simulator.java,v 1.12 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang600_Simulator.java,v 1.13 2014/01/26 14:52:56 drmiller Exp $
 
 import javax.swing.*;
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 class Wang600_Simulator
 	implements Wang_Core
 {
-	final String ident = "$Id: Wang600_Simulator.java,v 1.12 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: Wang600_Simulator.java,v 1.13 2014/01/26 14:52:56 drmiller Exp $";
 	// CPU registers.
 	// ucode accessible
 	byte s;
@@ -1006,7 +1006,7 @@ class Wang600_Simulator
 				Wang600.CN24.reset();
 			}
 			Wang600.M630.reset();
-			Wang_UI.resetCN36();
+			Wang_CN36_Bus.resetCN36();
 		} else if (iob == 1) { // CN24 output only, 6 bits
 			c &= 0x3f;
 			if (Wang600.CN24 != null) {
@@ -1019,7 +1019,7 @@ class Wang600_Simulator
 				// All known devices are ACK only
 				_cn36.do_ack(iob);
 			} else {
-				_cn36 = Wang_UI.startCN36(iob, (c & 0x0ff));
+				_cn36 = Wang_CN36_Bus.startCN36(iob, (c & 0x0ff));
 			}
 		}
 	}

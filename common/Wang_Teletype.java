@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_Teletype.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang_Teletype.java,v 1.9 2014/01/26 14:52:57 drmiller Exp $
 
 import java.io.*;
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.net.*;
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_InputDevice, ActionListener
 {
-	final String ident = "$Id: Wang_Teletype.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: Wang_Teletype.java,v 1.9 2014/01/26 14:52:57 drmiller Exp $";
 
 	public static final String Model = "07";
 	public static final String Description = "Teletype";
@@ -162,7 +162,7 @@ class Wang_Teletype extends ASR33_Teletype
 		if (!on) {
 			_input = false;
 			_inp = null;
-			Wang_UI.deregisterCN36(this);
+			Wang_CN36_Bus.deregisterCN36(this);
 		}
 		super.onOff(on);
 		if (_mu != null) {
@@ -411,7 +411,7 @@ class Wang_Teletype extends ASR33_Teletype
 		java.net.URL url = this.getClass().getResource("icons/wang607.png");
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang " + getName() + " Emulation<BR>"+
-			"$Revision: 1.8 $ $Date: 2014/01/14 21:53:51 $<BR>"+
+			"$Revision: 1.9 $ $Date: 2014/01/26 14:52:57 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -460,7 +460,7 @@ class Wang_Teletype extends ASR33_Teletype
 		_miPunS.addActionListener(this);
 		_miPunT.addActionListener(this);
 
-		Wang_UI.registerCN36(this);
+		Wang_CN36_Bus.registerCN36(this);
 	}
 
 	public void actionPerformed(ActionEvent e) {
