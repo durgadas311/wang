@@ -1,4 +1,4 @@
-# $Id: Makefile.ship,v 1.31 2014/01/25 23:50:35 drmiller Exp $
+# $Id: Makefile.ship,v 1.32 2014/01/26 14:19:02 drmiller Exp $
 
 COPTS =
 
@@ -9,6 +9,7 @@ SPCL = plotter_chrgen.dat
 # Order is significant, until we setup dependencies
 COMMON_CLASSES = \
 		Wang_SplashScreen.class \
+		Wang_RunCommand.class \
 		SuffFileFilter.class \
 		SuffFileChooser.class \
 		Wang_Colors.class \
