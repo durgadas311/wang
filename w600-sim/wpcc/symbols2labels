@@ -39,26 +39,22 @@ while read line; do
 		echo -e "\t*(.wang${arch}subr.${sym})" >> ${ld2file}
 
 		# this line goes to the labeling output... not timing sensitive
-		echo "${f} ${line}"
+		echo -e "${f}\t${line}"
 		((f+=1))
 		x=0
 	fi
-done | awk -v name="${name}" \
+done | awk -F'\t' -v name="${name}" \
 'BEGIN{min=255;max=0;}
 {
 	f=$1+0;
-	ff=$2;
-	for (x=3; x<=NF; ++x) {
-		ff=ff " " $x;
-	}
-	fc[f]=ff;
+	fc[f]=$2;
 	if (f<min) min=f;
 	if (f>max) max=f;
 }
 END{
 	b=int(min/16);
 	b=b*16;
-	e=int((max+15)/16);
+	e=int((max+16)/16);
 	e=e*16;
 	while (b < e) {
 		if ((b % 16) == 0) {
@@ -83,9 +79,8 @@ END{
 		}
 		if (b in fc) {
 			l=fc[b];
-			n=gsub(/_/," ",l);
-			if (n > 0) {
-				printf "<HTML><CENTER>%s</HTML>", l;
+			if (l ~ / /) {
+				printf "<HTML><CENTER>%s</CENTER></HTML>", l;
 			} else {
 				printf "%s", l;
 			}
