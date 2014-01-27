@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang600_Properties.java,v 1.6 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang600_Properties.java,v 1.7 2014/01/27 21:12:45 drmiller Exp $
 
 import java.awt.*;
 import java.io.FileNotFoundException;
@@ -12,6 +12,7 @@ class Wang600_Properties extends Wang_Properties
 	JCheckBox _d12_cb;
 	JCheckBox _cdp_cb;
 	JCheckBox _sp1_cb;
+	JCheckBox _wfl_cb;
 	JRadioButton _f_rb1;
 	JRadioButton _f_rb2;
 	JRadioButton _f_rb3;
@@ -63,6 +64,7 @@ class Wang600_Properties extends Wang_Properties
 		_607host_pn = new JPanel();
 		_607host_pn.add(new JLabel("Teletype Host:"));
 		_607host_pn.add(_607host_tx);
+		_wfl_cb = new JCheckBox("Enable Function Key Labels");
 		_dia_pn = new JPanel();
 		GridBagLayout gridbag = new GridBagLayout();
 		_dia_pn.setLayout(gridbag);
@@ -103,6 +105,9 @@ class Wang600_Properties extends Wang_Properties
 		s.gridy += 1;
 		gridbag.setConstraints(_607host_pn, s);
 		_dia_pn.add(_607host_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_wfl_cb, s);
+		_dia_pn.add(_wfl_cb);
 
 		setupDialog(_dia_pn, Wang_UI.getIcon());
 	}
@@ -177,6 +182,8 @@ class Wang600_Properties extends Wang_Properties
 		_cdp_cb.setSelected(getBoolean("wang600_centerDP"));
 		_d12_cb.setSelected(getBoolean("wang600_digit12"));
 		_sp1_cb.setSelected(getBoolean("wang600_special1"));
+		boolean wfl = (getProperty("wang_function_labels") != null);
+		_wfl_cb.setSelected(wfl);
 		String f = getProperty("wang600_displayfont");
 		if (f.equals(_f_rb1.getActionCommand())) {
 			_f_rb1.setSelected(true);
@@ -204,6 +211,13 @@ class Wang600_Properties extends Wang_Properties
 		setProperty("wang600_special1", Boolean.toString(_sp1_cb.isSelected()));
 		setProperty("wang600_home", _home_tx.getText());
 		setProperty("wang600_607_host", _607host_tx.getText());
+		if (_wfl_cb.isSelected()) {
+			if (!wfl) {
+				setProperty("wang_function_labels", "");
+			}
+		} else {
+			remove("wang_function_labels");
+		}
 		processDefaults();
 
 		if (ret == OPTION_SAVE) {

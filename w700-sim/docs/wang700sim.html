@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<!-- $Id: wang700sim.html,v 1.16 2014/01/17 18:20:03 drmiller Exp $ -->
+<!-- $Id: wang700sim.html,v 1.17 2014/01/27 21:12:45 drmiller Exp $ -->
 </HEAD>
 <BODY>
 
@@ -27,6 +27,13 @@ The corresponding parameter names in the rc file are listed in square brackets.
 	Path to wang700 files. Default: ~/Wang700Files.
 <DT>Teletype Host<DD>[wang700_707_host]
 	The host/IP used to connect to Model 706/707. Default: localhost
+<DT>Enable Function Key Labels<DD>[wang_function_labels]
+	This property holds the currently loaded function key label file,
+	however the Edit Preferences screen only allows enable/disable.
+	Disabling will delete the property, while enabling (if not already
+	enabled) will create an empty property (no label file selected).
+	Once enabled, loading of label file may be done by right-clicking on the label bar.
+	Changing this setting requires restarting the calculator to take affect.
 </DL>
 
 Other parameters (maintained by the calculator, not typically user-controlled),
@@ -57,13 +64,6 @@ that are not exposed in the "Preferences" dialog, are:
 	Default: "w7t".
 <DT>Disk (Model 730) file suffix<DD>[wang700_disk_file_suffix]
 	Default: "w7d".
-<DT>Function Key Labels<DD>[wang_function_labels]
-	This property holds the currently loaded function key label file.
-	This property is currently not present, and is required in order to
-	show the function key label bar. It may be added
-	(empty, i.e. "wang_function_labels=") in order to
-	enable this feature, or deleted to disable the feature again.
-	Once enabled, loading of label file may be done by right-clicking on the label bar.
 </DL>
 
 <P>The simulator is normally started with the following command:

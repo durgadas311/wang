@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang700_Properties.java,v 1.5 2014/01/14 21:53:51 drmiller Exp $
+// $Id: Wang700_Properties.java,v 1.6 2014/01/27 21:12:45 drmiller Exp $
 
 import java.awt.*;
 import javax.swing.*;
@@ -10,6 +10,7 @@ class Wang700_Properties extends Wang_Properties
 {
 	static final long serialVersionUID = 311000000015L;
 	JCheckBox _sp1_cb;
+	JCheckBox _wfl_cb;
 	JRadioButton _f_rb1;
 	JRadioButton _f_rb2;
 	JRadioButton _f_rb3;
@@ -37,6 +38,7 @@ class Wang700_Properties extends Wang_Properties
 
 		// Edit Properties...
 		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
+		_wfl_cb = new JCheckBox("Enable Function Key Labels");
 		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
 		_f_rb1.setActionCommand("Panaplex9seg.ttf");
 		_f_rb2 = new JRadioButton("Nixie Tubes");
@@ -93,6 +95,9 @@ class Wang700_Properties extends Wang_Properties
 		s.gridy += 1;
 		gridbag.setConstraints(_707host_pn, s);
 		_dia_pn.add(_707host_pn);
+		s.gridy += 1;
+		gridbag.setConstraints(_wfl_cb, s);
+		_dia_pn.add(_wfl_cb);
 
 		setupDialog(_dia_pn, Wang_UI.getIcon());
 	}
@@ -150,6 +155,8 @@ class Wang700_Properties extends Wang_Properties
 
 	public boolean editPreferences() {
 		_sp1_cb.setSelected(getBoolean("wang700_special1"));
+		boolean wfl = (getProperty("wang_function_labels") != null);
+		_wfl_cb.setSelected(wfl);
 		String f = getProperty("wang700_displayfont");
 		if (f.equals(_f_rb1.getActionCommand())) {
 			_f_rb1.setSelected(true);
@@ -175,6 +182,13 @@ class Wang700_Properties extends Wang_Properties
 		setProperty("wang700_special1", Boolean.toString(_sp1_cb.isSelected()));
 		setProperty("wang700_home", _home_tx.getText());
 		setProperty("wang700_707_host", _707host_tx.getText());
+		if (_wfl_cb.isSelected()) {
+			if (!wfl) {
+				setProperty("wang_function_labels", "");
+			}
+		} else {
+			remove("wang_function_labels");
+		}
 		processDefaults();
 
 		if (ret == OPTION_SAVE) {
