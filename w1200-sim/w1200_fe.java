@@ -1,5 +1,5 @@
 // Copyright (c) 2011,2014 Douglas Miller
-// $Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $
+// $Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $
 
 import java.awt.*;
 import java.awt.event.*;
@@ -16,7 +16,7 @@ import java.awt.Desktop;
 
 public class w1200_fe
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 
 	public static File _dir;
 	public static java.text.SimpleDateFormat _timestamp =
@@ -24,7 +24,6 @@ public class w1200_fe
 	private static JFrame front_end;
 
 	public static void main(String[] args) {
-		Wang_UI.Initialize();
 		GridBagLayout gridbag = new GridBagLayout();
 		String dir;
 
@@ -250,7 +249,7 @@ public class w1200_fe
 }
 
 class Wang1200_Indicator extends JLabel {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692038L;
 
 //	GridBagLayout gridbag = new GridBagLayout();
@@ -297,7 +296,7 @@ class Wang1200_Indicator extends JLabel {
 class Wang1200_SimInput
 		implements ActionListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 
 	public void actionPerformed(ActionEvent e) {
 		if (!(e.getSource() instanceof JMenuItem)) {
@@ -325,7 +324,7 @@ class Wang1200_SimInput
 
 class Wang1200_TapeEject extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 311057692031L;
 	static final int num_keys = 1;
 
@@ -400,7 +399,7 @@ class Wang1200_Model611 extends JComponent
 	implements Wang_OutputDevice, ActionListener, ComponentListener
 {
 	static final long serialVersionUID = 31140769203L;
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	private byte[] cn24_tabstops;
 	private int _max;	// last active tab stop, or zero if none
 
@@ -1285,7 +1284,7 @@ class Wang1200_Help extends JComponent
 		JLabel lab = new JLabel("<HTML><CENTER>"+
 			"Wang 1200 Word Processor System<BR>"+
 			"Simulator<BR>"+
-			"$Revision: 1.77 $ $Date: 2014/01/14 21:53:51 $<BR>"+
+			"$Revision: 1.78 $ $Date: 2014/01/27 21:11:47 $<BR>"+
 			"<BR>"+
 			"<IMG SRC=\""+url.toString()+"\">"+
 			"<BR>"+
@@ -1404,7 +1403,7 @@ class Wang1200_Help extends JComponent
 class Wang1200_KeyboardInst extends Wang1200_Keyboard
 	implements ActionListener, KeyListener, WindowListener, ComponentListener
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 4;
 
@@ -1833,7 +1832,7 @@ System.err.println("action");
 
 class Wang1200_Keyboards extends JPanel
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692034L;
 	public Wang1200_Keyboards() { }
 
@@ -1979,7 +1978,7 @@ if (url != null) {
 
 class Wang1200_Keyboard_left extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 10;
 
@@ -2256,7 +2255,7 @@ class Wang1200_Keyboard_left extends Wang1200_Keyboards
 
 class Wang1200_Keyboard_right extends Wang1200_Keyboards
 {
-	final String ident = "$Id: w1200_fe.java,v 1.77 2014/01/14 21:53:51 drmiller Exp $";
+	final String ident = "$Id: w1200_fe.java,v 1.78 2014/01/27 21:11:47 drmiller Exp $";
 	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 11;
 
