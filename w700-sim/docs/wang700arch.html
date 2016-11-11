@@ -626,9 +626,9 @@ the calculator is actively refreshing. If the calculator is busy doing
 something else, the display will go blank (from lack of refresh).
 
 <P>The microcode refreshes the display by sequentially loading each digit from memory,
-and pausing for about ? cycles (almost ?uS).
-This means the entire display (16 digits) is refreshed every ?mS, or about
-? times a second.
+and pausing for about 431 cycles (almost 593 uS).
+This means the entire display (16 digits) is refreshed every 9.5 mS, or about
+105 times a second.
 The display decoders are fed directly from the output
 latch of RAM (RA,RB) and the N address register.
 N contains the column (digit) number to enable,
