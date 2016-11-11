@@ -133,10 +133,13 @@ This clock is sent to an 11-stage ring counter, providing the eleven timing sign
 These signals orchestrate the operation of the calculator.
 The instruction time is then 1.375uS or a rate of about 727,272 instructions per second.
 
+<P><UL><IMG SRC="wang700timing.gif"></UL>
+
 <P>The following table outlines various calculator actions relative to timing signals.
 
 <P><UL><TABLE BORDER>
 <TR><TH>Phase</TH><TH>Actions</TH></TR>
+<TR><TD>P0-P3</TD><TD>Microcode instruction sense and latch</TD></TR>
 <TR><TD>P4</TD><TD>Latch L,M,N (MOP)</TD></TR>
 <TR><TD>P5</TD><TD>Perform Tape Functions (MOP)</TD></TR>
 <TR><TD>P5-P6</TD><TD>Latch Output Data (MOP)</TD></TR>
