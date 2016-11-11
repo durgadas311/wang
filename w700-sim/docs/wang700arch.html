@@ -475,13 +475,24 @@ as follows:
 
 <H4>Memory Usage</H4>
 
-All memory in the calculator is organized as 8-bit words.
+<P>The calculator memory was based on magnetic core memory technology.
+This means that reading memory is a destructive operation, clearing the
+location to all zero. This is used by the microcode in places to clear
+memory (registers) quickly, but most of the time the microcode must follow any
+memory read with a memory write in order to restore the contents.
+
+<P>All memory in the calculator is organized as 8-bit words.
 Memory addresses are byte-addresses, but the calculator
 interlaces the memory usage by upper (i.e. RA) and
 lower (i.e. RB) nibbles.
 Even numbered registers use the upper part of a
 range of 16 bytes, odd registers use the lower part.
 Program steps are not interlaced.
+
+<P>The fact that odd/even registers are interlaced in the same bytes of memory
+means that most of the time the microcode must follow a memory read with a memory write,
+even if a register is being cleared since only one nibble of the byte is being cleared
+and the other must be preserved.
 
 <P><UL><TABLE BORDER> 
 <TR><TH COLSPAN=5>Memory Usage (Model 720C)</TH></TR>
