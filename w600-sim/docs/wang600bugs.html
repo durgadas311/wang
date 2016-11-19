@@ -3,7 +3,7 @@
 
 <H2>Known Bugs and Problems</H2>
 
-<LI>On Linux platforms (and possibly others?) the Java VM sometimes throws
+<LI>On older Linux platforms (and possibly others?) the Java VM sometimes throws
 a "Null Pointer Exception" when starting up. This appears in the terminal
 window that was used to start the GUI. Since the problem is intermittent,
 closing and starting again seems to get past the problem.
@@ -18,40 +18,7 @@ instead of just using existing font(s). For whatever reason, the drawing
 does not match the font used for the rest of the output. Newer versions
 of Java compiler or runtime, or postscript libraries, may eliminate the problem.
 
-<LI>There is currently no way to add a descriptive header/footer to printed output.
-I am looking into printer dialog changes to allow that.
-
-<LI>There is currently no easy way to convert a program that runs in RAM (normal
-program memory) into one that can be run from ROM, since the ROM requires different
-instructions (and sometimes labels) for SEARCH, f(x), and CALL. It should be
-possible to write a convert routine to convert the commands and labels.
-The conversion could be an option on the file-chooser used to select the
-ROM image.
-
-<LI>There is currently no way to combine programs (subroutines) into a
-ROM image. In addition to converting commands as described previously,
-there also needs to be a way to handle label renaming so that conflicting
-labels can be resolved. Again, it should be possible to write a
-convert routine to do this. This also could be part of the options
-checkboxes on the file-chooser dialog.
-
-<LI>There is currently no easy way to assemble programs and subroutines,
-and register values, into an image for the Fixed/Removable Disk device.
-Not sure what the best way to do this is. Theoretically, this could all
-be done from the Wang 600 by getting the code/data into the program steps
-through "normal" means (Tape device or keyboard entry), and then using
-the I/O commands to write that out to a disk image.  But some method
-of assembling the segments into aligned regions, and generating a "map"
-to be used to write program loaders, would be nice.
-
 <H3>To-do List</H3>
-
-<LI> Support "input mode" for the Model 611, translating alpha-numeric keystrokes
-into ALPHA codes.
-
-<LI> Convert the "C" back-end to Java and integrate into the GUI. This might
-avoid the need to compile on most platforms - the Java VM should be able the
-run the code no matter where it was originally compiled.
 
 <LI> Enhance "tape file" formats to include Alf Urban's format, and possibly
 others. This may include enhancing the Tape File dialog in the case of a new
@@ -62,8 +29,9 @@ GNU tools for building program libraries and possible even building ROM and
 Disk images. It might also pave the way for a "compiler" for wang programs,
 possibly based on GNU tools such as cpp and gcc.
 
-<LI>Add support for the flat-bed plotter, model 612. This should use the
-same codes as the model 602 Plotting OutputWriter, refer to the
-Streitmatter Operation Manual from Rock Valley College for codes.
+<LI> Save pushbutton positions in RC file so that machine "powers up" in the same
+state that it was last used.
+
+<LI> Improve WPCC to work independently of GCC, possibly written in Java.
 
 </HTML>
