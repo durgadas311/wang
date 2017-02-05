@@ -67,7 +67,11 @@ enum segments {
 	seg_h,
 	seg_i,
 	seg_dp,
+	NSEGS,
+	seg_xh = NSEGS,
+	seg_xi,
 };
+#define HORIZ_SEGS	((1 << seg_a) | (1 << seg_d) | (1 << seg_g))
 
 // original absolute char origin is 46,0
 // original char cell width is 1450
@@ -82,9 +86,11 @@ int origins[][2] = {
 [seg_e] = { 46,42 },
 [seg_f] = { 152,788 },
 [seg_g] = { 274,718 },
-[seg_h] = { 588,788 },
-[seg_i] = { 482,42 },
+[seg_h] = { 600,856 },
+[seg_i] = { 500,140 },
 [seg_dp] = { 1056,-100 },
+[seg_xh] = { 588,788 },	// { 600,856 } = { +12,+68 }
+[seg_xi] = { 482,42 },	// { 500,140 } = { +18,+98 }
 };
 
 int horiz_seg[4][2] = {
@@ -95,9 +101,23 @@ int horiz_seg[4][2] = {
 };
 
 int vert_seg[4][2] = {
-	{ 101,728 },
+	{ 101,728 },	// { 78,562 } / { 76,558 } = { -23,-166 } / { -25,-170 }
 	{ 120,0 },
-	{ -101,-728 },
+	{ -101,-728 },	// {-78,-562 } / { -76,-558 }
+	{ -120,0 },
+};
+
+int fix_seg_h[4][2] = {
+	{ 78,562 },
+	{ 120,0 },
+	{ -78,-562 },
+	{ -120,0 },
+};
+
+int fix_seg_i[4][2] = {
+	{ 76,558 },
+	{ 120,0 },
+	{ -76,-558 },
 	{ -120,0 },
 };
 
@@ -111,7 +131,8 @@ float dp_seg[4][6] = {
 void do_dp(int x, int y) {
 	float fx, fy;
 	fx = x;
-	fy = y + 100;
+	//y += 100;
+	fy = y;
 	int c;
 	printf("%d %d m 0\n", x, y);
 	for (c = 0; c < 4; ++c) {
@@ -150,9 +171,15 @@ void do_segment(enum segments seg) {
 	case seg_c:
 	case seg_e:
 	case seg_f:
-	case seg_h:
-	case seg_i:
+	case seg_xh:
+	case seg_xi:
 		do_seg(x, y, vert_seg);
+		break;
+	case seg_h:
+		do_seg(x, y, fix_seg_h);
+		break;
+	case seg_i:
+		do_seg(x, y, fix_seg_i);
 		break;
 	case seg_dp:
 		do_dp(x, y);
@@ -160,33 +187,83 @@ void do_segment(enum segments seg) {
 	}
 }
 
-void do_char(char *line) {
-	static int nc = 0;
-	char *next;
-	unsigned long c = strtoul(line, &next, 0);
-	if (next == line || !isblank(*next)) {
-		return;
-	}
-	while (isblank(*next)) ++next;
-	printf("StartChar: uni%04X\n", c);
-	printf("Encoding: %d %d %d\n", c, c, nc++); // what is 3rd number?
+struct seg_chars {
+	int chr;
+	unsigned int segs;
+};
+
+void do_char(int cn, struct seg_chars *sc) {
+	printf("StartChar: uni%04X\n", sc->chr);
+	printf("Encoding: %d %d %d\n", sc->chr, sc->chr, cn); // what is 3rd number?
 	printf("Width: %d\n", cell[0]);
 	printf("VWidth: 0\n");
 	printf("Flags: HW\n");
 	printf("LayerCount: 2\n");
 	printf("Fore\n");
 	printf("SplineSet\n");
-	int s = seg_a;
-	while (*next == '0' || *next == '1') {
-		char n = *next++;
-		enum segments seg = s++;
-		if (n != '1') {
+	enum segments seg = seg_a;
+	for (seg = seg_a; seg < NSEGS; ++seg) {
+		if ((sc->segs & (1 << seg)) == 0) {
 			continue;
 		}
-		do_segment(seg);
+		if (seg == seg_h && (sc->segs & HORIZ_SEGS) == 0) {
+			do_segment(seg_xh);
+		} else if (seg == seg_i && (sc->segs & HORIZ_SEGS) == 0) {
+			do_segment(seg_xi);
+		} else {
+			do_segment(seg);
+		}
 	}
 	printf("EndSplineSet\n");
 	printf("EndChar\n");
+}
+
+int load_char(char **line, struct seg_chars *sc) {
+	char *next;
+	unsigned long c = strtoul(*line, &next, 0);
+	if (next == *line || !isblank(*next)) {
+		return -1;
+	}
+	while (isblank(*next)) ++next;
+	int s = seg_a;
+	unsigned int segs = 0;
+	while (*next == '0' || *next == '1') {
+		enum segments seg = s++;
+		// if (!9seg && (seg == seg_h || seg == seg_i)) continue;
+		char n = *next++;
+		if (n != '1') {
+			continue;
+		}
+		segs |= (1 << seg);
+	}
+	while (*next && *next++ != '\n');
+	*line = next;
+	sc->chr = c;
+	sc->segs = segs;
+	return 0;
+}
+
+struct seg_chars *load_chars(char *buf, int *_nc, int *_mx) {
+	int nc = 0;
+	int mx = 0;
+	char *s = buf;
+	struct seg_chars *sc = (struct seg_chars *)buf;
+	while (*s != 0) {
+		if (load_char(&s, sc) == 0) {
+			if (sc->chr > mx) {
+				mx = sc->chr;
+			}
+			++sc;
+			++nc;
+		}
+	}
+	if (_nc != NULL) {
+		*_nc = nc;
+	}
+	if (_mx != NULL) {
+		*_mx = mx;
+	}
+	return (struct seg_chars *)buf;
 }
 
 int main(int argc, char **argv) {
@@ -222,12 +299,19 @@ int main(int argc, char **argv) {
 	close(fd);
 	buf[stb.st_size] = 0;
 
-	printf("Ascent: %d\nDescent: %d\n", ascent, descent);
+	int nc = 0;
+	int mx = 0;
+	struct seg_chars *sc = load_chars(buf, &nc, &mx);
+	if (nc < 1) {
+		return 0; // print something?
+	}
 
-	char *s = buf;
-	while (*s != 0) {
-		do_char(s);
-		while (*s && *s++ != '\n');
+	printf("Ascent: %d\n"
+		"Descent: %d\n"
+		"BeginChars: %d %d\n",
+		ascent, descent, mx, nc);
+	for (x = 0; x < nc; ++x) {
+		do_char(x, &sc[x]);
 	}
 	
 	printf("\nEndChars\n"
