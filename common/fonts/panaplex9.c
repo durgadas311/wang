@@ -58,9 +58,12 @@
 
 #include "genfontseg.h"
 
+#define seg_dp	(NSEGS + 0)
+
 static void draw_ppx9(struct display *, unsigned int, enum segments);
 struct display display_ppx9 = {
 .nseg = 9,
+.xseg = 1,	/* dp */
 .cell = { 1450, 2048 },
 .ascent = 1556,
 .descent = 492,
@@ -111,19 +114,11 @@ static int fix_seg_i[4][2] = {
 };
 
 static void do_dp(int x, int y) {
-	int c;
-	move_to(x, y);
-	for (c = 0; c < 4; ++c) {
-		arc_to(c, 100);
-	}
+	circ_at(x, y, 100);
 }
 
 static void do_seg(int x, int y, int seg[4][2]) {
-	int c;
-	move_to(x, y);
-	for (c = 0; c < 4; ++c) {
-		draw_to(seg[c][0], seg[c][1]);
-	}
+	poly_at(x, y, seg, 4);
 }
 
 static void do_segment(enum segments seg) {

@@ -15,17 +15,34 @@
 
 #include "genfontseg.h"
 
-static float _x, _y;
+/* TODO: how to import these? */
+extern struct display display_ppx9;
+extern struct display display_ftb5;
 
-void move_to(int x, int y) {
-	_x = x;
-	_y = y;
+static float _x, _y;
+static float _sx, _sy;
+
+void go_to(int x, int y) {
+	_sx = _x = x;
+	_sy = _y = y;
 	printf("%g %g m 0\n", _x, _y);
 }
 
-void draw_to(int x, int y) {
-	_x += x;
-	_y += y;
+void move_to(int dx, int dy) {
+	_x += dx;
+	_y += dy;
+	printf("%g %g m 0\n", _x, _y);
+}
+
+void draw_to(int dx, int dy) {
+	_x += dx;
+	_y += dy;
+	printf(" %g %g l 1\n", _x, _y);
+}
+
+void close_to() {
+	_x = _sx;
+	_y = _sy;
 	printf(" %g %g l 1\n", _x, _y);
 }
 
@@ -53,6 +70,21 @@ void arc_to(int q, int r) {
 	_y += r * quads[q][5];
 }
 
+void circ_at(int x, int y, int r) {
+	int c;
+	go_to(x, y);
+	for (c = 0; c < 4; ++c) {
+		arc_to(c, r);
+	}
+}
+
+void poly_at(int x, int y, int poly[][2], int n) {
+	int p;
+	go_to(x, y);
+	for (p = 0; p < n; ++p) {
+		draw_to(poly[p][0], poly[p][1]);
+	}
+}
 
 struct seg_chars {
 	int chr;
@@ -69,17 +101,24 @@ void do_char(int cn, struct seg_chars *sc, struct display *dsp) {
 	printf("Fore\n");
 	printf("SplineSet\n");
 	enum segments seg = seg_a;
-	for (seg = seg_a; seg < NSEGS; ++seg) {
+	for (seg = seg_a; seg < dsp->nseg; ++seg) {
 		if ((sc->segs & (1 << seg)) == 0) {
 			continue;
 		}
 		dsp->drawseg(dsp, sc->segs, seg);
 	}
+	for (seg = 0; seg < dsp->xseg; ++seg) {
+		enum segments sg = seg + NSEGS;
+		if ((sc->segs & (1 << sg)) == 0) {
+			continue;
+		}
+		dsp->drawseg(dsp, sc->segs, sg);
+	}
 	printf("EndSplineSet\n");
 	printf("EndChar\n");
 }
 
-int load_char(char **line, struct seg_chars *sc) {
+int load_char(char **line, struct seg_chars *sc, struct display *dsp) {
 	char *next;
 	unsigned long c = strtoul(*line, &next, 0);
 	if (next == *line || !isblank(*next)) {
@@ -90,7 +129,9 @@ int load_char(char **line, struct seg_chars *sc) {
 	unsigned int segs = 0;
 	while (*next == '0' || *next == '1') {
 		enum segments seg = s++;
-		// if (!9seg && (seg == seg_h || seg == seg_i)) continue;
+		if (s == dsp->nseg) {
+			s = NSEGS;
+		}
 		char n = *next++;
 		if (n != '1') {
 			continue;
@@ -104,13 +145,13 @@ int load_char(char **line, struct seg_chars *sc) {
 	return 0;
 }
 
-struct seg_chars *load_chars(char *buf, int *_nc, int *_mx) {
+struct seg_chars *load_chars(char *buf, int *_nc, int *_mx, struct display *dsp) {
 	int nc = 0;
 	int mx = 0;
 	char *s = buf;
 	struct seg_chars *sc = (struct seg_chars *)buf;
 	while (*s != 0) {
-		if (load_char(&s, sc) == 0) {
+		if (load_char(&s, sc, dsp) == 0) {
 			if (sc->chr > mx) {
 				mx = sc->chr;
 			}
@@ -127,11 +168,65 @@ struct seg_chars *load_chars(char *buf, int *_nc, int *_mx) {
 	return (struct seg_chars *)buf;
 }
 
+static void preamble(struct display *dsp) {
+	printf(	"SplineFontDB: 3.0\n"
+		"FontName: Untitled1\n"
+		"FullName: Untitled1\n"
+		"FamilyName: Untitled1\n"
+		"Weight: Medium\n"
+		"Copyright: Created by Douglas Miller,,, with FontForge 2.0 (http://fontforge.sf.net)\n"
+		"UComments: \"2017-2-1: Created.\" \n"
+		"Version: 001.000\n"
+		"ItalicAngle: 0\n"
+		"UnderlinePosition: -100\n"
+		"UnderlineWidth: 50\n"
+		"Ascent: %d\n"
+		"Descent: %d\n"
+		"LayerCount: 2\n"
+		"Layer: 0 0 \"Back\"  1\n"
+		"Layer: 1 0 \"Fore\"  0\n"
+		"XUID: [1021 590 1989546996 919824]\n"
+		"FSType: 0\n"
+		"OS2Version: 0\n"
+		"OS2_WeightWidthSlopeOnly: 0\n"
+		"OS2_UseTypoMetrics: 1\n"
+		"CreationTime: 1454106881\n"
+		"ModificationTime: 1454113539\n"
+		"OS2TypoAscent: 0\n"
+		"OS2TypoAOffset: 1\n"
+		"OS2TypoDescent: 0\n"
+		"OS2TypoDOffset: 1\n"
+		"OS2TypoLinegap: 90\n"
+		"OS2WinAscent: 0\n"
+		"OS2WinAOffset: 1\n"
+		"OS2WinDescent: 0\n"
+		"OS2WinDOffset: 1\n"
+		"HheadAscent: 0\n"
+		"HheadAOffset: 1\n"
+		"HheadDescent: 0\n"
+		"HheadDOffset: 1\n"
+		"OS2Vendor: 'PfEd'\n"
+		"DEI: 91125\n"
+		"Encoding: ISO8859-1\n"
+		"UnicodeInterp: none\n"
+		"NameList: Adobe Glyph List\n"
+		"DisplaySize: -24\n"
+		"AntiAlias: 1\n"
+		"FitToEm: 1\n"
+		"WinInfo: 16 16 15\n",
+		dsp->ascent, dsp->descent);
+}
+
 int main(int argc, char **argv) {
 	int c;
 	int x, y;
 	int fd = -1;
 	struct stat stb;
+#if 0
+	struct display *dsp = &display_ppx9;
+#else
+	struct display *dsp = &display_ftb5;
+#endif
 
 	extern int optind;
 	extern char *optarg;
@@ -162,20 +257,16 @@ int main(int argc, char **argv) {
 
 	int nc = 0;
 	int mx = 0;
-	struct seg_chars *sc = load_chars(buf, &nc, &mx);
+	struct seg_chars *sc = load_chars(buf, &nc, &mx, dsp);
 	if (nc < 1) {
 		return 0; // print something?
 	}
 
-	extern struct display display_ppx9;
-	printf("Ascent: %d\n"
-		"Descent: %d\n"
-		"BeginChars: %d %d\n",
-		display_ppx9.ascent, display_ppx9.descent, mx, nc);
+	preamble(dsp);
+	printf("\nBeginChars: %d %d\n\n", mx, nc);
 	for (x = 0; x < nc; ++x) {
-		do_char(x, &sc[x], &display_ppx9);
+		do_char(x, &sc[x], dsp);
 	}
-	
 	printf("\nEndChars\n"
 		"EndSplineFont\n");
 
