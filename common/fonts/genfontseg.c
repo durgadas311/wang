@@ -21,29 +21,40 @@ extern struct display display_ftb5;
 
 static float _x, _y;
 static float _sx, _sy;
+static float _shear = 0.176;
+
+static void print_pt(float x, float y) {
+	printf("%g %g ", x + _shear * y, y);
+}
 
 void go_to(int x, int y) {
 	_sx = _x = x;
 	_sy = _y = y;
-	printf("%g %g m 0\n", _x, _y);
+	print_pt(_x, _y);
+	printf("m 0\n");
 }
 
 void move_to(int dx, int dy) {
 	_x += dx;
 	_y += dy;
-	printf("%g %g m 0\n", _x, _y);
+	print_pt(_x, _y);
+	printf("m 0\n");
 }
 
 void draw_to(int dx, int dy) {
 	_x += dx;
 	_y += dy;
-	printf(" %g %g l 1\n", _x, _y);
+	printf(" ");
+	print_pt(_x, _y);
+	printf("l 1\n");
 }
 
 void close_to() {
 	_x = _sx;
 	_y = _sy;
-	printf(" %g %g l 1\n", _x, _y);
+	printf(" ");
+	print_pt(_x, _y);
+	printf("l 1\n");
 }
 
 //        q=0  |  q=1
@@ -52,20 +63,24 @@ void close_to() {
 //             |
 //        q=3  |  q=2
 // ccw, (x,y) already placed (move_to, etc)
-static float quads[4][6] = {
+static float quads[8][6] = {
+	/* clock-wise */
 	{ 0,0.552,	0.448,1,	1,1 },
 	{ 0.552,0,	1,-0.448,	1,-1 },
 	{ 0,-0.552,	-0.448,-1,	-1,-1 },
 	{ -0.552,0,	-1,0.448,	-1,1 },
+	/* counter-clock-wise */
+	{ -0.552,0,	-1,-0.448,	-1,-1 },
+	{ 0,0.552,	-0.448,1,	-1,1 },
+	{ 0.552,0,	1,0.448,	1,1 },
+	{ 0,-0.552,	0.448,-1,	1,-1 },
 };
 void arc_to(int q, int r) {
-	printf(" %g %g %g %g %g %g c 0\n",
-		_x + r * quads[q][0],
-		_y + r * quads[q][1],
-		_x + r * quads[q][2],
-		_y + r * quads[q][3],
-		_x + r * quads[q][4],
-		_y + r * quads[q][5]);
+	printf(" ");
+	print_pt(_x + r * quads[q][0], _y + r * quads[q][1]);
+	print_pt(_x + r * quads[q][2], _y + r * quads[q][3]);
+	print_pt(_x + r * quads[q][4], _y + r * quads[q][5]);
+	printf("c 0\n");
 	_x += r * quads[q][4];
 	_y += r * quads[q][5];
 }

@@ -24,13 +24,13 @@ struct display display_ftb5 = {
 };
 
 static int origins[][2] = {
-[seg_a] = { 200,1854 },
-[seg_b] = { 0,0 },
-[seg_c] = { 0,0 },
-[seg_d] = { 0,0 },
+[seg_a] = { 0,1854 },
+[seg_b] = { 1170, 1120 },
+[seg_c] = { 1170,30 },
+[seg_d] = { 170,0 },
 [seg_e] = { 0,220 },
-[seg_f] = { 200,1036 },
-[seg_g] = { 220,1024 },
+[seg_f] = { 85,1036 },
+[seg_g] = { 110,1024 },
 [seg_am] = { 0,0 },
 [seg_pm] = { 0,0 },
 [seg_co] = { 0,0 },
@@ -41,36 +41,58 @@ static void draw_a() {
 	draw_to(0, 20);
 	arc_to(0, 170);
 	draw_to(813, 0);
-	draw_to(-15, -170);
-	draw_to(-770, 0);
-	draw_to(-20, -20);
+	draw_to(0, -170);
+	draw_to(-793, 0);
+	/* draw_to(-20, -20); */
+	arc_to(4, 20);
 	close_to();
 }
 
 static void draw_b() {
+	go_to(origins[seg_b][0], origins[seg_b][1]);
+	draw_to(-85, -85);
+	draw_to(-85, 85);
+	draw_to(0, 925);
+	arc_to(1, 170);
+	close_to();
 }
 
 static void draw_c() {
+	go_to(origins[seg_c][0], origins[seg_c][1]);
+	draw_to(-170, 170);
+	draw_to(0, 719);
+	draw_to(85, 85);
+	draw_to(85, -85);
+	close_to();
 }
 
 static void draw_d() {
+	go_to(origins[seg_d][0], origins[seg_d][1]);
+	arc_to(3, 170);
+	draw_to(0, 20);
+	draw_to(170, 0);
+	/* draw_to(20, -20); */
+	arc_to(7, 20);
+	draw_to(790, 0);
+	draw_to(170, -170);
+	close_to();
 }
 
 static void draw_f() {
 	go_to(origins[seg_f][0], origins[seg_f][1]);
-	draw_to(-85, 73);
-	draw_to(85, 719);
+	draw_to(-85, 85);
+	draw_to(0, 719);
 	draw_to(170, 0);
-	draw_to(-85, -719);
+	draw_to(0, -719);
 	close_to();
 }
 
 static void draw_e() {
 	go_to(origins[seg_e][0], origins[seg_e][1]);
-	draw_to(85, 719);
-	draw_to(85, 73);
-	draw_to(85, -73);
-	draw_to(-85, -719);
+	draw_to(0, 719);
+	draw_to(85, 85);
+	draw_to(85, -85);
+	draw_to(0, -719);
 	close_to();
 }
 
