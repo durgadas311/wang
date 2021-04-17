@@ -17,11 +17,11 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS) icons/setup.png)
 WICONS = $(subst .png,.ico,$(PNGS))
 
-PACKAGES = wang600apc.tgz wang600apc.dmg wang600apc.exe
+PACKAGES = wang600apc.tgz # wang600apc.dmg wang600apc.exe
 SRCTAR = w600-sim.tgz
 
 update:
-	cd ..; cvs -q update common w600-sim
+#	cd ..; cvs -q update common w600-sim
 
 clobber: clean
 	rm -f *.class Manifest.txt *.jar *.tgz
@@ -32,7 +32,7 @@ tar:
 	tar -czv --transform 's/.ship$$//' \
 		-f w600-sim/$(SRCTAR) \
 		w600-sim/Makefile.ship w600-sim/*.java common/*.java \
-		w600-sim/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
+		wang600-docs/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/icons/*.png	\
 		common/fonts/*.ttf	\
@@ -46,18 +46,18 @@ STATE = Exp
 endif
 
 Release.java: _FRC_
-	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
+#	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
 ifeq ($(MAKECMDGOALS),ship)
-	@cvs commit -f -m. $@
+#	@cvs commit -f -m. $@
 endif
-	@if ! grep -s -q 'State: $(STATE)' $@; then \
-		cvs admin -s $(STATE) $@; \
-		rm -f $@; \
-	fi
-	@cvs -Q update $@
+#	@if ! grep -s -q 'State: $(STATE)' $@; then \
+#		cvs admin -s $(STATE) $@; \
+#		rm -f $@; \
+#	fi
+#	@cvs -Q update $@
 
-ship: tar packages wpcc.tgz www
-	mv -v $(SRCTAR) $(PACKAGES) wpcc.tgz /http/durgadas.com/sebhc/w600-sim
+ship: tar packages www # wpcc.tgz
+	rsync -Wuv $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w600-sim
 
 packages: $(PACKAGES)
 
@@ -129,11 +129,9 @@ wpcc.tgz: _FRC_
 	rm -rf temp_wpcc
 
 www: _FRC_
-	mkdir -p /http/durgadas.com/wang600/{wang600docs,wpcc}
-	cp docs/*.html docs/*.gif /http/durgadas.com/wang600/wang600docs
-	cp www/wang6* /http/durgadas.com/wang600
-	cp wpcc/www/*.html /http/durgadas.com/wang600/wpcc
-	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w600-sim
+	rsync -Wuv docs/*.html docs/*.gif durgadas.com:/var/www/html/wang600/wang600docs
+	rsync -Wuv www/wang6* durgadas.com:/var/www/html/wang600
+	rsync -Wuv www/downloads/*.html www/downloads/.htaccess durgadas.com:/var/www/html/sebhc/w600-sim
 
 icns: $(ICNS)
 

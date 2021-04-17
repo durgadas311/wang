@@ -1684,10 +1684,10 @@ class Wang600_Help extends JComponent
 
 		_frame.setJMenuBar(mb);
 		_frame.add(_scroll);
-		_frame.pack();
 
 		_frame.addWindowListener(this);
 		_frame.addComponentListener(this);
+		_frame.pack();
 
 		Dimension fdim = _frame.getSize();
 		Dimension sdim = _scroll.getSize();

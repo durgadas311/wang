@@ -10,7 +10,7 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
-PACKAGES = wang1200wps.tgz wang1200wps.dmg wang1200wps.exe
+PACKAGES = wang1200wps.tgz # wang1200wps.dmg wang1200wps.exe
 SRCTAR = w1200-sim.tgz
 
 PNGS = $(wildcard icons/wang1200-*x*.png)
@@ -37,7 +37,7 @@ tar:
 #		w1200-sim/docs/*.pdf
 
 ship: tar packages
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w1200-sim
+	rsync -Wuv $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w1200-sim
 
 packages: $(PACKAGES)
 
@@ -57,27 +57,27 @@ wang1200wps.tgz: temp_dest
 	rm -rf $(TMPDIR)
 
 wang1200wps.exe: all winicons wang1200.jar wang1200.nsi
-	makensis wang1200.nsi
+#	makensis wang1200.nsi
 
 # Need better way to estimate size of image...
 wang1200wps.dmg: all icns wang1200.jar
-	rm -f $@
-	dd if=/dev/zero of=$@ bs=64k count=16
-	hformat -l WANG1200WPS $@
-	hmount $@
-	hmkdir Wang1200.app Wang1200Files
-	hcd Wang1200.app
-	hmkdir Contents
-	hcd Contents
-	hcopy -r wang1200.plist.tmplt :Info.plist
-	hmkdir Resources MacOS
-	hcopy -r wang1200.jar run txt2wng :MacOS
-	hcopy -r icons/wang1200-*x*.icns :Resources
-	hcd
-	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
-	hcopy -r README :README.html
-	hcopy -r examples/*.wpt :Wang1200Files
-	humount $@
+#	rm -f $@
+#	dd if=/dev/zero of=$@ bs=64k count=16
+#	hformat -l WANG1200WPS $@
+#	hmount $@
+#	hmkdir Wang1200.app Wang1200Files
+#	hcd Wang1200.app
+#	hmkdir Contents
+#	hcd Contents
+#	hcopy -r wang1200.plist.tmplt :Info.plist
+#	hmkdir Resources MacOS
+#	hcopy -r wang1200.jar run txt2wng :MacOS
+#	hcopy -r icons/wang1200-*x*.icns :Resources
+#	hcd
+#	hcopy -r Uninstall-wang1200.sh :Uninstall-wang1200
+#	hcopy -r README :README.html
+#	hcopy -r examples/*.wpt :Wang1200Files
+#	humount $@
 
 install: temp_dest
 	rm -rf $(INSDEST)
@@ -86,10 +86,9 @@ install: temp_dest
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_
-	mkdir -p /http/durgadas.com/wang1200/wang1200docs
-	cp docs/*.html docs/*.gif /http/durgadas.com/wang1200/wang1200docs
-	cp www/wang1200* /http/durgadas.com/wang1200
-	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w1200-sim
+	rsync -Wuv docs/*.html docs/*.gif durgadas.com:/var/www/html/wang1200/wang1200docs
+	rsync -Wuv www/wang1200* durgadas.com:/var/www/html/wang1200
+	rsync -Wuv www/downloads/*.html www/downloads/.htaccess durgadas.com:/var/www/html/sebhc/w1200-sim
 
 icns: $(ICNS)
 

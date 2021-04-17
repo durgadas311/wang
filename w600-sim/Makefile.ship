@@ -1,6 +1,7 @@
 # $Id: Makefile.ship,v 1.33 2014/01/26 14:52:56 drmiller Exp $
 
 COPTS =
+SHELL = /bin/bash
 
 ROM = wang600.rom
 
@@ -98,7 +99,7 @@ jar: wang600.jar
 SHIP_DOCS = $(filter-out docs/wang600arch.html,$(wildcard docs/*.html))
 
 wang600.jar: Release.java Release.class w600_fe.class w600_edit.class w600initProps.class
-	echo -e "Main-Class: w600_fe\nSplashScreen-Image: icons/wang600.gif" >Manifest.txt
+	/bin/echo -e "Main-Class: w600_fe\nSplashScreen-Image: icons/wang600.gif" >Manifest.txt
 	jar cfm $@ Manifest.txt $(ROM) *.class icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \

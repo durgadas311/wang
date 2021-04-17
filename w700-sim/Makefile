@@ -11,7 +11,7 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 MACOSX = mini-mac
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
-PACKAGES = wang700apc.tgz wang700apc.dmg wang700apc.exe
+PACKAGES = wang700apc.tgz # wang700apc.dmg wang700apc.exe
 SRCTAR = w700-sim.tgz
 
 PNGS = $(wildcard icons/wang700-*x*.png)
@@ -34,7 +34,7 @@ clobber: clean
 	rm -rf $(TMPDIR)
 
 rom.diff: $(ROM)
-	-cvs diff -u -r 1.1 $(ROM) >rom.diff
+#	-cvs diff -u -r 1.1 $(ROM) >rom.diff
 
 tar: wang700.jar
 	cd ..;\
@@ -55,21 +55,21 @@ STATE = Exp
 endif
 
 Release.java: _FRC_
-	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
+#	@if [[ ! -f $@ ]]; then cvs -Q update $@; fi
 ifeq ($(MAKECMDGOALS),ship)
-	@cvs commit -f -m. $@
+#	@cvs commit -f -m. $@
 endif
-	@if ! grep -s -q 'State: $(STATE)' $@; then \
-		cvs admin -s $(STATE) $@; \
-		rm -f $@; \
-	fi
-	@cvs -Q update $@
+#	@if ! grep -s -q 'State: $(STATE)' $@; then \
+#		cvs admin -s $(STATE) $@; \
+#		rm -f $@; \
+#	fi
+#	@cvs -Q update $@
 
 ship: tar packages www
-	mv -v $(SRCTAR) $(PACKAGES) /http/durgadas.com/sebhc/w700-sim
+	rsync -Wuv $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w700-sim
 
 update:
-	cd ..; cvs -q update common w700-sim
+#	cd ..; cvs -q update common w700-sim
 
 packages: $(PACKAGES)
 
@@ -134,15 +134,14 @@ install: temp_dest
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_
-	mkdir -p /http/durgadas.com/wang700/wang700docs
-	cp docs/*.html docs/*.gif /http/durgadas.com/wang700/wang700docs
-	cp www/wang700* /http/durgadas.com/wang700
-	cp www/downloads/*.html www/downloads/.htaccess /http/durgadas.com/sebhc/w700-sim
+	rsync -Wuv docs/*.html docs/*.gif durgadas.com:/var/www/html/wang700/wang700docs
+	rsync -Wuv www/wang700* durgadas.com:/var/www/html/wang700
+	rsync -Wuv www/downloads/*.html www/downloads/.htaccess durgadas.com:/var/www/html/sebhc/w700-sim
 
 reicon:
-	cvs -q update icons
+#	cvs -q update icons
 	$(MAKE) _icons
-	cvs ci -m"update icons" icons
+#	cvs ci -m"update icons" icons
 
 icns: $(ICNS)
 
