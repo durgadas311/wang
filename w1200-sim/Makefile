@@ -1,4 +1,5 @@
 # $Id: Makefile,v 1.25 2013/12/10 01:43:56 drmiller Exp $
+SHELL = /bin/bash
 
 include Makefile.ship
 
