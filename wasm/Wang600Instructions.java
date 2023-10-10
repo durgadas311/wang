@@ -5,7 +5,7 @@ import java.util.Vector;
 public class Wang600Instructions implements WangInstructions {
 	private WangSymTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
-	private 
+	private TiltRotate tr = new TiltRotate();
 
 	// operand type, if any.
 	static final int NONE = 0;	// one-step instructions
@@ -17,22 +17,8 @@ public class Wang600Instructions implements WangInstructions {
 	static final int IO = 6;
 	static final int INDIR = 7;
 
-	static final int ATERM = 0x22;	// terminates ALPHA string command
-
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
-	static final String[] a = {	// unshifted
-		"-","y", " ","\\b","q","p","=", "j","\\t","/","\\x","\\y",",",";","f","g",
-		"w","s","\\s","\\u","i","'",".","\\h","\\r","o","\\i","\\v","a","r","v","m",
-		"b","h","\\+","\\-","k","e","n", "t","\\p","l","\\+","\\-","c","d","u","x",
-		"9","0","\\+","\\-","6","5","2", "z","\\p","4","\\+","\\-","8","7","3","1",
-	};
-	static final String[] A = {	// shifted
-		"_","Y", " ","\\b", "Q","P", "+", "J","\\t","?","\\x","\\y",",",":","F","G",
-		"W","S","\\s","\\u", "I","\"",".","\\q","\\r","O","\\i","\\v","A","R","V","M",
-		"B","H","\\+","\\-", "K","E", "N", "T","\\p","L","\\+","\\-","C","D","U","X",
-		"(",")","\\+","\\-","\\c","%", "@", "Z","\\p","$","\\+","\\-","*","&","#","!",
-	};
 
 	class Instruction {
 		public String mnemonic;
@@ -132,11 +118,110 @@ public class Wang600Instructions implements WangInstructions {
 		initAll();
 	}
 
+	public int maxPC() { return 1847; }
+	public int maxReg() { return 246; }
+
 	// Assembly methods //
 
+	Instruction asm(String opcode) {
+		for (Instruction x : instr) {
+			if (x.equalsMn(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
+	private byte getFormat(String opr) {
+		int cd = (F.indexOf(opr.charAt(0)) << 4);
+		cd |= Integer.valueOf(opr.substring(2));
+		return (byte)cd;
+	}
+
+	private byte getCode(String opr) {
+		int cd = (Integer.valueOf(opr.substring(0,2)) << 4);
+		cd |= Integer.valueOf(opr.substring(3));
+		return (byte)cd;
+	}
+
 	// label, if any, already parsed. Else 'lab' is null.
-	public int encode(String line, byte[] mem, int start) {
-		return 0;
+	public int encode(String[] line, byte[] mem, int start) {
+		int adr = start;
+		int x = 0;
+		int reg;
+		Instruction e;
+
+		while (x < line.length && line[x].length() == 0) ++x;
+		if (x >= line.length) return 0;
+		if (line[x].equalsIgnoreCase("ENTER")) {
+			++x;
+			for (int i = 0; i < line[x].length(); ++i) {
+				int q = E.indexOf(Character.toUpperCase(line[x].charAt(i)));
+				if (q < 0) {
+					// TODO: indicate error "invalid number"
+					return -1;
+				}
+				mem[adr++] = (byte)q;
+			}
+			return adr - start;
+		}
+		e = asm(line[x++]);
+		if (e == null) return -1; // indicate error "invalid opcode"
+		mem[adr++] = e.opcode;
+		if (e.flags == 0) return adr - start;
+		if (x >= line.length) {
+			return -1; // indicate error "syntax"
+		}
+		switch (e.flags) {
+		case MARK:	// TODO: prevent/warn on END PROG?
+		case LABEL:
+			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
+				mem[adr++] = getCode(line[x]);
+				break;
+			}
+		case INDIR:	// TODO: validate operation code?
+			e = asm(line[x]);
+			if (e == null) return -1; // indicate error "invalid code"
+			mem[adr++] = e.opcode;
+			break;
+		case REG:
+			reg = Integer.valueOf(line[x]);
+			if (reg < 0 || reg > maxReg()) {
+				// TODO: indicate error "invalid regtister"
+				return -1;
+			}
+			mem[adr++] = (byte)reg;
+			break;
+		case FMT:
+			if (!line[x].matches("^[X-ZA-M]/[0-1][0-9]$")) {
+				// TODO: indicate error "bad format"
+				return -1;
+			}
+			mem[adr++] = getFormat(line[x]);
+			break;
+		case ALPHA:
+			// line[x] must have quotes, or else be a key.
+			if (line[x].matches("^\".*\"$")) {
+				reg = tr.a2tr(line[x].substring(1, line[x].length() - 1),
+					false, mem, adr);
+				adr += reg;
+			} else {
+				// TODO: same as INDIR, etc.
+				e = asm(line[x]);
+				if (e == null) return -1; // indicate error "invalid code"
+				mem[adr++] = e.opcode;
+			}
+			break;
+		case IO:
+			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
+				// TODO: indicate error "bad I/O"
+				return -1;
+			}
+			mem[adr++] = getCode(line[x]);
+			break;
+		}
+
+		return adr - start;
 	}
 
 	public int dreg(String line, byte[] mem, int start) {
@@ -177,23 +262,23 @@ public class Wang600Instructions implements WangInstructions {
 		if ((mem[x] & 0xff) < 0x0d) {
 			ret = "ENTER ";
 			while ((mem[x] & 0xff) < 0x0d) {
-				ret += E.charAt(mem[x++] & 0x0f);
+				o = mem[x++] & 0xff;
+				ret += E.charAt(o);
 			}
-			ins.length = x - start;
 			ins.mnemonic = ret;
+			ins.length = x - start;
 			ins.flags = 0;
 			return ins;
 		}
 		o = mem[x++] & 0xff;
 		e = disas(o);
 		if (e == null) {
-			ins.mnemonic = String.format("?%02d %02d", 
-					(o >> 4), (o & 0x0f));
+			ins.mnemonic = "?";
 			ins.length = 1;
 			ins.flags = 0;
 			return ins;
 		}
-		ret = e.mnemonic;
+		ret += e.mnemonic;
 		// TODO: prevent overflow of mem[]...
 		if (e.flags != 0) {
 			o = mem[x++] & 0xff;
@@ -212,17 +297,19 @@ public class Wang600Instructions implements WangInstructions {
 			break;
 		case ALPHA:
 			if (o < 0x80) {
-				shifted = false;
-				ret += "\"";
+				shifted = false; // a.k.a. Shift Down
+				ret += " \"";
 				while (o < 0x80) {
-					if (shifted) {
-						ret += A[o];
+					if (o == tr.term()) {
+						ret += "\\0";
+						break;
+					} else if (o == tr.shiftDown()) {
+						shifted = false;
+					} else if (o == tr.shiftUp()) {
+						shifted = true;
 					} else {
-						ret += a[o];
+						ret += tr.tr2a(o, shifted);
 					}
-					if (o == ATERM) break;
-					else if (o == 0x12) shifted = false;
-					else if (o == 0x13) shifted = true;
 					o = mem[x++] & 0xff;
 				}
 				// TODO: need to backup if no ATERM...
@@ -235,6 +322,7 @@ public class Wang600Instructions implements WangInstructions {
 			ret += String.format(" %02d-%02d", (o >> 4), (o & 0x0f));
 			break;
 		}
+		
 		ins.mnemonic = ret;
 		ins.length = x - start;
 		ins.flags = e.flags;
