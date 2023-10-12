@@ -6,16 +6,7 @@ public class Wang600Instructions implements WangInstructions {
 	private WangSymTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
-
-	// operand type, if any.
-	static final int NONE = 0;	// one-step instructions
-	static final int MARK = 1;
-	static final int REG = 2;
-	static final int FMT = 3;
-	static final int LABEL = 4;
-	static final int ALPHA = 5;
-	static final int IO = 6;
-	static final int INDIR = 7;
+	private char error;
 
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
@@ -78,9 +69,9 @@ public class Wang600Instructions implements WangInstructions {
 		instr.add(new Instruction("PRINT*",	0xf1, FMT));
 		instr.add(new Instruction("I/O",	0xf2, IO));
 		instr.add(new Instruction("SRCHROM",	0xf3, MARK));
-		instr.add(new Instruction("SRCHROM2",	0xf4, MARK));
-		instr.add(new Instruction("SRCHROM3",	0xf5, MARK));
-		instr.add(new Instruction("SRCHROM4",	0xf6, MARK));
+		instr.add(new Instruction("SRCHROM*",	0xf4, MARK));
+		instr.add(new Instruction("SRCHROM*",	0xf5, MARK));
+		instr.add(new Instruction("SRCHROM*",	0xf6, MARK));
 		instr.add(new Instruction("CALL",	0xf7, MARK));
 		instr.add(new Instruction("MARK*",	0xf8, LABEL));
 		instr.add(new Instruction("STORE*",	0xf9, REG));
@@ -91,7 +82,7 @@ public class Wang600Instructions implements WangInstructions {
 		instr.add(new Instruction("GROUP2",	0xfe, IO));
 		instr.add(new Instruction("SEARCH*",	0xff, MARK));
 		instr.add(new Instruction("E13",	0x0d, 0));
-		instr.add(new Instruction("E14",	0x0e, 0));
+		instr.add(new Instruction("CLRALL",	0x0e, 0));
 		instr.add(new Instruction("CLEAR",	0x0f, 0));
 		for (int x = 0; x < 16; ++x) {
 			String n = String.format("%02d", x);
@@ -120,6 +111,7 @@ public class Wang600Instructions implements WangInstructions {
 
 	public int maxPC() { return 1847; }
 	public int maxReg() { return 246; }
+	public char lastError() { return error; }
 
 	// Assembly methods //
 
@@ -151,6 +143,7 @@ public class Wang600Instructions implements WangInstructions {
 		int reg;
 		Instruction e;
 
+		error = ' ';
 		while (x < line.length && line[x].length() == 0) ++x;
 		if (x >= line.length) return 0;
 		if (line[x].equalsIgnoreCase("ENTER")) {
@@ -158,7 +151,7 @@ public class Wang600Instructions implements WangInstructions {
 			for (int i = 0; i < line[x].length(); ++i) {
 				int q = E.indexOf(Character.toUpperCase(line[x].charAt(i)));
 				if (q < 0) {
-					// TODO: indicate error "invalid number"
+					error = 'V';
 					return -1;
 				}
 				mem[adr++] = (byte)q;
@@ -166,11 +159,15 @@ public class Wang600Instructions implements WangInstructions {
 			return adr - start;
 		}
 		e = asm(line[x++]);
-		if (e == null) return -1; // indicate error "invalid opcode"
+		if (e == null) {
+			error = 'O';
+			return -1;
+		}
 		mem[adr++] = e.opcode;
 		if (e.flags == 0) return adr - start;
 		if (x >= line.length) {
-			return -1; // indicate error "syntax"
+			error = 'S';
+			return -1;
 		}
 		switch (e.flags) {
 		case MARK:	// TODO: prevent/warn on END PROG?
@@ -181,20 +178,23 @@ public class Wang600Instructions implements WangInstructions {
 			}
 		case INDIR:	// TODO: validate operation code?
 			e = asm(line[x]);
-			if (e == null) return -1; // indicate error "invalid code"
+			if (e == null) {
+				error = 'P';
+				return -1;
+			}
 			mem[adr++] = e.opcode;
 			break;
 		case REG:
 			reg = Integer.valueOf(line[x]);
 			if (reg < 0 || reg > maxReg()) {
-				// TODO: indicate error "invalid regtister"
+				error = 'R';
 				return -1;
 			}
 			mem[adr++] = (byte)reg;
 			break;
 		case FMT:
 			if (!line[x].matches("^[X-ZA-M]/[0-1][0-9]$")) {
-				// TODO: indicate error "bad format"
+				error = 'F';
 				return -1;
 			}
 			mem[adr++] = getFormat(line[x]);
@@ -208,13 +208,16 @@ public class Wang600Instructions implements WangInstructions {
 			} else {
 				// TODO: same as INDIR, etc.
 				e = asm(line[x]);
-				if (e == null) return -1; // indicate error "invalid code"
+				if (e == null) {
+					error = 'P';
+					return -1;
+				}
 				mem[adr++] = e.opcode;
 			}
 			break;
 		case IO:
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
-				// TODO: indicate error "bad I/O"
+				error = 'I';
 				return -1;
 			}
 			mem[adr++] = getCode(line[x]);
@@ -249,6 +252,18 @@ public class Wang600Instructions implements WangInstructions {
 		return e.mnemonic;
 	}
 
+	public WangInstruction decodeOp(int op) {
+		WangInstruction ins = new WangInstruction();
+		Instruction e;
+
+		e = disas(op);
+		if (e == null) return null;
+		ins.mnemonic = e.mnemonic;
+		ins.flags = e.flags;
+		// ins.length is implied by flags
+		return ins;
+	}
+
 	public WangInstruction decode(byte[] mem, int start) {
 		String ret = "";
 		int x = start;
@@ -256,8 +271,6 @@ public class Wang600Instructions implements WangInstructions {
 		WangInstruction ins = new WangInstruction();
 		Instruction e;
 		boolean shifted;
-
-		// TODO: handle ALPHA text sequences...
 
 		if ((mem[x] & 0xff) < 0x0d) {
 			ret = "ENTER ";
@@ -293,7 +306,8 @@ public class Wang600Instructions implements WangInstructions {
 			ret += String.format(" %d", o);
 			break;
 		case FMT:
-			ret += F.charAt(o >> 4) + "/" + String.format("%02d", o & 0x0f);
+			ret += " " + F.charAt(o >> 4) + "/" +
+				String.format("%02d", o & 0x0f);
 			break;
 		case ALPHA:
 			if (o < 0x80) {
@@ -301,7 +315,8 @@ public class Wang600Instructions implements WangInstructions {
 				ret += " \"";
 				while (o < 0x80) {
 					if (o == tr.term()) {
-						ret += "\\0";
+						// terminator is implied...
+						// ret += "\\0";
 						break;
 					} else if (o == tr.shiftDown()) {
 						shifted = false;
@@ -312,7 +327,7 @@ public class Wang600Instructions implements WangInstructions {
 					}
 					o = mem[x++] & 0xff;
 				}
-				// TODO: need to backup if no ATERM...
+				if (o >= 0x80) --x;
 				ret += "\"";
 			} else {
 				ret += " " + getKey(o);
@@ -322,10 +337,13 @@ public class Wang600Instructions implements WangInstructions {
 			ret += String.format(" %02d-%02d", (o >> 4), (o & 0x0f));
 			break;
 		}
-		
 		ins.mnemonic = ret;
 		ins.length = x - start;
 		ins.flags = e.flags;
 		return ins;
+	}
+
+	public String printHelp() {
+		return "<letter>/<decimal>";
 	}
 }

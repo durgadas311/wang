@@ -3,13 +3,11 @@
 import java.io.*;
 
 public class WangAssembler {
-	boolean lst;
 	WangInstructions wi;
-	int err = 0;
+	int errs = 0;
 
-	public WangAssembler(WangInstructions wi, boolean lst) {
+	public WangAssembler(WangInstructions wi) {
 		this.wi = wi;
-		this.lst = lst;
 	}
 
 	private int low(byte b) { return (b & 0x0f); }
@@ -59,29 +57,37 @@ public class WangAssembler {
 			s = line.replaceFirst(";.*$", "");
 			toks = s.split("\\s(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 			if (toks.length == 0) { // is this the way?
-				if (lst) {
+				if (ls != null) {
 					ls.format("                %s\n", line);
 				}
 				continue;
 			}
 			n = wi.encode(toks, mem, adr);
 			if (n <= 0) {
-System.err.format("ERROR: %s\n", line);
-				// TODO: error? what to print?
-				break;
+				++errs;
 			}
-			if (!lst) {
+			if (ls == null) {
 				adr += n;
 			} else {
 				int end = adr + n;
-				ls.format("%04d  %02d-%02d     %s\n", adr, high(mem[adr]), low(mem[adr]), line);
+				ls.format("%c%04d  %02d-%02d     %s\n",
+					wi.lastError(),
+					adr, high(mem[adr]), low(mem[adr]), line);
 				++adr;
 				while (adr < end) {
-					ls.format("%04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
+					ls.format(" %04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
 					++adr;
 				}
 			}
+			if (errs > 10) {
+				System.err.format("Too many errors\n");
+				break;
+			}
 		}
-		return objectOut(mem, adr, os);
+		n = objectOut(mem, adr, os);
+		if (n < 0) {
+			return n;
+		}
+		return errs;
 	}
 }

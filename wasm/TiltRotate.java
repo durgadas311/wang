@@ -3,7 +3,6 @@
 import java.util.Vector;
 
 public class TiltRotate {
-	static final int ATERM = 0x22;	// terminates ALPHA string command
 	static final String[] a = {	// unshifted
 		"-","y", " ","\\b","q","p","=", "j","\\t","/","\\x","\\y",",",";","f","g",
 		"w","s","\\u","\\s","i","'",".","\\h","\\r","o","\\i","\\v","a","r","v","m",
@@ -17,10 +16,13 @@ public class TiltRotate {
 		"(",")","\\+","\\-","\\c","%", "@", "Z","\\p","$","\\+","\\-","*","&","#","!",
 	};
 
-	boolean endTerm;
+	int aterm = 0x22;
 
-	// TODO: any options?
 	public TiltRotate() {
+	}
+
+	public TiltRotate(int trm) {
+		aterm = trm;
 	}
 
 	private int isIn(char c, String[] s) {
@@ -35,10 +37,6 @@ public class TiltRotate {
 	}
 
 	private byte doEsc(char c) {
-		if (c == '0') {
-			endTerm = true;
-			return (byte)ATERM;
-		}
 		for (int x = 0; x < a.length; ++x) {
 			if (a[x].length() == 2 && c == a[x].charAt(1)) {
 				return (byte)x;
@@ -47,7 +45,7 @@ public class TiltRotate {
 		return (byte)0; // TODO:
 	}
 
-	public int term() { return ATERM; }
+	public int term() { return aterm; }
 	public int shiftDown() { return 0x12; }
 	public int shiftUp() { return 0x13; }
 
@@ -70,11 +68,13 @@ public class TiltRotate {
 		int x;
 		int i;
 
-		endTerm = false;
 		for (x = 0; x < s.length(); ++x) {
 			// TODO: escapes. Also non-shifted (blank, etc).
 			if (s.charAt(x) == '\\' && x + 1 < s.length()) {
 				++x;
+				if (s.charAt(x) == '0') {
+					break; // we're done
+				}
 				mem[adr++] = doEsc(s.charAt(x));
 				continue;
 			}
@@ -84,12 +84,13 @@ public class TiltRotate {
 				shift = false;
 				i = isIn(s.charAt(x), a);
 			}
-if (s.charAt(x) == '!') {
-System.err.format("Bang %s %s\n", shift, shifted);
-}
 			if (i < 0) {
 				// TODO: invalid character placeholder...
 				continue;
+			}
+			if ((i & 0x06) == 0x02 || (i & 0x0f) == 0x08) {
+				// do not shift for these
+				shift = shifted;
 			}
 			if (x == 0 || shift != shifted) {
 				mem[adr++] = (byte)(shift ? shiftUp() : shiftDown());
@@ -97,9 +98,10 @@ System.err.format("Bang %s %s\n", shift, shifted);
 			}
 			mem[adr++] = (byte)i;
 		}
-		if (!endTerm) {
-			mem[adr++] = (byte)term();
+		if (shifted) {
+			mem[adr++] = (byte)shiftDown();
 		}
+		mem[adr++] = (byte)term();
 		return adr - start;
 	}
 }
