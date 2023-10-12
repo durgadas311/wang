@@ -37,6 +37,7 @@ public class WangAssembler {
 		String line;
 		String s;
 		String[] toks;
+		boolean stdout = (ls == System.out);
 
 		try {
 			in = new BufferedReader(new FileReader(file));
@@ -58,7 +59,8 @@ public class WangAssembler {
 			}
 			s = line.replaceFirst(";.*$", "");
 			toks = s.split("\\s(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-			if (toks.length == 0) { // is this the way?
+			if (toks.length == 0 ||
+				toks.length == 1 && toks[0].length() == 0) {
 				if (ls != null) {
 					ls.format("                %s\n", line);
 				}
@@ -67,6 +69,11 @@ public class WangAssembler {
 			n = wi.encode(toks, mem, adr);
 			if (n <= 0) {
 				++errs;
+				if (!stdout) {
+					System.err.format("%c%04d  %02d-%02d     %s\n",
+						wi.lastError(),
+						adr, high(mem[adr]), low(mem[adr]), line);
+				}
 			}
 			if (ls == null) {
 				adr += n;
@@ -90,6 +97,7 @@ public class WangAssembler {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
 				mem[adr++] = (byte)wi.endProg();
 			} else {
+				mem[adr++] = (byte)wi.endProg();
 				mem[adr++] = (byte)0xff;
 			}
 		}

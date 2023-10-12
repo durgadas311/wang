@@ -133,6 +133,9 @@ public class wasm {
 		tape = tape || (aout != null && aout.getName().matches(".*\\.w[67]t"));
 		asm = new WangAssembler(mach, tape);
 		int foo = asm.asm(file, aout, list);
+		if (foo != 0) {
+			System.err.format("%d Errors in assembly\n", foo);
+		}
 		System.exit(foo == 0 ? 0 : 1);
 	}
 
