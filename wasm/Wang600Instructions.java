@@ -111,6 +111,7 @@ public class Wang600Instructions implements WangInstructions {
 
 	public int maxPC() { return 1847; }
 	public int maxReg() { return 246; }
+	public int endProg() { return 0x9e; }
 	public char lastError() { return error; }
 
 	// Assembly methods //

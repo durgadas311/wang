@@ -4,11 +4,13 @@ import java.io.*;
 
 public class WangDisassembler {
 	boolean lst;
+	boolean tape;
 	WangInstructions wi;
 
-	public WangDisassembler(WangInstructions wi, boolean lst) {
+	public WangDisassembler(WangInstructions wi, boolean lst, boolean tape) {
 		this.wi = wi;
 		this.lst = lst;
+		this.tape = tape;
 		// TODO: allow for definition of a "register point" after which
 		// all data is for registers. Note that END PROG may/will follow
 		// register data.
@@ -33,6 +35,14 @@ public class WangDisassembler {
 		}
 		adr = 0;
 		while (adr < mem.length && adr <= wi.maxPC()) {
+			if (tape && (mem[adr] & 0xff) == wi.endProg() &&
+					adr + 1 < mem.length) {
+				++adr;
+				if ((mem[adr] & 0xff) != wi.endProg()) {
+					os.format("EOD\n");
+				}
+				continue;
+			}
 			e = wi.decode(mem, adr);
 			if (!lst) {
 				os.format("\t%s\n", e.mnemonic);

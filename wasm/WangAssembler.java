@@ -4,10 +4,12 @@ import java.io.*;
 
 public class WangAssembler {
 	WangInstructions wi;
+	boolean tape;
 	int errs = 0;
 
-	public WangAssembler(WangInstructions wi) {
+	public WangAssembler(WangInstructions wi, boolean tape) {
 		this.wi = wi;
+		this.tape = tape;
 	}
 
 	private int low(byte b) { return (b & 0x0f); }
@@ -82,6 +84,13 @@ public class WangAssembler {
 			if (errs > 10) {
 				System.err.format("Too many errors\n");
 				break;
+			}
+		}
+		if (tape) {
+			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
+				mem[adr++] = (byte)wi.endProg();
+			} else {
+				mem[adr++] = (byte)0xff;
 			}
 		}
 		n = objectOut(mem, adr, os);

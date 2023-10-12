@@ -18,5 +18,6 @@ public interface WangInstructions {
 	WangInstruction decodeOp(int op);
 	int maxPC();
 	int maxReg();
+	int endProg();
 	String printHelp(); // help string for PRINT/WRITE command (FMT)
 }

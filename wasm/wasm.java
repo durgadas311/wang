@@ -8,6 +8,7 @@ public class wasm {
 	boolean w600 = false;
 	boolean w700 = false;
 	boolean docs = false;
+	boolean tape = false;
 	WangDisassembler disas = null;
 	WangAssembler asm = null;
 	WangInstructions mach = null;
@@ -22,9 +23,10 @@ public class wasm {
 		System.err.format("Options:\n");
 		System.err.format("600        Use Wang 600 machine codes\n");
 		System.err.format("700        Use Wang 700 machine codes\n");
-		System.err.format("nolst      Do not produce assembly listing");
-		System.err.format("lst=<file> Produce assembly listing to file");
-		System.err.format("out=<file> Produce object code to file (a.out)");
+		System.err.format("tape       Treat as tape image\n");
+		System.err.format("nolst      Do not produce assembly listing\n");
+		System.err.format("lst=<file> Produce assembly listing to file (stdout)\n");
+		System.err.format("out=<file> Produce object code to file (a.out)\n");
 		System.err.format("raw        Disassemble as source, not listing\n");
 		System.err.format("docs       Dump instruction codes and mnemonics\n");
 	}
@@ -47,6 +49,8 @@ public class wasm {
 				w700 = true;
 			} else if (arg.equals("raw")) {
 				raw = true;
+			} else if (arg.equals("tape")) {
+				tape = true;
 			} else if (arg.equals("nolst")) {
 				list = null;
 			} else if (arg.startsWith("lst=")) {
@@ -118,14 +122,16 @@ public class wasm {
 			System.exit(0);
 		}
 		if (dis) {
-			disas = new WangDisassembler(mach, !raw);
+			tape = tape || file.getName().matches(".*\\.w[67]t");
+			disas = new WangDisassembler(mach, !raw, tape);
 			disas.disas(file, System.out);
 			System.exit(0);
 		}
 		if (aout == null) {
 			aout = new File("a.out");
 		}
-		asm = new WangAssembler(mach);
+		tape = tape || (aout != null && aout.getName().matches(".*\\.w[67]t"));
+		asm = new WangAssembler(mach, tape);
 		int foo = asm.asm(file, aout, list);
 		System.exit(foo == 0 ? 0 : 1);
 	}
