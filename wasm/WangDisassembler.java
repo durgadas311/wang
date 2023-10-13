@@ -33,6 +33,7 @@ public class WangDisassembler {
 			ee.printStackTrace();
 			return -1;
 		}
+		os.format("; Disassembled from %s\n", file.getName());
 		adr = 0;
 		while (adr < mem.length && adr <= wi.maxPC()) {
 			if (tape && (mem[adr] & 0xff) == wi.endProg() &&

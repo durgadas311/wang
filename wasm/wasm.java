@@ -26,7 +26,7 @@ public class wasm {
 		System.err.format("tape       Treat as tape image\n");
 		System.err.format("nolst      Do not produce assembly listing\n");
 		System.err.format("lst=<file> Produce assembly listing to file (stdout)\n");
-		System.err.format("out=<file> Produce object code to file (a.out)\n");
+		System.err.format("out=<file> Produce output to file (a.out/stdout)\n");
 		System.err.format("raw        Disassemble as source, not listing\n");
 		System.err.format("docs       Dump instruction codes and mnemonics\n");
 	}
@@ -122,9 +122,19 @@ public class wasm {
 			System.exit(0);
 		}
 		if (dis) {
+			if (aout != null) {
+				try {
+					list = new PrintStream(new FileOutputStream(aout));
+				} catch (Exception ee) {
+					ee.printStackTrace();
+					System.exit(1);
+				}
+			} else {
+				list = System.out;
+			}
 			tape = tape || file.getName().matches(".*\\.w[67]t");
 			disas = new WangDisassembler(mach, !raw, tape);
-			disas.disas(file, System.out);
+			disas.disas(file, list);
 			System.exit(0);
 		}
 		if (aout == null) {
