@@ -197,8 +197,8 @@ public class Wang700Instructions implements WangInstructions {
 			if (reg > 99) {
 				mem[adr - 1] |= 0x80;
 				reg -= 100;
-				reg = ((reg / 10) << 4) | (reg % 10);
 			}
+			reg = ((reg / 10) << 4) | (reg % 10);
 			mem[adr++] = (byte)reg;
 			break;
 		case FMT:	// WRITE instruction
