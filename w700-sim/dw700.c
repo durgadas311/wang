@@ -47,7 +47,7 @@ void diwang(char *buf, uint64_t *v) {
 		switch(u->jh) {
 		case 2: s += sprintf(s, "S<1>"); break;
 		case 3: s += sprintf(s, "S<3>"); break;
-		case 4: s += sprintf(s, "OFL"); break;
+		case 4: s += sprintf(s, "OV"); break;
 		case 5: s += sprintf(s, "CC"); break;
 		case 6: s += sprintf(s, "KBD"); break;
 		case 7: s += sprintf(s, "jh7?"); break;
@@ -56,7 +56,7 @@ void diwang(char *buf, uint64_t *v) {
 		switch(u->jl) {
 		case 2: s += sprintf(s, "S<0>"); break;
 		case 3: s += sprintf(s, "S<2>"); break;
-		case 4: s += sprintf(s, "ALU"); break;
+		case 4: s += sprintf(s, "Zo"); break;
 		case 5: s += sprintf(s, "Q"); break;
 		case 6: s += sprintf(s, "SC"); break;
 		case 7: s += sprintf(s, "jl7?"); break;
@@ -78,7 +78,7 @@ void diwang(char *buf, uint64_t *v) {
 	switch(u->bi) {
 	case 0: g = "bi0?"; break;
 	case 1: g = k; break;
-	case 2: g = "D"; break;
+	case 2: g = "D1"; break;
 	case 3: g = "bi3?"; break;
 	case 4: g = "KA"; break;
 	case 5: g = "KB"; break;
@@ -98,12 +98,13 @@ void diwang(char *buf, uint64_t *v) {
 		else g = "15";
 		break;
 	case 3:
-		if (u->bd) sprintf(opB, "(9 - %s)", g);
-		else sprintf(opB, "(15 - %s)", g);
+		if (u->bd) sprintf(opB, "(9-%s)", g);
+		else sprintf(opB, "(15-%s)", g);
 		g = opB;
 		break;
 	}
 	s = alu;
+	if (u->bd) s += sprintf(s, "BCD(");
 	s += sprintf(s, "%s %c %s", h, ops[u->aop], g);
 	switch (u->aop) {
 	case 1:
@@ -117,39 +118,68 @@ void diwang(char *buf, uint64_t *v) {
 		s += sprintf(s, " >> 1");
 		break;
 	}
-	if (u->bd) s += sprintf(s, "(bcd)");
-	/* s += sprintf(s, " ->[ALU"); */
+	if (u->bd) s += sprintf(s, ")");
+	s += sprintf(s, " ->[Zo");
 	if (u->aop < 5 || u->aop > 6) {
-		/* s += sprintf(s, ",CC"); */
+		s += sprintf(s, ",CC");
 		switch (u->aop) {
 		case 2:
 		case 3:
 		case 4:
 		case 7:
-			s += sprintf(s, " ->SC");
+			s += sprintf(s, ",SC");
 			break;
 		}
 	}
-	/* s += sprintf(s, "]"); */
+	s += sprintf(s, "]");
 
-	char *t = targ;
 	if (u->st >=1 && u->st <= 8) {
 		sprintf(acc, "S<%d>=%d", (u->st - 1) & 3, ((u->st - 1) >> 2) ^ 1);
 	} else {
 		switch(u->st) {
 		case 0: /* sprintf(mach, "NOP"); */ break;
 		case 9: sprintf(mach, "RESET"); break;
-		case 10: sprintf(acc, "S<0>=!ALU"); break;
-		case 11: sprintf(acc, "S<1>=ALU"); break;
-		case 12: sprintf(mach, "OFL=1"); break;
+		case 10: sprintf(acc, "S<0>=!Z"); break;
+		case 11: sprintf(acc, "S<1>=Z"); break;
+		case 12: sprintf(mach, "OV=1"); break;
 		case 13: sprintf(acc, "S=0"); break;
 		case 14: sprintf(mach, "ERR=1"); break;
 		case 15: sprintf(mach, "st15?"); break;
 		}
 	}
-	if (targ[0] && u->zo != 7) {
-		t += sprintf(t, " = ");
+
+	char *t = targ;
+	switch(u->mop) {
+	case 0:	sprintf(opA, "mem(LMN) = RA=alu,RB"); break;
+	case 1:	sprintf(opA, "mem(LMN) = RA,RB=alu"); break;
+	case 2:
+		t += sprintf(t, "L=T,M=U,N=V; ");
+		sprintf(opA, "CA,CB=RA,RB = mem(LMN)");
+		break;
+	case 3:
+		t += sprintf(t, "L=T,M=U,N=V; ");
+		sprintf(opA, "RA,RB = mem(LMN)");
+		break;
+	case 4:
+		t += sprintf(t, "L=15,M=%s,N=V; ", k);
+		sprintf(opA, "CA,CB=RA,RB = mem(LMN)");
+		break;
+	case 5:
+		t += sprintf(t, "L=15,M=%s,N=V; ", k);
+		sprintf(opA, "RA,RB = mem(LMN)");
+		break;
+	case 6:	sprintf(opA, "KB<0>=RBS"); break;
+	case 7:	t += sprintf(t, "IOB=KB<0:2>; "); break;
+	case 8:	/* sprintf(opA, "no-op"); */ break;
+	case 9:	sprintf(opA, "Q=%s", u->aop == 7 ? "SC" : "CC"); break;
+	case 10:	t += sprintf(t, "KB<0>=Dot; "); break;
+	case 11:	t += sprintf(t, "Din=KB<0>; "); break;
+	case 12:	t += sprintf(t, "TMR=1,%s; ", u->bi & 1 ? "WR" : "RD"); break;
+	case 13:	t += sprintf(t, "TMR=0; "); break;
+	case 14:	t += sprintf(t, "GIOA,GIOB=KA,KB; "); break;
+	case 15:	sprintf(opA, "mop15?"); break;
 	}
+
 	switch(u->zo) {
 	case 0:	t += sprintf(t, "S"); break;
 	case 1:	t += sprintf(t, "T"); break;
@@ -164,36 +194,17 @@ void diwang(char *buf, uint64_t *v) {
 		t += sprintf(t, " = ");
 	}
 
-	switch(u->mop) {
-	case 0:	sprintf(opA, "mem(L,M,N) = (RA=z),RB"); break;
-	case 1:	sprintf(opA, "mem(L,M,N) = RA,(RB=z)"); break;
-	case 2:	sprintf(opA, "CA,CB = RA,RB = mem(L,M,N=T,U,V)"); break;
-	case 3:	sprintf(opA, "RA,RB = mem(L,M,N=T,U,V)"); break;
-	case 4:	sprintf(opA, "CA,CB = RA,RB = mem(L,M,N=15,%s,V)", k); break;
-	case 5:	sprintf(opA, "RA,RB = mem(L,M,N=15,%s,V)", k); break;
-	case 6:	sprintf(opA, "KB<0> = RBS"); break;
-	case 7:	sprintf(opA, "IOB = KB"); break;
-	case 8:	/* sprintf(opA, "no-op"); */ break;
-	case 9:	sprintf(opA, "Q = %s", u->aop == 7 ? "SC" : "CC"); break;
-	case 10:	sprintf(opA, "KB<0> = Dot"); break;
-	case 11:	sprintf(opA, "Din = KB<0>"); break;
-	case 12:	sprintf(opA, "TMR=1(%s)", u->bi & 1 ? "WR" : "RD"); break;
-	case 13:	sprintf(opA, "TMR=0"); break;
-	case 14:	sprintf(opA, "GIOA,GIOB=KA,KB"); break;
-	case 15:	sprintf(opA, "mop15?"); break;
-	}
-
 	s = buf;
 	//if (u->ac) *s++ = '*'; else *s++ = '_';
 	s += sprintf(s, "%s%s", targ, alu);
+	if (opA[0]) {
+		s += sprintf(s, "; %s", opA);
+	}
 	if (acc[0]) {
 		s += sprintf(s, "; %s", acc);
 	}
 	if (mach[0]) {
 		s += sprintf(s, "; %s", mach);
-	}
-	if (opA[0]) {
-		s += sprintf(s, "; %s", opA);
 	}
 	if (stack[0]) {
 		s += sprintf(s, "; %s", stack);

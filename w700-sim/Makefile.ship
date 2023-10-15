@@ -69,7 +69,7 @@ DASM = dw700.o loaducode_txt.o
 
 all: w700_fe.class
 
-CFLAGS += -g -O3 $(COPTS)
+CFLAGS += -g -O3 $(COPTS) -Wformat-overflow=0
 
 w700-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)

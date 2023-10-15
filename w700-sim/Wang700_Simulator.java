@@ -585,7 +585,7 @@ class Wang700_Simulator
 				str += " Warp";
 			} else if (nxt >= 0) {
 				str += String.format(" PC %03x", nxt);
-			} else {
+			} else if (cyc < 0) {
 				str += " Sleep";
 			}
 			str += String.format("... %d\n", cycles);
@@ -670,6 +670,9 @@ class Wang700_Simulator
 
 	public void chgMode0() {
 		good = 0;
+		if (trace) { // can only be if _dbg != null
+			_dbg.warp("MODE0 Jam", -1, 0);
+		}
 		do_blanking();
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
@@ -726,6 +729,9 @@ class Wang700_Simulator
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
 	public void pressKey(int key) {
+		if (trace) { // can only be if _dbg != null
+			_dbg.warp(String.format("Key Press %02x", key), -1, 0);
+		}
 		keyCodes.add(key);
 		// needs other side-effects... display?
 	}
