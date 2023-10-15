@@ -347,9 +347,6 @@ class Wang700_Simulator
 
 			String ops = "+++++&^+";
 			String alu = new String();
-			if (uu.aop == 7) {
-				alu = "SC >> ";
-			}
 			alu += h + " " + ops.substring(uu.aop, uu.aop + 1) + " " + g;
 			switch (uu.aop) {
 			case 1:
@@ -363,9 +360,12 @@ class Wang700_Simulator
 			if (uu.bd != 0) {
 				alu = "BCD(" + alu + ")";
 			}
+			if (uu.aop == 7) {
+				alu += " >> 1";
+			}
 			alu += " ->[Zo";
 			if (uu.aop == 7) {
-				alu += ",CC] >> SC";
+				alu += ",CC,SC]";
 			} else {
 				if (uu.aop < 5) {
 					alu += ",CC";
