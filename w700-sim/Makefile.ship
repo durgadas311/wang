@@ -74,6 +74,9 @@ CFLAGS += -g -O3 $(COPTS) -Wformat-overflow=0
 w700-dasm: wang-dasm.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
+ucorphans: ucorphans.o $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(DASM)
+
 w700_fe.class: w700_fe.java $(COMMON_CLASSES) $(W700_CLASSES)
 	javac w700_fe.java
 
