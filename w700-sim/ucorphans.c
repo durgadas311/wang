@@ -19,6 +19,8 @@ extern void diwang(char *buf, uint64_t *v);
 char calls[2 * 1024] = {0};
 char buf[1024];
 
+int show = 0;
+
 int main(int argc, char **argv) {
 	int rc;
 	uint64_t *ucode;
@@ -26,15 +28,26 @@ int main(int argc, char **argv) {
 	size_t ucodez = 2 * 1024 * sizeof(*ucode);
 	int adr;
 	int x;
+	int t;
+	extern char *optarg;
+	extern int optind;
 
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s ucode-file\n", argv[0]);
+	while ((x = getopt(argc, argv, "t:")) != EOF) {
+		switch(x) {
+		case 't':
+			show = strtoul(optarg, NULL, 0);
+			break;
+		}
+	}
+
+	if (optind + 1 != argc) {
+		fprintf(stderr, "Usage: %s [-t num] ucode-file\n", argv[0]);
 		return 1;
 	}
 
-	int fd = open(argv[1], O_RDONLY);
+	int fd = open(argv[optind], O_RDONLY);
 	if (fd < 0) {
-		perror(argv[1]);
+		perror(argv[optind]);
 		return 1;
 	}
 	// assume text format...
@@ -64,17 +77,29 @@ int main(int argc, char **argv) {
 		calls[adr]++;
 		if (u->jl > 1) calls[adr | 0x001]++;
 		if (u->jh > 1) calls[adr | 0x002]++;
+		if (u->jl > 1 && u->jh > 1) calls[adr | 0x003]++;
 	}
 
 	for (x = 0; x < 2 * 1024; ++x) {
 		if (ucode[x] != 0UL && calls[x] == 0) {
-			u = (w700_ucode_t *)&ucode[x];
-			diwang(buf, &ucode[x]);
-			printf("%03x: [%x%x%x%x%x%x%x%x%x%x%03x%x%x] %s\n",x,
-				u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->bd,
-				u->mop, u->kk, u->st,
-				u->jad << 2, u->jh, u->jl,
-				buf);
+			t = 0;
+			adr = x;
+			do {
+				u = (w700_ucode_t *)&ucode[adr];
+				diwang(buf, &ucode[adr]);
+				printf("%.*s%03x: [%x%x%x%x%x%x%x%x%x%x%03x%x%x] %s\n",
+					t, "                            ", adr,
+					u->ai, u->bi, u->zo, u->aop, u->ac, u->bc, u->bd,
+					u->mop, u->kk, u->st,
+					u->jad << 2, u->jh, u->jl,
+					buf);
+				if (u->jl > 1 || u->jh > 1) {
+					break;
+				}
+				adr = u->jad << 2;
+				if (u->jl == 1) adr |= 0x001;
+				if (u->jh == 1) adr |= 0x002;
+			} while (++t < show && calls[adr] < 2);
 		}
 	}
 
