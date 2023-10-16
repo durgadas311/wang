@@ -67,7 +67,7 @@ endif
 #	@cvs -Q update $@
 
 ship: tar packages www
-	rsync -Wuv $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w700-sim
+	rsync -Wuv wang700.jar $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w700-sim
 
 update:
 #	cd ..; cvs -q update common w700-sim

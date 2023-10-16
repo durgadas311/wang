@@ -48,9 +48,9 @@
 026: [51521108a058c10] KB = KB + 10 ->[Zo,CC,SC]; jump 58e
 027: [515211084059000] KB = KB + 4 ->[Zo,CC,SC]; jump 590
 028: [013601085d58810] V = 0 ^ 5 ->[Zo]; S=0; jump 58a
-029: [40171004d05f401] L=15,M=13,N=V; T = SC >> KA + 0 ->[Zo,CC] >> SC; CA,CB=RA,RB = mem(LMN); jump 5f5
-02a: [401710080363010] T = SC >> KA + 0 ->[Zo,CC] >> SC; S<2>=1; jump 632
-02b: [401710080563010] T = SC >> KA + 0 ->[Zo,CC] >> SC; S<0>=0; jump 632
+029: [40171004d05f401] L=15,M=13,N=V; T = KA + 0 >> 1 ->[Zo,CC,SC]; CA,CB=RA,RB = mem(LMN); jump 5f5
+02a: [401710080363010] T = KA + 0 >> 1 ->[Zo,CC,SC]; S<2>=1; jump 632
+02b: [401710080563010] T = KA + 0 >> 1 ->[Zo,CC,SC]; S<0>=0; jump 632
 02c: [005600080059410] KB = 0 ^ 0 ->[Zo]; jump 596
 02d: [505610060002c24] KB = KB ^ 0 ->[Zo]; KB<0>=RBS; jump 02c[S<1>:Zo]
 02e: [015601088003033] KB = 0 ^ 8 ->[Zo]; jump 030[S<3>:S<2>]
@@ -416,16 +416,16 @@
 196: [01661108603d414] CA = S ^ 6 ->[Zo]; jump 3d6[:Zo]
 197: [01760101103c401] CB = 0 ^ 1 ->[Zo]; mem(LMN) = RA,RB=alu; jump 3c5
 198: [707210010366001] CB = CB + 0 ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; S<2>=1; jump 661
-199: [707710010466001] CB = SC >> CB + 0 ->[Zo,CC] >> SC; mem(LMN) = RA,RB=alu; S<3>=1; jump 661
+199: [707710010466001] CB = CB + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; S<3>=1; jump 661
 19a: [10161004f019833] L=15,M=15,N=V; T = T ^ 0 ->[Zo]; CA,CB=RA,RB = mem(LMN); jump 198[S<3>:S<2>]
 19b: [707610010266001] CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; S<1>=1; jump 661
 19c: [707610010019810] CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 19a
 19d: [707610010019810] CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 19a
-19e: [707710010066010] CB = SC >> CB + 0 ->[Zo,CC] >> SC; mem(LMN) = RA,RB=alu; jump 662
+19e: [707710010066010] CB = CB + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 662
 19f: [71721108a019c10] CB = CB + 10 ->[Zo,CC,SC]; jump 19e
-1a0: [707710010066011] CB = SC >> CB + 0 ->[Zo,CC] >> SC; mem(LMN) = RA,RB=alu; jump 663
+1a0: [707710010066011] CB = CB + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 663
 1a1: [71721108a01a000] CB = CB + 10 ->[Zo,CC,SC]; jump 1a0
-1a2: [70771001003d001] CB = SC >> CB + 0 ->[Zo,CC] >> SC; mem(LMN) = RA,RB=alu; jump 3d1
+1a2: [70771001003d001] CB = CB + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 3d1
 1a3: [71721108a01a010] CB = CB + 10 ->[Zo,CC,SC]; jump 1a2
 1a4: [017601014166401] CB = 0 ^ 4 ->[Zo]; mem(LMN) = RA,RB=alu; S<0>=1; jump 665
 1a5: [017601013266401] CB = 0 ^ 3 ->[Zo]; mem(LMN) = RA,RB=alu; S<1>=1; jump 665
@@ -622,7 +622,7 @@
 264: [4044100a0026450] KB<0>=Dot; KA = KA + 0 + 1 ->[Zo,CC,SC]; jump 264[CC:]
 265: [4044100a0026400] KB<0>=Dot; KA = KA + 0 + 1 ->[Zo,CC,SC]; jump 264
 266: [7073100a0026451] KB<0>=Dot; CB = CB + 0 + SC ->[Zo,CC,SC]; jump 265[CC:]
-267: [504710080068c01] KA = SC >> KB + 0 ->[Zo,CC] >> SC; jump 68d
+267: [504710080068c01] KA = KB + 0 >> 1 ->[Zo,CC,SC]; jump 68d
 268: [005600080026c11] KB = 0 ^ 0 ->[Zo]; jump 26f
 269: [400610080040c13] S = KA ^ 0 ->[Zo]; jump 40e[:S<2>]
 26a: [01460108306c001] KA = 0 ^ 3 ->[Zo]; jump 6c1
@@ -703,9 +703,9 @@
 2b5: [014601081c68800] KA = 0 ^ 1 ->[Zo]; OV=1; jump 688
 2b6: [00460008002b411] KA = 0 ^ 0 ->[Zo]; jump 2b7
 2b7: [01360108106d000] V = 0 ^ 1 ->[Zo]; jump 6d0
-2b8: [606710000044400] CA = SC >> CA + 0 ->[Zo,CC] >> SC; mem(LMN) = RA=alu,RB; jump 444
+2b8: [606710000044400] CA = CA + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 444
 2b9: [61621108a02b800] CA = CA + 10 ->[Zo,CC,SC]; jump 2b8
-2ba: [60671000006d011] CA = SC >> CA + 0 ->[Zo,CC] >> SC; mem(LMN) = RA=alu,RB; jump 6d3
+2ba: [60671000006d011] CA = CA + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 6d3
 2bb: [61621108a02b810] CA = CA + 10 ->[Zo,CC,SC]; jump 2ba
 2bc: [101610080d6d411] T = T ^ 0 ->[Zo]; S=0; jump 6d7
 2bd: [015601081c68800] KB = 0 ^ 1 ->[Zo]; OV=1; jump 688
@@ -1372,9 +1372,9 @@
 552: [014601083068800] KA = 0 ^ 3 ->[Zo]; jump 688
 553: [30301204f07ac11] L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; CA,CB=RA,RB = mem(LMN); jump 7af
 554: [604610000444001] KA = CA ^ 0 ->[Zo]; mem(LMN) = RA=alu,RB; S<3>=1; jump 441
-555: [60671000006d401] CA = SC >> CA + 0 ->[Zo,CC] >> SC; mem(LMN) = RA=alu,RB; jump 6d5
+555: [60671000006d401] CA = CA + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 6d5
 556: [606610000b7b010] CA = CA ^ 0 ->[Zo]; mem(LMN) = RA=alu,RB; S<1>=Z; jump 7b2
-557: [60671000006d400] CA = SC >> CA + 0 ->[Zo,CC] >> SC; mem(LMN) = RA=alu,RB; jump 6d4
+557: [60671000006d400] CA = CA + 0 >> 1 ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 6d4
 558: [013601087044406] V = 0 ^ 7 ->[Zo]; jump 444[:SC]
 559: [70561001046d410] KB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; S<3>=1; jump 6d6
 55a: [004600080d6d410] KA = 0 ^ 0 ->[Zo]; S=0; jump 6d6
@@ -1493,8 +1493,8 @@
 5cb: [003600080d0ac00] V = 0 ^ 0 ->[Zo]; S=0; jump 0ac
 5cc: [406610010070c00] CA = KA ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 70c
 5cd: [10461004d370c11] L=15,M=13,N=V; KA = T ^ 0 ->[Zo]; CA,CB=RA,RB = mem(LMN); S<2>=1; jump 70f
-5ce: [61651100305cc11] CA = CA & 3 ->[Zo]; mem(LMN) = RA=alu,RB; jump 5cf
-5cf: [01660100105d000] CA = 0 ^ 1 ->[Zo]; mem(LMN) = RA=alu,RB; jump 5d0
+5ce: [61651100205cc11] CA = CA & 2 ->[Zo]; mem(LMN) = RA=alu,RB; jump 5cf
+5cf: [61661100105d000] CA = CA ^ 1 ->[Zo]; mem(LMN) = RA=alu,RB; jump 5d0
 5d0: [01360108f071001] V = 0 ^ 15 ->[Zo]; jump 711
 5d1: [616611084033014] CA = CA ^ 4 ->[Zo]; jump 332[:Zo]
 5d2: [00360008000b810] V = 0 ^ 0 ->[Zo]; jump 0ba
@@ -1532,7 +1532,7 @@
 5f2: [01060108105f011] S = 0 ^ 1 ->[Zo]; jump 5f3
 5f3: [51621118105f400] CA = BCD(KB + 1) ->[Zo,CC,SC]; jump 5f4
 5f4: [216311185072c00] CA = BCD(U + 5 + SC) ->[Zo,CC,SC]; jump 72c
-5f5: [502710090072c01] U = SC >> KB + 0 ->[Zo,CC] >> SC; Q=SC; jump 72d
+5f5: [502710090072c01] U = KB + 0 >> 1 ->[Zo,CC,SC]; Q=SC; jump 72d
 5f6: [60161000005f010] T = CA ^ 0 ->[Zo]; mem(LMN) = RA=alu,RB; jump 5f2
 5f7: [30341005e072c11] L=15,M=14,N=V; V = V + 0 + 1 ->[Zo,CC,SC]; RA,RB = mem(LMN); jump 72f
 5f8: [707610010335804] CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; S<2>=1; jump 358[:Zo]
@@ -1593,7 +1593,7 @@
 62f: [303012030015c55] L=T,M=U,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 15c[CC:Q]
 630: [506610010063001] CA = KB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 631
 631: [303212030016055] L=T,M=U,N=V; V = V + 15 ->[Zo,CC,SC]; RA,RB = mem(LMN); jump 160[CC:Q]
-632: [502710090063011] U = SC >> KB + 0 ->[Zo,CC] >> SC; Q=SC; jump 633
+632: [502710090063011] U = KB + 0 >> 1 ->[Zo,CC,SC]; Q=SC; jump 633
 633: [00320008003b803] V = 0 + 0 ->[Zo,CC,SC]; jump 3b8[:S<2>]
 634: [30311005f04e450] L=15,M=15,N=V; V = V + 0 + 1 ->[Zo,CC]; RA,RB = mem(LMN); jump 4e4[CC:]
 635: [606610000074811] CA = CA ^ 0 ->[Zo]; mem(LMN) = RA=alu,RB; jump 74b
@@ -1701,7 +1701,7 @@
 69b: [004600080052c01] KA = 0 ^ 0 ->[Zo]; jump 52d
 69c: [707310080052c51] CB = CB + 0 + SC ->[Zo,CC,SC]; jump 52d[CC:]
 69d: [017601089053000] CB = 0 ^ 9 ->[Zo]; jump 530
-69e: [505710080078c00] KB = SC >> KB + 0 ->[Zo,CC] >> SC; jump 78c
+69e: [505710080078c00] KB = KB + 0 >> 1 ->[Zo,CC,SC]; jump 78c
 69f: [502610080078c01] U = KB ^ 0 ->[Zo]; jump 78d
 6a0: [01560108806a001] KB = 0 ^ 8 ->[Zo]; jump 6a1
 6a1: [1016100e0026800] GIOA,GIOB=KA,KB; T = T ^ 0 ->[Zo]; jump 268

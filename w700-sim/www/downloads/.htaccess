@@ -6,3 +6,7 @@ AddDescription "Wang 700 Programmable Calculator simulator, OSX" wang700apc.dmg
 AddDescription "Wang 700 Programmable Calculator simulator, Windows" wang700apc.exe
 AddDescription "Wang 700 Programmable Calculator simulator, Linux" wang700apc.tgz
 AddDescription "Wang 700 Programmable Calculator simulator (full source)" w700-sim.tgz
+AddDescription "Wang 700 Programmable Calculator simulator JAR" wang700.jar
+AddDescription "Wang 700/600 Assembler/Disassembler" wasm.jar
+AddDescription "Wang 700/600 Assembler/Disassembler Manual" wasm.pdf
+AddDescription "Wang 700 A/B Reference Manual (original)" Wang700UsersGuide.pdf
