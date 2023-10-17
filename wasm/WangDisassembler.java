@@ -24,6 +24,7 @@ public class WangDisassembler {
 		int adr;
 		WangInstruction e;
 		boolean endProg;
+		String t;
 
 		try {
 			FileInputStream fi = new FileInputStream(file);
@@ -49,15 +50,18 @@ public class WangDisassembler {
 				endProg = true;
 			}
 			e = wi.decode(mem, adr);
+			t = (e.flags == wi.LABEL ? (lst ? " " : "") : "\t");
 			if (!lst) {
-				os.format("\t%s\n", e.mnemonic);
+				os.format("%s%s\n", t, e.mnemonic);
 				if (endProg) os.format("\n");
 				adr += e.length;
 				continue;
 			}
 			int end = adr + e.length;
 			// TODO: stop at END PROG?
-			os.format("%04d  %02d-%02d\t%s\n", adr, high(mem[adr]), low(mem[adr]), e.mnemonic);
+			os.format("%04d  %02d-%02d%s%s\n",
+				adr, high(mem[adr]), low(mem[adr]),
+				t, e.mnemonic);
 			++adr;
 			while (adr < end) {
 				os.format("%04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
