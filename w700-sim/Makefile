@@ -12,7 +12,7 @@ TMPDEST = $(TMPDIR)/$(INSNAME)
 MACOSX = mini-mac
 SUBPATH = $(shell echo $${PWD\#$${HOME}/} )
 
-PACKAGES = wang700apc.tgz # wang700apc.dmg wang700apc.exe
+PACKAGES = wang700apc.tgz wang700apc.exe # wang700apc.dmg
 SRCTAR = w700-sim.tgz
 
 PNGS = $(wildcard icons/wang700-*x*.png)
