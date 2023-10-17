@@ -188,6 +188,13 @@ public class Wang700Instructions implements WangInstructions {
 				mem[adr++] = getCode(line[x]);
 				break;
 			}
+			e = asm(line[x]);
+			if (e == null) {
+				error = 'P';
+				return -1;
+			}
+			mem[adr++] = e.opcode;
+			break;
 		case REG:
 			reg = Integer.valueOf(line[x]);
 			if (reg < 0 || reg > maxReg()) {

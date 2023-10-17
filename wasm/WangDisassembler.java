@@ -23,6 +23,7 @@ public class WangDisassembler {
 		byte[] mem;
 		int adr;
 		WangInstruction e;
+		boolean endProg;
 
 		try {
 			FileInputStream fi = new FileInputStream(file);
@@ -36,17 +37,21 @@ public class WangDisassembler {
 		os.format("; Disassembled from %s\n", file.getName());
 		adr = 0;
 		while (adr < mem.length && adr <= wi.maxPC()) {
+			endProg = false;
 			if (tape && (mem[adr] & 0xff) == wi.endProg() &&
 					adr + 1 < mem.length) {
 				++adr;
 				if ((mem[adr] & 0xff) != wi.endProg()) {
-					os.format("EOD\n");
+					os.format("EOD\n\n");
+					++adr;
+					continue;
 				}
-				continue;
+				endProg = true;
 			}
 			e = wi.decode(mem, adr);
 			if (!lst) {
 				os.format("\t%s\n", e.mnemonic);
+				if (endProg) os.format("\n");
 				adr += e.length;
 				continue;
 			}
@@ -58,6 +63,7 @@ public class WangDisassembler {
 				os.format("%04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
 				++adr;
 			}
+			if (endProg) os.format("\n");
 		}
 		return 0;
 	}
