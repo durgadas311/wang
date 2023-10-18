@@ -102,6 +102,9 @@ public class Wang600Instructions implements WangInstructions {
 			instr.add(new Instruction("G" + n, 0xd0 + x, 0));
 			instr.add(new Instruction("EX" + n, 0xe0 + x, 0));
 		}
+		// Add some assembler aliases, not seen by disassembler
+		instr.add(new Instruction("CHGSGN", 0x0c, 0));
+		instr.add(new Instruction("SETEXP", 0x0b, 0));
 	}
 
 	public Wang600Instructions(WangSymTable tbl) {
@@ -253,14 +256,26 @@ public class Wang600Instructions implements WangInstructions {
 		return e.mnemonic;
 	}
 
+	// Used for assembler help
 	public WangInstruction decodeOp(int op) {
 		WangInstruction ins = new WangInstruction();
-		Instruction e;
+		boolean multi = false;
 
-		e = disas(op);
-		if (e == null) return null;
-		ins.mnemonic = e.mnemonic;
-		ins.flags = e.flags;
+		for (Instruction e : instr) {
+			if (e.equalsOp(op)) {
+				if (ins.mnemonic == null) {
+					ins.mnemonic = e.mnemonic;
+					ins.flags = e.flags; // all the same?
+				} else {
+					multi = true;
+					ins.mnemonic += " | " + e.mnemonic;
+				}
+			}
+		}
+		if (ins.mnemonic == null) return null;
+		if (multi) {
+			ins.mnemonic = "{ " + ins.mnemonic + " }";
+		}
 		// ins.length is implied by flags
 		return ins;
 	}
