@@ -151,9 +151,11 @@ winicons: $(WICONS)
 _icons: $(ICNS) $(WICONS)
 
 %.icns: %.png
-	sips -s format icns $? --out $@
+	false
+#	sips -s format icns $? --out $@
 
 %.ico: %.png
-	sips -s format ico $? --out $@
+	convert $? -define icon:auto-resize=256,64,48,32,16 $@
+#	sips -s format ico $? --out $@
 
 _FRC_:

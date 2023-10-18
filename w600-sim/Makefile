@@ -18,7 +18,7 @@ PNGS := $(filter %32x32.png %48x48.png %128x128.png, $(PNGS))
 ICNS = $(subst .png,.icns,$(PNGS) icons/setup.png)
 WICONS = $(subst .png,.ico,$(PNGS))
 
-PACKAGES = wang600apc.tgz # wang600apc.dmg wang600apc.exe
+PACKAGES = wang600apc.tgz wang600apc.exe # wang600apc.dmg
 SRCTAR = w600-sim.tgz
 
 update:
@@ -57,8 +57,8 @@ endif
 #	fi
 #	@cvs -Q update $@
 
-ship: tar packages www # wpcc.tgz
-	rsync -Wuv $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w600-sim
+ship: tar packages www
+	rsync -Wuv wang600.jar $(SRCTAR) $(PACKAGES) durgadas.com:/var/www/html/sebhc/w600-sim
 
 packages: $(PACKAGES)
 
@@ -137,11 +137,13 @@ www: _FRC_
 icns: $(ICNS)
 
 %.icns: %.png
-	sips -s format icns $? --out $@
+	false
+#	sips -s format icns $? --out $@
 
 winicons: $(WICONS)
 
 %.ico: %.png
-	sips -s format ico $? --out $@
+	convert $? -define icon:auto-resize=256,64,48,32,16 $@
+#	sips -s format ico $? --out $@
 
 _FRC_:
