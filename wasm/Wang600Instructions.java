@@ -181,6 +181,14 @@ public class Wang600Instructions implements WangInstructions {
 				break;
 			}
 		case INDIR:	// TODO: validate operation code?
+			if (e.flags == INDIR && line[x].matches("[Rr][01][0-9]")) {
+				// "case" statement: step += (Rxx)
+				reg = Integer.valueOf(line[x].substring(1));
+				if (reg <= 15) {
+					mem[adr++] = (byte)reg;
+					break;
+				}
+			}
 			e = asm(line[x]);
 			if (e == null) {
 				error = 'P';
@@ -316,7 +324,11 @@ public class Wang600Instructions implements WangInstructions {
 		case MARK:
 		case LABEL:
 		case INDIR:
-			ret += " " + getKey(o);
+			if (e.flags == INDIR && o < 0x10) { // "case" statement
+				ret += String.format(" R%02d", o);
+			} else {
+				ret += " " + getKey(o);
+			}
 			break;
 		case REG:
 			ret += String.format(" %d", o);
