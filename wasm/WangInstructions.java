@@ -11,13 +11,17 @@ public interface WangInstructions {
 	static final int INDIR = 7;
 	static final int REG100 = 8;	// Register is +100
 
-	int encode(String[] line, byte[] mem, int start);
-	int dreg(String line, byte[] mem, int start);
+	int encode(String[] line, int first, byte[] mem, int start);
+	int regPad(byte[] mem, int start);
+	String adrRegStr(int adr);
+	int dreg(String[] line, int first, byte[] mem, int start);
 	char lastError();
+	WangSymbolTable getSymTab();
 	WangInstruction decode(byte[] mem, int start);
 	WangInstruction decodeOp(int op);
 	int maxPC();
 	int maxReg();
 	int endProg();
 	String printHelp(); // help string for PRINT/WRITE command (FMT)
+	String regHelp();
 }

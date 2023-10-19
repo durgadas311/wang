@@ -78,9 +78,9 @@ public class wasm {
 			if (s.matches(".*\\.w6[a-z]")) w600 = true;
 		}
 		if (w700) {
-			mach = new Wang700Instructions(null);
+			mach = new Wang700Instructions();
 		} else if (w600) {
-			mach = new Wang600Instructions(null);
+			mach = new Wang600Instructions();
 		} else {
 			System.err.format("No machine specified\n");
 			System.exit(1);
@@ -119,6 +119,7 @@ public class wasm {
 					break;
 				}
 			}
+			System.out.format("      .REG %s\n", mach.regHelp());
 			System.exit(0);
 		}
 		if (dis) {

@@ -2,8 +2,8 @@
 
 import java.util.Vector;
 
-public class Wang600Instructions implements WangInstructions {
-	private WangSymTable tbl;
+public class Wang600Instructions implements WangInstructions, WangRegFixer {
+	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
 	private char error;
@@ -107,8 +107,8 @@ public class Wang600Instructions implements WangInstructions {
 		instr.add(new Instruction("SETEXP", 0x0b, 0));
 	}
 
-	public Wang600Instructions(WangSymTable tbl) {
-		this.tbl = tbl;
+	public Wang600Instructions() {
+		tbl = new WangSymbolTable(this);
 		initAll();
 	}
 
@@ -140,16 +140,19 @@ public class Wang600Instructions implements WangInstructions {
 		return (byte)cd;
 	}
 
+	public void fixReg(byte[] mem, int adr, int reg) {
+		mem[adr] = (byte)reg;
+	}
+
 	// label, if any, already parsed. Else 'lab' is null.
-	public int encode(String[] line, byte[] mem, int start) {
+	public int encode(String[] line, int first, byte[] mem, int start) {
 		int adr = start;
 		int x = 0;
 		int reg;
 		Instruction e;
 
 		error = ' ';
-		while (x < line.length && line[x].length() == 0) ++x;
-		if (x >= line.length) return 0;
+		x = first;
 		if (line[x].equalsIgnoreCase("ENTER")) {
 			++x;
 			for (int i = 0; i < line[x].length(); ++i) {
@@ -197,10 +200,14 @@ public class Wang600Instructions implements WangInstructions {
 			mem[adr++] = e.opcode;
 			break;
 		case REG:
-			reg = Integer.valueOf(line[x]);
-			if (reg < 0 || reg > maxReg()) {
-				error = 'R';
-				return -1;
+			if (line[x].charAt(0) == '&') {
+				reg = tbl.getLabel(line[x].substring(1), adr);
+			} else {
+				reg = Integer.valueOf(line[x]);
+				if (reg < 0 || reg > maxReg()) {
+					error = 'R';
+					return -1;
+				}
 			}
 			mem[adr++] = (byte)reg;
 			break;
@@ -239,8 +246,65 @@ public class Wang600Instructions implements WangInstructions {
 		return adr - start;
 	}
 
-	public int dreg(String line, byte[] mem, int start) {
-		return 0;
+	public int regPad(byte[] mem, int start) {
+		int adr = start;
+
+		while ((adr & 0x07) != 0) {
+			mem[adr++] = (byte)0x93; // STOP
+		}
+		return adr - start;
+	}
+
+	// adr already adjusted with regPad().
+	private int adrReg(int adr) {
+		return (maxPC() - adr) / 8 + 16;
+	}
+
+	public String adrRegStr(int adr) {
+		return String.format(" (%d)", adrReg(adr));
+	}
+
+	// .REG <label> {"string"|number}
+	// assumes regPad() already called.
+	public int dreg(String[] line, int first, byte[] mem, int start) {
+		int adr = start;
+		int reg;
+		String val = "";
+		int x;
+		int c = 0;
+		double d;
+
+		x = first + 1;	// skip ".REG"
+		reg = adrReg(adr);
+		if (x < line.length) {
+			tbl.setLabel(line[x], reg, mem);
+			++x;
+		}
+		if (x < line.length) {
+			if (line[x].matches("\"[0-9a-fA-F]*\"")) {
+				val = line[x].replaceAll("\"", "");
+			} else {
+				d = Double.valueOf(line[x]);
+				val = String.format("%+18.11e", d);
+				val = val.replace('+', '0');
+				val = val.replace('-', '1');
+				val = val.replaceAll("[.eE]", "");
+			}
+		}
+		for (x = 15; x >= 0; --x) {
+			c <<= 4; // add '0'
+			if (x < val.length()) {
+				c |= Character.digit(val.charAt(x), 16);
+			}
+			if ((x & 1) == 0) {
+				mem[adr++] = (byte)c;
+			}
+		}
+		return adr - start;
+	}
+
+	public WangSymbolTable getSymTab() {
+		return tbl;
 	}
 
 	// Disassembly methods //
@@ -373,5 +437,9 @@ public class Wang600Instructions implements WangInstructions {
 
 	public String printHelp() {
 		return "<letter>/<decimal>";
+	}
+
+	public String regHelp() {
+		return "[label] [\"string\" | number]";
 	}
 }

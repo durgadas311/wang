@@ -59,14 +59,26 @@ public class WangAssembler {
 			}
 			s = line.replaceFirst(";.*$", "");
 			toks = s.split("\\s(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-			if (toks.length == 0 ||
-				toks.length == 1 && toks[0].length() == 0) {
+			n = 0;
+			while (n < toks.length && toks[n].length() == 0) ++n;
+			if (n >= toks.length) {
 				if (ls != null) {
 					ls.format("                %s\n", line);
 				}
 				continue;
 			}
-			n = wi.encode(toks, mem, adr);
+			if (toks[n].equalsIgnoreCase(".REG")) {
+				int m = wi.regPad(mem, adr);
+				int end = adr + m;
+				while (adr < end) {
+					ls.format(" %04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
+					++adr;
+				}
+				n = wi.dreg(toks, n, mem, adr);
+				line += wi.adrRegStr(adr);
+			} else {
+				n = wi.encode(toks, n, mem, adr);
+			}
 			if (n <= 0) {
 				++errs;
 				if (!stdout) {
@@ -76,7 +88,7 @@ public class WangAssembler {
 				}
 			}
 			if (ls == null) {
-				adr += n;
+				if (n > 0) adr += n;
 			} else {
 				int end = adr + n;
 				ls.format("%c%04d  %02d-%02d     %s\n",
@@ -100,6 +112,16 @@ public class WangAssembler {
 				mem[adr++] = (byte)wi.endProg();
 				mem[adr++] = (byte)0xff;
 			}
+		}
+		for (WangSymbol sym : wi.getSymTab().getSyms()) {
+			if (!sym.def) {
+				++errs;
+				ls.format("Undefined: %s\n", sym.nam);
+				if (!stdout) {
+					System.err.format("Undefined: %s\n", sym.nam);
+				}
+			}
+			// TODO: check for unused symbols?
 		}
 		n = objectOut(mem, adr, os);
 		if (n < 0) {
