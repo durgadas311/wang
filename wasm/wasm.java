@@ -9,6 +9,7 @@ public class wasm {
 	boolean w700 = false;
 	boolean docs = false;
 	boolean tape = false;
+	boolean rom = false;
 	WangDisassembler disas = null;
 	WangAssembler asm = null;
 	WangInstructions mach = null;
@@ -54,6 +55,8 @@ public class wasm {
 				raw = true;
 			} else if (arg.equals("tape")) {
 				tape = true;
+			} else if (arg.equals("rom")) {
+				rom = true;
 			} else if (arg.equals("nolst")) {
 				list = null;
 			} else if (arg.startsWith("lst=")) {
@@ -79,6 +82,13 @@ public class wasm {
 			String s = aout.getName();
 			if (s.matches(".*\\.w7[a-z]")) w700 = true;
 			if (s.matches(".*\\.w6[a-z]")) w600 = true;
+		}
+		if (!w600 && !w700 && rom) {
+			w600 = true;
+		}
+		if (rom && w700) {
+			System.err.format("ROM only supported for 600\n");
+			System.exit(1);
 		}
 		if (w700) {
 			mach = new Wang700Instructions();
@@ -124,6 +134,7 @@ public class wasm {
 			}
 			System.out.format("      .REG %s\n", mach.regHelp());
 			System.out.format("      .OUT <device>\n");
+			System.out.format("      .INCLUDE <file>\n");
 			System.exit(0);
 		}
 		if (dev != null) {
@@ -144,7 +155,8 @@ public class wasm {
 				list = System.out;
 			}
 			tape = tape || file.getName().matches(".*\\.w[67]t");
-			disas = new WangDisassembler(mach, !raw, tape);
+			rom = rom || file.getName().matches(".*\\.w6x");
+			disas = new WangDisassembler(mach, !raw, tape, rom);
 			disas.disas(file, list);
 			System.exit(0);
 		}
@@ -152,7 +164,7 @@ public class wasm {
 			aout = new File("a.out");
 		}
 		tape = tape || (aout != null && aout.getName().matches(".*\\.w[67]t"));
-		asm = new WangAssembler(mach, tape);
+		asm = new WangAssembler(mach, tape, rom);
 		int foo = asm.asm(file, aout, list);
 		if (foo != 0) {
 			System.err.format("%d Errors in assembly\n", foo);

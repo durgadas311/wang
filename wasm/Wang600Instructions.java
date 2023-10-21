@@ -113,8 +113,10 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 	}
 
 	public int maxPC() { return 1847; }
+	public int maxRomPC() { return 2047; }
 	public int maxReg() { return 246; }
 	public int endProg() { return 0x9e; }
+	public int stop() { return 0x93; }
 	public char lastError() { return error; }
 
 	// Assembly methods //

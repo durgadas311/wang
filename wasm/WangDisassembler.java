@@ -5,12 +5,15 @@ import java.io.*;
 public class WangDisassembler {
 	boolean lst;
 	boolean tape;
+	boolean rom;
 	WangInstructions wi;
 
-	public WangDisassembler(WangInstructions wi, boolean lst, boolean tape) {
+	public WangDisassembler(WangInstructions wi, boolean lst,
+				boolean tape, boolean rom) {
 		this.wi = wi;
 		this.lst = lst;
 		this.tape = tape;
+		this.rom = rom;
 		// TODO: allow for definition of a "register point" after which
 		// all data is for registers. Note that END PROG may/will follow
 		// register data.
@@ -37,6 +40,7 @@ public class WangDisassembler {
 		}
 		os.format("; Disassembled from %s\n", file.getName());
 		adr = 0;
+		// TODO: strip off trailing STOPs if rom...
 		while (adr < mem.length && adr <= wi.maxPC()) {
 			endProg = false;
 			if (tape && (mem[adr] & 0xff) == wi.endProg() &&

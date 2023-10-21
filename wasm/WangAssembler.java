@@ -1,19 +1,22 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
+import java.util.Arrays;
 import java.io.*;
 
 public class WangAssembler {
 	WangInstructions wi;
 	boolean tape;
+	boolean rom;
 	int errs = 0;
 	boolean stdout;
 
 	byte[] mem;
 	int adr;
 
-	public WangAssembler(WangInstructions wi, boolean tape) {
+	public WangAssembler(WangInstructions wi, boolean tape, boolean rom) {
 		this.wi = wi;
 		this.tape = tape;
+		this.rom = rom;
 	}
 
 	private int low(byte b) { return (b & 0x0f); }
@@ -149,7 +152,11 @@ public class WangAssembler {
 		n = asm(file, ls);
 		if (n < 0) return n;
 
-		if (tape) {
+		if (rom) {
+			if (adr <= wi.maxRomPC()) {
+				Arrays.fill(mem, adr, wi.maxRomPC() + 1, (byte)wi.stop());
+			}
+		} else if (tape) {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
 				mem[adr++] = (byte)wi.endProg();
 			} else {
