@@ -15,6 +15,8 @@ public interface WangInstructions {
 	int regPad(byte[] mem, int start);
 	String adrRegStr(int adr);
 	int dreg(String[] line, int first, byte[] mem, int start);
+	int setOutput(String dev);
+	int setOutput(String[] line, int first);
 	char lastError();
 	WangSymbolTable getSymTab();
 	WangInstruction decode(byte[] mem, int start);

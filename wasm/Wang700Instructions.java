@@ -160,6 +160,24 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 		mem[adr] = (byte)reg;
 	}
 
+	public int setOutput(String dev) {
+		if (!dev.matches("[wW]7[01][012]") && !dev.matches("[Ww]70[67]")) {
+			error = 'S';
+			return -1;
+		}
+		tr.setDevice(Integer.valueOf(dev.substring(2)));
+		return 0;
+	}
+
+	public int setOutput(String[] line, int first) {
+		int x = first + 1; // skip ".OUT"
+		if (x >= line.length) {
+			error = 'S';
+			return -1;
+		}
+		return setOutput(line[x]);
+	}
+
 	// label, if any, already parsed. Else 'lab' is null.
 	public int encode(String[] line, int first, byte[] mem, int start) {
 		int adr = start;

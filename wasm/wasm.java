@@ -15,6 +15,7 @@ public class wasm {
 	File file = null;
 	File aout = null;
 	PrintStream list = System.out;
+	String dev = null;
 
 	private void help() {
 		System.err.format("Usage: wasm [options] dis=<file>\n" +
@@ -43,10 +44,12 @@ public class wasm {
 			} else if (arg.startsWith("asm=")) {
 				dis = false;
 				file = new File(arg.substring(4));
-			} else if (arg.equals("600")) {
+			} else if (arg.matches("6[01][012]")) {
 				w600 = true;
-			} else if (arg.equals("700")) {
+				dev = "W" + arg;
+			} else if (arg.matches("7[01][012]")) {
 				w700 = true;
+				dev = "W" + arg;
 			} else if (arg.equals("raw")) {
 				raw = true;
 			} else if (arg.equals("tape")) {
@@ -120,7 +123,14 @@ public class wasm {
 				}
 			}
 			System.out.format("      .REG %s\n", mach.regHelp());
+			System.out.format("      .OUT <device>\n");
 			System.exit(0);
+		}
+		if (dev != null) {
+			if (mach.setOutput(dev) < 0) {
+				System.err.format("Invalid device \"%s\"\n", dev);
+				System.exit(1);
+			}
 		}
 		if (dis) {
 			if (aout != null) {

@@ -76,6 +76,14 @@ public class WangAssembler {
 				}
 				n = wi.dreg(toks, n, mem, adr);
 				line += wi.adrRegStr(adr);
+			} else if (toks[n].equalsIgnoreCase(".OUT")) {
+				n = wi.setOutput(toks, n);
+				if (n < 0) ++errs;
+				if (ls != null) {
+					ls.format("%c               %s\n",
+						wi.lastError(), line);
+				}
+				continue;
 			} else {
 				n = wi.encode(toks, n, mem, adr);
 			}
