@@ -6,6 +6,10 @@ public class WangAssembler {
 	WangInstructions wi;
 	boolean tape;
 	int errs = 0;
+	boolean stdout;
+
+	byte[] mem;
+	int adr;
 
 	public WangAssembler(WangInstructions wi, boolean tape) {
 		this.wi = wi;
@@ -28,25 +32,38 @@ public class WangAssembler {
 		return 0;
 	}
 
-	public int asm(File file, File os, PrintStream ls) {
-		byte[] mem;
-		int adr;
+	// Send output to listing, and if error also to stderr
+	private void errorList(String line, int ret, PrintStream ls) {
+		if (ret < 0) ++errs;
+		if (ret < 0 && !stdout) {
+			System.err.format("%s\n", line);
+		}
+		if (ls != null) {
+			ls.format("%s\n", line);
+		}
+	}
+
+	private int asm(File file, PrintStream ls) {
 		int n;
 		WangInstruction e;
 		BufferedReader in;
 		String line;
 		String s;
 		String[] toks;
-		boolean stdout = (ls == System.out);
+		int ie = errs;
 
 		try {
 			in = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException fnf) {
+			errorList(String.format("No file: %s", file.getName()),
+				-1, ls);
+			return -1;
 		} catch (Exception ee) {
+			// TODO: print cleaner message
 			ee.printStackTrace();
 			return -1;
 		}
-		mem = new byte[wi.maxPC() + 1];
-		adr = 0;
+
 		// TODO: line numbers...
 		while (true) {
 			try {
@@ -57,14 +74,14 @@ public class WangAssembler {
 			if (line == null) {
 				break;
 			}
+			// TODO: fix this for e.g. ALPHA "...;..."
 			s = line.replaceFirst(";.*$", "");
 			toks = s.split("\\s(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 			n = 0;
 			while (n < toks.length && toks[n].length() == 0) ++n;
 			if (n >= toks.length) {
-				if (ls != null) {
-					ls.format("                %s\n", line);
-				}
+				errorList(String.format("                %s", line),
+					0, ls);
 				continue;
 			}
 			if (toks[n].equalsIgnoreCase(".REG")) {
@@ -78,30 +95,37 @@ public class WangAssembler {
 				line += wi.adrRegStr(adr);
 			} else if (toks[n].equalsIgnoreCase(".OUT")) {
 				n = wi.setOutput(toks, n);
-				if (n < 0) ++errs;
-				if (ls != null) {
-					ls.format("%c               %s\n",
-						wi.lastError(), line);
+				errorList(String.format("%c               %s",
+							wi.lastError(), line),
+					n, ls);
+				continue;
+			} else if (toks[n].equalsIgnoreCase(".INCLUDE")) {
+				// TODO: asm() needs to be split into "global" vs. each
+				// to make recursive work.
+				++n;
+				if (n >= toks.length) {
+					errorList(String.format("S               %s",
+								wi.lastError(), line),
+						-1, ls);
+					continue;
 				}
+				errorList(String.format(">               %s", line),
+					0, ls);
+				n = asm(new File(toks[n]), ls); // errs counted
+				errorList(String.format("<               %s", line),
+					0, ls);
 				continue;
 			} else {
 				n = wi.encode(toks, n, mem, adr);
 			}
-			if (n <= 0) {
-				++errs;
-				if (!stdout) {
-					System.err.format("%c%04d  %02d-%02d     %s\n",
+			errorList(String.format("%c%04d  %02d-%02d     %s",
 						wi.lastError(),
-						adr, high(mem[adr]), low(mem[adr]), line);
-				}
-			}
+						adr, high(mem[adr]), low(mem[adr]), line),
+					n, ls);
 			if (ls == null) {
 				if (n > 0) adr += n;
 			} else {
 				int end = adr + n;
-				ls.format("%c%04d  %02d-%02d     %s\n",
-					wi.lastError(),
-					adr, high(mem[adr]), low(mem[adr]), line);
 				++adr;
 				while (adr < end) {
 					ls.format(" %04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
@@ -113,6 +137,18 @@ public class WangAssembler {
 				break;
 			}
 		}
+		return errs > ie ? -1 : 0;
+	}
+
+	public int asm(File file, File os, PrintStream ls) {
+		int n;
+		stdout = (ls == System.out);
+
+		mem = new byte[wi.maxPC() + 1];
+		adr = 0;
+		n = asm(file, ls);
+		if (n < 0) return n;
+
 		if (tape) {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
 				mem[adr++] = (byte)wi.endProg();
@@ -124,17 +160,13 @@ public class WangAssembler {
 		for (WangSymbol sym : wi.getSymTab().getSyms()) {
 			if (!sym.def) {
 				++errs;
-				ls.format("Undefined: %s\n", sym.nam);
-				if (!stdout) {
-					System.err.format("Undefined: %s\n", sym.nam);
-				}
+				errorList(String.format("Undefined: %s", sym.nam),
+									-1, ls);
 			}
 			// TODO: check for unused symbols?
 		}
 		n = objectOut(mem, adr, os);
-		if (n < 0) {
-			return n;
-		}
+		if (n < 0) return n;
 		return errs;
 	}
 }
