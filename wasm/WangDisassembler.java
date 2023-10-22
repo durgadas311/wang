@@ -25,6 +25,7 @@ public class WangDisassembler {
 	public int disas(File file, PrintStream os) {
 		byte[] mem;
 		int adr;
+		int last;
 		WangInstruction e;
 		boolean endProg;
 		String t;
@@ -40,8 +41,14 @@ public class WangDisassembler {
 		}
 		os.format("; Disassembled from %s\n", file.getName());
 		adr = 0;
-		// TODO: strip off trailing STOPs if rom...
-		while (adr < mem.length && adr <= wi.maxPC()) {
+		last = mem.length - 1;
+		if (rom) {
+			if (last > wi.maxRomPC()) last = wi.maxRomPC();
+			while (last > 0 && (mem[last] & 0xff) == wi.stop()) --last;
+		} else {
+			if (last > wi.maxPC()) last = wi.maxPC();
+		}
+		while (adr <= last) {
 			endProg = false;
 			if (tape && (mem[adr] & 0xff) == wi.endProg() &&
 					adr + 1 < mem.length) {
