@@ -93,7 +93,7 @@ public class wasm {
 		if (w700) {
 			mach = new Wang700Instructions();
 		} else if (w600) {
-			mach = new Wang600Instructions();
+			mach = new Wang600Instructions(rom);
 		} else {
 			System.err.format("No machine specified\n");
 			System.exit(1);

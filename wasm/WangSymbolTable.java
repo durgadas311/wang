@@ -1,14 +1,19 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
 import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 
 public class WangSymbolTable {
 	private Vector<WangSymbol> syms;
 	private WangRegFixer fix;
+	private Map<Integer,Integer> labs;
 
 	public WangSymbolTable(WangRegFixer fix) {
 		this.fix = fix;
 		syms = new Vector<WangSymbol>();
+		labs = new HashMap<Integer,Integer>();
 	}
 
 	private WangSymbol lookup(String lab) {
@@ -53,5 +58,36 @@ public class WangSymbolTable {
 			sym.refs.add(ref);
 		}
 		return sym.val;
+	}
+
+	// define or reference a label
+	public void setMark(int key, int ref, int type, boolean rom) {
+		switch (type) {
+		case WangInstructions.LABEL:
+			if (rom) {
+				key |= 0x100;
+			}
+			if (!labs.containsKey(key)) {
+				labs.put(key, ref);
+			} else {
+				labs.replace(key, ref);
+			}
+			break;
+		case WangInstructions.ROMARK:	// SEARCH, CALL ROM
+		case WangInstructions.FROM:	// f(x) ROM
+			key |= 0x100;
+			// FALLTHROUGH
+		case WangInstructions.MARK:	// SEARCH, CALL, ...
+		case WangInstructions.FCALL:	// f(x)
+			if (labs.containsKey(key)) break;
+			labs.put(key, -ref);
+			break;
+		default:
+			break;
+		}
+	}
+
+	public Set<Map.Entry<Integer,Integer>> getMarks() {
+		return labs.entrySet();
 	}
 }

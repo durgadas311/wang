@@ -1,6 +1,8 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Vector;
 import java.io.*;
 
 public class WangAssembler {
@@ -103,8 +105,6 @@ public class WangAssembler {
 					n, ls);
 				continue;
 			} else if (toks[n].equalsIgnoreCase(".INCLUDE")) {
-				// TODO: asm() needs to be split into "global" vs. each
-				// to make recursive work.
 				++n;
 				if (n >= toks.length) {
 					errorList(String.format("S               %s",
@@ -117,6 +117,14 @@ public class WangAssembler {
 				n = asm(new File(toks[n]), ls); // errs counted
 				errorList(String.format("<               %s", line),
 					0, ls);
+				continue;
+			} else if (toks[n].equalsIgnoreCase(".EXT") ||
+					toks[n].equalsIgnoreCase(".EXTROM")) {
+				// external label(s)
+				n = wi.xlab(toks, n);
+				errorList(String.format("%c               %s",
+							wi.lastError(), line),
+					n, ls);
 				continue;
 			} else {
 				n = wi.encode(toks, n, mem, adr);
@@ -146,15 +154,21 @@ public class WangAssembler {
 	public int asm(File file, File os, PrintStream ls) {
 		int n;
 		stdout = (ls == System.out);
+		int max;
 
-		mem = new byte[wi.maxPC() + 1];
+		if (rom) {
+			max = wi.maxRomPC() + 1;
+		} else {
+			max = wi.maxPC() + 1;
+		}
+		mem = new byte[max];
 		adr = 0;
 		n = asm(file, ls);
 		if (n < 0) return n;
 
 		if (rom) {
-			if (adr <= wi.maxRomPC()) {
-				Arrays.fill(mem, adr, wi.maxRomPC() + 1, (byte)wi.stop());
+			if (adr < max) {
+				Arrays.fill(mem, adr, max, (byte)wi.stop());
 			}
 		} else if (tape) {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
@@ -164,10 +178,18 @@ public class WangAssembler {
 				mem[adr++] = (byte)0xff;
 			}
 		}
+		for (Map.Entry<Integer,Integer> sym : wi.getSymTab().getMarks()) {
+			int key = sym.getKey();
+			int val = sym.getValue();
+			if (val < 0) {
+				errorList(String.format("Undefined: %s %02d-%02d",
+					(key & 0x100) != 0 ? "ROM" : "",
+					(key >> 4) & 0x0f, key & 0x0f), -1, ls);
+			}
+		}
 		for (WangSymbol sym : wi.getSymTab().getSyms()) {
 			if (!sym.def) {
-				++errs;
-				errorList(String.format("Undefined: %s", sym.nam),
+				errorList(String.format("Undefined: &%s", sym.nam),
 									-1, ls);
 			}
 			// TODO: check for unused symbols?

@@ -7,6 +7,7 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
 	private char error;
+	private boolean rom;
 
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
@@ -68,16 +69,16 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		instr.add(new Instruction("RECALL*",	0xf0, REG));
 		instr.add(new Instruction("PRINT*",	0xf1, FMT));
 		instr.add(new Instruction("I/O",	0xf2, IO));
-		instr.add(new Instruction("SRCHROM",	0xf3, MARK));
-		instr.add(new Instruction("SRCHROM*",	0xf4, MARK));
-		instr.add(new Instruction("SRCHROM*",	0xf5, MARK));
-		instr.add(new Instruction("SRCHROM*",	0xf6, MARK));
+		instr.add(new Instruction("SRCHROM",	0xf3, ROMARK));
+		instr.add(new Instruction("SRCHROM*",	0xf4, ROMARK));
+		instr.add(new Instruction("SRCHROM*",	0xf5, ROMARK));
+		instr.add(new Instruction("SRCHROM*",	0xf6, ROMARK));
 		instr.add(new Instruction("CALL",	0xf7, MARK));
 		instr.add(new Instruction("MARK*",	0xf8, LABEL));
 		instr.add(new Instruction("STORE*",	0xf9, REG));
 		instr.add(new Instruction("ALPHA*",	0xfa, ALPHA));
 		instr.add(new Instruction("INDIR",	0xfb, INDIR));
-		instr.add(new Instruction("CALLROM",	0xfc, MARK));
+		instr.add(new Instruction("CALLROM",	0xfc, ROMARK));
 		instr.add(new Instruction("GROUP1",	0xfd, IO));
 		instr.add(new Instruction("GROUP2",	0xfe, IO));
 		instr.add(new Instruction("SEARCH*",	0xff, MARK));
@@ -96,10 +97,10 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 			instr.add(new Instruction("/" + n, 0x50 + x, 0));
 			instr.add(new Instruction("ST" + n, 0x60 + x, 0));
 			instr.add(new Instruction("RE" + n, 0x70 + x, 0));
-			instr.add(new Instruction("f" + n, 0xa0 + x, 0));
-			instr.add(new Instruction("F" + n, 0xb0 + x, 0));
-			instr.add(new Instruction("g" + n, 0xc0 + x, 0));
-			instr.add(new Instruction("G" + n, 0xd0 + x, 0));
+			instr.add(new Instruction("f" + n, 0xa0 + x, FCALL));
+			instr.add(new Instruction("F" + n, 0xb0 + x, FCALL));
+			instr.add(new Instruction("g" + n, 0xc0 + x, FROM));
+			instr.add(new Instruction("G" + n, 0xd0 + x, FROM));
 			instr.add(new Instruction("EX" + n, 0xe0 + x, 0));
 		}
 		// Add some assembler aliases, not seen by disassembler
@@ -107,9 +108,10 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		instr.add(new Instruction("SETEXP", 0x0b, 0));
 	}
 
-	public Wang600Instructions() {
+	public Wang600Instructions(boolean rom) {
 		tbl = new WangSymbolTable(this);
 		initAll();
+		this.rom = rom;
 	}
 
 	public int maxPC() { return 1847; }
@@ -147,6 +149,7 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 	}
 
 	public int setOutput(String dev) {
+		error = ' ';
 		if (!dev.matches("[wW]6[01][012]") && !dev.matches("[Ww]60[67]")) {
 			error = 'S';
 			return -1;
@@ -170,6 +173,7 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		int x = 0;
 		int reg;
 		Instruction e;
+		int flag;
 
 		error = ' ';
 		x = first;
@@ -191,20 +195,34 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 			return -1;
 		}
 		mem[adr++] = e.opcode;
-		if (e.flags == 0) return adr - start;
+		flag = e.flags;
+		switch (flag) {
+		case FCALL:
+		case FROM:
+			tbl.setMark(e.opcode & 0xff, adr - 1, e.flags, rom);
+			// FALLTHROUGH
+		case 0:
+			return adr - start;
+		default:
+			break;
+		}
 		if (x >= line.length) {
 			error = 'S';
 			return -1;
 		}
-		switch (e.flags) {
+		switch (flag) {
 		case MARK:	// TODO: prevent/warn on END PROG?
+		case ROMARK:
 		case LABEL:
 			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
-				mem[adr++] = getCode(line[x]);
+				byte b = getCode(line[x]);
+				tbl.setMark(b & 0xff, adr - 1, flag, rom);
+				mem[adr++] = b;
 				break;
 			}
+			// FALLTHROUGH
 		case INDIR:	// TODO: validate operation code?
-			if (e.flags == INDIR && line[x].matches("[Rr][01][0-9]")) {
+			if (flag == INDIR && line[x].matches("[Rr][01][0-9]")) {
 				// "case" statement: step += (Rxx)
 				reg = Integer.valueOf(line[x].substring(1));
 				if (reg <= 15) {
@@ -217,6 +235,7 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 				error = 'P';
 				return -1;
 			}
+			tbl.setMark(e.opcode & 0xff, adr - 1, flag, rom);
 			mem[adr++] = e.opcode;
 			break;
 		case REG:
@@ -284,6 +303,31 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		return String.format(" (%d)", adrReg(adr));
 	}
 
+	public int xlab(String[] line, int first) {
+		int key = 0;
+		int x = first;
+
+		error = ' ';
+		if (line[x].equalsIgnoreCase(".EXTROM")) {
+			key += 0x100;
+		}
+		while (++x < line.length) {
+			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
+				key |= getCode(line[x]);
+			} else {
+				Instruction e = asm(line[x]);
+				if (e == null) {
+					error = 'P';
+					return -1;
+				}
+				key |= (e.opcode & 0xff);
+			}
+			tbl.setMark(key, 0, LABEL, false);
+			key &= ~0xff;
+		}
+		return 0;
+	}
+
 	// .REG <label> {"string"|number}
 	// assumes regPad() already called.
 	public int dreg(String[] line, int first, byte[] mem, int start) {
@@ -294,6 +338,11 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		int c = 0;
 		double d;
 
+		error = ' ';
+		if (rom) {
+			error = 'X';
+			return -1;
+		}
 		x = first + 1;	// skip ".REG"
 		reg = adrReg(adr);
 		if (x < line.length) {
