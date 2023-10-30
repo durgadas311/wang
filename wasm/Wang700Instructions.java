@@ -126,6 +126,8 @@ public class Wang700Instructions implements WangInstructions {
 
 	public Wang700Instructions() {
 		tbl = new WangSymbolTable();
+		tbl.reserveMarks(0x00, 0x40); // block-out subroutine calls
+		tbl.reserveMark(endProg()); // END PROG is problematic
 		initAll();
 		tr = new TiltRotate(0x4d);
 	}
@@ -184,6 +186,42 @@ public class Wang700Instructions implements WangInstructions {
 		return setOutput(line[x]);
 	}
 
+	// check symbolic program label
+	private int chkSym(String key, int ref, int type) {
+		int ret;
+		if (type == LABEL) {
+			ret = tbl.setMark(key, ref);
+			if (ret < 0) {
+				error = 'M';
+				return -1;
+			}
+		} else {
+			ret = tbl.getMark(key, ref, type);
+			if (pass && ret < 0) {
+				error = 'U';
+				return -1;
+			}
+		}
+		return ret;
+	}
+
+	// check specified program label
+	private int chkLab(int key, int ref, int type) {
+		if (type == LABEL) {
+			if (tbl.setMark(key, ref, false) < 0) {
+				error = 'M';
+				return -1;
+			}
+		} else {
+			int reg = tbl.getMark(key, ref, type);
+			if (pass && reg < 0) {
+				error = 'U';
+				return -1;
+			}
+		}
+		return 0;
+	}
+
 	// label, if any, already parsed. Else 'lab' is null.
 	public int encode(String[] line, int first, byte[] mem, int start) {
 		int adr = start;
@@ -200,7 +238,7 @@ public class Wang700Instructions implements WangInstructions {
 				int q = E.indexOf(Character.toUpperCase(line[x].charAt(i)));
 				if (q < 0) {
 					error = 'V';
-					return -1;
+					return -(adr - start);
 				}
 				mem[adr++] = (byte)(q + 0x70);
 			}
@@ -215,7 +253,11 @@ public class Wang700Instructions implements WangInstructions {
 		flag = e.flags;
 		switch (flag) {
 		case FCALL:
-			tbl.setMark(e.opcode & 0xff, adr - 1, flag, false);
+			reg = tbl.getMark(e.opcode & 0xff, adr - 1, flag);
+			if (pass && reg < 0) {
+				error = 'U';
+				return -1;
+			}
 			// FALLTHROUGH
 		case 0:
 			return adr - start;
@@ -229,18 +271,30 @@ public class Wang700Instructions implements WangInstructions {
 		switch (flag) {
 		case MARK:	// TODO: prevent/warn on END PROG?
 		case LABEL:
+			if (line[x].charAt(0) == '&') {
+				reg = chkSym(line[x].substring(1), adr - 1, flag);
+				if (reg < 0) {
+					return -2;
+				}
+				mem[adr++] = (byte)reg;
+				break;
+			}
 			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
 				byte b = getCode(line[x]);
-				tbl.setMark(b & 0xff, adr, flag, false);
+				if (chkLab(b & 0xff, adr - 1, flag) < 0) {
+					return -2;
+				}
 				mem[adr++] = b;
 				break;
 			}
 			e = asm(line[x]);
 			if (e == null) {
 				error = 'P';
-				return -1;
+				return -2;
 			}
-			tbl.setMark(e.opcode & 0xff, adr, flag, false);
+			if (chkLab(e.opcode & 0xff, adr - 1, flag) < 0) {
+				return -2;
+			}
 			mem[adr++] = e.opcode;
 			break;
 		case REG:
@@ -248,21 +302,21 @@ public class Wang700Instructions implements WangInstructions {
 				reg = tbl.getLabel(line[x].substring(1), adr);
 				if (pass && reg < 0) {
 					error = 'U';
-					return -1;
+					return -2;
 				}
 			} else {
 				reg = Integer.valueOf(line[x]);
 				if (reg < 0 || reg > maxReg()) {
 					error = 'R';
-					return -1;
+					return -2;
 				}
 			}
-			fixReg(mem, adr, reg);
+			fixReg(mem, adr++, reg);
 			break;
 		case FMT:	// WRITE instruction
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
 				error = 'F';
-				return -1;
+				return -2;
 			}
 			mem[adr++] = getCode(line[x]);
 			break;
@@ -276,7 +330,7 @@ public class Wang700Instructions implements WangInstructions {
 				e = asm(line[x]);
 				if (e == null) {
 					error = 'P';
-					return -1;
+					return -2;
 				}
 				mem[adr++] = e.opcode;
 			}
@@ -284,7 +338,7 @@ public class Wang700Instructions implements WangInstructions {
 		case IO:
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
 				error = 'I';
-				return -1;
+				return -2;
 			}
 			mem[adr++] = getCode(line[x]);
 			break;
@@ -331,6 +385,7 @@ public class Wang700Instructions implements WangInstructions {
 	public int xlab(String[] line, int first) {
 		int key = 0;
 		int x = first;
+		int ret = 0;
 
 		error = ' ';
 		while (++x < line.length) {
@@ -344,9 +399,12 @@ public class Wang700Instructions implements WangInstructions {
 				}
 				key = (e.opcode & 0xff);
 			}
-			tbl.setMark(key, 0, LABEL, false);
+			if (tbl.setMark(key, -1, false) < 0) {
+				error = 'M';
+				ret = -1;
+			}
 		}
-		return 0;
+		return ret;
 	}
 
 	// .REG <label> {"string"|number}
@@ -368,12 +426,12 @@ public class Wang700Instructions implements WangInstructions {
 			ss = line[x].split(",");
 			if (tbl.setLabel(ss[0], reg, mem) < 0) {
 				error = 'M';
-				return -1;
+				return -16;
 			}
 			if (ss.length > 1) {
 				if (tbl.setLabel(ss[1], reg + 1, mem) < 0) {
 					error = 'M';
-					return -1;
+					return -16;
 				}
 			}
 			++x;

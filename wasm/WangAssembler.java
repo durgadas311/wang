@@ -94,7 +94,7 @@ public class WangAssembler {
 				int m = wi.regPad(mem, adr);
 				int end = adr + m;
 				while (adr < end) {
-					errorList(String.format(" %04d  %02d-%02d\n",
+					errorList(String.format(" %04d  %02d-%02d",
 						adr, high(mem[adr]), low(mem[adr])),
 						0, ls);
 					++adr;
@@ -137,12 +137,12 @@ public class WangAssembler {
 						adr, high(mem[adr]), low(mem[adr]), line),
 					n, ls);
 			if (ls == null) {
-				if (n > 0) adr += n;
+				adr += (n > 0 ? n : -n);
 			} else {
-				int end = adr + n;
+				int end = adr + (n > 0 ? n : -n);
 				++adr;
 				while (adr < end) {
-					errorList(String.format(" %04d  %02d-%02d\n",
+					errorList(String.format(" %04d  %02d-%02d",
 						adr, high(mem[adr]), low(mem[adr])),
 						0, ls);
 					++adr;
@@ -172,6 +172,7 @@ public class WangAssembler {
 		wi.finalPass(false);
 		n = asm(file, ls);
 		if (n < 0) return n;
+		wi.getSymTab().resolveMarks();
 		Arrays.fill(mem, (byte)0);
 		errs = 0;
 		adr = 0;
@@ -189,15 +190,6 @@ public class WangAssembler {
 			} else {
 				mem[adr++] = (byte)wi.endProg();
 				mem[adr++] = (byte)0xff;
-			}
-		}
-		for (Map.Entry<Integer,Integer> sym : wi.getSymTab().getMarks()) {
-			int key = sym.getKey();
-			int val = sym.getValue();
-			if (val < 0) {
-				errorList(String.format("Undefined: %s %02d-%02d",
-					(key & 0x100) != 0 ? "ROM" : "",
-					(key >> 4) & 0x0f, key & 0x0f), -1, ls);
 			}
 		}
 		n = objectOut(mem, adr, os);
