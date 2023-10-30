@@ -2,12 +2,13 @@
 
 import java.util.Vector;
 
-public class Wang600Instructions implements WangInstructions, WangRegFixer {
+public class Wang600Instructions implements WangInstructions {
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
 	private char error;
 	private boolean rom;
+	private boolean pass;
 
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
@@ -109,7 +110,7 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 	}
 
 	public Wang600Instructions(boolean rom) {
-		tbl = new WangSymbolTable(this);
+		tbl = new WangSymbolTable();
 		initAll();
 		this.rom = rom;
 	}
@@ -120,6 +121,8 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 	public int endProg() { return 0x9e; }
 	public int stop() { return 0x93; }
 	public char lastError() { return error; }
+	public boolean finalPass() { return pass; }
+	public void finalPass(boolean p) { pass = p; }
 
 	// Assembly methods //
 
@@ -142,10 +145,6 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		int cd = (Integer.valueOf(opr.substring(0,2)) << 4);
 		cd |= Integer.valueOf(opr.substring(3));
 		return (byte)cd;
-	}
-
-	public void fixReg(byte[] mem, int adr, int reg) {
-		mem[adr] = (byte)reg;
 	}
 
 	public int setOutput(String dev) {
@@ -241,6 +240,10 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		case REG:
 			if (line[x].charAt(0) == '&') {
 				reg = tbl.getLabel(line[x].substring(1), adr);
+				if (pass && reg < 0) {
+					error = 'U';
+					return -1;
+				}
 			} else {
 				reg = Integer.valueOf(line[x]);
 				if (reg < 0 || reg > maxReg()) {
@@ -346,7 +349,10 @@ public class Wang600Instructions implements WangInstructions, WangRegFixer {
 		x = first + 1;	// skip ".REG"
 		reg = adrReg(adr);
 		if (x < line.length) {
-			tbl.setLabel(line[x], reg, mem);
+			if (tbl.setLabel(line[x], reg, mem) < 0) {
+				error = 'M';
+				return -1;
+			}
 			++x;
 		}
 		if (x < line.length) {

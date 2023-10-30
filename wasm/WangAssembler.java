@@ -39,6 +39,7 @@ public class WangAssembler {
 
 	// Send output to listing, and if error also to stderr
 	private void errorList(String line, int ret, PrintStream ls) {
+		if (!wi.finalPass()) return;
 		if (ret < 0) ++errs;
 		if (ret < 0 && !stdout) {
 			System.err.format("%s\n", line);
@@ -93,7 +94,9 @@ public class WangAssembler {
 				int m = wi.regPad(mem, adr);
 				int end = adr + m;
 				while (adr < end) {
-					ls.format(" %04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
+					errorList(String.format(" %04d  %02d-%02d\n",
+						adr, high(mem[adr]), low(mem[adr])),
+						0, ls);
 					++adr;
 				}
 				n = wi.dreg(toks, n, mem, adr);
@@ -139,7 +142,9 @@ public class WangAssembler {
 				int end = adr + n;
 				++adr;
 				while (adr < end) {
-					ls.format(" %04d  %02d-%02d\n", adr, high(mem[adr]), low(mem[adr]));
+					errorList(String.format(" %04d  %02d-%02d\n",
+						adr, high(mem[adr]), low(mem[adr])),
+						0, ls);
 					++adr;
 				}
 			}
@@ -162,9 +167,17 @@ public class WangAssembler {
 			max = wi.maxPC() + 1;
 		}
 		mem = new byte[max];
+		errs = 0;
 		adr = 0;
+		wi.finalPass(false);
 		n = asm(file, ls);
 		if (n < 0) return n;
+		Arrays.fill(mem, (byte)0);
+		errs = 0;
+		adr = 0;
+		wi.finalPass(true);
+		n = asm(file, ls);
+		if (n < 0) return errs;
 
 		if (rom) {
 			if (adr < max) {
@@ -186,13 +199,6 @@ public class WangAssembler {
 					(key & 0x100) != 0 ? "ROM" : "",
 					(key >> 4) & 0x0f, key & 0x0f), -1, ls);
 			}
-		}
-		for (WangSymbol sym : wi.getSymTab().getSyms()) {
-			if (!sym.def) {
-				errorList(String.format("Undefined: &%s", sym.nam),
-									-1, ls);
-			}
-			// TODO: check for unused symbols?
 		}
 		n = objectOut(mem, adr, os);
 		if (n < 0) return n;

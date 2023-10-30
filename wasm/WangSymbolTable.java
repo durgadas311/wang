@@ -7,11 +7,9 @@ import java.util.Set;
 
 public class WangSymbolTable {
 	private Vector<WangSymbol> syms;
-	private WangRegFixer fix;
 	private Map<Integer,Integer> labs;
 
-	public WangSymbolTable(WangRegFixer fix) {
-		this.fix = fix;
+	public WangSymbolTable() {
 		syms = new Vector<WangSymbol>();
 		labs = new HashMap<Integer,Integer>();
 	}
@@ -34,16 +32,15 @@ public class WangSymbolTable {
 			return 0;
 		}
 		WangSymbol sym = lookup(lab);
-		if (sym == null) {
-			sym = new WangSymbol(lab, val);
-			syms.add(sym);
-		} else {
-			sym.define(val);
+		if (sym != null) {
+			if (sym.val != val) {
+				// multiple definitions... error...
+				return -1;
+			}
+			return 0;
 		}
-		for (Integer ref : sym.refs) {
-			fix.fixReg(mem, ref, val);
-		}
-		sym.refs.clear();
+		sym = new WangSymbol(lab, val);
+		syms.add(sym);
 		return 0;
 	}
 
@@ -51,11 +48,8 @@ public class WangSymbolTable {
 		WangSymbol sym = lookup(lab);
 
 		if (sym == null) {
-			sym = new WangSymbol(lab);
-			syms.add(sym);
-		}
-		if (!sym.def) {
-			sym.refs.add(ref);
+			// undefined... error...
+			return -1;
 		}
 		return sym.val;
 	}

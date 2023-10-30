@@ -30,6 +30,8 @@ public interface WangInstructions {
 	int maxReg();
 	int endProg();
 	int stop();
+	boolean finalPass();
+	void finalPass(boolean p);
 	String printHelp(); // help string for PRINT/WRITE command (FMT)
 	String regHelp();
 }

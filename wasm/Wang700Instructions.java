@@ -2,11 +2,12 @@
 
 import java.util.Vector;
 
-public class Wang700Instructions implements WangInstructions, WangRegFixer {
+public class Wang700Instructions implements WangInstructions {
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr;
 	private char error;
+	private boolean pass;
 
 	static final String E = "0123456789E-.";
 
@@ -124,7 +125,7 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 	}
 
 	public Wang700Instructions() {
-		tbl = new WangSymbolTable(this);
+		tbl = new WangSymbolTable();
 		initAll();
 		tr = new TiltRotate(0x4d);
 	}
@@ -135,6 +136,8 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 	public int endProg() { return 0x5c; }
 	public int stop() { return 0x5f; }
 	public char lastError() { return error; }
+	public boolean finalPass() { return pass; }
+	public void finalPass(boolean p) { pass = p; }
 
 	// Assembly methods //
 
@@ -153,7 +156,7 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 		return (byte)cd;
 	}
 
-	public void fixReg(byte[] mem, int adr, int reg) {
+	private void fixReg(byte[] mem, int adr, int reg) {
 		if (reg > 99) {
 			mem[adr - 1] |= 0x80;
 			reg -= 100;
@@ -243,15 +246,18 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 		case REG:
 			if (line[x].charAt(0) == '&') {
 				reg = tbl.getLabel(line[x].substring(1), adr);
-				mem[adr++] = (byte)reg; // dummy value
+				if (pass && reg < 0) {
+					error = 'U';
+					return -1;
+				}
 			} else {
 				reg = Integer.valueOf(line[x]);
 				if (reg < 0 || reg > maxReg()) {
 					error = 'R';
 					return -1;
 				}
-				fixReg(mem, adr, reg);
 			}
+			fixReg(mem, adr, reg);
 			break;
 		case FMT:	// WRITE instruction
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
@@ -360,9 +366,15 @@ public class Wang700Instructions implements WangInstructions, WangRegFixer {
 		reg = adrReg(adr);
 		if (x < line.length) {
 			ss = line[x].split(",");
-			tbl.setLabel(ss[0], reg, mem);
+			if (tbl.setLabel(ss[0], reg, mem) < 0) {
+				error = 'M';
+				return -1;
+			}
 			if (ss.length > 1) {
-				tbl.setLabel(ss[1], reg + 1, mem);
+				if (tbl.setLabel(ss[1], reg + 1, mem) < 0) {
+					error = 'M';
+					return -1;
+				}
 			}
 			++x;
 		}
