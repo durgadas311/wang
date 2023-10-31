@@ -29,7 +29,11 @@ public class Wang600Instructions implements WangInstructions {
 		}
 
 		public boolean equalsMn(String mn) {
-			return mnemonic.equalsIgnoreCase(mn);
+			if (flags == FCALL || flags == FROM) {
+				return mnemonic.equals(mn);
+			} else {
+				return mnemonic.equalsIgnoreCase(mn);
+			}
 		}
 	}
 

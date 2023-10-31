@@ -107,6 +107,7 @@ public class wasm {
 				System.out.format("%02d-%02d %s",
 					(op >> 4), (op & 0x0f), i.mnemonic);
 				switch (i.flags) {
+				case WangInstructions.ROMARK:
 				case WangInstructions.MARK:
 				case WangInstructions.LABEL:
 					System.out.format(" <label>\n");
@@ -135,6 +136,10 @@ public class wasm {
 			System.out.format("      .REG %s\n", mach.regHelp());
 			System.out.format("      .OUT <device>\n");
 			System.out.format("      .INCLUDE <file>\n");
+			System.out.format("      .EXT <label>...\n");
+			if (mach.maxRomPC() > 0) {
+				System.out.format("      .EXTROM <label>...\n");
+			}
 			System.exit(0);
 		}
 		if (dev != null) {
