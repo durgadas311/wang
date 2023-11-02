@@ -8,14 +8,19 @@ import java.util.Set;
 public class WangSymbolTable {
 	private Vector<WangSymbol> regs;
 	private Vector<WangSymbol> syms;
+	private Vector<WangSymbol> subs;
 	private Map<Integer,Integer> labs;
 	private boolean[] lset;
+	private int subrLo, subrHi;
 
-	public WangSymbolTable() {
+	public WangSymbolTable(int lo, int hi) {
 		regs = new Vector<WangSymbol>();
 		syms = new Vector<WangSymbol>();
+		subs = new Vector<WangSymbol>();
 		labs = new HashMap<Integer,Integer>();
 		lset = new boolean[256];
+		subrLo = lo;
+		subrHi = hi;
 	}
 
 	private WangSymbol lookup(String lab) {
@@ -29,6 +34,15 @@ public class WangSymbolTable {
 
 	private WangSymbol find(String lab) {
 		for (WangSymbol sym : syms) {
+			if (sym.nam.equalsIgnoreCase(lab)) {
+				return sym;
+			}
+		}
+		return null;
+	}
+
+	private WangSymbol subr(String lab) {
+		for (WangSymbol sym : subs) {
 			if (sym.nam.equalsIgnoreCase(lab)) {
 				return sym;
 			}
@@ -85,9 +99,37 @@ public class WangSymbolTable {
 		return sym.val;
 	}
 
-	// reference a symbolic program label
+	// reference a symbolic program label - e.g. SEARCH &xxxx
 	public int getMark(String key, int ref, int type) {
 		WangSymbol sym = find(key);
+
+		if (sym == null) {
+			// undefined... error... (unless first pass)
+			return -1;
+		}
+		return sym.val; // on second pass, should be resolved
+	}
+
+	// define a symbolic subroutine label - MARK $xxxx
+	// returns label code, if resolved (second pass).
+	public int setSubr(String key, int ref) {
+		WangSymbol sym = subr(key);
+
+		if (sym != null) {
+			if (sym.ref != ref) {
+				return -1;
+			}
+		} else {
+			sym = new WangSymbol(ref, key);
+			subs.add(sym);
+		}
+		return sym.val;
+	}
+
+	// reference a symbolic subroutine label - e.g. $xxxx
+	// (the label *is* the command/instruction)
+	public int getSubr(String key, int ref, int type) {
+		WangSymbol sym = subr(key);
 
 		if (sym == null) {
 			// undefined... error... (unless first pass)
@@ -138,18 +180,34 @@ public class WangSymbolTable {
 
 	private int getFreeMark() {
 		int x;
-		for (x = 0; x < lset.length && lset[x]; ++x);
+		for (x = 0; x < lset.length && lset[x]; ++x) {
+			if (x == subrLo) x = subrHi - 1;
+		}
 		if (x < lset.length) {
 			lset[x] = true;
 			return x;
 		}
-		return -1;
+		return -2;
+	}
+
+	private int getFreeSubr() {
+		int x;
+		for (x = subrLo; x < subrHi && lset[x]; ++x);
+		if (x < subrHi) {
+			lset[x] = true;
+			return x;
+		}
+		return -2;
 	}
 
 	public int resolveMarks() {
 		for (WangSymbol sym : syms) {
 			// can any be already resolved?
 			sym.val = getFreeMark();
+		}
+		for (WangSymbol sym : subs) {
+			// can any be already resolved?
+			sym.val = getFreeSubr();
 		}
 		return 0;
 	}

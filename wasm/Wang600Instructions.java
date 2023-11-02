@@ -114,8 +114,13 @@ public class Wang600Instructions implements WangInstructions {
 	}
 
 	public Wang600Instructions(boolean rom) {
-		tbl = new WangSymbolTable();
-		tbl.reserveMarks(0xa0, 0xe0); // block-out subroutine calls
+		if (rom) {
+			tbl = new WangSymbolTable(0xc0, 0xe0);
+			tbl.reserveMarks(0xa0, 0xc0); // excl non-ROM f(x)
+		} else {
+			tbl = new WangSymbolTable(0xa0, 0xc0);
+			tbl.reserveMarks(0xc0, 0xe0); // excl ROM f(x)
+		}
 		tbl.reserveMark(endProg()); // END PROG is problematic
 		initAll();
 		this.rom = rom;
@@ -175,14 +180,25 @@ public class Wang600Instructions implements WangInstructions {
 	// check symbolic program label
 	private int chkSym(String key, int ref, int type) {
 		int ret;
+		boolean sub = (key.charAt(0) == '$');
+		String sym = key.substring(1);
+
 		if (type == LABEL) {
-			ret = tbl.setMark(key, ref);
+			if (sub) {
+				ret = tbl.setSubr(sym, ref);
+			} else {
+				ret = tbl.setMark(sym, ref);
+			}
 			if (ret < 0) {
 				error = 'M';
 				return -1;
 			}
 		} else {
-			ret = tbl.getMark(key, ref, type);
+			if (sub) {
+				ret = tbl.getSubr(sym, ref, type);
+			} else {
+				ret = tbl.getMark(sym, ref, type);
+			}
 			if (pass && ret < 0) {
 				error = 'U';
 				return -1;
@@ -230,13 +246,25 @@ public class Wang600Instructions implements WangInstructions {
 			}
 			return adr - start;
 		}
-		e = asm(line[x++]);
-		if (e == null) {
-			error = 'O';
-			return -1;
+		if (line[x].charAt(0) == '$') {
+			// symbolic subroutine call
+			reg = tbl.getSubr(line[x].substring(1), adr, FCALL);
+			if (pass && reg < 0) {
+				error = 'U';
+				return -1;
+			}
+			mem[adr++] = (byte)reg;
+			flag = 0;
+			e = null; // not used since flag=0
+		} else {
+			e = asm(line[x++]);
+			if (e == null) {
+				error = 'O';
+				return -1;
+			}
+			mem[adr++] = e.opcode;
+			flag = e.flags;
 		}
-		mem[adr++] = e.opcode;
-		flag = e.flags;
 		switch (flag) {
 		case FCALL:
 		case FROM:
@@ -260,8 +288,8 @@ public class Wang600Instructions implements WangInstructions {
 		case MARK:	// TODO: prevent/warn on END PROG?
 		case ROMARK:
 		case LABEL:
-			if (line[x].charAt(0) == '&') {
-				reg = chkSym(line[x].substring(1), adr - 1, flag);
+			if (line[x].charAt(0) == '&' || line[x].charAt(0) == '$') {
+				reg = chkSym(line[x], adr - 1, flag);
 				if (reg < 0) {
 					return -2;
 				}
