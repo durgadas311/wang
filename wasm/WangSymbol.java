@@ -8,10 +8,11 @@ public class WangSymbol {
 	public WangSymbol(String lab, int reg) {
 		val = reg;
 		nam = lab;
+		ref = -1;
 	}
 
 	public WangSymbol(int ref, String lab) {
-		val = 0xff;
+		val = -1;	// also 15-15
 		nam = lab;
 		this.ref = ref;
 	}

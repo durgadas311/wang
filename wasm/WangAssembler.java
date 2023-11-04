@@ -94,7 +94,8 @@ public class WangAssembler {
 				int m = wi.regPad(mem, adr);
 				int end = adr + m;
 				while (adr < end) {
-					errorList(String.format(" %04d  %02d-%02d",
+					errorList(String.format(" %04d  %02d-%02d     " +
+						"; Register Pad",
 						adr, high(mem[adr]), low(mem[adr])),
 						0, ls);
 					++adr;
@@ -125,6 +126,13 @@ public class WangAssembler {
 					toks[n].equalsIgnoreCase(".EXTROM")) {
 				// external label(s)
 				n = wi.xlab(toks, n);
+				errorList(String.format("%c               %s",
+							wi.lastError(), line),
+					n, ls);
+				continue;
+			} else if (toks[n].equalsIgnoreCase(".DEF")) {
+				// pre-defined symbols
+				n = wi.def(toks, n);
 				errorList(String.format("%c               %s",
 							wi.lastError(), line),
 					n, ls);

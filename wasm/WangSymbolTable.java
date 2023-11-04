@@ -83,13 +83,37 @@ public class WangSymbolTable {
 		return sym.val;
 	}
 
+	// pre-define symbolic program label
+	// (caller avoids this on second pass?)
+	public int defMark(String key, int val) {
+		WangSymbol sym = find(key);
+
+		if (sym != null) {
+			if (sym.val != val) {
+				return -1;	// multiple def
+			}
+		} else if (val >= subrLo && val < subrHi) {
+			// This maybe should include Wang 600 ROM f(x),
+			// but those are valid in program space as long
+			// as not used as one-key subroutines.
+			return -2;	// invalid label
+		} else {
+			sym = new WangSymbol(key, val);
+			syms.add(sym);
+			lset[val & 0xff] = true;	// label no longer free
+		}
+		return 0;
+	}
+
 	// define a symbolic program label - MARK &xxxx
 	// returns label code, if resolved (second pass).
 	public int setMark(String key, int ref) {
 		WangSymbol sym = find(key);
 
 		if (sym != null) {
-			if (sym.ref != ref) {
+			if (sym.ref < 0) {
+				sym.ref = ref;
+			} else if (sym.ref != ref) {
 				return -1;
 			}
 		} else {
@@ -103,11 +127,30 @@ public class WangSymbolTable {
 	public int getMark(String key, int ref, int type) {
 		WangSymbol sym = find(key);
 
-		if (sym == null) {
+		if (sym == null || sym.ref < 0) {
 			// undefined... error... (unless first pass)
 			return -1;
 		}
 		return sym.val; // on second pass, should be resolved
+	}
+
+	// pre-define symbolic subroutine label
+	// (caller avoids this on second pass?)
+	public int defSubr(String key, int val) {
+		WangSymbol sym = subr(key);
+
+		if (sym != null) {
+			if (sym.val != val) {
+				return -1;	// multiple def
+			}
+		} else if (val < subrLo || val >= subrHi) {
+			return -2;	// invalid label
+		} else {
+			sym = new WangSymbol(key, val);
+			subs.add(sym);
+			lset[val & 0xff] = true;	// label no longer free
+		}
+		return 0;
 	}
 
 	// define a symbolic subroutine label - MARK $xxxx
@@ -116,7 +159,9 @@ public class WangSymbolTable {
 		WangSymbol sym = subr(key);
 
 		if (sym != null) {
-			if (sym.ref != ref) {
+			if (sym.ref < 0) {
+				sym.ref = ref;
+			} else if (sym.ref != ref) {
 				return -1;
 			}
 		} else {
@@ -131,7 +176,7 @@ public class WangSymbolTable {
 	public int getSubr(String key, int ref, int type) {
 		WangSymbol sym = subr(key);
 
-		if (sym == null) {
+		if (sym == null || sym.ref < 0) {
 			// undefined... error... (unless first pass)
 			return -1;
 		}
@@ -202,11 +247,13 @@ public class WangSymbolTable {
 
 	public int resolveMarks() {
 		for (WangSymbol sym : syms) {
-			// can any be already resolved?
+			// might be pre-dedfined
+			if (sym.val >= 0) continue;
 			sym.val = getFreeMark();
 		}
 		for (WangSymbol sym : subs) {
-			// can any be already resolved?
+			// might be pre-dedfined
+			if (sym.val >= 0) continue;
 			sym.val = getFreeSubr();
 		}
 		return 0;

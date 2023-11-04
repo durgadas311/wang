@@ -158,6 +158,24 @@ public class Wang600Instructions implements WangInstructions {
 		return (byte)cd;
 	}
 
+	public Instruction keyOrCode(String opr) {
+		Instruction e;
+		int op;
+
+		if (opr.matches("^[0-1][0-9]-[0-1][0-9]$")) {
+			op = getCode(opr) & 0xff;
+			e = disas(op);
+			if (e == null) {
+				// all codes are valid here, but caller
+				// may check (e.mnemonic == null).
+				e = new Instruction(null, op, 0);
+			}
+		} else {
+			e = asm(opr);
+		}
+		return e;
+	}
+
 	public int setOutput(String dev) {
 		error = ' ';
 		if (!dev.matches("[wW]6[01][012]") && !dev.matches("[Ww]60[67]")) {
@@ -296,15 +314,7 @@ public class Wang600Instructions implements WangInstructions {
 				mem[adr++] = (byte)reg;
 				break;
 			}
-			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
-				byte b = getCode(line[x]);
-				if (chkLab(b & 0xff, adr - 1, flag) < 0) {
-					return -2;
-				}
-				mem[adr++] = b;
-				break;
-			}
-			e = asm(line[x]);
+			e = keyOrCode(line[x]);
 			if (e == null) {
 				error = 'P';
 				return -2;
@@ -408,22 +418,54 @@ public class Wang600Instructions implements WangInstructions {
 		error = ' ';
 		extrom = line[x].equalsIgnoreCase(".EXTROM");
 		while (++x < line.length) {
-			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
-				key = getCode(line[x]);
-			} else {
-				Instruction e = asm(line[x]);
-				if (e == null) {
-					error = 'P';
-					return -1;
-				}
-				key = (e.opcode & 0xff);
+			Instruction e = keyOrCode(line[x]);
+			if (e == null) {
+				error = 'P';
+				return -1;
 			}
+			key = (e.opcode & 0xff);
 			if (tbl.setMark(key, -1, extrom) < 0) {
 				error = 'M';
 				ret = -1;
 			}
 		}
 		return ret;
+	}
+
+	public int def(String[] line, int first) {
+		int x = first + 1;
+		boolean sub;
+		String key;
+		Instruction e;
+
+		error = ' ';
+		if (x + 1 >= line.length) {
+			error = 'S';
+			return -1;
+		}
+		if (line[x].charAt(0) != '&' &&
+				line[x].charAt(0) != '$') {
+			error = 'P';
+			return -1;
+		}
+		sub = (line[x].charAt(0) == '$');
+		key = line[x].substring(1);
+		e = keyOrCode(line[x + 1]);
+		if (e == null) {
+			error = 'O';
+			return -1;
+		}
+		if (sub) {
+			x = tbl.defSubr(key, e.opcode & 0xff);
+		} else {
+			x = tbl.defMark(key, e.opcode & 0xff);
+		}
+		if (x < 0) {
+			if (x == -1) error = 'M';
+			else error = 'P';
+			return -1;
+		}
+		return 0;
 	}
 
 	// .REG <label> {"string"|number}

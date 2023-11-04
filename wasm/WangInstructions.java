@@ -19,6 +19,7 @@ public interface WangInstructions {
 	String adrRegStr(int adr);
 	int dreg(String[] line, int first, byte[] mem, int start);
 	int xlab(String[] line, int first);
+	int def(String[] line, int first);
 	int setOutput(String dev);
 	int setOutput(String[] line, int first);
 	char lastError();
