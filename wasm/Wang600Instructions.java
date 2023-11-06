@@ -253,9 +253,20 @@ public class Wang600Instructions implements WangInstructions {
 		error = ' ';
 		x = first;
 		if (line[x].equalsIgnoreCase("ENTER")) {
-			++x;
-			for (int i = 0; i < line[x].length(); ++i) {
-				int q = E.indexOf(Character.toUpperCase(line[x].charAt(i)));
+			String val = line[++x];
+			if (val.charAt(0) == '&') {
+				reg = tbl.getLabel(val.substring(1), adr);
+				if (reg < 0) {
+					if (pass) {
+						error = 'U';
+						return -3;
+					}
+					reg = 0;
+				}
+				val = String.format("%03d", reg);
+			}
+			for (int i = 0; i < val.length(); ++i) {
+				int q = E.indexOf(Character.toUpperCase(val.charAt(i)));
 				if (q < 0) {
 					error = 'V';
 					return -(adr - start);
