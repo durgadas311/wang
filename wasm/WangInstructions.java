@@ -14,10 +14,11 @@ public interface WangInstructions {
 	static final int FCALL = 10;	// f(x) calls
 	static final int FROM = 11;	// Wang 600 ROM f(x) 
 
-	int encode(String[] line, int first, byte[] mem, int start);
-	int regPad(byte[] mem, int start);
+	int encode(String[] line, int first, WangMemory mem, int start);
+	int regPad(WangMemory mem, int start);
+	int regPad(int start);
 	String adrRegStr(int adr);
-	int dreg(String[] line, int first, byte[] mem, int start);
+	int dreg(String[] line, int first, WangMemory mem, int start);
 	int xlab(String[] line, int first);
 	int def(String[] line, int first);
 	int setOutput(String dev);

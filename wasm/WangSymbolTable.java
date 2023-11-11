@@ -55,7 +55,7 @@ public class WangSymbolTable {
 	}
 
 	// define register label
-	public int setLabel(String lab, int val, byte[] mem) {
+	public int setLabel(String lab, int val) {
 		if (lab == null || lab.length() == 0 || lab.equals("-")) {
 			return 0;
 		}
@@ -245,7 +245,8 @@ public class WangSymbolTable {
 		return -2;
 	}
 
-	public int resolveMarks() {
+	public int resolveMarks(int regs) {
+		// TODO: assign registers starting at 'regs' step.
 		for (WangSymbol sym : syms) {
 			// might be pre-dedfined
 			if (sym.val >= 0) continue;

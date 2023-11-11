@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Vector;
 import java.io.*;
 
-public class WangAssembler {
+public class WangAssembler implements WangMemory {
 	WangInstructions wi;
 	boolean tape;
 	boolean rom;
 	int errs = 0;
 	boolean stdout;
+	int startPC;
+	int maxPC;
+	int regPC;
 
 	byte[] mem;
 	int adr;
@@ -19,10 +22,50 @@ public class WangAssembler {
 		this.wi = wi;
 		this.tape = tape;
 		this.rom = rom;
+		startPC = 0;
+		regPC = -1;
+		if (rom) {
+			maxPC = wi.maxRomPC() + 1;
+		} else {
+			maxPC = wi.maxPC() + 1;
+		}
 	}
 
-	private int low(byte b) { return (b & 0x0f); }
-	private int high(byte b) { return ((b >> 4) & 0x0f); }
+	public int getMem(int adr) {
+		if (adr < startPC || adr >= maxPC) {
+			return -1;
+		}
+		adr -= startPC;
+		if (mem == null) {
+			return 0;
+		}
+		return mem[adr] & 0xff;
+	}
+
+	public boolean putMem(int adr, int val) {
+		if (adr < startPC || adr >= maxPC) {
+			return true;
+		}
+		adr -= startPC;
+		if (mem == null) {
+			mem = new byte[(maxPC - startPC) + 2];
+			Arrays.fill(mem, (byte)0);
+		}
+		mem[adr] = (byte)val;
+		return false;
+	}
+
+	private int low(int adr) {
+		int b = getMem(adr);
+		if (b < 0) return 0;
+		return (b & 0x0f);
+	}
+
+	private int high(int adr) {
+		int b = getMem(adr);
+		if (b < 0) return 0;
+		return ((b >> 4) & 0x0f);
+	}
 
 	private int objectOut(byte[] mem, int len, File out) {
 		try {
@@ -47,6 +90,40 @@ public class WangAssembler {
 		if (ls != null) {
 			ls.format("%s\n", line);
 		}
+	}
+
+	private int do_prog(String[] toks, int start) {
+		int n = start + 1;	// skip .PROG
+		int i;
+
+		// must be before program starts,
+		// and cannot specify <regs> in ROM.
+		if ((!wi.finalPass() && mem != null) || (rom && n + 2 < toks.length)) {
+			return 'X';
+		}
+		if (n >= toks.length) return 'S';	// syntax error
+		try {
+			i = Integer.valueOf(toks[n++]);
+		} catch (Exception ee) { return 'S'; }
+		if (i < 0 || i > wi.maxPC()) return 'S';
+		startPC = i;
+		if (n < toks.length) {
+			try {
+				i = Integer.valueOf(toks[n++]);
+			} catch (Exception ee) { return 'S'; }
+			if (i <= startPC || i > wi.maxPC()) return 'S';
+			maxPC = i + 1;
+		}
+		if (n < toks.length) {
+			try {
+				i = Integer.valueOf(toks[n++]);
+			} catch (Exception ee) { return 'S'; }
+			if (i < 0 || i > wi.maxPC()) return 'S';
+			regPC = wi.regPad(i);
+		}
+
+		adr = startPC; // reset to new start
+		return 0;
 	}
 
 	private int asm(File file, PrintStream ls) {
@@ -90,17 +167,24 @@ public class WangAssembler {
 					0, ls);
 				continue;
 			}
-			if (toks[n].equalsIgnoreCase(".REG")) {
-				int m = wi.regPad(mem, adr);
+			if (toks[n].equalsIgnoreCase(".PROG")) {
+				// .PROG <start> [<end> [<regs>]]
+				// define program space.
+				n = do_prog(toks, n);
+				errorList(String.format("%c               " + line, n),
+						n == 0 ? 0 : -1, ls);
+				continue;
+			} else if (toks[n].equalsIgnoreCase(".REG")) {
+				int m = wi.regPad(this, adr);
 				int end = adr + m;
 				while (adr < end) {
 					errorList(String.format(" %04d  %02d-%02d     " +
 						"; Register Pad",
-						adr, high(mem[adr]), low(mem[adr])),
+						adr, high(adr), low(adr)),
 						0, ls);
 					++adr;
 				}
-				n = wi.dreg(toks, n, mem, adr);
+				n = wi.dreg(toks, n, this, adr);
 				line += wi.adrRegStr(adr);
 			} else if (toks[n].equalsIgnoreCase(".OUT")) {
 				n = wi.setOutput(toks, n);
@@ -138,11 +222,11 @@ public class WangAssembler {
 					n, ls);
 				continue;
 			} else {
-				n = wi.encode(toks, n, mem, adr);
+				n = wi.encode(toks, n, this, adr);
 			}
 			errorList(String.format("%c%04d  %02d-%02d     %s",
 						wi.lastError(),
-						adr, high(mem[adr]), low(mem[adr]), line),
+						adr, high(adr), low(adr), line),
 					n, ls);
 			if (ls == null) {
 				adr += (n > 0 ? n : -n);
@@ -151,7 +235,7 @@ public class WangAssembler {
 				++adr;
 				while (adr < end) {
 					errorList(String.format(" %04d  %02d-%02d",
-						adr, high(mem[adr]), low(mem[adr])),
+						adr, high(adr), low(adr)),
 						0, ls);
 					++adr;
 				}
@@ -167,30 +251,26 @@ public class WangAssembler {
 	public int asm(File file, File os, PrintStream ls) {
 		int n;
 		stdout = (ls == System.out);
-		int max;
 
-		if (rom) {
-			max = wi.maxRomPC() + 1;
-		} else {
-			max = wi.maxPC() + 1;
-		}
-		mem = new byte[max];
 		errs = 0;
-		adr = 0;
+		adr = startPC;
 		wi.finalPass(false);
 		n = asm(file, ls);
 		if (n < 0) return n;
-		wi.getSymTab().resolveMarks();
-		Arrays.fill(mem, (byte)0);
+		if (regPC < 0) {
+			regPC = wi.regPad(adr);
+		}
+		wi.getSymTab().resolveMarks(regPC);
 		errs = 0;
-		adr = 0;
+		adr = startPC;
 		wi.finalPass(true);
 		n = asm(file, ls);
 		if (n < 0) return errs;
 
 		if (rom) {
-			if (adr < max) {
-				Arrays.fill(mem, adr, max, (byte)wi.stop());
+			if (adr < maxPC) {
+				Arrays.fill(mem, adr - startPC, maxPC - startPC,
+						(byte)wi.stop());
 			}
 		} else if (tape) {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
@@ -200,7 +280,7 @@ public class WangAssembler {
 				mem[adr++] = (byte)0xff;
 			}
 		}
-		n = objectOut(mem, adr, os);
+		n = objectOut(mem, adr - startPC, os);
 		if (n < 0) return n;
 		return errs;
 	}

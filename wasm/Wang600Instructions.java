@@ -243,7 +243,7 @@ public class Wang600Instructions implements WangInstructions {
 	}
 
 	// label, if any, already parsed. Else 'lab' is null.
-	public int encode(String[] line, int first, byte[] mem, int start) {
+	public int encode(String[] line, int first, WangMemory mem, int start) {
 		int adr = start;
 		int x = 0;
 		int reg;
@@ -271,7 +271,10 @@ public class Wang600Instructions implements WangInstructions {
 					error = 'V';
 					return -(adr - start);
 				}
-				mem[adr++] = (byte)q;
+				if (mem.putMem(adr++, q)) {
+					error = 'Z';
+					return -(adr - start);
+				}
 			}
 			return adr - start;
 		}
@@ -282,7 +285,10 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'U';
 				return -1;
 			}
-			mem[adr++] = (byte)reg;
+			if (mem.putMem(adr++, reg)) {
+				error = 'Z';
+				return -1;
+			}
 			flag = 0;
 			e = null; // not used since flag=0
 		} else {
@@ -291,7 +297,10 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'O';
 				return -1;
 			}
-			mem[adr++] = e.opcode;
+			if (mem.putMem(adr++, e.opcode)) {
+				error = 'Z';
+				return -1;
+			}
 			flag = e.flags;
 		}
 		switch (flag) {
@@ -322,7 +331,10 @@ public class Wang600Instructions implements WangInstructions {
 				if (reg < 0) {
 					return -2;
 				}
-				mem[adr++] = (byte)reg;
+				if (mem.putMem(adr++, reg)) {
+					error = 'Z';
+					return -2;
+				}
 				break;
 			}
 			e = keyOrCode(line[x]);
@@ -333,14 +345,20 @@ public class Wang600Instructions implements WangInstructions {
 			if (chkLab(e.opcode & 0xff, adr - 1, flag) < 0) {
 				return -2;
 			}
-			mem[adr++] = e.opcode;
+			if (mem.putMem(adr++, e.opcode)) {
+				error = 'Z';
+				return -2;
+			}
 			break;
 		case INDIR:	// TODO: validate operation code?
 			if (line[x].matches("[Rr][01][0-9]")) {
 				// "case" statement: step += (Rxx)
 				reg = Integer.valueOf(line[x].substring(1));
 				if (reg <= 15) {
-					mem[adr++] = (byte)reg;
+					if (mem.putMem(adr++, reg)) {
+						error = 'Z';
+						return -2;
+					}
 					break;
 				}
 			}
@@ -349,7 +367,10 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'P';
 				return -2;
 			}
-			mem[adr++] = e.opcode;
+			if (mem.putMem(adr++, e.opcode)) {
+				error = 'Z';
+				return -2;
+			}
 			break;
 		case REG:
 			if (line[x].charAt(0) == '&') {
@@ -365,14 +386,20 @@ public class Wang600Instructions implements WangInstructions {
 					return -2;
 				}
 			}
-			mem[adr++] = (byte)reg;
+			if (mem.putMem(adr++, reg)) {
+				error = 'Z';
+				return -2;
+			}
 			break;
 		case FMT:
 			if (!line[x].matches("^[X-ZA-M]/[0-1][0-9]$")) {
 				error = 'F';
 				return -2;
 			}
-			mem[adr++] = getFormat(line[x]);
+			if (mem.putMem(adr++, getFormat(line[x]))) {
+				error = 'Z';
+				return -1;
+			}
 			break;
 		case ALPHA:
 			// line[x] must have quotes, or else be a key.
@@ -387,7 +414,10 @@ public class Wang600Instructions implements WangInstructions {
 					error = 'P';
 					return -2;
 				}
-				mem[adr++] = e.opcode;
+				if (mem.putMem(adr++, e.opcode)) {
+					error = 'Z';
+					return -2;
+				}
 			}
 			break;
 		case IO:
@@ -395,18 +425,26 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'I';
 				return -2;
 			}
-			mem[adr++] = getCode(line[x]);
+			if (mem.putMem(adr++, getCode(line[x]))) {
+				error = 'Z';
+				return -2;
+			}
 			break;
 		}
 
 		return adr - start;
 	}
 
-	public int regPad(byte[] mem, int start) {
+	public int regPad(int start) {
+		return (start + 0x07) & ~0x07;
+	}
+
+	public int regPad(WangMemory mem, int start) {
 		int adr = start;
 
 		while ((adr & 0x07) != 0) {
-			mem[adr++] = (byte)0x93; // STOP
+			// overflow is caught later
+			mem.putMem(adr++, stop());
 		}
 		return adr - start;
 	}
@@ -481,7 +519,7 @@ public class Wang600Instructions implements WangInstructions {
 
 	// .REG <label> {"string"|number}
 	// assumes regPad() already called.
-	public int dreg(String[] line, int first, byte[] mem, int start) {
+	public int dreg(String[] line, int first, WangMemory mem, int start) {
 		int adr = start;
 		int reg;
 		String val = "";
@@ -497,7 +535,7 @@ public class Wang600Instructions implements WangInstructions {
 		x = first + 1;	// skip ".REG"
 		reg = adrReg(adr);
 		if (x < line.length) {
-			if (tbl.setLabel(line[x], reg, mem) < 0) {
+			if (tbl.setLabel(line[x], reg) < 0) {
 				error = 'M';
 				return -8;
 			}
@@ -520,7 +558,10 @@ public class Wang600Instructions implements WangInstructions {
 				c |= Character.digit(val.charAt(x), 16);
 			}
 			if ((x & 1) == 0) {
-				mem[adr++] = (byte)c;
+				if (mem.putMem(adr++, c)) {
+					error = 'Z';
+					return -8;
+				}
 			}
 		}
 		return adr - start;
