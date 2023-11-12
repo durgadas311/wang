@@ -10,6 +10,7 @@ public class WangSymbolTable {
 	private Vector<WangSymbol> syms;
 	private Vector<WangSymbol> subs;
 	private Map<Integer,Integer> labs;
+	private Vector<WangSLabel> slbs;
 	private boolean[] lset;
 	private int subrLo, subrHi;
 
@@ -18,15 +19,50 @@ public class WangSymbolTable {
 		syms = new Vector<WangSymbol>();
 		subs = new Vector<WangSymbol>();
 		labs = new HashMap<Integer,Integer>();
+		slbs = new Vector<WangSLabel>();
 		lset = new boolean[256];
 		subrLo = lo;
 		subrHi = hi;
+	}
+
+	// reset anything between passes
+	public void reset() {
+		WangSLabel.reset();
+	}
+
+	// check all register sources to ensure 'sym' is globally unique.
+	// only called in pass 2, where all instances should exist.
+	private boolean isUniq(String name, int ref) {
+		int n = 0;
+		if (name == null) return true;
+		for (WangSymbol sym : regs) {
+			if (sym.nam.equalsIgnoreCase(name)) {
+				++n;
+			}
+		}
+		for (WangSLabel lab : slbs) {
+			if (lab.low.ref == ref) continue;
+			if (lab.low.nam.equalsIgnoreCase(name) ||
+				lab.high.nam.equalsIgnoreCase(name)) {
+				++n;
+			}
+		}
+		return (n < 2);
 	}
 
 	private WangSymbol lookup(String lab) {
 		for (WangSymbol sym : regs) {
 			if (sym.nam.equalsIgnoreCase(lab)) {
 				return sym;
+			}
+		}
+		return null;
+	}
+
+	private WangSLabel slookup(WangSLabel lab) {
+		for (WangSLabel lb : slbs) {
+			if (lb.low.ref == lab.low.ref) {
+				return lb;
 			}
 		}
 		return null;
@@ -245,8 +281,74 @@ public class WangSymbolTable {
 		return -2;
 	}
 
+	// called during pass 1
+	public int addSLabel(WangSLabel lab) {
+		WangSymbol sym;
+
+		slbs.add(lab);
+		if (lab.low.nam != null) {
+			sym = lookup(lab.low.nam);
+			if (sym == null) {
+				regs.add(lab.low);
+			} else if (sym.ref != lab.low.ref) {
+				lab.err = -1;	// multiple defs
+			}
+		}
+		if (lab.high.nam != null) {
+			sym = lookup(lab.high.nam);
+			if (sym == null) {
+				regs.add(lab.high);
+			} else if (sym.ref != lab.high.ref) {
+				lab.err = -1;	// multiple defs
+			}
+		}
+		return 0;
+	}
+
+	// called during pass 2
+	public int chkSLabel(WangSLabel lab) {
+		// should already exist in 'slbs', plus
+		// already has symbols in 'regs'...
+
+		WangSLabel lb = slookup(lab); // lookup by ref
+		if (lb == null) {	// should not be possible
+			return -1;
+		}
+		lab.err = lb.err;
+		lab.low.val = lb.low.val;
+		lab.high.val = lb.high.val;
+		return lb.err;
+	}
+
+	private void dump(String tag) {
+		for (WangSymbol sym : this.regs) {
+			System.err.format("%s \"%s\" %d/%d\n", tag,
+				sym.nam, sym.val, sym.ref);
+		}
+		for (WangSLabel lab : slbs) {
+			System.err.format("%s %d \"%s\" %d/%d : \"%s\" %d/%d\n", tag,
+				lab.count, lab.low.nam, lab.low.val, lab.low.ref,
+				lab.high.nam, lab.high.val, lab.high.ref);
+		}
+	}
+
+	// 'regs' is the starting (highest) register number available.
+	// allocations go downward towards "0".
 	public int resolveMarks(int regs) {
+		//dump("*");
 		// TODO: assign registers starting at 'regs' step.
+		for (WangSLabel lab : slbs) {
+			// if no space, leave high/low = -1
+			if (regs >= lab.count - 1) {
+				lab.high.val = regs;
+				lab.low.val = regs - (lab.count - 1);
+				// labels already added
+			} else {
+				lab.err = -2;	// overflow
+			}
+			regs -= lab.count;
+		}
+		//dump("-");
 		for (WangSymbol sym : syms) {
 			// might be pre-dedfined
 			if (sym.val >= 0) continue;

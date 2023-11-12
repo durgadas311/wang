@@ -437,7 +437,7 @@ public class Wang700Instructions implements WangInstructions {
 
 	// R (high nibble) and R+1 (low nibble)
 	// adr already adjusted with regPad().
-	private int adrReg(int adr) {
+	public int adrReg(int adr) {
 		return ((maxPC() - adr) / 16) * 2;
 	}
 

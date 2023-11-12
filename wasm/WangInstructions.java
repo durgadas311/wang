@@ -17,6 +17,7 @@ public interface WangInstructions {
 	int encode(String[] line, int first, WangMemory mem, int start);
 	int regPad(WangMemory mem, int start);
 	int regPad(int start);
+	int adrReg(int adr);
 	String adrRegStr(int adr);
 	int dreg(String[] line, int first, WangMemory mem, int start);
 	int xlab(String[] line, int first);

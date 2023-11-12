@@ -126,6 +126,35 @@ public class WangAssembler implements WangMemory {
 		return 0;
 	}
 
+	private String slab(String sym) {
+		if (sym.length() == 0 || sym.equals("-")) return null;
+		if (sym.charAt(0) == '&') return sym.substring(1);
+		return sym;
+	}
+
+	private void error(char c, String line, PrintStream ls) {
+		errorList(String.format("%c               %s", c, line), -1, ls);
+	}
+
+	// returns 0 on success, else error letter.
+	private int do_sreg(WangSLabel lab) {
+		int e;
+
+		if (rom) {
+			return 'X';
+		}
+		if (!wi.finalPass()) {	// pass 1
+			return (wi.getSymTab().addSLabel(lab) < 0 ? 'M' : 0);
+		}
+		// pass 2
+		e = wi.getSymTab().chkSLabel(lab);
+		if (e < 0) {
+			if (e == -1) return 'M';
+			return 'Z';
+		}
+		return 0;
+	}
+
 	private int asm(File file, PrintStream ls) {
 		int n;
 		WangInstruction e;
@@ -171,7 +200,8 @@ public class WangAssembler implements WangMemory {
 				// .PROG <start> [<end> [<regs>]]
 				// define program space.
 				n = do_prog(toks, n);
-				errorList(String.format("%c               " + line, n),
+				errorList(String.format("%c               %s",
+							n == 0 ? ' ' : n, line),
 						n == 0 ? 0 : -1, ls);
 				continue;
 			} else if (toks[n].equalsIgnoreCase(".REG")) {
@@ -186,6 +216,31 @@ public class WangAssembler implements WangMemory {
 				}
 				n = wi.dreg(toks, n, this, adr);
 				line += wi.adrRegStr(adr);
+			} else if (toks[n].equalsIgnoreCase(".SREG")) {
+				WangSLabel lab = new WangSLabel();
+				++n;	// skip ".SREG"
+				if (n >= toks.length) {
+					error('S', line, ls);
+					continue;
+				}
+				String[] ss = toks[n++].split(",");
+				if (ss.length > 2) {
+					error('S', line, ls);
+					continue;
+				}
+				lab.low.nam = slab(ss[0]);
+				if (ss.length > 1) {
+					lab.high.nam = slab(ss[1]);
+				}
+				if (n < toks.length) {
+					lab.count = Integer.valueOf(toks[n++]);
+				}
+				n = do_sreg(lab);
+				errorList(String.format("%c               %s (%d,%d)",
+					(n == 0 ? ' ' : n), line,
+					lab.low.val, lab.high.val),
+					(n == 0 ? 0 : -1), ls);
+				continue;
 			} else if (toks[n].equalsIgnoreCase(".OUT")) {
 				n = wi.setOutput(toks, n);
 				errorList(String.format("%c               %s",
@@ -195,9 +250,7 @@ public class WangAssembler implements WangMemory {
 			} else if (toks[n].equalsIgnoreCase(".INCLUDE")) {
 				++n;
 				if (n >= toks.length) {
-					errorList(String.format("S               %s",
-								wi.lastError(), line),
-						-1, ls);
+					error('S', line, ls);
 					continue;
 				}
 				errorList(String.format(">               %s", line),
@@ -224,7 +277,7 @@ public class WangAssembler implements WangMemory {
 			} else {
 				n = wi.encode(toks, n, this, adr);
 			}
-			errorList(String.format("%c%04d  %02d-%02d     %s",
+			errorList(String.format("%c%04d  %02d-%02d    %s",
 						wi.lastError(),
 						adr, high(adr), low(adr), line),
 					n, ls);
@@ -254,15 +307,19 @@ public class WangAssembler implements WangMemory {
 
 		errs = 0;
 		adr = startPC;
+		// start first pass
 		wi.finalPass(false);
 		n = asm(file, ls);
 		if (n < 0) return n;
+		// prepare for second pass
 		if (regPC < 0) {
 			regPC = wi.regPad(adr);
 		}
-		wi.getSymTab().resolveMarks(regPC);
+		wi.getSymTab().resolveMarks(wi.adrReg(regPC));
 		errs = 0;
 		adr = startPC;
+		wi.getSymTab().reset();
+		// start second pass
 		wi.finalPass(true);
 		n = asm(file, ls);
 		if (n < 0) return errs;

@@ -5,6 +5,11 @@ public class WangSymbol {
 	public int val;
 	public int ref;
 
+	public WangSymbol(int ref) {
+		val = -1;
+		this.ref = ref;
+	}
+
 	public WangSymbol(String lab, int reg) {
 		val = reg;
 		nam = lab;
