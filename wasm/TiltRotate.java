@@ -135,6 +135,8 @@ public class TiltRotate {
 	public int a2tr(String s, boolean shifted, WangMemory mem, int start) {
 		int adr = start;
 		boolean shift;
+		boolean err = false;
+		boolean e;
 		int x;
 		int i;
 		char c;
@@ -146,7 +148,8 @@ public class TiltRotate {
 				if (s.charAt(x) == '0') {
 					break; // we're done
 				}
-				mem.putMem(adr++, doEsc(s.charAt(x)));
+				e = mem.putMem(adr++, doEsc(s.charAt(x)));
+				err = err || e;
 				continue;
 			}
 			shift = false;
@@ -166,15 +169,23 @@ public class TiltRotate {
 				shift = shifted;
 			}
 			if (x == 0 || shift != shifted) {
-				mem.putMem(adr++, (shift ? shiftUp() : shiftDown()));
+				e = mem.putMem(adr++, (shift ? shiftUp() : shiftDown()));
+				err = err || e;
 				shifted = shift;
 			}
-			mem.putMem(adr++, i);
+			e = mem.putMem(adr++, i);
+			err = err || e;
 		}
 		if (shifted) {
-			mem.putMem(adr++, shiftDown());
+			e = mem.putMem(adr++, shiftDown());
+			err = err || e;
 		}
-		mem.putMem(adr++, term());
-		return adr - start;
+		e = mem.putMem(adr++, term());
+		err = err || e;
+		if (err) {
+			return -(adr - start);
+		} else {
+			return adr - start;
+		}
 	}
 }

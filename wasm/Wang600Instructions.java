@@ -406,6 +406,10 @@ public class Wang600Instructions implements WangInstructions {
 			if (line[x].matches("^\".*\"$")) {
 				reg = tr.a2tr(line[x].substring(1, line[x].length() - 1),
 					false, mem, adr);
+				if (reg < 0) {
+					error = 'Z';
+					return reg;
+				}
 				adr += reg;
 			} else {
 				// TODO: same as INDIR, etc.
