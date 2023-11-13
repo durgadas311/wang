@@ -6,6 +6,7 @@ import java.util.Vector;
 import java.io.*;
 
 public class WangAssembler implements WangMemory {
+	Vector<File> paths;
 	WangInstructions wi;
 	boolean tape;
 	boolean rom;
@@ -18,7 +19,9 @@ public class WangAssembler implements WangMemory {
 	byte[] mem;
 	int adr;
 
-	public WangAssembler(WangInstructions wi, boolean tape, boolean rom) {
+	public WangAssembler(WangInstructions wi, boolean tape, boolean rom,
+			Vector<File> paths) {
+		this.paths = paths;
 		this.wi = wi;
 		this.tape = tape;
 		this.rom = rom;
@@ -155,6 +158,18 @@ public class WangAssembler implements WangMemory {
 		return 0;
 	}
 
+	private File search(String fn) {
+		File f = new File(fn);
+		File ff;
+
+		if (f.isAbsolute() || f.isFile()) return f;
+		for (File d : paths) {
+			ff = new File(d, fn);
+			if (ff.isFile()) return ff;
+		}
+		return f;
+	}
+
 	private int asm(File file, PrintStream ls) {
 		int n;
 		WangInstruction e;
@@ -255,7 +270,8 @@ public class WangAssembler implements WangMemory {
 				}
 				errorList(String.format(">               %s", line),
 					0, ls);
-				n = asm(new File(toks[n]), ls); // errs counted
+				File f = search(toks[n]);
+				n = asm(f, ls); // errs counted
 				errorList(String.format("<               %s", line),
 					0, ls);
 				continue;

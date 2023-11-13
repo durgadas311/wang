@@ -1,5 +1,6 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
+import java.util.Vector;
 import java.io.*;
 
 public class wasm {
@@ -17,6 +18,7 @@ public class wasm {
 	File aout = null;
 	PrintStream list = System.out;
 	String dev = null;
+	Vector<File> paths;
 
 	private void help() {
 		System.err.format("Usage: wasm [options] dis=<file>\n" +
@@ -29,11 +31,13 @@ public class wasm {
 		System.err.format("nolst      Do not produce assembly listing\n");
 		System.err.format("lst=<file> Produce assembly listing to file (stdout)\n");
 		System.err.format("out=<file> Produce output to file (a.out/stdout)\n");
+		System.err.format("path=<dir> Set search path for .INCLUDE\n");
 		System.err.format("raw        Disassemble as source, not listing\n");
 		System.err.format("docs       Dump instruction codes and mnemonics\n");
 	}
 
 	public wasm(String[] args) {
+		paths = new Vector<File>();
 		if (args.length == 0) {
 			help();
 			System.exit(0);
@@ -69,6 +73,17 @@ public class wasm {
 				}
 			} else if (arg.startsWith("out=")) {
 				aout = new File(arg.substring(4));
+			} else if (arg.startsWith("path=")) {
+				String[] ss = arg.substring(5).split("[:;]");
+				File f;
+				for (String s : ss) {
+					f = new File(s);
+					if (!f.isDirectory()) {
+						System.err.format("Not directory: %s\n", s);
+						System.exit(1);
+					}
+					paths.add(f);
+				}
 			} else if (arg.equals("docs")) {
 				docs = true;
 			}
@@ -133,7 +148,10 @@ public class wasm {
 					break;
 				}
 			}
+			System.out.format("      .PROG first [last [regs]]\n");
 			System.out.format("      .REG %s\n", mach.regHelp());
+			System.out.format("      .SREG symbol[,symbol] [count]\n");
+			System.out.format("      .DEF symbol code\n");
 			System.out.format("      .OUT <device>\n");
 			System.out.format("      .INCLUDE <file>\n");
 			System.out.format("      .EXT <label>...\n");
@@ -169,7 +187,7 @@ public class wasm {
 			aout = new File("a.out");
 		}
 		tape = tape || (aout != null && aout.getName().matches(".*\\.w[67]t"));
-		asm = new WangAssembler(mach, tape, rom);
+		asm = new WangAssembler(mach, tape, rom, paths);
 		int foo = asm.asm(file, aout, list);
 		if (foo != 0) {
 			System.err.format("%d Errors in assembly\n", foo);

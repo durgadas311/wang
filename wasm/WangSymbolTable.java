@@ -95,6 +95,7 @@ public class WangSymbolTable {
 		if (lab == null || lab.length() == 0 || lab.equals("-")) {
 			return 0;
 		}
+		if (lab.charAt(0) == '&') lab = lab.substring(1);
 		WangSymbol sym = lookup(lab);
 		if (sym != null) {
 			if (sym.val != val) {
@@ -110,6 +111,7 @@ public class WangSymbolTable {
 
 	// reference register label
 	public int getLabel(String lab, int ref) {
+		if (lab.charAt(0) == '&') lab = lab.substring(1);
 		WangSymbol sym = lookup(lab);
 
 		if (sym == null) {

@@ -263,7 +263,7 @@ public class Wang700Instructions implements WangInstructions {
 		if (line[x].equalsIgnoreCase("ENTER")) {
 			String val = line[++x];
 			if (val.charAt(0) == '&') {
-				reg = tbl.getLabel(val.substring(1), adr);
+				reg = tbl.getLabel(val, adr);
 				if (reg < 0) {
 					if (pass) {
 						error = 'U';
@@ -357,7 +357,7 @@ public class Wang700Instructions implements WangInstructions {
 			break;
 		case REG:
 			if (line[x].charAt(0) == '&') {
-				reg = tbl.getLabel(line[x].substring(1), adr);
+				reg = tbl.getLabel(line[x], adr);
 				if (pass && reg < 0) {
 					error = 'U';
 					return -2;
