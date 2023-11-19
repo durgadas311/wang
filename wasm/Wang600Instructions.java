@@ -477,7 +477,7 @@ public class Wang600Instructions implements WangInstructions {
 				return -1;
 			}
 			key = (e.opcode & 0xff);
-			if (tbl.setMark(key, -1, extrom) < 0) {
+			if (tbl.setExt(key, maxPC(), extrom) < 0) {
 				error = 'M';
 				ret = -1;
 			}
@@ -508,9 +508,18 @@ public class Wang600Instructions implements WangInstructions {
 			error = 'O';
 			return -1;
 		}
+		boolean fcall = (e.flags == FCALL || e.flags == FROM);
 		if (sub) {
+			if (!fcall) {
+				error = 'P';
+				return -1;
+			}
 			x = tbl.defSubr(key, e.opcode & 0xff);
 		} else {
+			if (fcall) {
+				error = 'P';
+				return -1;
+			}
 			x = tbl.defMark(key, e.opcode & 0xff);
 		}
 		if (x < 0) {

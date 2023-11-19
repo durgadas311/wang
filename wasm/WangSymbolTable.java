@@ -68,6 +68,17 @@ public class WangSymbolTable {
 		return null;
 	}
 
+	// Find symbol by key code, in either syms or subs
+	private WangSymbol find(int code) {
+		for (WangSymbol sym : syms) {
+			if (sym.val == code) return sym;
+		}
+		for (WangSymbol sym : subs) {
+			if (sym.val == code) return sym;
+		}
+		return null;
+	}
+
 	private WangSymbol find(String lab) {
 		for (WangSymbol sym : syms) {
 			if (sym.nam.equalsIgnoreCase(lab)) {
@@ -130,11 +141,6 @@ public class WangSymbolTable {
 			if (sym.val != val) {
 				return -1;	// multiple def
 			}
-		} else if (val >= subrLo && val < subrHi) {
-			// This maybe should include Wang 600 ROM f(x),
-			// but those are valid in program space as long
-			// as not used as one-key subroutines.
-			return -2;	// invalid label
 		} else {
 			sym = new WangSymbol(key, val);
 			syms.add(sym);
@@ -181,8 +187,6 @@ public class WangSymbolTable {
 			if (sym.val != val) {
 				return -1;	// multiple def
 			}
-		} else if (val < subrLo || val >= subrHi) {
-			return -2;	// invalid label
 		} else {
 			sym = new WangSymbol(key, val);
 			subs.add(sym);
@@ -235,6 +239,29 @@ public class WangSymbolTable {
 		}
 		labs.put(key, ref);
 		lset[key & 0xff] = true;	// label no longer free
+		return 0;
+	}
+
+	// define an external program label
+	public int setExt(int key, int ref, boolean rom) {
+		if (rom) {
+			key |= 0x100;
+		}
+		if (labs.containsKey(key)) {
+			if (labs.get(key) != ref) {
+				// multiple definitions... error...
+				return -1;
+			}
+			return 0;
+		}
+		labs.put(key, ref);
+		lset[key & 0xff] = true;	// label no longer free
+		WangSymbol sym = find(key & 0xff);
+		if (sym == null) return 0;
+		if (sym.ref >= 0 && sym.ref != ref) {
+			return -1;	// multiple defs
+		}
+		sym.ref = ref;
 		return 0;
 	}
 
@@ -324,13 +351,21 @@ public class WangSymbolTable {
 
 	private void dump(String tag) {
 		for (WangSymbol sym : this.regs) {
-			System.err.format("%s \"%s\" %d/%d\n", tag,
+			System.err.format("%s REGS \"%s\" %02x/%d\n", tag,
 				sym.nam, sym.val, sym.ref);
 		}
 		for (WangSLabel lab : slbs) {
-			System.err.format("%s %d \"%s\" %d/%d : \"%s\" %d/%d\n", tag,
+			System.err.format("%s SLBS %d \"%s\" %d/%d : \"%s\" %d/%d\n", tag,
 				lab.count, lab.low.nam, lab.low.val, lab.low.ref,
 				lab.high.nam, lab.high.val, lab.high.ref);
+		}
+		for (WangSymbol sym : syms) {
+			System.err.format("%s SYMS \"%s\" %02x/%d\n", tag,
+				sym.nam, sym.val, sym.ref);
+		}
+		for (WangSymbol sym : subs) {
+			System.err.format("%s SUBS \"%s\" %02x/%d\n", tag,
+				sym.nam, sym.val, sym.ref);
 		}
 	}
 
@@ -338,7 +373,6 @@ public class WangSymbolTable {
 	// allocations go downward towards "0".
 	public int resolveMarks(int regs) {
 		//dump("*");
-		// TODO: assign registers starting at 'regs' step.
 		for (WangSLabel lab : slbs) {
 			// if no space, leave high/low = -1
 			if (regs >= lab.count - 1) {
