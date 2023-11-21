@@ -3,6 +3,9 @@
 import java.util.Vector;
 
 public class Wang600Instructions implements WangInstructions {
+	private static final int _RAM = 0x100;
+	private static final int _ROM = 0x200;
+
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
@@ -15,17 +18,17 @@ public class Wang600Instructions implements WangInstructions {
 
 	class Instruction {
 		public String mnemonic;
-		public byte opcode;
+		public int opcode;
 		public int flags;
 
 		public Instruction(String s, int o, int f) {
 			mnemonic = s;
-			opcode = (byte)o;
+			opcode = o;
 			flags = f;
 		}
 
 		public boolean equalsOp(int op) {
-			return opcode == (byte)op;
+			return (opcode & 0xff) == (op & 0xff);
 		}
 
 		public boolean equalsMn(String mn) {
@@ -111,6 +114,11 @@ public class Wang600Instructions implements WangInstructions {
 		// Add some assembler aliases, not seen by disassembler
 		instr.add(new Instruction("CHGSGN", 0x0c, 0));
 		instr.add(new Instruction("SETEXP", 0x0b, 0));
+		// context-sensitive pseudo-instructions
+		instr.add(new Instruction("@SEARCH",	0x80 | _RAM, MARK));
+		instr.add(new Instruction("@SEARCH",	0xf3 | _ROM, ROMARK));
+		instr.add(new Instruction("@CALL",	0xf7 | _RAM, MARK));
+		instr.add(new Instruction("@CALL",	0xfc | _ROM, ROMARK));
 	}
 
 	public Wang600Instructions(boolean rom) {
@@ -140,7 +148,9 @@ public class Wang600Instructions implements WangInstructions {
 	Instruction asm(String opcode) {
 		for (Instruction x : instr) {
 			if (x.equalsMn(opcode)) {
-				return x;
+				if ((x.opcode & ~0xff) == 0) return x;
+				if (rom && (x.opcode & _ROM) != 0) return x;
+				if (!rom && (x.opcode & _RAM) != 0) return x;
 			}
 		}
 		return null;
@@ -297,7 +307,7 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'O';
 				return -1;
 			}
-			if (mem.putMem(adr++, e.opcode)) {
+			if (mem.putMem(adr++, (byte)e.opcode)) {
 				error = 'Z';
 				return -1;
 			}
@@ -345,7 +355,7 @@ public class Wang600Instructions implements WangInstructions {
 			if (chkLab(e.opcode & 0xff, adr - 1, flag) < 0) {
 				return -2;
 			}
-			if (mem.putMem(adr++, e.opcode)) {
+			if (mem.putMem(adr++, (byte)e.opcode)) {
 				error = 'Z';
 				return -2;
 			}
@@ -367,7 +377,7 @@ public class Wang600Instructions implements WangInstructions {
 				error = 'P';
 				return -2;
 			}
-			if (mem.putMem(adr++, e.opcode)) {
+			if (mem.putMem(adr++, (byte)e.opcode)) {
 				error = 'Z';
 				return -2;
 			}
@@ -418,7 +428,7 @@ public class Wang600Instructions implements WangInstructions {
 					error = 'P';
 					return -2;
 				}
-				if (mem.putMem(adr++, e.opcode)) {
+				if (mem.putMem(adr++, (byte)e.opcode)) {
 					error = 'Z';
 					return -2;
 				}
