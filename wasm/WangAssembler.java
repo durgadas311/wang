@@ -339,11 +339,13 @@ public class WangAssembler implements WangMemory {
 		wi.finalPass(true);
 		n = asm(file, ls);
 		if (n < 0) return errs;
+		if (mem == null) return 1;
 
 		if (rom) {
 			if (adr < maxPC) {
 				Arrays.fill(mem, adr - startPC, maxPC - startPC,
 						(byte)wi.stop());
+				adr = maxPC;
 			}
 		} else if (tape) {
 			if ((mem[adr - 1] & 0xff) == wi.endProg()) {
