@@ -1,0 +1,59 @@
+; perform "Zeller's Congruence" calculation
+; R0 = month 1..12
+; R1 = day 1..31(*)
+; R2 = year YYYY
+; R3 = temp
+; z = (day+INT(2.6*(mon+1))+(year%100)+INT((year%100)/4)+INT(year/100)*5+INT(year/400))%7
+; z = INT(z+0.5)
+
+MARK $zeller
+	ENTER 3
+	ALPHA JIF+	; R0 >= 3
+		SEARCH &janfeb	; correct for Jan/Feb
+MARK &cont	; got correct month/year now
+	ENTER 1
+	+00
+	ENTER 26
+	*00
+	ENTER 10
+	/00
+	INT
+	+01
+	ENTER 100
+	/02
+	INT
+	ST03
+	-02
+	ENTER 100
+	*02
+	+01
+	ENTER 4
+	/02
+	INT
+	+01
+	RE03
+	ST02
+	ENTER 5
+	*02
+	+01
+	ENTER 4
+	/03
+	INT
+	+01
+	ENTER 7
+	/01
+	INT
+	-01
+	ENTER 7
+	*01
+	ENTER .5
+	+01
+	INT
+	RET
+
+MARK &janfeb	; convert Jan/Feb to 13/14 of previous year
+	ENTER 12
+	+00
+	ENTER 1
+	-02
+	SEARCH &cont

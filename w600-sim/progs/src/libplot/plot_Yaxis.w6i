@@ -1,0 +1,89 @@
+; draw Y axis with labeled tic marks, at X=0.
+; label is un-scaled Y value.
+
+; R16 = starting Y
+; R17 = ending Y
+; R18 = step for Y (tic interval)
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+; 
+MARK $plot_Yaxis
+	ENTER 1
+	$plot_chrsize	; character size for labels
+	ENTER 4
+	*01
+	ST09
+	RE00
+	ST08
+	ENTER 2
+	/08
+	$plot_home	; home pen
+	T12
+	T13
+	RECALL 16
+	ST10
+	ST15
+	RE11
+	ST14
+	$pt_scale	; scale coord
+	$plot_move	; move to position
+	@CALL &Y_tic	; draw Y tic
+	RECALL 18
+	+10
+MARK &py1
+	RE10
+	ST15
+	RE11
+	ST14
+	$pt_scale	; scale coord
+	$plot_draw	; draw to position
+	@CALL &Y_tic	; draw Y tic
+	RECALL 17
+	ST02
+	RECALL 18
+	+10
+	-02
+	JIF+
+		@SEARCH &py2
+	@SEARCH &py1	; do more segments
+MARK &py2
+	RECALL 18
+	+02
+	JIFNZ
+		RET
+		GO
+	RECALL 17	; do partial segment
+	ST15
+	RE11
+	ST14
+	$pt_scale	; scale coord
+	$plot_draw	; draw final partial segment
+	RET
+
+MARK &Y_tic
+	T00
+	ENTER 5-
+	ST01
+	$plot_draw		; draw tic mark
+	RE10
+	JIFNZ
+		@SEARCH &yt1
+	RE09
+	CHGSGN
+	ST01
+	RE08
+	CHGSGN
+	ST00
+	$plot_move	; move to label position
+	RE10
+	I/O 03-00	; print label/value
+MARK &yt1
+	$plot_home	; home pen
+	RE12
+	ST01
+	RE13
+	ST00
+	$plot_move	; return to Y axis
+	RET

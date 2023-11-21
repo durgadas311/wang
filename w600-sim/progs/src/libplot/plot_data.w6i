@@ -1,0 +1,38 @@
+; plot data points.
+; R16 = starting register number for Y data (>= 23).
+; R17 = number of data points
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+; X starts at 0 and advances by 1.
+MARK $plot_data
+	$plot_home
+	RECALL 16
+	ST11
+	ENTER 0
+	ST14		; X value
+	INDIR RE11
+	ST15		; Y data value
+	$pt_scale	; scale point
+	$plot_move	; move to first point
+	ENTER 1
+	+11
+MARK &pd1
+	RE11
+	ST14
+	RECALL 16
+	-14
+	INDIR RE11	; next data point
+	ST15
+	$pt_scale	; scale point
+	$plot_draw	; draw line to next point
+	RECALL 17
+	ST02
+	ENTER 1
+	+11
+	-02
+	JIF+
+		RET
+		GO
+	@SEARCH &pd1	; get another data point

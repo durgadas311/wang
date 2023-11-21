@@ -1,0 +1,110 @@
+; Craps game
+;	R00 = current roll
+;	R01 = bank
+;	R02 = bet
+;	R07 = random seed (libw6/random.w6i)
+
+; Enter random seed; GO
+	ST07
+	ENTER 500	; $500 to start
+	ST01
+MARK &again
+	RE01
+	STOP	; Enter bet
+	ST02
+	RE01
+	ST15
+	RE02
+	-15
+	JIF+
+		SEARCH &error	; error: can't bet more than have
+	$roll	; roll dice
+	ST00	; point
+	ALPHA STOP
+	ALPHA STOP
+	ENTER 12
+	I/O 11-00	; Jif R0 != 12
+		SEARCH &lose	; 12 loses
+	ENTER 2
+	I/O 11-00	; Jif R0 != 2
+		SEARCH &lose	; 2 loses
+	ENTER 3
+	I/O 11-00	; Jif R0 != 3
+		SEARCH &lose	; 3 loses
+	ENTER 7
+	I/O 11-00	; Jif R0 != 7
+		SEARCH &win	; 7 wins
+	ENTER 11
+	I/O 11-00	; Jif R0 != 11
+		SEARCH &win	; 11 wins
+MARK &point
+	$roll
+	ALPHA STOP
+	ALPHA STOP
+	I/O 11-00	; Jif R0 != roll
+		SEARCH &win	; roll == point, winner
+	ST14
+	ENTER 7
+	-14
+	JIF0	; roll == 7 (lose)
+		SEARCH &point	; keep trying
+; lose
+MARK &lose
+	RECALL &BLANK
+	ALPHA STOP	; lose...
+	ALPHA STOP
+	RE02
+	-01		; deduct loss
+	SEARCH &again
+
+MARK &win
+	ENTER 0
+	1/X	; force "error" - display flashing
+	RE00
+	ALPHA STOP	; win!
+	ALPHA STOP
+	JIFERR		; clear error condition
+		GO
+		GO
+	RE02
+	+01		; add winnings
+	SEARCH &again
+
+; error in bet - flash display and try again
+MARK &error
+	ENTER 0
+	1/X
+	RE01
+	ALPHA STOP	; display flashing amount available
+	ALPHA STOP
+	JIFERR	; clear error condition
+		GO
+		GO
+	SEARCH &again
+
+; roll two die, sum in R03
+MARK $roll
+	$rand	; get random number
+	ST14
+	ENTER 6
+	*14
+	ENTER 1
+	+14
+	INT	; convert to 1-6
+	ST03
+	$rand	; get random number
+	ST14
+	ENTER 6
+	*14
+	ENTER 1
+	+14
+	INT	; convert to 1-6
+	+03
+	RET
+
+	.include	random.w6i
+
+	; register pattern for blanked display...
+	.REG BLANK "FFFFFFFFFFFFF00A"
+
+	END	; termination for LIST, REC PROG, etc.

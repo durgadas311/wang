@@ -1,0 +1,5 @@
+; Demonstration of printing text on the OutputWriter
+
+	ALPHA "Hello World!\r"
+	END
+

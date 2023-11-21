@@ -6,6 +6,16 @@ import java.io.*;
 import javax.swing.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
+// GROUP 1 00-00..07 or 00-08..15 (config sw)
+// x0	RST (restart) only
+// x1	COT (no RST)
+// x2	D=9 (JMP0)
+// x3	D=5 (JMP1)
+// x4	D=7 (JMP2)
+// x5	D=10/11 (JMP3)
+// x6	D=0/11 (JMP4)
+// x7	D=16/17 (JMP5)
+
 class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnable
 {
 	public static final String Model = "03";

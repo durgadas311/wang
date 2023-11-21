@@ -1,0 +1,80 @@
+; Wang 612 flatbed plotter demo
+;
+; Moves the pen to three different locations
+; and prints an example of the character set
+; at each.
+
+	.OUT	W612
+	CLRALL
+
+	; Start at (10,10), character size 1 and spacing 6
+	ENTER 10
+	ST01
+	ST00
+	f03	; move abs
+	ENTER 1
+	f01	; char size
+	ENTER 6
+	f02	; char spacing
+	f00	; test print
+
+	; Go to (10,20), character size 2 and spacing 12
+	ENTER 10
+	ST01
+	ENTER 20
+	ST00
+	f03	; move abs
+	ENTER 2
+	f01	; char size
+	ENTER 12
+	f02	; char spacing
+	f00	; test print
+
+	; Go to (10,50), character size 3 and spacing 18
+	ENTER 10
+	ST01
+	ENTER 50
+	ST00
+	f03	; move abs
+	ENTER 3
+	f01	; char size
+	ENTER 18
+	f02	; char spacing
+	f00	; test print
+
+	SEARCH EX14
+
+; move to absolute coords R00,R01
+MARK f03
+	ALPHA "\h"
+	ALPHA "\m"
+	RET
+
+; test print of characters at current location
+MARK f00
+	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+}?={,:'."
+	RET
+
+; set character size
+MARK f01
+	ST01
+	ENTER 0
+	ST00
+	ALPHA "\z"
+	RET
+
+; set character spacing
+MARK f02
+	ST01
+	ST02
+	ENTER 1.4
+	*02
+	ENTER 0.5
+	+02
+	INT
+	ST00
+	ALPHA "\s"
+	RET
+
+MARK EX14
+	END

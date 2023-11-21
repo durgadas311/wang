@@ -579,6 +579,7 @@ class Wang_Paper
 			_xplots = 0;
 			//_plotArray.dispose();
 			_plotArray = null;
+			_last = -1;
 			_base_y = _incr_y;
 			// repaint, etc, handled by caller...
 		}

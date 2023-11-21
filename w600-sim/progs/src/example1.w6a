@@ -1,0 +1,95 @@
+; Example from 2202 Reference Manual - 602/702/2202 Plotting Output Writers
+; * modified for 612 flatbed plotter *
+;
+; 10 SELECT PLOT 413
+; 20 FOR Y=-6 TO 6 STEP .25
+; 30 X=SQR(36-Y^2)
+; 40 PLOT <X,Y,":">
+; 50 NEXT Y
+; 60 FOR Y=5 TO -5 STEP -.25
+; 70 X=SQR(25-Y^2)
+; 80 PLOT <-X,Y,"*">
+; 90 NEXT Y
+; 100 FOR Y=7 TO -7 STEP -.3
+; 110 X=Y
+; 120 PLOT <X,-Y,".">
+; 130 NEXT Y
+; 140 END
+;
+; Produces a plot (drawing counter-clock-wise from left-most ':') something like:
+;
+;                **
+;             *      *
+;           *          *
+;            .          *
+;      :      .         :
+;       :      .       :
+;          :    .   :
+;              : .
+;                 .
+;
+; With the final line of '.' retracing itself back to the last '*'.
+
+	.OUT	W612
+
+	T00		; Y=0
+	T01		; X=0
+	ALPHA "\h"	; pen to home position (W602: "\r")
+	ENTER 500
+	ST01		; X=500
+	ST00		; Y=500
+	ALPHA "\m"	; W602: "| "
+	ENTER -6
+	ST00
+MARK &loop1
+	ENTER 36
+	ST01
+	RE00
+	X^2
+	-01
+	SQRT
+	ST01	; R1 = sqrt(6^2 - R0^2)
+	ALPHA "\p"	; W602: "|:"
+	ENTER .25
+	+00
+	ENTER 6
+	ALPHA JIF+
+		SEARCH &loop1
+	ALPHA JIF0
+		SEARCH &done1
+	SEARCH &loop1
+MARK &done1
+	ENTER 5
+	ST00
+MARK &loop2
+	ENTER 25
+	ST01
+	RE00
+	X^2
+	-01
+	SQRT
+	CHGSGN
+	ST01
+	ALPHA "\p"	; W602: "|*"
+	ENTER -.25
+	+00
+	ENTER -5
+	ALPHA SIN
+		SEARCH &loop2
+	ENTER 7
+	ST00
+MARK &loop3
+	RE00
+	ST01
+	CHGSGN
+	ST00
+	ALPHA "\p"	; W602: "|."
+	RE00
+	CHGSGN
+	ST00
+	ENTER -.25
+	+00
+	ENTER -7
+	ALPHA SIN
+		SEARCH &loop3
+	END

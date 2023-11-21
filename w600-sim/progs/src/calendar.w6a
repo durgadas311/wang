@@ -1,0 +1,186 @@
+; Prints a month's calendar on the OutputWriter
+; Enter month; GO; Enter year; GO
+
+; Registers used:
+;	R0 = (zeller)
+;	R1 = (zeller)
+;	R2 = (zeller)
+;	R3 = (zeller)
+;	R4 = day of week
+;	R5 = FEB days
+;	R6 = max day of month
+;	R7 = cur day of month
+;	R8 = temp
+
+;		; enter month
+	ST00
+	CLEAR
+	STOP	; enter year
+	ST02
+	ST03
+	ENTER 28
+	ST05
+	ENTER 31
+	ST06
+	ENTER 100
+	/03
+	INT
+	-03
+	JIF0
+	SEARCH T02	; if not turn of century
+	RE02
+	ST03
+	ENTER 400	;
+	/03
+	INT
+	-03
+	JIF0
+	SEARCH T01	; not div by 400, not leap year
+MARK T00	; leap year
+	ENTER 1
+	+05	; 29 days in FEB
+MARK T01	; not leap year
+	f00	; print header
+	ENTER 1
+	ST01	; first of month
+	$zeller	; zeller - compute day of week
+	JIFNZ
+		ENTER 7	; convert "0" to "7"
+		GO
+	ST08
+	ENTER 2
+	EX08
+	-08
+	ST07	; R7 = 2 - Z
+	ENTER 7
+	ST04
+MARK E0	; loop for printing a week
+	RE07
+	JIF+
+		SEARCH E1	; don't print day
+	JIFNZ
+		SEARCH E1	; don't print day
+	I/O 02-00	; print %2d (day)
+	SEARCH E2
+MARK E1	; don't print day
+	I/O 12-03	; print "   "
+MARK E2
+	ENTER 1
+	+07
+	RE06	; num days
+	ST08
+	RE07
+	-08
+	JIF+
+		SEARCH E3	; done with month
+	ENTER 1
+	-04
+	JIF0
+		SEARCH E0	; do another day of week
+	; done with week
+	ALPHA "\r"
+	ENTER 7
+	ST04
+	SEARCH E0	; do another week
+
+MARK E3
+	ALPHA "\r"
+	SEARCH EX14	; end prog (exit)
+
+; Not turn of century
+MARK T02
+	RE02
+	ST03
+	ENTER 4
+	/03
+	INT
+	-03
+	JIF0
+		SEARCH T01	; not leap year
+	SEARCH T00	; leap year
+
+; print header
+MARK f00
+	RE00
+	f01		; print month name
+	I/O 12-07	; print "       "
+	RE02
+	I/O 04-00	; print "%4d" (year)
+	ALPHA "\r  S  M  T  W  T  F  S\r"
+	RET
+
+; print month name
+MARK f01
+	ST03
+	ENTER 1
+	-03
+	ENTER 2
+	*03		; R3 = (month - 1) * 2
+	INDIR R03	; "switch" on R03
+	SEARCH E4	; R03 = 0
+	SEARCH E5	; R03 = 2
+	SEARCH E6	; R03 = 4
+	SEARCH E7	; R03 = 6
+	SEARCH E8	; R03 = 8
+	SEARCH E9	; R03 = 10
+	SEARCH E.	; R03 = 12
+	SEARCH EE	; R03 = 14
+	SEARCH E-	; R03 = 16
+	SEARCH E13	; R03 = 18
+	SEARCH CLRALL	; R03 = 20
+	SEARCH CLEAR	; R03 = 22
+
+; print the chosen month name
+MARK E4
+	ALPHA "January  "
+	RET
+MARK E5
+	ALPHA "February "
+	RE05
+	ST06	; 28/29 days
+	RET
+MARK E6
+	ALPHA "March    "
+	RET
+MARK E7
+	ALPHA "April    "
+	ENTER 1
+	-06	; 30 days
+	RET
+MARK E8
+	ALPHA "May      "
+	RET
+MARK E9
+	ALPHA "June     "
+	ENTER 1
+	-06	; 30 days
+	RET
+MARK E.
+	ALPHA "July     "
+	RET
+MARK EE
+	ALPHA "August   "
+	RET
+MARK E-
+	ALPHA "September"
+	ENTER 1
+	-06	; 30 days
+	RET
+MARK E13
+	ALPHA "October  "
+	RET
+MARK CLRALL
+	ALPHA "November "
+	ENTER 1
+	-06	; 30 days
+	RET
+MARK CLEAR
+	ALPHA "December "
+	RET
+
+	.INCLUDE	zeller.w6i
+
+; end of program (exit)
+MARK EX14
+	END
+

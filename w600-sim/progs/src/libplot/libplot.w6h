@@ -1,0 +1,3 @@
+; user API for libplot ROM
+	.include libplot.w6i	; symbolic API
+	.EXTROM	g00 g01 g02 g03 g04 g05 g06 g07 g08 g09

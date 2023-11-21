@@ -1,0 +1,57 @@
+; Disassembled from list_dat.w6t
+
+	CLRALL
+	ENTER 16	; first free register
+	CALL &load_tape_data
+	JIF+
+		SEARCH &exit
+	RE00
+	ST14
+	ENTER 16	; first free register
+	-14
+	ENTER 0
+	ST15
+	ALPHA "Outdoor Temp, Deg. C\r"
+	ALPHA "Sample  Time  Temp\r"
+	ALPHA "------  ----  -------\r"
+	;      ###___  ####  ####.###
+MARK &more
+	RE15
+	I/O 03-00	; print ###
+	I/O 12-03	; print ___
+	RE15
+	ST13
+	ENTER 15	; 15 minutes/sample
+	*13
+	ENTER 60	; to seconds
+	/13
+	INT
+	ST12
+	-13
+	ENTER 60
+	*13
+	RE12
+	ALPHA f02	; X *= 100
+	+13
+	I/O 04-00	; print ####
+	RE15
+	ST13
+	ENTER 16
+	+13
+	INDIR RE13
+	I/O 04-03	; print ####.###
+	ALPHA "\r"	; newline
+	RE14
+	ST13
+	ENTER 1
+	+15
+	-13
+	JIF+
+		SEARCH &exit
+	SEARCH &more
+
+	.include	load_tape_data.w6i
+
+MARK &exit
+	END
+

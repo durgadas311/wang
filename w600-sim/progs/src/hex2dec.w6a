@@ -1,0 +1,100 @@
+; Use f(x) keys to enter HEX digits 0-F, display shows running total.
+
+	.DEF	$key0 f00
+	.DEF	$key1 f01
+	.DEF	$key2 f02
+	.DEF	$key3 f03
+	.DEF	$key4 f04
+	.DEF	$key5 f05
+	.DEF	$key6 f06
+	.DEF	$key7 f07
+	.DEF	$key8 f08
+	.DEF	$key9 f09
+	.DEF	$keyA f10
+	.DEF	$keyB f11
+	.DEF	$keyC f12
+	.DEF	$keyD f13
+	.DEF	$keyE f14
+	.DEF	$keyF f15
+
+MARK $key0
+	ST00
+	ENTER 16
+	*00
+	RET
+MARK $key1
+	$key0
+	ENTER 1
+	+00
+	RET
+MARK $key2
+	$key0
+	ENTER 2
+	+00
+	RET
+MARK $key3
+	$key0
+	ENTER 3
+	+00
+	RET
+MARK $key4
+	$key0
+	ENTER 4
+	+00
+	RET
+MARK $key5
+	$key0
+	ENTER 5
+	+00
+	RET
+MARK $key6
+	$key0
+	ENTER 6
+	+00
+	RET
+MARK $key7
+	$key0
+	ENTER 7
+	+00
+	RET
+MARK $key8
+	$key0
+	ENTER 8
+	+00
+	RET
+MARK $key9
+	$key0
+	ENTER 9
+	+00
+	RET
+MARK $keyA
+	$key0
+	ENTER 10
+	+00
+	RET
+MARK $keyB
+	$key0
+	ENTER 11
+	+00
+	RET
+MARK $keyC
+	$key0
+	ENTER 12
+	+00
+	RET
+MARK $keyD
+	$key0
+	ENTER 13
+	+00
+	RET
+MARK $keyE
+	$key0
+	ENTER 14
+	+00
+	RET
+MARK $keyF
+	$key0
+	ENTER 15
+	+00
+	RET
+	END

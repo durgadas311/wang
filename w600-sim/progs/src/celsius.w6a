@@ -1,0 +1,13 @@
+; Convert degrees farenheight to celcius
+
+; Uses R15
+
+; Enter temp F; GO
+	ST15
+	ENTER 32
+	-15	; F - 32
+	ENTER 5
+	*15	; (F - 32) * 5
+	ENTER 9
+	/15	; ((F - 32) * 5) / 9
+	END

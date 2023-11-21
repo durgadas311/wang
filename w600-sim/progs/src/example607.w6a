@@ -1,0 +1,24 @@
+; Demonstration of an interactive program on a Teletype
+; Prompts for temperature F, converts to C and prints.
+
+	.OUT	W607
+
+	ALPHA "Converts Fahrenheit to Celcius\r"
+MARK &again
+	ALPHA "Enter Fahrenheit: "
+	CLEAR
+	GROUP1 00-05	; input number from TTY
+	ST15
+	; convert F to C (R15)
+	ENTER 32
+	-15
+	ENTER 5
+	*15
+	ENTER 9
+	/15
+	; Display (X) contains temp C
+	ALPHA "Celsius = "
+	I/O 03-01	; print X in 3.1 format
+	ALPHA "\r\r"
+	SEARCH &again
+	END

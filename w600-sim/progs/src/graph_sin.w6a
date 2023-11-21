@@ -1,0 +1,42 @@
+; Plot a sine wave on the PlottingOutputWriter
+	.OUT	W602
+	.INCLUDE	libplot.w6h
+
+	CLRALL
+	ENTER 0		; starting X = 0
+	STORE 16
+	ENTER 360	; ending X = 360
+	STORE 17
+	ENTER 1		; step X = 1
+	STORE 18
+	ENTER 1
+	STORE 21	; X scale = 1
+	ENTER 200
+	STORE 22	; Y scale = 200
+	ENTER 0
+	STORE 19	; X base = 0
+	ENTER 300
+	STORE 20	; Y base = 300
+	$grapher
+	ENTER 0
+	ST14
+	ENTER 1
+	ST15
+	$pt_scale	; sets R0,R1
+	ALPHA "| y = SIN(x)"
+	SEARCH &exit
+
+MARK EX00
+	SIN
+	RET
+
+MARK EX01
+	RE01	; (R1,R0) => (R0,-R1)
+	CHGSGN
+	EX00
+	ST01
+	ALPHA "|."
+	RET
+
+MARK &exit
+	END

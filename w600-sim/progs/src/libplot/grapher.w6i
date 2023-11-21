@@ -1,0 +1,42 @@
+; Plot a graph calling EX00 for f(x) and EX01 for plot(x,y)
+	.OUT	W612	; flatbed plotter
+	.EXT	EX00	; user's f(x) routine
+	.EXT	EX01	; user's PLOT(R1,R0) routine
+;
+; R16 = starting X value
+; R17 = ending X value
+; R18 = step for X
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+;
+MARK $grapher
+	T01
+	T00
+	ALPHA "\z"
+	RECALL 16	; starting X
+	ST11
+	ST14
+	CALL EX00	; callback to user's f(x)
+	ST15
+	$pt_scale	; scale coords (R14,R15)
+	CALL EX01	; callback to user's plot
+	RECALL 18	; step for X
+	+11
+MARK &gr1
+	RE11
+	ST14
+	CALL EX00	; callback to user's f(x)
+	ST15
+	$pt_scale	; scale coords
+	CALL EX01	; callback to user's plot
+	RECALL 17
+	ST02
+	RECALL 18
+	+11
+	-02
+	JIF+
+		RET
+		GO
+	@SEARCH &gr1	; loop back for another point

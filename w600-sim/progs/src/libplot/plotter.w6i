@@ -1,0 +1,39 @@
+; plot on Wang 612 using EX00 as f(x)
+	.OUT	W612	; flatbed plotter
+	.EXT	EX00	; user's f(x) routine
+
+; R16 = starting X
+; R17 = ending X
+; R18 = step for X
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+;
+MARK $plotter
+	$plot_home	; home pen
+	RECALL 16
+	ST11
+	ST14
+	CALL EX00	; callback to user's f(x)
+	ST15		; save new Y
+	$pt_scale	; compute delta
+	$plot_move	; move to start position
+	RECALL 18
+	+11
+MARK &pl1
+	RE11
+	ST14
+	CALL EX00	; callback to user's f(x)
+	ST15
+	$pt_scale
+	$plot_draw	; draw to next position
+	RECALL 17
+	ST02
+	RECALL 18
+	+11
+	-02
+	JIF+
+		RET
+		GO
+	@SEARCH &pl1	; do another point

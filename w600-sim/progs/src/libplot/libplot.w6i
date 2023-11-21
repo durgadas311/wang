@@ -1,0 +1,49 @@
+; symbolic API for libplot ROM
+	.DEF	$grapher	g00
+	; generic graphing routine. User supplies EX00 as f(x),
+	; and EX01 as the routine to plot one point at (R1,R0).
+	; R16=starting X, R17=ending X, R18=step for X
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale
+
+	; The following are specific to the 612 flatbed plotter.
+
+	.DEF	$plotter	g01
+	; plot graph on plotter, user supplies EX00 for f(x).
+	; R16=starting X, R17=ending X, R18=step for X
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale
+
+	.DEF	$plot_data	g02
+	; plot graph of data points on plotter.
+	; R16 = starting register number (>= 23)
+	; R17 = number of data points
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale
+
+	.DEF	$plot_chrsize	g03
+	; set character size for plotter
+	; X = character size index (1..)
+
+	.DEF	$plot_home	g04
+	; move plotter pen to home position (0,0)
+
+	.DEF	$plot_move	g05
+	; move plotter pen to (R1,R0)
+
+	.DEF	$plot_draw	g06
+	; draw on plotter to (R1,R0)
+
+	.DEF	$plot_Xaxis	g07
+	; draw X axis on plotter.
+	; R16=starting X, R17=ending X, R18=step for X (tic interval)
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale
+
+	.DEF	$plot_Yaxis	g08
+	; draw Y axis on plotter
+	; R16=starting Y, R17=ending Y, R18=step for Y (tic interval)
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale
+
+	; generic utility routines
+
+	.DEF	$pt_scale	g09
+	; scale point (R14,R15) into delta (R1,R0) from last (R12,R13)
+	; R12=previous X, R13=previous Y, R14=current X, R15=current Y,
+	; R19=base X, R20=base Y, R21=X scale, R22=Y scale

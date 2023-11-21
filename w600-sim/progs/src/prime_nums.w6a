@@ -1,0 +1,57 @@
+; Find prime numbers between 2 and 1e10.
+; Only considers odd numbers, and only checks dividors 1 < D <= sqrt(N)
+
+; R0 = temp for comparisons
+; R1 = current number to test
+; R2 = temp for quotient
+; R8 = current divisor to use
+; R10 = temp for testing quotient
+
+	CLRALL
+	ENTER 2	; first prime is "2"
+	PRINT X/00
+	ENTER 1	; 3-2
+	ST01
+MARK &next1
+	ENTER 2	; skip even numbers
+	+01
+	ST00
+	ENTER 1E10
+	ALPHA SIN	; R0 < X
+		SEARCH &done
+	RE01
+	SQRT
+	INT
+	ST00
+	ENTER 2
+	+00	; R0 = int(sqrt(R1)) + 2
+	; R0 = stopping point for divisors
+	ENTER 1
+	ST08
+MARK &next2
+	RE01
+	ST02
+	ENTER 1
+	+08
+	ALPHA JIF0	; R0 == X
+		SEARCH &try_it
+	SEARCH &got_one
+MARK &try_it
+	RE08
+	/02
+	ST10
+	INT
+	-10
+	JIF0	; zero if it divides evenly
+		SEARCH &next2
+	SEARCH &next1
+
+MARK &got_one
+	RE01
+	PRINT X/00
+	SEARCH &next1
+
+MARK &done
+	CLEAR
+	END
+

@@ -1,0 +1,6 @@
+; move pen to (R1,R0)
+	.OUT	W612	; flatbed plotter
+
+MARK $plot_move
+	ALPHA "\m"	; move command (pen up)
+	RET

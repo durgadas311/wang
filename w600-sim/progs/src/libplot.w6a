@@ -1,0 +1,14 @@
+; Framework for building the libplot ROM
+
+	.include	libplot.w6i	; API
+
+	.include	grapher.w6i
+	.include	plot_chrsize.w6i
+	.include	plot_data.w6i
+	.include	plot_draw.w6i
+	.include	plot_home.w6i
+	.include	plot_move.w6i
+	.include	plotter.w6i
+	.include	plot_Xaxis.w6i
+	.include	plot_Yaxis.w6i
+	.include	pt_scale.w6i

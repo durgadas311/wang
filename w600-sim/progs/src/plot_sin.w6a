@@ -1,0 +1,61 @@
+; Wang 612 demo to plot a sine wave
+;
+; Uses the plot library in ROM.
+; The library calls back to EX00 for each datapoint.
+	.include	libplot.w6h
+
+	CLRALL
+	; setup parameters for the ROM
+	; for x=0 to 360 step 5
+	ENTER 0
+	STORE 16	; start X
+	ENTER 360
+	STORE 17	; ending X
+	ENTER 5
+	STORE 18	; step for X
+
+	ENTER 2.5
+	STORE 21
+	ENTER 450
+	STORE 22
+	ENTER 50
+	STORE 19	; offset for Y
+	ENTER 500
+	STORE 20	; offset for X
+	$plotter	; plot the wave
+
+	ENTER 1
+	$plot_chrsize	; set character size 1
+	ENTER 90
+	STORE 18
+	ENTER 0
+	ST10
+	$plot_Xaxis
+	ENTER 1-
+	STORE 16
+	ENTER 1
+	STORE 17
+	ENTER 1
+	STORE 18
+	ENTER 0
+	ST11
+	$plot_Yaxis
+	ENTER 2
+	$plot_chrsize	; set character size 2
+	ENTER 0
+	ST14
+	ENTER 1-.05
+	ST15
+	$pt_scale	; scale point
+	$plot_move		; move pen to position
+	.out	W612
+	ALPHA "Y = SIN{X}"	; print title of graph
+	SEARCH &exit
+
+; f(x) for the plot library
+MARK EX00
+	SIN
+	RET
+
+MARK &exit
+	END

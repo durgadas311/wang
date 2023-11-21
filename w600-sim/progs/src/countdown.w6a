@@ -1,0 +1,15 @@
+; Simple countdown to 0
+; Uses R14
+
+; Enter start; GO
+	ST14
+MARK &loop
+	JIFNZ
+		SEARCH &exit
+	ENTER 1
+	-14
+	ALPHA STOP	;
+	ALPHA STOP	; 1 second pause
+	SEARCH &loop
+MARK &exit
+	END

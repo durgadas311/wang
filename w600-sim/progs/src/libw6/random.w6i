@@ -1,0 +1,12 @@
+; $RAND: random number 0.0 <= x < 1.0
+; uses R07 (seed: 0..0.9999)
+
+MARK $rand
+	ENTER 1
+	+07
+	ALPHA f07
+	LNX
+	*07
+	INT
+	-07
+	RET

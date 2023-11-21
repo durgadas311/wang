@@ -1,0 +1,32 @@
+; load data off tape.
+; block 1 is number of items 'N'
+; block 2 is 'N' numbers
+; X = first register to use (&array[0])
+;
+; Return:
+;	R0 = last register (&array[N-1])
+;	R1 = first register (&array[0])
+;	R15 = number of registers used (N)
+
+	.SREG	&_last	; TODO: wasm needs to generate a "last_reg" symbol
+
+MARK &load_tape_data
+	ST01	; &array[0]
+	ENTER 0	; dest register number
+	ALPHA RECALL	; load one number into R0
+	RE00
+	ST15		;
+	RE01		; base reg
+	+00		;
+	ENTER 1
+	-00		; R0 = &array[N-1]
+	ENTER &_last
+	ALPHA SIN	; jif X <= R0
+		SEARCH &ltd_err
+	RE00
+	ALPHA RECALL	; load numbers into (R0)
+	RET
+
+MARK &ltd_err
+	ENTER 1-
+	RET

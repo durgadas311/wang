@@ -1,0 +1,6 @@
+; draw from current to position to (R1,R0)
+	.OUT	W612	; flatbed plotter
+
+MARK $plot_draw
+	ALPHA "\p"	; plot command (pen down)
+	RET

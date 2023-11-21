@@ -1,0 +1,29 @@
+; Program to compute day-of-week for given month/day/year
+; Enter month, press GO
+; enter dat-of-month, press GO
+; enter year, press GO
+; Uses "Zeller's Congruence"
+; R0 = month
+; R1 = day-of-month
+; R2 = year
+
+	ST00
+	PRINT M/00
+	CLEAR
+	STOP
+	ST01
+	PRINT D/00
+	CLEAR
+	STOP
+	ST02
+	PRINT Y/00
+	$zeller
+	PRINT X/00
+	PRINT X/15
+	SEARCH &exit
+
+	.include zeller.w6i
+
+MARK &exit
+	END
+

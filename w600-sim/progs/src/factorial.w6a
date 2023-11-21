@@ -1,0 +1,24 @@
+; Compute factorial
+; enter N, press GO, stops with N! in display.
+
+	JIF+
+		SEARCH &error
+	ST15
+	ENTER 1
+	ST14	; result (0!)
+MARK &loop
+	RE15
+	JIF0
+		SEARCH &more
+	RE14
+	SEARCH &exit
+MARK &more
+	*14
+	ENTER 1
+	-15
+	SEARCH &loop
+
+MARK &error
+	CLEAR
+MARK &exit
+	END

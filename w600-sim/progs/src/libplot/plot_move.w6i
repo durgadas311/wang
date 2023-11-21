@@ -1,0 +1,6 @@
+; pen to home position
+	.OUT	W612	; flatbed plotter
+
+MARK $plot_home
+	ALPHA "\h"	; home command (pen up)
+	RET

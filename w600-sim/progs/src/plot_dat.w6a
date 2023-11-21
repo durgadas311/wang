@@ -1,0 +1,63 @@
+; Plot a list of data points on the flatbed plotter
+
+	.INCLUDE	libplot.w6h
+	.EXT	g02	; plot data point
+	.EXT	g03	; set char size
+	.EXT	g05	; move pen to poisition
+	.EXT	g07	; draw X axis
+	.EXT	g08	; draw Y axis
+
+	CLRALL
+	ENTER 23	; starting register of array
+	CALL &load_tape_data
+	JIF+
+		SEARCH &exit	; error
+	ENTER 23
+	STORE 16	; &array[0] - start
+	RE00
+	STORE 17	; &array[N-1]
+	ENTER 5
+	STORE 21	; tic
+	ENTER 10
+	STORE 22	;
+	ENTER 40
+	STORE 19
+	ENTER 200
+	STORE 20
+	$plot_data
+	RECALL 17
+	ST02
+	RECALL 16
+	-02
+	STORE 17
+	ENTER 0
+	STORE 16
+	ENTER 8
+	STORE 18
+	ENTER 0
+	ST10
+	$plot_Xaxis
+	ENTER -15
+	STORE 16
+	ENTER 6
+	STORE 17
+	ENTER 5
+	STORE 18
+	ENTER 0
+	ST11
+	$plot_Yaxis
+	ENTER 2
+	$plot_chrsize
+	ENTER 0
+	ST14
+	ENTER -17
+	ST15
+	$pt_scale
+	$plot_move
+	ALPHA "outdoor temp, deg c"
+	SEARCH &exit
+
+	.INCLUDE	load_tape_data.w6i
+
+MARK &exit
+	END
