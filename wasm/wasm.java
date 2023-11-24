@@ -9,6 +9,7 @@ public class wasm {
 	boolean w600 = false;
 	boolean w700 = false;
 	boolean docs = false;
+	boolean data = false;
 	boolean tape = false;
 	boolean rom = false;
 	WangDisassembler disas = null;
@@ -23,11 +24,13 @@ public class wasm {
 	private void help() {
 		System.err.format("Usage: wasm [options] dis=<file>\n" +
 				  "       wasm [options] asm=<file>\n" +
+				  "       wasm [options] dat=<file>\n" +
 				  "       wasm { 600 | 700 } docs\n");
 		System.err.format("Options:\n");
 		System.err.format("600        Use Wang 600 machine codes\n");
 		System.err.format("700        Use Wang 700 machine codes\n");
 		System.err.format("tape       Treat as tape image\n");
+		System.err.format("rom        Treat as expansion ROM image\n");
 		System.err.format("nolst      Do not produce assembly listing\n");
 		System.err.format("lst=<file> Produce assembly listing to file (stdout)\n");
 		System.err.format("out=<file> Produce output to file (a.out/stdout)\n");
@@ -48,6 +51,9 @@ public class wasm {
 				file = new File(arg.substring(4));
 			} else if (arg.startsWith("asm=")) {
 				dis = false;
+				file = new File(arg.substring(4));
+			} else if (arg.startsWith("dat=")) {
+				data = true;
 				file = new File(arg.substring(4));
 			} else if (arg.matches("6[01][012]")) {
 				w600 = true;
@@ -187,7 +193,11 @@ public class wasm {
 			aout = new File("a.out");
 		}
 		tape = tape || (aout != null && aout.getName().matches(".*\\.w[67]t"));
-		asm = new WangAssembler(mach, tape, rom, paths);
+		asm = new WangAssembler(mach, tape, rom, raw, paths);
+		if (data) {
+			int foo = asm.data(file, aout);
+			System.exit(foo == 0 ? 0 : 1);
+		}
 		int foo = asm.asm(file, aout, list);
 		if (foo != 0) {
 			System.err.format("%d Errors in assembly\n", foo);

@@ -134,10 +134,14 @@ public class Wang600Instructions implements WangInstructions {
 		this.rom = rom;
 	}
 
+	// TODO: support different memory configs?
 	public int maxPC() { return 1847; }
 	public int maxRomPC() { return 2047; }
 	public int maxReg() { return 246; }
+	public int regsPerBlk() { return 1; }
+	public int regBlkLen() { return 8; }
 	public int endProg() { return 0x9e; }
+	public int endData() { return 0xff; }
 	public int stop() { return 0x93; }
 	public char lastError() { return error; }
 	public boolean finalPass() { return pass; }
@@ -468,6 +472,11 @@ public class Wang600Instructions implements WangInstructions {
 		return (maxPC() - adr) / 8 + 16;
 	}
 
+	// negative values indicate error
+	public int regAdr(int reg) {
+		return ((maxPC() & ~0x07) + (16 * 8)) - (reg * 8);
+	}
+
 	public String adrRegStr(int adr) {
 		return String.format(" (%d)", adrReg(adr));
 	}
@@ -540,45 +549,31 @@ public class Wang600Instructions implements WangInstructions {
 		return 0;
 	}
 
-	// .REG <label> {"string"|number}
-	// assumes regPad() already called.
-	public int dreg(String[] line, int first, WangMemory mem, int start) {
+	public int setReg(int reg, String val, WangMemory mem, int start) {
 		int adr = start;
-		int reg;
-		String val = "";
+		String v;
+		double d;
 		int x;
 		int c = 0;
-		double d;
 
-		error = ' ';
-		if (rom) {
-			error = 'X';
-			return -1;
-		}
-		x = first + 1;	// skip ".REG"
-		reg = adrReg(adr);
-		if (x < line.length) {
-			if (tbl.setLabel(line[x], reg) < 0) {
-				error = 'M';
+		if (val.matches("\"[0-9a-fA-F]*\"")) {
+			v = val.replaceAll("\"", "");
+		} else {
+			try {
+				d = Double.valueOf(val);
+			} catch (Exception ee) {
+				error = 'S';
 				return -8;
 			}
-			++x;
-		}
-		if (x < line.length) {
-			if (line[x].matches("\"[0-9a-fA-F]*\"")) {
-				val = line[x].replaceAll("\"", "");
-			} else {
-				d = Double.valueOf(line[x]);
-				val = String.format("%+18.11e", d);
-				val = val.replace('+', '0');
-				val = val.replace('-', '1');
-				val = val.replaceAll("[.eE]", "");
-			}
+			v = String.format("%+18.11e", d);
+			v = v.replace('+', '0');
+			v = v.replace('-', '1');
+			v = v.replaceAll("[.eE]", "");
 		}
 		for (x = 15; x >= 0; --x) {
 			c <<= 4; // add '0'
-			if (x < val.length()) {
-				c |= Character.digit(val.charAt(x), 16);
+			if (x < v.length()) {
+				c |= Character.digit(v.charAt(x), 16);
 			}
 			if ((x & 1) == 0) {
 				if (mem.putMem(adr++, c)) {
@@ -588,6 +583,33 @@ public class Wang600Instructions implements WangInstructions {
 			}
 		}
 		return adr - start;
+	}
+
+	// .REG <label> {"string"|number}
+	// assumes regPad() already called.
+	public int dreg(String[] line, int first, WangMemory mem, int start) {
+		int reg;
+		String val = "";
+		int x;
+
+		error = ' ';
+		if (rom) {
+			error = 'X';
+			return -8;
+		}
+		x = first + 1;	// skip ".REG"
+		reg = adrReg(start);
+		if (x < line.length) {
+			if (tbl.setLabel(line[x], reg) < 0) {
+				error = 'M';
+				return -8;
+			}
+			++x;
+		}
+		if (x < line.length) {
+			val = line[x];
+		}
+		return setReg(reg, val, mem, start);
 	}
 
 	public WangSymbolTable getSymTab() {

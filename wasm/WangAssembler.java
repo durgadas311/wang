@@ -10,6 +10,7 @@ public class WangAssembler implements WangMemory {
 	WangInstructions wi;
 	boolean tape;
 	boolean rom;
+	boolean raw;
 	int errs = 0;
 	boolean stdout;
 	int startPC;
@@ -19,12 +20,13 @@ public class WangAssembler implements WangMemory {
 	byte[] mem;
 	int adr;
 
-	public WangAssembler(WangInstructions wi, boolean tape, boolean rom,
+	public WangAssembler(WangInstructions wi, boolean tape, boolean rom, boolean raw,
 			Vector<File> paths) {
 		this.paths = paths;
 		this.wi = wi;
 		this.tape = tape;
 		this.rom = rom;
+		this.raw = raw;
 		startPC = 0;
 		regPC = -1;
 		if (rom) {
@@ -68,6 +70,16 @@ public class WangAssembler implements WangMemory {
 		int b = getMem(adr);
 		if (b < 0) return 0;
 		return ((b >> 4) & 0x0f);
+	}
+
+	private int objectOut(byte[] mem, int start, int len, OutputStream out) {
+		try {
+			out.write(mem, start, len);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+			return -1;
+		}
+		return 0;
 	}
 
 	private int objectOut(byte[] mem, int len, File out) {
@@ -358,5 +370,110 @@ public class WangAssembler implements WangMemory {
 		n = objectOut(mem, adr - startPC, os);
 		if (n < 0) return n;
 		return errs;
+	}
+
+	// Convert ASCII list of numbers into a block of register data.
+	// Note that register data is backwards: array[0] is the last.
+	// 
+	public int data(File file, File os) {
+		BufferedReader in;
+		String line = null;
+		int reg;
+		int num = 0;
+		int err = 0;
+		int i, n;
+
+		if (rom) {
+			System.err.format("ROM may not contain data\n");
+			return -1;
+		}
+		// Wang 700 tape data is marginally useful, but will be allowed.
+		// Note that Wang 700 requires an END PROG on tape, while
+		// Wang 600 handles a simple end-of-block.
+		try {
+			in = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException fnf) {
+			System.err.format("No file: %s", file.getName());
+			return -1;
+		} catch (Exception ee) {
+			// TODO: print cleaner message
+			ee.printStackTrace();
+			return -1;
+		}
+		// Use full address space...
+		maxPC = wi.regAdr(-1); // end of RAM, incl reserved registers
+		reg = 0;
+		// TODO: must reverse the order!
+		do {
+			for (i = 0; i < wi.regsPerBlk(); ++i) {
+				try {
+					line = in.readLine();
+				} catch (Exception ee) {
+					line = null;
+				}
+				if (line == null) break;
+				++num;
+				// TODO: comments?
+				// TODO: allow end-of-block directives?
+				adr = wi.regAdr(reg);
+				n = wi.setReg(reg, line, this, adr);
+				if (n < 0) {
+					++err;
+					System.err.format("%c %3d: %s\n",
+						wi.lastError(), num, line);
+				}
+				++reg;
+			}
+			if (line == null) break;
+		} while (reg <= wi.maxReg());
+		if (reg > wi.maxReg()) {
+			// TODO: only error if more data in file...
+			// TODO: automatically break into chunks?
+			System.err.format("Memory Overflow\n");
+			return -1;
+		}
+		if (num == 0) {
+			System.err.format("No Data\n");
+			return -1;
+		}
+		startPC = adr;
+		adr = maxPC;
+		if (!raw) {
+			mem[adr++] = (byte)wi.endProg();
+			if (tape) {
+				mem[adr++] = (byte)wi.endData();
+			}
+		}
+		FileOutputStream fo;
+		try {
+			fo = new FileOutputStream(os);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+			return -1;
+		}
+		if (!raw) {
+			WangRegBlock blk = new WangRegBlock(wi);
+			int a = 0;
+
+			wi.setReg(0, String.format("%d", num), blk, a);
+			a += wi.regBlkLen();
+			blk.putMem(a++, wi.endProg());
+			if (tape) {
+				blk.putMem(a++, wi.endData());
+			}
+			n = objectOut(blk.mem, 0, a, fo);
+			// TODO: errors
+		}
+		// TODO: write output file...
+		n = objectOut(mem, startPC, adr - startPC, fo);
+		// TODO: errors
+		try {
+			fo.close();
+		} catch (Exception ee) {
+			ee.printStackTrace();
+			return -1;
+		}
+		// TODO: return error status
+		return 0;
 	}
 }

@@ -18,7 +18,9 @@ public interface WangInstructions {
 	int regPad(WangMemory mem, int start);
 	int regPad(int start);
 	int adrReg(int adr);
+	int regAdr(int reg);
 	String adrRegStr(int adr);
+	int setReg(int reg, String val, WangMemory mem, int start);
 	int dreg(String[] line, int first, WangMemory mem, int start);
 	int xlab(String[] line, int first);
 	int def(String[] line, int first);
@@ -32,6 +34,9 @@ public interface WangInstructions {
 	int maxRomPC();
 	int maxReg();
 	int endProg();
+	int endData();
+	int regsPerBlk();
+	int regBlkLen();
 	int stop();
 	boolean finalPass();
 	void finalPass(boolean p);

@@ -134,7 +134,10 @@ public class Wang700Instructions implements WangInstructions {
 	public int maxPC() { return 1983; }
 	public int maxRomPC() { return 0; }
 	public int maxReg() { return 248; }
+	public int regsPerBlk() { return 2; }
+	public int regBlkLen() { return 16; }
 	public int endProg() { return 0x5c; }
+	public int endData() { return 0x5c; }
 	public int stop() { return 0x5f; }
 	public char lastError() { return error; }
 	public boolean finalPass() { return pass; }
@@ -438,7 +441,11 @@ public class Wang700Instructions implements WangInstructions {
 	// R (high nibble) and R+1 (low nibble)
 	// adr already adjusted with regPad().
 	public int adrReg(int adr) {
-		return ((maxPC() - adr) / 16) * 2;
+		return ((maxPC() - adr) / 16) << 1;
+	}
+
+	public int regAdr(int reg) {
+		return ((maxPC() & ~0x0f) - ((reg >> 1) * 16));
 	}
 
 	public String adrRegStr(int adr) {
@@ -527,21 +534,48 @@ public class Wang700Instructions implements WangInstructions {
 		return 0;
 	}
 
+	// odd registers in low nibble, even in high.
+	public int setReg(int reg, String val, WangMemory mem, int start) {
+		int adr = start;
+		boolean odd = ((reg & 1) != 0);
+		int x;
+		int c = 0;
+		int b;
+		double d;
+		String v;
+
+		v = getRegVal(val);
+		for (x = 15; x >= 0; --x) {
+			c = 0;
+			if (x < v.length()) {
+				c = Character.digit(v.charAt(x), 16);
+			}
+			b = mem.getMem(adr);
+			if (odd) {
+				b &= 0xf0;
+				b |= c;
+			} else {
+				b &= 0x0f;
+				b |= (c << 4);
+			}
+			if (mem.putMem(adr++, b)) {
+				error = 'Z';
+				return -16;
+			}
+		}
+		return adr - start;
+	}
+
 	// .REG <label> {"string"|number}
 	// assumes regPad() already called.
 	public int dreg(String[] line, int first, WangMemory mem, int start) {
-		int adr = start;
 		int reg;
-		String val0 = "";
-		String val1 = "";
 		int x;
-		int c = 0;
-		double d;
 		String[] ss;
 
 		error = ' ';
 		x = first + 1;	// skip ".REG"
-		reg = adrReg(adr);
+		reg = adrReg(start);
 		if (x < line.length) {
 			ss = line[x].split(",");
 			if (tbl.setLabel(ss[0], reg) < 0) {
@@ -558,25 +592,14 @@ public class Wang700Instructions implements WangInstructions {
 		}
 		if (x < line.length) {
 			ss = line[x].split(",");
-			val0 = getRegVal(ss[0]);
+			x = setReg(reg, ss[0], mem, start);
+			if (x < 0) return x;
 			if (ss.length > 1) {
-				val1 = getRegVal(ss[1]);
+				// other half can't overflow if first did not...
+				x = setReg(reg + 1, ss[1], mem, start);
 			}
 		}
-		for (x = 15; x >= 0; --x) {
-			c = 0;
-			if (x < val0.length()) {
-				c |= (Character.digit(val0.charAt(x), 16) << 4);
-			}
-			if (x < val1.length()) {
-				c |= Character.digit(val1.charAt(x), 16);
-			}
-			if (mem.putMem(adr++, c)) {
-				error = 'Z';
-				return -16;
-			}
-		}
-		return adr - start;
+		return 16;
 	}
 
 	public WangSymbolTable getSymTab() {
