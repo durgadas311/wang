@@ -30,14 +30,16 @@ public class TiltRotate {
 	};
 
 	static final String[] wx12 = {	// unshifted
+	// print (at current location)
 	"-","Y",  " ",  "/","Q","P","+","J",  "}","?",  "=",  "{",",",":","F","G",
 	"W","S","\\u","\\d","I","'",".","!","\\r","O","\\i","\\v","A","R","V","M",
 	"B","H","\\+","\\-","K","E","N","T","\\x","1","\\+","\\-","C","D","U","X",
 	"9","0","\\+","\\-","6","5","2","Z","\\y","4","\\+","\\-","8","7","3","L",
-	 "","Y",  " ",  "/","Q","P","+","J",  "}","?",  "=",  "{",",",":","F","G",
-	"W","S","\\p","\\m","I","'",".", "","\\z","O","\\s","\\h","A","R","V","M",
-	"B","H","\\+","\\-","K","E","N","T","\\p","1","\\+","\\-","C","D","U","X",
-	"9","0","\\+","\\-","6","5","2","Z","\\p","4","\\+","\\-","8","7","3","L",
+	// plot (at R1,R0 delta) - mainly for plotter control characters
+	"|-","|Y", "| ", "|/","|Q","|P","|+","|J", "|}","|?", "|=", "|{","|,","|:","|F","|G",
+	"|W","|S","\\p","\\m","|I","|'","|.",  "","\\z","|O","\\s","\\h","|A","|R","|V","|M",
+	"|B","|H","\\+","\\-","|K","|E","|N","|T","\\p","|1","\\+","\\-","|C","|D","|U","|X",
+	"|9","|0","\\+","\\-","|6","|5","|2","|Z","\\p","|4","\\+","\\-","|8","|7","|3","|L",
 	};
 	static final String[] WX12 = {	// shifted - no shift
 	};
@@ -122,10 +124,20 @@ public class TiltRotate {
 	// one at a time, caller keeps track of SHIFT
 	// might return empty string (invalid char)
 	public String tr2a(int tr, boolean shifted) {
-		if (shifted) {
-			return A[tr];
+		boolean plot = ((tr & 0x40) != 0);
+
+		if (shifted && A.length > 0) {
+			if (plot && tr >= A.length) {
+				return "|" + A[tr & 0x3f];
+			} else {
+				return A[tr];
+			}
 		} else {
-			return a[tr];
+			if (plot && tr >= a.length) {
+				return "|" + a[tr & 0x3f];
+			} else {
+				return a[tr];
+			}
 		}
 	}
 
@@ -135,6 +147,7 @@ public class TiltRotate {
 	public int a2tr(String s, boolean shifted, WangMemory mem, int start) {
 		int adr = start;
 		boolean shift;
+		boolean plot;
 		boolean err = false;
 		boolean e;
 		int x;
@@ -142,7 +155,6 @@ public class TiltRotate {
 		char c;
 
 		for (x = 0; x < s.length(); ++x) {
-			// TODO: escapes. Also non-shifted (blank, etc).
 			if (s.charAt(x) == '\\' && x + 1 < s.length()) {
 				++x;
 				if (s.charAt(x) == '0') {
@@ -151,6 +163,11 @@ public class TiltRotate {
 				e = mem.putMem(adr++, doEsc(s.charAt(x)));
 				err = err || e;
 				continue;
+			}
+			plot = false;
+			if (s.charAt(x) == '|' && x + 1 < s.length()) {
+				++x;
+				plot = true;
 			}
 			shift = false;
 			c = s.charAt(x);
@@ -163,6 +180,9 @@ public class TiltRotate {
 			if (i < 0) {
 				// TODO: invalid character placeholder...
 				continue;
+			}
+			if (plot) {
+				i |= 0x40;
 			}
 			if ((i & 0x06) == 0x02 || (i & 0x0f) == 0x08) {
 				// do not shift for these
