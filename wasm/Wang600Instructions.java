@@ -690,11 +690,20 @@ public class Wang600Instructions implements WangInstructions {
 		}
 		ret += e.mnemonic;
 		// TODO: prevent overflow of mem[]...
-		if (e.flags != 0) {
+		switch (e.flags) {
+		case FCALL:
+		case FROM:
+		case 0:
+			// single-step instructions
+			break;
+		default:
+			// ALPHA might have even more...
 			o = mem[x++] & 0xff;
+			break;
 		}
 		switch (e.flags) {
 		case MARK:
+		case ROMARK:
 		case LABEL:
 		case INDIR:
 			if (e.flags == INDIR && o < 0x10) { // "case" statement
