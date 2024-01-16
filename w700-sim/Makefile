@@ -42,12 +42,12 @@ tar: wang700.jar
 	cd ..;\
 	tar -czv --transform 's/.ship$$//' \
 		-f w700-sim/$(SRCTAR) \
-		w700-sim/Makefile.ship w700-sim/*.java \
-		common/icons/*.png \
+		w700-sim/Makefile.ship w700-sim/*.java w700-sim/*.rom \
+		common/*.java common/icons/*.png \
 		w700-sim/README w700-sim/LICENSE \
 		w700-sim/README.gui \
 		w700-sim/progs/*.w7* w700-sim/progs/*.txt w700-sim/progs/*.wfl \
-		w700-sim/icons/*.gif common/fonts/*.ttf \
+		w700-sim/icons/*.gif common/fonts/*.ttf common/plotter_chrgen.dat \
 		w700-sim/docs/*.html w700-sim/docs/*.gif
 
 ifeq ($(MAKECMDGOALS),ship)
