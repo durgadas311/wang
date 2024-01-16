@@ -20,12 +20,26 @@ public class w700_fe
 
 	public static void main(String[] args) {
 		Wang_SplashScreen.starting();
+		boolean test = false;
+		boolean dbg = false;
+		boolean stop = false;
+		String model = null;
 
 		GridBagLayout gridbag = new GridBagLayout();
 
-		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
-		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
-		boolean stop = (args.length > 0 && args[0].compareTo("-I") == 0);
+		for (String arg : args) {
+			if (arg.equals("-t")) {
+				test = true;
+			} else if (arg.equals("-i")) {
+				dbg = true;
+			} else if (arg.equals("-I")) {
+				stop = true;
+			} else if (arg.matches("7[02]0[AaBbCc]")) {
+				model = arg.toUpperCase();
+			} else {
+				System.err.format("Unrecognized arg \"%s\"\n", arg);
+			}
+		}
 
 		java.net.URL url = w700_fe.class.getResource("icons/wang700-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -39,6 +53,9 @@ public class w700_fe
 		Wang_UI.setIcon(new ImageIcon(img));
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang700_home"));
 		Wang_UI.setSeries("7");
+		if (model != null) {
+			Wang_UI.getProperties().setProperty("wang700_model", model);
+		}
 
 		front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
 		front_end.setIconImage(img);

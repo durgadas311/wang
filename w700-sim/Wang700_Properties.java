@@ -21,6 +21,9 @@ class Wang700_Properties extends Wang_Properties
 	JTextArea _707host_tx;
 	JPanel _707host_pn;
 	JPanel _dia_pn;
+	JComboBox<String> _mdl_kb;
+	String[] _mdl_val = new String[] { "700C", "720C" };
+	JPanel _mdl_pn;
 
 	public Wang700_Properties() {
 		try {
@@ -37,6 +40,10 @@ class Wang700_Properties extends Wang_Properties
 		processDefaults();
 
 		// Edit Properties...
+		_mdl_kb = new JComboBox<String>(_mdl_val);
+		_mdl_pn = new JPanel();
+		_mdl_pn.add(new JLabel("Model:"));
+		_mdl_pn.add(_mdl_kb);
 		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
 		_wfl_cb = new JCheckBox("Enable Function Key Labels");
 		_f_rb1 = new JRadioButton("PanaPlex 9-Segment");
@@ -75,6 +82,9 @@ class Wang700_Properties extends Wang_Properties
 		s.insets.left = 0;
 		s.insets.right = 0;
 		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(_mdl_pn, s);
+		_dia_pn.add(_mdl_pn);
+		s.gridy += 1;
 		gridbag.setConstraints(_sp1_cb, s);
 		_dia_pn.add(_sp1_cb);
 		s.gridy += 1;
@@ -153,10 +163,33 @@ class Wang700_Properties extends Wang_Properties
 		}
 	}
 
+	private void getComboSelection(JComboBox<String> kb, String prop) {
+		int x;
+		String m = null;
+		x = kb.getSelectedIndex();
+		if (x >= 0) {
+			m = _mdl_val[x];
+		}
+		setProperty(prop, m);
+	}
+
+	private void setComboSelection(JComboBox<String> kb, String prop) {
+		int x;
+		String m = getProperty(prop);
+		if (m == null) return;
+		for (x = 0; x < _mdl_val.length; ++x) {
+			if (_mdl_val[x].equals(m)) {
+				kb.setSelectedIndex(x);
+				return;
+			}
+		}
+	}
+
 	public boolean editPreferences() {
 		_sp1_cb.setSelected(getBoolean("wang700_special1"));
 		boolean wfl = (getProperty("wang_function_labels") != null);
 		_wfl_cb.setSelected(wfl);
+		setComboSelection(_mdl_kb, "wang700_model");
 		String f = getProperty("wang700_displayfont");
 		if (f.equals(_f_rb1.getActionCommand())) {
 			_f_rb1.setSelected(true);
@@ -177,6 +210,7 @@ class Wang700_Properties extends Wang_Properties
 
 		// TBD: change parameters and restart?
 		// TBD: do validation?
+		getComboSelection(_mdl_kb, "wang700_model");
 		ButtonModel bm = _f_bg.getSelection();
 		setProperty("wang700_displayfont", bm.getActionCommand());
 		setProperty("wang700_special1", Boolean.toString(_sp1_cb.isSelected()));
