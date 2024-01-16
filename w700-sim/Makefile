@@ -26,16 +26,17 @@ EXE = w700-sim
 w700ucode2rom: w700ucode2rom.c loaducode_txt.o
 	$(CC) $(CFLAGS) -o $@ w700ucode2rom.c loaducode_txt.o
 
-$(ROM): ROM720C.txt w700ucode2rom
+want720c.rom: ROM720C.txt w700ucode2rom
 	./w700ucode2rom ROM720C.txt
 	mv ROM720C.rom $@
+
+wang700c.rom: ROM700C.txt w700ucode2rom
+	./w700ucode2rom ROM700C.txt
+	mv ROM700C.rom $@
 
 clobber: clean
 	rm -f *.class w700_fe w700-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)
-
-rom.diff: $(ROM)
-#	-cvs diff -u -r 1.1 $(ROM) >rom.diff
 
 tar: wang700.jar
 	cd ..;\
@@ -80,7 +81,7 @@ temp_dest: all $(ICNS) wang700.jar
 	chmod +x $(TMPDEST)/run $(TMPDEST)/INSTALL $(TMPDEST)/UNINSTALL
 	mkdir -p $(TMPDEST)/icons
 	cp $(PNGS) ../common/icons/WangX14Edit.png $(TMPDEST)/icons
-	cp $(ROM) $(TMPDEST)
+	cp $(ROMS) $(TMPDEST)
 	mkdir -p $(TMPDEST)/progs
 	cp progs/*.w7* progs/*.txt progs/*.wfl $(TMPDEST)/progs
 
@@ -131,7 +132,7 @@ install: temp_dest
 	rm -rf $(INSDEST)
 	mv $(TMPDEST) $(INSDIR)
 	rmdir $(TMPDIR)
-	cp $(ROM) $(INSDEST)
+	cp $(ROMS) $(INSDEST)
 	cd $(INSDEST); ./INSTALL
 
 www: _FRC_

@@ -60,6 +60,8 @@ class Wang700_Simulator
 	static final int D13_STEP = 0x08;
 
 	public byte[] _ram;
+	int memsize;
+	int memmask;
 
 	public JMenuItem getXRomMenu(int key) {
 		return new JMenuItem("Not Used", key);
@@ -110,8 +112,6 @@ class Wang700_Simulator
 
 	public class Wang700_UcodeRom {
 		public byte[] _ucode; // raw ucode from file, 64-bit words
-		// right now, the only override is for mem size, so just hardcode
-		// all that.
 
 		public Wang700_UcodeRom(java.io.InputStream img) {
 			// Can't change _ucode after initial setup (i.e. while running).
@@ -744,10 +744,18 @@ class Wang700_Simulator
 		} else {
 			_dbg = null;
 		}
-		// at some point, get these from properties...
-		int memsize = 2048;
 		// might need to search for possible ucode versions???
-		String romfile = "wang720c.rom";
+		String romfile;
+		// at some point, get these from properties...
+		if (false) {
+			romfile = "wang720c.rom";
+			memsize = 2048;
+			memmask = 0x07ff;
+		} else {
+			romfile = "wang700c.rom";
+			memsize = 1024;
+			memmask = 0x03ff;
+		}
 		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
 		if (rom == null) {
 			try {
@@ -1043,7 +1051,7 @@ if (_dbg != null) {
 
 	private void rd_ram_i() {
 		int adr = ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
-		adr &= 0x07ff;
+		adr &= memmask;
 		byte b = _ram[adr];
 		_ram[adr] = 0; //core memory: destructive read
 		ra = (byte)((b >> 4) & 0x0f);
@@ -1052,7 +1060,7 @@ if (_dbg != null) {
 
 	private void wr_ram_i() {
 		int adr = ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
-		adr &= 0x07ff;
+		adr &= memmask;
 		_ram[adr] = (byte)((ra << 4) | rb);
 	}
 
