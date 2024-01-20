@@ -10,7 +10,7 @@ FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
-ROMS = wang720c.rom wang720b.rom wang700c.rom
+ROMS = wang720c.rom wang720b.rom wang720a.rom wang700c.rom
 SPCL = plotter_chrgen.dat
 
 COMMON_CLASSES = \

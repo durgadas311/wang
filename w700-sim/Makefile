@@ -34,6 +34,10 @@ wang720b.rom: ROM720B.txt w700ucode2rom
 	./w700ucode2rom ROM720B.txt
 	mv ROM720B.rom $@
 
+wang720a.rom: ROM720A.txt w700ucode2rom
+	./w700ucode2rom ROM720A.txt
+	mv ROM720A.rom $@
+
 wang700c.rom: ROM700C.txt w700ucode2rom
 	./w700ucode2rom ROM700C.txt
 	mv ROM700C.rom $@
