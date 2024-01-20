@@ -55,9 +55,15 @@ public class w700_fe
 		Wang_UI.setSeries("7");
 		if (model != null) {
 			Wang_UI.getProperties().setProperty("wang700_model", model);
+		} else {
+			model = Wang_UI.getProperties().getProperty("wang700_model");
+			if (model == null) {
+				model = "720C";
+				Wang_UI.getProperties().setProperty("wang700_model", model);
+			}
 		}
 
-		front_end = new JFrame("Wang 700 Advanced Programmable Calculator");
+		front_end = new JFrame("Wang " + model + " Advanced Programmable Calculator");
 		front_end.setIconImage(img);
 
 		Wang_Keys.toggle_on = new ImageIcon(w700_fe.class.getResource("icons/toggle_on.gif"));

@@ -26,9 +26,13 @@ EXE = w700-sim
 w700ucode2rom: w700ucode2rom.c loaducode_txt.o
 	$(CC) $(CFLAGS) -o $@ w700ucode2rom.c loaducode_txt.o
 
-want720c.rom: ROM720C.txt w700ucode2rom
+wang720c.rom: ROM720C.txt w700ucode2rom
 	./w700ucode2rom ROM720C.txt
 	mv ROM720C.rom $@
+
+wang720b.rom: ROM720B.txt w700ucode2rom
+	./w700ucode2rom ROM720B.txt
+	mv ROM720B.rom $@
 
 wang700c.rom: ROM700C.txt w700ucode2rom
 	./w700ucode2rom ROM700C.txt

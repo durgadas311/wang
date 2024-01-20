@@ -746,12 +746,8 @@ class Wang700_Simulator
 		}
 		// might need to search for possible ucode versions???
 		String romfile;
+		// wang700_model is never null here
 		String model = Wang_UI.getProperties().getProperty("wang700_model");
-		if (model == null) {
-			model = "720C";
-			Wang_UI.getProperties().setProperty("wang700_model", model);
-		}
-		// at some point, get these from properties...
 		romfile = "wang" + model.toLowerCase() + ".rom";
 		if (model.matches(".2..")) {
 			memsize = 2048;

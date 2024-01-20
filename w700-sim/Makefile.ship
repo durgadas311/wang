@@ -10,7 +10,7 @@ FONTS = $(notdir $(wildcard ../common/fonts/*.ttf))
 COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
-ROMS = wang720c.rom wang700c.rom
+ROMS = wang720c.rom wang720b.rom wang700c.rom
 SPCL = plotter_chrgen.dat
 
 COMMON_CLASSES = \
@@ -107,7 +107,7 @@ SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
 
 wang700.jar: Release.java Release.class w700_fe.class w700_edit.class w700initProps.class $(ROMS)
 	/bin/echo -e "Main-Class: w700_fe\nSplashScreen-Image: icons/wang700.gif" >Manifest.txt
-	jar cfm $@ Manifest.txt *.class $(ROMS) wang700c.rom icons/*.{gif,png} $(SHIP_DOCS) \
+	jar cfm $@ Manifest.txt *.class $(ROMS) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS))

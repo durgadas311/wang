@@ -22,7 +22,7 @@ class Wang700_Properties extends Wang_Properties
 	JPanel _707host_pn;
 	JPanel _dia_pn;
 	JComboBox<String> _mdl_kb;
-	String[] _mdl_val = new String[] { "700C", "720C" };
+	String[] _mdl_val = new String[] { "700C", "720B", "720C" };
 	JPanel _mdl_pn;
 
 	public Wang700_Properties() {
