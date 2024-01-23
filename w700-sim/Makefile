@@ -42,6 +42,14 @@ wang700c.rom: ROM700C.txt w700ucode2rom
 	./w700ucode2rom ROM700C.txt
 	mv ROM700C.rom $@
 
+wang700b.rom: ROM700B.txt w700ucode2rom
+	./w700ucode2rom ROM700B.txt
+	mv ROM700B.rom $@
+
+wang700a.rom: ROM700A.txt w700ucode2rom
+	./w700ucode2rom ROM700A.txt
+	mv ROM700A.rom $@
+
 clobber: clean
 	rm -f *.class w700_fe w700-dasm Manifest.txt *.jar *.tgz
 	rm -rf $(TMPDIR)

@@ -326,7 +326,14 @@ td.tag {text-align: center;}
 
 </TABLE>
 
-* Two-step codes
+<UL>
+<LI>(*) Two-step codes.
+<LI>(I/O) codes only function on "C" models.
+<LI>DIRECT+100 codes only function on 720 models.
+<LI>(?) All unimplemented codes in the range 08-00 to 15-15
+will map directly to their corresponding codes in the
+range 00-00 to 07-15.
+</UL>
 
 <P><TABLE BORDER>
 <TR><TH>DIRECT prefixes (incl. STORE/RECALL Y)</TH></TR>
@@ -334,7 +341,8 @@ td.tag {text-align: center;}
 	where bb = 10..15 overlaps with aa+1&nbsp;00..05
 	(i.e. normal range for bb is 00..09).
 	Use of the "DIRECT + 100"
-	commands is required to access registers above 09&nbsp;09.
+	commands is usually required to access registers above 09&nbsp;09, although
+	codes such as 11&nbsp;09 (register 119) may also be used.
 	Any code may be used, however END&nbsp;PROG (05&nbsp;12) should be avoided.<BR>
 	</TD></TR>
 </TABLE>
@@ -556,6 +564,7 @@ single-digit number (1..9).
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>08&nbsp;00 through 08&nbsp;15 (I/O) - Random-Access Device I/O</TH></TR>
+<TR><TD COLSPAN=2>I/O codes are only functional on "C" models</TD></TR>
 <TR>
 	<TD COLSPAN=2>
 	Perform block read/write between device address in Y and program memory step in X.
@@ -1123,6 +1132,7 @@ are used as parameters, not carriage movement.
 values are used to move the pen to the desired position where the indicated character
 is drawn. Note, only the first character of a string should be marked as plotted,
 or else each character will be speparated from the last by the X and Y delta.
+Plotting is only available on "B" and "C" models.
 
 <P>The codes highlighted gray indicate deviation from the normal shifted mode of the
 character but are otherwise still aligned with the Selectric codes.
