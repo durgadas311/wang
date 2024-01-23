@@ -23,6 +23,9 @@ class Wang600_Properties extends Wang_Properties
 	JTextArea _607host_tx;
 	JPanel _607host_pn;
 	JPanel _dia_pn;
+	JComboBox<String> _mdl_kb;
+	String[] _mdl_val = new String[] { "600-2TP", "600-6TP", "600-14TP" };
+	JPanel _mdl_pn;
 
 	public Wang600_Properties() {
 		try {
@@ -39,6 +42,10 @@ class Wang600_Properties extends Wang_Properties
 		processDefaults();
 
 		// Edit Properties...
+		_mdl_kb = new JComboBox<String>(_mdl_val);
+		_mdl_pn = new JPanel();
+		_mdl_pn.add(new JLabel("Model:"));
+		_mdl_pn.add(_mdl_kb);
 		_d12_cb = new JCheckBox("Enable Column 12");
 		_cdp_cb = new JCheckBox("Center DP");
 		_sp1_cb = new JCheckBox("Enable PanaPlex '1'");
@@ -79,6 +86,9 @@ class Wang600_Properties extends Wang_Properties
 		s.insets.left = 0;
 		s.insets.right = 0;
 		s.anchor = GridBagConstraints.WEST;
+		gridbag.setConstraints(_mdl_pn, s);
+		_dia_pn.add(_mdl_pn);
+		s.gridy += 1;
 		gridbag.setConstraints(_d12_cb, s);
 		_dia_pn.add(_d12_cb);
 		s.gridy += 1;
@@ -178,12 +188,35 @@ class Wang600_Properties extends Wang_Properties
 		}
 	}
 
+	private void getComboSelection(JComboBox<String> kb, String prop) {
+		int x;
+		String m = null;
+		x = kb.getSelectedIndex();
+		if (x >= 0) {
+			m = _mdl_val[x];
+		}
+		setProperty(prop, m);
+	}
+
+	private void setComboSelection(JComboBox<String> kb, String prop) {
+		int x;
+		String m = getProperty(prop);
+		if (m == null) return;
+		for (x = 0; x < _mdl_val.length; ++x) {
+			if (_mdl_val[x].equals(m)) {
+				kb.setSelectedIndex(x);
+				return;
+			}
+		}
+	}
+
 	public boolean editPreferences() {
 		_cdp_cb.setSelected(getBoolean("wang600_centerDP"));
 		_d12_cb.setSelected(getBoolean("wang600_digit12"));
 		_sp1_cb.setSelected(getBoolean("wang600_special1"));
 		boolean wfl = (getProperty("wang_function_labels") != null);
 		_wfl_cb.setSelected(wfl);
+		setComboSelection(_mdl_kb, "wang600_model");
 		String f = getProperty("wang600_displayfont");
 		if (f.equals(_f_rb1.getActionCommand())) {
 			_f_rb1.setSelected(true);
@@ -204,6 +237,7 @@ class Wang600_Properties extends Wang_Properties
 
 		// TBD: change parameters and restart?
 		// TBD: do validation?
+		getComboSelection(_mdl_kb, "wang600_model");
 		ButtonModel bm = _f_bg.getSelection();
 		setProperty("wang600_displayfont", bm.getActionCommand());
 		setProperty("wang600_digit12", Boolean.toString(_d12_cb.isSelected()));

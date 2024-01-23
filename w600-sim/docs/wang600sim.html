@@ -10,6 +10,12 @@ The following parameters on the "Preferences" window control certain aspects of 
 The corresponding parameter names in the rc file are listed in square brackets.
 
 <DL>
+<DT>Model<DD>[wang600_model]
+	Selects the model (memory size) of the simulator. 600-2TP,
+	600-6TP, and 600-14TP are recogninzed/allowed.
+	While the calculator does prevent entry of an out-of-bounds
+	P.C., registers are not protected and it is possible to
+	overrun user memory and crash the calculator.
 <DT>Enable Column 12<DD>[wang600_digit12]
 	Enables display of digit column 12,
 	which was not connected in the original hardware. Default: off.

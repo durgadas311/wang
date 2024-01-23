@@ -24,12 +24,28 @@ public class w600_fe
 
 	public static void main(String[] args) {
 		Wang_SplashScreen.starting();
+		boolean test = false;
+		boolean dbg = false;
+		boolean stop = false;
+		String model = null;
 
 		GridBagLayout gridbag = new GridBagLayout();
 
-		boolean test = (args.length > 0 && args[0].compareTo("-t") == 0);
-		boolean dbg = (args.length > 0 && args[0].compareTo("-i") == 0);
-		boolean stop = (args.length > 0 && args[0].compareTo("-I") == 0);
+		for (String arg : args) {
+			if (arg.equals("-t")) {
+				test = true;
+			} else if (arg.equals("-i")) {
+				dbg = true;
+			} else if (arg.equals("-I")) {
+				stop = true;
+			} else if (arg.equalsIgnoreCase("600-2TP") ||
+					arg.equalsIgnoreCase("600-6TP") ||
+					arg.equalsIgnoreCase("600-14TP")) {
+				model = arg.toUpperCase();
+			} else {
+				System.err.format("Unrecognized arg \"%s\"\n", arg);
+			}
+		}
 
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
@@ -44,8 +60,17 @@ public class w600_fe
 		Wang_UI.setIcon(new ImageIcon(img));
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
 		Wang_UI.setSeries("6");
+		if (model != null) {
+			Wang_UI.getProperties().setProperty("wang600_model", model);
+		} else {
+			model = Wang_UI.getProperties().getProperty("wang600_model");
+			if (model == null) {
+				model = "600-14TP";
+				Wang_UI.getProperties().setProperty("wang600_model", model);
+			}
+		}
 
-		front_end = new JFrame("Wang 600 Advanced Programmable Calculator");
+		front_end = new JFrame("Wang " + model + " Advanced Programmable Calculator");
 		front_end.setIconImage(img);
 
 		front_end.setLayout(gridbag);

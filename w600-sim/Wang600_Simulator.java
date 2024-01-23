@@ -68,6 +68,8 @@ class Wang600_Simulator
 	static final int D20_DEGREES = 0x01;
 	static final int D21_PRT_ON = 0x02;
 
+	int memsize;
+	int memmask;
 	public byte[] _ram;
 	public byte[] _xrom;
 
@@ -812,9 +814,23 @@ class Wang600_Simulator
 		} else {
 			_dbg = null;
 		}
-		// at some point, get these from properties...
-		int memsize = 2048; // could be based on Model (2TP, 6TP, 14TP, ...)
+		memsize = 2048; // could be based on Model (2TP, 6TP, 14TP, ...)
+		memmask = 0xfff; // nibble address, not byte addr
 		String romfile = "wang600.rom";
+		String model = Wang_UI.getProperties().getProperty("wang600_model");
+		if (model == null) {
+			model = "600-12TP";
+			Wang_UI.getProperties().setProperty("wang600_model", model);
+		}
+		if (model.equals("600-14TP")) {
+			// memsize already set
+		} else if (model.equals("600-6TP")) {
+			memsize = 1024;
+			memmask = 0x7ff;
+		} else if (model.equals("600-2TP")) {
+			memsize = 512;
+			memmask = 0x3ff;
+		}
 		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
 		if (rom == null) {
 			try {
@@ -1115,7 +1131,7 @@ class Wang600_Simulator
 
 	private void rd_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		//adr &= ram_mask;
+		adr &= memmask;
 		boolean odd = ((adr & 1) != 0);
 		adr >>= 1;
 		byte b = _ram[adr];
@@ -1138,7 +1154,7 @@ class Wang600_Simulator
 
 	private void wr_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		//adr &= ram_mask;
+		adr &= memmask;
 		byte a = ca;
 		byte b = _ram[adr >> 1];
 		if ((adr & 1) != 0) {
