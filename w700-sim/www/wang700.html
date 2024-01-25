@@ -33,11 +33,21 @@ electronic computers and business machines.
 
 <P>All known models are supported (700A, 700B, 700C, 720A, 720B, 720C).
 The JAVA command line may add the model string to select a model, or the
-Edit->Preferences menu may be used to set the model in the properties
+"Edit"/"Preferences" menu may be used to set the model in the properties
 file. The default model is 720C. Note that these models are implemented
 by taking the 720C microcode and reducing functionality to meet the
 limits of the desired model. The original microcode used on models other
 than 720C is not available.
+
+<P><TABLE BORDER>
+<TR><TH>Base Model</TH><TH>A</TH><TH>B</TH><TH>C</TH></TR>
+<TR><TD>700</TD><TD>960 steps<BR>120 regs</TD><TD>Plotting Devs</TD><TD>Storage Devs</TD></TR>
+<TR><TD>720</TD><TD>1984 steps<BR>248 regs</TD><TD>Plotting Devs</TD><TD>Storage Devs</TD></TR>
+</TABLE>
+
+<P>Models A, B, and C were cumulative, where
+B contains all of A plus Plotting and
+C contains all of A and B plus Storage I/O.
 
 <P>Several peripheral/add-on devices are supported,
 in addition to the (normally) built-in tape drive. These include:

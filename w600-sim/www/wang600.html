@@ -36,11 +36,27 @@ real microcode, it can be used to discover and understand
 the behavior of the original Wang 600's (up to the limitations
 of the hardware simulation).
 
-<P>A specific model may be specified, which controls the amount of memory
+<P>A particular model may be specified, which controls the amount of memory
 available. Model strings "600-2TP", "600-6TP", and "600-14TP" are supported.
 Either the model string may be added to the JAVA command line, or the
-Edit->Preferences menu may be used to select a model to be set in
-the properties file.
+"Edit"/"Preferences" menu may be used to select a model to be set in
+the properties file. Note that all models include the Tape and Printer options,
+there is no evidence (photos) that any machines were shipped without both.
+Also note that there are 16 registers that are not shared with program steps.
+Each register consumes 8 program steps. There is also no evidence that different
+models had different features (microcode).
+
+<P><TABLE BORDER> 
+<TR><TH>Model</TH><TH>Memory</TH><TH>Space</TH></TR>
+<TR><TD>600-2TP</TD><TD>1Kx4</TD><TD>312 steps<BR>55 regs</TD></TR>
+<TR><TD>600-6TP</TD><TD>2Kx4</TD><TD>824 steps<BR>119 regs</TD></TR>
+<TR><TD>600-14TP</TD><TD>4Kx4</TD><TD>1848 steps<BR>247 regs</TD></TR>
+</TABLE>
+
+<P>Note that the Wang 600 does not prevent overflow of register space,
+which then runs into system memory. While writing to this space is
+usually disastrous to normal operation of the calculator, reading of
+that space can be quite informative about how the calculator works.
 
 <P>Several peripheral/add-on devices are supported,
 in addition to the (normally) built-in printer and
