@@ -812,7 +812,7 @@ class Wang700_Display extends Wang_Display
 		if (e.getSource() == timer) {
 			// only happens in main...
 			flasher();
-			_other.flasher();
+			//_other.flasher();
 		} else {
 			// what was it? e.getSource().stop()???
 		}
