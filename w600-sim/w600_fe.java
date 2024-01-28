@@ -6,6 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
+import java.util.concurrent.Semaphore;
 
 import java.awt.print.*;
 import javax.print.attribute.*;
@@ -989,7 +990,7 @@ System.err.println("sync error");
 }
 
 class Wang600_Display extends Wang_Display
-		implements ActionListener
+		implements ActionListener, Runnable
 {
 	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
@@ -1006,6 +1007,7 @@ class Wang600_Display extends Wang_Display
 	private boolean flashing;
 	private boolean state;
 	private javax.swing.Timer timer;
+	private Semaphore sem;
 
 	public Wang_ErrorLight getOv() { return pe; }
 	public Wang_ErrorLight getErr() { return me; }
@@ -1055,7 +1057,8 @@ class Wang600_Display extends Wang_Display
 	public void actionPerformed(ActionEvent e) {
 		// verify the action is for the timer?
 		if (e.getSource() == timer) {
-			flasher();
+			// flasher();
+			sem.release();
 //		} else if (e.getSource() == timer2) {
 //			blanker();
 		} else {
@@ -1070,6 +1073,8 @@ class Wang600_Display extends Wang_Display
 		flashing = false;
 		state = false;
 		timer = new Timer(100, this);
+		sem = new Semaphore(0);
+		new Thread(this).start();
 
 		setLayout(new FlowLayout());
 		disp = new JLabel(blank, SwingConstants.CENTER);
@@ -1195,6 +1200,22 @@ System.err.println("IOException for " + f);
 		String s = new String(disp_a);
 		disp.setText(s);
 		repaint();
+	}
+
+	public void run() {
+		Rectangle r = null;
+		while (true) {
+			try {
+				sem.acquire();
+			} catch (Exception ee) {}
+			if (r == null) {
+				r = disp.getBounds(null);
+System.err.format("disp %d %d %d %d\n", r.x, r.y, r.width, r.height);
+			}
+			flasher();
+			//disp.paintImmediately(r);
+			disp.paint(disp.getGraphics());
+		}
 	}
 }
 
