@@ -816,7 +816,6 @@ class Wang600_Simulator
 		}
 		memsize = 2048; // could be based on Model (2TP, 6TP, 14TP, ...)
 		memmask = 0xfff; // nibble address, not byte addr
-		String romfile = "wang600.rom";
 		String model = Wang_UI.getProperties().getProperty("wang600_model");
 		if (model == null) {
 			model = "600-12TP";
@@ -830,6 +829,10 @@ class Wang600_Simulator
 		} else if (model.equals("600-2TP")) {
 			memsize = 512;
 			memmask = 0x3ff;
+		}
+		String romfile = Wang_UI.getProperties().getProperty("wang600_ucode");
+		if (romfile == null) {
+			romfile = "wang600.rom";
 		}
 		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
 		if (rom == null) {

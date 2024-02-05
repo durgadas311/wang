@@ -32,6 +32,14 @@ public class w600_fe
 
 		GridBagLayout gridbag = new GridBagLayout();
 
+		Wang_UI.setProperties(new Wang600_Properties());
+		if (Wang_UI.getProperties().isNew()) {
+			// since this file should have been create during INSTALL,
+			// go ahead and nag the user.
+			Wang_UI.warning("Load Setup",
+				"Wang600_Properties file not found - using defaults");
+		}
+
 		for (String arg : args) {
 			if (arg.equals("-t")) {
 				test = true;
@@ -43,6 +51,10 @@ public class w600_fe
 					arg.equalsIgnoreCase("600-6TP") ||
 					arg.equalsIgnoreCase("600-14TP")) {
 				model = arg.toUpperCase();
+			} else if (arg.matches(".*=.*")) {
+				String[] ss = arg.split("=");
+				Wang_UI.getProperties().setProperty("wang600_" + ss[0],
+					ss[1]);
 			} else {
 				System.err.format("Unrecognized arg \"%s\"\n", arg);
 			}
@@ -50,14 +62,6 @@ public class w600_fe
 
 		java.net.URL url = w600_fe.class.getResource("icons/wang600-48x48.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
-
-		Wang_UI.setProperties(new Wang600_Properties());
-		if (Wang_UI.getProperties().isNew()) {
-			// since this file should have been create during INSTALL,
-			// go ahead and nag the user.
-			Wang_UI.warning("Load Setup",
-				"Wang600_Properties file not found - using defaults");
-		}
 		Wang_UI.setIcon(new ImageIcon(img));
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
 		Wang_UI.setSeries("6");
