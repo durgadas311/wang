@@ -748,13 +748,16 @@ class Wang700_Simulator
 		String romfile;
 		// wang700_model is never null here
 		String model = Wang_UI.getProperties().getProperty("wang700_model");
-		romfile = "wang" + model.toLowerCase() + ".rom";
 		if (model.matches(".2..")) {
 			memsize = 2048;
 			memmask = 0x07ff;
 		} else {
 			memsize = 1024;
 			memmask = 0x03ff;
+		}
+		romfile = Wang_UI.getProperties().getProperty("wang700_ucode");
+		if (romfile == null) {
+			romfile = "wang" + model.toLowerCase() + ".rom";
 		}
 		java.io.InputStream rom = this.getClass().getResourceAsStream(romfile);
 		if (rom == null) {
