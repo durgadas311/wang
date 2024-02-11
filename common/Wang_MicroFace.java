@@ -4,8 +4,7 @@
 import java.awt.*;
 import javax.swing.*;
 
-class Wang_MicroFace
-		implements Wang_InputDevice
+class Wang_MicroFace implements Wang_GroupIODevice
 {
 	final String ident = "$Id: Wang_MicroFace.java,v 1.6 2014/01/26 14:52:57 drmiller Exp $";
 

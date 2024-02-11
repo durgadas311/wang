@@ -815,7 +815,7 @@ class Wang600_Printer
 	}
 }
 
-class Wang600_Model630 implements Wang_CN36_Type2 {
+class Wang600_Model630 implements Wang_RandIODevice {
 	private int _cmd;
 	private int _adr;
 	private boolean _wr;
@@ -912,6 +912,13 @@ class Wang600_Model630 implements Wang_CN36_Type2 {
 		disk_open();
 	}
 
+	public boolean start_cn36(int iob, int c) {
+		// TODO: implement device selection.
+		// ...
+		// Wang_UI.getCore().replyIO(iob, GO);
+		return false;
+	}
+
 	public void do_ack(int iob) {
 		// only respond to ACK if in a command already
 		// and don't respond to an ACK of an ACK
@@ -991,6 +998,8 @@ System.err.println("sync error");
 		_wr = false;
 		// cancel anything...
 	}
+
+	public int getGLRN() { return 0; }
 }
 
 class Wang600_Display extends Wang_Display

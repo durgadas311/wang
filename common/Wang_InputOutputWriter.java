@@ -7,7 +7,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 class Wang_InputOutputWriter extends IBM_Selectric
-		implements Wang_InputDevice, KeyListener
+		implements Wang_GroupIODevice, KeyListener
 {
 	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.21 2014/01/26 14:52:57 drmiller Exp $";
 

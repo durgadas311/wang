@@ -19,7 +19,7 @@ COMMON_CLASSES = \
 		Wang_PropertyEditor.class \
 		Wang_CharConverter.class \
 		Wang_Indicator.class \
-		Wang_InputDevice.class \
+		Wang_GroupIODevice.class \
 		Wang_CN36_Bus.class \
 		Wang_Core.class \
 		Wang_UI.class \
@@ -38,7 +38,7 @@ COMMON_CLASSES = \
 		Wang_MicroFace.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
-		Wang_CN36_Type2.class \
+		WangRandIODevice.class \
 		Wang_Display.class \
 		Wang_Help.class \
 		Wang_Keyboards.class \

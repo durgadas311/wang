@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.net.*;
 
 class Wang_Teletype extends ASR33_Teletype
-		implements Wang_InputDevice, ActionListener
+		implements Wang_GroupIODevice, ActionListener
 {
 	final String ident = "$Id: Wang_Teletype.java,v 1.9 2014/01/26 14:52:57 drmiller Exp $";
 

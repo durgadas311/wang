@@ -1,9 +1,37 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_InputDevice.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
+// Copyright (c) 2011,2024 Douglas Miller
 
 
-// e.g. Group 1/2 Devices attached to a Wang "CN-36" port (Input only)
-interface Wang_InputDevice
+// e.g. Group 1/2 Devices attached to a Wang "CN-36" port (typically Input only)
+//
+// When the calculator executes GROUP [12] XX-XX it sets up IOB and
+// then strobes XX-XX out to select the device, then halts. 
+//
+// Mode   GROUP   IOB
+// STOP     1     100	(keyboard mode)
+// RUN      1     110	(executing program)
+// STOP     2     101	(keyboard mode)
+// RUN      2     111	(executing program)
+//
+// Device then controls the calculator input and typically issues a
+// GO command to resume normal operation. Device may also control
+// LEARN mode (getGLRN()), typically used to force new code/data into
+// program memory.
+//
+// When the calulator executes the GROUP [12] XX-XX code, the
+// simulator ends up calling start_cn36() for all registered
+// devices. The first one returning true  becomes the chosen
+// (currently selected) device.
+//
+// do_ack() is called by the calculator to acknowledge each byte
+// sent by the device (using Wang_UI.getCore().replyIO()).
+//
+// Devices may use the constants "GO", ... to send those commands
+// to the calculator, while still maintaining independence from
+// 700 Series vs. 600 Series code differences. Example:
+//	Wang_UI.getCore().replyIO(iob, GO);
+// Note that the 'iob' parameter is ignored.
+
+interface Wang_GroupIODevice
 {
 	static String Model = "00";
 	static String Description = "Unknown";
@@ -43,11 +71,6 @@ interface Wang_InputDevice
 	// This represents the "negotiation" protocol when the Group I/O
 	// is first issued.
 	boolean start_cn36(int iob, int c);
-
-	// Process output byte in context of Wang Input Device.
-	// There are typically only ACKs sent in response to
-	// codes sent from peripheral device.
-	void do_dev(int iob, int c);
 
 	// Process ACK for previous send
 	void do_ack(int iob);

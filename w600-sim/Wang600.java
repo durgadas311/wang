@@ -6,7 +6,7 @@ class Wang600 {
 	public static Wang_Printer Prt;
 	public static Wang_TapeDrive Tape;
 	public static Wang_OutputDevice CN24;
-	public static Wang_CN36_Type2 M630;
+	public static Wang_RandIODevice M630;
 	public static Wang_PaperTapeReader M603;
 	public static Wang_MicroFace M605;
 	public static Wang_Keyboard Kbd;

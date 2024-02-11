@@ -702,26 +702,26 @@ class Wang700_Simulator
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
 		// do some validation on iob?
-		if (rep == Wang_InputDevice.GO) {
+		if (rep == Wang_GroupIODevice.GO) {
 			rep = 0x5e; // GO
-		} else if (rep == Wang_InputDevice.START) {
+		} else if (rep == Wang_GroupIODevice.START) {
 			rep = 0x4c; // WRITE ALPHA
-		} else if (rep == Wang_InputDevice.END) {
+		} else if (rep == Wang_GroupIODevice.END) {
 			rep = 0x4d; // END ALPHA
-		} else if (rep == Wang_InputDevice.EOT) {
+		} else if (rep == Wang_GroupIODevice.EOT) {
 			rep = 0x00; // SR 0000
-		} else if (rep == Wang_InputDevice.DP) {
+		} else if (rep == Wang_GroupIODevice.DP) {
 			rep = 0x7c; // Decimal Point
-		} else if (rep == Wang_InputDevice.CHG_SIGN) {
+		} else if (rep == Wang_GroupIODevice.CHG_SIGN) {
 			rep = 0x7b; // Decimal Point
-		} else if (rep >= Wang_InputDevice.E0 && rep <= Wang_InputDevice.E9) {
-			rep = 0x70 | (rep - Wang_InputDevice.E0); // Digit
-		} else if (rep == Wang_InputDevice.SET_EXP) {
+		} else if (rep >= Wang_GroupIODevice.E0 && rep <= Wang_GroupIODevice.E9) {
+			rep = 0x70 | (rep - Wang_GroupIODevice.E0); // Digit
+		} else if (rep == Wang_GroupIODevice.SET_EXP) {
 			rep = 0x7a;
-		} else if (rep == Wang_InputDevice.CLR_DSP) {
+		} else if (rep == Wang_GroupIODevice.CLR_DSP) {
 			rep = 0x7f;	// CLEAR X
-		} else if (rep >= Wang_InputDevice.SR0 && rep < Wang_InputDevice.SREND) {
-			rep = 0x00 | (rep - Wang_InputDevice.SR0);
+		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
+			rep = 0x00 | (rep - Wang_GroupIODevice.SR0);
 		}
 		pressKey(rep);
 	}
@@ -942,10 +942,14 @@ class Wang700_Simulator
 	}
 
 	private void dev_reset() {
+		// TODO: does this really de-select device?
+		// need to keep _cn36 for subsequent I/O commands.
 		_cn36 = null;
 		if (Wang700.CN24 != null) {
 			Wang700.CN24.reset();
 		}
+		// TODO: needs to be more generic?
+		// M730 is also on Wang_CN36_Bus.
 		Wang700.M730.reset();
 		Wang_CN36_Bus.resetCN36();
 	}
@@ -957,7 +961,7 @@ class Wang700_Simulator
 			if (Wang700.CN24 != null) {
 				Wang700.CN24.do_cn24(c);
 			}
-		} else if (iob == 2 || iob == 3) { // CN36 Model 630
+		} else if (iob == 2 || iob == 3) { // CN36 "I/O" commands
 try {
 			Wang700.M730.do_dev(iob, c);
 } catch (Exception ee) {
@@ -1073,7 +1077,7 @@ if (_dbg != null) {
 	int lastx;
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_InputDevice _cn36;	// current active device
+	private Wang_GroupIODevice _cn36;	// current active device
 
 	private void refresh(boolean canSleep) {
 		short x = (short)(((s & 2) << 7) | (n << 4) | rb);

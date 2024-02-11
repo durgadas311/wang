@@ -347,9 +347,30 @@ There is also a "Plotter" menu that allows setting the plot area, pen color,
 and returning the plot carriage to the "home" position.
 Future enhancements will include control over the paper size.
 
-<A ID="model630"><H3>630 Fixed/Removable Disk</H3></A>
+<A ID="randIO"><H3>External Storage (Random Access I/O)</H3></A>
 
-This device is simulated by a single file that supports the entire
+<P>Devices that use the I/O command to transfer data must also
+be selected (enabled) ahead of time using a GROUP I/O command sequence.
+Each device has a unique set of values, one of which must be used as
+the second step of a GROUP 1 or GROUP 2 command, depending on the device
+and configuration. The device answers the GROUP I/O command immediately with
+a GO command, but retains selection of the hardware until another GROUP I/O
+command is executed. Once selected, a device will respond to I/O 13-xx commands,
+otherwise it ignores them.
+
+<A ID="model608"><H4>608/618 Extended Memory</H4></A>
+
+<P>GROUP 2 00-xx where "xx" is the value configured by the switches
+on the device. Rather than actually support multiple, separate, devices,
+the simulator implements all 16 possible devices, with each device
+configured for 0 to 4K of memory, in 1K chunks.
+
+<P>Model 608 employed core memory with unknown configuration options.
+Model 618 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
+
+<A ID="model630"><H4>630 Fixed/Removable Disk</H4></A>
+
+<P>This device is simulated by a single file that supports the entire
 16M address range of the device protocol. So there is not a separate removable
 disk, but simply a single image that may be read/written as a whole.
 Selecting the "630 Disk" option from the "Devices" menu will pop-up
@@ -363,8 +384,8 @@ Unwritten portions of the file will read back as zero.
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
 <TR><TD COLSPAN=2>End Of Tape is signaled by S&amp;R&nbsp;00 and GO</TD></TR>
 </TABLE>
 

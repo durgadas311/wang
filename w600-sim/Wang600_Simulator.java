@@ -775,26 +775,26 @@ class Wang600_Simulator
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
 		// do some validation on iob?
-		if (rep == Wang_InputDevice.GO) {
+		if (rep == Wang_GroupIODevice.GO) {
 			rep = 0x83; // GO
-		} else if (rep == Wang_InputDevice.START) {
+		} else if (rep == Wang_GroupIODevice.START) {
 			rep = 0x92; // ALPHA
-		} else if (rep == Wang_InputDevice.END) {
+		} else if (rep == Wang_GroupIODevice.END) {
 			rep = 0x22; // end alpha
-		} else if (rep == Wang_InputDevice.EOT) {
+		} else if (rep == Wang_GroupIODevice.EOT) {
 			rep = 0xa0; // f(0)
-		} else if (rep == Wang_InputDevice.DP) {
+		} else if (rep == Wang_GroupIODevice.DP) {
 			rep = 0x0a; // Decimal Point
-		} else if (rep == Wang_InputDevice.CHG_SIGN) {
+		} else if (rep == Wang_GroupIODevice.CHG_SIGN) {
 			rep = 0x0c; // Change Sign (make negative)
-		} else if (rep >= Wang_InputDevice.E0 && rep <= Wang_InputDevice.E9) {
-			rep = 0x00 | (rep - Wang_InputDevice.E0); // Digit
-		} else if (rep == Wang_InputDevice.SET_EXP) {
+		} else if (rep >= Wang_GroupIODevice.E0 && rep <= Wang_GroupIODevice.E9) {
+			rep = 0x00 | (rep - Wang_GroupIODevice.E0); // Digit
+		} else if (rep == Wang_GroupIODevice.SET_EXP) {
 			rep = 0x0b;
-		} else if (rep == Wang_InputDevice.CLR_DSP) {
+		} else if (rep == Wang_GroupIODevice.CLR_DSP) {
 			rep = 0x0f;
-		} else if (rep >= Wang_InputDevice.SR0 && rep < Wang_InputDevice.SREND) {
-			rep = 0xa0 | (rep - Wang_InputDevice.SR0);
+		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
+			rep = 0xa0 | (rep - Wang_GroupIODevice.SR0);
 		}
 		pressKey(rep);
 	}
@@ -1174,7 +1174,7 @@ class Wang600_Simulator
 	int lastx;
 
 	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_InputDevice _cn36;	// current active device
+	private Wang_GroupIODevice _cn36;	// current active device
 
 	private void refresh(boolean canSleep) {
 		short x = (short)((n << 4) | rb);

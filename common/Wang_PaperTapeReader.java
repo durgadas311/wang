@@ -5,8 +5,7 @@ import java.awt.*;
 import java.io.*;
 import javax.swing.*;
 
-class Wang_PaperTapeReader
-		implements Wang_InputDevice
+class Wang_PaperTapeReader implements Wang_GroupIODevice
 {
 	final String ident = "$Id: Wang_PaperTapeReader.java,v 1.9 2014/01/26 14:52:57 drmiller Exp $";
 
