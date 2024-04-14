@@ -1,7 +1,8 @@
 # TODO: add Wang 700 Motherboard? ./wang700schematics/motherboard/Makefile...
 
 SCHEMS = kicad/5929-core-drive/5929-core-drive.pdf \
-	kicad/5969-wire-weave-rom/5969-wire-weave-rom.pdf
+	kicad/5969-wire-weave-rom/5969-wire-weave-rom.pdf \
+	kicad/5938-wire-weave-rom/5938-wire-weave-rom.pdf
 
 DOCS = wang_part_numbers.txt WangMagneticMemory.pdf
 
