@@ -3,9 +3,9 @@
 SCHEMS = kicad/5929-core-drive/5929-core-drive.pdf \
 	kicad/5969-wire-weave-rom/5969-wire-weave-rom.pdf
 
-TXTS = wang_part_numbers.txt
+DOCS = wang_part_numbers.txt WangMagneticMemory.pdf
 
-SHIPS = $(SCHEMS) $(TXTS)
+SHIPS = $(SCHEMS) $(DOCS)
 
 all:
 
