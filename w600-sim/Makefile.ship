@@ -110,3 +110,8 @@ wang600setup.jar: w600initProps.class
 	jar cfm $@ Manifest.txt w600initProps.class \
 		Wang_UI.class Wang_Properties.class Wang600_Properties.class \
 		Wang_PropertyEditor.class icons/setup.icns 
+
+DASM = dw600.o
+
+ucorphans: ucorphans.o $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(DASM)
