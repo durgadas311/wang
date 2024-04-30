@@ -13,6 +13,9 @@ xcode: xcode.o xcode-1.o xcode-2.o
 zcode: zcode.o xcode-1.o xcode-2.o
 	$(CC) -o $@ $^
 
+wcode: wcode.o xcode-1.o xcode-2.o
+	$(CC) -o $@ $^
+
 xcode-%.c: wire-rom-%.txt romerr.awk
 	awk -f romerr.awk -v tag=xcode_$* wire-rom-$*.txt >$@
 
