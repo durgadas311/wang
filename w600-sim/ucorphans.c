@@ -31,13 +31,17 @@ int main(int argc, char **argv) {
 	int adr;
 	int x;
 	int t;
+	int zero = 0;
 	extern char *optarg;
 	extern int optind;
 
-	while ((x = getopt(argc, argv, "t:")) != EOF) {
+	while ((x = getopt(argc, argv, "t:z")) != EOF) {
 		switch(x) {
 		case 't':
 			show = strtoul(optarg, NULL, 0);
+			break;
+		case 'z':
+			++zero;
 			break;
 		}
 	}
@@ -92,7 +96,7 @@ int main(int argc, char **argv) {
 	}
 
 	for (x = 0; x < ROM_SIZE; ++x) {
-		if (ucode[x] != 0UL && calls[x] == 0) {
+		if (calls[x] == 0 && (zero || ucode[x] != 0UL)) {
 			t = 0;
 			adr = x;
 			do {
