@@ -115,3 +115,6 @@ DASM = dw600.o
 
 ucorphans: ucorphans.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
+
+ucdis: ucdis.o $(DASM)
+	$(CC) $(CFLAGS) -o $@ $< $(DASM)
