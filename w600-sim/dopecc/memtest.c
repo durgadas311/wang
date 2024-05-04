@@ -13,28 +13,27 @@ typedef unsigned long u64;
 /*
 Use register 15-15 for results.
 
-000: 0 + 0 ->[Zo,CC]; RESET; jump 010
+000: 0 + 0 ->[Zo,CC]; RESET; jump 02c
 
 // set test results in 15-15...
 bad:
-001: CA = 0 + 0 ->[Zo,CC]; mem(15,15,1) = CA; jump 002 // "0"
+001: CA = 0 + 0 - 1 ->[Zo,CC]; mem(15,15,1) = CA; jump 002 // "_"
 002: CA = T + 0 ->[Zo,CC]; mem(15,15,2) = CA; jump 003 // adr hi
 003: CA = U + 0 ->[Zo,CC]; mem(15,15,3) = CA; jump 004 // adr mid
 004: CA = V + 0 ->[Zo,CC]; mem(15,15,4) = CA; jump 005 // adr lo
-005: CA = 0 + 0 ->[Zo,CC]; mem(15,15,5) = CA; jump 006 // "0"
+005: CA = 0 + 0 - 1 ->[Zo,CC]; mem(15,15,5) = CA; jump 006 // "_"
 006: CA = KB + 0 ->[Zo,CC]; mem(15,15,6) = CA; jump 007 // seed
-007: CA = 0 + 0 ->[Zo,CC]; mem(15,15,7) = CA; jump 008 // "0"
+007: CA = 0 + 0 - 1 ->[Zo,CC]; mem(15,15,7) = CA; jump 008 // "_"
+008: CA = S + 0 ->[Zo,CC]; mem(15,15,8) = CA; jump 009 // syndrome
+009: CA = 0 + 0 - 1 ->[Zo,CC]; mem(15,15,9) = CA; jump 00a // "_"
 // display refresh code... until PRIME
-008: V = V + 0 + 1 ->[Zo,CC]; jump 009
-009: 0 + 0 ->[Zo,CC]; CA = mem(15,15,V), CB = rom(15,15,V); jump 00c
-// start memory test, "seed" is in KB
-00a: KA = KB + 0; call 024 // subr2 // next seed #
-00b: KB = KA + 0; jump 010
+00a: V = V + 0 + 1 ->[Zo,CC]; jump 00b
+00b: 0 + 0 ->[Zo,CC]; CA = mem(15,15,V), CB = rom(15,15,V); jump 00c
 // continue display refresh
 00c: U = U + 0 + 1 ->[Zo,CC,SC]; jump 00c[CC:]
 00d: U = U + 0 + 1 ->[Zo,CC,SC]; jump 00c[CC:]
 00e: T = T + 0 + 1 ->[Zo,CC,SC]; jump 00d[CC:]
-00f: 0 + 0 ->[Zo,CC]; jump 008
+00f: 0 + 0 ->[Zo,CC]; jump 00a
 //
 010: KA = KB + 0 ->[Zo,CC]; call 026 // zero
 011: 0 + 0; jump 012
@@ -44,7 +43,7 @@ bad:
 015: KA = KB + 0; jump 016 // verify using seed from KB
 016: 0 + 0; call 026 // zero
 017: 0 + 0; CA = mem(T,U,V); jump 018 <----------+
-018: KA ^ CA ->[Zo,CC]; jump 01a[:Zo]            |
+018: S = KA ^ CA ->[Zo,CC]; jump 01a[:Zo]        |
 019:                                             |
 01a: 0 + 0; jump 001                             |
 01b: 0 + 0; jump 01c                             |
@@ -67,31 +66,32 @@ zero:
 028: 0 + 0; return
 029: V = 0 + 0 ->[Zo,CC]; return	*
 02a: KA = 0 + 0; return
+02b:
+02c: KA = KB + 0; call 024 // subr2 // next seed #
+02d: KB = KA + 0; jump 010
 */
 
 u64 ucode[2048] = {
 //                  a     m     s
 //            a b z o a b o k s u       j j
 //            i i o p c c p k t b   jad h l
-[0x000]=UCODE(0,0,0,0,0,0,0,0,9,0,0x008,1,0),
+[0x000]=UCODE(0,0,0,0,0,0,0,0,9,0,0x02c,0,0),
 
-[0x001]=UCODE(0,0,6,0,0,0,3,1,0,0,0x000,1,0),
+[0x001]=UCODE(0,0,6,1,0,1,3,1,0,0,0x000,1,0), // blank
 [0x002]=UCODE(1,0,6,0,1,0,3,2,0,0,0x000,1,1),
 [0x003]=UCODE(2,0,6,0,1,0,3,3,0,0,0x004,0,0),
 [0x004]=UCODE(3,0,6,0,1,0,3,4,0,0,0x004,0,1),
-[0x005]=UCODE(0,0,6,0,0,0,3,5,0,0,0x004,1,0),
+[0x005]=UCODE(0,0,6,1,0,1,3,5,0,0,0x004,1,0), // blank
 [0x006]=UCODE(5,0,6,0,1,0,3,6,0,0,0x004,1,1),
-[0x007]=UCODE(0,0,6,0,0,0,3,7,0,0,0x008,0,0),
-[0x008]=UCODE(3,0,3,1,1,0,0,0,0,0,0x008,0,1), // refresh loop
-[0x009]=UCODE(0,0,0,0,0,0,5,15,0,0,0x00c,0,0), // skip...
-// start test:
-[0x00a]=UCODE(5,0,4,0,1,0,0,0,0,1,0x024,0,0),
-[0x00b]=UCODE(4,0,5,0,1,0,0,0,0,0,0x010,0,0),
-// ...skip
+[0x007]=UCODE(0,0,6,1,0,1,3,7,0,0,0x008,0,0), // blank
+[0x008]=UCODE(0,0,6,0,1,0,3,8,0,0,0x008,0,1),
+[0x009]=UCODE(0,0,6,1,0,1,3,9,0,0,0x008,1,0), // blank
+[0x00a]=UCODE(3,0,3,1,1,0,0,0,0,0,0x008,1,1), // refresh loop
+[0x00b]=UCODE(0,0,0,0,0,0,5,15,0,0,0x00c,0,0),
 [0x00c]=UCODE(2,0,2,1,1,0,0,0,0,0,0x00c,5,0),
 [0x00d]=UCODE(2,0,2,1,1,0,0,0,0,0,0x00c,5,0),
 [0x00e]=UCODE(1,0,1,1,1,0,0,0,0,0,0x00c,5,1),
-[0x00f]=UCODE(0,0,0,0,0,0,0,0,0,0,0x008,0,0), // loop back
+[0x00f]=UCODE(0,0,0,0,0,0,0,0,0,0,0x008,1,0), // loop back
 
 //                  a     m     s
 //            a b z o a b o k s u       j j
@@ -104,7 +104,7 @@ u64 ucode[2048] = {
 [0x015]=UCODE(5,0,4,0,1,0,0,0,0,0,0x014,1,0),
 [0x016]=UCODE(0,0,0,0,0,0,0,0,0,1,0x024,1,0),
 [0x017]=UCODE(0,0,0,0,0,0,4,0,0,0,0x018,0,0), // loop
-[0x018]=UCODE(4,6,0,6,1,1,0,0,0,0,0x018,1,4),
+[0x018]=UCODE(4,6,0,6,1,1,0,0,15,0,0x018,1,4),
 [0x019]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,0),
 [0x01a]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,1),
 [0x01b]=UCODE(0,0,0,0,0,0,0,0,0,0,0x01c,0,0),
@@ -131,8 +131,10 @@ u64 ucode[2048] = {
 [0x02a]=UCODE(0,0,4,0,0,0,0,0,0,0,0x000,0,7),
 
 [0x02b]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,0),
-[0x02c]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,0),
-[0x02d]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,0),
+// start test:
+[0x02c]=UCODE(5,0,4,0,1,0,0,0,0,1,0x024,0,0),
+[0x02d]=UCODE(4,0,5,0,1,0,0,0,0,0,0x010,0,0),
+
 [0x02e]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,0),
 
 };
