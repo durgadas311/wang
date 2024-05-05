@@ -27,13 +27,18 @@ int main(int argc, char **argv) {
 	size_t ucodez = ROM_SIZE * sizeof(*ucode);
 	int x;
 	int verbose = 0;
+	int nop = 0;
+	int autoend = 0;
 	int begin = 0;
 	int end = 0x7ff;
 	extern char *optarg;
 	extern int optind;
 
-	while ((x = getopt(argc, argv, "b:e:v")) != EOF) {
+	while ((x = getopt(argc, argv, "ab:e:v")) != EOF) {
 		switch(x) {
+		case 'a':
+			++autoend;
+			break;
 		case 'b':
 			begin = strtoul(optarg, NULL, 0) & 0x7ff;
 			break;
@@ -73,6 +78,14 @@ int main(int argc, char **argv) {
 	close(fd);
 
 	for (x = begin; x < end; ++x) {
+		if (!ucode[x]) {
+			++nop;
+		} else {
+			nop = 0;
+		}
+		if (autoend && nop > 4) {
+			break;
+		}
 		u = (w600_ucode_t *)&ucode[x];
 		diwang(buf, &ucode[x]);
 		printf("%03x: ", x);

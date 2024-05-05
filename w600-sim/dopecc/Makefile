@@ -7,6 +7,9 @@ exe: xcode ycode zcode
 %.rom: %.o
 	objcopy -j .data -O binary $*.o $*.rom
 
+%.dis: %.rom
+	../ucdis -a $< >$@
+
 xcode: xcode.o xcode-1.o xcode-2.o
 	$(CC) -o $@ $^
 
