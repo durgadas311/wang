@@ -11,6 +11,7 @@ typedef unsigned long u64;
 Display register 15-15. If key pressed, put code in first 2 digits.
 
 000: V = 0 - 0 - 1 ->[Zo,CC]; RESET; jump 007
+// refresh display from 15-15, break for key press
 001: V = V + 0 + 1 ->[Zo,CC]; jump 002
 002: 0 + 0 ->[Zo,CC]; jump 008[KBD:]
 003: 0 + 0 ->[Zo,CC]; CA = mem(15,15,V), CB = rom(15,15,V); jump 004
@@ -18,17 +19,17 @@ Display register 15-15. If key pressed, put code in first 2 digits.
 005: U = U + 0 + 1 ->[Zo,CC,SC]; jump 004[CC:]
 006: T = T + 0 + 1 ->[Zo,CC,SC]; jump 005[CC:]
 007: 0 + 0 ->[Zo,CC]; jump 001
+
 // no key pressed
 008: CA = 0 + D1 ->[Zo,CC]; mem(15,15,4) = CA; jump 009
 009: CA = 0 + D2 ->[Zo,CC]; mem(15,15,5) = CA; jump 003
+
 // key pressed
 00a: CA = KA + 0 ->[Zo,CC]; mem(15,15,1) = CA; jump 00b
 00b: CA = KB + 0 ->[Zo,CC]; mem(15,15,2) = CA; jump 00c
 00c: 0 + 0 ->[Zo,CC]; CA = mem(15,15,3), CB = rom(15,15,3); jump 00d
-00d: CA = CA + 0 + 1 ->[Zo,CC,SC]; mem(15,15,3) = CA; jump 003
-// end
-00e: 0 + 0 ->[Zo,CC]; jump 000
-00f: 0 + 0 ->[Zo,CC]; jump 000
+00d: CA = CA + 0 + 1 ->[Zo,CC,SC]; RESET; mem(15,15,3) = CA; jump 003
+
 */
 
 u64 ucode[2048] = {
@@ -48,7 +49,7 @@ u64 ucode[2048] = {
 [0x00a]=UCODE(4,0,6,0,1,0,3,1,0,0,0x008,1,1),
 [0x00b]=UCODE(5,0,6,0,1,0,3,2,0,0,0x00c,0,0),
 [0x00c]=UCODE(0,0,0,0,0,0,6,3,0,0,0x00c,0,1),
-[0x00d]=UCODE(6,0,6,4,1,0,3,3,0,0,0x000,1,1),
+[0x00d]=UCODE(6,0,6,4,1,0,3,3,9,0,0x000,1,1),
 [0x00e]=0,
 [0x00f]=0,
 };
