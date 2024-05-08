@@ -9,12 +9,12 @@
 1.9	O	/KB2
 1.10	I	/GKB2
 1.11	-	cha_gnd
-1.12	I	KBL
+1.12	O	KBL
 1.13	O	/CRI
 1.14	I	/GKA3
 1.15	I	/GKB0
 1.A	I	/RWC
-1.B	I	+5VR
+1.B	-	+5VR
 1.C	-	+-0V
 1.D	O	/IOC
 1.E	I	/GISN
@@ -35,15 +35,15 @@
 2.4	O	/KA2
 2.5	O	/KA0
 2.6	O	/KA1
-2.7	O	CBo
+2.7	O	CB0
 2.8	I	/KBD3
 2.9	O	/GKBD
 2.10	O	/N0B
 2.11	O	/N3B
-2.12	O	/GIoA2Fb
+2.12	O	/GIoA2F
 2.13	O	/N1B
 2.14	O	/N2B
-2.15	O	/GIoA3Fb
+2.15	O	/GIoA3F
 2.A	I	/CE1
 2.B	I	/CE2
 2.C	I	CE2
@@ -62,19 +62,19 @@
 
 3.1	I	KAP
 3.2	I	KBP
-3.3	O	/GIoB0Fb
-3.4	O	/GIoB1Fb
-3.5	O	/GIoB2Fb
-3.6	O	/GIoB3Fb
-3.7	O	/GIoA1Fb
-3.8	O	/GIoA0Fb
+3.3	O	/GIoB0F
+3.4	O	/GIoB1F
+3.5	O	/GIoB2F
+3.6	O	/GIoB3F
+3.7	O	/GIoA1F
+3.8	O	/GIoA0F
 3.9	O	/TKWS
 3.10	O	/GISO
 3.11	O	/TKA1
-3.12	I	+12VR
+3.12	-	+12VR
 3.13	-	+-0V
-3.14	I	+5VR
-3.15	I	MSV (-13V)
+3.14	-	+5VR
+3.15	-	MSV
 3.A	I	C1
 3.B	I	R5
 3.C	I	C5
@@ -91,8 +91,8 @@
 3.R	O	/TKB1
 3.S	O	/TKB0
 
-X.1	O	MSV (-13V)
-X.2	O	+5V
+X.1	-	MSV
+X.2	-	+5V
 X.3	O	XA10
 X.4	O	XA11
 X.5	O	/XA11
@@ -105,7 +105,7 @@ X.11	O	/XA5
 X.12	O	/XA6
 X.13	O	/XA7
 X.14	O	/XA8
-X.15	O	+12V
+X.15	-	+12V
 X.A	-	+-0V
 X.B	-	cha_gnd
 X.C	O	/XA9
@@ -114,7 +114,7 @@ X.E	I	OPR3
 X.F	I	OPR2
 X.H	I	OPR1
 X.J	O	/XA2
-X.K	O	/RWC
+X.K	I	/RWC
 X.L
 X.M
 X.N

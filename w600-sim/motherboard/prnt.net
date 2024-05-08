@@ -16,9 +16,9 @@ P.15	I	col11
 P.16	I	col12
 P.17	O	Psense2a
 P.18	O	Psense2b
-P.19	I	+3.5V
-P.20	I	+3.5V
-P.21	I	+3.5V
+P.19	-	+3.5V
+P.20	-	+3.5V
+P.21	-	+3.5V
 P.22
 P.23	I	col13
 P.24	I	col14

@@ -3,7 +3,7 @@ P.B	-	+-0V
 P.C
 P.D	-	+-0V
 P.E	I	WDT
-P.F	I	MHO
-P.H	I	MHG
+P.F	O	MHO
+P.H	O	MHG
 P.J
 P.K

@@ -14,16 +14,16 @@
 1.14	I	/KA
 1.15	I	/KB
 1.A
-1.B	I	+5VR
+1.B	-	+5VR
 1.C	-	+-0V
-1.D	I	CBo
-1.E	I	/KBD3
+1.D	I	CB0
+1.E	O	/KBD3
 1.F	I	TP4
 1.H	I	TP3
 1.J	I	TP2
 1.K	I	TP1
 1.L	O	SHL
-1.M	O	D21
+1.M	I	D21
 1.N	I	/PVSR
 1.P	I	RS
 1.R	O	/KBP
@@ -33,15 +33,15 @@
 2.2	I	KK1
 2.3	I	KK2
 2.4	I	KK3
-2.5	I	Vo
-2.6	I	Uo
-2.7	I	To
+2.5	I	V0
+2.6	I	U0
+2.7	I	T0
 2.8	I	CA0
 2.9	I	AC0
 2.10	O	B
 2.11	O	A
 2.12
-2.13	I	KBP
+2.13	O	KBP
 2.14	I	LRN
 2.15	I	CDP
 2.A	I	SKB0
@@ -51,7 +51,7 @@
 2.E
 2.F
 2.H	O	/CA0
-2.J	I	KAP
+2.J	O	KAP
 2.K	I	CK1234
 2.L	I	AI0
 2.M	I	AI1
@@ -73,8 +73,8 @@
 3.11	I	/CRI
 3.12	I	SKB1
 3.13	-	+-0V
-3.14	I	+5VR
-3.15	I	-12VR
+3.14	-	+5VR
+3.15	-	-12VR
 3.A	I	PC0
 3.B	I	PC1
 3.C	I	PC2
@@ -90,5 +90,3 @@
 3.P
 3.R
 3.S
-
-J37	I	D21

@@ -9,7 +9,7 @@ P.8	O	/RBS
 P.9
 P.10
 P.11	-	+-0V
-P.12	I	relay_pwr
+P.12	-	relay_pwr
 P.13	-	+-0V
 P.14	-	+-0V
 P.15	-	+-0V
