@@ -1,0 +1,94 @@
+1.1
+1.2
+1.3
+1.4	I	/BR
+1.5	O	OVL
+1.6	O	ERRL
+1.7	I	/OV
+1.8	I	/ERR
+1.9	O	BDX
+1.10	I	SUB
+1.11
+1.12
+1.13
+1.14
+1.15
+1.A
+1.B	I	+5VR
+1.C	-	+-0V
+1.D
+1.E	I	/ADF
+1.F
+1.H	O	BL
+1.J	I	Ros
+1.K	I	/RPC
+1.L	I	/SPC
+1.M	I	/PRIME
+1.N	I	/VPGM
+1.P	O	/PVSR
+1.R	I	CL
+1.S	I	KBD
+
+2.1	I	Zo
+2.2	I	Q*
+2.3
+2.4
+2.5
+2.6
+2.7
+2.8
+2.9
+2.10	I	CC
+2.11	I	S0
+2.12	I	S1
+2.13	I	S2
+2.14	I	S3
+2.15	I	SC
+2.A	I	CK2
+2.B	I	CK3
+2.C	I	CK4
+2.D	I	CK5
+2.E
+2.F
+2.H
+2.J
+2.K
+2.L	I	JH0
+2.M	I	JH2
+2.N	I	JH1
+2.P	I	JL0
+2.R	I	JL1
+2.S	I	JL2
+
+3.1
+3.2	O	jh
+3.3	O	jad0
+3.4	O	jl
+3.5	O	jad3
+3.6	O	jad4
+3.7	O	jad2
+3.8	O	jad1
+3.9	O	/jad7
+3.10	O	/jad8
+3.11	O	jad6
+3.12	O	jad5
+3.13	-	+-0V
+3.14	I	+5VR
+3.15
+3.A	I	JAD0
+3.B	I	JAD1
+3.C	I	JAD2
+3.D	I	JAD4
+3.E	I	JAD3
+3.F	I	JAD5
+3.H	I	JAD6
+3.J	I	JAD8
+3.K	I	JAD7
+3.L
+3.M
+3.N
+3.P
+3.R
+3.S
+
+J32	O	/ADF

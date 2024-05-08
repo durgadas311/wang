@@ -1,0 +1,30 @@
+1.1	I	MSV (-13V)
+1.2	I	+5V
+1.3	I	XA10
+1.4	I	XA11
+1.5	I	/XA11
+1.6	I	/XA10
+1.7	I	/XA3
+1.8	I	/XA0
+1.9	I	/XA1
+1.10	I	/XA4
+1.11	I	/XA5
+1.12	I	/XA6
+1.13	I	/XA7
+1.14	I	/XA8
+1.15	I	+12V
+1.A	-	+-0V
+1.B	-	cha_gnd
+1.C	I	/XA9
+1.D	O	OPR4
+1.E	O	OPR3
+1.F	O	OPR2
+1.H	O	OPR1
+1.J	I	/XA2
+1.K	I	/RWC
+1.L
+1.M
+1.N
+1.P
+1.R
+1.S	I	XN0

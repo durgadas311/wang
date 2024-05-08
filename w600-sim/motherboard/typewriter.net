@@ -1,0 +1,24 @@
+P.1	I	/TKB0
+P.2	I	/TKB1
+P.3	I	/TKB2
+P.4	I	/TKB3
+P.5	I	/TKA0
+P.6	I	/TKA1
+P.7	I	/TKWS
+P.8	O	/RBS
+P.9
+P.10
+P.11	-	+-0V
+P.12	I	relay_pwr
+P.13	-	+-0V
+P.14	-	+-0V
+P.15	-	+-0V
+P.16	-	+-0V
+P.17	-	+-0V
+P.18	-	+-0V
+P.19	-	+-0V
+P.20	-	+-0V
+P.21
+P.22
+P.23	-	cha_gnd
+P.24	-	+-0V

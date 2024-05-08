@@ -1,0 +1,92 @@
+1.1
+1.2
+1.3	I	ST3
+1.4	I	ST2
+1.5	I	ST1
+1.6	I	ST0
+1.7
+1.8	O	/CB*
+1.9
+1.10	O	/T
+1.11	O	/U
+1.12	O	/V
+1.13	O	/ZK
+1.14	O	/KA
+1.15	O	/KB
+1.A
+1.B	I	+5VR
+1.C	-	+-0V
+1.D
+1.E	I	TP234
+1.F
+1.H
+1.J
+1.K	I	TP1
+1.L
+1.M
+1.N
+1.P	I	RS
+1.R	I	CL
+1.S	O	/CL
+
+2.1
+2.2
+2.3
+2.4
+2.5
+2.6
+2.7
+2.8
+2.9	I	BC0
+2.10	I	B
+2.11	I	A
+2.12
+2.13	I	/mop6
+2.14	I	/mop5
+2.15	I	/mop4
+2.A	O	Zo
+2.B
+2.C	O	/Z
+2.D	I	CK5
+2.E	I	CK4
+2.F
+2.H	I	/CA0
+2.J
+2.K	I	CK1234
+2.L	O	MC
+2.M	O	SDI
+2.N
+2.P
+2.R
+2.S	O	CKRB
+
+3.1	O	S0
+3.2
+3.3	O	S1
+3.4
+3.5	O	S2
+3.6
+3.7	O	S3
+3.8
+3.9	O	SC
+3.10	O	CC
+3.11	O	/ERR
+3.12	O	/OV
+3.13	-	+-0V
+3.14	I	+5VR
+3.15
+3.A
+3.B
+3.C
+3.D
+3.E
+3.F
+3.H	I	ZO0
+3.J	I	ZO1
+3.K	I	ZO2
+3.L	O	R*
+3.M	I	AOP0
+3.N	I	AOP1
+3.P	I	AOP2
+3.R
+3.S

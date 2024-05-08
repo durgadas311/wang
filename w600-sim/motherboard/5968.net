@@ -1,0 +1,129 @@
+1.1
+1.2
+1.3
+1.4	I	mop7
+1.5	I	Ros
+1.6	I	/KBP
+1.7
+1.8
+1.9
+1.10
+1.11
+1.12
+1.13
+1.14
+1.15
+1.A
+1.B	I	+5VR
+1.C	-	+-0V
+1.D
+1.E
+1.F
+1.H
+1.J
+1.K
+1.L
+1.M
+1.N
+1.P
+1.R
+1.S
+
+2.1
+2.2
+2.3
+2.4
+2.5
+2.6
+2.7	O	PC0
+2.8	O	PC1
+2.9	O	PC2
+2.10	O	PC3
+2.11	O	PC4
+2.12
+2.13
+2.14
+2.15
+2.A	I	-12VR
+2.B	I	+12VR
+2.C
+2.D	I	/PRIME
+2.E	I	PPF
+2.F	I	/mop8
+2.H
+2.J
+2.K
+2.L
+2.M
+2.N
+2.P
+2.R
+2.S
+
+3.1
+3.2
+3.3
+3.4
+3.5
+3.6
+3.7
+3.8
+3.9	-	cha_gnd
+3.10
+3.11
+3.12
+3.13	-	+-0V
+3.14	I	+5VR
+3.15
+3.A
+3.B
+3.C
+3.D
+3.E
+3.F
+3.H
+3.J
+3.K
+3.L
+3.M
+3.N	I	PPS
+3.P
+3.R
+3.S	I	+3.5V
+
+P.1
+P.2
+P.3
+P.4
+P.5	O	col1
+P.6	O	col2
+P.7	O	col3
+P.8	O	col4
+P.9	O	col5
+P.10
+P.11	O	col7
+P.12	O	col8
+P.13	O	col9
+P.14	O	col10
+P.15	O	col11
+P.16	O	col12
+P.17	I	Psense2a
+P.18	I	Psense2b
+P.19	O	+3.5V
+P.20	O	+3.5V
+P.21	O	+3.5V
+P.22
+P.23	O	col13
+P.24	O	col14
+P.25	O	col15
+P.26	O	col16
+P.27	O	col17
+P.28	O	col18
+P.29	O	col19
+P.30	O	col20
+P.31	O	col21
+P.32	O	pfeed
+P.33	O	rfeed
+P.34	-	cha_gnd
+P.35	I	Psense1a
+P.36	I	Psense1b

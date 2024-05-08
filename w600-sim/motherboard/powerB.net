@@ -1,0 +1,11 @@
+*       -       +-0V
+*       -       cha_gnd
+*       O       +5VR
+*       O       +250V
+*       O       -13V
+*       O       +17V
+*       O       -13.3V
+*       O       -17V
+*       O       +3.5V
+*       O       +12V
+*	O	relay_pwr

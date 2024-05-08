@@ -1,0 +1,36 @@
+P.1
+P.2
+P.3
+P.4
+P.5	I	col1
+P.6	I	col2
+P.7	I	col3
+P.8	I	col4
+P.9	I	col5
+P.10
+P.11	I	col7
+P.12	I	col8
+P.13	I	col9
+P.14	I	col10
+P.15	I	col11
+P.16	I	col12
+P.17	O	Psense2a
+P.18	O	Psense2b
+P.19	I	+3.5V
+P.20	I	+3.5V
+P.21	I	+3.5V
+P.22
+P.23	I	col13
+P.24	I	col14
+P.25	I	col15
+P.26	I	col16
+P.27	I	col17
+P.28	I	col18
+P.29	I	col19
+P.30	I	col20
+P.31	I	col21
+P.32	I	pfeed
+P.33	I	rfeed
+P.34	-	cha_gnd
+P.35	O	Psense1a
+P.36	O	Psense1b
