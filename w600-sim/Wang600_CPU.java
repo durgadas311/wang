@@ -33,6 +33,7 @@ class Wang600_CPU
 	public byte ov;
 	public byte err;
 
+	// internal signals and latches
 	public boolean kbl;
 	public boolean ioc;
 	public boolean z2;
@@ -286,16 +287,36 @@ class Wang600_CPU
 		return disas(uu, raw);
 	}
 
-	// these three might need "synchronized"
-	public void setKaKb(int key) { 
+	public synchronized void setJam(int key) {
+		fp.setGKBD(true);
+		jam = 0x1000 | key;
 		kbd = 1;
+		ov = 0;
+		fp.setOv(ov);
+		if (key == 0) { // PRIME
+			err = 0;
+			fp.setErr(err);
+		}
+	}
+
+	public synchronized void setStep() {
+		kbd3 = true;
+	}
+
+	public synchronized void setKaKb(int key) { 
+		fp.setGKBD(true);
 		_ka = (byte)((key >> 4) & 0x0f);
 		_kb = (byte)(key & 0x0f);
 		z2 = true;
 		kbd3 = false;
+		kbd = 1;
+	}
+	public void setGi(int key) { 
+		// On 6185, these go directly to the KA/KB pre-latches
+		setKaKb(key);
 	}
 
-	private void chkKaKb() {
+	private synchronized void chkKaKb() {
 		// "kbd3" here does not directly emulate the hardware KBD3.
 		if (!kbd3) {
 			// On the 6184, this happens continuously while KBD3
@@ -316,7 +337,7 @@ class Wang600_CPU
 		}
 	}
 
-	private void clrKaKb() {
+	private synchronized void clrKaKb() {
 		_ka = 0;
 		_kb = 0;
 		ka = 0;
@@ -324,6 +345,7 @@ class Wang600_CPU
 		kbd3 = true;
 		kbd = 0;
 		z2 = false;
+		fp.setGKBD(false);
 	}
 
 	private byte[] odd_parity;
@@ -793,7 +815,7 @@ class Wang600_CPU
 		case 12:
 			printer_status();
 			// not just printer, but CN-24 (RBS) as well...
-			kb |= 2;
+			kb |= (fp.getRBS() << 1);
 			break;
 		case 13:
 			tape_on(uu.bi & 1);
@@ -858,12 +880,6 @@ class Wang600_CPU
 		if (jam != 0) {
 			next = jam & 0x0fff;
 			jam = 0;
-			ov = 0;
-			fp.setOv(ov);
-			if (next == 0) { // PRIME
-				err = 0;
-				fp.setErr(err);
-			}
 		}
 
 		pc = next;

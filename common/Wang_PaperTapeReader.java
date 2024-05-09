@@ -132,7 +132,7 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice
 		return false;
 	}
 
-	public void pickFile(JMenuItem m) {
+	public void menuClick(JMenuItem m) {
 		tape_close();
 		SuffFileChooser ch = new SuffFileChooser(_mountLabel,
 			_fileType, _pickLabel, Wang_UI.getDir());

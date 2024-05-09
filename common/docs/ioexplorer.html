@@ -1,0 +1,146 @@
+<HTML>
+<BODY>
+
+<H2>Wang I/O Explorer</H2>
+
+<P>The Wang I/O Explorer simulates various I/O devices for the
+purpose of testing and learning how the microcode implements I/O
+or for developing/testing programs that use I/O.
+
+<P>See <A HREF="ioexamples.html">Examples</A>.
+
+<P>The window contains the following sections.
+
+<DL>
+<DT>(top)
+<DD>This displays the core I/O registers of the calculator, GIoA, GIoB, and IOB.
+The values shown are the last values written by the calculator, or blank if
+nothing has been written.
+
+<DT>TypeWriter
+<DD>Provides control and displays data from the "Typewriter" port,
+then 24-pin Centronics connector.
+	<DL>
+	<DT>(Output) raw
+	<DD>When selected, output is shown as raw hexadecimal values.
+	Otherwise, it is shown as ASCII interpretation of the tile-rotate codes.
+	Raw output may contain control characters not normally shown in text,
+	such as "PRINT MODE", "SHIFT UP", "SHIFT DOWN".</DD>
+	<DT>(Output) clear
+	<DD>Clears the Output field so that more output may be seen.</DD>
+	<DT>Output
+	<DD>Shows the data sent by the calculator out the "Typewriter" port.</DD>
+	<DT>auto
+	<DD>Selects automatic mode, avoiding the need to acknowledge each
+	character as it is sent.</DD>
+	<DT>TWS
+	<DD>This (disable) item indicates when the calculator has sent
+	a character and RBS still indicates "busy".</DD>
+	<DT>RBS
+	<DD>This controls the RBS (ready/busy) signal to the calculator.
+	It is cleared when a TWS is detected, and may be manually
+	set to resume output (of the next character).</DD>
+	</DL>
+</DD>
+
+<DT>Group 1/2
+<DD>Provides control over execution of GROUP 1 and GROUP 2 commands
+from the calculator.
+	<DL>
+	<DT>(lamp)
+	<DD>Indicates when the matching GROUP command address has been sent
+	and the device is officially active.</DD>
+	<DT>Addr
+	<DD>Used to specify what device address will match a GROUP command.
+	May use "00-00" split-decimal notation or "XX" hexadecimal notation.
+	If left blank, equates to an address of "00-00". This must match the second
+	code after a GROUP 1 or GROUP 2 command in order to activate the device.</DD>
+	<DT>Grp1/Grp2
+	<DD>This radio button selects whether the device matches GROUP 1 or
+	GROUP 2 commands.</DD>
+	<DT>(Input) num
+	<DD>If selected, the following input text will be interpreted as
+	numeric entry, else it is considered text and converted to
+	OutputWriter tile-rotate codes.</DD>
+	<DT>Input
+	<DD>This field specifies what will be sent as input for a GROUP 1
+	or GROUP 2 command. After sending the last character, then next
+	thing sent is a GO code - which terminates the GROUP command.
+	If left blank, then no input is sent - only the GO.
+	Input is interpreted according to the "num" selection.</DD>
+	<DT>auto
+	<DD>When selected, the device will operate independently of the
+	user. Otherwise, it is necessary to press GISN or GO buttons
+	for each character.</DD>
+	<DT>!GKBD
+	<DD>This (disabled) item shows the current state of the calculator
+	"GKBD" signal, inverted. If selected, the calculator GKBD signal is off,
+	indicating that the calculator is ready for an input character.</DD>
+	<DT>GISN
+	<DD>This button is used to manually send the next character (or GO).</DD>
+	<DT>GLRN
+	<DD>This selects the state of the GLRN signal during the time that the
+	device is active. It is reset by PRIME or by sending the GO code,
+	and so must be selected again for each use. It may be selected any time
+	before the GROUP command and will have no effect until the device
+	is activated.</DD>
+	<DT>GO
+	<DD>This sends the GO code which terminates the GROUP command.
+	It may be used to terminate the input before reaching then end
+	of the data.</DD>
+	</DL>
+</DD>
+
+<DT>Block I/O
+<DD>Provides control over execution of I/O commands
+from the calculator. Note that block I/O is an extension of the
+GROUP 1 and 2 protocols, in that the GROUP commands are used
+to activate the device before it will respond to I/O commands.
+	<DL>
+	<DT>Supported
+	<DD>Must be selected in order to allow the GROUP 1/2 device
+	to support Block I/O protocols. When selected, the "Input"
+	field on the GROUP 1/2 control is ignored.
+	Also, the device remains active after the GO code is sent.
+	</DD>
+	<DT>auto
+	<DD>Selects automatic mode where each byte of the I/O
+	protocol is acknowledged without the need for manually
+	pressing GISN.</DD>
+	<DT>GISO
+	<DD>This (disabled) item indicates that the calculator has
+	pulsed the GISO signal and sent a byte of output.
+	It is cleared when the GISN button or action is taken.</DD>
+	<DT>GISN
+	<DD>Manually sends a byte to the calculator. If the protocol
+	is dictating an acknowledge, then a 0 is sent. Otherwise,
+	a byte of data from the Input field is sent.</DD>
+	<DT>Header
+	<DD>Shows the header bytes of the I/O protocol,
+	in hexadecimal, as they are received.
+	First three bytes are the requested data address, interpretted
+	by the device (e.g. Expand Memory uses as a byte address,
+	while Dual Cassette Tape uses as a tape block number).
+	</DD>
+	<DT>(Header)
+	<DD>The field to the right of the Header shows a human-readable
+	interpretation of the header bytes.</DD>
+	<DT>Status
+	<DD>Specifies the value to be sent when the status byte
+	of the protocol is reached. Typically, only the low bit
+	is significant. May use "00-00" split-decimal notation or
+	"XX" hexadecimal notation. Blank implies 0.
+	<DT>Input
+	<DD>Specifies the data to be sent when the calculator
+	performs a I/O read command. Use hexadecimal, blank-separated,
+	notation.</DD>
+	<DT>Output
+	<DD>Shows the data sent by the calculator when performing
+	an I/O write command.
+	</DL>
+</DD>
+
+</DL>
+
+</BODY>
+</HTML>

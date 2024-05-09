@@ -11,6 +11,8 @@ public interface Wang_FrontPanel {
 	void dev_out(byte iob, byte c);
 	int getMode0(boolean clear);
 	int getMode1(boolean clear);
+	int getRBS();
+	void setGKBD(boolean state);
 	void do_printer(int x, byte pr_drum);
 	void do_line();
 	void setOv(byte on);

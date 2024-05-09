@@ -201,4 +201,6 @@ try {
 		// "auto raise"...
 		onOff(true);
 	}
+
+	public int getRBS() { return 1; } // always ready, for now
 }

@@ -322,6 +322,8 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		onOff(true);
 	}
 
+	public int getRBS() { return 1; } // always ready, for now
+
 	static public String getModel() {
 		return Wang_UI.getSeries() + Model;
 	}

@@ -92,6 +92,7 @@ class Wang700_CPU
 		kbd = 1; // this allows use of KA/KB
 		kbd1 = true; // this allows use of KA/KB
 		z2 = false;
+		fp.setGKBD(true);
 		// On real machines, did not always happen that power-on asserted PRIME...
 		pc = 0x000;	// force PRIME on power-up...
 		l = 0;
@@ -356,8 +357,8 @@ class Wang700_CPU
 		return disas(uu, raw);
 	}
 
-	// these might need "synchronized"
-	public void setJam(int key) {
+	public synchronized void setJam(int key) {
+		fp.setGKBD(true);
 		jam = 0x1000 | key;
 		kbd = 1;
 		ov = 0;
@@ -368,11 +369,11 @@ class Wang700_CPU
 		}
 	}
 
-	public void setStep() {
+	public synchronized void setStep() {
 		kbd1 = true;
 	}
 
-	public void setKaKb(int key) {
+	public synchronized void setKaKb(int key) {
 		_ka |= (byte)((key >> 4) & 0x0f);
 		_kb |= (byte)(key & 0x0f);
 		// On 5919, _ka/_kb is pass-thru to KA/KB while kbd=0
@@ -382,9 +383,11 @@ class Wang700_CPU
 		}
 		kbd = 1;
 		z2 = true;
+		fp.setGKBD(true);
 	}
 
 	public void setGi(int key) {
+		fp.setGKBD(true);
 		// On 5919, GIA/B is pass-thru to KA/KB while kbd=0
 		_gi = (byte)(key & 0x0ff);
 		if (kbd == 0) {
@@ -396,13 +399,13 @@ class Wang700_CPU
 		z2 = true;
 	}
 
-	private void chkKaKb() {
+	private synchronized void chkKaKb() {
 		// The 700 does not handle keyboard data in every instruction cycle,
 		// but rather restricts KA/KB to keyboard/device data between
 		// RESET and input strobe (kbd == 0).
 	}
 
-	private void clrKaKb() {
+	private synchronized void clrKaKb() {
 		_ka = 0; 
 		_kb = 0;
 		// On 5919, _ka/_kb is pass-thru to KA/KB while kbd=0
@@ -412,6 +415,7 @@ class Wang700_CPU
 		ka = _ka;
 		z2 = false;
 		_gin = false;
+		fp.setGKBD(false);
 	}
 
 	private byte[] odd_parity;
@@ -557,6 +561,11 @@ class Wang700_CPU
 		fp.tape_off(0);
 	}
 
+	private void dev_out() {
+		byte c = (byte)((gioa << 4) | giob);
+		fp.dev_out(iob, c);
+	}
+
 	private byte bin_add3_i(byte a, byte b, byte c) {
 		byte _s = (byte)(a + b + c);
 		zo = (byte)((_s & 0x0f) == 0 ? 1 : 0);
@@ -659,14 +668,6 @@ class Wang700_CPU
 		iob = (byte)(io & 0x07);
 		ioc = ((iob & 0b110) == 0b010);
 		kbl = ((iob & 0b110) != 0);
-		if (iob == 0) {
-			fp.dev_reset();
-		}
-	}
-
-	private void dev_out() {
-		byte c = (byte)((gioa << 4) | giob);
-		fp.dev_out(iob, c);
 	}
 
 	public int instr_exec() {
@@ -859,7 +860,9 @@ class Wang700_CPU
 		case 3:	rd_ram_i(); break; // L,M,N setup at P5-6
 		case 4:	rd_ram_i(); ca = ra; cb = rb; break; // L,M,N setup at P5-6
 		case 5:	rd_ram_i(); break; // L,M,N setup at P5-6
-		case 6:	kb |= 1; break; // RBS (always "ready" for us)
+		case 6:
+			kb |= fp.getRBS();
+			break;
 		case 7:	break; // done at P5-6
 		case 8:	break;
 		case 9:	q = (uu.aop == 7 ? sc : cc); break;

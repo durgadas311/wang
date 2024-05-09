@@ -364,6 +364,8 @@ abstract class ASR33_Teletype
 		}
 	}
 
+	public int getRBS() { return 1; } // always ready, for now
+
 	public ASR33_Teletype(String propBase, int port) {
 		_shifted = false;
 		_crPrint = false;

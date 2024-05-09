@@ -77,7 +77,7 @@ class Wang_MicroFace implements Wang_GroupIODevice
 		return false;
 	}
 
-	public void pickFile(JMenuItem m) {
+	public void menuClick(JMenuItem m) {
 		for (int x = 0; x < 16; ++x) {
 			if (_intfs[x] != null && _intfs[x].length() > 0) {
 				_texts[x].setText(_intfs[x]);

@@ -18,13 +18,19 @@ COMMON_CLASSES = \
 		Wang_RunCommand.class \
 		SuffFileFilter.class \
 		SuffFileChooser.class \
+		LED.class \
+		RoundLED.class \
 		Wang_Colors.class \
 		Wang_Keys.class \
 		Wang_Properties.class \
 		Wang_PropertyEditor.class \
 		Wang_CharConverter.class \
 		Wang_Indicator.class \
+		Wang_Peripheral.class \
+		Wang_OutputDevice.class \
 		Wang_GroupIODevice.class \
+		Wang_BlockIODevice.class \
+		Wang_CN24_dev.class \
 		Wang_CN36_Bus.class \
 		Wang_Core.class \
 		Wang_UI.class \
@@ -32,7 +38,6 @@ COMMON_CLASSES = \
 		Wang_FunctionLabelBar.class \
 		Wang_TapeDevice.class \
 		Wang_TapeDrive.class \
-		Wang_OutputDevice.class \
 		Wang_Paper.class \
 		IBM_Selectric.class \
 		ASR33_Teletype.class \
@@ -43,13 +48,14 @@ COMMON_CLASSES = \
 		Wang_MicroFace.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
-		Wang_RandIODevice.class \
 		Wang_Display.class \
 		Wang_Help.class \
 		Wang_Keyboards.class \
 		Wang_Keyboard.class \
 		Wang_Debugger.class \
-		Wang_DebugConsole.class
+		Wang_DebugConsole.class \
+		GenericHelp.class \
+		WangIOExplorer.class
 
 W700_CLASSES = \
 		Wang700.class \
@@ -113,13 +119,15 @@ clean:
 jar: wang700.jar
 
 SHIP_DOCS = $(filter-out docs/wang700arch.html,$(wildcard docs/*.html))
+COMN_DOCS = $(notdir $(wildcard ../common/docs/*.html))
 
 wang700.jar: Release.java Release.class w700_fe.class w700_edit.class w700initProps.class $(ROMS)
 	/bin/echo -e "Main-Class: w700_fe\nSplashScreen-Image: icons/wang700.gif" >Manifest.txt
 	jar cfm $@ Manifest.txt *.class $(ROMS) icons/*.{gif,png} $(SHIP_DOCS) \
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
-		$(addprefix -C ../common ,$(COMMON_ICONS))
+		$(addprefix -C ../common ,$(COMMON_ICONS)) \
+		$(addprefix -C ../common docs/,$(COMN_DOCS))
 
 wang700setup.jar: w700initProps.class
 	echo "Main-Class: w700initProps" >Manifest.txt

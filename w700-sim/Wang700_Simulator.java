@@ -424,6 +424,9 @@ class Wang700_Simulator
 		}
 		// needs other side-effects... display? clear key buffer?
 		good = 0;
+		if (cmd == 0) { // PRIME is visible to all devices
+			dev_reset();
+		}
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
@@ -432,6 +435,8 @@ class Wang700_Simulator
 		setGi(0);
 	}
 
+	// device sends byte to calculator. might need translation from
+	// generic to Wang 700 command codes.
 	public void replyIO(int iob, int rep) {
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
@@ -458,12 +463,14 @@ class Wang700_Simulator
 			rep = 0x00 | (rep - Wang_GroupIODevice.SR0);
 		}
 		setGi(rep);
-		// TODO: review how this should be done.
-		if ((iob & ~1) == 2) {
-			Wang700.M730.do_ack(iob);
-		} else if (_cn36 != null) {
-			_cn36.do_ack(iob);
-		}
+// TODO: review how this should be done.
+// seems like this should not be ACKing but
+// rather the microcode does that later.
+//		if ((iob & ~1) == 2) { // block I/O
+//			Wang700.M730.do_ack(iob);
+//		} else if (_cn36 != null) {
+//			_cn36.do_ack(iob);
+//		}
 	}
 
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
@@ -557,13 +564,14 @@ class Wang700_Simulator
 		}
 	}
 
+	public Wang_Debugger getDebug() {
+		return _dbg.getDebug();
+	}
+
 	private short[] dispx;
 	private short[] dispy;
 	int good;
 	int lastx;
-
-	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_GroupIODevice _cn36;	// current active device
 
 	private void refresh(boolean canSleep) {
 		byte n = cpu.n;
@@ -583,8 +591,7 @@ class Wang700_Simulator
 			Wang700.DispX.do_display(dispx);
 			// do not refresh Y when LEARN (or LEARN AND PRINT)
 			// (assumes display got blanked previously)
-			if ((Wang700.Kbd.getMode0(false) & D12_LRN_L_P) == 0 &&
-					(_cn36 == null || _cn36.getGLRN() == 0)) {
+			if ((getMode0(false) & D12_LRN_L_P) == 0) {
 				Wang700.DispY.do_display(dispy);
 			}
 		} else {
@@ -680,47 +687,46 @@ class Wang700_Simulator
 		Wang700.Tape.tape_off(0);
 	}
 	public void dev_reset() {
-		// TODO: does this really de-select device?
-		// need to keep _cn36 for subsequent I/O commands.
-		_cn36 = null;
-		if (Wang700.CN24 != null) {
-			Wang700.CN24.reset();
-		}
-		// TODO: needs to be more generic?
-		// M730 is also on Wang_CN36_Bus.
-		Wang700.M730.reset();
+		// PRIME pressed, everything is reset
+		Wang_CN24_dev.reset(); // handles null
 		Wang_CN36_Bus.resetCN36();
 	}
 	public void dev_out(byte iob, byte c) {
-		if (iob == 0) {
-			dev_reset();
-		} else if (iob == 1) { // CN24 output only, 6 bits
+		if (iob == 1) { // "Typewriter", CN24 output only, 6 bits
+			if ((c & 0x40) != 0) {
+				// TODO: local control codes - not needed?
+				return;
+			}
 			c &= 0x3f;
-			if (Wang700.CN24 != null) {
-				Wang700.CN24.do_cn24(c);
+			if (Wang_CN24_dev.get() != null) {
+				Wang_CN24_dev.get().do_cn24(c);
 			}
-		} else if (iob == 2 || iob == 3) { // CN36 Model 630
-			Wang700.M730.do_dev(iob, c);
-		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
-			if (_cn36 != null) {
-				// All known devices are ACK only
-				_cn36.do_ack(iob);
-			} else {
-				_cn36 = Wang_CN36_Bus.startCN36(iob, (c & 0x0ff));
-			}
+		} else { // includes IOB=0 (end of command)
+			Wang_CN36_Bus.doCN36(iob, (c & 0x0ff));
 		}
 	}
+	// Get mode0 switches state, possibly modified by peripherals
 	public int getMode0(boolean clear) {
 		int g = Wang700.Kbd.getMode0(clear);
 		if (clear) mode0 = Wang700.Kbd.getMode0(false);
 		// clear 0010 if glrn?
-		if (_cn36 != null) {
-			g |= (byte)((_cn36.getGLRN() & 1) << 2);
+		if (Wang_CN36_Bus.getGLRN() != 0) {
+			g |= (byte)D12_LRN_L_P;
 		}
 		return g;
 	}
 	public int getMode1(boolean clear) {
 		return 0; // No MODE1 switches
+	}
+	public int getRBS() { 
+		if (Wang_CN24_dev.get() != null) {
+			return Wang_CN24_dev.get().getRBS();
+		} else {
+			return 1; // always ready
+		}
+	}
+	public void setGKBD(boolean state) {
+		Wang_CN36_Bus.setGKBD(state);
 	}
 	public void do_printer(int x, byte pr_drum) {
 		// No drum printer

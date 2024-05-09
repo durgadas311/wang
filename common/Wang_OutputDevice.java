@@ -1,23 +1,16 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_OutputDevice.java,v 1.8 2014/01/14 21:53:51 drmiller Exp $
-
-import java.awt.*;
-import javax.swing.*;
-
+// Copyright (c) 2011,2026 Douglas Miller
 
 // e.g. Devices attached to a Wang 600 "CN-24" port (Output Only)
 // TODO: handle Input/Output devices like IBM Selectric Typewriter (Wang1200)?
-interface Wang_OutputDevice
+interface Wang_OutputDevice extends Wang_Peripheral
 {
 	static String Model = "00";
 	static String Description = "Unknown";
 
-	// General-purpose device reset
-	void reset();
-
 	// Process byte-pair in context of Wang Output Device
 	void do_cn24(byte b);
 	void do_cn24_direct(char c);
+	int getRBS();
 	// carriage-control, etc.
 	void do_space();
 	void do_backspace();
@@ -30,21 +23,4 @@ interface Wang_OutputDevice
 	void do_shift_dn();
 	void do_lock(int lk);
 	void do_bell();
-
-	// Return the text-frame of the device, for handling events
-	// and setting up action listeners
-	JFrame getFrame();
-	Component getComponent();
-
-	// Set the visibility of the output frame
-	void onOff(boolean on);
-
-	// Return current visibility of the output frame
-	boolean onOff();
-
-	public void setProperties(Wang_Properties p);
-
-	// returns descriptive name of device
-	// static String getName();
-	// needs to be static, but "java to the rescue" again...
 }

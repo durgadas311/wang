@@ -371,4 +371,6 @@ new DbgFunc() {
 			// or flood will ensue.
 		}
 	}
+
+	public Wang_Debugger getDebug() { return _dbg; }
 }

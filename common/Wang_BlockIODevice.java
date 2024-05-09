@@ -1,4 +1,4 @@
-// Copyright (c) 2011,2024 Douglas Miller
+// Copyright (c) 2011,2026 Douglas Miller
 
 import javax.swing.*;
 
@@ -10,9 +10,9 @@ import javax.swing.*;
 // Wang_UI.getCore().replyIO() form a matched pair for each byte
 // exchanged.
 
-interface Wang_RandIODevice extends Wang_GroupIODevice {
+interface Wang_BlockIODevice extends Wang_GroupIODevice {
 	JMenuItem getMenu(int key); // get/create menu item
-	void pickFile(JMenuItem m); // install new (disk) image
+	void menuClick(JMenuItem m); // only called if getMenu() != null
 
 	// Process output byte in context of Wang Group I/O Device.
 	// These are for the random I/O device protocol, as used

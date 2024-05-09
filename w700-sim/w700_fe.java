@@ -239,23 +239,35 @@ public class w700_fe
 		gridbag.setConstraints(pan, s);
 		front_end.add(pan);
 
+if (false) {
 		String cn24 = Wang_UI.getProperties().getProperty("wang700_cn24_device");
-		Wang700.CN24 = null;
+		Wang_CN24_dev.connect(null);
 		if (cn24 != null && cn24.equals(Wang_PlottingOutputWriter.getModel())) {
-			Wang700.CN24 = new Wang_PlottingOutputWriter();
+			Wang_CN24_dev.connect(new Wang_PlottingOutputWriter());
 		} else if (cn24 != null && cn24.equals(Wang_OutputWriter.getModel())) {
-			Wang700.CN24 = new Wang_OutputWriter();
+			Wang_CN24_dev.connect(new Wang_OutputWriter());
 		} else if (cn24 != null && cn24.equals(Wang_InputOutputWriter.getModel())) {
-			Wang700.CN24 = new Wang_InputOutputWriter();
+			Wang_CN24_dev.connect(new Wang_InputOutputWriter());
 		} else if (cn24 != null && cn24.equals(Wang_Plotter.getModel())) {
-			Wang700.CN24 = new Wang_Plotter();
+			Wang_CN24_dev.connect(new Wang_Plotter());
 		} else if (cn24 != null && cn24.equals(Wang_Teletype.getModel())) {
-			Wang700.CN24 = new Wang_Teletype("wang700_707_");
+			Wang_CN24_dev.connect(new Wang_Teletype("wang700_707_"));
 		}
 		// Must be after Keyboard created.
+		// TODO: create list of these and map of menus
+		// TODO: only instantiate if "installed"?
 		Wang700.M730 = new Wang700_Model730();
 		Wang700.M703 = new Wang_PaperTapeReader("wang700_703_image", front_end);
 		Wang700.M705 = new Wang_MicroFace("wang700_705_", front_end);
+}
+if (true) {
+		WangIOExplorer iox = new WangIOExplorer(Wang_UI.getProperties());
+		Wang700.M730 = iox; // compatible use of space
+		// not yet:
+		//Wang_CN24_dev.connect(iox);
+		//Wang_CN36_Bus.registerCN36(iox);
+		//iox.onOff(true);
+}
 
 		Wang700.Help = new Wang700_Help(front_end);
 
@@ -270,16 +282,30 @@ public class w700_fe
 		JMenuItem mi;
 		mu.add(inp.getOutputMenu()); // CN-24 output devices
 
+if (false) {
+		// TODO: loop through all known devices
 		mi = Wang700.M730.getMenu(KeyEvent.VK_D);
-		mi.addActionListener(inp);
-		mu.add(mi);
+		if (mi != null) {
+			mi.addActionListener(inp);
+			mu.add(mi);
+		}
 		mi = Wang700.M703.getMenu(KeyEvent.VK_P);
-		mi.addActionListener(inp);
-		mu.add(mi);
+		if (mi != null) {
+			mi.addActionListener(inp);
+			mu.add(mi);
+		}
 		mi = Wang700.M705.getMenu(KeyEvent.VK_M);
+		if (mi != null) {
+			mi.addActionListener(inp);
+			mu.add(mi);
+		}
+}
+if (true) {
+		mi = Wang700.M730.getMenu(KeyEvent.VK_X);
 		mi.addActionListener(inp);
 		mu.add(mi);
-
+}
+		// TODO: generalize 711/707-style devices (both CN36 and CN24)
 		mu.add(Wang_Teletype.getMenu()); // TTY sub-menu, when active
 
 		mu = new JMenu("Edit");
@@ -341,41 +367,41 @@ class Wang700_SimInput
 	public JMenu getOutputMenu() { return _mu; }
 
 	private void disposeDevice() {
-		if (Wang700.CN24 instanceof Wang_Plotter) {
+		if (Wang_CN24_dev.get() instanceof Wang_Plotter) {
 			_mi712.setText(Wang_Plotter.getName() +
 				" (not installed)");
-			Wang700.CN24.onOff(false);
-		} else if (Wang700.CN24 instanceof Wang_OutputWriter) {
+			Wang_CN24_dev.get().onOff(false);
+		} else if (Wang_CN24_dev.get() instanceof Wang_OutputWriter) {
 			_mi701.setText(Wang_OutputWriter.getName() +
 				" (not installed)");
-			Wang700.CN24.onOff(false);
-		} else if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) {
+			Wang_CN24_dev.get().onOff(false);
+		} else if (Wang_CN24_dev.get() instanceof Wang_PlottingOutputWriter) {
 			_mi702.setText(Wang_PlottingOutputWriter.getName() +
 				" (not installed)");
-			Wang700.CN24.onOff(false);
-		} else if (Wang700.CN24 instanceof Wang_InputOutputWriter) {
+			Wang_CN24_dev.get().onOff(false);
+		} else if (Wang_CN24_dev.get() instanceof Wang_InputOutputWriter) {
 			_mi711.setText(Wang_InputOutputWriter.getName() +
 				" (not installed)");
-			Wang700.CN24.onOff(false);
-		} else if (Wang700.CN24 instanceof Wang_Teletype) {
+			Wang_CN24_dev.get().onOff(false);
+		} else if (Wang_CN24_dev.get() instanceof Wang_Teletype) {
 			_mi707.setText(Wang_Teletype.getName() +
 				" (not installed)");
-			Wang700.CN24.onOff(false);
+			Wang_CN24_dev.get().onOff(false);
 		}
 	}
 
 	private void setupDevice() {
-		if (Wang700.CN24.getFrame() != null) Wang700.CN24.getFrame().addWindowListener(this);
+		if (Wang_CN24_dev.get().getFrame() != null) Wang_CN24_dev.get().getFrame().addWindowListener(this);
 		String model = "";
-		if (Wang700.CN24 instanceof Wang_Plotter) {
+		if (Wang_CN24_dev.get() instanceof Wang_Plotter) {
 			model = Wang_Plotter.getModel();
-		} else if (Wang700.CN24 instanceof Wang_OutputWriter) {
+		} else if (Wang_CN24_dev.get() instanceof Wang_OutputWriter) {
 			model = Wang_OutputWriter.getModel();
-		} else if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) {
+		} else if (Wang_CN24_dev.get() instanceof Wang_PlottingOutputWriter) {
 			model = Wang_PlottingOutputWriter.getModel();
-		} else if (Wang700.CN24 instanceof Wang_InputOutputWriter) {
+		} else if (Wang_CN24_dev.get() instanceof Wang_InputOutputWriter) {
 			model = Wang_InputOutputWriter.getModel();
-		} else if (Wang700.CN24 instanceof Wang_Teletype) {
+		} else if (Wang_CN24_dev.get() instanceof Wang_Teletype) {
 			model = Wang_Teletype.getModel();
 		}
 		try { // if this fails, oh well.
@@ -393,57 +419,57 @@ class Wang700_SimInput
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
 		if (m.getMnemonic() == KeyEvent.VK_1) {
-			if (!(Wang700.CN24 instanceof Wang_OutputWriter)) {
+			if (!(Wang_CN24_dev.get() instanceof Wang_OutputWriter)) {
 				disposeDevice();
-				Wang700.CN24 = new Wang_OutputWriter();
+				Wang_CN24_dev.connect(new Wang_OutputWriter());
 				_mi701.setText(Wang_OutputWriter.getName() +
 						" (installed)");
 				setupDevice();
 			} else {
-				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+				Wang_CN24_dev.get().onOff(!Wang_CN24_dev.get().onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_2) {
-			if (!(Wang700.CN24 instanceof Wang_PlottingOutputWriter)) {
+			if (!(Wang_CN24_dev.get() instanceof Wang_PlottingOutputWriter)) {
 				disposeDevice();
-				Wang700.CN24 = new Wang_PlottingOutputWriter();
+				Wang_CN24_dev.connect(new Wang_PlottingOutputWriter());
 				_mi702.setText(Wang_PlottingOutputWriter.getName() +
 						" (installed)");
 				setupDevice();
 			} else {
-				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+				Wang_CN24_dev.get().onOff(!Wang_CN24_dev.get().onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_3) {
-			if (!(Wang700.CN24 instanceof Wang_InputOutputWriter)) {
+			if (!(Wang_CN24_dev.get() instanceof Wang_InputOutputWriter)) {
 				disposeDevice();
-				Wang700.CN24 = new Wang_InputOutputWriter();
+				Wang_CN24_dev.connect(new Wang_InputOutputWriter());
 				_mi711.setText(Wang_InputOutputWriter.getName() +
 						" (installed)");
 				setupDevice();
 			} else {
-				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+				Wang_CN24_dev.get().onOff(!Wang_CN24_dev.get().onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_4) {
-			if (!(Wang700.CN24 instanceof Wang_Plotter)) {
+			if (!(Wang_CN24_dev.get() instanceof Wang_Plotter)) {
 				disposeDevice();
-				Wang700.CN24 = new Wang_Plotter();
+				Wang_CN24_dev.connect(new Wang_Plotter());
 				_mi712.setText(Wang_Plotter.getName() +
 						" (installed)");
 				setupDevice();
 			} else {
-				Wang700.CN24.onOff(!Wang700.CN24.onOff());
+				Wang_CN24_dev.get().onOff(!Wang_CN24_dev.get().onOff());
 			}
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_5) {
-			if (!(Wang700.CN24 instanceof Wang_Teletype)) {
+			if (!(Wang_CN24_dev.get() instanceof Wang_Teletype)) {
 				disposeDevice();
-				Wang700.CN24 = new Wang_Teletype("wang700_707_");
+				Wang_CN24_dev.connect(new Wang_Teletype("wang700_707_"));
 				_mi707.setText(Wang_Teletype.getName() +
 						" (installed)");
 				setupDevice();
@@ -460,19 +486,24 @@ class Wang700_SimInput
 					"wang700_cn24_device",
 					"");
 			} catch(Exception ee) {}
-			Wang700.CN24 = null;
+			Wang_CN24_dev.connect(null);
 			return;
 		}
+		// TODO: lookup mnemonic in map...
 		if (m.getMnemonic() == KeyEvent.VK_D) {
-			Wang700.M730.pickFile(m);
+			Wang700.M730.menuClick(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_P) {
-			Wang700.M703.pickFile(m);
+			Wang700.M703.menuClick(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_M) {
-			Wang700.M705.pickFile(m);
+			Wang700.M705.menuClick(m);
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_X) {
+			Wang700.M730.menuClick(m);
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_COPY) {
@@ -503,38 +534,38 @@ class Wang700_SimInput
 	}
 
 	public Wang700_SimInput(boolean test, boolean dbg, boolean stop) {
-		if (Wang700.CN24 != null) {
-			if (Wang700.CN24.getFrame() != null) Wang700.CN24.getFrame().addWindowListener(this);
+		if (Wang_CN24_dev.get() != null) {
+			if (Wang_CN24_dev.get().getFrame() != null) Wang_CN24_dev.get().getFrame().addWindowListener(this);
 		}
 
 		_mu = new JMenu("Output Device...");
 		// todo: make this a radio-button sub-menu
 		String status = " (not installed)";
-		if (Wang700.CN24 instanceof Wang_OutputWriter) status = " (installed)";
+		if (Wang_CN24_dev.get() instanceof Wang_OutputWriter) status = " (installed)";
 		_mi701 = new JMenuItem(Wang_OutputWriter.getName() + status,
 					KeyEvent.VK_1);
 		_mi701.addActionListener(this);
 		_mu.add(_mi701);
 		status = " (not installed)";
-		if (Wang700.CN24 instanceof Wang_PlottingOutputWriter) status = " (installed)";
+		if (Wang_CN24_dev.get() instanceof Wang_PlottingOutputWriter) status = " (installed)";
 		_mi702 = new JMenuItem(Wang_PlottingOutputWriter.getName() + status,
 					KeyEvent.VK_2);
 		_mi702.addActionListener(this);
 		_mu.add(_mi702);
 		status = " (not installed)";
-		if (Wang700.CN24 instanceof Wang_InputOutputWriter) status = " (installed)";
+		if (Wang_CN24_dev.get() instanceof Wang_InputOutputWriter) status = " (installed)";
 		_mi711 = new JMenuItem(Wang_InputOutputWriter.getName() + status,
 					KeyEvent.VK_3);
 		_mi711.addActionListener(this);
 		_mu.add(_mi711);
 		status = " (not installed)";
-		if (Wang700.CN24 instanceof Wang_Plotter) status = " (installed)";
+		if (Wang_CN24_dev.get() instanceof Wang_Plotter) status = " (installed)";
 		_mi712 = new JMenuItem(Wang_Plotter.getName() + status,
 					KeyEvent.VK_4);
 		_mi712.addActionListener(this);
 		_mu.add(_mi712);
 		status = " (not installed)";
-		if (Wang700.CN24 instanceof Wang_Teletype) status = " (installed)";
+		if (Wang_CN24_dev.get() instanceof Wang_Teletype) status = " (installed)";
 		_mi707 = new JMenuItem(Wang_Teletype.getName() + status,
 					KeyEvent.VK_5);
 		_mi707.addActionListener(this);
@@ -558,14 +589,14 @@ class Wang700_SimInput
 	public void windowDeactivated(WindowEvent e) { }
 
 	public void windowClosing(WindowEvent e) {
-		if (Wang700.CN24 != null && e.getWindow() == Wang700.CN24.getFrame()) {
-			Wang700.CN24.onOff(false);
+		if (Wang_CN24_dev.get() != null && e.getWindow() == Wang_CN24_dev.get().getFrame()) {
+			Wang_CN24_dev.get().onOff(false);
 			return;
 		}
 	}
 }
 
-class Wang700_Model730 implements Wang_RandIODevice {
+class Wang700_Model730 implements Wang_BlockIODevice {
 	private int _cmd;
 	private int _adr;
 	private boolean _wr;
@@ -635,7 +666,7 @@ class Wang700_Model730 implements Wang_RandIODevice {
 		return n;
 	}
 
-	public void pickFile(JMenuItem m) {
+	public void menuClick(JMenuItem m) {
 		disk_close();
 
 		SuffFileChooser ch = new SuffFileChooser("Mount",
@@ -661,6 +692,9 @@ class Wang700_Model730 implements Wang_RandIODevice {
 
 		disk_open();
 	}
+
+	public boolean isBlockIO() { return true; }
+	public boolean isDevEnabled() { return false; } // TODO: implement
 
 	public boolean start_cn36(int iob, int c) {
 		// TODO: implement device selection.
@@ -750,6 +784,13 @@ System.err.println("sync error");
 	}
 
 	public int getGLRN() { return 0; }
+	public void setGKBD(boolean state) { } // TODO: use this
+
+	public JFrame getFrame() { return null; } // TODO: implement
+	public Component getComponent() { return null; } // TODO: implement
+	public void onOff(boolean on) {} // TODO: implement
+	public boolean onOff() { return false; } // TODO: implement
+	public void setProperties(Wang_Properties p) {} // TODO: implement
 }
 
 class Wang700_Display extends Wang_Display
@@ -1641,7 +1682,7 @@ System.err.println("action");
 			return;
 		}
 		// must be a button, find out which
-		boolean alt = ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0);
+		boolean alt = ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0);
 		int x, y;
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {

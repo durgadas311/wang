@@ -12,6 +12,7 @@ interface Wang_Core extends Runnable {
 
 	// These are needed by the debugging console...
 	public void debugIntr();	// user requested debug mode...
+	public Wang_Debugger getDebug();
 
 	public void run();
 }

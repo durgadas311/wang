@@ -18,7 +18,8 @@ COMMON_CLASSES = \
 		Wang_Properties.class \
 		Wang_PropertyEditor.class \
 		Wang_CharConverter.class \
-		Wang_InputDevice.class \
+		Wang_Peripheral.class \
+		Wang_GroupIODevice.class \
 		Wang_Core.class \
 		Wang_UI.class \
 		Wang_TapeDevice.class \

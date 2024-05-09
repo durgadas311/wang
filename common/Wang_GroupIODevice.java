@@ -1,10 +1,11 @@
-// Copyright (c) 2011,2024 Douglas Miller
+// Copyright (c) 2011,2026 Douglas Miller
 
 
 // e.g. Group 1/2 Devices attached to a Wang "CN-36" port (typically Input only)
 //
 // When the calculator executes GROUP [12] XX-XX it sets up IOB and
-// then strobes XX-XX out to select the device, then halts. 
+// then strobes XX-XX out to select the device, then waits for input
+// from the device, but otherwise processes that as keyboard input.
 //
 // Mode   GROUP   IOB
 // STOP     1     100	(keyboard mode)
@@ -30,8 +31,17 @@
 // 700 Series vs. 600 Series code differences. Example:
 //	Wang_UI.getCore().replyIO(iob, GO);
 // Note that the 'iob' parameter is ignored.
+//
+// There are two classes of devices, "block I/O" and "input only".
+// It may be a convention that GROUP-2 devices are block I/O and
+// GROUP-1 devices are input-only. Block I/O devices will immediately
+// reply with GO when selected, remain selected, and perform their work
+// during the IOB=2/3 protocol phases. Input only devices will send
+// data to the calculator after being selected, and finish with a GO
+// or some other terminating command code.
+//
 
-interface Wang_GroupIODevice
+interface Wang_GroupIODevice extends Wang_Peripheral
 {
 	static String Model = "00";
 	static String Description = "Unknown";
@@ -61,13 +71,15 @@ interface Wang_GroupIODevice
 	// support all? many?
 	public static int SREND = 0x0f30;
 
-	// General-purpose device reset. Issued when IOB is set to 0,
-	// either at PRIME or the end of an I/O sequence. For Group 1/2
-	// devices this ends the "I own the bus" period.
-	void reset();
+	boolean isBlockIO(); // supports IOB2/3 protocols?
+	boolean isDevEnabled(); // did last start_cn36() return true?
 
 	// Process "start" byte-pair in context of Wang Input Device.
-	// Return "true" if this device "owns" that code.
+	// Return "true" if this device is enabled/selected.
+	// There may be a maximum of two devices enabled at a time,
+	// although a given GROUP-1/2 command can only enable 1.
+	// A block I/O device may stay enabled while a input-only
+	// device is being selected and used.
 	// This represents the "negotiation" protocol when the Group I/O
 	// is first issued.
 	boolean start_cn36(int iob, int c);
@@ -75,12 +87,14 @@ interface Wang_GroupIODevice
 	// Process ACK for previous send
 	void do_ack(int iob);
 
+	// an ACK of sorts that input char has been processed
+	void setGKBD(boolean state);
+
 	// Get device's assertion state for GLRN signal (0/1)
 	int getGLRN();
 
-	// returns descriptive name of device. Since an interface can't
-	// define static methods, these can't be enforced.
-	//
+	// returns descriptive name of device.
+	// Used before instantiating class.
+	// Java still can't do static right...
 	// static String getName();
-	// needs to be static, but "java to the rescue" again...
 }

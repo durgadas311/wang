@@ -705,6 +705,8 @@ if (_draw_bar) {
 		onOff(true);
 	}
 
+	public int getRBS() { return 1; } // always ready, for now
+
 	static public String getModel() {
 		return Wang_UI.getSeries() + Model;
 	}

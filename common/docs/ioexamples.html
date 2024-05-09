@@ -1,0 +1,109 @@
+<HTML>
+<BODY>
+
+<H2>Wang I/O Explorer Examples</H2>
+
+The I/O Explorer device is not connected on starting the simulator.
+Go to the "Devices" menu and select the item "I/O Explorer - not connected".
+This will plug-in the device to the simulator and also make the control panel visible.
+
+<H3>Typewriter</H3>
+
+<OL>
+<LI>Set "auto" in the TypeWriter section
+<LI>Recall Pi to the display (alpha SEARCH on the 600)
+<LI>Execute the command to print the display:
+	<UL>
+	<LI>600: I/O 03-09
+	<LI>700: WRITE 03-09
+	</UL>
+The value of Pi to 9 decimal places with 3 leading blanks should appear
+in the "Output" field.
+
+<P>Note how lowercase ells are used instead of the digit one.
+This is because the expected output device is an IBM Selectric which did
+not usually have a digit one on the typeball.
+</OL>
+
+<H3>GROUP 1 Input</H3>
+
+<OL>
+<LI>Set "Addr" field to "0" or blank
+<LI>Select the "Grp1" position of the radio button
+<LI>Select the "num" option next to "Input"
+<LI>In the "Input" field, type a number, composed of digits,
+optionally including decimal point, sign, and "e"  to introduce an exponent
+<LI>Set "auto" (in the Group 1/2 section)
+<LI>Execute a GROUP-1 00-00 command sequence
+</OL>
+
+<P>This should result in the number entry being in the display.
+Note that each character is treated as a number entry key press,
+and the whole string is not interpreted as a floating point value.
+This does not always result in the expected value, but usually does.
+
+<P>If GLRN had been set, then the number entry codes would have been
+stored in program memory starting at the current P.C. and the display
+would have been unchanged.
+
+<H3>Block I/O Write</H3>
+
+<P>"Write" is from the perspective of the calculator. The calculator will be
+sending program steps to the I/O device.
+
+<OL>
+<LI>Set "Addr" field to "0" or blank (in "Group 1/2")
+<LI>Select the "Grp1" position of the radio button (in "Group 1/2")
+<LI>Set "auto" (in the Group 1/2 section)
+<LI>Set "Supported" in the Block I/O section
+<LI>Set "auto" (in the Block I/O section)
+<LI>Execute a GROUP-1 00-00 command sequence (device light should stay on)
+<LI>Execute a I/O command suffix -09 to write 8 bytes to the device
+	<UL>
+	<LI>600: I/O 13-09
+	<LI>700: 08-09
+	</UL>
+</OL>
+
+<P>You should see 4 bytes in the "Header" field and 8 bytes in the
+"Output" field. The bytes will probably be 0 (mostly) since no interesting
+data was provided.
+
+<P>The "Y" display register on the 700, or register [00] on the 600, contains
+the address that is provided in the first 3 bytes of the "Header".
+Placing a more-interesting value in that register will change the bytes
+in the "Header".
+
+<P>The program steps being sent are starting at 0000. Placing something
+other than zeroes in the first program steps will change the data seen in
+the "Output" field.
+
+<P>As long as the device remains active (light on next to "Group 1/2"),
+additional Block I/O commands may be performed. Entering hex, blank-separated,
+values in the "Input" field allows non-zero data to be passed for read commands.
+
+<P>PRIME will de-activate the device, after which the GROUP-1 00-00 command
+must be run again in order to perform more I/O.
+
+<P>The last nibble of the I/O command determines the operation and length:
+<DL>
+<DT>-00 <DD>Read 1 byte from device</DD>
+<DT>-01 <DD>Read 8 bytes from device</DD>
+<DT>-02 <DD>Read 16 bytes from device</DD>
+<DT>-03 <DD>Read 32 bytes from device</DD>
+<DT>-04 <DD>Read 64 bytes from device</DD>
+<DT>-05 <DD>Read 128 bytes from device</DD>
+<DT>-06 <DD>Read 256 bytes from device</DD>
+<DT>-07 <DD>Read 0/64 bytes from device (undocumented)</DD>
+<DT>-08 <DD>Write 1 byte to device</DD>
+<DT>-09 <DD>Write 8 bytes to device</DD>
+<DT>-10 <DD>Write 16 bytes to device</DD>
+<DT>-11 <DD>Write 32 bytes to device</DD>
+<DT>-12 <DD>Write 64 bytes to device</DD>
+<DT>-13 <DD>Write 128 bytes to device</DD>
+<DT>-14 <DD>Write 256 bytes to device</DD>
+<DT>-15 <DD>Write 0/64 bytes to device (undocumented)</DD>
+</DL>
+
+</BODY>
+</HTML>

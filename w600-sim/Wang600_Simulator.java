@@ -521,12 +521,15 @@ class Wang600_Simulator
 
 	// "special key" is pressed (excl. STEP)
 	public void pressCmd(int cmd) {
-		cpu.jam = 0x1000 | cmd;
+		cpu.setJam(cmd);
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp("Key Jam", cmd, 0);
 		}
 		// needs other side-effects... display? clear key buffer?
 		good = 0;
+		if (cmd == 0) { // PRIME is visible to all devices
+			dev_reset();
+		}
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
@@ -558,9 +561,11 @@ class Wang600_Simulator
 
 	public void ackIO(int iob) {
 		// do some validation on iob?
-		setKaKb(0);
+		setGi(0);
 	}
 
+	// device sends byte to calculator. might need translation from
+	// generic to Wang 700 command codes.
 	public void replyIO(int iob, int rep) {
 		// might need to separate from keyboard input, but hardware
 		// doesn't (?)
@@ -586,24 +591,29 @@ class Wang600_Simulator
 		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
 			rep = 0xa0 | (rep - Wang_GroupIODevice.SR0);
 		}
-		setKaKb(rep);
-		// this needs to be done differently, if at all
-		// GKBD pin on connector should reflect KBD going off.
-		// KBD3 (GKBD) active prevents device sending data,
-		// and is implied off by do_ack() and set by GISN.
-		// KBD3 is also on when STEP is pressed (but not in ioc).
-		if ((iob & ~1) == 2) {
-			Wang600.M630.do_ack(iob);
-		} else if (_cn36 != null) {
-			_cn36.do_ack(iob);
-		}
+		setGi(rep);
+// this needs to be done differently, if at all(!)
+// GKBD pin on connector should reflect KBD going off.
+// KBD3 (GKBD) active prevents device sending data,
+// and is implied off by do_ack() and set by GISN.
+// KBD3 is also on when STEP is pressed (but not in ioc).
+//		if ((iob & ~1) == 2) {
+//			Wang600.M630.do_ack(iob);
+//		} else if (_cn36 != null) {
+//			_cn36.do_ack(iob);
+//		}
 	}
 
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
 	public void setKaKb(int key) {
 		cpu.setKaKb(key);
-		keyCodes.add(key);
+		keyCodes.add(key); // only used for the wakeup
+	}
+
+	public void setGi(int key) {
+		cpu.setGi(key);
+		keyCodes.add(key); // only used for the wakeup
 	}
 
 	// This is also used to wakeup the simulator (key < 0)
@@ -691,12 +701,13 @@ class Wang600_Simulator
 		}
 	}
 
+	public Wang_Debugger getDebug() {
+		return _dbg.getDebug();
+	}
+
 	private short[] disp;
 	int good;
 	int lastx;
-
-	// CN-36 "Input" devices (Group 1/2 I/O Protocol)
-	private Wang_GroupIODevice _cn36;	// current active device
 
 	private void refresh(boolean canSleep) {
 		byte n = cpu.n;
@@ -793,40 +804,46 @@ class Wang600_Simulator
 	public void tape_off(int wr) {
 		Wang600.Tape.tape_off(0);
 	}
+	public void dev_reset() {
+		// PRIME pressed, everything is reset
+		if (Wang_CN24_dev.get() != null) {
+			Wang_CN24_dev.get().reset();
+		}
+		Wang_CN36_Bus.resetCN36();
+	}
 	public void dev_out(byte iob, byte c) {
-		if (iob == 0) {
-			_cn36 = null;
-			if (Wang600.CN24 != null) {
-				Wang600.CN24.reset();
-			}
-			Wang600.M630.reset();
-			Wang_CN36_Bus.resetCN36();
-		} else if (iob == 1) { // CN24 output only, 6 bits
+		if (iob == 1) { // "Typewriter", CN24 output only, 6 bits
+			// 600 series does not support "local control codes",
+			// all output is passed to peripheral.
 			c &= 0x3f;
-			if (Wang600.CN24 != null) {
-				Wang600.CN24.do_cn24(c);
+			if (Wang_CN24_dev.get() != null) {
+				Wang_CN24_dev.get().do_cn24(c);
 			}
-		} else if (iob == 2 || iob == 3) { // CN36 Model 630
-			Wang600.M630.do_dev(iob, c);
-		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
-			if (_cn36 != null) {
-				// All known devices are ACK only
-				_cn36.do_ack(iob);
-			} else {
-				_cn36 = Wang_CN36_Bus.startCN36(iob, (c & 0x0ff));
-			}
+		} else { // includes IOB=0 (end of command)
+			Wang_CN36_Bus.doCN36(iob, (c & 0x0ff));
 		}
 	}
+	// Get mode0 switches state, possibly modified by peripherals
 	public int getMode0(boolean clear) {
 		int g = Wang600.Kbd.getMode0(clear);
 		// clear 0010 if glrn?
-		if (_cn36 != null) {
-			g |= (byte)((_cn36.getGLRN() & 1) << 2);
+		if (Wang_CN36_Bus.getGLRN() != 0) {
+			g |= (byte)Wang600_CPU.D12_LRN_L_P;
 		}
 		return g;
 	}
 	public int getMode1(boolean clear) {
 		return Wang600.Kbd.getMode1(clear);
+	}
+	public int getRBS() {
+		if (Wang_CN24_dev.get() != null) {
+			return Wang_CN24_dev.get().getRBS();
+		} else {
+			return 1; // always ready
+		}
+	}
+	public void setGKBD(boolean state) {
+		Wang_CN36_Bus.setGKBD(state);
 	}
 	public void do_printer(int x, byte pr_drum) {
 		Wang600.Prt.do_printer(x, pr_drum);

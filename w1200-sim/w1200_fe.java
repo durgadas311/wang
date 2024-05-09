@@ -1202,6 +1202,8 @@ class Wang1200_Model611 extends JComponent
 			do_char(c);
 		}
 	}
+
+	public int getRBS() { return 1; } // always ready, for now
 }
 
 class Wang1200_Help extends JComponent
