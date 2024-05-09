@@ -1223,7 +1223,7 @@ System.err.println("IOException for " + f);
 			} catch (Exception ee) {}
 			if (r == null) {
 				r = disp.getBounds(null);
-System.err.format("disp %d %d %d %d\n", r.x, r.y, r.width, r.height);
+//System.err.format("disp %d %d %d %d\n", r.x, r.y, r.width, r.height);
 			}
 			flasher();
 			//disp.paintImmediately(r);

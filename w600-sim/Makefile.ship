@@ -38,7 +38,7 @@ COMMON_CLASSES = \
 		Wang_MicroFace.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
-		WangRandIODevice.class \
+		Wang_RandIODevice.class \
 		Wang_Display.class \
 		Wang_Help.class \
 		Wang_Keyboards.class \
