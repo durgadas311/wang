@@ -27,3 +27,5 @@ xcode-%.c: wire-rom-%.txt romerr.awk
 
 wire-rom-%.c: wire-rom-%.txt rom2c.awk
 	awk -f rom2c.awk wire-rom-$*.txt >$@
+
+.PRECIOUS: %.rom
