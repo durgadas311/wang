@@ -1,3 +1,6 @@
+# add "DFLAGS=-v" to the make command to get full disassembly (with codes)
+DFLAGS =
+
 all:
 
 rom: wire-rom-0.rom wire-rom-1.rom wire-rom-2.rom
@@ -8,7 +11,7 @@ exe: xcode ycode zcode
 	objcopy -j .data -O binary $*.o $*.rom
 
 %.dis: %.rom
-	../ucdis -a $< >$@
+	../ucdis $(DFLAGS) -a $< >$@
 
 xcode: xcode.o xcode-1.o xcode-2.o
 	$(CC) -o $@ $^

@@ -26,7 +26,7 @@ Display register 15-15. If key pressed, put code in first 2 digits.
 
 */
 
-u64 ucode[2048] = {
+ucword ucode[2048] = {
 //                  a     m     s
 //            a b z o a b o k s u       j j
 //            i i o p c c p k t b   jad h l

@@ -46,7 +46,7 @@ Display register 15-15 after filling digits with test results
 026: 0 + 0 ->[Zo,CC]; jump 000
 */
 
-u64 ucode[2048] = {
+ucword ucode[2048] = {
 //                  a     m     s
 //            a b z o a b o k s u       j j
 //            i i o p c c p k t b   jad h l
