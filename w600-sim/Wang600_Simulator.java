@@ -196,6 +196,7 @@ class Wang600_Simulator
 
 	public class Wang600_UcodeRom {
 		public byte[] _ucode; // raw ucode from file, 64-bit words
+		public boolean std;
 		// right now, the only override is for mem size, so just hardcode
 		// all that.
 
@@ -222,16 +223,29 @@ class Wang600_Simulator
 				}
 				if (n == 16384) {
 					_ucode = buf;
-
-					// patch mem-size override instruction...
-					int idx = 0x008 * 8;
-					// 'memsize' is in bytes, Wang uses nibbles...
-					byte kk = (byte)((((memsize << 1) - 1) >> 8) & 0x0f);
-					_ucode[idx + 2] |= ((kk & 0x03) << 6);
-					_ucode[idx + 3] |= ((kk >> 2) & 0x03);
+					setupROM(memsize);
 				} else {
 					Wang_UI.fatal("Loading microcode", "Wrong size");
 				}
+			}
+		}
+
+		// If ROM is the standard one, enable sleeps and override memsize
+		private void setupROM(int memsize) {
+			// patch mem-size override instruction...
+			// TODO: more sophisticated tests
+			int idx = 0x008 * 8;
+			std = (_ucode[idx + 0] == 0x1c &&
+				_ucode[idx + 1] == 0x00 &&
+				(_ucode[idx + 2] & 0xff) == 0xc0 &&
+				_ucode[idx + 3] == 0x00 &&
+				_ucode[idx + 4] == 0x70 &&
+				_ucode[idx + 5] == 0x00);
+			if (std) {
+				// 'memsize' is in bytes, Wang uses nibbles...
+				byte kk = (byte)((((memsize << 1) - 1) >> 8) & 0x0f);
+				_ucode[idx + 2] |= ((kk & 0x03) << 6);
+				_ucode[idx + 3] |= ((kk >> 2) & 0x03);
 			}
 		}
 
@@ -847,11 +861,20 @@ class Wang600_Simulator
 
 		_xromFile = Wang_UI.getProperties().getFile("wang600_rom_image", true, Wang_UI.getDir());
 		loadXRom(_xromFile);
+		// For debugging, allow the RAM image to be set to something
+		String ram = Wang_UI.getProperties().getProperty("wang600_ram_image");
+		if (ram != null) try {
+			FileInputStream f = new FileInputStream(ram);
+			f.read(_ram);
+			f.close();
+		} catch (Exception ee) {}
 
 		pr_drum = 0;
 		pr_hammers = 0;
 		pr_tach = 0;
 		pr_col = 0;
+		kb = (byte)0x0f;
+		ka = (byte)0x0f;
 		disp = new short[16];
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
@@ -1249,6 +1272,7 @@ class Wang600_Simulator
 		Wang600_Ucode uu = _rom.fetchUcode(pc);
 		int nxt;
 		int rc = 0;
+		boolean mr = false;
 
 		if (uu.brkpt) {
 			_rom.breakPoint(pc);
@@ -1290,6 +1314,7 @@ class Wang600_Simulator
 			l = t;
 			m = u;
 			n = v;
+			mr = (uu.mop >= 4);
 		}
 
 		byte g = 0;
@@ -1399,6 +1424,8 @@ class Wang600_Simulator
 		case 9:
 			// T.B.D. reset 6184...
 	//fprintf(stderr, "%03x: res (%04x)\n", pc, key);
+			ka = 0;
+			kb = 0;
 			kbd = 0;
 			break;
 		case 10:
@@ -1522,7 +1549,11 @@ class Wang600_Simulator
 		// the following are called in specific order...
 		// keyboard injection of next pc must override all, so is last.
 
-		display_check();	// this might sleep until UI event...
+		if (_rom.std) {
+			display_check();	// this might sleep until UI event...
+		} else {
+			if (mr) refresh(false);
+		}
 
 		//sys->keyboard(sys, &key, 0);
 
