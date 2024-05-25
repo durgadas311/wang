@@ -38,6 +38,9 @@ class Wang600_Simulator
 	byte ov;
 	byte err;
 
+	boolean ioc;
+	boolean z2;
+
 	// ucode subroutine stack
 	int stk1;
 	int stk2;
@@ -631,7 +634,7 @@ class Wang600_Simulator
 			String str = String.format("d1=%01x|d2=%01x", Wang600.Kbd.getMode0(false), Wang600.Kbd.getMode1(false));
 			if (ov != 0) str += "|Prog Err";
 			if (err != 0) str += "|Mach Err";
-			if (keyCodes.size() > 0) str += "|Key Pressed";
+			if (kbd != 0) str += "|Key Pressed";
 			return str;
 		}
 
@@ -768,6 +771,7 @@ class Wang600_Simulator
 
 	public void chgMode2() {} // never called on 600
 
+	// "special key" is pressed (excl. STEP)
 	public void pressCmd(int cmd) {
 		jam = 0x1000 | cmd;
 		if (trace) { // can only be if _dbg != null
@@ -778,11 +782,35 @@ class Wang600_Simulator
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
+	// I/O protocol ("I/O" and "Group 1/2"):
+	// Calc -> Device
+	//	Calc loads KA,KB.
+	//	Calc does MOP15, pulses GISO or TKWS (depends on IOB).
+	// Device -> Calc
+	//	Calc does RESET, GKBD goes OFF (clear-to-send).
+	//	setup GKA,GKB and pulse GISN.
+	//	GKBD (KBD3) is set ON ("do not send").
+	// IOC (I/O Command, not GROUP 1/2)
+	// IOB=2 (command phase):
+	// 	Calc sends cmd (Calc -> Device)
+	//	Device acks by sending 0 (Device -> Calc)
+	// IOB=3 (data phase), cmd write:
+	// 	Calc sends data (Calc -> Device)
+	//	Device acks by sending 0 (Device -> Calc)
+	// IOB=3 (data phase), cmd read:
+	//	Device sends data (Device -> Calc)
+	//	Calculator acks by sending 0 (Calc -> Device)
+	// end of command ('length' bytes sent/recvd):
+	//	Device sends status/error (Device -> Calc)
+	//	Calculator acks (IOB=0)
+	// GROUP I/O:
+	//	Calc sends next code with IOB=4 or IOB=5.
+	//	Device sends 0 or more characters(?)...
+	//	Device sends GO (or ...?)
+
 	public void ackIO(int iob) {
-		// might need to separate from keyboard input, but hardware
-		// doesn't (?)
 		// do some validation on iob?
-		pressKey(0);
+		setKaKb(0);
 	}
 
 	public void replyIO(int iob, int rep) {
@@ -810,13 +838,39 @@ class Wang600_Simulator
 		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
 			rep = 0xa0 | (rep - Wang_GroupIODevice.SR0);
 		}
-		pressKey(rep);
+		setKaKb(rep);
+		// this needs to be done differently, if at all
+		// GKBD pin on connector should reflect KBD going off.
+		// KBD3 (GKBD) active prevents device sending data,
+		// and is implied off by do_ack() and set by GISN.
+		// KBD3 is also on when STEP is pressed (but not in ioc).
+		if ((iob & ~1) == 2) {
+			Wang600.M630.do_ack(iob);
+		} else if (_cn36 != null) {
+			_cn36.do_ack(iob);
+		}
 	}
 
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
-	public void pressKey(int key) {
+	public void setKaKb(int key) {
+		kbd = 1;
+		ka = (byte)((key >> 4) & 0x0f);
+		kb = (byte)(key & 0x0f);
+		z2 = true;
 		keyCodes.add(key);
+	}
+
+	// This is also used to wakeup the simulator (key < 0)
+	public void pressKey(int key) {
+		if (key < 0) {
+			keyCodes.add(key);
+			return;
+		}
+//fprintf(stderr,"%03x: key down %02x (%s)\n", pc, key, z2);
+//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
+		if (ioc || z2) return;
+		setKaKb(key);
 		// needs other side-effects... display?
 	}
 
@@ -1218,9 +1272,6 @@ class Wang600_Simulator
 					} catch(Exception ee) {
 						k = -1;
 					}
-					if (k >= 0) {
-						keyCodes.addFirst(k);
-					}
 					good = 0;
 				}
 			}
@@ -1422,11 +1473,10 @@ class Wang600_Simulator
 			s &= ~8;
 			break;
 		case 9:
-			// T.B.D. reset 6184...
-	//fprintf(stderr, "%03x: res (%04x)\n", pc, key);
 			ka = 0;
 			kb = 0;
 			kbd = 0;
+			z2 = false;
 			break;
 		case 10:
 			s = (byte)((s & 0x0e) | (zo ^ 1));
@@ -1478,6 +1528,9 @@ class Wang600_Simulator
 			gioa = ka;	// gioa = g;
 			giob = kb;	// giob = h;
 			iob = (byte)(br_k & 0x07);
+			ioc = ((iob & 0b110) == 0b010);
+			// hardware triggers GISO here (at CK5).
+			// ucode waits for KBD (after RESET).
 			dev_out();
 			break;
 		}
@@ -1500,28 +1553,9 @@ class Wang600_Simulator
 				break;
 			case 5: nxt |= (cc << 1); break;
 			case 6:
-				int key = -1;
-				if (keyCodes.size() > 0) {
-					// might return -1 for wake-up only,
-					// must ignore in that case.
-					key = keyCodes.remove();
-				}
-				if (key >= 0) {
-//fprintf(stderr,"%03x: chk pe\n", pc, key);
-//if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
-					kbd = 1;
-					ka = (byte)((key >> 4) & 0x0f);
-					kb = (byte)(key & 0x0f);
-					if ((iob & ~1) == 2) {
-						Wang600.M630.do_ack(iob);
-					} else if (_cn36 != null) {
-						_cn36.do_ack(iob);
-					}
-				}
 				nxt |= (kbd << 1);
+				// do here, or pressKey()?
 				if (kbd != 0) {
-					good = 0;
-					kbd = 0;
 					do_blanking();
 				}
 				break;
