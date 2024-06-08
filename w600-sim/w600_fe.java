@@ -1245,6 +1245,7 @@ class Wang600_Keyboard extends Wang_Keyboard
 	int _row;
 	int _col;
 	boolean _shift;
+	boolean _adf;	// "/ADF" is the signal that selects alt func spcl keys
 	int _shift_kbd;
 	int _shift_btn;
 	int _meta_kbd;
@@ -1321,6 +1322,52 @@ class Wang600_Keyboard extends Wang_Keyboard
 		setToggle(!_kbds[y]._keys[x].state, _kbds[y]._keys[x], _kbds[y]._buttons[x]);
 	}
 
+	private void set_group_mode0(int g, int y, int x, boolean alt) {
+		int z;
+		Wang_Keys key = _kbds[y]._keys[x];
+		int mode = key.getMode();
+		int numon = 0;
+		boolean run = false; // RUN also down?
+		boolean couldbe = (alt && (mode == 0 || mode == 4));
+		// The RUN button will only be encountered once, either
+		// it is the button currently pressed or it will be
+		// seen in this 'for' loop (but not both):
+		for (z = 0; z < _kbds[y]._keys.length; ++z) {
+			if (z == x) continue;
+			if (_kbds[y]._keys[z] == null) continue;
+			Wang_Keys key2 = _kbds[y]._keys[z];
+			int tg = key2.getGroup();
+			if (tg != g) continue;
+			// might check event modifiers to see if multiple-downs allowed...
+			int mode2 = key2.getMode();
+			boolean dbldown = (couldbe && mode2 != mode &&
+				(mode2 == 0 || mode2 == 4));
+			if (key2.state) {
+				if (dbldown) {
+					// leave button down...
+					++numon;
+				} else {
+					key2.state = false;
+					_mode0 &= ~key2.getMask();
+					_kbds[y]._buttons[z].setBackground(key2.color);
+				}
+			}
+			// is RUN button (still) down?
+			if (key2.getMode() == 0) run = key2.state;
+		}
+		// never toggle?
+		key.state = !key.state || (numon == 0);
+		if (key.getMode() == 0) run = key.state; // is RUN (now) down?
+		if (key.state) {
+			_mode0 |= key.getMode();
+			_kbds[y]._buttons[x].setBackground(key.altcolor);
+		} else {
+			_mode0 &= ~key.getMask();
+			_kbds[y]._buttons[x].setBackground(key.color);
+		}
+		_adf = (run && _mode0 == 4);
+	}
+
 	private void do_button(boolean shifted, int y, int x) {
 		int code = _kbds[y]._keys[x].getCode();
 		if (_kbds[y]._keys[x].isSHIFT()) {
@@ -1343,7 +1390,11 @@ class Wang600_Keyboard extends Wang_Keyboard
 			return;
 		}
 		if (g != 0) {
-			set_group(g, y, x);
+			if (type == Wang_Keys.MODE0) {
+				set_group_mode0(g, y, x, shifted);
+			} else {
+				set_group(g, y, x);
+			}
 		}
 		if (_kbds[y]._keys[x].isMETA()) {
 			return;
@@ -1360,10 +1411,12 @@ class Wang600_Keyboard extends Wang_Keyboard
 			return;
 		}
 		if (type == Wang_Keys.SPCL) {
-			if (_shift) {
-				code += 4;
+			// TODO: RUN+LEARN only? never _shift?
+			if (_adf || _shift) {
+				code |= 4;
 			}
 			Wang600.Core.pressCmd(code);
+			if (!shifted) setShift(false);
 			return;
 		}
 		if (type == Wang_Keys.MODE1) {

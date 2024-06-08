@@ -134,6 +134,14 @@ for that key.
 </TR>
 </TABLE></UL>
 
+<P>It appears that early 600 models (and all 500 models) used
+"Run-Learn" mode to access the "shifted" (alternate) functions S.M., INS, DEL, and B.S.
+This mode is entered by forcing both the Run and Learn buttons down together.
+Later 600 models may have had a simple modification to the keyboard to allow the
+Shift key to activate the alternate functions. This modification would have
+consisted of adding a diode between the Shift latch output and the /ADF signal
+used to select alternate functions.
+
 <P>In addition, the microcode logic allows for hard-wired overriding
 of certain instructions. The only instruction that is overridden is at 008,
 which is replaced with a "CA = KK; return" instruction where KK is
