@@ -4,25 +4,50 @@
 /*
 Display register 15-15. If key pressed, put code in first 2 digits.
 
-000: V = 0 - 0 - 1 ->[Zo,CC]; RESET; jump 007
-// refresh display from 15-15, break for key press
-001: V = V + 0 + 1 ->[Zo,CC]; jump 002
-002: 0 + 0 ->[Zo,CC]; jump 008[KBD:]
-003: 0 + 0 ->[Zo,CC]; CA = mem(15,15,V), CB = rom(15,15,V); jump 004
-004: U = U + 0 + 1 ->[Zo,CC,SC]; jump 004[CC:]
-005: U = U + 0 + 1 ->[Zo,CC,SC]; jump 004[CC:]
-006: T = T + 0 + 1 ->[Zo,CC,SC]; jump 005[CC:]
-007: 0 + 0 ->[Zo,CC]; jump 001
+Digit    Contents
+  1      Key high digit (last pressed)
+  2      Key low digit (last pressed)
+  3      Key counter
+  4      D1: [STEP|LRN|LST|SCI]
+  5      D2: [----|---|PRT|DEG]
+  6      Special Key addr (last pressed)
+  7      STEP counter
+
+000: CA = 0 + 0 ->[Zo,CC]; jump 010
+001: CA = 0 + 1 ->[Zo,CC]; jump 010
+002: CA = 0 + 2 ->[Zo,CC]; jump 010
+003: CA = 0 + 3 ->[Zo,CC]; jump 010
+004: CA = 0 + 4 ->[Zo,CC]; jump 010
+005: CA = 0 + 5 ->[Zo,CC]; jump 010
+006: CA = 0 + 6 ->[Zo,CC]; jump 010
+007: CA = 0 + 7 ->[Zo,CC]; jump 010
 
 // no key pressed
 008: CA = 0 + D1 ->[Zo,CC]; mem(15,15,4) = CA; jump 009
-009: CA = 0 + D2 ->[Zo,CC]; mem(15,15,5) = CA; jump 003
+009: CA & 8 ->[Zo]; jump 00e[:Zo]
 
 // key pressed
 00a: CA = KA + 0 ->[Zo,CC]; mem(15,15,1) = CA; jump 00b
 00b: CA = KB + 0 ->[Zo,CC]; mem(15,15,2) = CA; jump 00c
 00c: 0 + 0 ->[Zo,CC]; CA = mem(15,15,3), CB = rom(15,15,3); jump 00d
-00d: CA = CA + 0 + 1 ->[Zo,CC,SC]; RESET; mem(15,15,3) = CA; jump 003
+00d: CA = CA + 0 + 1 ->[Zo,CC,SC]; RESET; mem(15,15,3) = CA; jump 013
+
+// STEP pressed
+00e: 0 + 0 ->[Zo,CC]; CA = mem(15,15,7), CB = rom(15,15,7); jump 018
+// (no STEP)
+00f: CA = 0 + D2 ->[Zo,CC]; mem(15,15,5) = CA; jump 013
+
+010: V = 0 - 0 - 1 ->[Zo,CC]; RESET; mem(15,15,6) = CA; jump 011
+// refresh display from 15-15, break for key press
+011: V = V + 0 + 1 ->[Zo,CC]; jump 012
+012: 0 + 0 ->[Zo,CC]; jump 008[KBD:]
+013: 0 + 0 ->[Zo,CC]; CA = mem(15,15,V), CB = rom(15,15,V); jump 014
+014: U = U + 0 + 1 ->[Zo,CC,SC]; jump 014[CC:]
+015: U = U + 0 + 1 ->[Zo,CC,SC]; jump 014[CC:]
+016: T = T + 0 + 1 ->[Zo,CC,SC]; jump 015[CC:]
+017: 0 + 0 ->[Zo,CC]; jump 011
+
+018: CA = CA + 0 + 1 ->[Zo,CC]; mem(15,15,7) = CA; jump 00f
 
 */
 
@@ -30,20 +55,36 @@ ucword ucode[2048] = {
 //                  a     m     s
 //            a b z o a b o k s u       j j
 //            i i o p c c p k t b   jad h l
-[0x000]=UCODE(0,0,3,1,0,1,0,0,9,0,0x004,1,1),
-[0x001]=UCODE(3,0,3,1,1,0,0,0,0,0,0x000,1,0),
-[0x002]=UCODE(0,0,0,0,0,0,0,0,0,0,0x008,6,0),
-[0x003]=UCODE(0,0,0,0,0,0,5,15,0,0,0x004,0,0),
-[0x004]=UCODE(2,0,2,4,1,0,0,0,0,0,0x004,5,0),
-[0x005]=UCODE(2,0,2,4,1,0,0,0,0,0,0x004,5,0),
-[0x006]=UCODE(1,0,1,4,1,0,0,0,0,0,0x004,5,1),
-[0x007]=UCODE(0,0,0,0,0,0,0,0,0,0,0x000,0,1),
+
+[0x000]=UCODE(0,1,6,0,0,0,0,0,0,0,0x010,0,0),
+[0x001]=UCODE(0,1,6,0,0,0,0,1,0,0,0x010,0,0),
+[0x002]=UCODE(0,1,6,0,0,0,0,2,0,0,0x010,0,0),
+[0x003]=UCODE(0,1,6,0,0,0,0,3,0,0,0x010,0,0),
+[0x004]=UCODE(0,1,6,0,0,0,0,4,0,0,0x010,0,0),
+[0x005]=UCODE(0,1,6,0,0,0,0,5,0,0,0x010,0,0),
+[0x006]=UCODE(0,1,6,0,0,0,0,6,0,0,0x010,0,0),
+[0x007]=UCODE(0,1,6,0,0,0,0,7,0,0,0x010,0,0),
+
 [0x008]=UCODE(0,2,6,0,0,0,3,4,0,0,0x008,0,1),
-[0x009]=UCODE(0,3,6,0,0,0,3,5,0,0,0x000,1,1),
+[0x009]=UCODE(6,1,0,5,1,1,0,8,0,0,0x00c,1,4),
+
 [0x00a]=UCODE(4,0,6,0,1,0,3,1,0,0,0x008,1,1),
 [0x00b]=UCODE(5,0,6,0,1,0,3,2,0,0,0x00c,0,0),
 [0x00c]=UCODE(0,0,0,0,0,0,6,3,0,0,0x00c,0,1),
-[0x00d]=UCODE(6,0,6,4,1,0,3,3,9,0,0x000,1,1),
-[0x00e]=0,
-[0x00f]=0,
+[0x00d]=UCODE(6,0,6,4,1,0,3,3,9,0,0x010,1,1),
+
+[0x00e]=UCODE(0,0,0,0,0,0,6,7,0,0,0x018,0,0),
+[0x00f]=UCODE(0,3,6,0,0,0,3,5,0,0,0x010,1,1),
+
+// refresh loop
+[0x010]=UCODE(0,0,3,1,0,1,3,6,9,0,0x010,0,1),
+[0x011]=UCODE(3,0,3,1,1,0,0,0,0,0,0x010,1,0),
+[0x012]=UCODE(0,0,0,0,0,0,0,0,0,0,0x008,6,0),
+[0x013]=UCODE(0,0,0,0,0,0,5,15,0,0,0x014,0,0),
+[0x014]=UCODE(2,0,2,4,1,0,0,0,0,0,0x014,5,0),
+[0x015]=UCODE(2,0,2,4,1,0,0,0,0,0,0x014,5,0),
+[0x016]=UCODE(1,0,1,4,1,0,0,0,0,0,0x014,5,1),
+[0x017]=UCODE(0,0,0,0,0,0,0,0,0,0,0x010,0,1),
+
+[0x018]=UCODE(6,0,6,1,1,0,3,7,0,0,0x00c,1,1),
 };
