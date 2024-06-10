@@ -1390,7 +1390,8 @@ class Wang600_Keyboard extends Wang_Keyboard
 			return;
 		}
 		if (g != 0) {
-			if (type == Wang_Keys.MODE0) {
+			// group must be "1" for RUN/LEARN/... group
+			if (g == 1 && type == Wang_Keys.MODE0) {
 				set_group_mode0(g, y, x, shifted);
 			} else {
 				set_group(g, y, x);
@@ -2289,6 +2290,7 @@ class Wang600_Keyboard_stick extends Wang_Keyboards
 
 		setLayout(gridbag);
 
+		// group must be "1" for RUN/LEARN/... group
 		addPushButton(c, 15, 1, 0, 0,"Run","",Wang_Colors.white2, true,
 			new Wang_Keys(Wang_Colors.white1, Wang_Keys.GROUP(1,Wang_Keys.MODE0_CHG(6,0))));
 		addPushButton(c, 15, 1, 1, 0,"Learn","",Wang_Colors.white2, false,
