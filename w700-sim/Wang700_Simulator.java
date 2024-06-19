@@ -40,6 +40,8 @@ class Wang700_Simulator
 	byte ov;
 	byte err;
 
+	boolean z;
+
 	// simulator (no direct h/w relation)
 	int jam;
 	int next;
@@ -570,7 +572,7 @@ class Wang700_Simulator
 			String str = String.format("d1=%01x", Wang700.Kbd.getMode0(false));
 			if (ov != 0) str += "|Prog Err";
 			if (err != 0) str += "|Mach Err";
-			if (keyCodes.size() > 0) str += "|Key Pressed";
+			if (kbd != 0) str += "|Key Pressed";
 			return str;
 		}
 
@@ -692,10 +694,8 @@ class Wang700_Simulator
 	}
 
 	public void ackIO(int iob) {
-		// might need to separate from keyboard input, but hardware
-		// doesn't (?)
 		// do some validation on iob?
-		pressKey(0);
+		setKaKb(0);
 	}
 
 	public void replyIO(int iob, int rep) {
@@ -723,16 +723,32 @@ class Wang700_Simulator
 		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
 			rep = 0x00 | (rep - Wang_GroupIODevice.SR0);
 		}
-		pressKey(rep);
+		setKaKb(rep);
+		// TODO: review how this should be done.
+		if ((iob & ~1) == 2) {
+			Wang700.M730.do_ack(iob);
+		} else if (_cn36 != null) {
+			_cn36.do_ack(iob);
+		}
 	}
 
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
+
+	public void setKaKb(int key) {
+		kbd = 1;
+		ka = (byte)((key >> 4) & 0x0f);
+		kb = (byte)(key & 0x0f);
+		z = true;
+		keyCodes.add(key);
+	}
 
 	public void pressKey(int key) {
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp(String.format("Key Press %02x", key), -1, 0);
 		}
-		keyCodes.add(key);
+		// TODO: any I/O conditions?
+		if (z) return;
+		setKaKb(key);
 		// needs other side-effects... display?
 	}
 
@@ -1109,9 +1125,6 @@ if (_dbg != null) {
 					} catch(Exception ee) {
 						k = -1;
 					}
-					if (k >= 0) {
-						keyCodes.addFirst(k);
-					}
 					good = 0;
 				}
 			}
@@ -1300,8 +1313,13 @@ if (_dbg != null) {
 			if (iob == 0) {
 				dev_reset();
 			}
+			// might need to capture 'ioc' here
 			break;
-		case 14: gioa = ka; giob = kb; dev_out(); break;
+		case 14:
+			gioa = ka;
+			giob = kb;
+			dev_out();
+			break;
 		}
 
 		// P9
@@ -1327,7 +1345,12 @@ if (_dbg != null) {
 		case 6: s &= ~2; break;
 		case 7: s &= ~4; break;
 		case 8: s &= ~8; break;
-		case 9: kbd = 0; break;
+		case 9:
+			ka = 0;
+			kb = 0;
+			kbd = 0;
+			z = false;
+			break;
 		case 10: s = (byte)((s & 0x0e) | (zo ^ 1)); break;
 		case 11: s = (byte)((s & 0x0d) | (zo << 1)); break;
 		case 12: ov = 1; Wang700.DispX.setOv(ov); break;
@@ -1373,27 +1396,9 @@ if (_dbg != null) {
 			break;
 		case 5: nxt |= (cc << 1); break;
 		case 6:
-			int key = -1;
-			if (keyCodes.size() > 0) {
-				// might return -1 for wake-up only,
-				// must ignore in that case.
-				key = keyCodes.remove();
-			}
-			if (key >= 0) {
-//System.err.format("Key pressed %02x\n", key);
-				kbd = 1;
-				ka = (byte)((key >> 4) & 0x0f);
-				kb = (byte)(key & 0x0f);
-				if ((iob & ~1) == 2) {
-					Wang700.M730.do_ack(iob);
-				} else if (_cn36 != null) {
-					_cn36.do_ack(iob);
-				}
-			}
 			nxt |= (kbd << 1);
+			// do here, or pressKey()?
 			if (kbd != 0) {
-				good = 0;
-				kbd = 0;
 				do_blanking();
 			}
 			break;
