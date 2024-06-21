@@ -10,9 +10,6 @@
 #include <strings.h>
 #include <string.h>
 
-#define BIT0	2	// first bit in word
-#define BITN	43	// last bit in word
-
 typedef unsigned long u64;
 
 u64 rom600[2048] = {0};
@@ -25,10 +22,16 @@ int main(int argc, char **argv) {
 	int adr;
 	int begin = 0x7fc;
 	int end = 0x7ff;
+	int bit0 = 2;	// Wang 500/600
+	int bitn = 43;	// Wang 500/600
 	extern char *optarg;
 
-	while ((x = getopt(argc, argv, "b:e:r:")) != EOF) {
+	while ((x = getopt(argc, argv, "7b:e:r:")) != EOF) {
 		switch (x) {
+		case '7':
+			bit0 = 1;
+			bitn = 43;
+			break;
 		case 'b':
 			begin = strtoul(optarg, NULL, 0) & 0x7ff;
 			break;
@@ -59,8 +62,9 @@ int main(int argc, char **argv) {
 	for (adr = begin; adr <= end; ++adr) {
 		printf("%03x: ", adr);
 		base = rom600[adr];
-		for (x = BITN; x >= BIT0; --x) {
-			putchar((base & (1 << x)) ? '1' : '0');
+		// printf("%012lx ", base);
+		for (x = bitn; x >= bit0; --x) {
+			putchar((base & (1UL << x)) ? '1' : '0');
 		}
 		putchar('\n');
 	}
