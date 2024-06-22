@@ -1251,6 +1251,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 	int _mode0r;
 	int _defreg;
 	boolean _run; // _mode0 doesn't show RUN down, only NOT learn/list/etc
+	boolean modelC;
 
 	public int getMode0(boolean clear) {
 		int code = _mode0;
@@ -1333,7 +1334,9 @@ class Wang700_Keyboard extends Wang_Keyboard
 					++numon;
 				} else {
 					key2.state = false;
-					if (key2.getMode() == 0) _run = key2.state;
+					if (modelC && key2.getMode() == 0) {
+						_run = key2.state;
+					}
 					_mode0 &= ~key2.getMask();
 					_kbds[y]._buttons[z].setBackground(key2.color);
 				}
@@ -1341,7 +1344,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 		}
 		// never toggle?
 		key.state = !key.state || (numon == 0);
-		if (key.getMode() == 0) _run = key.state;
+		if (modelC && key.getMode() == 0) _run = key.state;
 		if (key.state) {
 			_mode0 |= key.getMode();
 			_kbds[y]._buttons[x].setBackground(key.altcolor);
@@ -1408,6 +1411,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 		_meta = 0;
 		_defreg = -1;	// "Y" register is target
 
+		modelC = Wang_UI.getProperties().getProperty("wang700_model").endsWith("C");
 		Dimension dim = new Dimension(500, 25);
 		GridBagConstraints s = new GridBagConstraints();
 		JPanel pan;
@@ -1479,7 +1483,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 		_col = 0;
 		_row += 1;
 
-		kbd = new Wang700_Keyboard_main();
+		kbd = new Wang700_Keyboard_main(modelC);
 		for (x = 0; x < kbd._nkeys; ++x) {
 			kbd._buttons[x].addActionListener(this);
 			kbd._buttons[x].setFocusable(false);
@@ -1668,7 +1672,7 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
-	public Wang700_Keyboard_main() {
+	public Wang700_Keyboard_main(boolean modelC) {
 		_buttons = new JButton[num_keys];
 		_keys = new Wang_Keys[num_keys];
 		_nkeys = 0;
@@ -1870,14 +1874,25 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 		addButton(c,1, 1, 0, 3, "icons/group2.gif",
 			new Wang_Keys(Wang_Colors.pink1, Wang_Keys.PROG_CODE(4,10)));
 		++_col;
-		addButton(c,1, 1, 0, 0, "icons/prime.gif",
-			new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
-		addButton(c,1, 1, 0, 1, "icons/set_pc.gif",
-			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
-		addButton(c,1, 1, 0, 2, "icons/verif_prog.gif",
-			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
-		addButton(c,1, 1, 0, 3, "icons/rec_prog.gif",
-			new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
+		if (modelC) {
+			addButton(c,1, 1, 0, 0, "icons/prime.gif",
+				new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
+			addButton(c,1, 1, 0, 1, "icons/set_pc.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
+			addButton(c,1, 1, 0, 2, "icons/verif_prog.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
+			addButton(c,1, 1, 0, 3, "icons/rec_prog.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
+		} else {
+			addButton(c,1, 1, 0, 0, "icons/prime-0.gif",
+				new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
+			addButton(c,1, 1, 0, 1, "icons/set_pc-0.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
+			addButton(c,1, 1, 0, 2, "icons/verif_prog-0.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
+			addButton(c,1, 1, 0, 3, "icons/rec_prog-0.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
+		}
 		addButton(c,1, 1, 0, 4, "icons/step.gif",
 			new Wang_Keys(Wang_Colors.green1, Wang_Keys.MODE0_CHG(8,8)));
 		++_col;

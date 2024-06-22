@@ -64,6 +64,7 @@ class Wang700_Simulator
 	public byte[] _ram;
 	int memsize;
 	int memmask;
+	boolean modelC;
 
 	public JMenuItem getXRomMenu(int key) {
 		return new JMenuItem("Not Used", key);
@@ -624,7 +625,7 @@ class Wang700_Simulator
 
 		public String ramDump(int adr, int len) {
 			String str = new String();
-			int aa = adr; 
+			int aa = adr;
 			int ln = len;
 			int xx, yy;
 			for (xx = 0; xx < ln;) {
@@ -771,6 +772,7 @@ class Wang700_Simulator
 			memsize = 1024;
 			memmask = 0x03ff;
 		}
+		modelC = model.endsWith("C");
 		romfile = Wang_UI.getProperties().getProperty("wang700_ucode");
 		if (romfile == null) {
 			romfile = "wang" + model.toLowerCase() + ".rom";
@@ -832,7 +834,7 @@ class Wang700_Simulator
 		to_last |= dat;
 		++to_sigc;
 		if ((to_sigc & 0x03) != 0) return;
-		byte bit = 0; 
+		byte bit = 0;
 		byte h = (byte)(to_last & 0x0f);
 		if (h == 0x05) bit = 1;
 		if (++to_bitc == 9) {
@@ -978,6 +980,15 @@ class Wang700_Simulator
 				Wang700.CN24.do_cn24(c);
 			}
 		} else if (iob == 2 || iob == 3) { // CN36 "I/O" commands
+			// Only modelC has working hardware to do this...
+			// It appears that there may have been hardware bug(s)
+			// preventing this from working on earlier models,
+			// and replacing 5927->5975 and 5928->5976 seems to fix
+			// it. It is possible that B, and maybe A, microcode
+			// had the I/O command implemented but it did not work.
+			// Since the I/O command did not have a dedicated key,
+			// it may have simply been a matter of not documenting it.
+			// TODO: prevent this from working if !modelC?
 try {
 			Wang700.M730.do_dev(iob, c);
 } catch (Exception ee) {
