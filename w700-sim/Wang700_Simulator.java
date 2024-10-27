@@ -115,6 +115,7 @@ class Wang700_Simulator
 
 	public class Wang700_UcodeRom {
 		public byte[] _ucode; // raw ucode from file, 64-bit words
+		public boolean std;
 
 		public Wang700_UcodeRom(java.io.InputStream img) {
 			// Can't change _ucode after initial setup (i.e. while running).
@@ -139,11 +140,29 @@ class Wang700_Simulator
 				}
 				if (n == 16384) {
 					_ucode = buf;
-
-					// patch instructions...
+					setupROM(memsize);
 				} else {
 					Wang_UI.fatal("Loading microcode", "Wrong size");
 				}
+			}
+		}
+
+		// If ROM is the standard one, enable sleeps
+		private void setupROM(int memsize) {
+			// TODO: more sophisticated tests.
+			// we don't yet know how all the different
+			// microcode versions differ.
+			// This tests for ROMs derived from 720C...
+			int idx = 0x034 * 8;
+			std = ((_ucode[idx + 0] & 0xff) == 0x02 &&
+				(_ucode[idx + 1] & 0xff) == 0xb3 &&
+				(_ucode[idx + 2] & 0xff) == 0x00 &&
+				(_ucode[idx + 3] & 0xff) == 0x88 &&
+				(_ucode[idx + 4] & 0xff) == 0x14 &&
+				(_ucode[idx + 5] & 0xff) == 0x04);
+			if (std) {
+				// anything to patch?
+//System.err.format("Standard ROM detected\n");
 			}
 		}
 
@@ -1149,6 +1168,11 @@ if (_dbg != null) {
 		Wang700.DispY.do_blanking();
 	}
 
+// Traps for standard "720C" ROM - must change for "REAL" A/B (and 700) ROMs
+//	0x034, 0x472, 431, "Display Refresh"
+//	0x5ed, 0x4ae, 513, "Alpha-Stop"
+//	0x4af, -1, -1, "Alpha-Stop" - debug information only
+
 	private void display_check() {
 		if (pc == 0x252) {
 		}
@@ -1189,6 +1213,7 @@ if (_dbg != null) {
 		Wang700_Ucode uu = _rom.fetchUcode(pc);
 		int nxt;
 		int ret = 0;
+		boolean mr = false;
 
 		if (uu.brkpt) {
 			_rom.breakPoint(pc);
@@ -1307,6 +1332,7 @@ if (_dbg != null) {
 			l = (uu.mop >= 4 ? (byte)15 : t);
 			m = (uu.mop >= 4 ? br_k : u);
 			n = v;
+			mr = true;
 		}
 
 		// P4-5
@@ -1436,7 +1462,11 @@ if (_dbg != null) {
 		// the following are called in specific order...
 		// keyboard injection of next pc must override all, so is last.
 
-		display_check();	// this might sleep until UI event...
+		if (_rom.std) {
+			display_check();	// this might sleep until UI event...
+		} else {
+			if (mr) refresh(false);
+		}
 
 		//sys->keyboard(sys, &key, 0);
 
