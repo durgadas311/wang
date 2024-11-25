@@ -1348,6 +1348,19 @@ printers and plotters. Only 6 bits of data output are provided. The pin-out is:
 	<DD>Ack from device - output was processed
 </DL></UL>
 
+<P>Programming:
+<P><UL><TABLE BORDER>
+<TR><TD>&#945;<BR>(09-02)</TD>
+    <TD>character data...<BR>(00-00 thru 07-15)</TD>
+    <TD>02-02</TD></TR>
+</TABLE></UL>
+<P>Each character is output on CN-24 with IOB set to 001.
+Character data codes are described in
+<A HREF="wang600bycode.html#character">Character Codes</A>.
+Note that codes 04-00 thru 07-15 are plotting variations of
+codes 00-00 thru 03-15 (when device supports plotting).
+<P>Additional two-step codes output formatted numbers or fields of spaces.
+
 <H4>CN-36</H4>
 
 The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
@@ -1440,12 +1453,15 @@ The following codes are used:
 <TR><TD>111</TD></TR>
 </TABLE></UL>
 
-<H5>Devices 100 and 101</H5>
+<H5>Devices 100 and 101 - Input and Device Select</H5>
 
-<P>The "Group I/O" peripherals were fairly limited. The devices generally
-responded to a byte code from the calculator, and then asserted Learn
-(and strobed PRIME as needed) and pushed program steps to the calculator.
-The devices and/or operators orchestrated the interaction.
+<P>These indicate a GROUP 1 or GROUP 2 command, with the GIOA/B outputs
+showing the device address code (code after the GROUP 1/2).
+If a device is configured for the address, it activates and remains
+selected based on the type of device. Some devices only provide input
+to the calculator, and will de-activate when the GO command terminates input.
+Other devices (Block I/O devices) auto-send a GO immediately and remain active until
+a GROUP 1/2 command selects a different device.
 
 <P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
 
@@ -1475,14 +1491,28 @@ The devices and/or operators orchestrated the interaction.
 	</UL>
 </UL>
 
-Note: The calculator cannot tell the difference between codes sent by device and
+<P>Note: The calculator cannot tell the difference between codes sent by device and
 codes entered from keyboard.
 
-<H5>Device 01X</H5>
+<P>Programming:
+<UL>
+<LI>Execute GROUP y xx-xx command to activate device "xx-xx".
+<LI>* Device inputs data to calculator, possibly triggered by user
+    (e.g. keyboard on InputOutputWriters).
+<LI>* Device (or user) sends GO command to terminate input.
+<LI>Calculator returns control to program/user.
+</UL>
+
+<P>* Block I/O devices (below) do not send any input or require user actions.
+
+<H5>Device 01X - Block I/O</H5>
+
+<P>Target device must have been previously selected using a GROUP 1/2 command.
 
 <UL><TABLE BORDER>
-<TR><TD>X=0</TD><TD>Command mode (Calculator to Device)</TD></TR>
-<TR><TD>X=1</TD><TD>Data mode (direction depends on command)</TD></TR>
+<TR><TH>IOB</TH><TH>Meaning</TH></TR>
+<TR><TD>010</TD><TD>Command mode (Calculator to Device)</TD></TR>
+<TR><TD>011</TD><TD>Data mode (direction depends on command)</TD></TR>
 </TABLE></UL>
 
 <P>The protocol is as follows (I/O 13&nbsp;xx command):
@@ -1554,6 +1584,20 @@ keyboard input, and is acknowledged by the act of reading that "keyboard code".
 <P>Each byte sent from the calculator is acknowledged by the device
 by sending a dummy "keyboard code".
 
+<P>Programming:
+
+<UL>
+<LI>(if needed) Execute GROUP 1/2 dd-dd sequence to activate
+    target device "dd-dd".
+<LI>Setup desired device storage address in register 00.
+<LI>Setup desired program step number in register 01.
+<LI>Execute I/O 13-xx sequence to perform desired block I/O operation.
+</UL>
+
+<P>The first step is only required if it was possible that other
+GROUP I/O devices were used since the desired target device was
+last activated.
+
 <P><UL><TABLE BORDER>
 <TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH><TD ROWSPAN=9>&nbsp;</TD>
 	<TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
@@ -1575,8 +1619,9 @@ by sending a dummy "keyboard code".
 	<TD>15</TD><TD>0x80</TD><TD>Write 64 bytes (steps)</TD></TR>
 </TABLE></UL>
 
-<P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 630
-Fixed/Removable Disk. The protocol is a block input/output of program steps,
+<P>The "I/O 13&nbsp;xx" devices include extended memory, dual cassette,
+floppy diskette, as well as the Model 630 Fixed/Removable Disk.
+The protocol is a block input/output of program steps,
 but could be used for (extended) register data as well. Sufficiently sophisticated
 code in ROM could allow all of RAM to be used for registers, and/or implement
 a simple "operating system" that demand-paged program and register data in RAM.

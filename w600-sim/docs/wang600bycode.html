@@ -8,7 +8,22 @@ td.tag {text-align: center;}
 </STYLE>
 </HEAD>
 <BODY>
-<TABLE BORDER>
+
+<P><UL>
+<A HREF="#program"><LI>Program Codes</LI></A>
+<A HREF="#labels"><LI>Program Label Codes</LI></A>
+<A HREF="#registers"><LI>Program Register Codes</LI></A>
+<A HREF="#indirect"><LI>Indirect Codes</LI></A>
+<A HREF="#alpha"><LI>Alpha Codes</LI></A>
+<A HREF="#print"><LI>Print Codes</LI></A>
+<A HREF="#group"><LI>Group I/O Codes</LI></A>
+<A HREF="#block"><LI>Block I/O Codes</LI></A>
+<A HREF="#character"><LI>Character Codes</LI></A>
+</UL>
+
+<P><A NAME="program">Program Codes</A>
+
+<P><TABLE BORDER>
 <TR><TH></TH>
 <TH>00</TH>
 <TH>01</TH>
@@ -319,6 +334,8 @@ td.tag {text-align: center;}
 
 * Two-step command sequences, described below
 
+<P><A NAME="labels">Program Label Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH>SEARCH, MARK, and Call prefixes</TH></TR>
 <TR><TD>The second step is a "label", used to implement goto and call.
@@ -329,6 +346,8 @@ td.tag {text-align: center;}
 	</TD></TR>
 </TABLE>
 
+<P><A NAME="registers">Program Register Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH>STORE and RECALL prefixes</TH></TR>
 <TR><TD>The second step is a register number, 00&nbsp;00 through 15&nbsp;15.
@@ -338,6 +357,8 @@ td.tag {text-align: center;}
 	program listings, recording/loading from tape, and inserting/deleting
 	program steps.</TD></TR>
 </TABLE>
+
+<P><A NAME="indirect">Indirect Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH>INDIR prefix</TH></TR>
@@ -354,6 +375,8 @@ td.tag {text-align: center;}
 	is a variable-length jump. The value is limited to 000 through 999.
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="alpha">Alpha Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>&#945; prefix</TH></TR>
@@ -410,6 +433,8 @@ td.tag {text-align: center;}
 
 </TABLE>
 
+<P><A NAME="print">Print Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Print prefix, and PRINT inside a program</TH></TR>
 <TR><TD>xx&nbsp;00 through xx&nbsp;10</TD>
@@ -458,6 +483,8 @@ td.tag {text-align: center;}
 		<TD>M</TD></TR>
 	</TABLE>
 </TABLE>
+
+<P><A NAME="block">Block I/O Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>I/O prefix</TH></TR>
@@ -521,6 +548,8 @@ td.tag {text-align: center;}
 	</TD></TR>
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="group">Group I/O Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=3>GROUP 1 or GROUP 2 prefix</TH></TR>
@@ -601,6 +630,8 @@ hase been acquired and transferred to the calculator.
 	<TD>Learn Mode</TD>
 	</TR>
 </TABLE>
+
+<P><A NAME="character">Character Codes</A>
 
 <P>
 <TABLE BORDER>

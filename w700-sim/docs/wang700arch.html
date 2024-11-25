@@ -553,7 +553,7 @@ and lost.
 <TR><TD>0x7d4</TD><TD></TD></TR>
 <TR><TD>0x7d5</TD><TD>Number Entry State</TD></TR>
 <TR><TD>0x7d6</TD><TD>Low nibble of direct command (if Prefix State is 08)</TD></TR>
-<TR><TD>0x7d7</TD><TD>Low nibble of I/O command (if Prefix State is 04)</TD></TR>
+<TR><TD>0x7d7</TD><TD>Low nibble of WRITE command (if Prefix State is 04)</TD></TR>
 <TR><TD>0x7d8</TD><TD>Extended Math State</TD></TR>
 <TR><TD>0x7d9</TD><TD></TD></TR>
 <TR><TD>0x7da</TD><TD>other state 10</TD></TR>
@@ -568,7 +568,7 @@ and lost.
 <DT><B>Prefix State</B><DD>
 <TABLE BORDER>
 <TR><TD>00 = no prefix</TD></TR>
-<TR><TD>04 = I/O, MARK</TD></TR>
+<TR><TD>04 = WRITE, MARK</TD></TR>
 <TR><TD>08 = Direct (incl 12 xx)</TD></TR>
 <TR><TD>12 = SEARCH</TD></TR>
 <TR><TD>01 = Running (OR'ed with above)</TD></TR>
@@ -808,6 +808,19 @@ printers and plotters. Only 6 bits of data output are provided. The pin-out is:
 	<DD>Ack from device - output was processed
 </DL></UL>
 
+<P>Programming:
+<P><UL><TABLE BORDER>
+<TR><TD>WRITE<BR>ALPHA</TD>
+    <TD>character data...<BR>(00-00 thru 07-15)</TD>
+    <TD>END<BR>ALPHA</TD></TR>
+</TABLE></UL>
+<P>Each character is output on CN-24 with IOB set to 001.
+Character data codes are described in
+<A HREF="wang700bycode.html#character">Character Codes</A>.
+Note that codes 04-00 thru 07-15 are plotting variations of
+codes 00-00 thru 03-15 (when device supports plotting).
+<P>Additional two-step codes output formatted numbers or fields of spaces.
+
 <H4>CN-36</H4>
 
 The CN-36 (Centronix 36-pin connector) is bi-directional and multi-device
@@ -890,22 +903,25 @@ The following codes are used:
 <TR><TH>IOB</TH><TH>Device</TH><TH>Command(s)</TH></TR>
 <TR><TD>000</TD><TD COLSPAN=2 BGCOLOR="lightgray">no device</TD></TR>
 <TR><TD>001</TD><TD BGCOLOR="lightgray">CN-24 (no device on CN-36)</TD>
-			<TD BGCOLOR="lightgray">ALPHA ... 02&nbsp;02<BR>
-					I/O 00&nbsp;xx thru 09&nbsp;xx<BR>
-					I/O 12&nbsp;xx</TD></TR>
-<TR><TD>01X</TD><TD>Model 730 Disk</TD><TD>I/O 13&nbsp;xx</TD></TR>
+			<TD BGCOLOR="lightgray">WRITE&nbsp;ALPHA ... END&nbsp;ALPHA<BR>
+					WRITE 00&nbsp;xx thru 09&nbsp;xx<BR>
+					WRITE 12&nbsp;xx</TD></TR>
+<TR><TD>01X</TD><TD>Block I/O</TD><TD>08&nbsp;xx</TD></TR>
 <TR><TD>100</TD><TD ROWSPAN=4>Various<BR>Peripherals</TD><TD>GROUP&nbsp;1 xx&nbsp;xx from Keyboard</TD></TR>
 <TR><TD>101</TD><TD>GROUP&nbsp;2 xx&nbsp;xx from Keyboard</TD></TR>
 <TR><TD>110</TD><TD>GROUP&nbsp;1 xx&nbsp;xx in Program</TD></TR>
 <TR><TD>111</TD><TD>GROUP&nbsp;2 xx&nbsp;xx in Program</TD></TR>
 </TABLE></UL>
 
-<H5>Devices 100 and 101 (110 and 111)</H5>
+<H5>Devices 100 and 101 (110 and 111) - Input and Device Select</H5>
 
-<P>The "Group I/O" peripherals were fairly limited. The devices generally
-responded to a byte code from the calculator, and then asserted Learn
-(and strobed PRIME as needed) and pushed program steps to the calculator.
-The devices and/or operators orchestrated the interaction.
+<P>These indicate a GROUP 1 or GROUP 2 command, with the GIOA/B outputs
+showing the device address code (code after the GROUP 1/2).
+If a device is configured for the address, it activates and remains
+selected based on the type of device. Some devices only provide input
+to the calculator, and will de-activate when the GO command terminates input.
+Other devices (Block I/O devices) auto-send a GO immediately and remain active until
+a GROUP 1/2 command selects a different device.
 
 <P>The protocol is as follows (GROUP&nbsp;y xx&nbsp;xx command):
 
@@ -937,21 +953,33 @@ The devices and/or operators orchestrated the interaction.
 	</UL>
 </UL>
 
-Note: The calculator cannot tell the difference between codes sent by device and
+<P>Note: The calculator cannot tell the difference between codes sent by device and
 codes entered from keyboard.
 
-<H5>Device 01X</H5>
+<P>Programming:
+<UL>
+<LI>Execute GROUP y xx-xx command to activate device "xx-xx".
+<LI>* Device inputs data to calculator, possibly triggered by user
+    (e.g. keyboard on InputOutputWriters).
+<LI>* Device (or user) sends GO command to terminate input.
+<LI>Calculator returns control to program/user.
+</UL>
+
+<P>* Block I/O devices (below) do not send any input or require user actions.
+
+<H5>Device 01X - Block I/O</H5>
 
 <UL><TABLE BORDER>
-<TR><TD>X=0</TD><TD>Command mode (Calculator to Device)</TD></TR>
-<TR><TD>X=1</TD><TD>Data mode (direction depends on command)</TD></TR>
+<TR><TH>IOB</TH><TH>Meaning</TH></TR>
+<TR><TD>010</TD><TD>Command mode (Calculator to Device)</TD></TR>
+<TR><TD>011</TD><TD>Data mode (direction depends on command)</TD></TR>
 </TABLE></UL>
 
-<P>The protocol is as follows (I/O 13&nbsp;xx command):
+<P>The protocol is as follows (08&nbsp;xx command):
 
 <UL>
 <LI>The calculator sends the 3-byte address equivalent
-of the integer contents of register 00, most significant byte first, all with IOB=010
+of the integer contents of Y, most significant byte first, all with IOB=010
 (command mode)
 	<UL>
 	For each byte:
@@ -1016,6 +1044,20 @@ keyboard input, and is acknowledged by the act of reading that "keyboard code".
 <P>Each byte sent from the calculator is acknowledged by the device
 by sending a dummy "keyboard code".
 
+<P>Programming:
+
+<UL>
+<LI>(if needed) Execute GROUP 1/2 dd-dd sequence to activate
+    target device "dd-dd".
+<LI>Setup desired device storage address in Y.
+<LI>Setup desired program step number in X.
+<LI>Execute 08-xx command to perform desired block I/O operation.
+</UL>
+
+<P>The first step is only required if it was possible that other
+GROUP I/O devices were used since the desired target device was
+last activated.
+
 <P><UL><TABLE BORDER>
 <TR><TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH><TD ROWSPAN=9>&nbsp;</TD>
 	<TH>xx</TH><TH>Size<BR>Code</TH><TH>Meaning</TH></TR>
@@ -1037,8 +1079,9 @@ by sending a dummy "keyboard code".
 	<TD>15</TD><TD>0x80</TD><TD>(nothing)</TD></TR>
 </TABLE></UL>
 
-<P>The "I/O 13&nbsp;xx" devices may not have been limited to the Model 730
-Fixed/Removable Disk. The protocol is a block input/output of program steps,
+<P>The "Block I/O" (code 08&nbsp;xx) devices include extended memory, dual cassette,
+floppy diskette, as well as the Model 730 Fixed/Removable Disk.
+The protocol is a block input/output of program steps,
 but could be used for (extended) register data as well. Sufficiently sophisticated
 code in ROM could allow all of RAM to be used for registers, and/or implement
 a simple "operating system" that demand-paged program and register data in RAM.

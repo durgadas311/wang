@@ -11,6 +11,19 @@ td.tag {text-align: center;}
 
 <P><B>PRELIMINARY</B>
 
+<P><UL>
+<A HREF="#program"><LI>Program Codes</LI></A>
+<A HREF="#labels"><LI>Program Label Codes</LI></A>
+<A HREF="#registers"><LI>Program Register Codes</LI></A>
+<A HREF="#alpha"><LI>WRITE ALPHA Codes</LI></A>
+<A HREF="#print"><LI>WRITE (Print) Codes</LI></A>
+<A HREF="#group"><LI>Group I/O Codes</LI></A>
+<A HREF="#block"><LI>Block I/O Codes</LI></A>
+<A HREF="#character"><LI>Character Codes</LI></A>
+</UL>
+
+<P><A NAME="program">Program Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH></TH>
 <TH>00</TH>
@@ -335,6 +348,8 @@ will map directly to their corresponding codes in the
 range 00-00 to 07-15.
 </UL>
 
+<P><A NAME="registers">Program Register Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH>DIRECT prefixes (incl. STORE/RECALL Y)</TH></TR>
 <TR><TD>The second step is a register number, aa&nbsp;bb,
@@ -347,12 +362,16 @@ range 00-00 to 07-15.
 	</TD></TR>
 </TABLE>
 
+<P><A NAME="labels">Program Label Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH>SEARCH and MARK prefixes</TH></TR>
 <TR><TD>The second step is a "label", used to implement goto and call.
 	Any code may be used, however END&nbsp;PROG should be avoided.<BR>
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="alpha">WRITE ALPHA Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=3>WRITE ALPHA prefix</TH></TR>
@@ -528,6 +547,8 @@ For example, prior to WRITE&nbsp;ALPHA 10<SUP>X</SUP> the X register must have a
 two-digit integer (i.e. some whole number 10..99). Other codes typically require a
 single-digit number (1..9).
 
+<P><A NAME="print">WRITE (Print) Codes</A>
+
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>WRITE prefix</TH></TR>
 <TR><TD>00&nbsp;00 through 09&nbsp;15</TD>
@@ -539,6 +560,8 @@ single-digit number (1..9).
 	<TD>Print field of xx blanks to OutputWriter.
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="group">Group I/O Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>GROUP 1 prefix</TH></TR>
@@ -563,6 +586,8 @@ single-digit number (1..9).
 	From keyboard, issues XS=5 instead of 7.
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="block">Block I/O Codes</A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>08&nbsp;00 through 08&nbsp;15 (I/O) - Random-Access Device I/O</TH></TR>
@@ -612,6 +637,8 @@ single-digit number (1..9).
 	</TABLE>
 	</TD></TR>
 </TABLE>
+
+<P><A NAME="character">Character Codes</A>
 
 <P>
 <TABLE BORDER>
