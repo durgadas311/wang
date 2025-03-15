@@ -13,6 +13,12 @@ exe: xcode ycode zcode
 %.dis: %.rom
 	../ucdis $(DFLAGS) -a $< >$@
 
+W600-%.h: W600-%.txt txt2c.awk
+	awk -f txt2c.awk $< >$@
+
+W600-%.o: W600-%.h W600-CC7681.c
+	$(CC) -c W600-CC7681.c -o $@ -DUCODE_FILE=$<
+
 xcode: xcode.o xcode-1.o xcode-2.o
 	$(CC) -o $@ $^
 
@@ -31,4 +37,4 @@ xcode-%.c: wire-rom-%.txt romerr.awk
 wire-rom-%.c: wire-rom-%.txt rom2c.awk
 	awk -f rom2c.awk wire-rom-$*.txt >$@
 
-.PRECIOUS: %.rom
+.PRECIOUS: %.rom W600-%.h

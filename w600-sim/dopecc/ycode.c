@@ -26,6 +26,7 @@ u64 chkrom[2048];
 char *bit_names[NBITS] = {
 [0]  = "  ?0",
 [1]  = "  ?1",
+#ifdef WIRE_WEAVE
 [2]  = " jl0 L16B L37D L37A",
 [3]  = " jl1 L16A L37D L37A",
 [4]  = " jl2 L17B L37D L37A",
@@ -68,6 +69,50 @@ char *bit_names[NBITS] = {
 [41] = " ai0 L35A L38F L38B",
 [42] = " ai1 L36B L38F L38B",
 [43] = " ai2 L36A L38F L38B",
+#else
+[2]  = " jl0 L18",
+[3]  = " jl1 L18",
+[4]  = " jl2 L19",
+[5]  = " jh0 L19",
+[6]  = " jh1 L19",
+[7]  = " jh2 L19",
+[8]  = "jad0 L17",
+[9]  = "jad1 L17",
+[10] = "jad2 L17",
+[11] = "jad3 L17",
+[12] = "jad4 L20",
+[13] = "jad5 L20",
+[14] = "jad6 L20",
+[15] = "jad7 L20",
+[16] = "jad8 L21",
+[17] = " sub L21",
+[18] = " st0 L21",
+[19] = " st1 L21",
+[20] = " st2 L22",
+[21] = " st3 L22",
+[22] = " kk0 L22",
+[23] = " kk1 L22",
+[24] = " kk2 L23",
+[25] = " kk3 L23",
+[26] = "mop0 L23",
+[27] = "mop1 L23",
+[28] = "mop2 L24",
+[29] = "mop3 L24",
+[30] = "  bc L24",
+[31] = "  ac L24",
+[32] = "aop0 L25",
+[33] = "aop1 L25",
+[34] = "aop2 L25",
+[35] = " zo0 L25",
+[36] = " zo1 L26",
+[37] = " zo2 L26",
+[38] = " bi0 L26",
+[39] = " bi1 L26",
+[40] = " bi2 L27",
+[41] = " ai0 L27",
+[42] = " ai1 L27",
+[43] = " ai2 L27",
+#endif
 };
 
 int get_rom(u64 *buf, int len, char *rom) {
@@ -144,11 +189,16 @@ int main(int argc, char **argv) {
 		memset(plus, 0, sizeof(plus));
 		memset(minus, 0, sizeof(minus));
 		saw = 0;
+#ifdef WIRE_WEAVE
 		skip = (!noskip && (x == 0x008 || /* memory size subroutine */
 			x == 0x474 || x == 0x49c ||
 			x == 0x4d2 || x == 0x4fe || x == 0x4ff ||
 			x == 0x7bd)) || x >= 0x7fc;
 		bad = (skip || (!nobad && (x == 0x055 || x == 0x248 || x == 0x352 || x == 0x512)));
+#else
+		skip = 0;
+		bad = 0;
+#endif
 		check = (base ^ chkrom[x]) & 0x0fffffffffffull;
 		while (!bad && check) {
 			b = ffsl(check) - 1;
