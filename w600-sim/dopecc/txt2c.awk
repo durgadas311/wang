@@ -14,10 +14,10 @@
 
 	ac=substr(aa,1,1);
 	ai=substr(aa,2,1);
-	aop=substr(ab,1,1);
-	bc=substr(ab,2,1);
+	aop=substr(ab,2,1);
+	bc=substr(ab,1,1);
 
-	if (ssb = "J") {
+	if (ssb == "J") {
 		ssb=0;
 	} else {
 		ssb=1;
