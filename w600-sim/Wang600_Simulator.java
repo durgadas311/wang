@@ -8,48 +8,11 @@ import java.util.Arrays;
 // Implements the Wang600 hardware. Does not provide any debug/trace support.
 
 class Wang600_Simulator
-	implements Wang_Core
+	implements Wang_FrontPanel, Wang_Core
 {
 	final String ident = "$Id: Wang600_Simulator.java,v 1.13 2014/01/26 14:52:56 drmiller Exp $";
-	// CPU registers.
-	// ucode accessible
-	byte s;
-	byte t;
-	byte u;
-	byte v;
-	byte ca;
-	byte cb;
-	byte ka;
-	byte kb;
-	// internal hardware accessible
-	byte l;
-	byte m;
-	byte n;
-	byte rb;
-	byte gioa;
-	byte giob;
-	byte iob;
-
-	// status flags (1 bit)
-	byte zo;
-	byte cc;
-	byte sc;
-	byte kbd;
-	byte ov;
-	byte err;
-
-	boolean ioc;
-	boolean z2;
-
-	// ucode subroutine stack
-	int stk1;
-	int stk2;
 
 	// simulator (no direct h/w relation)
-	int jam;
-	int next;
-	int pc;
-	long cycles;
 	long cylimit;
 	boolean run_sim;
 
@@ -58,25 +21,13 @@ class Wang600_Simulator
 	boolean trc_raw;
 	FileOutputStream trc_fp;
 
-	byte pr_drum;
-	int pr_hammers;
-	byte pr_tach;
-	int pr_col;
-
-	static final int D10_FP = 0x01;
-	static final int D11_LST_L_P = 0x02;
-	static final int D12_LRN_L_P = 0x04;
-	static final int D13_STEP = 0x08;
-
-	static final int D20_DEGREES = 0x01;
-	static final int D21_PRT_ON = 0x02;
-
 	int memsize;
 	int memmask;
 	public byte[] _ram;
 	public byte[] _xrom;
 
 	private File _xromFile;
+	private Wang600_CPU cpu;
 
 	public JMenuItem getXRomMenu(int key) {
 		String status = "none installed";
@@ -289,41 +240,41 @@ class Wang600_Simulator
 		}
 
 		public int getPC() {
-			return pc;
+			return cpu.pc;
 		}
 		public int getReg(String reg) {
 			if (reg.equalsIgnoreCase("s")) {
-				return s;
+				return cpu.s;
 			} else if (reg.equalsIgnoreCase("t")) {
-				return t;
+				return cpu.t;
 			} else if (reg.equalsIgnoreCase("u")) {
-				return u;
+				return cpu.u;
 			} else if (reg.equalsIgnoreCase("v")) {
-				return v;
+				return cpu.v;
 			} else if (reg.equalsIgnoreCase("ca")) {
-				return ca;
+				return cpu.ca;
 			} else if (reg.equalsIgnoreCase("cb")) {
-				return cb;
+				return cpu.cb;
 			} else if (reg.equalsIgnoreCase("ka")) {
-				return ka;
+				return cpu.ka;
 			} else if (reg.equalsIgnoreCase("kb")) {
-				return kb;
+				return cpu.kb;
 			} else if (reg.equalsIgnoreCase("gioa")) {
-				return gioa;
+				return cpu.gioa;
 			} else if (reg.equalsIgnoreCase("giob")) {
-				return giob;
+				return cpu.giob;
 			} else if (reg.equalsIgnoreCase("iob")) {
-				return iob;
+				return cpu.iob;
 			} else if (reg.equalsIgnoreCase("ov")) {
-				return ov;
+				return cpu.ov;
 			} else if (reg.equalsIgnoreCase("err")) {
-				return err;
+				return cpu.err;
 			} else if (reg.equalsIgnoreCase("pc")) {
-				return pc;
+				return cpu.pc;
 			} else if (reg.equalsIgnoreCase("stk1")) {
-				return stk1;
+				return cpu.stk1;
 			} else if (reg.equalsIgnoreCase("stk2")) {
-				return stk2;
+				return cpu.stk2;
 			} else {
 				return -1;
 			}
@@ -331,45 +282,49 @@ class Wang600_Simulator
 
 		public int setReg(String reg, int val) {
 			if (reg.equalsIgnoreCase("s")) {
-				s = (byte)val;
+				cpu.s = (byte)val;
 			} else if (reg.equalsIgnoreCase("t")) {
-				t = (byte)val;
+				cpu.t = (byte)val;
 			} else if (reg.equalsIgnoreCase("u")) {
-				u = (byte)val;
+				cpu.u = (byte)val;
 			} else if (reg.equalsIgnoreCase("v")) {
-				v = (byte)val;
+				cpu.v = (byte)val;
 			} else if (reg.equalsIgnoreCase("ca")) {
-				ca = (byte)val;
+				cpu.ca = (byte)val;
 			} else if (reg.equalsIgnoreCase("cb")) {
-				cb = (byte)val;
+				cpu.cb = (byte)val;
 			} else if (reg.equalsIgnoreCase("ka")) {
-				ka = (byte)val;
+				cpu.ka = (byte)val;
 			} else if (reg.equalsIgnoreCase("kb")) {
-				kb = (byte)val;
+				cpu.kb = (byte)val;
 			} else if (reg.equalsIgnoreCase("gioa")) {
-				gioa = (byte)val;
+				cpu.gioa = (byte)val;
 			} else if (reg.equalsIgnoreCase("giob")) {
-				giob = (byte)val;
+				cpu.giob = (byte)val;
 			} else if (reg.equalsIgnoreCase("iob")) {
-				iob = (byte)(val & 0x07);
+				cpu.iob = (byte)(val & 0x07);
 			} else if (reg.equalsIgnoreCase("ov")) {
-				ov = (byte)(val != 0 ? 1 : 0);
+				cpu.ov = (byte)(val != 0 ? 1 : 0);
 			} else if (reg.equalsIgnoreCase("err")) {
-				err = (byte)(val != 0 ? 1 : 0);
+				cpu.err = (byte)(val != 0 ? 1 : 0);
 			} else if (reg.equalsIgnoreCase("pc")) {
-				pc = val & 0x7ff;
+				cpu.pc = val & 0x7ff;
 			} else if (reg.equalsIgnoreCase("stk1")) {
-				stk1 = val & 0x7ff;
+				cpu.stk1 = val & 0x7ff;
 			} else if (reg.equalsIgnoreCase("stk2")) {
-				stk2 = val & 0x7ff;
+				cpu.stk2 = val & 0x7ff;
 			} else {
 				return -1;
 			}
 			return getReg(reg);
 		}
 
+		public String disas(int adr, boolean raw) {
+			return cpu.disas(adr, raw);
+		}
+
 		public long relCycleLimit(long num) {
-			cylimit = cycles + num;
+			cylimit = cpu.cycles + num;
 			return cylimit;
 		}
 
@@ -386,188 +341,15 @@ class Wang600_Simulator
 		}
 
 		public int getRamAdr() {
-			return ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
+			return ((cpu.l & 0x0f) << 8) |
+				((cpu.m & 0x0f) << 4) |
+				(cpu.n & 0x0f);
 		}
 
 		public long getCycles() {
-			return cycles;
+			return cpu.cycles;
 		}
 
-		public String disas(int adr, boolean raw) {
-			Wang600_Simulator.Wang600_Ucode uu = getUcode(adr);
-			String stack = new String();;
-			int k = uu.kk;
-			int nxt = uu.jad << 2;
-			if (uu.jh < 2) {
-				nxt |= (uu.jh << 1);
-			}
-			if (uu.jl < 2) {
-				nxt |= (uu.jl << 0);
-			}
-			if (uu.jl == 7) {
-				stack += "return";
-			} else {
-				if (uu.sub != 0) {
-					stack += "call";
-				} else {
-					stack += "jump";
-				}
-				stack += String.format(" %03x", nxt);
-				if (uu.jh >= 2 || uu.jl >= 2) {
-					stack += "[";
-					switch(uu.jh) {
-					case 2: stack += "S<1>"; break;
-					case 3: stack += "S<3>"; break;
-					case 4: stack += "OV"; break;
-					case 5: stack += "CC"; break;
-					case 6: stack += "KBD"; break;
-					}
-					stack += ":";
-					switch(uu.jl) {
-					case 2: stack += "S<0>"; break;
-					case 3: stack += "S<2>"; break;
-					case 4: stack += "Zo"; break;
-					case 5: stack += "Q?"; break;
-					case 6: stack += "SC"; break;
-					case 7: stack += "1?"; break;
-					}
-					stack += "]";
-				}
-			}
-			String h;
-			switch(uu.ai) {
-			case 0: h = "S"; break;
-			case 1: h = "T"; break;
-			case 2: h = "U"; break;
-			case 3: h = "V"; break;
-			case 4: h = "KA"; break;
-			case 5: h = "KB"; break;
-			case 6: h = "CA"; break;
-			case 7: h = "CB"; break;
-			default: h = ""; break;
-			}
-			String g;
-			switch(uu.bi) {
-			case 0: g = "0"; break;
-			case 1: g = Integer.toString(k); break;
-			case 2: g = "D1"; break;
-			case 3: g = "D2"; break;
-			case 4: g = "KA"; break;
-			case 5: g = "KB"; break;
-			case 6: g = "CA"; break;
-			case 7: g = "CB"; break;
-			default: g = ""; break;
-			}
-
-			if (uu.ac == 0) h = "0"; // "15"? "0"? ???
-			String ops = "+++++&|$";
-			if (uu.bc != 0) ops = "-----&^$";
-			String alu;
-			if (uu.aop == 7) {
-				alu = "0";
-			} else {
-				alu = h + " " + ops.substring(uu.aop, uu.aop + 1) + " " + g;
-				switch (uu.aop) {
-				case 1:
-				case 4:
-					alu += " " + ops.substring(uu.aop, uu.aop + 1) + " 1";
-					break;
-				case 3:
-					alu += " " + ops.substring(uu.aop, uu.aop + 1) + " SC";
-					break;
-				}
-				alu += " ->[Zo";
-				if (uu.aop < 5) {
-					alu += ",CC";
-					switch (uu.aop) {
-					case 2:
-					case 3:
-					case 4:
-						alu += ",SC";
-						break;
-					}
-				}
-				alu += "]";
-			}
-			String acc = null;
-			String mach = null;
-			if (uu.st >=1 && uu.st <= 8) {
-				acc = String.format("S<%d>=%d", (uu.st - 1) & 3, ((uu.st - 1) >> 2) ^ 1);
-			} else {
-				switch(uu.st) {
-				case 0: /* sprintf(mach, "NOP"); */ break;
-				case 9: mach = "RESET"; break;
-				case 10: acc = "S<0>=!Z"; break;
-				case 11: acc = "S<1>=Z"; break;
-				case 12: mach = "OV=1"; break;
-				case 13: acc = "S=0"; break;
-				case 14: mach = "ERR=1"; break;
-				}
-			}
-			String targ = new String();
-			if (targ.length() > 0 && uu.zo != 7) {	// always false???
-				targ += " = ";
-			}
-			switch(uu.zo) {
-			case 0:	if (uu.st == 15) targ += "S"; break;
-			case 1:	targ += "T"; break;
-			case 2:	targ += "U"; break;
-			case 3:	targ += "V"; break;
-			case 4:	targ += "KA"; break;
-			case 5:	targ += "KB"; break;
-			case 6:	targ += "CA"; break;
-			}
-			if (targ.length() > 0) {
-				targ += " = ";
-			}
-
-			String opA = null;
-			switch(uu.mop) {
-			case 1:	opA = "mem(T,U,V) = CA"; break;
-			case 2:	opA = String.format("mem(15,%d,V) = CA", k); break;
-			case 3:	opA = String.format("mem(15,15,%d) = CA", k); break;
-			case 4:	opA = "CA = mem(T,U,V), CB = rom(T,U,V)"; break;
-			case 5:	opA = String.format("CA = mem(15,%d,V), CB = rom(15,%d,V)", k, k); break;
-			case 6:	opA = String.format("CA = mem(15,15,%d), CB = rom(15,15,%d)", k, k); break;
-			case 7:	opA = "KBP <<+ KB<0>"; break;
-			case 8:	opA = "PPF=1"; break;
-			case 9:	opA = "<A9>"; break;
-			case 10:	opA = "KB<0> = MHG/MHO"; break;
-			case 11:	opA = "WDT = KB<0>"; break;
-			case 12:	opA = "KA=PC0-3, KB<3>=PC4, KB<1>=RBS"; break;
-			case 13:	opA = "TMR=1(";
-					if ((uu.bi & 1) != 0) opA += "WR";
-					else opA += "RD";
-					opA += ")";
-					break;
-			case 14:	opA = "TMR=0";
-					if ((uu.bi & 1) != 0) opA += "(noreset)";
-					break;
-			case 15:	opA = "GIOA=KA, GIOB=KB, IOB=";
-					opA += Integer.toString(k);
-					break;
-			}
-
-			String buf = targ + alu;
-			if (acc != null) {
-				buf += "; " + acc;
-			}
-			if (mach != null) {
-				buf += "; " + mach;
-			}
-			if (opA != null) {
-				buf += "; " + opA;
-			}
-			if (stack.length() > 0) {
-				buf += "; " + stack;
-			}
-			if (raw) {
-				buf = String.format("[%x%x%x%x%x%x%x%x%x%x%03x%x%x] ",
-					uu.ai, uu.bi, uu.zo, uu.aop, uu.ac, uu.bc, uu.mop, uu.kk, uu.st,
-					uu.sub, uu.jad << 2, uu.jh, uu.jl) + buf;
-			}
-			return buf;
-		}
 
 		public void core(FileOutputStream file) throws Exception {
 			file.write(_ram);
@@ -620,21 +402,22 @@ class Wang600_Simulator
 		}
 
 		public String getRegisters() {
-			String str = String.format("STK1 = %03x STK2 = %03x\n", stk1, stk2);
+			String str = String.format("STK1 = %03x STK2 = %03x\n",
+				cpu.stk1, cpu.stk2);
 			str += String.format("T = %01x U = %01x V = %01x CA = %01x CB = %01x\n",
-				t, u, v, ca, cb);
+				cpu.t, cpu.u, cpu.v, cpu.ca, cpu.cb);
 			str += String.format("S = %01x Zo = %d CC = %d SC = %d\n",
-				s, zo, cc, sc);
+				cpu.s, cpu.zo, cpu.cc, cpu.sc);
 			str += String.format("KA = %01x KB = %01x GIOA = %01x GIOB = %01x IOB = %01x\n",
-				ka, kb, gioa, giob, iob);
+				cpu.ka, cpu.kb, cpu.gioa, cpu.giob, cpu.iob);
 			return str;
 		}
 
 		public String getMachine() {
 			String str = String.format("d1=%01x|d2=%01x", Wang600.Kbd.getMode0(false), Wang600.Kbd.getMode1(false));
-			if (ov != 0) str += "|Prog Err";
-			if (err != 0) str += "|Mach Err";
-			if (kbd != 0) str += "|Key Pressed";
+			if (cpu.ov != 0) str += "|Prog Err";
+			if (cpu.err != 0) str += "|Mach Err";
+			if (cpu.kbd != 0) str += "|Key Pressed";
 			return str;
 		}
 
@@ -645,17 +428,17 @@ class Wang600_Simulator
 		}
 
 		public void putWarp(String tag, int nxt, int cyc) throws Exception {
-			String str = String.format("TRACE: %03x: %s", pc, tag);
+			String str = String.format("TRACE: %03x: %s", cpu.pc, tag);
 			if (cyc > 0) {
-				next = nxt;
-				cycles += cyc;
+				cpu.next = nxt;
+				cpu.cycles += cyc;
 				str += " Warp";
 			} else if (nxt >= 0) {
 				str += String.format(" PC %03x", nxt);
 			} else {
 				str += " Sleep";
 			}
-			str += String.format("... %d\n", cycles);
+			str += String.format("... %d\n", cpu.cycles);
 			if (trc_fp != null) {
 				trc_fp.write(str.getBytes());
 			} else {
@@ -666,18 +449,18 @@ class Wang600_Simulator
 		public void putTrace() throws Exception {
 			String str = ": ";
 			if (trc_cycles) {
-				str += String.format("%9d ", cycles);
+				str += String.format("%9d ", cpu.cycles);
 			}
 			str += String.format("%03x: [%03x %03x %03x] ",
-				pc, next, stk1, stk2);
+				cpu.pc, cpu.next, cpu.stk1, cpu.stk2);
 			str += String.format("%01x %01x %01x %01x [",
-				t, u, v, ca);
-			if (zo != 0) str += "Z"; else str += "z";
-			if (cc != 0) str += "I"; else str += "i";
-			if (sc != 0) str += "C"; else str += "c";
+				cpu.t, cpu.u, cpu.v, cpu.ca);
+			if (cpu.zo != 0) str += "Z"; else str += "z";
+			if (cpu.cc != 0) str += "I"; else str += "i";
+			if (cpu.sc != 0) str += "C"; else str += "c";
 			str += String.format("] %01x %01x %01x : ",
-				s, ka, kb);
-			str += disas(pc, trc_raw);
+				cpu.s, cpu.ka, cpu.kb);
+			str += cpu.disas(cpu.pc, trc_raw);
 			str += "\n";
 			if (trc_fp != null) {
 				trc_fp.write(str.getBytes());
@@ -760,11 +543,13 @@ class Wang600_Simulator
 
 
 	public void chgMode0() {
+System.err.format("chgMode0()\n");
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
 	public void chgMode1() {
+System.err.format("chgMode1()\n");
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
@@ -773,7 +558,8 @@ class Wang600_Simulator
 
 	// "special key" is pressed (excl. STEP)
 	public void pressCmd(int cmd) {
-		jam = 0x1000 | cmd;
+System.err.format("pressCmd(%02x)\n", cmd);
+		cpu.jam = 0x1000 | cmd;
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp("Key Jam", cmd, 0);
 		}
@@ -854,24 +640,23 @@ class Wang600_Simulator
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
 	public void setKaKb(int key) {
-		kbd = 1;
-		ka = (byte)((key >> 4) & 0x0f);
-		kb = (byte)(key & 0x0f);
-		z2 = true;
+		cpu.setKaKb(key);
 		keyCodes.add(key);
 	}
 
 	// This is also used to wakeup the simulator (key < 0)
 	public void pressKey(int key) {
+System.err.format("pressKey(%02x)\n", key);
 		if (key < 0) {
 			keyCodes.add(key);
 			return;
 		}
 //fprintf(stderr,"%03x: key down %02x (%s)\n", pc, key, z2);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
-		if (ioc || z2) return;
+		if (cpu.ioc || cpu.z2) return;
 		setKaKb(key);
 		// needs other side-effects... display?
+		do_blanking(); // yes?
 	}
 
 	private Wang_DebugConsole _dbg;
@@ -886,7 +671,7 @@ class Wang600_Simulator
 		memmask = 0xfff; // nibble address, not byte addr
 		String model = Wang_UI.getProperties().getProperty("wang600_model");
 		if (model == null) {
-			model = "600-12TP";
+			model = "600-14TP";
 			Wang_UI.getProperties().setProperty("wang600_model", model);
 		}
 		if (model.equals("600-14TP")) {
@@ -923,14 +708,7 @@ class Wang600_Simulator
 			f.close();
 		} catch (Exception ee) {}
 
-		pr_drum = 0;
-		pr_hammers = 0;
-		pr_tach = 0;
-		pr_col = 0;
-		kb = (byte)0x0f;
-		ka = (byte)0x0f;
 		disp = new short[16];
-		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		keyCodes = new java.util.concurrent.LinkedBlockingDeque<Integer>();
 		run_sim = !stop;
 		cylimit = Long.MAX_VALUE;
@@ -938,9 +716,8 @@ class Wang600_Simulator
 		trc_cycles = false;
 		trc_raw = false;
 		trc_fp = null;
-		// On real machines, did not always happen that power-on asserted PRIME...
-		pc = 0x000;	// force PRIME on power-up...
 
+		cpu = new Wang600_CPU(_rom._ucode, _ram, _xrom, this);
 		Thread t = new Thread(this);
 		t.start();
 	}
@@ -953,299 +730,6 @@ class Wang600_Simulator
 		}
 	}
 
-	private byte[] odd_parity;
-
-	byte to_last;
-	byte to_data;
-	byte to_byte;
-	int to_nibc;
-	int to_bitc;
-	int to_sigc;
-
-	private void tape_write(int dat) {
-		to_last <<= 1;
-		to_last |= dat;
-		to_sigc ^= 1;
-		if (to_sigc != 0) return;
-		byte bit = 0; 
-		byte h = (byte)(to_last & 0x03);
-		if (h == 0x02 || h == 0x01) bit = 1;
-		if (++to_bitc == 5) {
-			to_nibc ^= 1;
-			if (to_nibc != 0) {
-				to_byte = (byte)((to_byte & 0x0f) | (to_data << 4));
-			} else {
-				to_byte = (byte)((to_byte & 0xf0) | to_data);
-				Wang600.Tape.tape_record(to_byte);
-			}
-			to_data = 0;
-			to_bitc = 0;
-		} else {
-			to_data <<= 1;
-			to_data |= bit;
-		}
-	}
-
-	byte ti_last;
-	int ti_data;
-	int ti_bitc;
-	int ti_sigc;
-	long ti_repc;
-	byte ti_bit;
-
-	private int do_repc() {
-		return ti_bit;
-	}
-	private int do_sigc() {
-		--ti_sigc;
-		ti_bit = (byte)(ti_last & 1);
-		ti_last >>= 1;
-		ti_repc = cycles + 97;	// very sensitive...
-		return do_repc();
-	}
-	private int do_bitc() {
-		--ti_bitc;
-		int mask = (1 << ti_bitc);
-		if ((ti_data & mask) != 0) {
-			ti_last = 0x05;	// lsb first out...
-		} else {
-			ti_last = 0x01;	// lsb first out...
-		}
-		ti_sigc = 4;
-		return do_sigc();
-	}
-
-	private int tape_read() {
-		// wait for TD 0->1
-		// delay 56 cycles
-		// wait 220 cycles (sample TD for end of loop)
-		// [15,15,6] ^= DL	; compute parity?
-		// CY = 0 - DL		; CY = bit0
-		// [15,15,5] <<= 1	; make space
-		// [15,15,5] += CY	; insert new bit
-		// ACC += 1		; count bits
-		// wait up to 256 cycles for TD 0->1
-		//         __    __
-		// "1" = _|  |__|  |_
-		//         __
-		// "0" = _|  |_______
-		//
-		if (cycles < ti_repc) {
-			return do_repc();
-		}
-		if (ti_sigc > 0) {
-			return do_sigc();
-		}
-		if (ti_bitc > 0) {
-			return do_bitc();
-		}
-		int ti = Wang600.Tape.tape_play();
-		if (ti < 0) { // EOF
-			ti_repc = cycles + 700;	// expects at least 650?
-			ti_bit = 0;
-			return do_repc();
-		}
-		if ((ti & 0x00ff00) != 0) {
-			byte b1 = (byte)((ti >> 8) & 0x0ff);
-			byte b2 = (byte)(ti & 0x0ff);
-			int x = ((b1 >> 4) & 0x0f);
-			ti_data = (x << 1) | odd_parity[x];
-			x = (b1 & 0x0f);
-			ti_data <<= 5;
-			ti_data |= (x << 1) | odd_parity[x];
-
-			x = ((b2 >> 4) & 0x0f);
-			ti_data = (x << 1) | odd_parity[x];
-			x = (b2 & 0x0f);
-			ti_data <<= 5;
-			ti_data |= (x << 1) | odd_parity[x];
-
-			ti_bitc = 20;
-		} else {
-			int x = ((ti >> 4) & 0x0f);
-			ti_data = (x << 1) | odd_parity[x];
-			x = (ti & 0x0f);
-			ti_data <<= 5;
-			ti_data |= (x << 1) | odd_parity[x];
-			ti_bitc = 10;
-		}
-		return do_bitc();
-	}
-
-	private void tape_on(int wr) {
-		Wang600.Tape.tape_on(wr);
-		if (wr == 0) {
-			ti_bit = 0;
-			ti_last = 0;
-			ti_sigc = 0;
-			ti_bitc = 0;
-			ti_repc = 0;
-		} else {
-			to_last = 0;
-			to_data = 0;
-			to_byte = 0;
-			to_nibc = 0;
-			to_bitc = 0;
-			to_sigc = 0;
-		}
-	}
-
-	private void tape_off() {
-		Wang600.Tape.tape_off(0);
-	}
-
-	private void dev_out() {
-		byte c = (byte)((gioa << 4) | giob);
-		if (iob == 0) {
-			_cn36 = null;
-			if (Wang600.CN24 != null) {
-				Wang600.CN24.reset();
-			}
-			Wang600.M630.reset();
-			Wang_CN36_Bus.resetCN36();
-		} else if (iob == 1) { // CN24 output only, 6 bits
-			c &= 0x3f;
-			if (Wang600.CN24 != null) {
-				Wang600.CN24.do_cn24(c);
-			}
-		} else if (iob == 2 || iob == 3) { // CN36 Model 630
-			Wang600.M630.do_dev(iob, c);
-		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
-			if (_cn36 != null) {
-				// All known devices are ACK only
-				_cn36.do_ack(iob);
-			} else {
-				_cn36 = Wang_CN36_Bus.startCN36(iob, (c & 0x0ff));
-			}
-		}
-	}
-
-	private byte add3_i(byte a, byte b, byte c) {
-		byte s = (byte)(a + b + c);
-		zo = (byte)((s & 0x0f) == 0 ? 1 : 0);
-		cc = (byte)((s & 0x10) != 0 ? 1 : 0);
-		return (byte)(s & 0x0f);
-	}
-
-	private byte sub3_i(byte a, byte b, byte c) {
-		byte s = (byte)(a - b - c);
-		zo = (byte)((s & 0x0f) == 0 ? 1 : 0);
-		cc = (byte)((s & 0x10) != 0 ? 1 : 0);
-		return (byte)(s & 0x0f);
-	}
-
-	private byte and2(byte a, byte b) {
-		byte s = (byte)(a & b);
-		zo = (byte)((s & 0x0f) == 0 ? 1 : 0);
-		return (byte)(s & 0x0f);
-	}
-
-	private byte or2(byte a, byte b) {
-		byte s = (byte)(a | b);
-		zo = (byte)((s & 0x0f) == 0 ? 1 : 0);
-		return (byte)(s & 0x0f);
-	}
-
-	private byte xor2(byte a, byte b) {
-		byte s = (byte)(a ^ b);
-		zo = (byte)((s & 0x0f) == 0 ? 1 : 0);
-		return (byte)(s & 0x0f);
-	}
-
-	private byte add3_c(byte a, byte b, byte c) {
-		byte s = add3_i(a, b, c);
-		sc = cc;
-		return s;
-	}
-
-	private byte sub3_c(byte a, byte b, byte c) {
-		byte s = sub3_i(a, b, c);
-		sc = cc;
-		return s;
-	}
-
-	private void printer_status() {
-		// we don't want to do this unless it is really the
-		// drum printer we're looking at... can't tell?
-		if ((Wang600.Kbd.getMode1(false) & D21_PRT_ON) == 0) {
-			// only if running program doesn't get here...
-			// printer is off, tach will never pulse, so don't spin
-			if (pc == 0x6db) {
-				// sleep until key event... incl PRT ON...
-			}
-			return;
-		}
-		if (pr_tach != 0) {
-			pr_col = 0;
-			pr_drum = (byte)((pr_drum + 1) & 0x0f);
-			pr_hammers = 0;
-		}
-		pr_tach ^= 0x08;
-		ka = pr_drum;
-		kb = pr_tach;
-	}
-
-	private void printer_hammers() {
-		int x;
-		int h;
-
-		pr_hammers <<= 1;
-		pr_hammers &= 0x0fffff;
-		pr_hammers |= kb & 1;
-		if (++pr_col >= 20) {
-			h = pr_hammers;
-			for (x = 0; h != 0; ++x) {
-				if ((h & 1) != 0) {
-					Wang600.Prt.do_printer(x, pr_drum);
-				}
-				h >>= 1;
-			}
-			pr_col = 0;
-		}
-	}
-
-	private void printer_feed() {
-		// now, actually print it...
-		Wang600.Prt.do_line();
-	}
-
-	private void rd_ram_i(byte ah, byte am, byte al) {
-		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		adr &= memmask;
-		boolean odd = ((adr & 1) != 0);
-		adr >>= 1;
-		byte b = _ram[adr];
-		if (odd) {
-			b >>= 4;
-		}
-		rb = ca = (byte)(b & 0x0f);
-		// ROM should always be >= RAM in size... always 2K...
-		// (if present)
-		if (_xrom != null && adr < _xrom.length) {
-			b = _xrom[adr];
-			if (odd) {
-				b >>= 4;
-			}
-		} else {
-			b = 0x0f;
-		}
-		cb = (byte)(b & 0x0f);
-	}
-
-	private void wr_ram_i(byte ah, byte am, byte al) {
-		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		adr &= memmask;
-		byte a = ca;
-		byte b = _ram[adr >> 1];
-		if ((adr & 1) != 0) {
-			a <<= 4;
-			b &= 0x0f;
-		} else {
-			b &= 0xf0;
-		}
-		_ram[adr >> 1] = (byte)(b | a);
-	}
-
 	private short[] disp;
 	int good;
 	int lastx;
@@ -1254,7 +738,8 @@ class Wang600_Simulator
 	private Wang_GroupIODevice _cn36;	// current active device
 
 	private void refresh(boolean canSleep) {
-		short x = (short)((n << 4) | rb);
+		byte n = cpu.n;
+		short x = (short)((n << 4) | cpu.rb);
 		if (disp[n] != x) {
 			disp[n] = x;
 			good = 0;
@@ -1283,29 +768,46 @@ class Wang600_Simulator
 		Wang600.Disp.do_blanking();
 	}
 
-	private void display_check() {
-		if (pc == 0x252) {
+	//////////////////////////////
+	// Wang_FrontPanel interface
+	public int getMemSize() { return memsize; }
+	public int getMemMask() { return memmask; }
+	public void breakpoint(int pc) {
+		_rom.breakPoint(pc);
+		run_sim = false;
+	}
+	public void debug_check() {
+		if (trace) { // can only be if _dbg != null
+			_dbg.instr_trace();
+		}
+	}
+	public void display_check(boolean mr) {
+		if (!_rom.std) {
+			if (mr) refresh(false);
+		}
+		// this might sleep until UI event...
+		if (cpu.pc == 0x252) {
 		}
 		// 51c: begin display-refresh delay loop... short-cut to 51f...
-		if (pc == 0x51c) {	// display refresh routine...
+		if (cpu.pc == 0x51c) {	// display refresh routine...
 			if (trace) { // can only be if _dbg != null
 				_dbg.warp("Display Refresh", 0x51f, 272);
 			} else {
-				next = 0x51f;	// update some regs too?
-				cycles += 272;
+				cpu.next = 0x51f;	// update some regs too?
+				cpu.cycles += 272;
 			}
 			refresh(cylimit == Long.MAX_VALUE);
 		// 5c0: begin alpha-stop display-refresh delay loop... short-cut to 5c3...
-		} else if (pc == 0x5c0) {	// alpha-stop refresh routine...
+		} else if (cpu.pc == 0x5c0) {	// alpha-stop refresh routine...
 			if (trace) { // can only be if _dbg != null
 				_dbg.warp("Alpha-Stop", 0x5c3, 272);
 			} else {
-				next = 0x5c3;
-				cycles += 272;
+				cpu.next = 0x5c3;
+				cpu.cycles += 272;
 			}
 			refresh(false);
-		} else if (pc == 0x5c6) {	// alpha-stop done... "return"...
-			if (next == 0x27b) { // alpha-stop in running program...
+		} else if (cpu.pc == 0x5c6) {	// alpha-stop done... "return"...
+			if (cpu.next == 0x27b) { // alpha-stop in running program...
 				if (trace) { // can only be if _dbg != null
 					_dbg.warp("Alpha-Stop", -1, -1);
 				}
@@ -1318,293 +820,66 @@ class Wang600_Simulator
 			do_blanking();
 		}
 	}
-
-	private int instr_exec() {
-		Wang600_Ucode uu = _rom.fetchUcode(pc);
-		int nxt;
-		int rc = 0;
-		boolean mr = false;
-
-		if (uu.brkpt) {
-			_rom.breakPoint(pc);
-			run_sim = false;
-			return 0;
-		}
-
-		// F==7 && J==0:
-		//	PC <= STK1, STK1 <= PC, STK2 <= STK1
-		//
-		// F==7 && J==1:
-		//	PC <= STK1, STK1 <= STK2, STK2 <= STK1
-		//
-		// F!=7 && J==0:
-		//	PC <= NEXT**
-		//
-		// F!=7 && J==1:
-		//	STK2 = STK1, STK1 <= PC, PC <= NEXT**
-		//
-		// For conditional jump/call, these bits are latched early...
-		byte br_acc = s;
-		byte br_c = sc;
-		byte br_k = uu.kk;
-		int opf7 = (uu.jl == 7 ? 1 : 0);
-		if (opf7 != 0) {
-			nxt = stk1 | 1;
-			if (uu.sub != 0) {
-				stk1 = stk2;
-			} else {
-				stk1 = stk2; // bugfix?
-				//stk1 = pc;	// bad?
-				// rc = 1;
-			}
-		} else {
-			nxt = uu.jad << 2;
-		}
-
-		if (uu.mop >= 1 && uu.mop <= 6) {
-			l = t;
-			m = u;
-			n = v;
-			mr = (uu.mop >= 4);
-		}
-
-		byte g = 0;
-		byte h = 0;
-		switch(uu.ai) {
-		case 0: h = s; break;
-		case 1: h = t; break;
-		case 2: h = u; break;
-		case 3: h = v; break;
-		case 4: h = ka; break;
-		case 5: h = kb; break;
-		case 6: h = ca; break;
-		case 7: h = cb; break;
-		}
-
-		switch(uu.bi) {
-		case 0: g = 0; break;
-		case 1: g = br_k; break;
-		case 2:
-			g = (byte)Wang600.Kbd.getMode0(true);
-			// clear 0010 if glrn?
-			if (_cn36 != null) {
-				g |= (byte)((_cn36.getGLRN() & 1) << 2);
-			}
-			break;
-		case 3: g = (byte)(Wang600.Kbd.getMode1(true) ^ D20_DEGREES); break;
-		case 4: g = ka; break;
-		case 5: g = kb; break;
-		case 6: g = ca; break;
-		case 7: g = cb; break;
-		}
-
-		byte alu = 0;
-
-		if (uu.ac == 0) h = 0; // "15"? "0"? ???
-		switch (uu.aop) {
-		case 0:
-			if (uu.bc != 0) alu = sub3_i(h, g, (byte)0);
-			else alu = add3_i(h, g, (byte)0);
-			break;
-		case 1:
-			if (uu.bc != 0) alu = sub3_i(h, g, (byte)1);
-			else alu = add3_i(h, g, (byte)1);
-			break;
-		case 2:
-			if (uu.bc != 0) alu = sub3_c(h, g, (byte)0);
-			else alu = add3_c(h, g, (byte)0);
-			break;
-		case 3:
-			if (uu.bc != 0) alu = sub3_c(h, g, sc);
-			else alu = add3_c(h, g, sc);
-			break;
-		case 4:
-			if (uu.bc != 0) alu = sub3_c(h, g, (byte)1);
-			else alu = add3_c(h, g, (byte)1);
-			break;
-		case 5:
-			alu = and2(h, g);
-			break;
-		case 6:
-			if (uu.bc != 0) alu = xor2(h, g);
-			else alu = or2(h, g);
-			break;
-		case 7:
-			// alu = 0;
-			break;
-		}
-
-		switch(uu.zo) {
-		case 0:	if (uu.st == 15) s = alu; break;
-		case 1:	t = alu; break;
-		case 2:	u = alu; break;
-		case 3:	v = alu; break;
-		case 4:	ka = alu; break;
-		case 5:	kb = alu; break;
-		case 6:	ca = alu; break;
-		}
-
-		switch(uu.st) {
-		case 0:
-			// nop
-			break;
-		case 1:
-			s |= 1;
-			break;
-		case 2:
-			s |= 2;
-			break;
-		case 3:
-			s |= 4;
-			break;
-		case 4:
-			s |= 8;
-			break;
-		case 5:
-			s &= ~1;
-			break;
-		case 6:
-			s &= ~2;
-			break;
-		case 7:
-			s &= ~4;
-			break;
-		case 8:
-			s &= ~8;
-			break;
-		case 9:
-			ka = 0;
-			kb = 0;
-			kbd = 0;
-			z2 = false;
-			break;
-		case 10:
-			s = (byte)((s & 0x0e) | (zo ^ 1));
-			break;
-		case 11:
-			s = (byte)((s & 0x0d) | (zo << 1));
-			break;
-		case 12:
-			ov = 1;
-			Wang600.Disp.setOv(ov);
-			break;
-		case 13:
-			s = 0;
-			break;
-		case 14:
-			err = 1;
-			Wang600.Disp.setErr(err);
-			break;
-		}
-
-		switch(uu.mop) {
-		case 1:	wr_ram_i(l, m, n); break;
-		case 2:	wr_ram_i((byte)15, br_k, n); break;
-		case 3:	wr_ram_i((byte)15, (byte)15, br_k); break;
-		case 4:	rd_ram_i(l, m, n); break;
-		case 5:	rd_ram_i((byte)15, br_k, n); break;
-		case 6:	rd_ram_i((byte)15, (byte)15, br_k); break;
-		case 7:	printer_hammers(); break;
-		case 8:	printer_feed(); break;
-		case 9:	rc = 2; break;
-		case 10:
-			kb = (byte)((kb & ~1) | tape_read());
-			break;
-		case 11:
-			tape_write(kb & 1);
-			break;
-		case 12:
-			printer_status();
-			// not just printer, but CN-24 as well...
-			kb |= 2;
-			break;
-		case 13:
-			tape_on(uu.bi & 1);
-			break;
-		case 14:
-			tape_off(); // uu.bi & 1 affects this...
-			break;
-		case 15:
-			gioa = ka;	// gioa = g;
-			giob = kb;	// giob = h;
-			iob = (byte)(br_k & 0x07);
-			ioc = ((iob & 0b110) == 0b010);
-			// hardware triggers GISO here (at CK5).
-			// ucode waits for KBD (after RESET).
-			dev_out();
-			break;
-		}
-
-		// This is done "late" to ensure we use most recent flags for I and Z
-		if (opf7 == 0) {
-			if (uu.sub != 0) {
-				stk2 = stk1;
-				stk1 = pc;
-			}
-			switch(uu.jh) {
-			case 0: nxt |= (0 << 1); break;
-			case 1: nxt |= (1 << 1); break;
-			case 2: nxt |= ((br_acc & 2) >> 0); break;
-			case 3: nxt |= ((br_acc & 8) >> 2); break;
-			case 4:
-				nxt |= (ov << 1);
-				ov = 0;
-				Wang600.Disp.setOv(ov);
-				break;
-			case 5: nxt |= (cc << 1); break;
-			case 6:
-				nxt |= (kbd << 1);
-				// do here, or pressKey()?
-				if (kbd != 0) {
-					do_blanking();
-				}
-				break;
-			case 7: rc = 3; break;
-			}
-			switch(uu.jl) {
-			case 0: nxt |= (0 << 0); break;
-			case 1: nxt |= (1 << 0); break;
-			case 2: nxt |= ((br_acc & 1) >> 0); break;
-			case 3: nxt |= ((br_acc & 4) >> 2); break;
-			case 4: nxt |= (zo << 0); break;
-			case 5: rc = 4; break;
-			case 6: nxt |= (br_c << 0); break;
-			case 7: rc = 5; break;
-			}
-		}
-
-		++cycles;
-		next = nxt;
-
-		if (trace) { // can only be if _dbg != null
-			_dbg.instr_trace();
-		}
-
-		// the following are called in specific order...
-		// keyboard injection of next pc must override all, so is last.
-
-		if (_rom.std) {
-			display_check();	// this might sleep until UI event...
-		} else {
-			if (mr) refresh(false);
-		}
-
-		//sys->keyboard(sys, &key, 0);
-
-		if (jam != 0) {
-			next = jam & 0x0fff;
-			jam = 0;
-			ov = 0;
-			Wang600.Disp.setOv(ov);
-			if (next == 0) { // PRIME
-				err = 0;
-				Wang600.Disp.setErr(err);
-			}
-		}
-
-		pc = next;
-		return rc;
+	public void tape_record(byte to_byte) {
+		Wang600.Tape.tape_record(to_byte);
 	}
+	public int tape_play() {
+		return Wang600.Tape.tape_play();
+	}
+	public void tape_on(int wr) {
+		Wang600.Tape.tape_on(wr);
+	}
+	public void tape_off(int wr) {
+		Wang600.Tape.tape_off(0);
+	}
+	public void dev_out(byte iob, byte c) {
+		if (iob == 0) {
+			_cn36 = null;
+			if (Wang600.CN24 != null) {
+				Wang600.CN24.reset();
+			}
+			Wang600.M630.reset();
+			Wang_CN36_Bus.resetCN36();
+		} else if (iob == 1) { // CN24 output only, 6 bits
+			c &= 0x3f;
+			if (Wang600.CN24 != null) {
+				Wang600.CN24.do_cn24(c);
+			}
+		} else if (iob == 2 || iob == 3) { // CN36 Model 630
+			Wang600.M630.do_dev(iob, c);
+		} else if (iob == 4 || iob == 5) { // CN36 Group 1/2 devices
+			if (_cn36 != null) {
+				// All known devices are ACK only
+				_cn36.do_ack(iob);
+			} else {
+				_cn36 = Wang_CN36_Bus.startCN36(iob, (c & 0x0ff));
+			}
+		}
+	}
+	public int getMode0(boolean clear) {
+		int g = Wang600.Kbd.getMode0(clear);
+		// clear 0010 if glrn?
+		if (_cn36 != null) {
+			g |= (byte)((_cn36.getGLRN() & 1) << 2);
+		}
+		return g;
+	}
+	public int getMode1(boolean clear) {
+		return Wang600.Kbd.getMode1(clear);
+	}
+	public void do_printer(int x, byte pr_drum) {
+		Wang600.Prt.do_printer(x, pr_drum);
+	}
+	public void do_line() {
+		Wang600.Prt.do_line();
+	}
+	public void setOv(byte on) {
+		Wang600.Disp.setOv(on);
+	}
+	public void setErr(byte on) {
+		Wang600.Disp.setErr(on);
+	}
+	//////////////////////////////
 
 	public void run() {
 		// Run the simulator...
@@ -1612,7 +887,7 @@ class Wang600_Simulator
 		int rc = 0;
 		do {
 			if (debug && !run_sim) {
-				System.out.format("break at %03x %d\n", pc, cycles);
+				System.out.format("break at %03x %d\n", cpu.pc, cpu.cycles);
 				while (debug && !run_sim) {
 					rc = _dbg.command();
 					if (rc != 0) {
@@ -1620,11 +895,11 @@ class Wang600_Simulator
 					}
 				}
 			}
-			rc = instr_exec();
+			rc = cpu.instr_exec();
 			if (rc != 0) {
 				break;
 			}
-			if (debug && cycles >= cylimit) {
+			if (debug && cpu.cycles >= cylimit) {
 				// PC has NOT been executed...
 				cylimit = Long.MAX_VALUE;
 				run_sim = false;

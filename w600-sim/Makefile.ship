@@ -50,7 +50,10 @@ COMMON_CLASSES = \
 W600_CLASSES = \
 		Wang600.class \
 		Wang600_Properties.class \
-		Wang600_Simulator.class
+		Wang_FrontPanel.class \
+		Wang600_Ucode.class \
+		Wang600_Simulator.class \
+		Wang600_CPU.class
 
 COMMON_W614_CLASSES = \
 		Wang_Properties.class \
