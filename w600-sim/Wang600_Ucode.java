@@ -33,4 +33,15 @@ public class Wang600_Ucode {
 		ai = (byte)((instr[5] >> 1) & 0x07);
 		brkpt = ((instr[7] & 1) != 0);
 	}
+
+	public byte[] asBytes() {
+		byte[] instr = new byte[8];
+		instr[0] = (byte)((jl << 2) | (jh << 5));
+		instr[1] = (byte)jad;
+		instr[2] = (byte)((jad >> 8) | (sub << 1) | (st << 2) | (kk << 6));
+		instr[3] = (byte)((kk >> 2) | (mop << 2) | (bc << 6) | (ac << 7));
+		instr[4] = (byte)(aop | (zo << 3) | (bi << 6));
+		instr[5] = (byte)((bi >> 2) | (ai << 1));
+		return instr;
+	}
 }

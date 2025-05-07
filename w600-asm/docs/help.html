@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<H2>Wang600 Microcode Assembler Help</H2>
+
+<H3>Running The Assembler</H3>
+
+<P>The general command syntax is:
+
+<P><KBD>java -jar Wang600asm.jar [<I>rom-file</I>] [<I>prop</I>=<I>value</I>...]</KBD>
+
+<P><DL>
+<DT><I>rom-file</I>
+<DD>A ROM file to edit/load.</DD>
+
+<DT><I>prop</I>=<I>value</I>
+<DD>Property assignments.
+Remember to enclose <I>value</I> in quotes if required by your shell.</DD>
+</DL>
+
+<H3>Properties</H3>
+
+<P>Currently, the only recognized property is "run_rate", which sets
+the amount of delay imposed between each instruction with running instructions
+(as opposed to single-stepping instructions with "execute").
+Default is 10 milliseconds.
+It may be set to "0" but use caution as that may result in processes consuming
+larger amounts of the CPUs.
+
+<H3>Operating The Assembler</H3>
+
+<H4>Menus</H4>
+
+<P><DL>
+<DT>File
+<DD><DL>
+	<DT>New
+	<DD>Start a new, blank, ROM image</DD>
+	<DT>Load ROM
+	<DD>Load ROM contents from a file</DD>
+	<DT>Save ROM
+	<DD>Save ROM contents to a file</DD>
+	<DT>Save Text
+	<DD>Save disassembled ROM (window text only)</DD>
+	<DT>Show Scope
+	<DD>Show the Wang600 simulator "oscilloscope"</DD>
+</DL></DD>
+<DT>Help
+<DD><DL>
+	<DT>Show Help
+	<DD>Show this help window</DD>
+</DL></DD>
+</DL>
+
+<H4>Buttons</H4>
+
+<P>The "store" button is enabled when the current microcode instruction
+has been modified but not yet stored in the ROM image. Clicking this
+button stores the instruction in the ROM image (but does not save anything
+to disk). Many other operations will automatically store the instruction.
+
+<P>The "execute" button will cause the current microcode instruction to be executed
+in the simulator, and will also make the simulator oscilloscope window visible.
+
+<P>The "run" button, in conjunction with the "cycles" field, will start
+executing instructions until reaching the limit in "cycles" (machine cycles, i.e.
+instructions).
+A blank or zero "cycles" means infinity (well, currently 1 million cycles).
+Instructions are executed with a pause between, set by the "run_rate" property.
+This value is in milliseconds and defaults to 10.
+It may be set to "0", however that may increase the load on your PC.
+
+<H4>Microcode Fields</H4>
+
+<P>The drop-downs and fields corresponding to microcode instruction word
+fields are used to modify the current instruction. They also indicate
+the fields of the current instruction. The current instruction may be
+selected by using the UP and DOWN cursor keys, or via execution of instructions.
+Note that not all instructions in the ROM image are displayed to begin with.
+Only as instructions are "visited" do they appear, with the exception that
+all instructions between the first and last-visited are always created
+(executing a distant instruction causes all between to be shown).
+
+<H3>Operating The Oscilloscope</H3>
+
+<P>The microcode oscilloscope shows various CPU and machine registers on the top
+half. Below that are controls and displays corresponding to the machine's
+human interface. An approximation of the display is show, and below that
+are the RUN/LEARN/... buttons, along with the STEP button and mode
+switches (including Printer On). In addition, buttons are provided
+for the basic control functions PRIME, etc.
+
+<P>In addition, an interface is provided to inject key presses.
+A key-code value is entered into the field under the KEY button,
+and then the KEY button is clicked to "press" that key. 
+Key-codes are either 2-digit hexadecimal or in Wang split-decimal notation
+(For example, "8-12" and "8c" represent the same key-code value).
+
+</BODY>
+</HTML>

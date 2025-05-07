@@ -94,8 +94,7 @@ class Wang600_CPU
 		return new Wang600_Ucode(instr);
 	}
 
-	public String disas(int adr, boolean raw) {
-		Wang600_Ucode uu = fetchUcode(adr);
+	public String disas(Wang600_Ucode uu, boolean raw) {
 		String stack = new String();;
 		int k = uu.kk;
 		int nxt = uu.jad << 2;
@@ -268,6 +267,11 @@ class Wang600_CPU
 				uu.sub, uu.jad << 2, uu.jh, uu.jl) + buf;
 		}
 		return buf;
+	}
+
+	public String disas(int adr, boolean raw) {
+		Wang600_Ucode uu = fetchUcode(adr);
+		return disas(uu, raw);
 	}
 
 	public void setKaKb(int key) { 
