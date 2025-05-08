@@ -738,7 +738,7 @@ public class Wang600Assembler extends JFrame
 	private void updateJL() {
 		// TODO: force other fields to 0 for RETURN?
 		int ja = uu.jad << 2;
-		int j0 = jh.getSelectedIndex();
+		int j0 = jl.getSelectedIndex();
 		int j1 = uu.jh;
 		if (j0 == 1) {
 			ja |= 1;
