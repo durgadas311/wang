@@ -28,6 +28,6 @@ Wang600asm.jar: $(CLASSES) $(SIM_CLASS) $(AUXS)
 	jar -cmf Manifest.txt $@ *.class $(AUXS)
 
 ship: jar
-	rsync -uvW $(JARS) *.wuc durgadas.com:/var/www/html/wang600/microcode
+	rsync -uvW $(JARS) *.wuc durgadas.com:/var/www/html/sebhc/w600-sim/microcode
 
 __FRC__:
