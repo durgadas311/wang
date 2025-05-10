@@ -33,6 +33,7 @@ class Wang600_CPU
 	public byte ov;
 	public byte err;
 
+	public boolean kbl;
 	public boolean ioc;
 	public boolean z2;
 
@@ -553,6 +554,12 @@ class Wang600_CPU
 		_ram[adr >> 1] = (byte)(b | a);
 	}
 
+	public void new_iob(int io) {
+		iob = (byte)(io & 0x07);
+		ioc = ((iob & 0b110) == 0b010);
+		kbl = ((iob & 0b110) != 0);
+	}
+
 	public int instr_exec() {
 		Wang600_Ucode uu = fetchUcode(pc);
 		int nxt;
@@ -754,8 +761,7 @@ class Wang600_CPU
 		case 15:
 			gioa = ka;	// gioa = g;
 			giob = kb;	// giob = h;
-			iob = (byte)(br_k & 0x07);
-			ioc = ((iob & 0b110) == 0b010);
+			new_iob(br_k);
 			// hardware triggers GISO here (at CK5).
 			// ucode waits for KBD (after RESET).
 			dev_out();

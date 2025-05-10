@@ -543,13 +543,11 @@ class Wang600_Simulator
 
 
 	public void chgMode0() {
-System.err.format("chgMode0()\n");
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
 
 	public void chgMode1() {
-System.err.format("chgMode1()\n");
 		good = 0;
 		keyCodes.addFirst(-1); // don't press a key - just wake up sleeper
 	}
@@ -558,7 +556,6 @@ System.err.format("chgMode1()\n");
 
 	// "special key" is pressed (excl. STEP)
 	public void pressCmd(int cmd) {
-System.err.format("pressCmd(%02x)\n", cmd);
 		cpu.jam = 0x1000 | cmd;
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp("Key Jam", cmd, 0);
@@ -646,14 +643,13 @@ System.err.format("pressCmd(%02x)\n", cmd);
 
 	// This is also used to wakeup the simulator (key < 0)
 	public void pressKey(int key) {
-System.err.format("pressKey(%02x)\n", key);
 		if (key < 0) {
 			keyCodes.add(key);
 			return;
 		}
 //fprintf(stderr,"%03x: key down %02x (%s)\n", pc, key, z2);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
-		if (cpu.ioc || cpu.z2) return;
+		if (cpu.kbl || cpu.z2) return;
 		setKaKb(key);
 		// needs other side-effects... display?
 		do_blanking(); // yes?
