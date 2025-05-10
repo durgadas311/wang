@@ -21,12 +21,18 @@ Remember to enclose <I>value</I> in quotes if required by your shell.</DD>
 
 <H3>Properties</H3>
 
-<P>Currently, the only recognized property is "run_rate", which sets
-the amount of delay imposed between each instruction with running instructions
+<DL>
+<DT>run_rate
+<DD>Sets the amount of delay imposed between each instruction when running instructions
 (as opposed to single-stepping instructions with "execute").
 Default is 10 milliseconds.
 It may be set to "0" but use caution as that may result in processes consuming
 larger amounts of the CPUs.
+</DD>
+<DT>ram_size
+<DD>Selects the RAM size. Accepted values are "4K", "2K", and "1K" (4-bit words).
+</DD>
+</DL>
 
 <H3>Operating The Assembler</H3>
 
@@ -63,21 +69,35 @@ to disk). Many other operations will automatically store the instruction.
 <P>The "execute" button will cause the current microcode instruction to be executed
 in the simulator, and will also make the simulator oscilloscope window visible.
 
-<P>The "run" button, in conjunction with the "cycles" field, will start
-executing instructions until reaching the limit in "cycles" (machine cycles, i.e.
-instructions).
-A blank or zero "cycles" means infinity (well, currently 1 million cycles).
-Instructions are executed with a pause between, set by the "run_rate" property.
+<P>The "run" button, in conjunction with the "cycles" and "breakpt" fields,
+will start executing instructions until reaching the limit in "cycles"
+(machine cycles, i.e. instructions) or the breakpoint address.
+
+<P>A blank or zero "cycles" means infinity (well, currently 1 million cycles).
+
+<P>A blank "breakpt" means no breakpoint is (will be) set.
+The breakpoint is only set in the microcode image during the actual run,
+and is removed upon stopping.
+Invalid entry in the breakpoint field causes the field to be blanked.
+The breakpoint address may be set to the current instruction by pressing F1.
+
+<P>Instructions are executed with a pause between, set by the "run_rate" property.
 This value is in milliseconds and defaults to 10.
-It may be set to "0", however that may increase the load on your PC.
+It may be set to "0", however that may significantly increase the load on your PC
+during runs.
 
 <H4>Microcode Fields</H4>
 
 <P>The drop-downs and fields corresponding to microcode instruction word
 fields are used to modify the current instruction. They also indicate
-the fields of the current instruction. The current instruction may be
-selected by using the UP and DOWN cursor keys, or via execution of instructions.
-Note that not all instructions in the ROM image are displayed to begin with.
+the fields of the current instruction.
+
+<P>The current instruction may be
+selected by using the UP, DOWN, HOME, END, PAGE_UP, and PAGE_DOWN cursor keys,
+or by mouse click on the desired instruction, or mouse wheel,
+or via execution of instructions.
+
+<P>Note that not all instructions in the ROM image are displayed to begin with.
 Only as instructions are "visited" do they appear, with the exception that
 all instructions between the first and last-visited are always created
 (executing a distant instruction causes all between to be shown).
@@ -86,15 +106,31 @@ all instructions between the first and last-visited are always created
 
 <P>The microcode oscilloscope shows various CPU and machine registers on the top
 half. Below that are controls and displays corresponding to the machine's
-human interface. An approximation of the display is show, and below that
-are the RUN/LEARN/... buttons, along with the STEP button and mode
+human interface. The "Machine" menu provides various actions related to the
+condition of registers and memory.
+
+<P>The menu item Machine->Reset_Zero will clear all registers and RAM to "0".
+Note that this does NOT affect the current/next instruction to be executed.
+
+<P>The menu item Machine->Reset_Random will set (most) registers and RAM to random values.
+Note that this does NOT affect the current/next instruction to be executed.
+
+<P>The top pane includes a RAM viewport that allows up to 4 "rows" of RAM to be monitored.
+RAM is organized in 4-bit words and each row represents 16 words.
+This corresponds to the standard microcode concept of a calculator "register".
+Addresses are in the "logical" 4K word machine address range.
+If less that 4K RAM is configured, the behavior is the same as for the
+real calculator (e.g. FF0 == BF0 == 7F0 == 3F0 for 1K RAM).
+
+<P>In the bottom pane, an approximation of the display is shown (if refreshed by microcode),
+and below that are the RUN/LEARN/... buttons, along with the STEP button and mode
 switches (including Printer On). In addition, buttons are provided
 for the basic control functions PRIME, etc.
 
 <P>In addition, an interface is provided to inject key presses.
 A key-code value is entered into the field under the KEY button,
 and then the KEY button is clicked to "press" that key. 
-Key-codes are either 2-digit hexadecimal or in Wang split-decimal notation
+Key-codes are either 2-digit hexadecimal or Wang split-decimal notation
 (For example, "8-12" and "8c" represent the same key-code value).
 
 </BODY>

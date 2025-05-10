@@ -9,11 +9,12 @@ import java.awt.geom.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
 
 public class Wang600Assembler extends JFrame
 		implements Wang_FrontPanel,
-			KeyListener, MouseListener, ActionListener,
-			WindowListener, FocusListener, Runnable {
+			KeyListener, MouseListener, ActionListener, MouseWheelListener,
+			WindowListener, FocusListener, CaretListener, Runnable {
 	static final String[] txtx = { "txt" };
 	static final String[] txtd = { "Text" };
 	static final String[] wucx = { "wuc" };
@@ -116,6 +117,8 @@ public class Wang600Assembler extends JFrame
 	JButton exec;
 	JButton run;
 	JTextField cyc;
+	JTextField bpt;
+	int brkpt;
 	JMenuItem save;
 	long run_rate;
 	boolean running;
@@ -128,10 +131,12 @@ public class Wang600Assembler extends JFrame
 	byte[] xrom;	// program ext ROM
 	Wang600_Ucode uu;
 	int curr;	// current microcode ROM address
+	int max;	// last instr rendered
 	int carr;	// where we want the caret to stay
 	boolean dirty;	// whether display word differs from ROM image
 	boolean saved;	// whether ROM image has been saved to a file.
 	boolean update;
+	boolean foobar;
 
 	class BlockCaret extends DefaultCaret {
 		static final Color shadow = new Color(50, 50, 50, 100);
@@ -154,17 +159,6 @@ public class Wang600Assembler extends JFrame
 			}
 			g.fillRect(x, y, ww * fw - 1, fh);
 		}
-
-		@Override
-		public void setDot(int dot, Position.Bias dotBias) {
-			// prevent cursor keys from changing caret
-			if (dot != carr) return;
-			super.setDot(dot, dotBias);
-		}
-
-		// prevent mouse from changing caret
-		@Override
-		protected void positionCaret(MouseEvent e) { }
 	};
 
 	public Wang600Assembler(String[] args) {
@@ -180,6 +174,7 @@ public class Wang600Assembler extends JFrame
 		getContentPane().setName("Wang600 UCode Asm");
 		//getContentPane().setBackground(new Color(100, 100, 100));
 		_last = new File(System.getProperty("user.dir"));
+		max = -1;
 
 		fifo = new java.util.concurrent.LinkedBlockingDeque<Long>();
 		ww = 120;
@@ -190,8 +185,10 @@ public class Wang600Assembler extends JFrame
 		Font font = new Font("Monospaced", Font.PLAIN, 12);
 		setupFont(font);
 		text.setCaret(new BlockCaret());
+		text.addCaretListener(this);
 		text.addKeyListener(this);
 		text.addMouseListener(this);
+		text.addMouseWheelListener(this);
 		scroll = new JScrollPane(text);
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -227,19 +224,29 @@ public class Wang600Assembler extends JFrame
 		setJMenuBar(mb);
 
 		store = new JButton("store");
+		store.setPreferredSize(new Dimension(70, 30));
 		store.addActionListener(this);
 		store.setActionCommand("store");
 		exec = new JButton("execute");
+		exec.setPreferredSize(new Dimension(90, 30));
 		exec.addActionListener(this);
 		exec.setActionCommand("exec");
+		// components of the "run" panel...
 		run = new JButton("run");
+		run.setPreferredSize(new Dimension(70, 30));
 		run.addActionListener(this);
 		run.setActionCommand("run");
 		cyc = new JTextField();
-		cyc.setPreferredSize(new Dimension(80, 20));
+		cyc.setPreferredSize(new Dimension(60, 20));
 		cyc.setHorizontalAlignment(SwingConstants.RIGHT);
-		cyc.addFocusListener(this); // needed?
-		cyc.addActionListener(this); // needed?
+		//cyc.addFocusListener(this); // needed?
+		//cyc.addActionListener(this); // needed?
+		brkpt = -1;
+		bpt = new JTextField();
+		bpt.setPreferredSize(new Dimension(30, 20));
+		bpt.setHorizontalAlignment(SwingConstants.RIGHT);
+		bpt.addFocusListener(this);
+		bpt.addActionListener(this);
 
 		zo = new JComboBox<String>(zo_cb);
 		ai = new JComboBox<String>(ai_cb);
@@ -399,12 +406,8 @@ public class Wang600Assembler extends JFrame
 		add(exec);
 		gc.gridx += gc.gridwidth;
 
-		gc.gridwidth = 6;
-		JPanel pan = new JPanel();
-		pan.setLayout(new BoxLayout(pan, BoxLayout.X_AXIS));
-		pan.add(run);
-		pan.add(cyc);
-		pan.add(new JLabel("cycles"));
+		JPanel pan = runPanel();
+		gc.gridwidth = 11; // width - 2 - gc.gridwidth;
 		gb.setConstraints(pan, gc);
 		add(pan);
 
@@ -423,16 +426,6 @@ public class Wang600Assembler extends JFrame
 		// bug in openjdk? does not remember current position
 		setLocationByPlatform(true);
 
-		rom = new byte[8 * 2048];
-		ram = new byte[2048];
-		xrom = new byte[2048];
-		cpu = new Wang600_CPU(rom, ram, xrom, this);
-		scope = new Wang600Scope(cpu);
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		addWindowListener(this);
-		pack();
-		setVisible(true);
-
 		File f = null;
 		for (String arg : args) {
 			if (arg.indexOf("=") >= 0) {
@@ -450,6 +443,27 @@ public class Wang600Assembler extends JFrame
 		if (s != null) {
 			run_rate = Integer.valueOf(s);
 		}
+		int sz = 4096;
+		s = props.getProperty("ram_size");
+		if (s != null) {
+			if (s.equalsIgnoreCase("4K")) {
+				// already set
+			} else if (s.equalsIgnoreCase("2K")) {
+				sz = 2048;
+			} else if (s.equalsIgnoreCase("1K")) {
+				sz = 1024;
+			}
+		}
+
+		rom = new byte[8 * 2048];
+		ram = new byte[sz / 2];
+		xrom = new byte[2048];
+		cpu = new Wang600_CPU(rom, ram, xrom, this);
+		scope = new Wang600Scope(cpu);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(this);
+		pack();
+		setVisible(true);
 		if (f != null) {
 			loadRom(f);
 		} else {
@@ -482,6 +496,50 @@ public class Wang600Assembler extends JFrame
 		//fa = fm.getAscent();
 		fw = fm.charWidth('M');
 		fh = fm.getHeight();
+	}
+
+	private JPanel runPanel() {
+		GridBagLayout gb = new GridBagLayout();
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.fill = GridBagConstraints.NONE;
+		gc.gridx = 0;
+		gc.gridy = 0;
+		gc.weightx = 0;
+		gc.weighty = 0;
+		gc.gridwidth = 1;
+		gc.gridheight = 1;
+		gc.anchor = GridBagConstraints.CENTER;
+		JPanel pan = new JPanel();
+		pan.setLayout(gb);
+		//pan.setLayout(new BoxLayout(pan, BoxLayout.X_AXIS));
+		gb.setConstraints(run, gc);
+		pan.add(run);
+		++gc.gridx;
+		JPanel pn = new JPanel();
+		pn.setPreferredSize(new Dimension(5, 10));
+		gb.setConstraints(pn, gc);
+		pan.add(pn);
+		++gc.gridx;
+		JLabel lb = new JLabel("cycles:");
+		gb.setConstraints(lb, gc);
+		pan.add(lb);
+		++gc.gridx;
+		gb.setConstraints(cyc, gc);
+		pan.add(cyc);
+		++gc.gridx;
+		pn = new JPanel();
+		pn.setPreferredSize(new Dimension(5, 10));
+		gb.setConstraints(pn, gc);
+		pan.add(pn);
+		++gc.gridx;
+		lb = new JLabel("breakpt:");
+		gb.setConstraints(lb, gc);
+		pan.add(lb);
+		++gc.gridx;
+		gb.setConstraints(bpt, gc);
+		pan.add(bpt);
+		++gc.gridx;
+		return pan;
 	}
 
 	private void setDirty(boolean drt) {
@@ -530,10 +588,16 @@ public class Wang600Assembler extends JFrame
 		// TODO: only if changed?
 		running = r;
 		if (r) {
+			if (brkpt >= 0) {
+				setBreakpoint(brkpt);
+			}
 			// TODO: disable microcode modifiers?
 			run.setText("stop");
 			run.setActionCommand("stop");
 		} else {
+			if (brkpt >= 0) {
+				clrBreakpoint(brkpt);
+			}
 			run.setText("run");
 			run.setActionCommand("run");
 			text.requestFocus();
@@ -544,9 +608,18 @@ public class Wang600Assembler extends JFrame
 		return running;
 	}
 
-	private void singleStep() {
+	// called from run() thread for any/all instructions
+	private void singleStep(boolean noBrkpt) {
+		int lastPC = curr;
 		cpu.pc = curr;
+		boolean bp = false;
+		if (noBrkpt) {
+			bp = clrBreakpoint(lastPC);
+		}
 		int x = cpu.instr_exec();
+		if (bp) {
+			setBreakpoint(lastPC);
+		}
 		scope.refresh();
 		scope.view(true); // TODO: if not running?
 		setLoc(cpu.pc);
@@ -554,18 +627,34 @@ public class Wang600Assembler extends JFrame
 
 	private void padDisas(int adr) {
 		String dis;
-		int nl = text.getLineCount() - 1;
+		int nl = max;
 		while (nl < adr) {
+			++nl;
 			dis = String.format("%03x: %s\n", nl, cpu.disas(nl, false));
 			text.append(dis);
-			++nl;
 		}
+		if (max < adr) max = adr;
 	}
 
+	// move caret to address
+	private void gotoAdr(int adr) {
+		try {
+			carr = text.getLineStartOffset(adr); // each adr is a line
+		} catch (Exception ee) {
+			System.err.println(ee.getMessage());
+			return;
+		}
+		foobar = true;
+		text.setCaretPosition(carr);
+		foobar = false;
+		text.repaint();
+	}
+
+	// render disassembly and set caret to location
 	private void setDisas(Wang600_Ucode uu) {
-		padDisas(curr);
 		String dis = String.format("%03x: %s\n", curr, cpu.disas(uu, false));
 
+		foobar = true;
 		try {
 			carr = text.getLineStartOffset(curr); // each adr is a line
 			int end = text.getLineEndOffset(curr);
@@ -574,18 +663,21 @@ public class Wang600Assembler extends JFrame
 		} catch (Exception ee) {
 			System.err.println(ee.getMessage());
 		}
+		foobar = false;
 		// TODO: any other actions to skip?
 		if (!getRunning()) {
 			text.requestFocus();
 		}
 	}
 
+	// instruction changed, update disassembly
 	private void updDisas(Wang600_Ucode uu) {
 		setDirty(true);
 		setSaved(false);
 		setDisas(uu);
 	}
 
+	// setup fields based on instruction
 	private void setLoc(Wang600_Ucode uu) {
 		int ja = uu.jad << 2;
 		if (uu.jh == 1) {
@@ -618,10 +710,15 @@ public class Wang600Assembler extends JFrame
 		jl.setSelectedIndex(uu.jl);
 		update = false;
 		setDirty(false);
-		setDisas(uu);
+		//setDisas(uu); // is this needed?
 	}
 
 	private void setLoc(int adr) {
+		if (dirty) {
+			storeUcode(uu);
+		}
+		padDisas(adr);
+		gotoAdr(adr);
 		curr = adr;
 		uu = cpu.fetchUcode(adr);
 		setLoc(uu);
@@ -648,6 +745,7 @@ public class Wang600Assembler extends JFrame
 		return true;
 	}
 
+	// only the 'text' component gets key events
 	public void keyTyped(KeyEvent e) {}
 	public void keyPressed(KeyEvent e) {
 		int c = (int)e.getKeyChar();
@@ -655,23 +753,30 @@ public class Wang600Assembler extends JFrame
 		int m = e.getModifiersEx();
 
 		if (k == KeyEvent.VK_DOWN) {
-			if (dirty) {
-				storeUcode(uu);
-			}
 			if (curr < 0x7ff) {
 				setLoc(curr + 1);
 			}
-			return;
 		} else if (k == KeyEvent.VK_UP) {
-			if (dirty) {
-				storeUcode(uu);
-			}
 			if (curr > 0x000) {
 				setLoc(curr - 1);
 			}
-			return;
+		} else if (k == KeyEvent.VK_PAGE_DOWN) {
+				int n = curr + (wh - 1);
+				if (n > 0x7ff) n = 0x7ff;
+				setLoc(n);
+		} else if (k == KeyEvent.VK_PAGE_UP) {
+				int n = curr - (wh - 1);
+				if (n < 0) n = 0;
+				setLoc(n);
+		} else if (k == KeyEvent.VK_HOME) {
+				setLoc(0);
+		} else if (k == KeyEvent.VK_END) {
+				setLoc(0x7ff);
+		} else if (k == KeyEvent.VK_F1) {
+				bpt.setText(String.format("%03x", curr));
+				brkpt = curr;
 		}
-
+		e.consume();
 		//System.err.format("keyPressed %02x %04x %04x\n", c, k, m);
 	}
 	public void keyReleased(KeyEvent e) {}
@@ -836,6 +941,37 @@ public class Wang600Assembler extends JFrame
 		text.repaint();
 	}
 
+	// called just before running...
+	private void setBreakpoint(int pc) {
+		int idx = pc * 8;
+		rom[idx + 7] |= 1;
+	}
+
+	// called to cancel breakpoint
+	private boolean clrBreakpoint(int pc) {
+		int idx = pc * 8 + 7;
+		boolean was = ((rom[idx] & 1) != 0);
+		rom[idx] &= ~1;
+		return was;
+	}
+
+	private void doBreakpoint() {
+		String a = bpt.getText();
+		int ad = -1;
+		brkpt = -1;
+		try {
+			ad = Integer.valueOf(a, 16);
+		} catch (Exception ee) { // includes a.length() == 0
+			ad = -1;
+		}
+		if (ad < 0 || ad > 0x7ff) {
+			bpt.setText("");
+			return;
+		}
+		brkpt = ad;
+		bpt.setText(String.format("%03x", brkpt));
+	}
+
 	private void startOne() {
 		if (dirty) {
 			storeUcode(uu);
@@ -860,13 +996,12 @@ public class Wang600Assembler extends JFrame
 		if (limit <= 0) { // means infinity...
 			limit = 1000000; // practical infinity
 		}
-		setRunning(true);
+		setRunning(true); // sets breakpoint in ROM, if any
 		fifo.add(limit);
 	}
 
 	private void stopRun() {
-		long c = -1;
-		fifo.add(c);
+		fifo.add((long)-1);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -909,6 +1044,8 @@ public class Wang600Assembler extends JFrame
 				updateKK();
 			} else if (tf == jad) {
 				updateJAD();
+			} else if (tf == bpt) {
+				doBreakpoint();
 			}
 			return;
 		}
@@ -991,11 +1128,15 @@ public class Wang600Assembler extends JFrame
 				updateKK();
 			} else if (tf == jad) {
 				updateJAD();
+			} else if (tf == bpt) {
+				doBreakpoint();
 			}
 		}
 	}
 
-	public void breakpoint(int pc) {}
+	public void breakpoint(int pc) {
+		stopRun();
+	}
 	public void debug_check() {}
 	public void tape_record(byte to_byte) {}
 	public int tape_play() { return 0; }
@@ -1027,6 +1168,28 @@ public class Wang600Assembler extends JFrame
 		System.exit(0);
 	}
 
+	public void caretUpdate(CaretEvent e) {
+		if (foobar) return;
+		int dot = e.getDot();
+		if (dot == carr) return;
+		int ca = -1;
+		int nl = -1;
+		try {
+			ca = text.getLineOfOffset(dot);
+		} catch (Exception ee) {}
+		if (ca >= 0 && ca <= 0x7ff) {
+			setLoc(ca);
+		}
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int clicks = e.getWheelRotation();
+		int nc = curr + clicks;
+		if (nc < 0) nc = 0;
+		if (nc > 0x7ff) nc = 0x7ff;
+		setLoc(nc);
+	}
+
 	public void run() {
 		long limit;
 		while (true) {
@@ -1035,8 +1198,11 @@ public class Wang600Assembler extends JFrame
 			} catch (Exception ee) {
 				continue; // TODO: prevent runaway?
 			}
+			// TODO: must skip breakpoint on first instruction...
+			boolean first = true;
 			while (limit > 0 && fifo.size() == 0) {
-				singleStep();
+				singleStep(first);
+				first = false;
 				if (run_rate > 0) try {
 					Thread.sleep(run_rate);
 				} catch (Exception ee) {}

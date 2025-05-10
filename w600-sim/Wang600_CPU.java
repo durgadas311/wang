@@ -60,8 +60,8 @@ class Wang600_CPU
 	static final int D20_DEGREES = 0x01;
 	static final int D21_PRT_ON = 0x02;
 
-	int memsize;
-	int memmask;
+	public int memsize;
+	public int memmask;
 	public byte[] _rom; // microcode
 	public byte[] _ram; // program memory
 	public byte[] _xrom;// extension/add-on program ROM

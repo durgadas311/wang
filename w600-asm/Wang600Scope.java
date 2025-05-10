@@ -3,6 +3,7 @@
 import java.io.*;
 import java.util.Properties;
 import java.util.Arrays;
+import java.util.Random;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
@@ -12,6 +13,9 @@ import javax.swing.border.*;
 
 public class Wang600Scope extends JFrame
 		implements ActionListener, WindowListener {
+
+	static final int btn_w = 80;
+	static final int btn_h = 30;
 
 	Wang600_CPU cpu;
 
@@ -67,6 +71,7 @@ public class Wang600Scope extends JFrame
 	JCheckBox rad;
 	JTextField dsp;
 	byte[] disp;
+	Wang600RamPortal ram;
 
 	int mode0;
 	int mode1;
@@ -81,6 +86,20 @@ public class Wang600Scope extends JFrame
 
 		mode0 = 0;
 		mode1 = 0;
+
+		JMenuBar mb = new JMenuBar();
+		JMenu mu = new JMenu("Machine");
+		JMenuItem mi;
+		mi = new JMenuItem("Reset Zero", KeyEvent.VK_Z);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Reset Random", KeyEvent.VK_R);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mb.add(mu);
+		setJMenuBar(mb);
+
+		ram = new Wang600RamPortal(cpu, 4);
 
 		disp = new byte[16];
 		dsp = new JTextField();
@@ -259,30 +278,39 @@ public class Wang600Scope extends JFrame
 		lst.addActionListener(this);
 		grp.add(lst);
 		prm = new JButton("PRIME");
+		prm.setPreferredSize(new Dimension(btn_w, btn_h));
 		prm.setFocusPainted(false);
 		prm.addActionListener(this);
 		v_p = new JButton("VER PG");
+		v_p.setPreferredSize(new Dimension(btn_w, btn_h));
 		v_p.setFocusPainted(false);
 		v_p.addActionListener(this);
 		spc = new JButton("SET PC");
+		spc.setPreferredSize(new Dimension(btn_w, btn_h));
 		spc.setFocusPainted(false);
 		spc.addActionListener(this);
 		r_p = new JButton("REC PG");
+		r_p.setPreferredSize(new Dimension(btn_w, btn_h));
 		r_p.setFocusPainted(false);
 		r_p.addActionListener(this);
 		s_m = new JButton("S.M.");
+		s_m.setPreferredSize(new Dimension(btn_w, btn_h));
 		s_m.setFocusPainted(false);
 		s_m.addActionListener(this);
 		b_s = new JButton("B.S.");
+		b_s.setPreferredSize(new Dimension(btn_w, btn_h));
 		b_s.setFocusPainted(false);
 		b_s.addActionListener(this);
 		ins = new JButton("INS");
+		ins.setPreferredSize(new Dimension(btn_w, btn_h));
 		ins.setFocusPainted(false);
 		ins.addActionListener(this);
 		del = new JButton("DEL");
+		del.setPreferredSize(new Dimension(btn_w, btn_h));
 		del.setFocusPainted(false);
 		del.addActionListener(this);
 		stp = new JButton("STEP");
+		stp.setPreferredSize(new Dimension(btn_w, btn_h));
 		stp.setFocusPainted(false);
 		stp.addActionListener(this);
 		flt = new JCheckBox("Fl/Sc");
@@ -296,10 +324,11 @@ public class Wang600Scope extends JFrame
 		rad.setFocusPainted(false);
 		rad.addActionListener(this);
 		key = new JButton("KEY");
+		key.setPreferredSize(new Dimension(btn_w, btn_h));
 		key.setFocusPainted(false);
 		key.addActionListener(this);
 		key_code = new JTextField();
-		key_code.setPreferredSize(new Dimension(60, 20));
+		key_code.setPreferredSize(new Dimension(btn_w, 20));
 		key_code.setHorizontalAlignment(SwingConstants.RIGHT);
 		key_code.setEditable(true);
 		key_code.setFocusable(true);
@@ -317,8 +346,10 @@ public class Wang600Scope extends JFrame
 		gc.anchor = GridBagConstraints.CENTER;
 		gc.gridx = 1;
 		gc.gridy = 1;
+		gc.gridwidth = 3;
 		setLabel("Cycles");
-		++gc.gridx;
+		gc.gridx += gc.gridwidth;
+		gc.gridwidth = 1;
 		setGap(5);
 		++gc.gridx;
 		setLabel("NEXT");
@@ -373,9 +404,11 @@ public class Wang600Scope extends JFrame
 		int width = gc.gridx + 1;
 		++gc.gridy;
 		gc.gridx = 1;
+		gc.gridwidth = 3;
 		gb.setConstraints(cycl, gc);
 		add(cycl);
-		++gc.gridx;
+		gc.gridx += gc.gridwidth;
+		gc.gridwidth = 1;
 		++gc.gridx;
 		gb.setConstraints(next, gc);
 		add(next);
@@ -558,8 +591,19 @@ public class Wang600Scope extends JFrame
 		add(iob);
 		++gc.gridx;
 		++gc.gridx;
-
 		++gc.gridy;
+
+		if (ram != null) {
+			gc.gridx = 0;
+			setGap(10);
+			++gc.gridy;
+			gc.gridx = 1;
+			gc.gridwidth = width - 2;
+			gb.setConstraints(ram, gc);
+			add(ram);
+			gc.gridwidth = 1;
+			++gc.gridy;
+		}
 		gc.gridx = 0;
 		setGap(10);
 		++gc.gridy;
@@ -573,6 +617,7 @@ public class Wang600Scope extends JFrame
 		gc.gridwidth = 1;
 		setGap(10);
 		++gc.gridy;
+
 		gc.anchor = GridBagConstraints.WEST;
 		gc.gridx = 1;
 		gc.gridwidth = 12;
@@ -709,6 +754,77 @@ public class Wang600Scope extends JFrame
 		return s;
 	}
 
+	private void reset_clear() {
+		cpu.cycles = 0;
+		cpu.next = 0;
+		cpu.pc = 0;
+		cpu.stk1 = 0;
+		cpu.stk2 = 0;
+
+		cpu.zo = 0;
+		cpu.cc = 0;
+		cpu.sc = 0;
+		cpu.kbd = 0;
+		cpu.ov = 0;
+		cpu.err = 0;
+
+		cpu.s = 0;
+		cpu.t = 0;
+		cpu.u = 0;
+		cpu.v = 0;
+		cpu.ca = 0;
+		cpu.cb = 0;
+		cpu.ka = 0;
+		cpu.kb = 0;
+
+		cpu.l = 0;
+		cpu.m = 0;
+		cpu.n = 0;
+		cpu.rb = 0;
+		cpu.gioa = 0;
+		cpu.giob = 0;
+		cpu.iob = 0;
+		Arrays.fill(cpu._ram, (byte)0);
+		do_blanking();
+	}
+
+	private void reset_random() {
+		Random r = new Random(System.nanoTime());
+		cpu.cycles = 0;
+		cpu.next = 0;
+		cpu.pc = 0;
+		cpu.stk1 = r.nextInt() & 0x7ff;
+		cpu.stk2 = r.nextInt() & 0x7ff;
+
+		cpu.zo = 0;
+		cpu.cc = 0;
+		cpu.sc = 0;
+		cpu.kbd = 0;
+		cpu.ov = 0;
+		cpu.err = 0;
+
+		int i = r.nextInt();
+		cpu.s = (byte)(i & 0x0f);
+		cpu.t = (byte)((i >> 4) & 0x0f);
+		cpu.u = (byte)((i >> 8) & 0x0f);
+		cpu.v = (byte)((i >> 12) & 0x0f);
+		cpu.ca = (byte)((i >> 16) & 0x0f);
+		cpu.cb = (byte)((i >> 20) & 0x0f);
+		cpu.ka = (byte)((i >> 24) & 0x0f);
+		cpu.kb = (byte)((i >> 28) & 0x0f);
+
+		cpu.l = 0;
+		cpu.m = 0;
+		cpu.n = 0;
+		cpu.rb = 0;
+		i = r.nextInt();
+		cpu.gioa = (byte)(i & 0x0f);
+		cpu.giob = (byte)((i >> 4) & 0x0f);
+		cpu.new_iob(i >> 8);
+		r.nextBytes(cpu._ram);
+		do_blanking();
+	}
+
 	public void refresh() {
 		cycl.setText(String.format("%d", cpu.cycles));
 		next.setText(String.format("%03x", cpu.next));
@@ -739,6 +855,9 @@ public class Wang600Scope extends JFrame
 		gioa.setText(String.format("%d", cpu.gioa));
 		giob.setText(String.format("%d", cpu.giob));
 		iob.setText(String.format("%d", cpu.iob));
+		if (ram != null) {
+			ram.refresh();
+		}
 		// TODO: other hardware state?
 		repaint();
 	}
@@ -816,76 +935,104 @@ public class Wang600Scope extends JFrame
 	}
 
 	private void do_key() {
+		if (cpu.kbl || cpu.z2) return;
 		cpu.setKaKb(parse_key());
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JRadioButton) {
-			JRadioButton rb = (JRadioButton)e.getSource();
-			String k = rb.getActionCommand();
-			mode0 &= 0b1001;
-			if (k.equals("run")) {
-				//
-			} else if (k.equals("lrn")) {
-				mode0 |= 0b0100;
-			} else if (k.equals("l_p")) {
-				mode0 |= 0b0110;
-			} else if (k.equals("lst")) {
-				mode0 |= 0b0010;
+	private void do_radiobutton(JRadioButton rb) {
+		String k = rb.getActionCommand();
+		mode0 &= 0b1001;
+		if (k.equals("run")) {
+			//
+		} else if (k.equals("lrn")) {
+			mode0 |= 0b0100;
+		} else if (k.equals("l_p")) {
+			mode0 |= 0b0110;
+		} else if (k.equals("lst")) {
+			mode0 |= 0b0010;
+		}
+		d1.setText(binary4(mode0));
+	}
+
+	private void do_button(JButton bt) {
+		if (bt == stp) {
+			mode0 |= 0b1000;
+			d1.setText(binary4(mode0));
+		} else if (bt == prm) {
+			cpu.jam = 0x1000;
+		} else if (bt == v_p) {
+			cpu.jam = 0x1001;
+		} else if (bt == spc) {
+			cpu.jam = 0x1002;
+		} else if (bt == r_p) {
+			cpu.jam = 0x1003;
+		} else if (bt == s_m) {
+			cpu.jam = 0x1004;
+		} else if (bt == b_s) {
+			cpu.jam = 0x1005;
+		} else if (bt == ins) {
+			cpu.jam = 0x1006;
+		} else if (bt == del) {
+			cpu.jam = 0x1007;
+		} else if (bt == key) {
+			do_key();
+		}
+	}
+
+	private void do_checkbox(JCheckBox cb) {
+		if (cb == flt) {
+			if (flt.isSelected()) {
+				mode0 |= 0b0001;
+			} else {
+				mode0 &= ~0b0001;
 			}
 			d1.setText(binary4(mode0));
+		} else if (cb == prt) {
+			if (prt.isSelected()) {
+				mode1 &= ~0b0010;
+			} else {
+				mode1 |= 0b0010;
+			}
+			d2.setText(binary4(mode1 ^ 1));
+		} else if (cb == rad) {
+			if (rad.isSelected()) {
+				mode1 &= ~0b0001;
+			} else {
+				mode1 |= 0b0001;
+			}
+			d2.setText(binary4(mode1 ^ 1));
+		}
+	}
+
+	private void do_menuitem(JMenuItem mi) {
+		int mn = mi.getMnemonic();
+		if (mn == KeyEvent.VK_Z) {
+			reset_clear();
+			refresh();
+			return;
+		} else if (mn == KeyEvent.VK_R) {
+			reset_random();
+			refresh();
 			return;
 		}
-		if (e.getSource() instanceof JButton) {
-			JButton bt = (JButton)e.getSource();
-			if (bt == stp) {
-				mode0 |= 0b1000;
-				d1.setText(binary4(mode0));
-			} else if (bt == prm) {
-				cpu.jam = 0x1000;
-			} else if (bt == v_p) {
-				cpu.jam = 0x1001;
-			} else if (bt == spc) {
-				cpu.jam = 0x1002;
-			} else if (bt == r_p) {
-				cpu.jam = 0x1003;
-			} else if (bt == s_m) {
-				cpu.jam = 0x1004;
-			} else if (bt == b_s) {
-				cpu.jam = 0x1005;
-			} else if (bt == ins) {
-				cpu.jam = 0x1006;
-			} else if (bt == del) {
-				cpu.jam = 0x1007;
-			} else if (bt == key) {
-				do_key();
-			}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		Object src = e.getSource();
+		if (src instanceof JRadioButton) {
+			do_radiobutton((JRadioButton)src);
 			return;
 		}
-		if (e.getSource() instanceof JCheckBox) {
-			JCheckBox cb = (JCheckBox)e.getSource();
-			if (cb == flt) {
-				if (flt.isSelected()) {
-					mode0 |= 0b0001;
-				} else {
-					mode0 &= ~0b0001;
-				}
-				d1.setText(binary4(mode0));
-			} else if (cb == prt) {
-				if (prt.isSelected()) {
-					mode1 &= ~0b0010;
-				} else {
-					mode1 |= 0b0010;
-				}
-				d2.setText(binary4(mode1 ^ 1));
-			} else if (cb == rad) {
-				if (rad.isSelected()) {
-					mode1 &= ~0b0001;
-				} else {
-					mode1 |= 0b0001;
-				}
-				d2.setText(binary4(mode1 ^ 1));
-			}
+		if (src instanceof JButton) {
+			do_button((JButton)src);
+			return;
+		}
+		if (src instanceof JCheckBox) {
+			do_checkbox((JCheckBox)src);
+			return;
+		}
+		if (src instanceof JMenuItem) {
+			do_menuitem((JMenuItem)src);
 			return;
 		}
 	}
