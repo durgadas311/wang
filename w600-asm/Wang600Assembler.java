@@ -114,6 +114,7 @@ public class Wang600Assembler extends JFrame
 		"0", "1", "S0", "S2", "ZR", "-", "SC", "return" };
 
 	JButton store;
+	JButton revert;
 	JButton exec;
 	JButton run;
 	JTextField cyc;
@@ -227,6 +228,10 @@ public class Wang600Assembler extends JFrame
 		store.setPreferredSize(new Dimension(70, 30));
 		store.addActionListener(this);
 		store.setActionCommand("store");
+		revert = new JButton("revert");
+		revert.setPreferredSize(new Dimension(80, 30));
+		revert.addActionListener(this);
+		revert.setActionCommand("revert");
 		exec = new JButton("execute");
 		exec.setPreferredSize(new Dimension(90, 30));
 		exec.addActionListener(this);
@@ -398,15 +403,16 @@ public class Wang600Assembler extends JFrame
 		gc.gridx = 1;
 		setGap(10);
 		++gc.gridy;
-		gc.gridwidth = 4;
-		gb.setConstraints(store, gc);
-		add(store);
-		gc.gridx += gc.gridwidth;
-		gb.setConstraints(exec, gc);
-		add(exec);
+
+		gc.gridwidth = 8;
+		JPanel pan = storePanel();
+		gc.anchor = GridBagConstraints.WEST;
+		gb.setConstraints(pan, gc);
+		add(pan);
+		gc.anchor = GridBagConstraints.CENTER;
 		gc.gridx += gc.gridwidth;
 
-		JPanel pan = runPanel();
+		pan = runPanel();
 		gc.gridwidth = 11; // width - 2 - gc.gridwidth;
 		gb.setConstraints(pan, gc);
 		add(pan);
@@ -498,7 +504,19 @@ public class Wang600Assembler extends JFrame
 		fh = fm.getHeight();
 	}
 
+	private JPanel storePanel() {
+		JPanel pan = new JPanel();
+		pan.setLayout(new BoxLayout(pan, BoxLayout.X_AXIS));
+		pan.add(store);
+		JPanel pn = new JPanel();
+		pn.setPreferredSize(new Dimension(5, 10));
+		pan.add(pn);
+		pan.add(revert);
+		return pan;
+	}
+
 	private JPanel runPanel() {
+		JPanel pn;
 		GridBagLayout gb = new GridBagLayout();
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.fill = GridBagConstraints.NONE;
@@ -512,10 +530,18 @@ public class Wang600Assembler extends JFrame
 		JPanel pan = new JPanel();
 		pan.setLayout(gb);
 		//pan.setLayout(new BoxLayout(pan, BoxLayout.X_AXIS));
+		gb.setConstraints(exec, gc);
+		pan.add(exec);
+		++gc.gridx;
+		pn = new JPanel();
+		pn.setPreferredSize(new Dimension(5, 10));
+		gb.setConstraints(pn, gc);
+		pan.add(pn);
+		++gc.gridx;
 		gb.setConstraints(run, gc);
 		pan.add(run);
 		++gc.gridx;
-		JPanel pn = new JPanel();
+		pn = new JPanel();
 		pn.setPreferredSize(new Dimension(5, 10));
 		gb.setConstraints(pn, gc);
 		pan.add(pn);
@@ -545,6 +571,7 @@ public class Wang600Assembler extends JFrame
 	private void setDirty(boolean drt) {
 		dirty = drt;
 		store.setEnabled(dirty);
+		revert.setEnabled(dirty);
 	}
 
 	private void setSaved(boolean svd) {
@@ -709,7 +736,6 @@ public class Wang600Assembler extends JFrame
 		jh.setSelectedIndex(uu.jh);
 		jl.setSelectedIndex(uu.jl);
 		update = false;
-		setDirty(false);
 	}
 
 	private void setLoc(int adr) {
@@ -723,6 +749,7 @@ public class Wang600Assembler extends JFrame
 		curr = adr;
 		uu = cpu.fetchUcode(adr);
 		setLoc(uu);
+		setDirty(false);
 	}
 
 	private File pickFile(String purpose, String[] sufx, String[] sufd) {
@@ -752,6 +779,7 @@ public class Wang600Assembler extends JFrame
 		int c = (int)e.getKeyChar();
 		int k = e.getKeyCode();
 		int m = e.getModifiersEx();
+		boolean shift = ((m & InputEvent.SHIFT_DOWN_MASK) != 0);
 
 		if (k == KeyEvent.VK_DOWN) {
 			if (curr < 0x7ff) {
@@ -776,6 +804,11 @@ public class Wang600Assembler extends JFrame
 		} else if (k == KeyEvent.VK_F1) {
 				bpt.setText(String.format("%03x", curr));
 				brkpt = curr;
+		} else if (shift && k == KeyEvent.VK_DELETE) {
+				uu = new Wang600_Ucode(new byte[8]);
+				setLoc(uu);
+				updDisas(uu);
+				setDirty(true);
 		}
 		e.consume();
 		//System.err.format("keyPressed %02x %04x %04x\n", c, k, m);
@@ -1010,6 +1043,11 @@ public class Wang600Assembler extends JFrame
 			JButton bt = (JButton)e.getSource();
 			if (bt == store) {
 				storeUcode(uu);
+			} else if (bt == revert) {
+				setDirty(false); // prevent setLoc() from storing
+				setLoc(curr);
+				updDisas(uu);
+				setDirty(false); // reverse what updDisas() did
 			} else if (bt == exec) {
 				startOne();
 			} else if (bt == run) {

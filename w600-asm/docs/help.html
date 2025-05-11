@@ -70,10 +70,12 @@ larger amounts of the CPUs.
 
 <H4>Buttons</H4>
 
-<P>The "store" button is enabled when the current microcode instruction
-has been modified but not yet stored in the ROM image. Clicking this
-button stores the instruction in the ROM image (but does not save anything
-to disk). Many other operations will automatically store the instruction.
+<P>The "store" and "revert" buttons are enabled when the current microcode instruction
+has been modified but not yet stored in the ROM image.
+Clicking "store" stores the modified instruction in the ROM image
+(but does not save anything to disk).
+Clicking "revert" reverts the instruction to the current contents in the ROM image.
+CAUTION: Navigating to another instruction will automatically store the instruction.
 
 <P>The "execute" button will cause the current microcode instruction to be executed
 in the simulator, and will also make the simulator oscilloscope window visible.
@@ -105,6 +107,10 @@ the fields of the current instruction.
 selected by using the UP, DOWN, HOME, END, PAGE_UP, and PAGE_DOWN cursor keys,
 or by mouse click on the desired instruction, or mouse wheel,
 or via execution of instructions.
+CAUTION: This navigation automatically stores a modified instruction.
+
+<P>The current instruction may be cleared to all fields "0" by
+pressing Shift + Delete.
 
 <P>Note that not all instructions in the ROM image are displayed to begin with.
 Only as instructions are "visited" do they appear, with the exception that
