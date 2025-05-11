@@ -71,8 +71,10 @@ class Wang600_CPU
 		_rom = uc;
 		_ram = ram;
 		_xrom = xrom;
-		memsize = fp.getMemSize();
-		memmask = fp.getMemMask();
+		if (fp != null) {
+			memsize = fp.getMemSize();
+			memmask = fp.getMemMask();
+		}
 		this.fp = fp;
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
 		reset();

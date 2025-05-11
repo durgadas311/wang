@@ -19,6 +19,15 @@
 Remember to enclose <I>value</I> in quotes if required by your shell.</DD>
 </DL>
 
+<P>As a special case, a direct disassembly of a ROM iamge file to stdout
+may be done using the syntax:
+
+<P><KBD>java -jar Wang600asm.jar -d [-z] [-r] <I>rom-file</I></KBD>
+
+<P>Where: <B>-z</B> trims off all trailing zeroed instructions,
+and <B>-r</B> includes the raw hexadecimal representation of
+the instruction fields.
+
 <H3>Properties</H3>
 
 <DL>
