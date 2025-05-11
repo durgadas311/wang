@@ -432,7 +432,7 @@ public class Wang600Assembler extends JFrame
 				String[] ss = arg.split("=", 2);
 				props.setProperty(ss[0], ss[1]);
 			} else if (f == null) {
-				f = new File(args[0]);
+				f = new File(arg);
 				if (!f.exists()) {
 					f = null;
 				}
@@ -710,15 +710,16 @@ public class Wang600Assembler extends JFrame
 		jl.setSelectedIndex(uu.jl);
 		update = false;
 		setDirty(false);
-		//setDisas(uu); // is this needed?
 	}
 
 	private void setLoc(int adr) {
 		if (dirty) {
 			storeUcode(uu);
 		}
+		foobar = true;
 		padDisas(adr);
 		gotoAdr(adr);
+		foobar = false;
 		curr = adr;
 		uu = cpu.fetchUcode(adr);
 		setLoc(uu);
@@ -1058,6 +1059,7 @@ public class Wang600Assembler extends JFrame
 				return;
 			}
 			newRom();
+			max = -1;
 			text.setText("");
 			setLoc(0);
 			return;
@@ -1069,6 +1071,7 @@ public class Wang600Assembler extends JFrame
 			File lod = pickFile("Load ROM", wucx, wucd);
 			if (lod != null) {
 				loadRom(lod);
+				max = -1;
 				text.setText("");
 				setLoc(0);
 			}
