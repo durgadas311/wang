@@ -164,6 +164,7 @@ public class Wang600Assembler extends JFrame
 
 	public Wang600Assembler(String[] args) {
 		super("Wang600 Microcode Assembler");
+		String s;
 		props = new Properties();
 		// TODO: possibly load properties from file
 		java.net.URL url;
@@ -173,13 +174,35 @@ public class Wang600Assembler extends JFrame
 		}
 
 		getContentPane().setName("Wang600 UCode Asm");
+		setResizable(false);
 		//getContentPane().setBackground(new Color(100, 100, 100));
 		_last = new File(System.getProperty("user.dir"));
 		max = -1;
-
 		fifo = new java.util.concurrent.LinkedBlockingDeque<Long>();
+
+		File f = null;
+		for (String arg : args) {
+			if (arg.indexOf("=") >= 0) {
+				String[] ss = arg.split("=", 2);
+				props.setProperty(ss[0], ss[1]);
+			} else if (f == null) {
+				f = new File(arg);
+				if (!f.exists()) {
+					f = null;
+				}
+			}
+		}
+
 		ww = 120;
 		wh = 24;
+		s = props.getProperty("lines");
+		if (s != null) {
+			int nl = Integer.valueOf(s);
+			if (nl >= 5 && nl <= 200) {
+				wh = nl;
+			}
+		}
+
 		text = new JTextArea(wh, ww);
 		text.setEditable(false); // this prevents caret... grrr.
 		text.setBackground(Color.white);
@@ -432,20 +455,8 @@ public class Wang600Assembler extends JFrame
 		// bug in openjdk? does not remember current position
 		setLocationByPlatform(true);
 
-		File f = null;
-		for (String arg : args) {
-			if (arg.indexOf("=") >= 0) {
-				String[] ss = arg.split("=", 2);
-				props.setProperty(ss[0], ss[1]);
-			} else if (f == null) {
-				f = new File(arg);
-				if (!f.exists()) {
-					f = null;
-				}
-			}
-		}
 		run_rate = 10;
-		String s = props.getProperty("run_rate");
+		s = props.getProperty("run_rate");
 		if (s != null) {
 			run_rate = Integer.valueOf(s);
 		}

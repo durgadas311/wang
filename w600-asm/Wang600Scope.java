@@ -82,6 +82,7 @@ public class Wang600Scope extends JFrame
 		super("Wang600 CPU Scope");
 		this.cpu = cpu;
 		getContentPane().setName("Wang600 Scope");
+		setResizable(false);
 		Font font = new Font("Monospaced", Font.PLAIN, 18);
 
 		mode0 = 0;
