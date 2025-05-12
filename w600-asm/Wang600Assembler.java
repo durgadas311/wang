@@ -20,6 +20,9 @@ public class Wang600Assembler extends JFrame
 	static final String[] wucx = { "wuc" };
 	static final String[] wucd = { "Wang uCode" };
 
+	static final int OPTION_CANCEL = 0;
+	static final int OPTION_YES = 1;
+
 	JTextArea text;
 	FontMetrics fm;
 	int fh;
@@ -33,6 +36,7 @@ public class Wang600Assembler extends JFrame
 	Wang600Scope scope;
 	private java.util.concurrent.LinkedBlockingDeque<Long> fifo;
 	Properties props;
+	Object[] dis_btns;
 
 	JComboBox zo;
 	JComboBox ai;	// AI,AC
@@ -138,6 +142,7 @@ public class Wang600Assembler extends JFrame
 	boolean saved;	// whether ROM image has been saved to a file.
 	boolean update;
 	boolean foobar;
+	File romFile;
 
 	class BlockCaret extends DefaultCaret {
 		static final Color shadow = new Color(50, 50, 50, 100);
@@ -173,6 +178,10 @@ public class Wang600Assembler extends JFrame
 			_help = new GenericHelp("Wang600 ucode asm Help", url);
 		}
 
+		dis_btns = new Object[2];
+		dis_btns[OPTION_YES] = "Discard";
+		dis_btns[OPTION_CANCEL] = "Cancel";
+
 		getContentPane().setName("Wang600 UCode Asm");
 		setResizable(false);
 		//getContentPane().setBackground(new Color(100, 100, 100));
@@ -202,11 +211,16 @@ public class Wang600Assembler extends JFrame
 				wh = nl;
 			}
 		}
+		int fz = 12;
+		s = props.getProperty("font_size");
+		if (s != null) {
+			fz = Integer.valueOf(s);
+		}
 
 		text = new JTextArea(wh, ww);
 		text.setEditable(false); // this prevents caret... grrr.
 		text.setBackground(Color.white);
-		Font font = new Font("Monospaced", Font.PLAIN, 12);
+		Font font = new Font("Monospaced", Font.PLAIN, fz);
 		setupFont(font);
 		text.setCaret(new BlockCaret());
 		text.addCaretListener(this);
@@ -374,6 +388,8 @@ public class Wang600Assembler extends JFrame
 		setGap(5);
 		++gc.gridx;
 		setLabel("JL");
+		++gc.gridx;
+		setGap(10);
 		++gc.gridx;
 		int width = gc.gridx + 1;
 		++gc.gridy;
@@ -588,15 +604,21 @@ public class Wang600Assembler extends JFrame
 	private void setSaved(boolean svd) {
 		saved = svd;
 		save.setEnabled(!saved);
+		String ttl;
 		if (saved) {
-			setTitle("Wang600 Microcode Assembler");
+			ttl = "Wang600 Microcode Assembler";
 		} else {
-			setTitle("* Wang600 Microcode Assembler");
+			ttl = "* Wang600 Microcode Assembler";
 		}
+		if (romFile != null) {
+			ttl += " - " + romFile.getName();
+		}
+		setTitle(ttl);
 	}
 
 	private void newRom() {
 		Arrays.fill(rom, (byte)0);
+		romFile = null;
 		setDirty(false);
 		setSaved(true);
 	}
@@ -618,6 +640,7 @@ public class Wang600Assembler extends JFrame
 			is.close();
 			// TODO: locate "end" of ROM and display up to that
 		} catch (Exception ee) {}
+		romFile = f;
 		setDirty(false);
 		setSaved(true);
 	}
@@ -775,9 +798,12 @@ public class Wang600Assembler extends JFrame
 
 	private boolean saveCheck(String purpose) {
 		if (dirty || !saved) {
-			int ans = PopupFactory.confirm((Component)this, purpose,
-						"Unsaved ROM - Discard?");
-			if (ans != JOptionPane.YES_OPTION) {
+			int ans = JOptionPane.showOptionDialog((Component)this,
+					"Discard Unsaved ROM?", purpose,
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null, dis_btns, dis_btns[OPTION_YES]);
+			if (ans != OPTION_YES) {
 				return false;
 			}
 		}

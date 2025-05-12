@@ -97,6 +97,9 @@ public class Wang600Scope extends JFrame
 		mi = new JMenuItem("Reset Random", KeyEvent.VK_R);
 		mi.addActionListener(this);
 		mu.add(mi);
+		mi = new JMenuItem("Blank Display", KeyEvent.VK_B);
+		mi.addActionListener(this);
+		mu.add(mi);
 		mb.add(mu);
 		setJMenuBar(mb);
 
@@ -1014,6 +1017,9 @@ public class Wang600Scope extends JFrame
 		} else if (mn == KeyEvent.VK_R) {
 			reset_random();
 			refresh();
+			return;
+		} else if (mn == KeyEvent.VK_B) {
+			do_blanking();
 			return;
 		}
 	}

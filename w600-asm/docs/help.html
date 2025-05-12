@@ -48,6 +48,12 @@ scrolled-through.
 Default is 24. Minimum is 5.
 Maximum is 200 but beware of impractical values for your screen size.
 </DD>
+<DT>font_size
+<DD>Configures the size of the font used in the disassembly pane.
+Default is 12.
+This affects the number of lines that will fit on your screen,
+as well as the width of the window.
+</DD>
 </DL>
 
 <H3>Operating The Assembler</H3>
@@ -132,10 +138,21 @@ human interface. The "Machine" menu provides various actions related to the
 condition of registers and memory.
 
 <P>The menu item Machine->Reset_Zero will clear all registers and RAM to "0".
+Display is also blanked.
 Note that this does NOT affect the current/next instruction to be executed.
 
 <P>The menu item Machine->Reset_Random will set (most) registers and RAM to random values.
+Display is also blanked.
 Note that this does NOT affect the current/next instruction to be executed.
+
+<P>The menu item Machine->Blank_Display will clear the display as if
+refreshing had stopped.
+Since the simulation does not automatically blank the display if refreshing stops,
+this is the only way to be certain whether refreshing is still happening
+without stopping and resetting the machine.
+
+<P>Address values (NEXT, PC, STK1, STK2, Row Addr) are displayed in hexadecimal.
+D1 and D2 are dispalyed in binary. All others are displayed in decimal.
 
 <P>The top pane includes a RAM viewport that allows up to 4 "rows" of RAM to be monitored.
 RAM is organized in 4-bit words and each row represents 16 words.
