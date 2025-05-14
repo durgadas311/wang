@@ -36,6 +36,9 @@ class Wang600_CPU
 	public boolean kbl;
 	public boolean ioc;
 	public boolean z2;
+	private byte _ka;
+	private byte _kb;
+	private boolean kbd3;
 
 	// ucode subroutine stack
 	public int stk1;
@@ -85,8 +88,14 @@ class Wang600_CPU
 		pr_hammers = 0;
 		pr_tach = 0;
 		pr_col = 0;
+		// actual state of all these is indeterminate
+		_kb = (byte)0x0f;
+		_ka = (byte)0x0f;
 		kb = (byte)0x0f;
 		ka = (byte)0x0f;
+		kbd3 = true;
+		kbd = 0;
+		z2 = false;
 		// On real machines, did not always happen that power-on asserted PRIME...
 		pc = 0x000;	// force PRIME on power-up...
 	}
@@ -277,11 +286,44 @@ class Wang600_CPU
 		return disas(uu, raw);
 	}
 
+	// these three might need "synchronized"
 	public void setKaKb(int key) { 
 		kbd = 1;
-		ka = (byte)((key >> 4) & 0x0f);
-		kb = (byte)(key & 0x0f);
+		_ka = (byte)((key >> 4) & 0x0f);
+		_kb = (byte)(key & 0x0f);
 		z2 = true;
+		kbd3 = false;
+	}
+
+	private void chkKaKb() {
+		// "kbd3" here does not directly emulate the hardware KBD3.
+		if (!kbd3) {
+			// On the 6184, this happens continuously while KBD3
+			// is off, at each Rs clock pulse (end of instr).
+			// Microcode must ensure that KA/KB remain zero
+			// until input is received (key press or device
+			// input).  Data is pre-latched immediately when a
+			// key is pressed, and after a delay turns on KBD3.
+			// Device input pre-latches data on leading edge of
+			// GISN and sets KBD3 on trailing edge.  This window
+			// ensures that data is copied from the pre-latch
+			// into KA/KB on the next Rs.  KBD3 is off between
+			// ST=9 (RESET) and input.
+			//
+			ka |= _ka;
+			kb |= _kb;
+			kbd3 = true; // do this only once per input
+		}
+	}
+
+	private void clrKaKb() {
+		_ka = 0;
+		_kb = 0;
+		ka = 0;
+		kb = 0;
+		kbd3 = true;
+		kbd = 0;
+		z2 = false;
 	}
 
 	private byte[] odd_parity;
@@ -491,8 +533,8 @@ class Wang600_CPU
 			pr_hammers = 0;
 		}
 		pr_tach ^= 0x08;
-		ka = pr_drum;
-		kb = pr_tach;
+		ka |= pr_drum;
+		kb |= pr_tach;
 	}
 
 	private void printer_hammers() {
@@ -709,10 +751,7 @@ class Wang600_CPU
 			s &= ~8;
 			break;
 		case 9:
-			ka = 0;
-			kb = 0;
-			kbd = 0;
-			z2 = false;
+			clrKaKb();
 			break;
 		case 10:
 			s = (byte)((s & 0x0e) | (zo ^ 1));
@@ -744,14 +783,14 @@ class Wang600_CPU
 		case 8:	printer_feed(); break;
 		case 9:	rc = 2; break;
 		case 10:
-			kb = (byte)((kb & ~1) | tape_read());
+			kb |= (byte)tape_read();
 			break;
 		case 11:
 			tape_write(kb & 1);
 			break;
 		case 12:
 			printer_status();
-			// not just printer, but CN-24 as well...
+			// not just printer, but CN-24 (RBS) as well...
 			kb |= 2;
 			break;
 		case 13:
@@ -804,6 +843,8 @@ class Wang600_CPU
 
 		++cycles;
 		next = nxt;
+
+		chkKaKb();
 
 		fp.debug_check();
 
