@@ -337,6 +337,10 @@ public class Wang600Scope extends JFrame
 		key_code.setEditable(true);
 		key_code.setFocusable(true);
 
+		do_checkbox(flt);
+		do_checkbox(prt);
+		do_checkbox(rad);
+
 		gb = new GridBagLayout();
 		setLayout(gb);
 		gc = new GridBagConstraints();
