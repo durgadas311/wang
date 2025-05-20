@@ -910,7 +910,11 @@ public class Wang600Scope extends JFrame
 		byte n = cpu.n;
 		byte d = cpu.rb;
 		if (n == 0 || n == 13) {
-			disp[n] = (byte)((d & 1) != 0 ? '-' : '+');
+			if (d == 15) {
+				d = ' ';
+			} else {
+				d = (byte)((d & 1) != 0 ? '-' : '+');
+			}
 		} else {
 			if (d == 10) d = '.';
 			else if (d == 15) d = ' ';
@@ -918,8 +922,8 @@ public class Wang600Scope extends JFrame
 				d += ('A' - 10);
 			else
 				d += '0';
-			disp[n] = d;
 		}
+		disp[n] = d;
 		dsp.setText(new String(disp));
 	}
 
