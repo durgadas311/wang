@@ -806,6 +806,7 @@ class Wang700_Simulator
 		}
 		_rom = new Wang700_UcodeRom(rom);
 		_ram = new byte[memsize];
+		residualCore(_ram); // if any
 
 		dispx = new short[16];
 		dispy = new short[16];
@@ -825,6 +826,16 @@ class Wang700_Simulator
 
 		Thread t = new Thread(this);
 		t.start();
+	}
+
+	private void residualCore(byte[] core) {
+		InputStream f;
+		String p = Wang_UI.getProperties().getProperty("wang700_core");
+		if (p == null) return;
+		try {
+			f = new FileInputStream(p);
+			f.read(core);
+		} catch (Exception ee) {}
 	}
 
 	public void debugIntr() {
