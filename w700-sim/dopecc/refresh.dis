@@ -1,0 +1,22 @@
+000: KA = 0 ^ 0 ->[Zo]; jump 010
+001: KA = 0 ^ 1 ->[Zo]; jump 010
+002: KA = 0 ^ 2 ->[Zo]; jump 010
+003: KA = 0 ^ 3 ->[Zo]; jump 010
+004: KA = 0 ^ 4 ->[Zo]; jump 010
+005: KA = 0 ^ 5 ->[Zo]; jump 010
+006: KA = 0 ^ 6 ->[Zo]; jump 010
+007: KA = 0 ^ 7 ->[Zo]; jump 010
+008: L=15,M=15,N=V; T = T ^ 0 ->[Zo]; CA,CB=RA,RB = mem(LMN); jump 009
+009: CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 00a
+00a: U = U + 0 + 1 ->[Zo,CC,SC]; jump 00b
+00b: T = T + 0 + SC ->[Zo,CC,SC]; jump 00c[CC:]
+00c: T = T ^ 0 ->[Zo]; jump 00a
+00d: T = 0 ^ 7 ->[Zo]; jump 020[KBD:]
+00e: V = V + 15 ->[Zo,CC]; jump 00d[CC:]
+00f: T = 0 ^ 7 ->[Zo]; jump 008
+010: S = 0 + 0 + 1 ->[Zo,CC]; jump 011
+011: V = 0 ^ 15 ->[Zo]; jump 00f
+012: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+013: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+014: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+015: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000

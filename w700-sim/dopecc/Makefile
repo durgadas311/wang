@@ -6,7 +6,7 @@ SRC = $(wildcard *.c) $(wildcard *.h)
 ROM = $(wildcard *.rom) $(wildcard *.dis)
 TAR = Makefile $(SRC) $(ROM)
 
-all:
+all: refresh.dis keypress.dis
 
 %.rom: %.o
 	objcopy -j .data -O binary $*.o $*.rom
