@@ -757,8 +757,9 @@ class Wang700_Display extends Wang_Display
 {
 	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
 	static final long serialVersionUID = 311457692037L;
-	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
-	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',' '};
+	// Nixie tubes can't display invalid characters
+	final byte[] sign_chr = new byte[]{'+','-',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9',' ',' ',' ',' ',' ',' '};
 
 	byte[] disp_a;
 	short[] disp_b;
@@ -947,6 +948,7 @@ class Wang700_Display extends Wang_Display
 
 	// this really should be set aside in a neutral class, which is given
 	// access to display, tape, printer, etc...
+	// m[15] contains S1 (or !S0) in bit 8... i.e. FLD/FXD
 	public void do_display(short[] m) {
 		int ds;
 		int dc;
@@ -960,11 +962,11 @@ class Wang700_Display extends Wang_Display
 		// first check FXD/FLD...
 		dc = m[15] & 0x0f;
 		boolean fxd = ((m[15] & 0x0100) == 0);
-		if (dc == 15) {
+		if (dc == 15) { // intentional blanking
 			dp = 18; // infinity
-		} else if (fxd) { // FXD
+		} else if (fxd) { // FXD - fixed DP at pos 0
 			dp = 0;
-		} else { // FLD
+		} else { // FLD - floating DP at pos m[15]
 			dp = dc;
 		}
 		ds = 0;
