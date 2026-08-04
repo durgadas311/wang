@@ -4,6 +4,7 @@
 import javax.swing.*;
 import java.io.*;
 import java.util.Arrays;
+import java.util.Random;
 
 // Implements the Wang700 hardware. Does not provide any debug/trace support.
 
@@ -54,6 +55,12 @@ class Wang700_Simulator
 	boolean trace;
 	boolean trc_cycles;
 	boolean trc_raw;
+	// memory error injection:
+	Random rnd;
+	int inj_adr = -1;
+	int inj_clr;
+	int inj_set;
+	int inj_flp;
 	FileOutputStream trc_fp;
 
 	static final int D10_FP = 0x01;
@@ -807,6 +814,7 @@ class Wang700_Simulator
 		_rom = new Wang700_UcodeRom(rom);
 		_ram = new byte[memsize];
 		residualCore(_ram); // if any
+		errorInject();
 
 		dispx = new short[16];
 		dispy = new short[16];
@@ -836,6 +844,27 @@ class Wang700_Simulator
 			f = new FileInputStream(p);
 			f.read(core);
 		} catch (Exception ee) {}
+	}
+
+	private void errorInject() {
+		rnd = new Random(System.nanoTime());
+		String p = Wang_UI.getProperties().getProperty("wang700_inject");
+		if (p == null) return;
+		String[] ss = p.split(",");
+		if (ss.length != 4) {
+			System.err.format("Invalid inject \"%s\", usage: inject=adr,clr,set,flip\n", p);
+			return;
+		}
+		try {
+			inj_adr = Integer.decode(ss[0]);
+			inj_clr = Integer.decode(ss[1]);
+			inj_set = Integer.decode(ss[2]);
+			inj_flp = Integer.decode(ss[3]);
+		} catch (Exception ee) {
+			inj_adr = -1;
+			System.err.format("Invalid inject \"%s\", usage: inject=adr,clr,set,flip\n", p);
+			return;
+		}
 	}
 
 	public void debugIntr() {
@@ -1118,6 +1147,13 @@ if (_dbg != null) {
 		adr &= memmask;
 		byte b = _ram[adr];
 		_ram[adr] = 0; //core memory: destructive read
+		if (inj_adr == adr) {
+			if (rnd.nextInt(512) == 0) {
+				if (inj_clr != 0) b &= ~inj_clr;
+				if (inj_set != 0) b |= inj_set;
+				if (inj_flp != 0) b ^= inj_flp;
+			}
+		}
 		ra = (byte)((b >> 4) & 0x0f);
 		rb = (byte)(b & 0x0f);
 	}
