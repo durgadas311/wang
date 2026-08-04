@@ -1,4 +1,31 @@
-// program to refresh display using register 15-15 X/Y
+// program to test keyboard inputs
+//
+// The display shows the following:
+//
+// Y: +.000000000000+00 (blank in LEARN modes)
+// X:  .S KA KB KK M+ST
+//
+// Where "S" indicates the last special key pressed:
+//     0 = PRIME
+//     1 = VERIFY PROG
+//     2 = SET P.C.
+//     3 = RECORD PROG
+//     4 = S.M. (if available)
+//     5 = B.S. (if available)
+//     6 = INS (if available)
+//     7 = DEL (if available)
+// "KA" and "KB" are the codes of the last normal key pressed,
+// "KK" is the count of normal keys pressed so far (wraps 99 to 00).
+// "M" is the state of the mode switches:
+//     0 = RUN
+//     2 = LIST
+//     4 = LEARN
+//     6 = LEARN and PRINT
+// "ST" is the count of the number of times the STEP key has been
+// pressed (wraps 99 to 00).
+//
+// Pressing PRIME clears everything (resets counts).
+
 #include "ucode.h"
 
 /*

@@ -1,4 +1,38 @@
 // program to test memory
+
+// Normally displays "rolling digits" while running test passes.
+// Runs test continuously while power is on. Watch the core memory
+// temperature in case of excessive heat, although this should not
+// be any more stressful than a long-running program.
+//
+// The test generates BCD values (decimal digits) into memory
+// starting with a "seed". As each 4-bit value is written, the next
+// decimal digit value is used. Even though the memory is organized
+// and addressed as 8-bit values, locations can only be written as
+// 4-bits at a time. Once memory has been filled with a pattern,
+// it is read back compared using the same seed. If there are no errors,
+// then the seed is incremented and another pass begins.
+//
+// The program defaults to a memory size of 2K. It may be compiled
+// for 1K by specifying "-DMEMSIZE=1024" or by changing the MEMSIZE
+// define below. When using make, the command would add
+// "CFLAGS=-DMEMSIZE=1024".
+//
+// On error, it stops with "Prog Err" on and display showing
+//
+// Y:   +.XXX HH MM LL +XX
+// X:   +.XXXXXX SS TT +XX
+//
+// Where "X" and "+" indicate variable parts that depend on contents
+// of memory. "HH", "MM", "LL" are the High, Middle, and Low digits
+// of the fault address in decimal. "SS" and "TT" are the "syndrome"
+// bits: the bits that were wrong/different from expected. These
+// are shown as decimal representations of the 4-bit binary values
+// for each component (like program codes in LEARN mode).
+//
+// Pressing PRIME starts over with seed 00, while any other special
+// key (SET P.C., etc) restarts with the same seed as found the error.
+
 #include "ucode.h"
 
 #ifndef MEMSIZE
