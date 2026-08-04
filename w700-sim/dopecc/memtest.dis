@@ -1,0 +1,88 @@
+000: KA = 0 ^ 0 ->[Zo]; RESET; jump 016
+001: T = T ^ 0 ->[Zo]; RESET; jump 016
+002: T = T ^ 0 ->[Zo]; RESET; jump 016
+003: T = T ^ 0 ->[Zo]; RESET; jump 016
+004: T = T ^ 0 ->[Zo]; RESET; jump 016
+005: T = T ^ 0 ->[Zo]; RESET; jump 016
+006: T = T ^ 0 ->[Zo]; RESET; jump 016
+007: T = T ^ 0 ->[Zo]; RESET; jump 016
+008: L=15,M=15,N=V; T = T ^ 0 ->[Zo]; CA,CB=RA,RB = mem(LMN); jump 009
+009: CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 00a
+00a: U = U + 0 + 1 ->[Zo,CC,SC]; jump 00b
+00b: T = T + 0 + SC ->[Zo,CC,SC]; jump 00c[CC:]
+00c: T = T ^ 0 ->[Zo]; jump 00a
+00d: T = 0 ^ 7 ->[Zo]; jump 014[:S<2>]
+00e: V = V + 15 ->[Zo,CC]; jump 00d[CC:]
+00f: T = 0 ^ 7 ->[Zo]; jump 008
+010: S = 0 + 0 + 1 ->[Zo,CC]; jump 011
+011: V = 0 ^ 15 ->[Zo]; jump 00f
+012: S = 0 + 5 ->[Zo,CC]; jump 011
+013: KA = 0 ^ 0 ->[Zo]; jump 016
+014: T = T ^ 0 ->[Zo]; jump 016
+015: T = T ^ 0 ->[Zo]; jump 00f
+016: KB = KA ^ 0 ->[Zo]; jump 017
+017: T = 0 ^ 0 ->[Zo]; jump 018
+018: U = 0 ^ 0 ->[Zo]; jump 019
+019: V = 0 ^ 0 ->[Zo]; jump 01b
+01a: KB = KA ^ 0 ->[Zo]; jump 023
+01b: L=T,M=U,N=V; T = T ^ 0 ->[Zo]; RA,RB = mem(LMN); jump 01c
+01c: KB = BCD(KB + 0 + 1) ->[Zo,CC]; mem(LMN) = RA,RB=alu; jump 01d
+01d: L=T,M=U,N=V; T = T ^ 0 ->[Zo]; RA,RB = mem(LMN); jump 01e
+01e: KB = BCD(KB + 0 + 1) ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 01f
+01f: V = V + 0 + 1 ->[Zo,CC,SC]; jump 020
+020: U = U + 0 + SC ->[Zo,CC,SC]; jump 021
+021: T = T + 0 + SC ->[Zo,CC,SC]; jump 022
+022: CA = T & 8 ->[Zo]; jump 01a[:Zo]
+023: T = 0 ^ 0 ->[Zo]; jump 025
+024: KA = BCD(KA + 0 + 1) ->[Zo,CC]; jump 010
+025: L=T,M=U,N=V; T = T ^ 0 ->[Zo]; CA,CB=RA,RB = mem(LMN); jump 026
+026: CB = CB ^ 0 ->[Zo]; mem(LMN) = RA,RB=alu; jump 027
+027: KB = BCD(KB + 0 + 1) ->[Zo,CC]; jump 028
+028: CB = CB ^ KB ->[Zo]; jump 029
+029: KB = BCD(KB + 0 + 1) ->[Zo,CC]; jump 02a
+02a: CA = CA ^ KB ->[Zo]; jump 02b
+02b: CA = CA ^ 0 ->[Zo]; jump 02c[:Zo]
+02c: T = T ^ 0 ->[Zo]; jump 033
+02d: CB = CB ^ 0 ->[Zo]; jump 02e[:Zo]
+02e: T = T ^ 0 ->[Zo]; jump 033
+02f: V = V + 0 + 1 ->[Zo,CC,SC]; jump 030
+030: U = U + 0 + SC ->[Zo,CC,SC]; jump 031
+031: T = T + 0 + SC ->[Zo,CC,SC]; jump 032
+032: CA = T & 8 ->[Zo]; jump 024[:Zo]
+033: S = V ^ 0 ->[Zo]; OV=1; jump 034
+034: V = 0 ^ 12 ->[Zo]; jump 035
+035: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 036
+036: CB = BCD(CB + 0) ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 037
+037: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 038
+038: CB = 0 + 0 + SC ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 039
+039: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 03a
+03a: CB = 0 + 15 ->[Zo,CC]; mem(LMN) = RA,RB=alu; jump 03b
+03b: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 03c
+03c: CA = BCD(CA + 0) ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 03d
+03d: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 03e
+03e: CB = 0 + 0 + SC ->[Zo,CC,SC]; mem(LMN) = RA,RB=alu; jump 03f
+03f: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 040
+040: CB = 0 + 15 ->[Zo,CC]; mem(LMN) = RA,RB=alu; jump 041
+041: V = 0 ^ 12 ->[Zo]; jump 042
+042: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 043
+043: CB = BCD(S + 0) ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 044
+044: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 045
+045: CB = 0 + 0 + SC ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 046
+046: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 047
+047: CB = 0 + 15 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 048
+048: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 049
+049: CB = BCD(U + 0) ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 04a
+04a: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 04b
+04b: CB = 0 + 0 + SC ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 04c
+04c: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 04d
+04d: CB = 0 + 15 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 04e
+04e: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 04f
+04f: CB = BCD(T + 0) ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 050
+050: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 051
+051: CB = 0 + 0 + SC ->[Zo,CC,SC]; mem(LMN) = RA=alu,RB; jump 052
+052: L=15,M=15,N=V; V = V + 15 ->[Zo,CC]; RA,RB = mem(LMN); jump 053
+053: CB = 0 + 15 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 012
+054: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+055: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+056: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
+057: S = 0 + 0 ->[Zo,CC]; mem(LMN) = RA=alu,RB; jump 000
