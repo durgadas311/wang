@@ -37,6 +37,7 @@ class Wang700_Properties extends Wang_Properties
 				Wang_UI.warning("Load Setup", e.getMessage());
 			}
 		}
+		setProperty("prefix", "wang700_");
 		processDefaults();
 
 		// Edit Properties...

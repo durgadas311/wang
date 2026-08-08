@@ -54,7 +54,10 @@ COMMON_CLASSES = \
 W700_CLASSES = \
 		Wang700.class \
 		Wang700_Properties.class \
-		Wang700_Simulator.class
+		Wang_FrontPanel.class \
+		Wang700_Ucode.class \
+		Wang700_Simulator.class \
+		Wang700_CPU.class
 
 COMMON_W714_CLASSES = \
 		Wang_Properties.class \

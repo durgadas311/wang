@@ -1336,17 +1336,18 @@ class Wang700_Keyboard extends Wang_Keyboard
 					++numon;
 				} else {
 					key2.state = false;
-					if (modelC && key2.getMode() == 0) {
-						_run = key2.state;
-					}
 					_mode0 &= ~key2.getMask();
 					_kbds[y]._buttons[z].setBackground(key2.color);
 				}
 			}
+			// is RUN button (still) down?
+			if (modelC && key2.getMode() == 0) {
+				_run = key2.state;
+			}
 		}
 		// never toggle?
 		key.state = !key.state || (numon == 0);
-		if (modelC && key.getMode() == 0) _run = key.state;
+		if (modelC && key.getMode() == 0) _run = key.state; // is RUN (now) down?
 		if (key.state) {
 			_mode0 |= key.getMode();
 			_kbds[y]._buttons[x].setBackground(key.altcolor);
