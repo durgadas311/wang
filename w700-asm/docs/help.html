@@ -1,0 +1,177 @@
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<H2>Wang700 Microcode Assembler Help</H2>
+
+<H3>Running The Assembler</H3>
+
+<P>The general command syntax is:
+
+<P><KBD>java -jar Wang700asm.jar [<I>rom-file</I>] [<I>prop</I>=<I>value</I>...]</KBD>
+
+<P><DL>
+<DT><I>rom-file</I>
+<DD>A ROM file to edit/load.</DD>
+
+<DT><I>prop</I>=<I>value</I>
+<DD>Property assignments.
+Remember to enclose <I>value</I> in quotes if required by your shell.</DD>
+</DL>
+
+<P>As a special case, a direct disassembly of a ROM image file to stdout
+may be done using the syntax:
+
+<P><KBD>java -jar Wang700asm.jar -d [-z] [-r] <I>rom-file</I></KBD>
+
+<P>Where: <B>-z</B> trims off all trailing zeroed instructions,
+and <B>-r</B> includes the raw hexadecimal representation of
+the instruction fields.
+
+<H3>Properties</H3>
+
+<DL>
+<DT>run_rate
+<DD>Sets the amount of delay imposed between each instruction when running instructions
+(as opposed to single-stepping instructions with "execute").
+Default is 10 milliseconds.
+It may be set to "0" but use caution as that may result in processes consuming
+larger amounts of the CPUs.
+</DD>
+<DT>ram_size
+<DD>Selects the RAM size. Accepted values are "2K" and "1K" (8-bit words).
+</DD>
+<DT>lines
+<DD>Configures the number of lines in the disassembly window.
+This does not affect the total number of lines of disassembly that can be
+scrolled-through.
+Default is 24. Minimum is 5.
+Maximum is 200 but beware of impractical values for your screen size.
+</DD>
+<DT>font_size
+<DD>Configures the size of the font used in the disassembly pane.
+Default is 12.
+This affects the number of lines that will fit on your screen,
+as well as the width of the window.
+</DD>
+</DL>
+
+<H3>Operating The Assembler</H3>
+
+<H4>Menus</H4>
+
+<P><DL>
+<DT>File
+<DD><DL>
+	<DT>New
+	<DD>Start a new, blank, ROM image</DD>
+	<DT>Load ROM
+	<DD>Load ROM contents from a file</DD>
+	<DT>Save ROM
+	<DD>Save ROM contents to a file</DD>
+	<DT>Save Text
+	<DD>Save disassembled ROM (window text only)</DD>
+	<DT>Show Scope
+	<DD>Show the Wang700 simulator "oscilloscope"</DD>
+</DL></DD>
+<DT>Help
+<DD><DL>
+	<DT>Show Help
+	<DD>Show this help window</DD>
+</DL></DD>
+</DL>
+
+<H4>Buttons</H4>
+
+<P>The "store" and "revert" buttons are enabled when the current microcode instruction
+has been modified but not yet stored in the ROM image.
+Clicking "store" stores the modified instruction in the ROM image
+(but does not save anything to disk).
+Clicking "revert" reverts the instruction to the current contents in the ROM image.
+CAUTION: Navigating to another instruction will automatically store the instruction.
+
+<P>The "execute" button will cause the current microcode instruction to be executed
+in the simulator, and will also make the simulator oscilloscope window visible.
+
+<P>The "run" button, in conjunction with the "cycles" and "breakpt" fields,
+will start executing instructions until reaching the limit in "cycles"
+(machine cycles, i.e. instructions) or the breakpoint address.
+
+<P>A blank or zero "cycles" means infinity (well, currently 1 million cycles).
+
+<P>A blank "breakpt" means no breakpoint is (will be) set.
+The breakpoint is only set in the microcode image during the actual run,
+and is removed upon stopping.
+Invalid entry in the breakpoint field causes the field to be blanked.
+The breakpoint address may be set to the current instruction by pressing F1.
+
+<P>Instructions are executed with a pause between, set by the "run_rate" property.
+This value is in milliseconds and defaults to 10.
+It may be set to "0", however that may significantly increase the load on your PC
+during runs.
+
+<H4>Microcode Fields</H4>
+
+<P>The drop-downs and fields corresponding to microcode instruction word
+fields are used to modify the current instruction. They also indicate
+the fields of the current instruction.
+
+<P>The current instruction may be
+selected by using the UP, DOWN, HOME, END, PAGE_UP, and PAGE_DOWN cursor keys,
+or by mouse click on the desired instruction, or mouse wheel,
+or via execution of instructions.
+CAUTION: This navigation automatically stores a modified instruction.
+
+<P>The current instruction may be cleared to all fields "0" by
+pressing Shift + Delete.
+
+<P>Note that not all instructions in the ROM image are displayed to begin with.
+Only as instructions are "visited" do they appear, with the exception that
+all instructions between the first and last-visited are always created
+(executing a distant instruction causes all between to be shown).
+
+<H3>Operating The Oscilloscope</H3>
+
+<P>The microcode oscilloscope shows various CPU and machine registers on the top
+half. Below that are controls and displays corresponding to the machine's
+human interface. The "Machine" menu provides various actions related to the
+condition of registers and memory.
+
+<P>The menu item Machine->Reset_Zero will clear all registers and RAM to "0".
+Display is also blanked.
+Note that this does NOT affect the current/next instruction to be executed.
+
+<P>The menu item Machine->Reset_Random will set (most) registers and RAM to random values.
+Display is also blanked.
+Note that this does NOT affect the current/next instruction to be executed.
+
+<P>The menu item Machine->Blank_Display will clear the display as if
+refreshing had stopped.
+Since the simulation does not automatically blank the display if refreshing stops,
+this is the only way to be certain whether refreshing is still happening
+without stopping and resetting the machine.
+
+<P>Address values (NEXT, PC, Row Addr) are displayed in hexadecimal.
+D1 is dispalyed in binary. All others are displayed in decimal.
+
+<P>The top pane includes a RAM viewport that allows up to 4 "rows" of RAM to be monitored.
+RAM is organized in 8-bit words and each row represents 16 words,
+but accessed as 4-bit words and so shown as two rows.
+This corresponds to the standard microcode concept of a pair of calculator "registers".
+Addresses are in the "logical" 4K machine address range.
+Since less than 4K RAM is always configured, the behavior is the same as for the
+real calculator (e.g. FF0 == BF0 == 7F0 == 3F0 for 1K RAM).
+
+<P>In the bottom pane, an approximation of the display is shown (if refreshed by microcode),
+and below that are the RUN/LEARN/... buttons, along with the STEP button and mode
+switches. In addition, buttons are provided
+for the basic control functions PRIME, etc.
+
+<P>In addition, an interface is provided to inject key presses.
+A key-code value is entered into the field under the KEY button,
+and then the KEY button is clicked to "press" that key. 
+Key-codes are either 2-digit hexadecimal or Wang split-decimal notation
+(For example, "8-12" and "8c" represent the same key-code value).
+
+</BODY>
+</HTML>
