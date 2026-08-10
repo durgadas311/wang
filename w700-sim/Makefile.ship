@@ -80,6 +80,9 @@ w700-dasm: wang-dasm.o $(DASM)
 ucorphans: ucorphans.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
+ucwrwr: ucwrwr.o loaducode_txt.o
+	$(CC) $(CFLAGS) -o $@ $< loaducode_txt.o
+
 ucdis: ucdis.o $(DASM)
 	$(CC) $(CFLAGS) -o $@ $< $(DASM)
 
