@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Douglas Miller <durgadas311@gmail.com>
+// Copyright (c) 2026 Douglas Miller <durgadas311@gmail.com>
 
 import java.io.*;
 import java.util.Properties;
@@ -64,10 +64,8 @@ public class Wang700Scope extends JFrame
 	JButton stp;
 	JButton key;
 	JTextField key_code;
-	JTextField dspX;
-	JTextField dspY;
-	byte[] dispX;
-	byte[] dispY;
+	RefreshedDisplay dspX;
+	RefreshedDisplay dspY;
 	Wang700RamPortal ram;
 
 	int mode0;
@@ -102,15 +100,13 @@ public class Wang700Scope extends JFrame
 
 		ram = new Wang700RamPortal(cpu, 4);
 
-		dispX = new byte[16];
-		dispY = new byte[16];
-		dspX = new JTextField();
+		dspX = new RefreshedDisplay();
 		dspX.setFont(font);
 		dspX.setPreferredSize(new Dimension(200, 30));
 		dspX.setHorizontalAlignment(SwingConstants.RIGHT);
 		dspX.setEditable(false);
 		dspX.setFocusable(false);
-		dspY = new JTextField();
+		dspY = new RefreshedDisplay();
 		dspY.setFont(font);
 		dspY.setPreferredSize(new Dimension(200, 30));
 		dspY.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -863,10 +859,8 @@ public class Wang700Scope extends JFrame
 	}
 
 	private void do_blanking() {
-		Arrays.fill(dispX, (byte)' ');
-		Arrays.fill(dispY, (byte)' ');
-		dspX.setText(new String(dispX));
-		dspY.setText(new String(dispY));
+		dspX.do_blanking();
+		dspY.do_blanking();
 	}
 
 	private String dsp_string(byte[] disp, byte n, byte d, boolean fxd) {
@@ -911,11 +905,12 @@ public class Wang700Scope extends JFrame
 		// If anything, need to cancel the previous "refresh"
 		// when the timing is too short.
 		//if (last_dsp - last < 100) { // what's the magic value?
+		boolean ok = (last_dsp - last > 100); // what's the magic value?
 //System.err.format("skip %x %x %x (%d)\n", cpu.n, cpu.ra, cpu.rb, last_dsp - last);
 		//	return;
 		//}
-		dspX.setText(dsp_string(dispX, cpu.n, cpu.rb, (cpu.s & 2) == 0));
-		dspY.setText(dsp_string(dispY, cpu.n, cpu.ra, (cpu.s & 1) != 0));
+		dspX.do_refresh(cpu.n, cpu.rb, (cpu.s & 2) == 0, ok);
+		dspY.do_refresh(cpu.n, cpu.ra, (cpu.s & 1) != 0, ok);
 	}
 
 	private int parse_key() {

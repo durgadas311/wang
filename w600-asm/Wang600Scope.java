@@ -69,8 +69,7 @@ public class Wang600Scope extends JFrame
 	JCheckBox flt;
 	JCheckBox prt;
 	JCheckBox rad;
-	JTextField dsp;
-	byte[] disp;
+	RefreshedDisplay dsp;
 	Wang600RamPortal ram;
 
 	int mode0;
@@ -105,14 +104,13 @@ public class Wang600Scope extends JFrame
 
 		ram = new Wang600RamPortal(cpu, 4);
 
-		disp = new byte[16];
-		dsp = new JTextField();
+		dsp = new RefreshedDisplay();
 		dsp.setFont(font);
 		dsp.setPreferredSize(new Dimension(200, 30));
 		dsp.setHorizontalAlignment(SwingConstants.RIGHT);
 		dsp.setEditable(false);
 		dsp.setFocusable(false);
-		do_blanking();
+		dsp.do_blanking();
 
 		cycl = new JTextField();
 		cycl.setPreferredSize(new Dimension(80, 20));
@@ -793,7 +791,7 @@ public class Wang600Scope extends JFrame
 		cpu.giob = 0;
 		cpu.iob = 0;
 		Arrays.fill(cpu._ram, (byte)0);
-		do_blanking();
+		dsp.do_blanking();
 	}
 
 	private void reset_random() {
@@ -830,7 +828,7 @@ public class Wang600Scope extends JFrame
 		cpu.giob = (byte)((i >> 4) & 0x0f);
 		cpu.new_iob(i >> 8);
 		r.nextBytes(cpu._ram);
-		do_blanking();
+		dsp.do_blanking();
 	}
 
 	public void refresh() {
@@ -892,39 +890,17 @@ public class Wang600Scope extends JFrame
 		}
 	}
 
-	private void do_blanking() {
-		Arrays.fill(disp, (byte)' ');
-		dsp.setText(new String(disp));
-	}
-
 	// the CPU did a cycle that updates display refresh regs (RB, N)
 	public void dsp_refresh() {
 		// display updates must be N msecs (X cycles)
 		// apart in order to be visible.
 		// refresh loop pauses 272 cycles between updates.
+		// But, it is the delay *after* that matters, not before.
+		// Let RefreshedDisplay handle that.
 		long last = last_dsp;
 		last_dsp = cpu.cycles;
-		if (last_dsp - last < 100) { // what's the magic value?
-			return;
-		}
-		byte n = cpu.n;
-		byte d = cpu.rb;
-		if (n == 0 || n == 13) {
-			if (d == 15) {
-				d = ' ';
-			} else {
-				d = (byte)((d & 1) != 0 ? '-' : '+');
-			}
-		} else {
-			if (d == 10) d = '.';
-			else if (d == 15) d = ' ';
-			else if (d > 10)
-				d += ('A' - 10);
-			else
-				d += '0';
-		}
-		disp[n] = d;
-		dsp.setText(new String(disp));
+		// what's the magic number for "long enough"?
+		dsp.do_refresh(cpu.n, cpu.rb, (last_dsp - last > 100));
 	}
 
 	private int parse_key() {
@@ -1027,7 +1003,7 @@ public class Wang600Scope extends JFrame
 			refresh();
 			return;
 		} else if (mn == KeyEvent.VK_B) {
-			do_blanking();
+			dsp.do_blanking();
 			return;
 		}
 	}
