@@ -616,7 +616,7 @@ class Wang700_CPU
 		int adr = ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
 		adr &= memmask;
 		byte b = _ram[adr];
-		_ram[adr] = 0; //core memory: destructive read
+		_ram[adr] = 0; // core memory: destructive read
 		if (inj_adr == adr) {
 			if (rnd.nextInt(512) == 0) {
 				if (inj_clr != 0) b &= ~inj_clr;
@@ -628,10 +628,11 @@ class Wang700_CPU
 		rb = (byte)(b & 0x0f);
 	}
 
-	private void wr_ram_i() {
+	private void wr_ram_i(byte _ra, byte _rb) {
 		int adr = ((l & 0x0f) << 8) | ((m & 0x0f) << 4) | (n & 0x0f);
 		adr &= memmask;
-		_ram[adr] = (byte)((ra << 4) | rb);
+		// core memory: writes effectively only change "1" bits
+		_ram[adr] |= (byte)((_ra << 4) | _rb);
 	}
 
 	public void new_iob(int io) {
@@ -825,8 +826,8 @@ class Wang700_CPU
 
 		// P9 (non-conflict with P10 ST ops?)
 		switch(uu.mop) {
-		case 0:	ra = alu; wr_ram_i(); break; // L,M,N setup at P5-6
-		case 1:	rb = alu; wr_ram_i(); break; // L,M,N setup at P5-6
+		case 0: wr_ram_i(alu, rb); break; // L,M,N setup at P5-6
+		case 1: wr_ram_i(ra, alu); break; // L,M,N setup at P5-6
 		case 2:	rd_ram_i(); ca = ra; cb = rb; break; // L,M,N setup at P5-6
 		case 3:	rd_ram_i(); break; // L,M,N setup at P5-6
 		case 4:	rd_ram_i(); ca = ra; cb = rb; break; // L,M,N setup at P5-6
