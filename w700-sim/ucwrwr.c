@@ -18,13 +18,31 @@ extern void diwang(char *buf, uint64_t *v);
 
 uint64_t *ucode;
 
-static void check_wrwr(int adr1, w700_ucode_t *u, int adr2) {
-	w700_ucode_t *v;
+static int level = 0;
 
-	v = (w700_ucode_t *)&ucode[adr2];
-	if (v->mop != 0 && v->mop != 1) return;
-	if (v->mop == u->mop) return;
-	printf("%03x :: %03x\n", adr1, adr2);
+static int check_wrwr(w700_ucode_t *u, int adr) {
+	w700_ucode_t *v;
+	int ret;
+
+	v = (w700_ucode_t *)&ucode[adr];
+	if ((v->mop == 0 || v->mop == 1) && v->mop != u->mop) {
+		return adr;
+	}
+	if (level > 10) {
+		return -1;
+	}
+	++level;
+
+	adr = u->jad << 2;
+	if (u->jl == 1) adr |= 0x001;
+	if (u->jh == 1) adr |= 0x002;
+	ret = check_wrwr(u, adr);
+	if (ret < 0 && u->jl > 1) ret = check_wrwr(u, adr | 1);
+	if (ret < 0 && u->jh > 1) ret = check_wrwr(u, adr | 2);
+	if (ret < 0 && u->jl > 1 && u->jh > 1) ret = check_wrwr(u, adr | 3);
+
+	--level;
+	return ret;
 }
 
 int main(int argc, char **argv) {
@@ -69,13 +87,11 @@ int main(int argc, char **argv) {
 	for (x = 0; x < 2 * 1024; ++x) {
 		u = (w700_ucode_t *)&ucode[x];
 		if (u->mop != 0 && u->mop != 1) continue;
-		adr = u->jad << 2;
-		if (u->jl == 1) adr |= 0x001;
-		if (u->jh == 1) adr |= 0x002;
-		check_wrwr(x, u, adr);
-		if (u->jl > 1) check_wrwr(x, u, adr | 1);
-		if (u->jh > 1) check_wrwr(x, u, adr | 2);
-		if (u->jl > 1 && u->jh > 1) check_wrwr(x, u, adr | 3);
+		level = 0; // just in case...
+		adr = check_wrwr(u, x);
+		if (adr >= 0) {
+			printf("%03x :: %03x\n", x, adr);
+		}
 	}
 
 	free(ucode);
