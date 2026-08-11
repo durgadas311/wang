@@ -1880,19 +1880,19 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 		if (modelC) {
 			addButton(c,1, 1, 0, 0, "icons/prime.gif",
 				new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
-			addButton(c,1, 1, 0, 1, "icons/set_pc.gif",
-				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
-			addButton(c,1, 1, 0, 2, "icons/verif_prog.gif",
+			addButton(c,1, 1, 0, 1, "icons/verif_prog.gif",
 				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
+			addButton(c,1, 1, 0, 2, "icons/set_pc.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
 			addButton(c,1, 1, 0, 3, "icons/rec_prog.gif",
 				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
 		} else {
 			addButton(c,1, 1, 0, 0, "icons/prime-0.gif",
 				new Wang_Keys(Wang_Colors.white1, Wang_Keys.SPCL_KEY(0)));
-			addButton(c,1, 1, 0, 1, "icons/set_pc-0.gif",
-				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
-			addButton(c,1, 1, 0, 2, "icons/verif_prog-0.gif",
+			addButton(c,1, 1, 0, 1, "icons/verif_prog-0.gif",
 				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(1)));
+			addButton(c,1, 1, 0, 2, "icons/set_pc-0.gif",
+				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(2)));
 			addButton(c,1, 1, 0, 3, "icons/rec_prog-0.gif",
 				new Wang_Keys(Wang_Colors.green1, Wang_Keys.SPCL_KEY(3)));
 		}
