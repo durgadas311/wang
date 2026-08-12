@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
+import java.awt.datatransfer.StringSelection;
 
 public class Wang700Assembler extends JFrame
 		implements Wang_FrontPanel,
@@ -19,6 +20,8 @@ public class Wang700Assembler extends JFrame
 	static final String[] txtd = { "Text" };
 	static final String[] wucx = { "wuc" };
 	static final String[] wucd = { "Wang uCode" };
+	static final String[] cx = { "c" };
+	static final String[] cd = { "C uCode Macros" };
 
 	static final int OPTION_CANCEL = 0;
 	static final int OPTION_YES = 1;
@@ -112,6 +115,8 @@ public class Wang700Assembler extends JFrame
 	String[] jl_cb = new String[] {
 		"0", "1", "S0", "S2", "ZR", "Q", "SC", "undef" };
 
+	JTextField cmacro;
+	JButton cpmac;
 	JButton store;
 	JButton revert;
 	JButton exec;
@@ -239,10 +244,21 @@ public class Wang700Assembler extends JFrame
 		mi.addActionListener(this);
 		mu.add(mi);
 		save = mi;
-		mi = new JMenuItem("Save Text", KeyEvent.VK_T);
+		mi = new JMenuItem("Save as Text", KeyEvent.VK_T);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Save as C Macros", KeyEvent.VK_M);
 		mi.addActionListener(this);
 		mu.add(mi);
 		mi = new JMenuItem("Show Scope", KeyEvent.VK_W);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mb.add(mu);
+
+		mu = new JMenu("Edit");
+		mi = new JMenuItem("Copy C Macro", KeyEvent.VK_C);
+		// Accelerators don't actually work yet, but is informative
+		mi.setAccelerator(KeyStroke.getKeyStroke('C', InputEvent.ALT_DOWN_MASK));
 		mi.addActionListener(this);
 		mu.add(mi);
 		mb.add(mu);
@@ -325,6 +341,16 @@ public class Wang700Assembler extends JFrame
 		st.setActionCommand("st");
 		jh.setActionCommand("jh");
 		jl.setActionCommand("jl");
+
+		cmacro = new JTextField();
+		cmacro.setFont(font);
+		cmacro.setPreferredSize(new Dimension(500, fz * 3 / 2));
+		cmacro.setEditable(false);
+		cmacro.setFocusable(false);
+		cpmac = new JButton("copy");
+		cpmac.setPreferredSize(new Dimension(70, fz * 3 / 2));
+		cpmac.addActionListener(this);
+		cpmac.setActionCommand("copy");
 
 		//setLayout(new BorderLayout()); // allow resizing
 		gb = new GridBagLayout();
@@ -442,6 +468,19 @@ public class Wang700Assembler extends JFrame
 		add(jl);
 		++gc.gridx;
 		++gc.gridy;
+		gc.gridx = 1;
+		setGap(10);
+		++gc.gridy;
+
+		gc.gridwidth = 15;
+		gb.setConstraints(cmacro, gc);
+		add(cmacro);
+		gc.gridx += 15;
+		gc.gridwidth = 4;
+		gb.setConstraints(cpmac, gc);
+		add(cpmac);
+		++gc.gridy;
+		gc.gridwidth = 1;
 		gc.gridx = 1;
 		setGap(10);
 		++gc.gridy;
@@ -687,6 +726,62 @@ public class Wang700Assembler extends JFrame
 		setLoc(cpu.pc);
 	}
 
+	private String getCMacro(Wang700_Ucode uu, int adr) {
+		return String.format(
+			"[0x%03x]=UCODE(%d,%d,%d,%d,%d,%d,%d,%2d,%2d,%2d,0x%03x,%d,%d),",
+			adr, uu.ai, uu.bi, uu.zo, uu.aop, uu.ac, uu.bc, uu.bd,
+			uu.mop, uu.kk, uu.st, uu.jad << 2, uu.jh, uu.jl);
+	}
+	private void setCMacro(Wang700_Ucode uu) {
+		cmacro.setText(getCMacro(uu, curr));
+	}
+
+	private void cpCMacro() {
+		String str = cmacro.getText() + '\n';
+		StringSelection ss = new StringSelection(str);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+	}
+
+	private boolean isZero(byte[] rom, int adr) {
+		int idx = adr * 8;
+		int i = rom[idx] | rom[idx + 1] | rom[idx + 2] | rom[idx + 3] |
+			rom[idx + 4] | rom[idx + 5] | rom[idx + 6] | rom[idx + 7];
+		return (i == 0);
+	}
+
+	private void savCMacro(File f) {
+		Wang700_Ucode uu;
+		String cm;
+		// Trim trailing zeros
+		int end = rom.length / 8 - 1;
+		while (end >= 0 && isZero(rom, end)) --end;
+		if (end < 0) end = 0;
+		try {
+			FileOutputStream fo = new FileOutputStream(f);
+			PrintStream ps = new PrintStream(fo, true);
+			if (romFile != null) {
+				ps.format("/* %s */\n", romFile.getName());
+			} else {
+				ps.format("/* %s */\n", f.getName());
+			}
+			ps.println("#include \"ucode.h\"\n");
+			ps.println("ucword ucode[2048] = {");
+			ps.println("//                  a        m");
+			ps.println("//            a b z o a b b  o  k  s       j j");
+			ps.println("//            i i o p c c d  p  k  t   jad h l");
+			for (int adr = 0; adr <= end; ++adr) {
+				uu = cpu.fetchUcode(adr);
+				cm = getCMacro(uu, adr);
+				ps.println(cm);
+			}
+			ps.println("};");
+			ps.close();
+			// TODO: tear off?
+		} catch (Exception ee) {
+			// ...
+		}
+	}
+
 	private void padDisas(int adr) {
 		String dis;
 		int nl = max;
@@ -726,6 +821,7 @@ public class Wang700Assembler extends JFrame
 			System.err.println(ee.getMessage());
 		}
 		foobar = false;
+		setCMacro(uu);
 		// TODO: any other actions to skip?
 		if (!getRunning()) {
 			text.requestFocus();
@@ -767,6 +863,7 @@ public class Wang700Assembler extends JFrame
 		jad.setText(String.format("%03x", ja));
 		jh.setSelectedIndex(uu.jh);
 		jl.setSelectedIndex(uu.jl);
+		setCMacro(uu);
 		update = false;
 	}
 
@@ -844,6 +941,10 @@ public class Wang700Assembler extends JFrame
 				setLoc(uu);
 				updDisas(uu);
 				setDirty(true);
+		} else if (((m & InputEvent.ALT_DOWN_MASK) != 0) && k == KeyEvent.VK_C) {
+			// Because menu accelerators don't actually work yet,
+			// this is required.
+			cpCMacro();
 		}
 		e.consume();
 		//System.err.format("keyPressed %02x %04x %04x\n", c, k, m);
@@ -1057,6 +1158,8 @@ public class Wang700Assembler extends JFrame
 				} else {
 					stopRun();
 				}
+			} else if (bt == cpmac) {
+				cpCMacro();
 			} else {
 				//
 			}
@@ -1149,8 +1252,19 @@ public class Wang700Assembler extends JFrame
 			}
 			return;
 		}
+		if (m.getMnemonic() == KeyEvent.VK_M) {
+			File sav = pickFile("Save C Macros", cx, cd);
+			if (sav == null) return;
+			savCMacro(sav);
+			_last = sav;
+			return;
+		}
 		if (m.getMnemonic() == KeyEvent.VK_W) {
 			scope.view(true);
+			return;
+		}
+		if (m.getMnemonic() == KeyEvent.VK_C) {
+			cpCMacro();
 			return;
 		}
 		if (m.getMnemonic() == KeyEvent.VK_H) {
