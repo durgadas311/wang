@@ -62,8 +62,12 @@ public class Wang700Scope extends JFrame
 	JButton ins;
 	JButton del;
 	JButton stp;
-	JButton key;
-	JTextField key_code;
+	JButton key1;
+	JButton key2;
+	JButton gisn;
+	JTextField key1_code;
+	JTextField key2_code;
+	JTextField gisn_code;
 	RefreshedDisplay dspX;
 	RefreshedDisplay dspY;
 	Wang700RamPortal ram;
@@ -307,15 +311,34 @@ public class Wang700Scope extends JFrame
 		stp.setPreferredSize(new Dimension(btn_w, btn_h));
 		stp.setFocusPainted(false);
 		stp.addActionListener(this);
-		key = new JButton("KEY");
-		key.setPreferredSize(new Dimension(btn_w, btn_h));
-		key.setFocusPainted(false);
-		key.addActionListener(this);
-		key_code = new JTextField();
-		key_code.setPreferredSize(new Dimension(btn_w, 20));
-		key_code.setHorizontalAlignment(SwingConstants.RIGHT);
-		key_code.setEditable(true);
-		key_code.setFocusable(true);
+		key1 = new JButton("KEY");
+		key1.setPreferredSize(new Dimension(50, btn_h));
+		key1.setMargin(new Insets(2,2,2,2));
+		key1.setFocusPainted(false);
+		key1.addActionListener(this);
+		key1_code = new JTextField();
+		key1_code.setPreferredSize(new Dimension(50, btn_h));
+		key1_code.setHorizontalAlignment(SwingConstants.RIGHT);
+		key1_code.setEditable(true);
+		key2 = new JButton("KEY");
+		key2.setPreferredSize(new Dimension(50, btn_h));
+		key2.setMargin(new Insets(2,2,2,2));
+		key2.setFocusPainted(false);
+		key2.addActionListener(this);
+		key2_code = new JTextField();
+		key2_code.setPreferredSize(new Dimension(50, btn_h));
+		key2_code.setHorizontalAlignment(SwingConstants.RIGHT);
+		key2_code.setEditable(true);
+		gisn = new JButton("GISN");
+		gisn.setPreferredSize(new Dimension(50, btn_h));
+		gisn.setMargin(new Insets(2,2,2,2));
+		gisn.setFocusPainted(false);
+		gisn.addActionListener(this);
+		gisn_code = new JTextField();
+		gisn_code.setPreferredSize(new Dimension(50, btn_h));
+		gisn_code.setHorizontalAlignment(SwingConstants.RIGHT);
+		gisn_code.setEditable(true);
+		gisn_code.setFocusable(true);
 
 		gb = new GridBagLayout();
 		setLayout(gb);
@@ -619,8 +642,7 @@ public class Wang700Scope extends JFrame
 		gb.setConstraints(s_m, gc);
 		add(s_m);
 		gc.gridx += gc.gridwidth;
-		gb.setConstraints(key, gc);
-		add(key);
+		setBtnCode(key1, key1_code);
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
@@ -638,8 +660,7 @@ public class Wang700Scope extends JFrame
 		gb.setConstraints(b_s, gc);
 		add(b_s);
 		gc.gridx += gc.gridwidth;
-		gb.setConstraints(key_code, gc);
-		add(key_code);
+		setBtnCode(key2, key2_code);
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
@@ -656,6 +677,9 @@ public class Wang700Scope extends JFrame
 		gc.gridx += gc.gridwidth;
 		gb.setConstraints(ins, gc);
 		add(ins);
+		gc.gridx += gc.gridwidth;
+		setBtnCode(gisn, gisn_code);
+		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
 		gc.gridx -= gc.gridwidth;
@@ -707,6 +731,15 @@ public class Wang700Scope extends JFrame
 		setLocationByPlatform(true);
 
 		refresh();
+	}
+
+	private void setBtnCode(JButton btn, JTextField code) {
+		JPanel pn = new JPanel();
+		pn.setLayout(new BoxLayout(pn, BoxLayout.X_AXIS));
+		pn.add(code);
+		pn.add(btn);
+		gb.setConstraints(pn, gc);
+		add(pn);
 	}
 
 	private void setGap(int wid) {
@@ -913,9 +946,8 @@ public class Wang700Scope extends JFrame
 		dspY.do_refresh(cpu.n, cpu.ra, (cpu.s & 1) != 0, ok);
 	}
 
-	private int parse_key() {
+	private int parse_key(String k) {
 		int code = 0;
-		String k = key_code.getText();
 		if (k.length() == 0) {
 			return code;
 		}
@@ -932,9 +964,9 @@ public class Wang700Scope extends JFrame
 		return code;
 	}
 
-	private void do_key() {
+	private void do_key(String k) {
 		if (cpu.kbl || cpu.z2) return;
-		cpu.setKaKb(parse_key());
+		cpu.setKaKb(parse_key(k));
 	}
 
 	private void do_radiobutton(JRadioButton rb) {
@@ -972,8 +1004,13 @@ public class Wang700Scope extends JFrame
 			cpu.jam = 0x1006;
 		} else if (bt == del) {
 			cpu.jam = 0x1007;
-		} else if (bt == key) {
-			do_key();
+		} else if (bt == key1) {
+			do_key(key1_code.getText());
+		} else if (bt == key2) {
+			do_key(key2_code.getText());
+		} else if (bt == gisn) {
+			// TODO: prevent when not in I/O?
+			cpu.setKaKb(parse_key(gisn_code.getText()));
 		}
 	}
 
