@@ -377,7 +377,7 @@ public class Wang600Assembler extends JFrame
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
-		setLabel("Ai");
+		setLabel("AC,Ai");
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
@@ -385,7 +385,7 @@ public class Wang600Assembler extends JFrame
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
-		setLabel("Aop");
+		setLabel("BC,Aop");
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;

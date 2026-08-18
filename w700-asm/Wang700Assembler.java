@@ -372,7 +372,7 @@ public class Wang700Assembler extends JFrame
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
-		setLabel("Ai");
+		setLabel("AC,Ai");
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
