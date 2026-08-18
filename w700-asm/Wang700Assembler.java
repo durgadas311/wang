@@ -1068,6 +1068,20 @@ public class Wang700Assembler extends JFrame
 		updDisas(uu);
 	}
 
+	private void updateBC() {
+		int op = bc.getSelectedIndex();
+		// TODO: any special handling?
+		uu.bc = (byte)op;
+		updDisas(uu);
+	}
+
+	private void updateBD() {
+		int op = bd.getSelectedIndex();
+		// TODO: any special handling?
+		uu.bd = (byte)op;
+		updDisas(uu);
+	}
+
 	// store at curr...
 	private void storeUcode(Wang700_Ucode uu) {
 		int idx = curr * 8;
@@ -1171,7 +1185,8 @@ public class Wang700Assembler extends JFrame
 			if (cb == zo) updateZO();
 			else if (cb == ai) updateAI();
 			else if (cb == bi) updateBI();
-			// TODO: bc
+			else if (cb == bc) updateBC();
+			else if (cb == bd) updateBD();
 			else if (cb == aop) updateAOP();
 			else if (cb == mop) updateMOP();
 			else if (cb == st) updateST();
