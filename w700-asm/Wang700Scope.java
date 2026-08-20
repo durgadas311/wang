@@ -943,7 +943,11 @@ public class Wang700Scope extends JFrame
 		//	return;
 		//}
 		dspX.do_refresh(cpu.n, cpu.rb, (cpu.s & 2) == 0, ok);
-		dspY.do_refresh(cpu.n, cpu.ra, (cpu.s & 1) != 0, ok);
+		if ((mode0 & 0b0100) != 0) {
+			dspY.do_blanking();
+		} else {
+			dspY.do_refresh(cpu.n, cpu.ra, (cpu.s & 1) != 0, ok);
+		}
 	}
 
 	private int parse_key(String k) {
