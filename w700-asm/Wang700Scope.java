@@ -992,29 +992,30 @@ public class Wang700Scope extends JFrame
 		if (bt == stp) {
 			mode0 |= 0b1000;
 			d1.setText(binary4(mode0));
+			cpu.setStep();
 		} else if (bt == prm) {
-			cpu.jam = 0x1000;
+			cpu.setJam(0);
 		} else if (bt == v_p) {
-			cpu.jam = 0x1001;
+			cpu.setJam(1);
 		} else if (bt == spc) {
-			cpu.jam = 0x1002;
+			cpu.setJam(2);
 		} else if (bt == r_p) {
-			cpu.jam = 0x1003;
+			cpu.setJam(3);
 		} else if (bt == s_m) {
-			cpu.jam = 0x1004;
+			cpu.setJam(4);
 		} else if (bt == b_s) {
-			cpu.jam = 0x1005;
+			cpu.setJam(5);
 		} else if (bt == ins) {
-			cpu.jam = 0x1006;
+			cpu.setJam(6);
 		} else if (bt == del) {
-			cpu.jam = 0x1007;
+			cpu.setJam(7);
 		} else if (bt == key1) {
 			do_key(key1_code.getText());
 		} else if (bt == key2) {
 			do_key(key2_code.getText());
 		} else if (bt == gisn) {
 			// TODO: prevent when not in I/O?
-			cpu.setKaKb(parse_key(gisn_code.getText()));
+			cpu.setGi(parse_key(gisn_code.getText()));
 		}
 	}
 

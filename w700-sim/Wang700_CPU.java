@@ -38,12 +38,14 @@ class Wang700_CPU
 	public byte err;
 
 	// internal signals and latches
+	public boolean kbd1;
 	public boolean kbl;
 	public boolean ioc;
 	public boolean z2;
 	public byte _ka;
 	public byte _kb;
-	public boolean kbd3;
+	public byte _gi;
+	public boolean _gin;
 
 	// simulator (no direct h/w relation)
 	public int jam;
@@ -87,8 +89,8 @@ class Wang700_CPU
 		_ka = (byte)0x0f;
 		kb = (byte)0x0f;
 		ka = (byte)0x0f;
-		kbd3 = true;
-		kbd = 0;
+		kbd = 1; // this allows use of KA/KB
+		kbd1 = true; // this allows use of KA/KB
 		z2 = false;
 		// On real machines, did not always happen that power-on asserted PRIME...
 		pc = 0x000;	// force PRIME on power-up...
@@ -354,44 +356,62 @@ class Wang700_CPU
 		return disas(uu, raw);
 	}
 
-	// these three might need "synchronized"
-	public void setKaKb(int key) {
+	// these might need "synchronized"
+	public void setJam(int key) {
+		jam = 0x1000 | key;
 		kbd = 1;
-		_ka = (byte)((key >> 4) & 0x0f);
-		_kb = (byte)(key & 0x0f);
+		ov = 0;
+		fp.setOv(ov);
+		if (key == 0) { // PRIME
+			err = 0;
+			fp.setErr(err);
+		}
+	}
+
+	public void setStep() {
+		kbd1 = true;
+	}
+
+	public void setKaKb(int key) {
+		_ka |= (byte)((key >> 4) & 0x0f);
+		_kb |= (byte)(key & 0x0f);
+		// On 5919, _ka/_kb is pass-thru to KA/KB while kbd=0
+		if (kbd == 0) {
+			ka = _ka;
+			kb = _kb;
+		}
+		kbd = 1;
 		z2 = true;
-		kbd3 = false;
+	}
+
+	public void setGi(int key) {
+		// On 5919, GIA/B is pass-thru to KA/KB while kbd=0
+		_gi = (byte)(key & 0x0ff);
+		if (kbd == 0) {
+			ka = (byte)((_gi >> 4) & 0x0f);
+			kb = (byte)(_gi & 0x0f);
+		}
+		kbd = 1;
+		_gin = true;
+		z2 = true;
 	}
 
 	private void chkKaKb() {
-		// "kbd3" here does not directly emulate the hardware KBD3.
-		if (!kbd3) {
-			// On the 6184, this happens continuously while KBD3
-			// is off, at each Rs clock pulse (end of instr).
-			// Microcode must ensure that KA/KB remain zero
-			// until input is received (key press or device
-			// input).  Data is pre-latched immediately when a
-			// key is pressed, and after a delay turns on KBD3.
-			// Device input pre-latches data on leading edge of
-			// GISN and sets KBD3 on trailing edge.  This window
-			// ensures that data is copied from the pre-latch
-			// into KA/KB on the next Rs.  KBD3 is off between
-			// ST=9 (RESET) and input.
-			//
-			ka |= _ka;
-			kb |= _kb;
-			kbd3 = true; // do this only once per input
-		}
+		// The 700 does not handle keyboard data in every instruction cycle,
+		// but rather restricts KA/KB to keyboard/device data between
+		// RESET and input strobe (kbd == 0).
 	}
 
 	private void clrKaKb() {
 		_ka = 0; 
 		_kb = 0;
-		ka = 0;
-		kb = 0;
-		kbd3 = true;
+		// On 5919, _ka/_kb is pass-thru to KA/KB while kbd=0
 		kbd = 0;
+		kbd1 = false;
+		ka = _ka;
+		ka = _ka;
 		z2 = false;
+		_gin = false;
 	}
 
 	private byte[] odd_parity;
@@ -660,6 +680,9 @@ class Wang700_CPU
 			return 0;
 		}
 
+		// On 5919, KA/KB can only be used if KBD1 or KBD
+		boolean kakbzo = (kbd1 || // check STEP
+				kbd != 0);
 		// For conditional jump, these bits are latched early...
 		byte br_s = s;
 		byte br_sc = sc;
@@ -797,8 +820,12 @@ class Wang700_CPU
 		case 1:	t = alu; break;
 		case 2:	u = alu; break;
 		case 3:	v = alu; break;
-		case 4:	ka = alu; break;
-		case 5:	kb = alu; break;
+		// 5919: KBD forces PRE/CLR on KA/KB and prevents use by Zo,
+		// but this breaks 720C microcode...
+		case 4:	if (kakbzo) ka = alu; break;
+		case 5:	if (kakbzo) kb = alu; break;
+//		case 4:	ka = alu; break;
+//		case 5:	kb = alu; break;
 		case 6:	ca = alu; break;
 		case 7:	cb = alu; break;
 		}
@@ -892,12 +919,6 @@ class Wang700_CPU
 		if (jam != 0) {
 			next = jam & 0x0fff;
 			jam = 0;
-			ov = 0;
-			fp.setOv(ov);
-			if (next == 0) { // PRIME
-				err = 0;
-				fp.setErr(err);
-			}
 		}
 
 		last = pc;

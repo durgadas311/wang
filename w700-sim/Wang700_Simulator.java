@@ -30,6 +30,8 @@ class Wang700_Simulator
 	boolean modelC;
 	private Wang700_CPU cpu;
 
+	private int mode0 = 0;
+
 	public JMenuItem getXRomMenu(int key) {
 		return new JMenuItem("Not Used", key);
 	}
@@ -400,6 +402,9 @@ class Wang700_Simulator
 
 
 	public void chgMode0() {
+		int m0 = getMode0(false);
+		if (((m0 ^ mode0) & 8) != 0) cpu.setStep();
+		mode0 = m0;
 		good = 0;
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp("MODE0 Jam", -1, 0);
@@ -413,7 +418,7 @@ class Wang700_Simulator
 	public void chgMode2() {} // never called on 700
 
 	public void pressCmd(int cmd) {
-		cpu.jam = 0x1000 | cmd;
+		cpu.setJam(cmd);
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp("Key Jam", cmd, 0);
 		}
@@ -424,7 +429,7 @@ class Wang700_Simulator
 
 	public void ackIO(int iob) {
 		// do some validation on iob?
-		setKaKb(0);
+		setGi(0);
 	}
 
 	public void replyIO(int iob, int rep) {
@@ -452,7 +457,7 @@ class Wang700_Simulator
 		} else if (rep >= Wang_GroupIODevice.SR0 && rep < Wang_GroupIODevice.SREND) {
 			rep = 0x00 | (rep - Wang_GroupIODevice.SR0);
 		}
-		setKaKb(rep);
+		setGi(rep);
 		// TODO: review how this should be done.
 		if ((iob & ~1) == 2) {
 			Wang700.M730.do_ack(iob);
@@ -465,7 +470,12 @@ class Wang700_Simulator
 
 	public void setKaKb(int key) {
 		cpu.setKaKb(key);
-		keyCodes.add(key);
+		keyCodes.add(key); // only used for the wakeup
+	}
+
+	public void setGi(int key) {
+		cpu.setGi(key);
+		keyCodes.add(key); // only used for the wakeup
 	}
 
 	public void pressKey(int key) {
@@ -702,6 +712,7 @@ class Wang700_Simulator
 	}
 	public int getMode0(boolean clear) {
 		int g = Wang700.Kbd.getMode0(clear);
+		if (clear) mode0 = Wang700.Kbd.getMode0(false);
 		// clear 0010 if glrn?
 		if (_cn36 != null) {
 			g |= (byte)((_cn36.getGLRN() & 1) << 2);
