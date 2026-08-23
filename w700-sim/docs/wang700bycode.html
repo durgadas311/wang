@@ -538,6 +538,16 @@ if (X >= 1) then
 endif
 </PRE>
 	</TD></TR>
+<TR><TD>12&nbsp;00<BR>
+	through<BR>
+	15&nbsp;15</TD>
+	<TD>(various)</TD>
+	<TD>Local typewriter control codes.
+	Code written to GIOA/GIOB but no strobe to OutputWriters.
+	Only known use was to control
+	the "typewriter relay" (12&nbsp;00, 12&nbsp;01),
+	which may not have actually been used by OutputWriters.
+	</TD></TR>
 </TABLE>
 
 <P>&#164; The most-significant digit of the X mantissa is accessed directly
@@ -900,7 +910,7 @@ single-digit number (1..9).
 <TD CLASS="sym" BGCOLOR="lightgray">3</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">L</TD></TR>
 
-<TR><TH>04</TH>
+<TR><TH>08</TH>
 <TD CLASS="sym" BGCOLOR="lightblue">-</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">Y</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">space</TD>
@@ -918,7 +928,7 @@ single-digit number (1..9).
 <TD CLASS="sym" BGCOLOR="lightblue">F</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">G</TD></TR>
 
-<TR><TH>05</TH>
+<TR><TH>09</TH>
 <TD CLASS="sym" BGCOLOR="lightblue">W</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">S</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">plot</TD>
@@ -936,7 +946,7 @@ single-digit number (1..9).
 <TD CLASS="sym" BGCOLOR="lightblue">V</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">M</TD></TR>
 
-<TR><TH>06</TH>
+<TR><TH>10</TH>
 <TD CLASS="sym" BGCOLOR="lightblue">B</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">H</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x+</TD>
@@ -954,7 +964,7 @@ single-digit number (1..9).
 <TD CLASS="sym" BGCOLOR="lightblue">U</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">X</TD></TR>
 
-<TR><TH>07</TH>
+<TR><TH>11</TH>
 <TD CLASS="sym" BGCOLOR="lightblue">9</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">0</TD>
 <TD CLASS="sym" BGCOLOR="pink">step x+y+</TD>
