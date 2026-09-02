@@ -623,7 +623,7 @@ class Wang_CharConverter {
 	}
 
 	public byte[] asciiToTiltrotate(byte code) {
-		byte c = revxlate_ibm[code];
+		byte c = revxlate_ibm[code & 0xff];
 		if (c == (byte)0xff) {
 			return null;
 		}
@@ -647,7 +647,7 @@ class Wang_CharConverter {
 	}
 
 	public byte asciiToCodedTiltrotate(byte code, boolean coded) {
-		byte c = revxlate_ibm[code];
+		byte c = revxlate_ibm[code & 0xff];
 		if (c != (byte)0xff) {
 			c = tiltrotateToCodedTiltrotate(c, coded);
 		}
@@ -659,7 +659,7 @@ class Wang_CharConverter {
 		// But if not, these get converted to ASCII equivalents if possible.
 		String s;
 		if (shifted) code |= 0x40;
-		byte bb = xlate_ibm[code];
+		byte bb = xlate_ibm[code & 0xff];
 		if (bb == 0 || bb >= '\200') {
 			// invalid, or plotting code...
 			s = null;
@@ -675,7 +675,7 @@ class Wang_CharConverter {
 		// carriage control, etc. Only a few are legal...
 		// (practically) all must have been decode separately.
 		if (shifted) code |= 0x40;
-		byte bb = xlate_tty[code];
+		byte bb = xlate_tty[code & 0xff];
 		if (bb == 0) {
 			return null;
 		}
@@ -683,7 +683,7 @@ class Wang_CharConverter {
 	}
 
 	public byte[] asciiTtyToTiltrotate(byte code) {
-		byte c = revxlate_tty[code];
+		byte c = revxlate_tty[code & 0xff];
 		if (c == (byte)0xff) {
 			return null;
 		}

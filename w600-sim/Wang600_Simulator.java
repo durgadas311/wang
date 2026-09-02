@@ -806,9 +806,7 @@ class Wang600_Simulator
 	}
 	public void dev_reset() {
 		// PRIME pressed, everything is reset
-		if (Wang_CN24_dev.get() != null) {
-			Wang_CN24_dev.get().reset();
-		}
+		Wang_CN24_dev.reset();
 		Wang_CN36_Bus.resetCN36();
 	}
 	public void dev_out(byte iob, byte c) {
@@ -816,9 +814,7 @@ class Wang600_Simulator
 			// 600 series does not support "local control codes",
 			// all output is passed to peripheral.
 			c &= 0x3f;
-			if (Wang_CN24_dev.get() != null) {
-				Wang_CN24_dev.get().do_cn24(c);
-			}
+			Wang_CN24_dev.do_cn24(c);
 		} else { // includes IOB=0 (end of command)
 			Wang_CN36_Bus.doCN36(iob, (c & 0x0ff));
 		}
@@ -836,11 +832,7 @@ class Wang600_Simulator
 		return Wang600.Kbd.getMode1(clear);
 	}
 	public int getRBS() {
-		if (Wang_CN24_dev.get() != null) {
-			return Wang_CN24_dev.get().getRBS();
-		} else {
-			return 1; // always ready
-		}
+		return Wang_CN24_dev.getRBS();
 	}
 	public void setGKBD(boolean state) {
 		Wang_CN36_Bus.setGKBD(state);

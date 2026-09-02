@@ -305,8 +305,8 @@ the carriage, and will eventually provide setup of paper size, margins, etc.
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
 </TABLE>
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
@@ -419,7 +419,7 @@ without the GO).
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
 </TABLE>
 
 <P>This device was a general-purpose electronic interface to any hardware that
@@ -460,18 +460,18 @@ equivalents on Windows (CYGWIN is preferred). These default commands are:
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 15&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 15&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
 <TR><TD COLSPAN=2>Run Mode emits X&nbsp;OFF (Stop Tape) when exiting commands</TD></TR>
 </TABLE>
 
@@ -482,16 +482,15 @@ and the Model 606 functionality is provided by a simple socket/port text client
 such as "telnet".
 
 <P>An ASR33 Teletype integrated the keyboard, print unit, paper tape punch,
-and paper tape reader. This emulation places the paper tape functionality
-in with the Model 607 code and leaves the keyboard and print unit to the
-chosen client. If a client supports session logging and playback, then the
-paper tape functionality in the Model 607 might be redundant. But since
-most "telnet" clients, and simple I/O through a socket, do not support such
-features this functionality is kept in with the Model 607 code.
+and paper tape reader. This emulation expects the paper tape functionality
+to be in the chosen client. Full ASR33 paper tape functionality is provided
+by the <A HREF="https://github.com/durgadas311/asr33">ASR33telnet.jar client</A>.
+If a client supports session logging and playback, then it may suffice
+depending on handling of X-ON and X-OFF.
 
 <P>The client connects to the Model 607 using the host configured (default
 is the localhost IP 127.0.0.1) using port 10607. The Model 607 must be "installed"
-(using the "Devices" -> "Output Device..." menu) in order for a client connection
+(using the "Devices" -> "Device..." menu) in order for a client connection
 to succeed. Although the Model 607 hardware supported more than one Model 606,
 this emulation does not (currently) support multiple clients connected at the same time.
 Note, such support would require a change to paper tape handling, as each client
@@ -509,15 +508,6 @@ however that would force character mode for all connections to that host
 by telnet, not just connections to the Model 607 (since telnet is rarely
 used anymore for "login connections", this may not be a problem).
 
-<P>The paper tape functions are controlled through the "Devices" -> "607 Teletye..."
-sub-menu, which is only enabled while a client is connected. This better emulates
-the true hardware locality of the ASR33 Teletype. A file image for the paper tape
-reader may be selected, and the paper tape punch image may be saved or torn-off (and discarded).
-There is always a file available to the punch, it is named "607Punch.txt".
-"Saving" consists of renaming that file and creating a new, empty, punch image.
-This file will be truncated (empty) whenever the "Tear Off" or "Save" options
-are used (with the exception of "Canceling a Save" does not alter the punch image).
-
 <P>Teletype-Wang character conversions are documented in the
 <A HREF="wang607.html">607 Character Conversion Table</A>.
 
@@ -526,8 +516,8 @@ are used (with the exception of "Canceling a Save" does not alter the punch imag
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 04&nbsp;08</TD><TD>Read cards in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;08</TD><TD>Read cards in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 04&nbsp;08</TD><TD>Read cards in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;08</TD><TD>Read cards in Learn Mode</TD></TR>
 </TABLE>
 
 <P>While support for the actual card reader is pending, there is

@@ -11,9 +11,6 @@ import javax.swing.*;
 // exchanged.
 
 interface Wang_BlockIODevice extends Wang_GroupIODevice {
-	JMenuItem getMenu(int key); // get/create menu item
-	void menuClick(JMenuItem m); // only called if getMenu() != null
-
 	// Process output byte in context of Wang Group I/O Device.
 	// These are for the random I/O device protocol, as used
 	// by the "I/O" commands.

@@ -1,5 +1,4 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_Paper.java,v 1.32 2014/01/14 21:53:51 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,10 +10,8 @@ import javax.print.attribute.standard.*;
 import javax.swing.text.*;
 
 class Wang_Paper
-	implements ActionListener, ComponentListener
+	implements ActionListener, ComponentListener, WindowListener
 {
-	final String ident = "$Id: Wang_Paper.java,v 1.32 2014/01/14 21:53:51 drmiller Exp $";
-
 	interface Wang_Plottable extends Printable {
 		boolean hasGraphics();	// i.e. can save as PNG
 		boolean hasText();	// i.e. can save as TXT
@@ -179,6 +176,7 @@ class Wang_Paper
 		_yoff = fdim.height - sdim.height;
 
 		_frame.addComponentListener(this);
+		_frame.addWindowListener(this);
 	}
 
 	// fixed size paper - e.g. flatbed plotter
@@ -237,6 +235,7 @@ class Wang_Paper
 		_yoff = fdim.height - sdim.height;
 
 		_frame.addComponentListener(this);
+		_frame.addWindowListener(this);
 	}
 
 	private void save(File file) {
@@ -354,6 +353,16 @@ class Wang_Paper
 	public void componentHidden(ComponentEvent e) { }
 	public void componentMoved(ComponentEvent e) { }
 	public void componentShown(ComponentEvent e) { }
+
+	public void windowActivated(WindowEvent e) { }
+	public void windowClosed(WindowEvent e) { }
+	public void windowIconified(WindowEvent e) { }
+	public void windowOpened(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeactivated(WindowEvent e) { }
+	public void windowClosing(WindowEvent e) {
+		onOff(false);
+	}
 
 	public void componentResized(ComponentEvent e) {
 		if (e.getComponent() == _frame) {

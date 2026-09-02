@@ -1,5 +1,4 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: IBM_Selectric.java,v 1.6 2014/01/14 21:53:51 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,9 +8,21 @@ import javax.swing.text.JTextComponent;
 class IBM_Selectric extends Wang_Paper
 	implements Wang_OutputDevice
 {
-	final String ident = "$Id: IBM_Selectric.java,v 1.6 2014/01/14 21:53:51 drmiller Exp $";
-
+	// many/all of these should be overridden by parent,
+	// but are required here to satisy compiler.
+	public String getModel() { return null; }
+	public String getName() { return null; }
+	public void plugIn(JMenu mu) {}
+	public void unPlug(JMenu mu) {}
+	public boolean isPlugged() { return false; }
+	public JMenuItem getMenu() { return null; }
 	public void setProperties(Wang_Properties p) { }
+
+	// needed to satisfy compiler? TODO: confirm these are required
+	public JFrame getFrame() { return super.getFrame(); }
+	public Component getComponent() { return super.getComponent(); }
+	public void onOff(boolean on) { super.onOff(on); }
+	public boolean onOff() { return super.onOff(); }
 
 	public void reset() {
 		// anything?

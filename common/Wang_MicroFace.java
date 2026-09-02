@@ -1,15 +1,74 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_MicroFace.java,v 1.6 2014/01/26 14:52:57 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
-class Wang_MicroFace implements Wang_GroupIODevice
+class Wang_MicroFace implements Wang_GroupIODevice, ActionListener, Runnable
 {
-	final String ident = "$Id: Wang_MicroFace.java,v 1.6 2014/01/26 14:52:57 drmiller Exp $";
-
 	public static final String Model = "05";
 	public static final String Description = "Micro Face";
+
+	private static JMenuItem pmi = null;
+	private static Wang_MicroFace thus = null;
+	public static String s_getModel() {
+		return Wang_UI.getSeries() + Model;
+	}
+	public static String s_getName() {
+		return s_getModel() + " " + Description;
+	}
+	public static JMenuItem s_getMenu(int key) { // plug-in menu
+		if (pmi != null) return pmi;
+		pmi = new JMenuItem(s_getName() + " (not installed)", key);
+		return pmi;
+	}
+	public static Wang_MicroFace s_getInstance(Component comp) {
+		if (thus != null) return thus;
+		String p = String.format("wang%s00_%s05_",
+			Wang_UI.getSeries(), Wang_UI.getSeries());
+		thus = new Wang_MicroFace(p, comp);
+		return thus;
+	}
+
+	static JMenuItem dev_mi = null;
+	private boolean plugged = false;
+
+	public String getModel() { return s_getModel(); }
+	public String getName() { return s_getName(); }
+	public void plugIn(JMenu mu) {
+		if (plugged) return;
+		plugged = true;
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (installed)");
+		}
+		if (mu != null) {
+			mu.add(getMenu());
+		}
+		Wang_CN36_Bus.registerCN36(this);
+		// onOff(true);
+	}
+	public void unPlug(JMenu mu) {
+		if (!plugged) return;
+		reset();
+		Wang_CN36_Bus.deregisterCN36(this);
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (not installed)");
+		}
+		if (mu != null) {
+			mu.remove(getMenu());
+		}
+		plugged = false;
+		// onOff(false);
+	}
+	public boolean isPlugged() { return plugged; }
+	public JMenuItem getMenu() {
+		if (dev_mi != null) return dev_mi;
+		dev_mi = new JMenuItem(s_getName(), KeyEvent.VK_D);
+		dev_mi.addActionListener(this);
+		return dev_mi;
+	}
+
 
 	// Group 1 07 xx = execute sampling of data on interface 'xx'
 
@@ -34,7 +93,11 @@ class Wang_MicroFace implements Wang_GroupIODevice
 	private static final int OPTION_SAVE = 1;
 	private static final int OPTION_CANCEL = 2;
 
+	LinkedBlockingDeque<Integer> giChr;
+	boolean gkbd; // actually, !GKBD
+
 	public void reset() {
+		giChr.clear(); // still could be one in the chamber...
 		_input = false;
 		_iob = 0;
 	}
@@ -48,7 +111,7 @@ class Wang_MicroFace implements Wang_GroupIODevice
 			_input = true;
 			_sample = out[0];
 			_sampix = 0;
-			do_ack(_iob);
+			sendNum(); // queue up entire thing, incl. GO
 			return true;
 		} else {
 			// does the user already know it failed?
@@ -59,6 +122,7 @@ class Wang_MicroFace implements Wang_GroupIODevice
 
 	public boolean start_cn36(int iob, int c) {
 		// currently, don't care if running program or not...
+		_input = false;
 		// We are a GROUP 1 device...
 		if ((iob & 0x05) != 4) {
 			return false;
@@ -71,10 +135,10 @@ class Wang_MicroFace implements Wang_GroupIODevice
 		c &= 0x0f;
 		if (_intfs[c].length() > 0) {
 			if (execute(c)) {
-				return true;
+				_input = true;
 			}
 		}
-		return false;
+		return _input;
 	}
 
 	public void menuClick(JMenuItem m) {
@@ -115,7 +179,8 @@ try {
 		}
 	}
 
-	private boolean sendNum() {
+	// queue up all output, including GO
+	private void sendNum() {
 		while (_sampix < _sample.length()) {
 			int b = 0;
 			int c = _sample.charAt(_sampix);
@@ -129,32 +194,25 @@ try {
 			}
 			// todo: must always send something... loop until valid numeric...
 			if (b > 0) {
-				Wang_UI.getCore().replyIO(_iob, b);
-				return true;
+				giChr.add(b);
 			}
 		}
-		return false;
+		giChr.add(GO);
 	}
 
-	public void do_ack(int iob) {
-		// should be ACK for previous code... should enable next...
-		// TODO
-		// check mode of operation and send next code...
-		// What about pass-through of data?
-		if (_input) {
-			if (!sendNum()) {
-				Wang_UI.getCore().replyIO(_iob, GO);
-				_input = false;
-			}
-		}
-	}
+	public void do_ack(int iob) {} // not used?
 
-	public void do_dev(int iob, int b) {
-		// right now only ACK happens
-		// TODO
-	}
+	public void do_dev(int iob, int b) {} // never called: isBlockIO() is false
 
 	public int getGLRN() { return 0; }
+	public void setGKBD(boolean state) { gkbd = !state; }
+	public boolean isBlockIO() { return false; }
+	public boolean isDevEnabled() { return _input; }
+	public void setProperties(Wang_Properties p) {}
+	public boolean onOff() { return false; }
+	public void onOff(boolean vis) {}
+	public JFrame getFrame() { return null; }
+	public Component getComponent() { return null; }
 
 	public JMenuItem getMenu(int key) {
 		return new JMenuItem(getName(), key);
@@ -172,6 +230,7 @@ try {
 
 	public Wang_MicroFace(String prop, Component comp) {
 		Wang_RunCommand.Initialize();
+		giChr = new LinkedBlockingDeque<Integer>();
 		_panels = new JPanel[16];
 		_texts = new JTextArea[16];
 		_dia_pn = new JPanel();
@@ -228,15 +287,36 @@ try {
 		}
 		// todo: share code with Wang_Properties...
 		setupDialog(_dia_pn, Wang_UI.getIcon());
-
-		Wang_CN36_Bus.registerCN36(this);
+		Thread t = new Thread(this);
+		t.start();
 	}
 
-	static public String getModel() {
-		return Wang_UI.getSeries() + Model;
+	public void actionPerformed(ActionEvent e) {
+		// There is only one, but decode it anyway...
+		Object src = e.getSource();
+		if (!(src instanceof JMenuItem)) return;
+		JMenuItem mi = (JMenuItem)src;
+		if (mi.getMnemonic() == KeyEvent.VK_D) {
+			// onOff(true);
+			menuClick(mi);
+		}
 	}
 
-	static public String getName() {
-		return getModel() + " " + Description;
+	public void run() {
+		while (true) {
+			int c = -1;
+			try {
+				c = giChr.take();
+				while (!gkbd) {
+					Thread.sleep(10);
+				}
+			} catch (Exception ee) {}
+			if (c < 0) continue; // or break?
+			if (!_input) continue; // PRIME, etc.
+			if (c == GO) {
+				_input = false;
+			}
+			Wang_UI.getCore().replyIO(_iob, c);
+		}
 	}
 }

@@ -1,24 +1,82 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: Wang_InputOutputWriter.java,v 1.21 2014/01/26 14:52:57 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
 class Wang_InputOutputWriter extends IBM_Selectric
-		implements Wang_GroupIODevice, KeyListener
+		implements Wang_GroupIODevice, KeyListener, ActionListener, Runnable
 {
-	final String ident = "$Id: Wang_InputOutputWriter.java,v 1.21 2014/01/26 14:52:57 drmiller Exp $";
-
 	public static final String Model = "11";
 	public static final String Description = "Input/Output Writer";
+	private static JMenuItem pmi = null;
+	private static Wang_InputOutputWriter thus = null;
+	public static String s_getModel() {
+		return Wang_UI.getSeries() + Model;
+	}
+	public static String s_getName() {
+		return s_getModel() + " " + Description;
+	}
+	public static JMenuItem s_getMenu(int key) { // plug-in menu
+		if (pmi != null) return pmi;
+		pmi = new JMenuItem(s_getName() + " (not installed)", key);
+		return pmi;
+	}
+	public static Wang_InputOutputWriter s_getInstance() {
+		if (thus != null) return thus;
+		thus = new Wang_InputOutputWriter();
+		return thus;
+	}
+
 
 	// Group 2 04 12 = Enter program steps (GLRN)
 	// Group 2 04 13 = Type (echo back to OutputWriter) (!GLRN)
 
 	private int _glrn;
 	private JFrame _frame;
+	static JMenuItem dev_mi = null;
+	private boolean plugged = false;
+
+	public String getModel() { return s_getModel(); }
+	public String getName() { return s_getName(); }
+	public void plugIn(JMenu mu) {
+		if (plugged) return;
+		plugged = true;
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (installed)");
+		}
+		if (mu != null) {
+			mu.add(getMenu());
+		}
+		Wang_CN24_dev.connect(this);
+		Wang_CN36_Bus.registerCN36(this);
+		onOff(true);
+	}
+	public void unPlug(JMenu mu) {
+		if (!plugged) return;
+		reset();
+		if (Wang_CN24_dev.get() == this) {
+			Wang_CN24_dev.connect(null);
+		}
+		Wang_CN36_Bus.deregisterCN36(this);
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (not installed)");
+		}
+		if (mu != null) {
+			mu.remove(getMenu());
+		}
+		plugged = false;
+		onOff(false);
+	}
+	public boolean isPlugged() { return plugged; }
+	public JMenuItem getMenu() {
+		if (dev_mi != null) return dev_mi;
+		dev_mi = new JMenuItem(s_getName(), KeyEvent.VK_D);
+		dev_mi.addActionListener(this);
+		return dev_mi;
+	}
 
 	public void reset() {
 		_glrn = 0;
@@ -39,39 +97,31 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		// don't care about run vs. keyboard modes?
 		// how would this work from a running program?!
 		// especially if GLRN is asserted...
-		if ((iob & ~0x2) != 5) return false;
-		if (c == 0x4c) {
+		_input = ((c & 0xfe) == 0x4c);
+		if (!_input) return _input;
+		if (c == 0x4c) { // "INPUT" - standard input mode
 			_glrn = 1;
-			_input = true;
 			_indOUTPUT.setOn(false);
 			_indINPUT.setOn(true);
 			super.getPaper().addKeyListener(this);
 			onOff(true);
-			return true;
-		}
-		if (c == 0x4d) {
+		} else if (c == 0x4d) { // "TYPE" - local echo but no send
 			_glrn = 0;
-			_input = false; // do not send codes to Calculator...
 			_indOUTPUT.setOn(false);
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
 			onOff(true);
-			return true;
 		}
-		return false;
+		return _input;
 	}
 
-	public void do_ack(int iob) {
-		// should be ACK for previous code... should enable next...
-		// TODO
-	}
-
-	public void do_dev(int iob, int b) {
-		// right now only ACK happens
-		// TODO
-	}
+	public void do_ack(int iob) { } // not used
 
 	public int getGLRN() { return _glrn; }
+	public void setGKBD(boolean state) { gkbd = !state; }
+
+	public boolean isBlockIO() { return false; }
+	public boolean isDevEnabled() { return _input; }
 
 	public void showAbout() {
 		java.net.URL url = this.getClass().getResource("icons/wang611.png");
@@ -94,38 +144,33 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	Wang_Indicator _indOUTPUT;
 	Wang_Indicator _indINPUT;
 	boolean _input;
-
-//	private void sendACK() {
-//		Wang_UI.getCore().ackIO(5);
-//	}
+	boolean gkbd;
+	LinkedBlockingDeque<Integer> giChr;
 
 	private void sendCode(byte b) {
-		if (!_input) return;
-		Wang_UI.getCore().replyIO(5, (b & 0x0ff));
+		if (_glrn == 0) return;
+		giChr.add(b & 0x0ff);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JButton) {
 			JButton butt = (JButton)e.getSource();
 			if (butt.getMnemonic() == KeyEvent.VK_G) {
-				// TODO: must release GLRN first... timing...
-				_glrn = 0;
-				// might have to notify Simulator?
-				if (!_input) return;
-				Wang_UI.getCore().replyIO(5, GO);
+				// regardless if TYPE mode, need to send GO
+				giChr.add(GO);
 				return;
 			}
 			if (butt.getMnemonic() == KeyEvent.VK_E) {
-				if (!_input) return;
-				Wang_UI.getCore().replyIO(5, END);
+				if (_glrn == 0) return;
+				giChr.add(END);
 				return;
 			}
 			if (butt.getMnemonic() == KeyEvent.VK_A) {
-				if (!_input) return;
-				Wang_UI.getCore().replyIO(5, START);
+				if (_glrn == 0) return;
+				giChr.add(START);
 				return;
 			}
-			if (butt.getMnemonic() == KeyEvent.VK_L) {
+			if (butt.getMnemonic() == KeyEvent.VK_L) { // "LOCAL"
 				boolean on = !butt.isSelected();
 				butt.setSelected(on);
 				if (on) {
@@ -145,6 +190,11 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		}
 		if (e.getSource() instanceof JMenuItem) {
 			JMenuItem m = (JMenuItem)e.getSource();
+
+			if (m.getMnemonic() == KeyEvent.VK_D) {
+				onOff(true);
+				return;
+			}
 			if (m.getMnemonic() == KeyEvent.VK_U) {
 				//setup();
 				return;
@@ -163,7 +213,6 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	private class ProxyKeyHandler
 			implements KeyListener
 	{
-		static final long serialVersionUID = 311603000004L;
 		Wang_InputOutputWriter _parent;
 
 		public ProxyKeyHandler(Wang_InputOutputWriter parent) {
@@ -171,17 +220,16 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		}
 
 		public void keyTyped(KeyEvent e) {
+		}
+		public void keyReleased(KeyEvent e) { }
+		public void keyPressed(KeyEvent e) {
 			_parent.onOff(true);
 			_parent.keyTyped(e);
 		}
-		public void keyReleased(KeyEvent e) { }
-		public void keyPressed(KeyEvent e) { }
 	}
 
 	private class ControlPanel extends JComponent
 	{
-		static final long serialVersionUID = 311602000004L;
-
 		public ControlPanel(Wang_InputOutputWriter parent) {
 			Border lb = BorderFactory.createBevelBorder(BevelBorder.RAISED);
 			GridBagLayout gridbag = new GridBagLayout();
@@ -345,9 +393,17 @@ class Wang_InputOutputWriter extends IBM_Selectric
 
 	private byte _shifted = (byte)0x12;	// default to (start with) Shift Down
 
+	// This is called from keyPressed(), so event must be scrutinized
 	public void keyTyped(KeyEvent e) {
 		char c = e.getKeyChar();
+		if (c > 0x7f) return; // reject meta keys, etc.
+		// Convert ENTER to RETURN+INDEX, and allow CTRL+ for just INDEX.
+		int k = e.getKeyCode();
+		int m = e.getModifiersEx();
 		e.consume(); // prevent JTextArea from seeing it
+		if (k == KeyEvent.VK_ENTER && (m & InputEvent.CTRL_DOWN_MASK) == 0) {
+			c = '\r'; // this will translate to CR+LF
+		}
 		byte b = (byte)c;
 		byte[] tr = Wang_UI.getCharConv().asciiToTiltrotate(b);
 		if (tr[0] != _shifted) {
@@ -364,7 +420,9 @@ class Wang_InputOutputWriter extends IBM_Selectric
 	public Wang_InputOutputWriter() {
 		super(Wang_UI.getSeries() + Model, Description);
 
+		giChr = new LinkedBlockingDeque<Integer>();
 		_input = false;
+		_glrn = 0;
 
 		JMenu mu;
 		mu = new JMenu("Typewriter");
@@ -390,17 +448,29 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		_frame.pack();
 		_frame.addKeyListener(new ProxyKeyHandler(this));
 
-		Wang_CN36_Bus.registerCN36(this);
-
 		// Not initially...
 		//_frame.setVisible(true);
+
+		Thread t = new Thread(this);
+		t.start();
 	}
 
-	static public String getModel() {
-		return Wang_UI.getSeries() + Model;
-	}
-
-	static public String getName() {
-		return getModel() + " " + Description;
+	public void run() {
+		while (true) {
+			int c = -1;
+			try {
+				c = giChr.take();
+				while (!gkbd) {
+					Thread.sleep(10);
+				}
+			} catch (Exception ee) {}
+			if (c < 0) continue; // or break?
+			if (!_input) continue; // PRIME, etc.
+			if (c == GO) {
+				// This is identical to PRIME
+				reset();
+			}
+			Wang_UI.getCore().replyIO(5, c);
+		}
 	}
 }

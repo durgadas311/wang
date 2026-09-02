@@ -698,9 +698,7 @@ class Wang700_Simulator
 				return;
 			}
 			c &= 0x3f;
-			if (Wang_CN24_dev.get() != null) {
-				Wang_CN24_dev.get().do_cn24(c);
-			}
+			Wang_CN24_dev.do_cn24(c);
 		} else { // includes IOB=0 (end of command)
 			Wang_CN36_Bus.doCN36(iob, (c & 0x0ff));
 		}
@@ -719,11 +717,7 @@ class Wang700_Simulator
 		return 0; // No MODE1 switches
 	}
 	public int getRBS() { 
-		if (Wang_CN24_dev.get() != null) {
-			return Wang_CN24_dev.get().getRBS();
-		} else {
-			return 1; // always ready
-		}
+		return Wang_CN24_dev.getRBS();
 	}
 	public void setGKBD(boolean state) {
 		Wang_CN36_Bus.setGKBD(state);

@@ -27,6 +27,7 @@ COMMON_CLASSES = \
 		Wang_BlockIODevice.class \
 		Wang_CN24_dev.class \
 		Wang_CN36_Bus.class \
+		Wang_Debugger.class \
 		Wang_Core.class \
 		Wang_UI.class \
 		Wang_ErrorLight.class \
@@ -48,10 +49,10 @@ COMMON_CLASSES = \
 		Wang_Keyboards.class \
 		Wang_Keyboard.class \
 		Wang_Printer.class \
-		Wang_Debugger.class \
 		Wang_DebugConsole.class \
 		GenericHelp.class \
-		WangIOExplorer.class
+		WangIOExplorer.class \
+		Wang_Devices.class
 
 W600_CLASSES = \
 		Wang600.class \

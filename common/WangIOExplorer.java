@@ -15,6 +15,27 @@ import javax.swing.border.*;
 public class WangIOExplorer extends JFrame
 		implements Wang_OutputDevice, Wang_BlockIODevice,
 			ActionListener, WindowListener, Runnable {
+	static String Model = "99";
+	static String Name = "I/O Explorer";
+	private static JMenuItem pmi = null;
+	private static WangIOExplorer thus = null;
+	public static String s_getModel() {
+		return Wang_UI.getSeries() + Model;
+	}
+	public static String s_getName() {
+		return Name;
+	}
+	public static JMenuItem s_getMenu(int key) { // plug-in menu
+		if (pmi != null) return pmi;
+		pmi = new JMenuItem(s_getName() + " (not installed)", key);
+		return pmi;
+	}
+	public static WangIOExplorer s_getInstance() {
+		if (thus != null) return thus;
+		thus = new WangIOExplorer(Wang_UI.getProperties());
+		return thus;
+	}
+
 	Wang_Debugger dbg;
 	boolean visib;
 	GenericHelp help;
@@ -922,6 +943,8 @@ public class WangIOExplorer extends JFrame
 				help.setVisible(true);
 			}
 			return;
+		} else if (mn == KeyEvent.VK_D) {
+			onOff(true);
 		}
 	}
 
@@ -989,20 +1012,20 @@ public class WangIOExplorer extends JFrame
 	public void do_lock(int lk) {}
 	public void do_bell() {}
 
-	private boolean mu_init = false;
+	static JMenuItem dev_mi = null;
+	private boolean plugged = false;
 	// Wang_BlockIODevice
-	public JMenuItem getMenu(int key) {
-		return new JMenuItem("I/O Explorer - not connected", key);
-	}
-
-	public void menuClick(JMenuItem m) {
-		if (!mu_init) {
-			mu_init = true;
-			m.setText("I/O Explorer");
-			Wang_CN24_dev.connect(this);
-			Wang_CN36_Bus.registerCN36(this);
-		}
+	// Calculator is sending hdr/data/ACK
+	// IOB is 2 or 3
+	public void do_dev(int _iob, int c) {
 		onOff(true);
+		updateGIO(_iob, c);
+		trigGISO(_iob);
+		bi_next(_iob, c); // process this byte, setup response
+		if (bi_auto.isSelected()) {
+			// fire back previously set up ACK or next
+			giChr.add(bi_rsp); // must wait for GKBD...
+		}
 	}
 
 	// Wang_GroupIODevice
@@ -1032,19 +1055,6 @@ public class WangIOExplorer extends JFrame
 			}
 		}
 		return devEna;
-	}
-
-	// Calculator is sending hdr/data/ACK
-	// IOB is 2 or 3
-	public void do_dev(int _iob, int c) {
-		onOff(true);
-		updateGIO(_iob, c);
-		trigGISO(_iob);
-		bi_next(_iob, c); // process this byte, setup response
-		if (bi_auto.isSelected()) {
-			// fire back previously set up ACK or next
-			giChr.add(bi_rsp); // must wait for GKBD...
-		}
 	}
 	// Calculator is ACKing our prev GISN
 	// IOB is 2 or 3?
@@ -1080,6 +1090,43 @@ System.err.format("do_ack\n");
 	}
 
 	// Wang_Peripheral
+	public String getModel() {
+		return s_getModel();
+	}
+	public String getName() {
+		return s_getName();
+	}
+	public void plugIn(JMenu mu) {
+		if (plugged) return;
+		plugged = true;
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (installed)");
+		}
+		if (mu != null) {
+			mu.add(getMenu());
+		}
+		Wang_CN24_dev.connect(this);
+		Wang_CN36_Bus.registerCN36(this);
+		onOff(true);
+	}
+	public void unPlug(JMenu mu) {
+		if (!plugged) return;
+		reset();
+		if (Wang_CN24_dev.get() == this) {
+			Wang_CN24_dev.connect(null);
+		}
+		Wang_CN36_Bus.deregisterCN36(this);
+		if (pmi != null) {
+			pmi.setText(s_getName() + " (not installed)");
+		}
+		if (mu != null) {
+			mu.remove(getMenu());
+		}
+		plugged = false;
+		onOff(false);
+	}
+	public boolean isPlugged() { return plugged; }
+
 	public void reset() { // hardware reset, a.k.a. PRIME
 		clear();
 		bi_hdr = 0;
@@ -1098,6 +1145,13 @@ System.err.format("do_ack\n");
 		bi_out.setText("");
 		
 	}
+	public JMenuItem getMenu() {
+		if (dev_mi != null) return dev_mi;
+		dev_mi = new JMenuItem(s_getName(), KeyEvent.VK_D);
+		dev_mi.addActionListener(this);
+		return dev_mi;
+	}
+
 	public JFrame getFrame() { return this; }
 	public Component getComponent() { return this; }
 	public void onOff(boolean vis) {

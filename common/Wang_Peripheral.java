@@ -6,6 +6,12 @@ import javax.swing.*;
 
 interface Wang_Peripheral
 {
+	String getModel();
+	String getName();
+	void plugIn(JMenu mu);
+	void unPlug(JMenu mu);
+	boolean isPlugged();
+
 	// General-purpose device reset
 	void reset();
 
@@ -13,6 +19,8 @@ interface Wang_Peripheral
 	// and setting up action listeners
 	JFrame getFrame();		// might be null
 	Component getComponent();	// might be null
+
+	JMenuItem getMenu(); // get/create menu item, self-handled
 
 	// Set the visibility of the output frame
 	void onOff(boolean on);

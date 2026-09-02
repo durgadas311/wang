@@ -52,11 +52,13 @@ abstract class ASR33_Teletype
 		// might need to support multiple TTYs, but
 		// still only one character at time.
 		int b = -1;
+		if (_cp == null) return b; // TODO: recovery
 		synchronized(_cp) {
 			try {
 				_cp.wait();
 				b = _currByte;
 			} catch (Exception ee) {
+ee.printStackTrace();
 				// assume all is dead?
 				b = -1;
 			}
@@ -73,9 +75,6 @@ abstract class ASR33_Teletype
 	abstract public void newConnection(Socket s);
 
 	abstract public boolean inputEnabled();
-
-	// character has not been (otherwise) sent to TTY/PUN
-	abstract public void ctrlChar(char c);
 
 	private class ConnectionProxy implements Runnable {
 		private InputStream _in;
@@ -153,6 +152,7 @@ abstract class ASR33_Teletype
 					b = _in.read();
 //System.err.format("Socket recv %02x\n", b);
 				} catch (Exception ee) {
+ee.printStackTrace();
 					b = -1;
 				}
 				if (doTelnet(b)) {
@@ -185,6 +185,7 @@ abstract class ASR33_Teletype
 			_cp = new ConnectionProxy(s);
 			_out = s.getOutputStream();
 		} catch (Exception ee) {
+ee.printStackTrace();
 			try { s.close(); } catch(IOException e) { }
 			return;
 		}
@@ -204,27 +205,15 @@ abstract class ASR33_Teletype
 		}
 	}
 
-	private boolean _crPrint;
-
 	public void ttyPrint(char c) {
-		// Need more than just "toupper()" as the tty forces
-		// all characters 96-127 into 64-95.
-		if (c < ' ' && c != '\n' && c != '\r' && c != '\007') return;
-		if (_crPrint && c == '\n') return;
-		_crPrint = (c == '\r');
+		// Do not pre-process char, it is the telnet client's
+		// responsibility. This client should be ASR33telnet.jar.
 		int b = c;
-		if (b > 0x7f) return;
-		if (b > 0x5f) {
-			b -= 32;
-		}
-
 		if (_remote != null) {
 			try {
 				_out.write(b);
-				if (_crPrint) {
-					_out.write('\n');
-				}
-			} catch(IOException e) {
+			} catch(IOException ee) {
+ee.printStackTrace();
 				tearDown();
 			}
 		}
@@ -270,13 +259,13 @@ abstract class ASR33_Teletype
 	public void do_settab() {
 		// PUN on (a.k.a DC2 or ^R)
 		// has not been printed...
-		ctrlChar('\022');
+		ttyPrint('\022');
 	}
 
 	public void do_clrtab() {
 		// PUN off (a.k.a DC4 or ^T)
 		// has not been printed...
-		ctrlChar('\024');
+		ttyPrint('\024');
 	}
 
 	public void do_tab() {
@@ -368,7 +357,6 @@ abstract class ASR33_Teletype
 
 	public ASR33_Teletype(String propBase, int port) {
 		_shifted = false;
-		_crPrint = false;
 		_remote = null;
 		_on = true;
 		_th = null;
@@ -376,6 +364,7 @@ abstract class ASR33_Teletype
 		boolean done = false;
 		boolean newDone = false;
 		InetAddress ia;
+		// TODO: make port configurable
 		String host = Wang_UI.getProperties().getProperty(_propBase + "host");
 		if (host == null) {
 			host = "";
@@ -391,7 +380,8 @@ abstract class ASR33_Teletype
 				}
 				_ss = new ServerSocket(port, 1, ia);
 				done = true;
-			} catch(Exception e) {
+			} catch(Exception ee) {
+ee.printStackTrace();
 //System.err.println("host=" + gotHost + " port=" + port + " " + e.toString());
 				_ss = null;
 			}
@@ -414,7 +404,8 @@ abstract class ASR33_Teletype
 		while (_on) {
 			try {
 				s = _ss.accept();
-			} catch(IOException e) {
+			} catch(IOException ee) {
+ee.printStackTrace();
 				// e.g. java.net.SocketException: Socket closed
 				break;
 			}

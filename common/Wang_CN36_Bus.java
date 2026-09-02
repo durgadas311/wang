@@ -1,6 +1,7 @@
 // Copyright (c) 2011,2026 Douglas Miller
 
 import java.util.Vector;
+import javax.swing.*;
 
 public class Wang_CN36_Bus
 {
@@ -14,11 +15,28 @@ public class Wang_CN36_Bus
 		if (_cn36 == null) {
 			_cn36 = new Vector<Wang_GroupIODevice>();
 		}
+		if (_cn36.contains(dev)) return;
 		_cn36.add(dev);
 	}
 	static public void deregisterCN36(Wang_GroupIODevice dev) {
 		if (_cn36 == null) return; // caller error
 		_cn36.removeElement(dev);
+	}
+	static public void unPlugAll(JMenu mu) {
+		if (_cn36 == null) return; // caller error
+		_idev = null;
+		_bdev = null;
+		// Cannot remove elements while iterating them,
+		// need to make a list that maintains the original
+		// element objects.
+		Vector<Wang_GroupIODevice> list = new Vector<Wang_GroupIODevice>();
+		for (Wang_GroupIODevice dev : _cn36) {
+			list.add(dev);
+		}
+		for (Wang_GroupIODevice dev : list) {
+			dev.unPlug(mu); // calls back into deregisterCN36()...
+		}
+		_cn36.clear(); // all should have been removed, already
 	}
 	static public void resetCN36() {
 		if (_cn36 == null) return;
@@ -44,17 +62,8 @@ public class Wang_CN36_Bus
 			}
 			return;
 		}
-if (iob != 0 && (_idev != null || _bdev != null)) {
-System.err.format("would-be ACK\n");
-}
-		if (iob != 0 && _idev != null) {
-// Not used????
-			// A device is actively handling the GROUP-1 or 2
-			// command (so this is  not the beginning). Must be
-			// an ACK of what the device sent.
-			_idev.do_ack(iob);
-			return;
-		}
+		// Every call is a new GROUP 1/2 command,
+		// there are no other strobes of GISO for IOB 4,5,6,7.
 		if (_cn36 == null) return; // no devices registered, nothing to do
 		// pass to all devices and see who is still enabled.
 		_idev = null;
