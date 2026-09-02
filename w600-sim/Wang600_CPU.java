@@ -783,7 +783,9 @@ class Wang600_CPU
 		case 8:	printer_feed(); break;
 		case 9:	rc = 2; break;
 		case 10:
-			kb |= (byte)tape_read();
+			// This should match hardware, but breaks LOAD PROG:
+			// kb |= (byte)tape_read(); why???
+			kb = (byte)((kb & ~1) | tape_read());
 			break;
 		case 11:
 			tape_write(kb & 1);
