@@ -485,12 +485,17 @@ class Wang700_Simulator
 		keyCodes.add(key); // only used for the wakeup
 	}
 
+	public boolean isKeyOK() {
+		if (cpu.kbl || cpu.z2) return false;
+		return true;
+	}
+
 	public void pressKey(int key) {
 		if (trace) { // can only be if _dbg != null
 			_dbg.warp(String.format("Key Press %02x", key), -1, 0);
 		}
 		// TODO: any I/O conditions?
-		if (cpu.kbl || cpu.z2) return;
+		if (!isKeyOK()) return;
 		setKaKb(key);
 		// needs other side-effects... display?
 		do_blanking(); // yes?

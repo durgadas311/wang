@@ -616,6 +616,11 @@ class Wang600_Simulator
 		keyCodes.add(key); // only used for the wakeup
 	}
 
+	public boolean isKeyOK() {
+		if (cpu.kbl || cpu.z2) return false;
+		return true;
+	}
+
 	// This is also used to wakeup the simulator (key < 0)
 	public void pressKey(int key) {
 		if (key < 0) {
@@ -624,7 +629,7 @@ class Wang600_Simulator
 		}
 //fprintf(stderr,"%03x: key down %02x (%s)\n", pc, key, z2);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
-		if (cpu.kbl || cpu.z2) return;
+		if (!isKeyOK()) return;
 		setKaKb(key);
 		// needs other side-effects... display?
 		do_blanking(); // yes?

@@ -33,7 +33,7 @@ tar:
 	tar -czv --transform 's/.ship$$//' \
 		-f w600-sim/$(SRCTAR) \
 		w600-sim/Makefile.ship w600-sim/*.java common/*.java \
-		wang600-docs/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
+		wang-docs/wang600-block-diag.pdf w600-sim/README w600-sim/LICENSE* \
 		w600-sim/$(ROM) w600-sim/icons/*.gif \
 		w600-sim/icons/*.png common/icons/*.png	\
 		common/fonts/*.ttf	\

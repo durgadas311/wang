@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import java.awt.print.*;
 import javax.print.attribute.*;
@@ -18,8 +19,6 @@ import java.awt.datatransfer.StringSelection;
 
 public class w600_fe
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-
 	private static JFrame front_end;
 
 	public static void main(String[] args) {
@@ -282,7 +281,6 @@ class Wang600_SimInput
 class Wang600_Printer
 	implements Wang_Printer, ActionListener, ComponentListener
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
 	final int PR_NUM_COL = 20;
 	final int PR_XCOL_WID = 3;
 	final int PR_XCOL_STRT = 15;
@@ -442,7 +440,6 @@ class Wang600_Printer
 
 	class PrintTextArea extends JTextArea
 			implements Printable {
-		static final long serialVersionUID = 311457692042L;
 		public PrintTextArea(int a, int b) {
 			super(a, b);
 		}
@@ -599,8 +596,6 @@ class Wang600_Printer
 class Wang600_Display extends Wang_Display
 		implements ActionListener, Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692037L;
 	final byte[] sign_chr = new byte[]{'+','-','+','-','+','-','+','-','+','-','+','-','+','-','+',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9','.','B','C','D','E',' '};
 
@@ -827,10 +822,8 @@ System.err.println("IOException for " + f);
 }
 
 class Wang600_Keyboard extends Wang_Keyboard
-	implements ActionListener, WindowListener, ComponentListener
+	implements ActionListener, WindowListener, ComponentListener, Runnable
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
 	GridBagLayout gridbag = new GridBagLayout();
@@ -1040,7 +1033,10 @@ class Wang600_Keyboard extends Wang_Keyboard
 	JScrollPane _scroll;
 	int _xoff, _yoff;
 
+	LinkedBlockingDeque<Integer> kbIn;
+
 	public Wang600_Keyboard(Wang_FunctionLabelBar fbar) {
+		kbIn = new LinkedBlockingDeque<Integer>();
 		int x;
 		_kbds = new Wang_Keyboards[num_kbds];
 		_nkbds = 0;
@@ -1147,6 +1143,9 @@ class Wang600_Keyboard extends Wang_Keyboard
 		setFocusCycleRoot(true);
 		setRequestFocusEnabled(true);
 		// setTransferHandler(TransferHandler newHandler) 
+
+		Thread t = new Thread(this);
+		t.start();
 	}
 
 	private static String getClipboard() {
@@ -1204,33 +1203,33 @@ System.err.println("action");
 
 	private void do_key(char c) {
 		if (c >= '0' && c <= '9') {
-			Wang600.Core.pressKey(c - '0');
+			kbIn.add(c - '0');
 		} else if (c == 'e' || c == 'E') {
-			Wang600.Core.pressKey(11);
+			kbIn.add(11);
 		} else if (c == '.') {
-			Wang600.Core.pressKey(10);
+			kbIn.add(10);
 		} else if (c == '-') {
-			Wang600.Core.pressKey(12);
+			kbIn.add(12);
 		} else if (c == '\b') {
-			Wang600.Core.pressKey(15);
+			kbIn.add(15);
 		} else if (c == 't' || c == 'T') {
-			Wang600.Core.pressKey(0x0010 | _defreg);
+			kbIn.add(0x0010 | _defreg);
 		} else if (c == '+') {
-			Wang600.Core.pressKey(0x0020 | _defreg);
+			kbIn.add(0x0020 | _defreg);
 		} else if (c == '_') {
-			Wang600.Core.pressKey(0x0030 | _defreg);
+			kbIn.add(0x0030 | _defreg);
 		} else if (c == '*') {
-			Wang600.Core.pressKey(0x0040 | _defreg);
+			kbIn.add(0x0040 | _defreg);
 		} else if (c == '/') {
-			Wang600.Core.pressKey(0x0050 | _defreg);
+			kbIn.add(0x0050 | _defreg);
 		} else if (c == 's' || c == 'S') {
-			Wang600.Core.pressKey(0x0060 | _defreg);
+			kbIn.add(0x0060 | _defreg);
 		} else if (c == 'r' || c == 'R') {
-			Wang600.Core.pressKey(0x0070 | _defreg);
+			kbIn.add(0x0070 | _defreg);
 		} else if (c == 'i' || c == 'I') {
-			Wang600.Core.pressKey(0x00fb);
+			kbIn.add(0x00fb);
 		} else if (c == 'x' || c == 'X') {
-			Wang600.Core.pressKey(0x00e0 | _defreg);
+			kbIn.add(0x00e0 | _defreg);
 		} else if (c == 0x04) {	// Ctrl-D
 			Wang600.Core.debugIntr();
 		}
@@ -1301,12 +1300,25 @@ System.err.println("action");
 			_frame.setPreferredSize(_frame.getSize());
 		}
 	}
+
+	public void run() {
+		while (true) {
+			int c = -1;
+			try {
+				c = kbIn.take();
+				while (!Wang600.Core.isKeyOK()) {
+					Thread.sleep(10);
+				}
+			} catch (Exception ee) {}
+			if (c < 0) continue; // or break?
+			Wang600.Core.pressKey(c);
+		}
+	}
 }
 
 class Wang600_Help extends JComponent
 	implements Wang_Help, ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
-	static final long serialVersionUID = 311857692031L;
 	private JFrame _frame;
 	private JEditorPane _text;
 	private JScrollPane _scroll;
@@ -1541,8 +1553,6 @@ class Wang600_Help extends JComponent
 
 class Wang600_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 54;
 
 	public Wang600_Keyboard_main() {
@@ -1760,8 +1770,6 @@ class Wang600_Keyboard_main extends Wang_Keyboards
 
 class Wang600_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 16;
 
 	public Wang600_Keyboard_meta() {
@@ -1854,8 +1862,6 @@ class Wang600_Keyboard_meta extends Wang_Keyboards
 
 class Wang600_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w600_fe.java,v 1.189 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
 	static public Wang_Keys getEject() {

@@ -6,6 +6,7 @@ interface Wang_Core extends Runnable {
 	public void chgMode1();
 	public void chgMode2();
 	public void pressCmd(int cmd);
+	public boolean isKeyOK();
 	public void pressKey(int key);
 	public void ackIO(int iob);
 	public void replyIO(int iob, int rep);

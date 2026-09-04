@@ -5,6 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import java.awt.Desktop;
 import java.awt.datatransfer.Transferable;
@@ -349,8 +350,6 @@ class Wang700_SimInput
 class Wang700_Display extends Wang_Display
 		implements ActionListener
 {
-	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692037L;
 	// Nixie tubes can't display invalid characters
 	final byte[] sign_chr = new byte[]{'+','-',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
 	final byte[] disp_chr = new byte[]{'0','1','2','3','4','5','6','7','8','9',' ',' ',' ',' ',' ',' '};
@@ -830,12 +829,11 @@ class Wang700_Help extends JComponent
 }
 
 class Wang700_Keyboard extends Wang_Keyboard
-	implements ActionListener, WindowListener, ComponentListener
+	implements ActionListener, WindowListener, ComponentListener, Runnable
 {
-	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 31145769203L;
 	static final int num_kbds = 3;
 
+	LinkedBlockingDeque<Integer> kbIn;
 	GridBagLayout gridbag = new GridBagLayout();
 	int _nkbds;
 	Wang_Keyboards[] _kbds;
@@ -1000,6 +998,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 	}
 
 	public Wang700_Keyboard(Wang_FunctionLabelBar fbar) {
+		kbIn = new LinkedBlockingDeque<Integer>();
 		int x;
 		_kbds = new Wang_Keyboards[num_kbds];
 		_nkbds = 0;
@@ -1096,6 +1095,9 @@ class Wang700_Keyboard extends Wang_Keyboard
 		setFocusCycleRoot(true);
 		setRequestFocusEnabled(true);
 		// setTransferHandler(TransferHandler newHandler) 
+
+		Thread t = new Thread(this);
+		t.start();
 	}
 
 	private static String getClipboard() {
@@ -1183,26 +1185,26 @@ System.err.println("action");
 
 	private void do_regop(int cmd) {
 		if (_defreg >= 0) {
-			Wang700.Core.pressKey(cmd | 0x40);
-			Wang700.Core.pressKey(_defreg);
+			kbIn.add(cmd | 0x40);
+			kbIn.add(_defreg);
 		} else {
-			Wang700.Core.pressKey(cmd | 0x60);
+			kbIn.add(cmd | 0x60);
 		}
 	}
 
 	private void do_key(char c) {
 		if (c >= '0' && c <= '9') {
-			Wang700.Core.pressKey(0x70 + (c - '0'));
+			kbIn.add(0x70 + (c - '0'));
 		} else if (c == 'e' || c == 'E') {
-			Wang700.Core.pressKey(0x7a);
+			kbIn.add(0x7a);
 		} else if (c == '.') {
-			Wang700.Core.pressKey(0x7c);
+			kbIn.add(0x7c);
 		} else if (c == '-') {
-			Wang700.Core.pressKey(0x7b);
+			kbIn.add(0x7b);
 		} else if (c == '\b') {
-			Wang700.Core.pressKey(0x7f);
+			kbIn.add(0x7f);
 //		} else if (c == 't' || c == 'T') {
-//			Wang700.Core.pressKey(0x0010 | _defreg);
+//			kbIn.add(0x0010 | _defreg);
 		} else if (c == '+') {
 			do_regop(0x00);
 		} else if (c == '_') {
@@ -1216,7 +1218,7 @@ System.err.println("action");
 		} else if (c == 'r' || c == 'R') {
 			do_regop(0x05);
 //		} else if (c == 'i' || c == 'I') {
-//			Wang700.Core.pressKey(0x00fb);
+//			kbIn.add(0x00fb);
 		} else if (c == 'x' || c == 'X') {
 			do_regop(0x06);
 		} else if (c == 0x04) {	// Ctrl-D
@@ -1261,12 +1263,24 @@ System.err.println("action");
 	public void componentShown(ComponentEvent e) { }
 
 	public void componentResized(ComponentEvent e) { }
+
+	public void run() {
+		while (true) {
+			int c = -1;
+			try {
+				c = kbIn.take();
+				while (!Wang700.Core.isKeyOK()) {
+					Thread.sleep(10);
+				}
+			} catch (Exception ee) {}
+			if (c < 0) continue; // or break?
+			Wang700.Core.pressKey(c);
+		}
+	}
 }
 
 class Wang700_Keyboard_main extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692031L;
 	static final int num_keys = 67;
 
 	public Wang700_Keyboard_main(boolean modelC) {
@@ -1502,8 +1516,6 @@ class Wang700_Keyboard_main extends Wang_Keyboards
 
 class Wang700_Keyboard_meta extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692032L;
 	static final int num_keys = 20;
 
 	public Wang700_Keyboard_meta() {
@@ -1634,8 +1646,6 @@ class Wang700_Keyboard_meta extends Wang_Keyboards
 
 class Wang700_Keyboard_stick extends Wang_Keyboards
 {
-	final String ident = "$Id: w700_fe.java,v 1.73 2014/01/26 14:52:56 drmiller Exp $";
-	static final long serialVersionUID = 311457692033L;
 	static final int num_keys = 22;
 
 	static public Wang_Keys getEject() {
