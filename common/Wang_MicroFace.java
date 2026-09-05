@@ -5,6 +5,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
+// GROUP-1 07-00 thru 07-15
+
 class Wang_MicroFace implements Wang_GroupIODevice, ActionListener, Runnable
 {
 	public static final String Model = "05";
@@ -93,50 +95,29 @@ class Wang_MicroFace implements Wang_GroupIODevice, ActionListener, Runnable
 	private static final int OPTION_SAVE = 1;
 	private static final int OPTION_CANCEL = 2;
 
-	LinkedBlockingDeque<Integer> giChr;
+	LinkedBlockingDeque<Integer> giCmd;
 	boolean gkbd; // actually, !GKBD
 
 	public void reset() {
-		giChr.clear(); // still could be one in the chamber...
+		giCmd.clear(); // still could be one in the chamber...
 		_input = false;
 		_iob = 0;
-	}
-
-	private boolean execute(int num) {
-		// fork/exec command in _intfs[n]...
-		// capturing stdout... (and...?)
-		String[] out = new String[2];
-		int x = Wang_RunCommand.runCommand(_intfs[num], out);
-		if (x == 0) {
-			_input = true;
-			_sample = out[0];
-			_sampix = 0;
-			sendNum(); // queue up entire thing, incl. GO
-			return true;
-		} else {
-			// does the user already know it failed?
-			System.err.format("GROUP 1 07 %02d failed: (%d) %s\n", num, x, out[1]);
-			return false;
-		}
 	}
 
 	public boolean start_cn36(int iob, int c) {
 		// currently, don't care if running program or not...
 		_input = false;
-		// We are a GROUP 1 device...
-		if ((iob & 0x05) != 4) {
-			return false;
-		}
 		_iob = iob;
-		if ((c & 0x0f0) != 0x70) {
-			return false;
-		}
-		// At this point, we are handling the I/O...
+		// We are a GROUP 1 device...
+		if ((iob & 0x05) != 4) return _input;
+		if ((c & 0x0f0) != 0x70) return _input;
 		c &= 0x0f;
-		if (_intfs[c].length() > 0) {
-			if (execute(c)) {
-				_input = true;
-			}
+		// only activate if there is a defined command
+		_input = (_intfs[c] != null && _intfs[c].length() > 0);
+		if (_input) {
+			// At this point, we are handling the I/O... and there is
+			// a command configured.
+			giCmd.add(c);
 		}
 		return _input;
 	}
@@ -179,27 +160,6 @@ try {
 		}
 	}
 
-	// queue up all output, including GO
-	private void sendNum() {
-		while (_sampix < _sample.length()) {
-			int b = 0;
-			int c = _sample.charAt(_sampix);
-			++_sampix;
-			if (c >= '0' && c <= '9') {
-				b = (c & 0x0f) + E0;
-			} else if (c == '.') {
-				b = DP;
-			} else if (c == '-') {
-				b = CHG_SIGN;
-			}
-			// todo: must always send something... loop until valid numeric...
-			if (b > 0) {
-				giChr.add(b);
-			}
-		}
-		giChr.add(GO);
-	}
-
 	public void do_ack(int iob) {} // not used?
 
 	public void do_dev(int iob, int b) {} // never called: isBlockIO() is false
@@ -230,7 +190,7 @@ try {
 
 	public Wang_MicroFace(String prop, Component comp) {
 		Wang_RunCommand.Initialize();
-		giChr = new LinkedBlockingDeque<Integer>();
+		giCmd = new LinkedBlockingDeque<Integer>();
 		_panels = new JPanel[16];
 		_texts = new JTextArea[16];
 		_dia_pn = new JPanel();
@@ -302,21 +262,75 @@ try {
 		}
 	}
 
+	// All the rest runs in a thread, separate from JAVA Events
+	// and main simulator thread.
+
+	private void sendChr(int c) {
+		while (_input && !gkbd) {
+			try { Thread.sleep(10); } catch (Exception ee) {}
+		}
+		if (!_input) return; // PRIME, etc.
+		if (c == GO) {
+			_input = false;
+		}
+		Wang_UI.getCore().replyIO(_iob, c);
+	}
+
+	// queue up all output, including GO
+	private void sendNum() {
+		while (_sampix < _sample.length()) {
+			int b = 0;
+			int c = _sample.charAt(_sampix);
+			++_sampix;
+			if (c >= '0' && c <= '9') {
+				b = (c & 0x0f) + E0;
+			} else if (c == '.') {
+				b = DP;
+			} else if (c == '-') {
+				b = CHG_SIGN;
+			}
+			// todo: must always send something... loop until valid numeric...
+			if (b > 0) {
+				sendChr(b);
+			}
+		}
+		sendChr(GO);
+	}
+
+	private boolean execute(int num) {
+		// an abundance of paranoia...
+		if (_intfs[num] == null || _intfs[num].length() == 0) {
+			return false;
+		}
+		// fork/exec command in _intfs[n]...
+		// capturing stdout... (and...?)
+		String[] out = new String[2];
+		int x = Wang_RunCommand.runCommand(_intfs[num], out);
+		if (x == 0) {
+			_sample = out[0];
+			_sampix = 0;
+			sendNum(); // send entire thing, incl. GO
+			return true;
+		} else {
+			// does the user already know it failed?
+			System.err.format("GROUP 1 07 %02d failed: (%d) %s\n", num, x, out[1]);
+			return false;
+		}
+	}
+
 	public void run() {
 		while (true) {
 			int c = -1;
 			try {
-				c = giChr.take();
-				while (!gkbd) {
-					Thread.sleep(10);
-				}
+				c = giCmd.take();
 			} catch (Exception ee) {}
 			if (c < 0) continue; // or break?
 			if (!_input) continue; // PRIME, etc.
-			if (c == GO) {
-				_input = false;
+			if (!execute(c)) {
+				// TODO: how to indicate a failure...
+				// The real device had no error mechanism.
+				sendChr(GO);
 			}
-			Wang_UI.getCore().replyIO(_iob, c);
 		}
 	}
 }

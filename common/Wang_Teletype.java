@@ -2,6 +2,7 @@
 
 import java.io.*;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -78,11 +79,38 @@ class Wang_Teletype extends ASR33_Teletype
 		// TODO: this should represent a setup menu
 		// for host/port.
 		if (dev_mi != null) return dev_mi;
-		dev_mi = new JMenuItem(s_getName() + " (no GUI)", KeyEvent.VK_D);
+		dev_mi = new JMenuItem(s_getName(), KeyEvent.VK_D);
 		dev_mi.addActionListener(this);
 		return dev_mi;
 	}
 
+	String _pfx;
+
+	GridBagLayout gb;
+	GridBagConstraints gc;
+	Object[] _btns;
+	JPanel _dia_pn;
+	JOptionPane _prefs;
+	private static final int OPTION_APPLY = 0;
+	private static final int OPTION_SAVE = 1;
+	private static final int OPTION_CANCEL = 2;
+	JTextField host_bx;
+	JTextField port_bx;
+
+	private void setGap(int wid) {
+		JPanel pan = new JPanel();
+		pan.setPreferredSize(new Dimension(wid, 10));
+		gb.setConstraints(pan, gc);
+		_dia_pn.add(pan);
+	}
+
+	private void setLabel(String str) {
+		JLabel lab = new JLabel(str);
+		lab.setHorizontalAlignment(SwingConstants.RIGHT);
+		lab.setOpaque(true);
+		gb.setConstraints(lab, gc);
+		_dia_pn.add(lab);
+	}
 
 	// Group 1 00 xx = "Run" mode (similar to PaperTapeReader)
 	// Group 2 00 xx = "Learn" mode
@@ -351,7 +379,63 @@ class Wang_Teletype extends ASR33_Teletype
 
 	public Wang_Teletype(String propBase) {
 		super(propBase, Integer.valueOf("10" + s_getModel()));
+		_pfx = propBase;
 
+		// Setup preferences dialog
+		_dia_pn = new JPanel();
+		gb = new GridBagLayout();
+		gc = new GridBagConstraints();
+		gc.fill = GridBagConstraints.NONE;
+		gc.gridx = 0;
+		gc.gridy = 0;
+		gc.weightx = 1;
+		gc.weighty = 1;
+		gc.gridwidth = 1;
+		gc.gridheight = 1;
+		gc.insets.left = 0;
+		gc.insets.right = 0;
+		gc.anchor = GridBagConstraints.WEST;
+		_dia_pn.setLayout(gb);
+		host_bx = new JTextField();
+		host_bx.setPreferredSize(new Dimension(100, 20));
+		host_bx.setHorizontalAlignment(SwingConstants.LEFT);
+		host_bx.setEditable(true);
+		port_bx = new JTextField();
+		port_bx.setPreferredSize(new Dimension(40, 20));
+		port_bx.setHorizontalAlignment(SwingConstants.LEFT);
+		port_bx.setEditable(true);
+		String sp = Wang_UI.getProperties().getProperty(_propBase + "host");
+		if (sp != null) {
+			host_bx.setText(sp);
+		}
+		sp = Wang_UI.getProperties().getProperty(_propBase + "port");
+		if (sp != null) {
+			port_bx.setText(sp);
+		} else {
+			port_bx.setText("10" + s_getModel());
+		}
+
+		setGap(10);
+		++gc.gridx;
+		++gc.gridy;
+		setLabel("Host:");
+		++gc.gridx;
+		gb.setConstraints(host_bx, gc);
+		_dia_pn.add(host_bx);
+		--gc.gridx;
+		++gc.gridy;
+		setLabel("Port:");
+		++gc.gridx;
+		gb.setConstraints(port_bx, gc);
+		_dia_pn.add(port_bx);
+
+		_btns = new Object[3];
+		_btns[OPTION_APPLY] = "Apply";
+		_btns[OPTION_SAVE] = "Save";
+		_btns[OPTION_CANCEL] = "Cancel";
+		_prefs = new JOptionPane(_dia_pn, JOptionPane.QUESTION_MESSAGE,
+			JOptionPane.YES_NO_CANCEL_OPTION, Wang_UI.getIcon(), _btns);
+	
 		_input = false;
 		_bytes = 0;
 		_glrn = 0;
@@ -367,9 +451,25 @@ class Wang_Teletype extends ASR33_Teletype
 			return;
 		}
 		JMenuItem m = (JMenuItem)e.getSource();
-		if (m.getMnemonic() == KeyEvent.VK_D) {
-			// TODO: setup host/port dialog
+		if (m.getMnemonic() != KeyEvent.VK_D) return;
+		Dialog dlg = _prefs.createDialog(null, getModel() + " Preferences");
+		dlg.setVisible(true);
+		Object res = _prefs.getValue();
+		if (_btns[OPTION_CANCEL].equals(res)) return;
+		if (_btns[OPTION_APPLY].equals(res) ||
+				_btns[OPTION_SAVE].equals(res)) {
+try {
+			Wang_Properties temp = Wang_UI.getProperties().getClass().newInstance();
+			temp.setProperty(_pfx + "host", host_bx.getText());
+			temp.setProperty(_pfx + "port", port_bx.getText());
+			// TODO: how is this supposed to work?
+			Wang_UI.getProperties().setProperty(_pfx + "host", host_bx.getText());
+			Wang_UI.getProperties().setProperty(_pfx + "port", port_bx.getText());
+			if (_btns[OPTION_SAVE].equals(res)) {
+				temp.save();
+			}
+} catch (Exception ee) {}
+			newListener();
 		}
-		// error - unknown menu action
 	}
 }

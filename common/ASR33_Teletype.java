@@ -1,5 +1,4 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: ASR33_Teletype.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,11 +8,9 @@ import java.io.*;
 abstract class ASR33_Teletype
 	implements Wang_OutputDevice, Runnable
 {
-	final String ident = "$Id: ASR33_Teletype.java,v 1.9 2014/01/14 21:53:51 drmiller Exp $";
-
 	String _propBase;
 
-	private boolean _on;
+	private int _port;
 	private boolean _shifted;
 
 	Thread _th;
@@ -23,27 +20,8 @@ abstract class ASR33_Teletype
 
 	public Component getComponent() { return null; }
 	public JFrame getFrame() { return null; }
-	public void onOff(boolean on) {
-		_on = on;
-		if (on) {
-			// "_on" allows new connections, anything else?
-			// but this case is not used.
-		} else {
-			// this object is about to be destroyed
-			// let thread tear-down...
-			if (_th != null) {
-				// _th.interrupt(); does not seem to do anything,
-				// but forcing the ServerSocket closed does terminate
-				// the accept().
-				try { _ss.close(); } catch (Exception ee) {}
-				_th = null;
-			}
-		}
-	}
-	public boolean onOff() {
-		// return (_remote != null) ?
-		return _on;
-	}
+	public void onOff(boolean on) {}
+	public boolean onOff() { return false; }
 
 	ConnectionProxy _cp;
 	int _currByte;
@@ -177,7 +155,7 @@ ee.printStackTrace();
 
 	private void subscribe(Socket s) {
 		// Right now only one connection allowed
-		if (!_on || _remote != null) {
+		if (_remote != null) {
 			try { s.close(); } catch(IOException e) { }
 			return;
 		}
@@ -355,21 +333,30 @@ ee.printStackTrace();
 
 	public int getRBS() { return 1; } // always ready, for now
 
-	public ASR33_Teletype(String propBase, int port) {
-		_shifted = false;
-		_remote = null;
-		_on = true;
-		_th = null;
-		_propBase = propBase;
-		boolean done = false;
-		boolean newDone = false;
+	public void newListener() {
+		if (_ss != null) {
+			try {
+				_ss.close(); // should terminate thread
+			} catch(Exception ee) {}
+			tearDown();
+			_ss = null;
+			_cp = null;
+		}
 		InetAddress ia;
 		// TODO: make port configurable
 		String host = Wang_UI.getProperties().getProperty(_propBase + "host");
 		if (host == null) {
 			host = "";
 		}
+		String port = Wang_UI.getProperties().getProperty(_propBase + "port");
+		if (port != null) {
+			try {
+				_port = Integer.valueOf(port);
+			} catch(Exception ee) {}
+		}
 		String gotHost = host;
+		boolean done = false;
+		boolean newDone = false;
 		while (!done) {
 			done = newDone;
 			try {
@@ -378,11 +365,12 @@ ee.printStackTrace();
 				} else {
 					ia = InetAddress.getByName(gotHost);
 				}
-				_ss = new ServerSocket(port, 1, ia);
+				_ss = new ServerSocket(_port, 1, ia);
 				done = true;
+// System.err.format("listening on \"%s\" %d\n", gotHost, _port);
 			} catch(Exception ee) {
 ee.printStackTrace();
-//System.err.println("host=" + gotHost + " port=" + port + " " + e.toString());
+//System.err.println("host=" + gotHost + " port=" + _port + " " + e.toString());
 				_ss = null;
 			}
 			if (_ss == null) {
@@ -399,24 +387,31 @@ ee.printStackTrace();
 		}
 	}
 
+	public ASR33_Teletype(String propBase, int port) {
+		_propBase = propBase;
+		_port = port; // default port
+		_shifted = false;
+		_remote = null;
+		_th = null;
+
+		newListener();
+	}
+
+
 	public void run() {
 		Socket s;
-		while (_on) {
+		while (true) {
 			try {
 				s = _ss.accept();
 			} catch(IOException ee) {
-ee.printStackTrace();
+				// ee.printStackTrace();
 				// e.g. java.net.SocketException: Socket closed
 				break;
 			}
 			subscribe(s);
 		}
-		tearDown();
-		try {
-			_ss.close();
-		} catch(IOException e) { }
-		_ss = null;
-		if (_on) {
+		// assume it was closed intentionally... don't touch anything
+		if (false) {
 			Wang_UI.warning("ASR33_Teletype", "Exiting in error");
 		}
 	}
