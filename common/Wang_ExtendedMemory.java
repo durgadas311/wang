@@ -15,7 +15,8 @@ import javax.swing.border.*;
 public class Wang_ExtendedMemory
 		implements Wang_BlockIODevice,
 			ActionListener, Runnable {
-	boolean debug = true;
+	static final int ramSize = 4096; // all units are the same
+	boolean debug = false;
 
 	static String Model = "08";
 	static String Name = "Extended Memory";
@@ -50,7 +51,7 @@ public class Wang_ExtendedMemory
 	private static final int OPTION_SAVE = 1;
 	private static final int OPTION_CANCEL = 2;
 	String _prop;
-	JTextArea _addr;
+	JCheckBox[] _devs;
 
 	boolean devEna;
 	boolean gkbd;
@@ -63,19 +64,33 @@ public class Wang_ExtendedMemory
 	int bi_cnt;
 	int bi_rsp; // what to send with next GISN (manual or auto)
 
-	byte[] _ram;
+	int curUnit;
+	byte[][] _ram;
 	int _ramMask;
 
 	public Wang_ExtendedMemory(String pfx) {
 		_pfx = pfx;
 		giChr = new java.util.concurrent.LinkedBlockingDeque<Integer>();
 
-		_prop = pfx + "addr";
-		_ram = new byte[4096]; // make configurable?
-		_ramMask = _ram.length - 1;
+		_ramMask = ramSize - 1;
 
 		// GBM switches - address config dialog
-		_prop = pfx + "_addr";
+		_ram = new byte[16][];
+		_devs = new JCheckBox[16];
+		int n = 0;
+		for (int x = 0; x < 16; ++x) {
+			_devs[x] = new JCheckBox(String.format("00-%02d %dK", x, ramSize / 1024));
+			_prop = String.format("%sdev%02d", _pfx, x);
+			if (Wang_UI.getProperties().getProperty(_prop) != null) {
+				_devs[x].setSelected(true);
+				_ram[x] = new byte[ramSize];
+				++n;
+			}
+		}
+		if (n == 0) { // always at least one, at 00
+			_devs[0].setSelected(true);
+			_ram[0] = new byte[ramSize];
+		}
 		_dia_pn = new JPanel();
 		gb = new GridBagLayout();
 		gc = new GridBagConstraints();
@@ -90,31 +105,10 @@ public class Wang_ExtendedMemory
 		gc.insets.right = 0;
 		gc.anchor = GridBagConstraints.WEST;
 		_dia_pn.setLayout(gb);
-		_addr = new JTextArea();
-		_addr.setPreferredSize(new Dimension(30, 20));
-		_addr.setText("00");
-		JPanel pn = new JPanel();
-		pn.setPreferredSize(new Dimension(10, 20));
-		gb.setConstraints(pn, gc);
-		_dia_pn.add(pn);
-		++gc.gridx;
-		JLabel lab = new JLabel("Address: 00-");
-		gb.setConstraints(lab, gc);
-		_dia_pn.add(lab);
-		++gc.gridx;
-		gb.setConstraints(_addr, gc);
-		_dia_pn.add(_addr);
-		++gc.gridx;
-		pn = new JPanel();
-		pn.setPreferredSize(new Dimension(10, 20));
-		gb.setConstraints(pn, gc);
-		_dia_pn.add(pn);
-		++gc.gridx;
-
-		String s = Wang_UI.getProperties().getProperty(_prop);
-		if (s != null) {
-			// TODO: validate/normalize?
-			_addr.setText(s);
+		for (int x = 0; x < 16; ++x) {
+			gb.setConstraints(_devs[x], gc);
+			_dia_pn.add(_devs[x]);
+			++gc.gridy;
 		}
 
 		_btns = new Object[3];
@@ -131,9 +125,11 @@ public class Wang_ExtendedMemory
 	}
 
 	private void debugDump() {
+		if (_ram[curUnit] == null) return;
 		try {
-			OutputStream os = new FileOutputStream("w608core");
-			os.write(_ram);
+			String f = String.format("w608core.%02", curUnit);
+			OutputStream os = new FileOutputStream(f);
+			os.write(_ram[curUnit]);
 			os.close();
 		} catch (Exception ee) {
 			ee.printStackTrace();
@@ -141,11 +137,11 @@ public class Wang_ExtendedMemory
 	}
 
 	private int readRAM(int adr) {
-		return _ram[adr & _ramMask] & 0xff;
+		return _ram[curUnit][adr & _ramMask] & 0xff;
 	}
 
 	private void writeRAM(int adr, int b) {
-		_ram[adr & _ramMask] = (byte)b;
+		_ram[curUnit][adr & _ramMask] = (byte)b;
 	}
 
 	private void doGO() {
@@ -201,15 +197,27 @@ public class Wang_ExtendedMemory
 		JMenuItem mi = (JMenuItem)src;
 		int mn = mi.getMnemonic();
 		if (mn != KeyEvent.VK_D) return;
-		Dialog dlg = _prefs.createDialog(null, "Set " + getModel() + " Address");
+		Dialog dlg = _prefs.createDialog(null, "Set " + getModel() + " Units");
 		dlg.setVisible(true);
 		Object res = _prefs.getValue();
 		if (_btns[OPTION_CANCEL].equals(res)) return;
 		if (_btns[OPTION_APPLY].equals(res) ||
 				_btns[OPTION_SAVE].equals(res)) {
 try {
-			Wang_Properties temp = Wang_UI.getProperties().getClass().newInstance();
-			temp.setProperty(_prop, _addr.getText()); // TODO: validat/normalize?
+			Wang_Properties temp = Wang_UI.getProperties().getClass().
+				getDeclaredConstructor().newInstance();
+			for (int x = 0; x < 16; ++x) {
+				_prop = String.format("%sdev%02d", _pfx, x);
+				if (_devs[x].isSelected()) {
+					temp.setProperty(_prop, "yes");
+					if (_ram[x] == null) {
+						_ram[x] = new byte[ramSize];
+					}
+				} else {
+					temp.remove(_prop);
+					_ram[x] = null;
+				}
+			}
 			if (_btns[OPTION_SAVE].equals(res)) {
 				temp.save();
 			}
@@ -225,14 +233,6 @@ try {
 		return gkbd;
 	}
 
-	private int getAddr() {
-		int a = 0;
-		try {
-			a = Integer.valueOf(_addr.getText());
-		} catch (Exception ee) {}
-		return a; // 00-xx
-	}
-
 	static JMenuItem dev_mi = null;
 	private boolean plugged = false;
 	// Wang_BlockIODevice
@@ -240,7 +240,6 @@ try {
 	// IOB is 2 or 3
 	public void do_dev(int _iob, int c) {
 		curIob = _iob;
-		//if (debug) System.err.format("do_dev %d %02x\n", _iob, c);
 		bi_next(_iob, c); // process this byte, setup response
 		// fire back previously set up ACK or next
 		giChr.add(bi_rsp); // must wait for GKBD...
@@ -251,22 +250,17 @@ try {
 	public boolean isDevEnabled() { return devEna; }
 	public boolean start_cn36(int _iob, int c) { // iob is 0,4,5,6,7
 		curIob = _iob;
-		int da = getAddr();
 		// must remain enabled unless IOB=0 or GROUP-2 addr mismatch
 		if (_iob == 0) {
-			if (debug) System.err.format("IOB=0 %s 256\n", devEna);
 			if (debug && devEna) debugDump();
 			return devEna;
 		}
 		if ((_iob & 0b101) == 0b100) { // GROUP-1, ignore
 			return devEna;
 		}
-		devEna = (da == c);
-		if (!devEna) {
-			if (debug) System.err.format("Device deactivated 266\n");
-			return devEna;
-		}
-		if (debug) System.err.format("Device activated\n");
+		devEna = ((c & ~15) == 0 && _devs[c].isSelected());
+		if (!devEna) return devEna;
+		curUnit = c;
 		doGO();
 		return devEna;
 	}
@@ -326,7 +320,6 @@ System.err.format("do_ack\n");
 	public boolean isPlugged() { return plugged; }
 
 	public void reset() { // hardware reset, a.k.a. PRIME
-		if (debug) System.err.format("Device reset %s\n", devEna);
 		bi_hdr = 0;
 		devEna = false;
 	}
@@ -355,7 +348,6 @@ System.err.format("do_ack\n");
 ee.printStackTrace();
 }
 			if (c < 0) continue; // or break?
-			if (debug) System.err.format("reply %d %02x\n", curIob, c);
 			// TODO: verify IOB = 4,5,6,7 ?
 			// do this early to avoid a race:
 			setKBD(false); // TODO: should we interfere?

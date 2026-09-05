@@ -361,9 +361,9 @@ otherwise it ignores them.
 <A ID="model608"><H4>608/618 Extended Memory</H4></A>
 
 <P>GROUP 2 00-xx where "xx" is the value configured by the switches
-on the device. Rather than actually support multiple, separate, devices,
-the simulator implements all 16 possible devices, with each device
-configured for 0 to 4K of memory, in 1K chunks.
+on the device. Multiple, separate, devices, are supported, default is
+one at 00-00. All units provide 4K each. The device menu allows
+configuration of multiple devices by address (00-00 through 00-15).
 
 <P>Model 608 employed core memory with unknown configuration options.
 Model 618 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
