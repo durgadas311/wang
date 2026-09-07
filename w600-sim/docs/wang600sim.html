@@ -362,10 +362,17 @@ otherwise it ignores them.
 
 <P>GROUP 2 00-xx where "xx" is the value configured by the switches
 on the device. Multiple, separate, devices, are supported, default is
-one at 00-00. All units provide 4K each. The device menu allows
-configuration of multiple devices by address (00-00 through 00-15).
+one at 00-00. All units provide 4K each. The device window shows
+each of the possible 16 units and their configuration status, along
+with a indicator light which shows which one (if any) is currently
+activated by a GROUP-1 00-xx command.
+Left click on a unit pops up a dialog to save the memory contents to a file.
+Right click on a unit pops up a dialog to load a file into the memory.
+Configuration of which devices (addresses) are present is done in the
+"Config Units" menu.
 
 <P>Model 608 employed core memory with unknown configuration options.
+Price lists suggest 608 was offered in 4K units, up to 32K per device.
 Model 618 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
 
 <A ID="model630"><H4>630 Fixed/Removable Disk</H4></A>
