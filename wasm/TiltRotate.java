@@ -127,6 +127,10 @@ public class TiltRotate {
 	// might return empty string (invalid char)
 	public String tr2a(int tr, boolean shifted) {
 		boolean plot = ((tr & aplot) != 0);
+		// Normalize tr for plot differences.
+		if (plot) {
+			tr = (tr & 0x3f) | 0x40;
+		}
 
 		if (shifted && A.length > 0) {
 			if (plot && tr >= A.length) {
