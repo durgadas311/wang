@@ -306,6 +306,17 @@ There is also a "Plotter" menu that allows setting the plot area, pen color,
 and returning the plot carriage to the "home" position.
 Future enhancements will include control over the paper size.
 
+<A ID="randIO"><H3>External Storage (Random Access I/O)</H3></A>
+
+<P>Devices that use the I/O command to transfer data must also
+be selected (enabled) ahead of time using a GROUP I/O command sequence.
+Each device has a unique set of values (address), one of which must be used as
+the second step of a GROUP 1 or GROUP 2 command, depending on the device
+and configuration. The device answers the GROUP I/O command immediately with
+a GO command, but retains selection of the hardware until another GROUP I/O
+command is executed. Once selected, a device will respond to I/O 13-xx commands,
+otherwise it ignores them.
+
 <A ID="model708"><H4>708/718 Extended Memory</H4></A>
 
 <P>GROUP 2 00-xx where "xx" is the value configured by the switches
@@ -322,6 +333,28 @@ Configuration of which devices (addresses) are present is done in the
 <P>Model 708 employed core memory with unknown configuration options.
 Price lists suggest 708 was offered in 4K units, up to 32K per device.
 Model 718 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
+
+<A ID="model740"><H4>740 Dual Floppy Discs</H4></A>
+
+<P>GROUP 2 00-xx where "xx" is the value configured by the switches
+on the device. The floppy to be used is selected based on the data address
+used.
+If the data address is less than the capacity, then the left drive is selected.
+If the data address is greater than the capacity, then the right drive is selected.
+It is unclear exactly how this worked on real hardware, as the firmware for the
+controller is not available.
+The capacity of a floppy is 315392 bytes (77 tracks, 16 sectors
+per track, 256 byte sectors). So the left drive is accessed using data addresses
+0..315391 and the right with addresses 315392..630783.
+
+<P>The device address may be set by clicking on the address field on the device GUI (default is 00-00).
+Each drive may be clicked to bring up a file dialog to select a disc image to
+insert into the drive. Disc images must be 315392 bytes in length. If a new file name
+is entered then a file of 315392 bytes is created.
+
+<P>Data may be transfered in any length or address. Unclear what original hardware
+supported, but the controller did have enough RAM to buffer sectors. But attempting
+to transfer beyond the end of the disk results in an error.
 
 <A ID="model730"><H3>730 Fixed/Removable Disk</H3></A>
 

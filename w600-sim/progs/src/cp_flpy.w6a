@@ -1,0 +1,31 @@
+; Copy a floppy disc from LEFT to RIGHT
+;	R00 = disc address
+;	R01 = buffer (step no.)
+;	R02 = max disc addr (315392)
+; Assumption: right drive selected by disc addr >= 315392.
+; It's possible the controller selected based on a single
+; bit in the disc addr, such as bit 19 in this case.
+
+; Begin:
+	ENTER 315392
+	ST02
+	T00		; device address starts at 0
+	ENTER 0050	; TODO: need syntax to reference a step
+	ST01
+	GROUP2 00-00	; address may need customization
+MARK &loop
+	I/O 13-06	; read a sector
+	RE02
+	+00		; select other disc
+	I/O 13-14	; write the sector
+	RE02
+	-00		; select first disc again
+	ENTER 256	; transfer size we use
+	+00		; next sector
+	RE02
+	ALPHA JIF+	; check if end of disc
+		SEARCH &loop
+	; all done!
+	END
+; TODO: need way to ref this step, 0050 is safe for now
+; and still allows running on smallest 600 models.

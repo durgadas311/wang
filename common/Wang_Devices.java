@@ -63,6 +63,10 @@ class Wang_Devices implements ActionListener {
 		mi.addActionListener(this);
 		mu.add(mi);
 
+		mi = Wang_DualFloppy.s_getMenu(740);
+		mi.addActionListener(this);
+		mu.add(mi);
+
 		mi = WangIOExplorer.s_getMenu(799);
 		mi.addActionListener(this);
 		mu.add(mi);
@@ -99,6 +103,9 @@ class Wang_Devices implements ActionListener {
 			break;
 		case 708:
 			p = Wang_ExtendedMemory.s_getInstance();
+			break;
+		case 740:
+			p = Wang_DualFloppy.s_getInstance();
 			break;
 		case 799:
 			p = WangIOExplorer.s_getInstance();

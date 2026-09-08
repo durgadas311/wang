@@ -45,6 +45,7 @@ COMMON_CLASSES = \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
 		Wang_ExtendedMemory.class \
+		Wang_DualFloppy.class \
 		Wang_Display.class \
 		Wang_Help.class \
 		Wang_Keyboards.class \
