@@ -343,7 +343,13 @@ public class WangAssembler implements WangMemory {
 		if (regPC < 0) {
 			regPC = wi.regPad(adr);
 		}
-		wi.getSymTab().resolveMarks(wi.adrReg(regPC));
+		n = wi.getSymTab().resolveRegs(wi.adrReg(regPC));
+		wi.getSymTab().resolveMarks();
+		if (n > 0) {
+			wi.endPC(regPC + wi.regSteps(n));
+		} else {
+			wi.endPC(adr);
+		}
 		errs = 0;
 		adr = startPC;
 		wi.getSymTab().reset();

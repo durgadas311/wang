@@ -15,6 +15,8 @@ public interface WangInstructions {
 	static final int FROM = 11;	// Wang 600 ROM f(x) 
 
 	int encode(String[] line, int first, WangMemory mem, int start);
+	void endPC(int pc);
+	int regSteps(int nreg);
 	int regPad(WangMemory mem, int start);
 	int regPad(int start);
 	int adrReg(int adr);

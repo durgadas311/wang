@@ -371,7 +371,9 @@ public class WangSymbolTable {
 
 	// 'regs' is the starting (highest) register number available.
 	// allocations go downward towards "0".
-	public int resolveMarks(int regs) {
+	// returns number of registers added.
+	public int resolveRegs(int regs) {
+		int n = 0;
 		//dump("*");
 		for (WangSLabel lab : slbs) {
 			// if no space, leave high/low = -1
@@ -379,12 +381,17 @@ public class WangSymbolTable {
 				lab.high.val = regs;
 				lab.low.val = regs - (lab.count - 1);
 				// labels already added
+				n += lab.count;
 			} else {
 				lab.err = -2;	// overflow
 			}
 			regs -= lab.count;
 		}
 		//dump("-");
+		return n;
+	}
+
+	public int resolveMarks() {
 		for (WangSymbol sym : syms) {
 			// might be pre-dedfined
 			if (sym.val >= 0) continue;

@@ -12,6 +12,7 @@ public class Wang600Instructions implements WangInstructions {
 	private char error;
 	private boolean rom;
 	private boolean pass;
+	private int lastStep;
 
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
@@ -146,6 +147,12 @@ public class Wang600Instructions implements WangInstructions {
 	public char lastError() { return error; }
 	public boolean finalPass() { return pass; }
 	public void finalPass(boolean p) { pass = p; }
+	public void endPC(int pc) {
+		// For now, only this case so store in variable.
+		// Future needs might require this be a formal
+		// entry in symbol table.
+		lastStep = pc; // actually, last_used + 1
+	}
 
 	// Assembly methods //
 
@@ -268,7 +275,9 @@ public class Wang600Instructions implements WangInstructions {
 		x = first;
 		if (line[x].equalsIgnoreCase("ENTER")) {
 			String val = line[++x];
-			if (val.charAt(0) == '&') {
+			if (val.equalsIgnoreCase("END")) {
+				val = String.format("%04d", lastStep);
+			} else if (val.charAt(0) == '&') {
 				reg = tbl.getLabel(val, adr);
 				if (reg < 0) {
 					if (pass) {
@@ -451,6 +460,11 @@ public class Wang600Instructions implements WangInstructions {
 		}
 
 		return adr - start;
+	}
+
+	// get number of steps needed for num registers
+	public int regSteps(int nreg) {
+		return (nreg * 8);
 	}
 
 	public int regPad(int start) {
