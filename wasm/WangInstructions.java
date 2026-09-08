@@ -16,6 +16,7 @@ public interface WangInstructions {
 
 	int encode(String[] line, int first, WangMemory mem, int start);
 	void endPC(int pc);
+	int verifyProg(byte[] mem, int end);
 	int regSteps(int nreg);
 	int regPad(WangMemory mem, int start);
 	int regPad(int start);

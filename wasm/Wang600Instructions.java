@@ -153,6 +153,17 @@ public class Wang600Instructions implements WangInstructions {
 		// entry in symbol table.
 		lastStep = pc; // actually, last_used + 1
 	}
+	public int verifyProg(byte[] mem, int end) {
+		int vp = 0;
+		for (int x = 0; x < end; ++x) {
+			int b = mem[x] & 0xff;
+			vp += (b & 0x0f) + (b >> 4);
+			if (b == endProg()) {
+				return vp;
+			}
+		}
+		return -1;	// error
+	}
 
 	// Assembly methods //
 

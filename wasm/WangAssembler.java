@@ -107,6 +107,12 @@ public class WangAssembler implements WangMemory {
 		}
 	}
 
+	private void verifyProg(int adr, PrintStream ls) {
+		if (ls == null) return;
+		int vp = wi.verifyProg(mem, adr);
+		ls.format("VERIFY PROG: %d\n", vp);
+	}
+
 	private int do_prog(String[] toks, int start) {
 		int n = start + 1;	// skip .PROG
 		int i;
@@ -358,6 +364,7 @@ public class WangAssembler implements WangMemory {
 		n = asm(file, ls);
 		if (n < 0) return errs;
 		if (mem == null) return 1;
+		verifyProg(adr, ls);
 
 		if (rom) {
 			if (adr < maxPC) {
