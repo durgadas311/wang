@@ -60,14 +60,16 @@ public class TiltRotate {
 	String[] a = wx01;
 	String[] A = WX01;
 
+	int aplot = 0x40;
 	int aterm = 0x22;
 	boolean upper = false;
 
 	public TiltRotate() {
 	}
 
-	public TiltRotate(int trm) {
+	public TiltRotate(int trm, int plt) {
 		aterm = trm;
+		aplot = plt;
 	}
 
 	private int isIn(char c, String[] s) {
@@ -124,7 +126,7 @@ public class TiltRotate {
 	// one at a time, caller keeps track of SHIFT
 	// might return empty string (invalid char)
 	public String tr2a(int tr, boolean shifted) {
-		boolean plot = ((tr & 0x40) != 0);
+		boolean plot = ((tr & aplot) != 0);
 
 		if (shifted && A.length > 0) {
 			if (plot && tr >= A.length) {
@@ -182,7 +184,7 @@ public class TiltRotate {
 				continue;
 			}
 			if (plot) {
-				i |= 0x40;
+				i |= aplot;
 			}
 			if ((i & 0x06) == 0x02 || (i & 0x0f) == 0x08) {
 				// do not shift for these

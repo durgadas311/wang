@@ -129,7 +129,7 @@ public class Wang700Instructions implements WangInstructions {
 		tbl = new WangSymbolTable(0x00, 0x40);
 		tbl.reserveMark(endProg()); // END PROG is problematic
 		initAll();
-		tr = new TiltRotate(0x4d);
+		tr = new TiltRotate(0x4d, 0x80);
 	}
 
 	public int maxPC() { return 1983; }
