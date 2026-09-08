@@ -10,7 +10,7 @@
 	ENTER 315392
 	ST02
 	T00		; device address starts at 0
-	ENTER 0050	; TODO: need syntax to reference a step
+	ENTER END
 	ST01
 	GROUP2 00-00	; address may need customization
 MARK &loop
@@ -27,5 +27,4 @@ MARK &loop
 		SEARCH &loop
 	; all done!
 	END
-; TODO: need way to ref this step, 0050 is safe for now
-; and still allows running on smallest 600 models.
+; buffer space starts here...
