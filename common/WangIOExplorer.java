@@ -69,6 +69,7 @@ public class WangIOExplorer extends JFrame
 	JButton gisn;
 	JCheckBox gkbd;
 	JButton go;
+	JButton sr;
 	JCheckBox glrn;
 	JCheckBox gi_auto;
 
@@ -202,6 +203,11 @@ public class WangIOExplorer extends JFrame
 		go.setMargin(new Insets(2,2,2,2));
 		go.setFocusPainted(false);
 		go.addActionListener(this);
+		sr = new JButton("S&R");
+		sr.setPreferredSize(new Dimension(50, 20));
+		sr.setMargin(new Insets(2,2,2,2));
+		sr.setFocusPainted(false);
+		sr.addActionListener(this);
 		glrn = new JCheckBox("GLRN");
 		glrn.addActionListener(this);
 		gi_auto = new JCheckBox("auto");
@@ -397,6 +403,11 @@ public class WangIOExplorer extends JFrame
 		++gc.gridx;
 		gb.setConstraints(go, gc);
 		add(go);
+		++gc.gridx;
+		setGap(5);
+		++gc.gridx;
+		gb.setConstraints(sr, gc);
+		add(sr);
 		++gc.gridx;
 		//setGap(100); // fudge on widest row
 		//++gc.gridx;
@@ -795,6 +806,12 @@ public class WangIOExplorer extends JFrame
 		}
 	}
 
+	private void doSR() {
+		if (gi_done) return;
+		// Only GO terminates the GROUP on the calculator
+		giChr.add(SR0);
+	}
+
 	private void doGO() {
 		if (gi_done) return;
 		gi_done = true;
@@ -896,6 +913,8 @@ public class WangIOExplorer extends JFrame
 			}
 		} else if (bt == go) {
 			doGO();
+		} else if (bt == sr) {
+			doSR();
 		} else if (bt == ty_clr) {
 			tyo_clear();
 		}
