@@ -380,7 +380,7 @@ try {
 		while (!gkbd) {
 			try { Thread.sleep(10); } catch (Exception ee) {}
 		}
-		if (c == GO) {
+		if (c == GO || c == SR0) {
 			_input = false;
 		}
 		Wang_UI.getCore().replyIO(_iob, c);
@@ -411,6 +411,11 @@ try {
 				// then forces a stop. We know immediately
 				// when data ends. This overrides whatever
 				// "program step" we're on.
+				//
+				// This does not trigger a GO, but does
+				// deactivate this device. If user's SR0-00
+				// executes a GO then the GROUP command
+				// is terminated.
 				sendChr(SR0);
 				pcd = -1;
 			} else {
