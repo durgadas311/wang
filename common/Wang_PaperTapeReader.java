@@ -260,6 +260,7 @@ class Wang_PaperTapeReader extends JFrame
 			visib = vis;
 			setVisible(vis);
 		}
+		if (vis) toFront();
 	}
 	public JFrame getFrame() { return null; }
 	public Component getComponent() { return null; }

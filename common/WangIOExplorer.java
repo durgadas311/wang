@@ -1178,6 +1178,7 @@ System.err.format("do_ack\n");
 			visib = vis;
 			setVisible(vis);
 		}
+		if (vis) toFront();
 	}
 	public boolean onOff() { return visib; }
 	public void setProperties(Wang_Properties p) {}

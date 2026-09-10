@@ -1029,9 +1029,11 @@ class Wang_Paper
 	}
 
 	public void onOff(boolean on) {
-		if (_onoff == on) return;
-		_onoff = on;
-		_frame.setVisible(_onoff);
+		if (_onoff != on) {
+			_onoff = on;
+			_frame.setVisible(_onoff);
+		}
+		if (on) _frame.toFront();
 	}
 
 	public void addMenu(JMenu mu) {
