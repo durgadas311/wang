@@ -244,6 +244,8 @@ ee.printStackTrace();
 		// PUN off (a.k.a DC4 or ^T)
 		// has not been printed...
 		ttyPrint('\024');
+		// This causes a CR/LF
+		do_crlf();
 	}
 
 	public void do_tab() {

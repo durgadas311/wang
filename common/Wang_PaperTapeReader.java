@@ -129,7 +129,7 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 		return dev_mi;
 	}
 
-	// Group 1 00 00 = skip non-num, tread numeric until non-numeric, GO
+	// Group 1 00 00 = skip non-num, read numeric until non-numeric, GO
 	// Group 1 00 07 = skip until CR, GO
 
 	String _prop;
@@ -409,8 +409,10 @@ try {
 			if (_end || _currByte < 0) {
 				// hardware counts 4 contig. RUBOUTs and
 				// then forces a stop. We know immediately
-				// when data ends.
-				pcd = 18;
+				// when data ends. This overrides whatever
+				// "program step" we're on.
+				sendChr(SR0);
+				pcd = -1;
 			} else {
 				++pcd;
 			}

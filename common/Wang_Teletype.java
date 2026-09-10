@@ -112,13 +112,13 @@ class Wang_Teletype extends ASR33_Teletype
 		_dia_pn.add(lab);
 	}
 
-	// Group 1 00 xx = "Run" mode (similar to PaperTapeReader)
-	// Group 2 00 xx = "Learn" mode
-	// 00 00 = X ON (activate paper tape, as for '03)
-	// 00 01 = print "1"
-	// 00 02 = print "2"
-	// 00 03 = print "3"
-	// 00 04 = print "4"
+	// Group 1 15 xx = "Run" mode (similar to PaperTapeReader)
+	// Group 2 15 xx = "Learn" mode
+	// 15 00 = X ON (activate paper tape, as for '03)
+	// 15 01 = print "1"
+	// 15 02 = print "2"
+	// 15 03 = print "3"
+	// 15 04 = print "4"
 	// all other: normal start
 	// Accept all "OutputWriter" text from calculator.
 
@@ -317,7 +317,7 @@ class Wang_Teletype extends ASR33_Teletype
 		// how would this work from a running program?!
 		// especially if GLRN is asserted...
 		if ((iob & ~0x3) != 4) return false; // group 1 or 2
-		_input = ((c & ~0x0f) == 0x00); // 00 xx
+		_input = ((c & ~0x0f) == 0xf0); // 15 xx
 		if (!_input) return _input;
 		_iob = iob;
 		switch(c & 0x0f) {
