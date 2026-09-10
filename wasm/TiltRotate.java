@@ -86,6 +86,11 @@ public class TiltRotate {
 	private byte doEsc(char c) {
 		for (int x = 0; x < a.length; ++x) {
 			if (a[x].length() == 2 && c == a[x].charAt(1)) {
+				// must convert 0x40 plot bit to 'aplot'
+				if ((x & 0x40) != 0) {
+					x &= ~0x40;
+					x |= aplot;
+				}
 				return (byte)x;
 			}
 		}
