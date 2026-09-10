@@ -61,7 +61,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 // RST -> load PCD
 // RUB OUT -> count 4, end, S&R
 
-class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnable
+class Wang_PaperTapeReader extends JFrame
+		implements Wang_GroupIODevice,
+		ActionListener, WindowListener, MouseListener, Runnable
 {
 	public static final String Model = "03";
 	public static final String Description = "Paper Tape Reader";
@@ -102,7 +104,7 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 			mu.add(getMenu());
 		}
 		Wang_CN36_Bus.registerCN36(this);
-		// onOff(true);
+		onOff(true);
 	}
 	public void unPlug(JMenu mu) {
 		if (!plugged) return;
@@ -115,16 +117,12 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 			mu.remove(getMenu());
 		}
 		plugged = false;
-		// onOff(false);
+		onOff(false);
 	}
 	public boolean isPlugged() { return plugged; }
 	public JMenuItem getMenu() {
 		if (dev_mi != null) return dev_mi;
-		String status = "not mounted";
-		if (_file != null) {
-			status = _file.getName();
-		}
-		dev_mi = new JMenuItem(s_getName() + " - " + status, KeyEvent.VK_D);
+		dev_mi = new JMenuItem(s_getName(), KeyEvent.VK_D);
 		dev_mi.addActionListener(this);
 		return dev_mi;
 	}
@@ -132,12 +130,13 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 	// Group 1 00 00 = skip non-num, read numeric until non-numeric, GO
 	// Group 1 00 07 = skip until CR, GO
 
-	String _prop;
+	String _prop; // tape image file
 	String _mountLabel;
 	String[] _pickLabel;
 	String[] _fileType;
 	File _file;
 	Component _comp;
+	boolean visib;
 
 	JRadioButton a00_00;
 	JRadioButton a00_08;
@@ -149,13 +148,19 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 	static final int OPTION_CANCEL = 2;
 	String _pfx;
 
+	PaperTapeViewer rdr_vu;
+	JMenuItem rdr_mi;
+	JMenuItem pos_mi;
+	long rdr_idx;
+	long rdr_tot;
+
 	int addr;
 	int _iob;
 	boolean _input;	// send to Wang vs. skip (00-00 vs. 00-07)
 	boolean _end;
 	int _currByte;	// -1 for none (BOT or EOT)
 	private static final String numerics = "0123456789.+-";
-	InputStream _fin;
+	RandomAccessFile _fin;
 	LinkedBlockingDeque<Integer> giCmd;
 	boolean gkbd; // actually, !GKBD
 
@@ -171,43 +176,60 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 	}
 
 	private void tape_close() {
-		if (_fin != null) {
-			try {
-				_fin.close();
-			} catch (Exception ee) {}
-			_fin = null;
-		}
+		if (_fin == null) return;
+		try {
+			_fin.close();
+		} catch (Exception ee) {}
+		_fin = null;
+		rdr_vu.update(0, 0);
+		rdr_vu.repaint();
 	}
 
 	private void tape_open() {
 		_end = false;
 		_currByte = -1;
-		if (_file == null) {
-			return;
-		}
+		if (_file == null) return;
 		try {
-			_fin = new FileInputStream(_file);
+			_fin = new RandomAccessFile(_file, "r");
+			rdr_idx = -1;
+			rdr_tot = _fin.length();
+			updateRdrView(0);
 		} catch (Exception ee) {
 		}
 	}
 
+	private void updateRdrView(long newIdx) {
+		long pos = newIdx - rdr_vu.buf;
+		int _beg = 0;
+		int _end = rdr_vu.win;
+
+		if (newIdx == rdr_idx) return;
+		if (pos < 0) {
+			_beg = (int)-pos;
+			pos = 0;
+		}
+		if (pos + (_end - _beg) > rdr_tot) {
+			_end = (int)(_beg + (rdr_tot - pos));
+		}
+		try {
+			_fin.seek(pos);
+			_fin.read(rdr_vu.tapeBuf, _beg, _end - _beg);
+			rdr_idx = newIdx;
+			rdr_vu.update(_beg, _end);
+			rdr_vu.repaint();
+		} catch (Exception ee) {}
+	}
+
 	private void getByte() {
-		if (_fin == null) {
+		if (_fin == null || rdr_idx >= rdr_tot) {
 			_end = true;
 			_currByte = -1;
 			return;
 		}
-		int b = -1;
-		try {
-			b = _fin.read();
-		} catch(Exception ee) {
-		}
-		if (b < 0) {
-			_end = true;
-			_currByte = -1;
-		} else {
-			_currByte = (b & 0x0ff);
-		}
+		int b = rdr_vu.tapeBuf[rdr_vu.buf]; // 'buf' only valid for !top
+		// advance tape...
+		updateRdrView(rdr_idx + 1);
+		_currByte = b;
 	}
 
 	public boolean start_cn36(int iob, int c) {
@@ -232,16 +254,44 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 	public boolean isBlockIO() { return false; }
 	public boolean isDevEnabled() { return _input; }
 	public void setProperties(Wang_Properties p) {}
-	public boolean onOff() { return false; }
-	public void onOff(boolean vis) {}
+	public boolean onOff() { return visib; }
+	public void onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
 	public JFrame getFrame() { return null; }
 	public Component getComponent() { return null; }
 
 	public Wang_PaperTapeReader(String prop, Component comp) {
-		//super(Wang_UI.getSeries() + Model, Description);
+		super(s_getName());
+		getContentPane().setName("Wang " + s_getName());
+		setResizable(false);
+		addWindowListener(this);
+
 		giCmd = new LinkedBlockingDeque<Integer>();
 		_pfx = String.format("wang%s00_%s03_",
 			Wang_UI.getSeries(), Wang_UI.getSeries());
+
+		JMenuBar mb = new JMenuBar();
+		JMenu mu = new JMenu("Device");
+		JMenuItem mi = new JMenuItem("Mount Tape", KeyEvent.VK_M);
+		mi.addActionListener(this);
+		mu.add(mi);
+		rdr_mi = mi;
+		mi = new JMenuItem("Rewind Tape", KeyEvent.VK_R);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mi = new JMenuItem("Tape Positioner", KeyEvent.VK_P);
+		mi.addActionListener(this);
+		pos_mi = mi;
+		mu.add(mi);
+		mi = new JMenuItem("Config Addr", KeyEvent.VK_A);
+		mi.addActionListener(this);
+		mu.add(mi);
+		mb.add(mu);
+		setJMenuBar(mb);
 
 		a00_00 = new JRadioButton("00-00");
 		a00_08 = new JRadioButton("00-08");
@@ -299,6 +349,32 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 		_prefs = new JOptionPane(_dia_pn, JOptionPane.QUESTION_MESSAGE,
 			JOptionPane.YES_NO_CANCEL_OPTION, Wang_UI.getIcon(), _btns);
 
+		// Now do the main window
+		rdr_vu = new PaperTapeViewer(13, 60, false);
+		rdr_vu.addMouseListener(this);
+
+		gb = new GridBagLayout();
+		setLayout(gb);
+		//setBackground(Wang_Colors.ivory);
+		getContentPane().setBackground(Wang_Colors.ivory);
+		gc.gridx = 0;
+		gc.gridy = 0;
+
+		int tw = (rdr_vu.tapeh * 3) / 2;
+		pn = new JPanel();
+		pn.setPreferredSize(new Dimension(tw, rdr_vu.tapeh));
+		pn.setOpaque(false);
+		JLabel lab = new JLabel(" Wang " + s_getModel());
+		lab.setFont(new Font("Serif", Font.BOLD, 18));
+		lab.setHorizontalAlignment(SwingConstants.LEFT);
+		lab.setPreferredSize(new Dimension(tw, 20));
+		pn.add(lab);
+		gb.setConstraints(pn, gc);
+		add(pn);
+		++gc.gridx;
+		gb.setConstraints(rdr_vu, gc);
+		add(rdr_vu);
+
 		_input = false;
 		_mountLabel = "Mount Tape";
 		_pickLabel = new String[]{"Wang Data files","Text Files"};
@@ -307,8 +383,14 @@ class Wang_PaperTapeReader implements Wang_GroupIODevice, ActionListener, Runnab
 		_comp = comp;
 		_file = Wang_UI.getProperties().getFile(_prop, true, Wang_UI.getDir());
 		if (_file != null) {
+			rdr_mi.setText("Mount Tape - " + _file.getName());
 			tape_open();
 		}
+
+		pack();
+		onOff(false);
+		setLocationByPlatform(true);
+
 		Thread t = new Thread(this);
 		t.start();
 	}
@@ -339,19 +421,76 @@ try {
 
 	}
 
+	public void windowActivated(WindowEvent e) { }
+	public void windowClosed(WindowEvent e) { }
+	public void windowIconified(WindowEvent e) { }
+	public void windowOpened(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeactivated(WindowEvent e) { }
+	public void windowClosing(WindowEvent e) {
+		Object obj = e.getSource();
+		if (obj == this) {
+			onOff(false);
+			return;
+		}
+		// must be tape positioner
+		long rdr_bytes = 0;
+		try {
+			rdr_bytes = _fin.getFilePointer();
+		} catch (Exception ee) {}
+		updateRdrView(rdr_bytes);
+	}
+
+	public void mouseEntered(MouseEvent e) { }
+	public void mouseExited(MouseEvent e) { }
+	public void mousePressed(MouseEvent e) { }
+	public void mouseReleased(MouseEvent e) { }
+	public void mouseDragged(MouseEvent e) { }
+	public void mouseMoved(MouseEvent e) { }
+	public void mouseClicked(MouseEvent e) {
+		Object obj = e.getSource();
+		if (obj != rdr_vu) return;
+		pos_mi.doClick();
+	}
+
+
 	public void actionPerformed(ActionEvent e) {
 		// There is only one, but decode it anyway...
 		Object src = e.getSource();
 		if (!(src instanceof JMenuItem)) return;
 		JMenuItem mi = (JMenuItem)src;
-		if (mi.getMnemonic() != KeyEvent.VK_D) return;
-		int m = e.getModifiers();
-		if ((m & ActionEvent.SHIFT_MASK) != 0) {
+		if (mi.getMnemonic() == KeyEvent.VK_D) {
+			onOff(true);
+			return;
+		}
+		if (mi.getMnemonic() == KeyEvent.VK_R) {
+			if (_fin == null) return;
+			rdr_idx = -1;
+			_end = false;
+			updateRdrView(0);
+			return;
+		}
+		if (mi.getMnemonic() == KeyEvent.VK_P) {
+			if (_fin == null) return;
+			// TODO: stop reading?
+			// file pointer is out-of-position
+			try {
+				_fin.seek(rdr_idx);
+			} catch (Exception ee) {}
+			JFrame jf = new PaperTapePositioner(this, _fin, 8, this);
+			return;
+		}
+		if (mi.getMnemonic() == KeyEvent.VK_A) {
 			setupAddr();
 			return;
 		}
-		// assert mi == dev_mi
-		// There is no window, so only pop-up file dialog
+		if (mi.getMnemonic() != KeyEvent.VK_M) return;
+		// XXX: assert mi == dev_mi
+		// XXX: There is no window, so only pop-up file dialog
+//		String status = "not mounted";
+//		if (_file != null) {
+//			status = _file.getName();
+//		}
 		tape_close();
 		SuffFileChooser ch = new SuffFileChooser(_mountLabel,
 			_fileType, _pickLabel, Wang_UI.getDir());
@@ -361,10 +500,10 @@ try {
 		int rv = ch.showDialog(_comp);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			_file = ch.getSelectedFile();
-			mi.setText(getName() + " - " + _file.getName());
+			mi.setText("Mount Tape - " + _file.getName());
 		} else {
 			_file = null;
-			mi.setText(getName() + " - not mounted");
+			mi.setText("Mount Tapee - not mounted");
 		}
 		try { // if this fails, oh well.
 			Wang_UI.getProperties().setAndSaveProperty(
