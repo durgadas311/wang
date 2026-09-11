@@ -233,18 +233,24 @@ class Wang_Teletype extends ASR33_Teletype
 				// the calculator is not in an input mode.
 				// If ttyGet (ConnectionProxy) can detect that
 				// it could echo BEL.
-				ttyPrint((char)b);
-
-				if (b == 0x00ff) { // RUB ignored
-					continue;
-				}
 				// X ON, X OFF, PUN ON, PUN OFF from keyboard or reader
 				// should also be supported.
+				ttyPrint((char)b);
+
+				// 5994-1 depended on even-parity keyboards
+				// to detect RUBOUT, but relax that here.
+				b &= 0x7f; // all other chars ignore parity
+				if (b == 0x7f) { // RUB ignored
+					continue;
+				}
 
 				if (b == 0x01) { // ^A == Resume (GO)
-					do_crlf();
-					xOff();
+					if (_glrn == 0) {
+						xOff();
+						do_crlf();
+					}
 					_outp.putChr(GO);
+					_bytes = 0;	// should not matter
 					// quit thread now???
 					// _input (_glrn) does not officially end
 					// until GO is actually sent to
@@ -288,24 +294,30 @@ class Wang_Teletype extends ASR33_Teletype
 					} else if (b == 0x02) { // ^B == SR 0000
 						xOff();
 						sendCode(SR0);
+						// On 5994-1 it appears that SRx/GO
+						// resets the NOT# detection FF.
+						// This is done here by clearing the
+						// "valid byte" counter.
+						_bytes = 0;	// right?
 						continue;
 					} else if (b == 0x03) { // ^C == SR 0001
 						xOff();
 						sendCode(SR1);
+						_bytes = 0;	// right?
 						continue;
 					} else if (b == 0x04) { // ^D == SR 0002
 						xOff();
 						sendCode(SR2);
+						_bytes = 0;	// right?
+						continue;
+					} else if (_bytes > 0) {
+						// invalid char after valid(s)
+						do_crlf();
+						xOff();
+						_outp.putChr(GO);
+						// quit thread now???
 						continue;
 					}
-				}
-				// invalid char - if still here, error... decide fate...
-				if (_bytes > 0) {
-					do_crlf();
-					xOff();
-					_outp.putChr(GO);
-					// quit thread now???
-					continue;
 				}
 			}
 			_running = false;

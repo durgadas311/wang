@@ -41,12 +41,15 @@ ee.printStackTrace();
 				b = -1;
 			}
 		}
+		if (b < 0) return b;
 		// The TTY keyboard never generated "lower case" (etc), so fold...
-		if (b > 0x7f) {
-			b = 0x00ff; // RUBOUT - ignored
-		} else if (b >= 0x60) {
-			b -= 32;
+		// Do a parity-neutral folding into uppercase zone.
+		// This is just in case the client doesn't already do that,
+		// which ASR33*.jar does.
+		if ((b & 0x60) == 0x60) {
+			b &= ~0x20;
 		}
+		// Preserve parity and let consumer handle it
 		return b;
 	}
 
