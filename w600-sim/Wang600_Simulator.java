@@ -604,6 +604,9 @@ class Wang600_Simulator
 //		}
 	}
 
+	public int getGo() { return 0x83; }
+	public int getEndProg() { return 0x9e; }
+
 	java.util.concurrent.LinkedBlockingDeque<Integer> keyCodes;
 
 	public void setKaKb(int key) {

@@ -306,6 +306,27 @@ There is also a "Plotter" menu that allows setting the plot area, pen color,
 and returning the plot carriage to the "home" position.
 Future enhancements will include control over the paper size.
 
+<A ID="model714"><H3>714 Mark-Sense Card Reader</H3></A>
+
+<P>This device was a basic way of inputing programs (or executing commands)
+from an off-line source. The cards would be marked-up away from the
+calculator and then fed in when time was available.
+
+<P>GROUP-1 04-01 executed commands from the card in RUN mode.
+If a GO is encountered, input is terminated.
+
+<P>GROUP-2 04-01 loads program steps from cards in LEARN mode.
+The original hardware seems to have terminated the loading of steps
+when a GO is encountered. This seems draconian since GO is used as
+a no-op, particularly in conditional skips where only one step is
+required for the program logic.
+
+<P>The simulated device provides an
+option "No GO" which ignores embedded GO commands, and this is enabled
+by default. It also provides a "Auto Feed" option that keeps feeding
+steps as long as there are bytes left in the file (also enabled by default).
+Otherwise, the file may be loaded 40 steps at a time using the "Next" button.
+
 <A ID="randIO"><H3>External Storage (Random Access I/O)</H3></A>
 
 <P>Devices that use the I/O command to transfer data must also

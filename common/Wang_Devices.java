@@ -59,6 +59,10 @@ class Wang_Devices implements ActionListener {
 		mi.addActionListener(this);
 		mu.add(mi);
 
+		mi = Wang_CardReader.s_getMenu(714);
+		mi.addActionListener(this);
+		mu.add(mi);
+
 		mi = Wang_ExtendedMemory.s_getMenu(708);
 		mi.addActionListener(this);
 		mu.add(mi);
@@ -100,6 +104,9 @@ class Wang_Devices implements ActionListener {
 			break;
 		case 712:
 			p = Wang_Plotter.s_getInstance();
+			break;
+		case 714:
+			p = Wang_CardReader.s_getInstance(_comp);
 			break;
 		case 708:
 			p = Wang_ExtendedMemory.s_getInstance();

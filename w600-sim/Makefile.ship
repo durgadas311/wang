@@ -43,6 +43,8 @@ COMMON_CLASSES = \
 		PaperTapeViewer.class \
 		PaperTapePositioner.class \
 		Wang_PaperTapeReader.class \
+		CardDeck.class \
+		Wang_CardReader.class \
 		Wang_MicroFace.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \

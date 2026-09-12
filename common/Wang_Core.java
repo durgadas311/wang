@@ -11,6 +11,9 @@ interface Wang_Core extends Runnable {
 	public void ackIO(int iob);
 	public void replyIO(int iob, int rep);
 
+	public int getGo();
+	public int getEndProg();
+
 	// These are needed by the debugging console...
 	public void debugIntr();	// user requested debug mode...
 	public Wang_Debugger getDebug();

@@ -48,6 +48,8 @@ COMMON_CLASSES = \
 		Wang_Teletype.class \
 		PaperTapeViewer.class \
 		PaperTapePositioner.class \
+		CardDeck.class \
+		Wang_CardReader.class \
 		Wang_MicroFace.class \
 		Wang_PlottingOutputWriter.class \
 		Wang_OutputWriter.class \
