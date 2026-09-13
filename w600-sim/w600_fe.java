@@ -1265,7 +1265,7 @@ System.err.println("action");
 		for (y = 0; y < _nkbds; ++y) {
 			for (x = 0; x < _kbds[y]._keys.length; ++x) {
 				if (e.getSource() == _kbds[y]._buttons[x]) {
-					boolean shifted = ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0);
+					boolean shifted = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
 					do_button(shifted, y, x);
 					return;
 				}
