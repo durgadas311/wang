@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
 // GROUP-1 04-01 in RUN mode
@@ -17,10 +18,6 @@ class Wang_CardReader extends JFrame
 	public static final String Model = "14";
 	public static final String Description = "Card Reader";
 	public static final int stepsPerCard = 40;
-	static final Color buff1 = new Color(243, 226, 182);
-	static final Color silver1 = new Color(200, 200, 200);
-	static final Color silver2 = new Color(220, 220, 220);
-	static final Color silver3 = new Color(180, 180, 180);
 
 	private static JMenuItem pmi = null;
 	private static Wang_CardReader thus = null;
@@ -183,7 +180,7 @@ class Wang_CardReader extends JFrame
 		getContentPane().setName("Wang " + s_getName());
 		setResizable(false);
 		addWindowListener(this);
-		getContentPane().setBackground(silver1);
+		getContentPane().setBackground(CardDeck.silver);
 		go = Wang_UI.getCore().getGo();
 		ep = Wang_UI.getCore().getEndProg();
 		gon = new RoundLED(LED.Colors.INCAND);
@@ -204,17 +201,27 @@ class Wang_CardReader extends JFrame
 		next.setMnemonic(KeyEvent.VK_N);
 		auto = new JCheckBox("Auto Feed");
 		auto.addActionListener(this);
-		auto.setSelected(true);
+		auto.setOpaque(false);
 		no_go = new JCheckBox("No GO");
 		no_go.addActionListener(this);
 		no_go.setSelected(true);
-		next.setEnabled(false);
+		no_go.setOpaque(false);
 		inp = new CardDeck(50, 100, true);
 		out = new CardDeck(50, 100, false);
+		JPanel bar = new JPanel();
+		bar.setPreferredSize(new Dimension(70, 20));
+		bar.setBackground(CardDeck.silverl);
+		bar.setOpaque(true);
+		bar.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED,
+				CardDeck.silverll, CardDeck.silverll,
+				CardDeck.silverd, CardDeck.silverd));
 		dk_nm = new JTextField();
 		dk_nm.setPreferredSize(new Dimension(200, 20));
 		dk_nm.setBackground(Color.white);
 		dk_nm.setOpaque(true);
+
+		auto.setSelected(true);
+		next.setEnabled(false);
 
 		giCmd = new LinkedBlockingDeque<Integer>();
 
@@ -296,7 +303,8 @@ class Wang_CardReader extends JFrame
 		gc.gridy += gc.gridheight;
 		gc.anchor = GridBagConstraints.CENTER;
 		gc.gridheight = 1;
-		// TODO: a raised bar... gridheight = 1
+		gb.setConstraints(bar, gc);
+		add(bar);
 		++gc.gridy;
 		gc.anchor = GridBagConstraints.NORTH;
 		gc.gridheight = 4;
@@ -469,8 +477,10 @@ class Wang_CardReader extends JFrame
 			// TODO: hardware does this, but it's annoying if
 			// program has any GOs...
 			if (_currByte == go) {
-				skip = !no_go.isSelected();
-				sendChr(GO); // TODO: exact behavior needed
+				if (!no_go.isSelected()) {
+					skip = true;
+					sendChr(GO); // TODO: exact behavior needed
+				}
 			}
 			if (!skip) {
 				sendChr(_currByte);

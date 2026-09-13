@@ -10,8 +10,13 @@ import javax.swing.border.*;
 
 public class CardDeck extends JPanel {
 	static final Color buff1 = new Color(243, 226, 182);
+	public static final Color silver = new Color(200, 200, 200);
+	public static final Color silverl = new Color(230, 230, 230);
+	public static final Color silverll = new Color(240, 240, 240);
+	public static final Color silverd = new Color(180, 180, 180);
+	public static final Color silverdd = new Color(160, 160, 160);
 
-	private static final int bdw = 3;	// width of BevelBorder
+	private static final int bdw = 3; // width of BevelBorder (+1)
 	private Color clr;
 	private boolean topDown;
 	private boolean leftRight;
@@ -37,7 +42,8 @@ public class CardDeck extends JPanel {
 		width = wid;
 		height = hit;
 		setPreferredSize(new Dimension(wid + 2 * bdw, hit + 2 * bdw));
-		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED,
+			silverl, silverl, silverd, silverd));
 		setBackground(Color.white);
 		clr = buff1;
 		initDeck(0, 0);
@@ -86,13 +92,13 @@ public class CardDeck extends JPanel {
 		}
 		if (n > 0) {
 			if (topDown) {	// i.e. right-fill
-				g2d.fillRect(width - n, 0, width + 1, height + 1);
+				g2d.fillRect(width - n, 0, width, height);
 				if (max) {
 					g2d.setColor(Color.red);
 					g2d.drawLine(0, 0, 0, height);
 				}
 			} else {	// i.e. left-fill
-				g2d.fillRect(0, 0, n + 1, height + 1);
+				g2d.fillRect(0, 0, n, height);
 				if (max) {
 					g2d.setColor(Color.red);
 					g2d.drawLine(width, 0, width, height);
@@ -109,13 +115,13 @@ public class CardDeck extends JPanel {
 		}
 		if (n > 0) {
 			if (topDown) {
-				g2d.fillRect(0, 0, width + 1, n + 1);
+				g2d.fillRect(0, 0, width, n);
 				if (max) {
 					g2d.setColor(Color.red);
 					g2d.drawLine(0, height, width, height);
 				}
 			} else {
-				g2d.fillRect(0, height - n, width + 1, n + 1);
+				g2d.fillRect(0, height - n, width, n);
 				if (max) {
 					g2d.setColor(Color.red);
 					g2d.drawLine(0, 0, width, 0);
@@ -136,8 +142,8 @@ public class CardDeck extends JPanel {
 		} else {
 			vert(g2d, stack);
 		}
-		g2d.setColor(Color.black);
 		if (cards > 0) {
+			g2d.setColor(Color.black);
 			g2d.drawString(count, width / 2 - 5, height / 2 + 5);
 		}
 	}
