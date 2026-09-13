@@ -25,6 +25,7 @@ class Wang_MarkSenseCard extends JLabel
 	int _code_used;
 	String _title;
 	File _file;
+	File _dir;
 	int _pgix;
 	int _npg;
 	boolean _changed;
@@ -45,6 +46,9 @@ class Wang_MarkSenseCard extends JLabel
 	int _rows_per_card = 40;
 
 	private Wang_InstructionDecoder _decoder;
+	private int _ep; // END PROG code for this platform
+	private int _go; // GO code for this platform
+	private String _tp_sfx;
 
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
@@ -100,6 +104,9 @@ class Wang_MarkSenseCard extends JLabel
 		super();
 
 		_decoder = deco;
+		_ep = Wang_UI.getCore().getEndProg();
+		_go = Wang_UI.getCore().getGo();
+		_tp_sfx = ".w" + Wang_UI.getSeries() + "t";
 
 		_image = new ImageIcon(getClass().getResource("icons/Wang_MarkSenseCard.png"));
 		setIcon(_image);
@@ -125,6 +132,9 @@ class Wang_MarkSenseCard extends JLabel
 		mi = new JMenuItem("Save", KeyEvent.VK_S);
 		mi.addActionListener(this);
 		mu.add(mi);
+		mi = new JMenuItem("Save As", KeyEvent.VK_A);
+		mi.addActionListener(this);
+		mu.add(mi);
 		mi = new JMenuItem("Print", KeyEvent.VK_P);
 		mi.addActionListener(this); 
 		mu.add(mi);
@@ -133,10 +143,11 @@ class Wang_MarkSenseCard extends JLabel
 		mu.add(mi);
 		_menu = mu;
 
+		_dir = Wang_UI.getDir();
 		if (pgm == null) {
 			newFile();
 		} else {
-			setupFile(new File(Wang_UI.getDir() + "/" + pgm));
+			setupFile(new File(pgm));
 		}
 	}
 
@@ -153,11 +164,11 @@ class Wang_MarkSenseCard extends JLabel
 
 	private File pickFile(String purpose) {
 		File file;
-		SuffFileChooser ch = new SuffFileChooser(purpose,
-			Wang_UI.getDir());
+		SuffFileChooser ch = new SuffFileChooser(purpose, _dir);
 		int rv = ch.showDialog(this);
 		if (rv == JFileChooser.APPROVE_OPTION) {
 			file = ch.getSelectedFile();
+			_dir = file;
 		} else {
 			file = null;
 		}
@@ -180,8 +191,8 @@ class Wang_MarkSenseCard extends JLabel
 			} catch (Exception ee) {
 			}
 			if (_code_used >= 2 &&
-					(_code[_code_used - 2] & 0x0ff) == 0x9e) {
-				if ((_code[_code_used - 1] & 0x0ff) == 0x9e) {
+					(_code[_code_used - 2] & 0x0ff) == _ep) {
+				if ((_code[_code_used - 1] & 0x0ff) == _ep) {
 					_code_used -= 1;
 				} else {
 					_code_used -= 2;
@@ -215,16 +226,25 @@ class Wang_MarkSenseCard extends JLabel
 			return;
 		}
 		_date = _timestamp.format(new java.util.Date());
-		// need to restore "EOF" marker...
-		int saved = _code_used;
-		if (saved >= 1 && (_code[saved - 1] & 0x0ff) == 0x9e) {
-			_code[saved++] = (byte)0x9e;
-		} else {
-			_code[saved++] = (byte)0x9e;
-			_code[saved++] = (byte)0xff;
+		int saved = 0;
+		// must squeeze out SKIP rows.
+		// Do this non-destructively to _code[]/_skips[]
+		byte[] _out = new byte[_code.length];
+		for (int x = 0; x < _code_used; ++x) {
+			if (_skips[x] != 0) continue;
+			_out[saved++] = _code[x];
+		}
+		// need to restore "EOF" marker for tape images...
+		if (_file.getName().endsWith(_tp_sfx)) {
+			if (saved >= 1 && (_out[saved - 1] & 0x0ff) == _ep) {
+				_out[saved++] = (byte)_ep;
+			} else {
+				_out[saved++] = (byte)_ep;
+				_out[saved++] = (byte)0xff;
+			}
 		}
 		try {
-			f.write(_code, 0, saved);
+			f.write(_out, 0, saved);
 		} catch (Exception ee) {
 		}
 	}
@@ -232,7 +252,22 @@ class Wang_MarkSenseCard extends JLabel
 	public void keyTyped(KeyEvent e) { }
 
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+		int m = e.getModifiersEx();
+		boolean shift = (m & InputEvent.SHIFT_DOWN_MASK) != 0;
+		if (shift && e.getKeyCode() == KeyEvent.VK_HOME) {
+			_pgix = 0;
+			scrollRectToVisible(_top);
+			repaint();
+			return;
+		}
+		if (shift && e.getKeyCode() == KeyEvent.VK_END) {
+			_pgix = _npg - 1;
+			scrollRectToVisible(_bottom);
+			repaint();
+			return;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_LEFT ||
+				e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
 			if (_pgix * _rows_per_card == _code_used && _npg > 1) {
 				--_npg;
 			}
@@ -241,7 +276,8 @@ class Wang_MarkSenseCard extends JLabel
 				_pgix = 0;
 			}
 			repaint();
-		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT ||
+				e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
 			++_pgix;
 			if (_pgix >= _npg) {
 				if (_pgix * _rows_per_card == _code_used) {
@@ -252,9 +288,11 @@ class Wang_MarkSenseCard extends JLabel
 			}
 			// allow for adding new page???
 			repaint();
-		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+		} else if (e.getKeyCode() == KeyEvent.VK_UP ||
+				e.getKeyCode() == KeyEvent.VK_HOME) {
 			scrollRectToVisible(_top);
-		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN ||
+				e.getKeyCode() == KeyEvent.VK_END) {
 			scrollRectToVisible(_bottom);
 		}
 	}
@@ -314,9 +352,25 @@ class Wang_MarkSenseCard extends JLabel
 				}
 				repaint();
 				_changed = true;
-			} else {
-				// corner cases?
-System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
+			} else if (cx < _code_used && _code_used < _code.length) {
+//System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
+				// Click "strobe" mark column
+				// insert step
+				int sk0 = 1; // to insert
+				int cc0 = _go; // to insert
+				for (int z = cx; z < _code_used; ++z) {
+					int sk = _skips[z] & 0xff;
+					int cc = _code[z] & 0xff;
+					_skips[z] = (byte)sk0;
+					_code[z] = (byte)cc0;
+					sk0 = sk;
+					cc0 = cc;
+				}
+				_skips[_code_used] = (byte)sk0;
+				_code[_code_used] = (byte)cc0;
+				++_code_used;
+				repaint();
+				_changed = true;
 			}
 		}
 	}
@@ -363,6 +417,15 @@ System.err.println("step " + Math.floor(y) + " bit " + Math.floor(x));
 				_file = nu;
 				_title = _file.getName();
 			}
+			saveFile();
+			_changed = false;
+			repaint();
+			return;
+		} else if (m.getMnemonic() == KeyEvent.VK_A) {
+			File nu = pickFile("Save Card Deck As");
+			if (nu == null) return;
+			_file = nu;
+			_title = _file.getName();
 			saveFile();
 			_changed = false;
 			repaint();

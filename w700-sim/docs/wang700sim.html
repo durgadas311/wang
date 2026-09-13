@@ -1,7 +1,4 @@
 <HTML>
-<HEAD>
-<!-- $Id: wang700sim.html,v 1.18 2014/02/01 13:28:31 drmiller Exp $ -->
-</HEAD>
 <BODY>
 
 <H2>Running Environment</H2>
@@ -17,23 +14,23 @@ The corresponding parameter names in the rc file are listed in square brackets.
 	Enables use of the center segments of the PanaPlex 9-segment display
 	when representing the digit one, if the PanaPlex 9-segment display is
 	selected (non-standard).
-	Default: on.
+	Default: on.</DD>
 <DT>Display style<DD>[wang700_displayfont]
 	Selects the font to use for the display. Original hardware matches the
 	default "Nixie Tunes" (NixieZM1336.ttf).
 	Optional is "PanaPlex 9-Segment" (Panaplex9seg.ttf).
-	If not set, some system-default font is used.
+	If not set, some system-default font is used.</DD>
 <DT>Home<DD>[wang700_home]
-	Path to wang700 files. Default: ~/Wang700Files.
+	Path to wang700 files. Default: ~/Wang700Files.</DD>
 <DT>Teletype Host<DD>[wang700_707_host]
-	The host/IP used to connect to Model 706/707. Default: localhost
+	The host/IP used to connect to Model 706/707. Default: localhost</DD>
 <DT>Enable Function Key Labels<DD>[wang_function_labels]
 	This property holds the currently loaded function key label file,
 	however the Edit Preferences screen only allows enable/disable.
 	Disabling will delete the property, while enabling (if not already
 	enabled) will create an empty property (no label file selected).
 	Once enabled, loading of label file may be done by right-clicking on the label bar.
-	Changing this setting requires restarting the calculator to take affect.
+	Changing this setting requires restarting the calculator to take affect.</DD>
 </DL>
 
 Other parameters (maintained by the calculator, not typically user-controlled),
@@ -43,27 +40,27 @@ that are not exposed in the "Preferences" dialog, are:
 
 <DT>Last Tape image<DD>[wang700_tape_image]
 	The tape image file that was in the
-	tape drive when the calculator was last used. Default: none. 
+	tape drive when the calculator was last used. Default: none.</DD>
 <DT>Last Disk image<DD>[wang700_disk_image]
 	The expansion Model 730 disk image file that was
-	installed when the calculator was last used. Default: none.
+	installed when the calculator was last used. Default: none.</DD>
 <DT>Model 703 Paper Tape image<DD>[wang700_703_image]
-	The Paper Tape image file that was mounted when the calculator was last used.
+	The Paper Tape image file that was mounted when the calculator was last used.</DD>
 <DT>Micro Face devices<DD>[wang700_705_xx]
 	(Where 'xx' is 0 to 15)
 	The "Micro Face" device (native command) that was last setup for the
 	given device number. These properties may be edited in the
-	"Devices" -> "705 Micro Face" menu.
+	"Devices" -> "705 Micro Face" menu.</DD>
 <DT>Model 707 Paper Tape image<DD>[wang700_707_rdr_image]
-	The Paper Tape image file that was mounted when the Model 706/707 was last used.
+	The Paper Tape image file that was mounted when the Model 706/707 was last used.</DD>
 <DT>Last Output device<DD>[wang700_cn24_device]
 	The Output device that was installed when the calculator was last used.
 	Uses values such as "701" or "712".
-	Default: none.
+	Default: none.</DD>
 <DT>Tape file suffix<DD>[wang700_tape_file_suffix]
-	Default: "w7t".
+	Default: "w7t".</DD>
 <DT>Disk (Model 730) file suffix<DD>[wang700_disk_file_suffix]
-	Default: "w7d".
+	Default: "w7d".</DD>
 </DL>
 
 <P>The simulator is normally started with the following command:
@@ -233,9 +230,9 @@ will have only one program image, these are not normally used.
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output only, with standard spacing.
-The device is "connected" through the "Devices"/"Output Device..." sub-menu.
+The device is "connected" through the "Devices"/"Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device (when already connected) from the "Output Device..."
+Selecting the device (when already connected) from the "Device..."
 sub-menu also makes it visible.
 
 <P>Since there is no physical printer, the printed output is put in a
@@ -251,151 +248,22 @@ default printer.
 
 <P>This peripheral was based on a modified IBM Selectric typewriter.
 It is capable of text output along with micro-spacing which allows plotting.
-The device is "connected" through the "Devices"/"Output Device..." sub-menu.
+The device is "connected" through the "Devices"/"Device..." sub-menu.
 Printing to this device causes the "output window" to become visible.
-Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
+Selecting the device (when already connected) from the "Device..." sub-menu also makes it visible.
 The output may be consumed in the same way as for the Output Writer,
 from the "File" menu (Saved, Printed, or Tear Off).
 There is also a "Typewriter" menu that provides a "Home" function for
 the carriage, and will eventually provide setup of paper size, margins, etc.
-
-<A ID="model711"><H3>711 Input/OutputWriter</H3></A>
-
-<P><TABLE BORDER>
-<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
-<TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
-</TABLE>
-
-<P>This peripheral was based on a modified IBM Selectric typewriter.
-It is capable of text output as well as input from the keyboard.
-The device is "connected" through the "Devices"/"Output Device..." sub-menu.
-Printing to this device causes the "output window" to become visible.
-Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
-The output may be consumed in the same way as for the Output Writer,
-from the "File" menu (Saved, Printed, or Tear Off).
-There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
-
-<P>In addition to the "paper view" window there is a control panel that indicates
-and controls the input modes. Clicking the I/O LOCAL switch will toggle between
-those two modes. In LOCAL mode the page may be typed directly without
-sending anything to the calculator. Unlike the real hardware, the calculator is
-allowed to run normally in LOCAL mode.
-I/O mode is when the device is under full control of the calulator.
-
-<P>The calculator command Group&nbsp;2 04&nbsp;12 places the device in the "input mode", where the calulator is forced into LEARN mode and characters typed in the device window
-are stored in the program memory of the calculator. Typically, a sequence of characters
-are preceded by the ALPHA code and ended with an END&nbsp;ALPHA code.
-Press the GO button to end input mode.
-
-<P>The calculator command Group&nbsp;2 04&nbsp;13 places the device in the "type mode", where characters typed in the devuice window are printed but not sent to the calculator.
-The calculator remains in the RUN mode, but is waiting for the GO command from the device
-in order to be released.
-
-<A ID="model712"><H3>712 Flatbed Plotter</H3></A>
-
-<P>This device is capable of vector (line) plotting as well as (drawn) text from a limited
-character set.
-The device is "connected" through the "Devices"/"Output Device..." sub-menu.
-Plotting to this device causes the "output window" to become visible.
-Selecting the device (when already connected) from the "Output Device..." sub-menu also makes it visible.
-The output may be consumed in the same way as for the Output Writer,
-from the "File" menu (Saved, Printed, or Tear Off).
-There is also a "Plotter" menu that allows setting the plot area, pen color,
-and returning the plot carriage to the "home" position.
-Future enhancements will include control over the paper size.
-
-<A ID="model714"><H3>714 Mark-Sense Card Reader</H3></A>
-
-<P>This device was a basic way of inputing programs (or executing commands)
-from an off-line source. The cards would be marked-up away from the
-calculator and then fed in when time was available.
-
-<P>GROUP-1 04-01 executed commands from the card in RUN mode.
-If a GO is encountered, input is terminated.
-
-<P>GROUP-2 04-01 loads program steps from cards in LEARN mode.
-The original hardware seems to have terminated the loading of steps
-when a GO is encountered. This seems draconian since GO is used as
-a no-op, particularly in conditional skips where only one step is
-required for the program logic.
-
-<P>The simulated device provides an
-option "No GO" which ignores embedded GO commands, and this is enabled
-by default. It also provides a "Auto Feed" option that keeps feeding
-steps as long as there are bytes left in the file (also enabled by default).
-Otherwise, the file may be loaded 40 steps at a time using the "Next" button.
-
-<A ID="randIO"><H3>External Storage (Random Access I/O)</H3></A>
-
-<P>Devices that use the I/O command to transfer data must also
-be selected (enabled) ahead of time using a GROUP I/O command sequence.
-Each device has a unique set of values (address), one of which must be used as
-the second step of a GROUP 1 or GROUP 2 command, depending on the device
-and configuration. The device answers the GROUP I/O command immediately with
-a GO command, but retains selection of the hardware until another GROUP I/O
-command is executed. Once selected, a device will respond to I/O 13-xx commands,
-otherwise it ignores them.
-
-<A ID="model708"><H4>708/718 Extended Memory</H4></A>
-
-<P>GROUP 2 00-xx where "xx" is the value configured by the switches
-on the device. Multiple, separate, devices, are supported, default is
-one at 00-00. All units provide 4K each. The device window shows
-each of the possible 16 units and their configuration status, along
-with a indicator light which shows which one (if any) is currently
-activated by a GROUP-1 00-xx command.
-Left click on a unit pops up a dialog to save the memory contents to a file.
-Right click on a unit pops up a dialog to load a file into the memory.
-Configuration of which devices (addresses) are present is done in the
-"Config Units" menu.
-
-<P>Model 708 employed core memory with unknown configuration options.
-Price lists suggest 708 was offered in 4K units, up to 32K per device.
-Model 718 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
-
-<A ID="model740"><H4>740 Dual Floppy Discs</H4></A>
-
-<P>GROUP 2 00-xx where "xx" is the value configured by the switches
-on the device. The floppy to be used is selected based on the data address
-used.
-If the data address is less than the capacity, then the left drive is selected.
-If the data address is greater than the capacity, then the right drive is selected.
-It is unclear exactly how this worked on real hardware, as the firmware for the
-controller is not available.
-The capacity of a floppy is 315392 bytes (77 tracks, 16 sectors
-per track, 256 byte sectors). So the left drive is accessed using data addresses
-0..315391 and the right with addresses 315392..630783.
-
-<P>The device address may be set by clicking on the address field on the device GUI (default is 00-00).
-Each drive may be clicked to bring up a file dialog to select a disc image to
-insert into the drive. Disc images must be 315392 bytes in length. If a new file name
-is entered then a file of 315392 bytes is created.
-
-<P>Data may be transfered in any length or address. Unclear what original hardware
-supported, but the controller did have enough RAM to buffer sectors. But attempting
-to transfer beyond the end of the disk results in an error.
-
-<A ID="model730"><H3>730 Fixed/Removable Disk</H3></A>
-
-<P>This device is simulated by a single file that supports the entire
-16M address range of the device protocol. So there is not a separate removable
-disk, but simply a single image that may be read/written as a whole.
-Selecting the "730 Disk" option from the "Devices" menu will pop-up
-a file selection dialog from which a image may be selected to use as
-the disk. The file will be expanded as needed by writes. The file may
-also be "sparse", if writes are made beyond the current end of file.
-Unwritten portions of the file will read back as zero.
 
 <A ID="model703"><H3>703 Paper Tape Reader</H3></A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
-<TR><TD COLSPAN=2>End Of Tape is signaled by S&amp;R&nbsp;00 and GO</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;00</TD><TD>Read number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 00&nbsp;07</TD><TD>Skip to CR/LF (no data entry)</TD></TR>
+<TR><TD COLSPAN=2>End Of Tape is signaled by S&amp;R0&nbsp;00</TD></TR>
 </TABLE>
 
 <P>This device is referred to in Wang documentation as the "Paper Tape Editor".
@@ -417,18 +285,15 @@ Carriage Return is seen.
 The emulation looks for the Unix end-of-line character (line feed).
 
 <P>Also, it was not clear from the brochure exactly how "End Of Tape" was handle.
-This emulation sends both "SR&nbsp;0000" and "GO" on end of tape, as that seems to be required
-if the tape is being handled entirely under program control (because the calculator was
-essentially stopped while waiting for the Group I/O operation,
-the SR&nbsp;0000 would RETURN to the stopped state and the program would not continue
-without the GO).
+This emulation sends only "S&amp;R0&nbsp;00" on end of tape, and if the user's subroutine
+executes a GO then the GROUP command will terminate.
 
 <A ID="model705"><H3>705 Micro Face</H3></A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 07&nbsp;xx</TD><TD>Enter number from device 'xx' in Run Mode</TD></TR>
 </TABLE>
 
 <P>This device was a general-purpose electronic interface to any hardware that
@@ -469,18 +334,18 @@ equivalents on Windows (CYGWIN is preferred). These default commands are:
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;1 00&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
-<TR><TD>GROUP&nbsp;2 00&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;01</TD><TD>Print "1" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;02</TD><TD>Print "2" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;03</TD><TD>Print "3" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;04</TD><TD>Print "4" and enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 15&nbsp;05-15</TD><TD>Enter number in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;00</TD><TD>Start Tape (X&nbsp;ON) and enter characters in Learn Mode (tape must contain WRITE&nbsp;ALPHA codes, etc.)</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;01</TD><TD>Print "1" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;02</TD><TD>Print "2" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;03</TD><TD>Print "3" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;04</TD><TD>Print "4" and enter characters in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 15&nbsp;05-15</TD><TD>Enter characters in Learn Mode</TD></TR>
 <TR><TD COLSPAN=2>Run Mode emits X&nbsp;OFF (Stop Tape) when exiting commands</TD></TR>
 </TABLE>
 
@@ -520,22 +385,159 @@ used anymore for "login connections", this may not be a problem).
 <P>Teletype-Wang character conversions are documented in the
 <A HREF="wang707.html">707 Character Conversion Table</A>.
 
+<A ID="model711"><H3>711 Input/OutputWriter</H3></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;12</TD><TD>Type in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;13</TD><TD>Enter in Learn Mode</TD></TR>
+</TABLE>
+
+<P>This peripheral was based on a modified IBM Selectric typewriter.
+It is capable of text output as well as input from the keyboard.
+The device is "connected" through the "Devices"/"Device..." sub-menu.
+Printing to this device causes the "output window" to become visible.
+Selecting the device (when already connected) from the "Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the Output Writer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Typewriter" menu will eventually provide setup of paper size, margins, etc.
+
+<P>In addition to the "paper view" window there is a control panel that indicates
+and controls the input modes. Clicking the I/O LOCAL switch will toggle between
+those two modes. In LOCAL mode the page may be typed directly without
+sending anything to the calculator. Unlike the real hardware, the calculator is
+allowed to run normally in LOCAL mode.
+I/O mode is when the device is under full control of the calulator.
+
+<P>The calculator command Group&nbsp;2 04&nbsp;12 places the device in the "input mode", where the calulator is forced into LEARN mode and characters typed in the device window
+are stored in the program memory of the calculator. Typically, a sequence of characters
+are preceded by the ALPHA code and ended with an END&nbsp;ALPHA code.
+Press the GO button to end input mode.
+
+<P>The calculator command Group&nbsp;2 04&nbsp;13 places the device in the "type mode", where characters typed in the devuice window are printed but not sent to the calculator.
+The calculator remains in the RUN mode, but is waiting for the GO command from the device
+in order to be released.
+
+<A ID="model712"><H3>712 Flatbed Plotter</H3></A>
+
+<P>This device is capable of vector (line) plotting as well as (drawn) text from a limited
+character set.
+The device is "connected" through the "Devices"/"Device..." sub-menu.
+Plotting to this device causes the "output window" to become visible.
+Selecting the device (when already connected) from the "Device..." sub-menu also makes it visible.
+The output may be consumed in the same way as for the Output Writer,
+from the "File" menu (Saved, Printed, or Tear Off).
+There is also a "Plotter" menu that allows setting the plot area, pen color,
+and returning the plot carriage to the "home" position.
+Future enhancements will include control over the paper size.
+
 <A ID="model714"><H3>714 Mark-Sense Card Reader</H3></A>
 
 <P><TABLE BORDER>
 <TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
 <TR><TH>Code</TH><TH>Effects</TH></TR>
-<TR><TD>GROUP&nbsp1 04&nbsp;08</TD><TD>Read cards in Run Mode</TD></TR>
-<TR><TD>GROUP&nbsp2 04&nbsp;08</TD><TD>Read cards in Learn Mode</TD></TR>
+<TR><TD>GROUP&nbsp;1 04&nbsp;01</TD><TD>Read cards in Run Mode</TD></TR>
+<TR><TD>GROUP&nbsp;2 04&nbsp;01</TD><TD>Read cards in Learn Mode</TD></TR>
 </TABLE>
 
-<P>While support for the actual card reader is pending, there is
-a novelty program that allows one to "edit" a program image
-in a similar way that a stack of mark-sense cards were edited. 
-This is provided in the wang700.jar file, and may be run
-with the command "java -cp wang700.jar w700_edit", or the "edit"  
-("Wang714" on Windows) startup script
-in the package directory (typically HOME/wang700apc).
+<P>This device was a basic way of inputing programs (or executing commands)
+from an off-line source. The cards would be marked-up away from the
+calculator and then fed in when time was available.
+
+<P>GROUP-1 04-01 executed commands from the card in RUN mode.
+If a GO is encountered, input is terminated.
+
+<P>GROUP-2 04-01 loads program steps from cards in LEARN mode.
+The original hardware seems to have terminated the loading of steps
+when a GO is encountered. This seems draconian since GO is used as
+a no-op, particularly in conditional skips where only one step is
+required for the program logic.
+
+<P>The simulated device provides an
+option "No GO" which ignores embedded GO commands, and this is enabled
+by default. It also provides a "Auto Feed" option that keeps feeding
+steps as long as there are bytes left in the file (also enabled by default).
+Otherwise, the file may be loaded 40 steps at a time using the "Next" button.
+
+<P>A Mark-Sense card editor is available by running the "w700_edit" class
+in the JAR file. For example:
+<UL><PRE>java -cp wang700.jar w700_edit</PRE></UL>
+
+<!---------------------------------------------------------------->
+<A ID="randIO"><H3>External Storage (Random Access I/O)</H3></A>
+
+<P>Devices that use the I/O command to transfer data must also
+be selected (enabled) ahead of time using a GROUP I/O command sequence.
+Each device has a unique set of values (address), one of which must be used as
+the second step of a GROUP 1 or GROUP 2 command, depending on the device
+and configuration. The device answers the GROUP I/O command immediately with
+a GO command, but retains selection of the hardware until another GROUP I/O
+command is executed. Once selected, a device will respond to I/O 13-xx commands,
+otherwise it ignores them.
+
+<A ID="model708"><H4>708/718 Extended Memory</H4></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;xx</TD><TD>Activate device 'xx' for block I/O</TD></TR>
+</TABLE>
+
+<P>GROUP 2 00-xx where "xx" is the value configured by the switches
+on the device. Multiple, separate, devices, are supported, default is
+one at 00-00. All units provide 4K each. The device window shows
+each of the possible 16 units and their configuration status, along
+with a indicator light which shows which one (if any) is currently
+activated by a GROUP-2 00-xx command.
+Left click on a unit pops up a dialog to save the memory contents to a file.
+Right click on a unit pops up a dialog to load a file into the memory.
+Configuration of which devices (addresses) are present is done in the
+"Config Units" menu.
+
+<P>Model 708 employed core memory with unknown configuration options.
+Price lists suggest 708 was offered in 4K units, up to 32K per device.
+Model 718 employed up to 4 banks of 1Kx1 MOS dynamic RAM chips (8 chips per 1K bank).
+
+<A ID="model740"><H4>740 Dual Floppy Discs</H4></A>
+
+<P><TABLE BORDER>
+<TR><TH COLSPAN=2>Group I/O Commands</TH></TR>
+<TR><TH>Code</TH><TH>Effects</TH></TR>
+<TR><TD>GROUP&nbsp;2 00&nbsp;xx</TD><TD>Activate device 'xx' for block I/O</TD></TR>
+</TABLE>
+
+<P>GROUP 2 00-xx where "xx" is the value configured by the switches
+on the device. The floppy to be used is selected based on the data address
+used.
+If the data address is less than the capacity, then the left drive is selected.
+If the data address is greater than the capacity, then the right drive is selected.
+It is unclear exactly how this worked on real hardware, as the firmware for the
+controller is not available.
+The capacity of a floppy is 315392 bytes (77 tracks, 16 sectors
+per track, 256 byte sectors). So the left drive is accessed using data addresses
+0..315391 and the right with addresses 315392..630783.
+
+<P>The device address may be set by clicking on the address field on the device GUI (default is 00-00).
+Each drive may be clicked to bring up a file dialog to select a disc image to
+insert into the drive. Disc images must be 315392 bytes in length. If a new file name
+is entered then a file of 315392 bytes is created.
+
+<P>Data may be transfered in any length or address. Unclear what original hardware
+supported, but the controller did have enough RAM to buffer sectors. But attempting
+to transfer beyond the end of the disk results in an error.
+
+<A ID="model730"><H3>730 Fixed/Removable Disk</H3></A>
+
+<P>Not yet implemented.
+<P>This device is simulated by a single file that supports the entire
+16M address range of the device protocol. So there is not a separate removable
+disk, but simply a single image that may be read/written as a whole.
+Selecting the "730 Disk" option from the "Devices" menu will pop-up
+a file selection dialog from which a image may be selected to use as
+the disk. The file will be expanded as needed by writes. The file may
+also be "sparse", if writes are made beyond the current end of file.
+Unwritten portions of the file will read back as zero.
 
 <H3>Simulator Internals</H3>
 
@@ -581,4 +583,5 @@ gaps on the tape to indicate the end/beginning of a program
 gaps are represented with a pair of END&nbsp;PROG codes and the simulator
 must convert to/from the equivalent signals and timing for the microcode.
 
+</BODY>
 </HTML>

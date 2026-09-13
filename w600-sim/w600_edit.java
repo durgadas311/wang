@@ -1,5 +1,4 @@
-// Copyright (c) 2011,2014 Douglas Miller
-// $Id: w600_edit.java,v 1.8 2014/01/26 14:52:56 drmiller Exp $
+// Copyright (c) 2011,2026 Douglas Miller <durgadas311@gmail.com>
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,12 +6,13 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
 
-public class w600_edit
+public class w600_edit implements Wang_Core
 {
-	final String ident = "$Id: w600_edit.java,v 1.8 2014/01/26 14:52:56 drmiller Exp $";
-
 	public static void main(String[] args) {
+		new w600_edit(args);
+	}
 
+	public w600_edit(String[] args) {
 		java.net.URL url = w600_edit.class.getResource("icons/WangX14Edit.png");
 		Image img = Toolkit.getDefaultToolkit().getImage(url);
 		Wang_UI.setIcon(new ImageIcon(img));
@@ -21,6 +21,7 @@ public class w600_edit
 		//Wang_UI.setIcon(new ImageIcon(img));
 		Wang_UI.setDir(Wang_UI.getProperties().getProperty("wang600_home"));
 		Wang_UI.setSeries("6");
+		Wang_UI.setCore(this);
 
 		JFrame frame = new JFrame("Wang 600-Series Card Editor");
 		frame.setLayout(new FlowLayout());
@@ -55,12 +56,29 @@ public class w600_edit
 		frame.pack();
 		frame.setVisible(true);
 	}
+
+	// What a mess... fake Wang_Core:
+	public void chgMode0() {}
+	public void chgMode1() {}
+	public void chgMode2() {}
+	public void pressCmd(int cmd) {}
+	public boolean isKeyOK() { return false; }
+	public void pressKey(int key) {}
+	public void ackIO(int iob) {}
+	public void replyIO(int iob, int rep) {}
+
+	public int getGo() { return 0x83; }
+	public int getEndProg() { return 0x9e; }
+
+	public void debugIntr() {}
+	public Wang_Debugger getDebug() { return null; }
+
+	public void run() {}
 }
 
 class Wang614_Help extends JComponent
 	implements ActionListener, WindowListener, ComponentListener, HyperlinkListener
 {
-	static final long serialVersionUID = 311857692031L;
 	private JFrame _frame;
 	private JEditorPane _text;
 	private JScrollPane _scroll;

@@ -1,5 +1,4 @@
 <HTML>
-<!-- $Id: wang614.html,v 1.1 2013/02/09 03:18:39 drmiller Exp $ -->
 
 <H2>Wang 614 Mark Sense Card Editor Basic Operation</H2>
 
@@ -7,23 +6,32 @@
 an interface that simluates use of the mark sense cards widely used for
 programming Wang Programmable Calculators.
 
-<P>The "File" menu is fairly standard. "New" clears the program and marks all
-cards as empty (SKIP filled in). "Open" will load an existing file and present
-it as a deck of cards. "Save" will save the current program out to the file
-it was loaded from, or in the case of "New" will prompt for a file name. "Print"
-will print out the current card deck in a 3-up manner on landscape pages.
-"Quit" will exit the editor. The editor attempts to prevent you from accidentally
+<P>The "File" menu is fairly standard.
+<UL>
+<LI>"New" clears the program and marks all cards as empty (SKIP filled in).
+<LI>"Open" will load an existing file and present it as a deck of cards.
+<LI>"Save" will save the current program out to the file
+it was loaded from, or in the case of "New" will prompt for a file name.
+<LI>"Save As" will save the current program always prompting for the file name.
+<LI>"Print" will print out the current card deck in a 3-up manner on landscape pages.
+<LI>"Quit" will exit the editor.
+</UL>
+The editor attempts to prevent you from accidentally
 discarding changes, but allows you to procede if you click "Yes".
 
 <P>The editor automatically decodes the program codes and assigns step numbers.
 It also keeps track of the card number, file name, and last-modified date.
-Navigation through the card deck is by left and right arrow, and the current card
-may be scrolled to the top or bottom by using up arrow and down arrow,
+Navigation through the card deck is by left and right arrow (or Page Up and Down),
+and the current card may be scrolled to the top or bottom by using up arrow and down arrow
+(or Home and End) keys, respectively.
+Shift Home and Shift End jump to the beginning and end of the program,
 respectively.
 
 <P>Clicking on the program code "bubbles" will toggle their state.
 Clicking on a SKIP bubble will also toggle it's state, but will not
 erase the program codes, except under conditions described next.
+Clicking at a step in the far right "strobe" column will insert
+a new step there, pre-filled with a GO command and with SKIP set.
 
 <P>If a SKIP bubble is clicked beyond the end of the current program,
 the program will be extended to that step but all steps in between
