@@ -1000,7 +1000,6 @@ public class WangIOExplorer extends JFrame
 
 	// Wang_OutputDevice
 	public void do_cn24(byte b) { // 'b' already stripped to 6 bits
-		onOff(true);
 		trigTWS();
 		updateGIO();
 		tyo_raw += String.format(" %02x", b);
@@ -1037,7 +1036,6 @@ public class WangIOExplorer extends JFrame
 	// Calculator is sending hdr/data/ACK
 	// IOB is 2 or 3
 	public void do_dev(int _iob, int c) {
-		onOff(true);
 		updateGIO(_iob, c);
 		trigGISO(_iob);
 		bi_next(_iob, c); // process this byte, setup response
@@ -1051,7 +1049,6 @@ public class WangIOExplorer extends JFrame
 	public boolean isBlockIO() { return bi_supp.isSelected(); }
 	public boolean isDevEnabled() { return devEna; }
 	public boolean start_cn36(int _iob, int c) { // iob is 0,4,5,6,7
-		onOff(true);
 		updateGIO(_iob, c);
 		int da = parse_key(adr.getText());
 		if (_iob == 0) {
@@ -1081,7 +1078,6 @@ public class WangIOExplorer extends JFrame
 	// NEVER CALLED???
 	public void do_ack(int _iob) {
 System.err.format("do_ack\n");
-		onOff(true);
 		updateGIO();
 		trigGISO(curIob);
 		if (bi_auto.isSelected()) {
