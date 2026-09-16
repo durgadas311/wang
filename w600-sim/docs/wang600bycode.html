@@ -830,10 +830,10 @@ hase been acquired and transferred to the calculator.
 <TD CLASS="sym">P</TD>
 <TD CLASS="sym">+</TD>
 <TD CLASS="sym">J</TD>
-<TD CLASS="sym" BGCOLOR="lightgreen">}</TD>
+<TD CLASS="sym" BGCOLOR="lightgreen">)</TD>
 <TD CLASS="sym">?</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">=</TD>
-<TD CLASS="sym" BGCOLOR="lightgreen">{</TD>
+<TD CLASS="sym" BGCOLOR="lightgreen">(</TD>
 <TD CLASS="sym">,</TD>
 <TD CLASS="sym">:</TD>
 <TD CLASS="sym">F</TD>
@@ -842,16 +842,16 @@ hase been acquired and transferred to the calculator.
 <TR><TH>01</TH>
 <TD CLASS="sym">W</TD>
 <TD CLASS="sym">S</TD>
-<TD CLASS="sym" BGCOLOR="lightgreen">pen dn</TD>
-<TD CLASS="sym" BGCOLOR="lightgreen">pen up</TD>
+<TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
+<TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
 <TD CLASS="sym">I</TD>
 <TD CLASS="sym" BGCOLOR="lightgray">'</TD>
 <TD CLASS="sym">.</TD>
+<TD CLASS="sym" BGCOLOR="lightgreen">*</TD>
 <TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
-<TD CLASS="sym" BGCOLOR="lightyellow">return index?</TD>
 <TD CLASS="sym">O</TD>
-<TD CLASS="sym" BGCOLOR="lightyellow">index?</TD>
-<TD CLASS="sym" BGCOLOR="lightyellow">rev index?</TD>
+<TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
+<TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
 <TD CLASS="sym">A</TD>
 <TD CLASS="sym">R</TD>
 <TD CLASS="sym">V</TD>
@@ -902,10 +902,10 @@ hase been acquired and transferred to the calculator.
 <TD CLASS="sym" BGCOLOR="lightblue">P</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">+</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">J</TD>
-<TD CLASS="sym" BGCOLOR="lightblue">}</TD>
+<TD CLASS="sym" BGCOLOR="lightblue">)</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">?</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">=</TD>
-<TD CLASS="sym" BGCOLOR="lightblue">{</TD>
+<TD CLASS="sym" BGCOLOR="lightblue">(</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">,</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">:</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">F</TD>
@@ -919,7 +919,7 @@ hase been acquired and transferred to the calculator.
 <TD CLASS="sym" BGCOLOR="lightblue">I</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">'</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">.</TD>
-<TD CLASS="sym" BGCOLOR="lightyellow">n/a</TD>
+<TD CLASS="sym" BGCOLOR="lightblue">*</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">chr size</TD>
 <TD CLASS="sym" BGCOLOR="lightblue">O</TD>
 <TD CLASS="sym" BGCOLOR="lightgreen">chr space</TD>
@@ -1154,6 +1154,7 @@ are used as parameters, not carriage movement.
 values are used to move the pen to the desired position where the indicated character
 is drawn. Note, only the first character of a string should be marked as plotted,
 or else each character will be speparated from the last by the X and Y delta.
+There is evidence that the plotter did not handle printing characters in PLOT mode.
 
 <P>The codes highlighted gray indicate deviation from the normal shifted mode of the
 character but are otherwise still aligned with the Selectric codes.

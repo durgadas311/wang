@@ -52,7 +52,7 @@ MARK f03
 
 ; test print of characters at current location
 MARK f00
-	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+}?={,:'."
+	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+)?=(,:'.*"
 	RET
 
 ; set character size

@@ -9,6 +9,67 @@ import javax.swing.JRadioButton;
 import javax.swing.text.DefaultCaret;
 import java.awt.image.*;
 
+// Accrding to schematics:
+//
+//	* X- results in UX (increase X voltage)
+//	* Y- results in DY (decrease Y voltage)
+//
+// From HOME position (zero X/Y voltage, lower-left), the only practical
+// direction (right/up) is X-,Y+ (X- is counter-intuitive). Without more
+// understanding or evidence how this affected programming, behavior
+// will remain that X+ moves to the right in spite of the schematics.
+//
+// ChrSpc Xs/Ys causes both to be applied at the end of each char.
+// But, if both were non-zero then the next character would be printed
+// diagonally. Seems that either one of Xs or Ys should be "0" under
+// normal circumstances, or else something non-obvious is going on.
+// The signs of Xs and Ys are saved in FFs separate from the magnitudes
+// (signs in L37B/L27B on 6249, magnitudes in L25/L27/L43 on 6248).
+// Executing the 01-10 command saves the current signs in the spare FFs,
+// and performing the LOSP phase of character printing recalls those
+// signs into position to affect UX/DX/UY/DY.
+//
+// X register (R01) issues 02-02, 03-02, 03-10 for positive values. 
+// Y register (R00) issues 02-10, 03-02, 03-03 for positive values. 
+// 712/612 Brochure (unk date, "preliminary") states that X is R00, 
+// but the 600 microcode proves X is R01. 
+//
+// ChrSpc might normally have Y=0 to print left-right. ChrSpc is
+// applied after the STOP word in chargen ROM.
+//
+// ChrSiz is applied to each dx/dy in chargen ROM (but not ChrSpc
+// or draw/move?).
+//
+// Un-plotted (print mode) 01-02, 01-03, 01-08, 01-10, 01-11 do not
+// perform any functions, only when in plot mode (preceded by 03-08).
+//
+// Characters may not be printed in plot mode, only print mode. To control
+// starting point of text, use draw/move command (600: 05-02/05-03).
+// Characters are always printed "upright", regardless of spacing
+// direction.
+//
+// The Streitmatter doc claims the entire (scaled) plot area is divided up
+// into 999 units. However, this does not compute. The delta X/Y registers,
+// that hold the values sent by the calculator, are 10 bits eachs and so can
+// range from 0 to 1023. But the D/A counters used to position the pen are
+// 12 bit and can range from 0 to 4095. Counter overflow holds the value
+// at 4095. "Check Scale" with PRST asserted (pressed) sets the D/A to 2000.
+// So while the max delta for a give command (draw/move) is 1023, the entire
+// plot area seems to max out at 4095.
+//
+// ChrSiz stores a 4-bit value. When used, the value is loaded into a 4-bit
+// up-counter using essentially "ChrSiz ^ 0x1110", with the cycle ending when
+// this counter overflows. This implies character scaling that does not match
+// the Streitmatter doc (i.e. "3" is not larger than "2").
+//
+// ChrSpc stores 8-bit values for X and Y and is limited to 0-255. It appears
+// that processing ChrSpc (LOSP) or regular draw/move injects a constant 0b1110
+// into the scale counter. This should result in 2 clocks, but the input to this
+// counter is a FF that toggles from the low bit of the delta FFs. Unclear just
+// what sort of scaling is indicated without understanding the delta circuitry better.
+//
+// TODO: reconcile this!!! 
+
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice, ActionListener
 {
@@ -247,7 +308,8 @@ class Wang_Plotter extends Wang_Paper
 	}
 
 	private class Plotter_CharGen {
-		public byte pen;
+		public boolean stop;
+		public boolean pen;
 		public byte dx;
 		public byte dy;
 	}
@@ -259,15 +321,17 @@ class Wang_Plotter extends Wang_Paper
 		cn24_chrgen = new Plotter_CharGen[64][];
 		// there MUST be an easier way...
 		try {
+			int b;
 			int x, y;
 			for (x = 0; x < 64; ++x) {
 				cn24_chrgen[x] = new Plotter_CharGen[16];
 				for (y = 0; y < 16; ++y) {
 					cn24_chrgen[x][y] = new Plotter_CharGen();
-//System.err.format("cn24_chrgen[%d][%d] = b[%d]\n", x, y, z);
-					cn24_chrgen[x][y].pen = (byte)inp.read(); //b[z];
-					cn24_chrgen[x][y].dx = (byte)inp.read(); //b[z];
-					cn24_chrgen[x][y].dy = (byte)inp.read(); //b[z];
+					b = inp.read();
+					cn24_chrgen[x][y].stop = (b & 0x80) != 0;
+					cn24_chrgen[x][y].pen = (b & 1) != 0;
+					cn24_chrgen[x][y].dx = (byte)inp.read(); // signed
+					cn24_chrgen[x][y].dy = (byte)inp.read(); // signed
 				}
 			}
 			inp.close();
@@ -501,9 +565,34 @@ if (_draw_bar) {
 	}
 
 	private int _x, _y;
-	private int _dx, _dy;
-	private int _cx, _cy;
-	private int _sx, _sy;
+	private int _dx, _dy;	// 10 bits in hw
+	private int _cx, _cy;	// 4 bits in hw, scaling factor for char gen steps
+	private int _sx, _sy;	// 8 bits in hw, num steps advanced after char
+
+	// According to the schematics, the character generator uses 1024x10 ROM
+	// organized as 64 characters (A4-A9) of 16-word "steps" (A0-A3) with each
+	// word formatted as:
+	//
+	//	9  8  7  6  5  4  3  2  1  0
+	//	S  ---Y---  y  ---X---  x  P
+	//
+	//	S = STOP (end of character, after current word)
+	//	Y = delta Y (0-7)
+	//	y = Y direction (1=up/+)
+	//	X = delta X (0-7)
+	//	x = X direction (1=up/+)
+	//	P = Pen up/down (1=down/draw)
+	//
+	// Assumed starting position is character cell lower-left,
+	// each character must return to that position when finished.
+	//
+	// All of TKA=0 are printable and have valid characters in the ROM,
+	// TKA!=0 do not print for -02,-03,-08,-10,-11 characters and
+	// presumably the ROM has no contents for those. The character
+	// 01-07 probably prints, but cannot find documentation to show
+	// what character that is.
+	//
+	// Without actual ROM dumps, cannot confirm this.
 
 	private boolean _plotChar(byte p) {
 		boolean res = false, r;
@@ -511,26 +600,14 @@ if (_draw_bar) {
 		cg = cn24_chrgen[p];
 //System.err.println("cg = " + cg);
 		if (cg == null) return res;
-		int sx = _x;
-		int sy = _y;
+		if (cg[0].stop && cg[0].dx == 0 && cg[0].dy == 0) return res;
 		int i;
-		for (i = 0; i < 16; ++i) {
+		for (i = 0; i < 16; ++i) { // hw did not stop without STOP
 //System.err.println("cg[" + i + "] = " + cg[i]);
-			if (cg[i].pen == 0 && cg[i].dx == 0 && cg[i].dy == 0) {
-				break;
-			}
-			if ((cg[i].pen & 0x80) != 0) {
-				byte q = (byte)(cg[i].pen & 0x3f);
-				r = _plotChar(q);
-				_x = sx;
-				_y = sy;
-			} else {
-				r = _plot(cg[i].pen != 0, cg[i].dx * _cx, cg[i].dy * _cy);
-			}
+			r = _plot(cg[i].pen, cg[i].dx * _cx, cg[i].dy * _cy);
 			res = (res || r);
+			if (cg[i].stop) break;
 		}
-		_x = sx;
-		_y = sy;
 		return res;
 	}
 
@@ -539,7 +616,10 @@ if (_draw_bar) {
 		if (p >= 64) return false;
 		//boolean res =
 		_plotChar(p);
+		// Technically, both _sx and _sy are applied.
+		// TODO: is this scaled by _cx/_cy? seems not.
 		_x += _sx;
+		//_y += _sy;
 		_dx = 0;
 		_dy = 0;
 		return true;
@@ -610,6 +690,9 @@ if (_draw_bar) {
 
 	private boolean chrSize() {
 		//System.err.println("chrSize(" + _dx + "," + _dy + ")");
+		// Accrding to schematic, this should be:
+		// _cx = _cy = 16 - ((_dx ^ 1) & 0x0f);
+		// ...? * 2 ?
 		if (_dx > 0 && _dx < 16) {
 			_cx = _cy = _dx;
 		}
@@ -618,6 +701,8 @@ if (_draw_bar) {
 
 	private boolean chrSpace() {
 		//System.err.println("chrSpace(" + _dx + "," + _dy + ")");
+		// should be: _sx = (_dx & 0x0ff);
+		//            _sy = (_dy & 0x0ff);
 		if (_dx > 0 && _dy > 0 && _dx < 1000 && _dy < 1000) {
 			_sx = _dx;
 			_sy = _dy;
@@ -670,7 +755,7 @@ if (_draw_bar) {
 		boolean drew = false;
 		if ((c & 0x26) == 0x22) {
 			// simple movement - generated by calculator
-			// TBD: requires plot mode?
+			// TODO: requires plot mode?
 			// all must return here or else _dx/_dy get cleared
 			switch(c) {
 			case 0x22:
@@ -713,6 +798,7 @@ if (_draw_bar) {
 				drew = plotMode();
 				break;
 			}
+			// return; // OK to clear _dx/_dy?
 		} else if (_plot) {
 			// special
 			switch(c) {
@@ -736,21 +822,26 @@ if (_draw_bar) {
 				drew = setPen();
 				break;
 			default:
-				drew = plotChar(c);
+				// Hardware does not appear to print in PLOT mode
+				// drew = plotChar(c);
 				break;
 			}
 			// ignore anything else
 		} else {
-			// some characters have no encoding?
+			// TODO: None of these are implemented... only char print.
 			switch(c) {
+			case 0x12:
+			case 0x13:
+				// pen up/down only in PLOT mode...
+				break;
 			case 0x18:
-				drew = return_index();
+				// drew = return_index();
 				break;
 			case 0x1a:
-				drew = index();
+				// drew = index();
 				break;
 			case 0x1b:
-				drew = rev_index();
+				// drew = rev_index();
 				break;
 			default:
 				drew = plotChar(c);
