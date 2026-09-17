@@ -55,7 +55,8 @@ import java.awt.image.*;
 // 12 bit and can range from 0 to 4095. Counter overflow holds the value
 // at 4095. "Check Scale" with PRST asserted (pressed) sets the D/A to 2000.
 // So while the max delta for a give command (draw/move) is 1023, the entire
-// plot area seems to max out at 4095.
+// plot area seems to max out at 4095. There appears to be a 4x factor between
+// delta values and D/A clocking, transforming 0-1023 into 0-4095.
 //
 // ChrSiz stores a 4-bit value. When used, the value is loaded into a 4-bit
 // up-counter using essentially "ChrSiz ^ 0x1110", with the cycle ending when
@@ -349,8 +350,8 @@ class Wang_Plotter extends Wang_Paper
 
 	double _pageWidth;	// inches for physical paper
 	double _pageHeight;	// inches for physical paper
-	double _scaleX;		// ratio for PlotArea (1/1000ths to paper)
-	double _scaleY;		// ratio for PlotArea (1/1000ths to paper)
+	double _scaleX;		// ratio for PlotArea (1/1024ths to paper)
+	double _scaleY;		// ratio for PlotArea (1/1024ths to paper)
 
 	// Plottable region, in inches
 	public void setPlotArea(double xs, double ys,
@@ -384,11 +385,11 @@ class Wang_Plotter extends Wang_Paper
 		super.setUseableArea(ox, oy, sx, sy);
 
 //		double dpi;
-		// This device always plots within a 1000x1000 virtual area
+		// This device always plots within a 1024x1024 virtual area
 //		if (xw < yh) {
-//			dpi = 1000.0 / xw;
+//			dpi = 1024.0 / xw;
 //		} else {
-//			dpi = 1000.0 / yh;
+//			dpi = 1024.0 / yh;
 //		}
 //		int x = (int)(xw * dpi + 0.5);
 //		int y = (int)(yh * dpi + 0.5);
@@ -400,9 +401,9 @@ class Wang_Plotter extends Wang_Paper
 			gx = xw / yh;
 		}
 		// We scale all coords before passing to 'super'...
-		// need to translate 1/1000ths into points...
-		_scaleX = gx * (sx / 1000.0);
-		_scaleY = gy * (sy / 1000.0);
+		// need to translate 1/1024ths into points...
+		_scaleX = gx * (sx / 1024.0);
+		_scaleY = gy * (sy / 1024.0);
 		home();
 		_text.setCaret(new PlotBarCaret());
 		setCursor(_x, _y);
@@ -411,7 +412,6 @@ class Wang_Plotter extends Wang_Paper
 
 	private class PlotBarCaret extends DefaultCaret
 			implements ImageObserver {
-		static final long serialVersionUID = 311601000040L;
 
 		int _plot_pen1 = 20;
 		int _plot_pen2 = 10;
@@ -490,9 +490,6 @@ if (_draw_bar) {
 	}
 
 	private class MnemonicAction extends AbstractAction {
-
-		static final long serialVersionUID = 311602000004L;
-
 		public MnemonicAction(int key) {
 			putValue(Action.MNEMONIC_KEY, key);
 		}
@@ -562,19 +559,22 @@ if (_draw_bar) {
 		home();
 		_dx = 0;
 		_dy = 0;
+		// hw defaults (sort of)
 		_cx = 1;
 		_cy = 1;
-		_sx = 6;
-		_sy = 9;
+		_sx = 0;
+		_sy = 0;
 		setCursor(_x, _y);
 		_text.enableCursor(true);
 		_text.setPen(Color.black);
 	}
 
 	private int _x, _y;
+	private boolean _gx, _gy;	// signs for dx/dy (true=pos)
 	private int _dx, _dy;	// 10 bits in hw
 	private int _cx, _cy;	// 4 bits in hw, scaling factor for char gen steps
 	private int _sx, _sy;	// 8 bits in hw, num steps advanced after char
+	private boolean _sgx, _sgy;	// signs for _sx/_sy
 
 	// According to the schematics, the character generator uses 1024x10 ROM
 	// organized as 64 characters (A4-A9) of 16-word "steps" (A0-A3) with each
@@ -625,8 +625,10 @@ if (_draw_bar) {
 		_plotChar(p);
 		// Technically, both _sx and _sy are applied.
 		// TODO: is this scaled by _cx/_cy? seems not.
-		_x += _sx;
-		//_y += _sy;
+		if (_sgx) _x += _sx;
+		else _x -= _sx;
+		if (_sgy) _y += _sy;
+		else _y -= _sy;
 		_dx = 0;
 		_dy = 0;
 		return true;
@@ -634,28 +636,30 @@ if (_draw_bar) {
 
 	private void setCursor(int x, int y) {
 		int px = (int)Math.round(x * _scaleX);
-		int py = (int)Math.round((999 - y) * _scaleY);
+		int py = (int)Math.round((1023 - y) * _scaleY);
 		_text.setCursor(px, py);
 	}
 
 	private boolean _plot(boolean draw, int dx, int dy) {
+		// hw seems to clock D/A at 4x, so 1023 becomes 4095.
+		// Just use 1x values here.
 		int xd = _x + dx;
 		if (xd < 0) xd = 0;
-		if (xd >= 1000) xd = 999;
+		if (xd >= 1024) xd = 1023;
 		int yd = _y + dy;
 		if (yd < 0) yd = 0;
-		if (yd >= 1000) yd = 999;
+		if (yd >= 1024) yd = 1023;
 //System.err.println("Plot " + _x + "," + _y + " -> " + xd + "," + yd);
 		// Plotter origin is different than our drawables... flip "y".
 		if (draw) {
 			int px = (int)Math.round(_x * _scaleX);
-			int py = (int)Math.round((999 - _y) * _scaleY);
+			int py = (int)Math.round((1023 - _y) * _scaleY);
 			if (dx == 0 && dy == 0) {
 				// plot a "dot"...
 				_text.addPlot(px, py, -1, -1);
 			} else {
 				int pdx = (int)Math.round(xd * _scaleX);
-				int pdy = (int)Math.round((999 - yd) * _scaleY);
+				int pdy = (int)Math.round((1023 - yd) * _scaleY);
 				_text.addPlot(px, py, pdx, pdy);
 			}
 		}
@@ -664,56 +668,37 @@ if (_draw_bar) {
 		return true;
 	}
 
+	private boolean _plot(boolean draw) {
+		int dx = _dx & 0x3ff;
+		if (!_gx) dx = -dx;
+		int dy = _dy & 0x3ff;
+		if (!_gy) dy = -dy;
+		return _plot(draw, dx, dy);
+	}
+
 	private boolean plot() {
-		return _plot(true, _dx, _dy);
+		return _plot(true);
 	}
 
 	private boolean move() {
 		//System.err.println("move(" + _dx + "," + _dy + ")");
-		return _plot(false, _dx, _dy);
-	}
-
-	private boolean index() {
-		_y -= _sy;
-		if (_y < 0) _y = 0;
-		return true;
-	}
-
-	private boolean return_carr() {
-		_x = 0;
-		return true;
-	}
-
-	private boolean rev_index() {
-		_y += _sy;
-		if (_y >= 1000) _y = 999;
-		return true;
-	}
-
-	private boolean return_index() {
-		return_carr();
-		return index();
+		return _plot(false);
 	}
 
 	private boolean chrSize() {
 		//System.err.println("chrSize(" + _dx + "," + _dy + ")");
 		// Accrding to schematic, this should be:
-		// _cx = _cy = 16 - ((_dx ^ 1) & 0x0f);
-		// ...? * 2 ?
-		if (_dx > 0 && _dx < 16) {
-			_cx = _cy = _dx;
-		}
+		_cx = _cy = (_dx & 0x00f);
+		if (_cx == 0) _cx = _cy = 1; // not exactly hw...
 		return false;
 	}
 
 	private boolean chrSpace() {
-		//System.err.println("chrSpace(" + _dx + "," + _dy + ")");
-		// should be: _sx = (_dx & 0x0ff);
-		//            _sy = (_dy & 0x0ff);
-		if (_dx > 0 && _dy > 0 && _dx < 1000 && _dy < 1000) {
-			_sx = _dx;
-			_sy = _dy;
-		}
+		//System.err.format("chrSpace(%s %d, %s %d)\n", _gx, _dx, _gy, _dy);
+		_sx = (_dx & 0x0ff);
+		_sy = (_dy & 0x0ff);
+		_sgx = _gx;
+		_sgy = _gy;
 		return false;
 	}
 
@@ -748,9 +733,9 @@ if (_draw_bar) {
 	public void do_settab() {}
 	public void do_clrtab() {}
 	public void do_tab() {}
-	public void do_crlf() { if (return_index()) { setCursor(_x, _y); _text.repaint(); } }
-	public void do_index() { if (index()) { setCursor(_x, _y); _text.repaint(); } }
-	public void do_revindex() { if (rev_index()) { setCursor(_x, _y); _text.repaint(); } }
+	public void do_crlf() {}
+	public void do_index() {}
+	public void do_revindex() {}
 	public void do_space() { if (plotChar((byte)0x02)) { setCursor(_x, _y); _text.repaint(); } }
 	public void do_backspace() {}
 
@@ -765,33 +750,45 @@ if (_draw_bar) {
 			// TODO: requires plot mode?
 			// all must return here or else _dx/_dy get cleared
 			switch(c) {
-			case 0x22:
-				_dx += 1;
+			case 0x22:	// X+
+				_gx = true;
+				++_dx;
 				break;
-			case 0x23:
-				_dx -= 1;
+			case 0x23:	// X-
+				_gx = false;
+				++_dx;
 				break;
-			case 0x2a:
-				_dy += 1;
+			case 0x2a:	// Y+
+				_gy = true;
+				++_dy;
 				break;
-			case 0x2b:
-				_dy -= 1;
+			case 0x2b:	// Y-
+				_gy = false;
+				++_dy;
 				break;
-			case 0x32:
-				_dx += 1;
-				_dy += 1;
+			case 0x32:	// X+/Y+
+				_gx = true;
+				_gy = true;
+				++_dx;
+				++_dy;
 				break;
-			case 0x33:
-				_dx -= 1;
-				_dy += 1;
+			case 0x33:	// X-/Y+
+				_gx = false;
+				_gy = true;
+				++_dx;
+				++_dy;
 				break;
-			case 0x3a:
-				_dx += 1;
-				_dy -= 1;
+			case 0x3a:	// X+/Y-
+				_gx = true;
+				_gy = false;
+				++_dx;
+				++_dy;
 				break;
-			case 0x3b:
-				_dx -= 1;
-				_dy -= 1;
+			case 0x3b:	// X-/Y-
+				_gx = false;
+				_gy = false;
+				++_dx;
+				++_dy;
 				break;
 			}
 			return;
@@ -842,13 +839,10 @@ if (_draw_bar) {
 				// pen up/down only in PLOT mode...
 				break;
 			case 0x18:
-				// drew = return_index();
 				break;
 			case 0x1a:
-				// drew = index();
 				break;
 			case 0x1b:
-				// drew = rev_index();
 				break;
 			default:
 				drew = plotChar(c);
