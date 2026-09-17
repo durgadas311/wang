@@ -1,8 +1,8 @@
-; load data off tape.
+; load data off tapes into registers.
 ; block 1 is number of items 'N'
 ; block 2 is 'N' numbers
-; X = first register to use (&array[0])
-;
+; Entry:
+;	display is first register to use (&array[0])
 ; Return:
 ;	R0 = last register (&array[N-1])
 ;	R1 = first register (&array[0])

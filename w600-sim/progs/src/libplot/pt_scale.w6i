@@ -1,16 +1,25 @@
 ; Scale new point (R14,R15) by (R21,R22) offset (R19,R20),
 ; and compute (R1,R0) relative to previous (R12,R13).
-; Returns (R1,R0) ready for plot commands.
+; Returns (R1,R0) ready for plot commands (delta X,Y).
 ; Updates (R12,R13) for next point.
 
 ; R12 = previous X
 ; R13 = previous Y
-; R14 = current (new) X
-; R15 = current (new) Y
+; R14 = current (new) X [input]
+; R15 = current (new) Y [input]
 ; R19 = base X offset
 ; R20 = base Y offset
 ; R21 = X scale
 ; R22 = Y scale
+;
+; R14 = INT(R14 * R21 + 0.5)
+; tmp = R12
+; R12 = R14 + R19
+; R01 = R12 - tmp [output delta X]
+; R15 = INT(R15 * R22 + 0.5)
+; tmp = R13
+; R13 = R15 + R20
+; R00 = R13 - tmp [output delta Y]
 
 MARK $pt_scale
 	RECALL 21	; scale factor

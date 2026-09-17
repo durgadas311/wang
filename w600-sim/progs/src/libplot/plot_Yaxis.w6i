@@ -1,5 +1,14 @@
-; draw Y axis with labeled tic marks, at X=0.
-; label is un-scaled Y value.
+; Draw Y axis with labeled tic marks, at X=0.
+; Label is un-scaled Y value.
+; Input params:
+; R10
+
+; maintained by pt_scale
+; R12 = last scaled X (previous X)
+; R13 = last scaled Y (previous Y)
+; input params to pt_scale
+; R14 =
+; R15 =
 
 ; R16 = starting Y
 ; R17 = ending Y
@@ -10,25 +19,27 @@
 ; R22 = Y scale
 ; 
 MARK $plot_Yaxis
-	ENTER 1
-	$plot_chrsize	; character size for labels
+	ENTER 1		; character size for labels
+	$plot_chrsize
+	RE01
+	ST08
 	ENTER 4
 	*01
 	ST09
-	RE00
-	ST08
+	ENTER 1.3
+	*08
 	ENTER 2
-	/08
-	$plot_home	; home pen
-	T12
-	T13
+	/08		; R8, R9 = bounds of tics
+	$plot_home	; always starts at (0,0)
+	T12		; prev X, for pt_scale
+	T13		; prev Y, for pt_scale
 	RECALL 16
 	ST10
 	ST15
 	RE11
 	ST14
-	$pt_scale	; scale coord
-	$plot_move	; move to position
+	$pt_scale	; updates R12,R13
+	$plot_move	; set starting position
 	@CALL &Y_tic	; draw Y tic
 	RECALL 18
 	+10
@@ -37,7 +48,7 @@ MARK &py1
 	ST15
 	RE11
 	ST14
-	$pt_scale	; scale coord
+	$pt_scale	; updates R12,R13
 	$plot_draw	; draw to position
 	@CALL &Y_tic	; draw Y tic
 	RECALL 17
@@ -58,7 +69,7 @@ MARK &py2
 	ST15
 	RE11
 	ST14
-	$pt_scale	; scale coord
+	$pt_scale	; updates R12,R13
 	$plot_draw	; draw final partial segment
 	RET
 
@@ -80,10 +91,11 @@ MARK &Y_tic
 	RE10
 	I/O 03-00	; print label/value
 MARK &yt1
+	; we lost our way home, so reset from (0,0)
 	$plot_home	; home pen
 	RE12
 	ST01
 	RE13
 	ST00
-	$plot_move	; return to Y axis
+	$plot_move	; return to prior Y axis position
 	RET

@@ -27,7 +27,7 @@
 	INT
 	-03
 	JIF0
-	SEARCH T02	; if not turn of century
+		SEARCH T02	; if not turn of century
 	RE02
 	ST03
 	ENTER 400	;
@@ -35,7 +35,7 @@
 	INT
 	-03
 	JIF0
-	SEARCH T01	; not div by 400, not leap year
+		SEARCH T01	; not div by 400, not leap year
 MARK T00	; leap year
 	ENTER 1
 	+05	; 29 days in FEB

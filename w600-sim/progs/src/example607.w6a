@@ -7,7 +7,7 @@
 MARK &again
 	ALPHA "Enter Fahrenheit: "
 	CLEAR
-	GROUP1 00-05	; input number from TTY
+	GROUP1 15-05	; input number from TTY
 	ST15
 	; convert F to C (R15)
 	ENTER 32

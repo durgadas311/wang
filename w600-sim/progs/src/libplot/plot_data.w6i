@@ -1,13 +1,24 @@
-; plot data points.
+; Plot data points from registers.
+; Data already acquired and set must fit in memory.
+;
+; Input params:
 ; R16 = starting register number for Y data (>= 23).
 ; R17 = number of data points
-; R19 = base X offset
-; R20 = base Y offset
-; R21 = X scale
-; R22 = Y scale
-; X starts at 0 and advances by 1.
+; R19 = base X offset (not used directly)
+; R20 = base Y offset (not used directly)
+; R21 = X scale (not used directly)
+; R22 = Y scale (not used directly)
+
+; Uses regs:
+; R00 = (implied for all plotting)
+; R01 = (implied for all plotting)
+; R02 = temp
+; R11 = current register number
+; R14 = input to pt_scale: X, 0-based (R11 - R16)
+; R15 = input to pt_scale: Y (regs[R11])
+
 MARK $plot_data
-	$plot_home
+	$plot_home	; known starting position
 	RECALL 16
 	ST11
 	ENTER 0
@@ -26,13 +37,13 @@ MARK &pd1
 	INDIR RE11	; next data point
 	ST15
 	$pt_scale	; scale point
-	$plot_draw	; draw line to next point
+	$plot_draw	; draw line to next point(s)
 	RECALL 17
-	ST02
+	ST02		; temp, for compare
 	ENTER 1
 	+11
 	-02
 	JIF+
-		RET
+		RET	; Done.
 		GO
 	@SEARCH &pd1	; get another data point

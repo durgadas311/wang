@@ -1,0 +1,60 @@
+; Print the Wang 612 flatbed plotter character set.
+; Self-contained, needs no ROM.
+
+	.OUT	W612
+	CLRALL
+
+	; Start at (10,100), character size 3 and spacing 18
+	ENTER 10
+	ST01
+	ENTER 100
+	ST00
+	$move_abs
+	ENTER 3
+	$char_size
+	ENTER 18
+	$char_spacing
+	ALPHA "-Y /QP+J)?=(,:FG"
+	ENTER 288-
+	ST01
+	ENTER 24-
+	ST00
+	$move
+	ALPHA "WS  I'.* O  ARVM"
+	ENTER 288-
+	ST01
+	ENTER 24-
+	ST00
+	$move
+	ALPHA "BH  KENT 1  CDUX"
+	ENTER 288-
+	ST01
+	ENTER 24-
+	ST00
+	$move
+	ALPHA "90  652Z 4  873L"
+	SEARCH EX14
+
+; move to absolute coords R00,R01
+MARK $move_abs
+	ALPHA "\h"
+MARK $move
+	ALPHA "\m"
+	RET
+
+; set character size
+MARK $char_size
+	ST01
+	T00
+	ALPHA "\z"
+	RET
+
+; set character spacing
+MARK $char_spacing
+	ST01
+	T00
+	ALPHA "\s"
+	RET
+
+MARK EX14
+	END

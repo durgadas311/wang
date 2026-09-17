@@ -58,21 +58,14 @@ MARK f00
 ; set character size
 MARK f01
 	ST01
-	ENTER 0
-	ST00
+	T00
 	ALPHA "\z"
 	RET
 
 ; set character spacing
 MARK f02
 	ST01
-	ST02
-	ENTER 1.4
-	*02
-	ENTER 0.5
-	+02
-	INT
-	ST00
+	T00
 	ALPHA "\s"
 	RET
 

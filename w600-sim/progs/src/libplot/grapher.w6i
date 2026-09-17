@@ -1,5 +1,5 @@
 ; Plot a graph calling EX00 for f(x) and EX01 for plot(x,y)
-	.OUT	W612	; flatbed plotter
+	.OUT	W612	; flatbed plotter (not needed)
 	.EXT	EX00	; user's f(x) routine
 	.EXT	EX01	; user's PLOT(R1,R0) routine
 ;
@@ -14,7 +14,6 @@
 MARK $grapher
 	T01
 	T00
-	ALPHA "\z"
 	RECALL 16	; starting X
 	ST11
 	ST14

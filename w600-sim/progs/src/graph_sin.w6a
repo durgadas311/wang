@@ -1,4 +1,5 @@
-; Plot a sine wave on the PlottingOutputWriter
+; Plot a sine wave on the PlottingOutputWriter.
+; Requires the "libplot" ROM.
 	.OUT	W602
 	.INCLUDE	libplot.w6h
 
@@ -26,10 +27,16 @@
 	ALPHA "| y = SIN(x)"
 	SEARCH &exit
 
+; Y = f(X) function.
+; On entry, display has X.
+; On return, display has the corresponding Y.
 MARK EX00
 	SIN
 	RET
 
+; Plot a point (R1,R0).
+; for 602, rotate graph 90 degrees right.
+; X axis is down page, Y is left/right.
 MARK EX01
 	RE01	; (R1,R0) => (R0,-R1)
 	CHGSGN

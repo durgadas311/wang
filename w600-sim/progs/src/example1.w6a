@@ -39,7 +39,7 @@
 	ST01		; X=500
 	ST00		; Y=500
 	ALPHA "\m"	; W602: "| "
-	ENTER -6
+	ENTER 6-
 	ST00
 MARK &loop1
 	ENTER 36
@@ -71,9 +71,9 @@ MARK &loop2
 	CHGSGN
 	ST01
 	ALPHA "\p"	; W602: "|*"
-	ENTER -.25
+	ENTER .25-
 	+00
-	ENTER -5
+	ENTER 5-
 	ALPHA SIN
 		SEARCH &loop2
 	ENTER 7
@@ -87,9 +87,9 @@ MARK &loop3
 	RE00
 	CHGSGN
 	ST00
-	ENTER -.25
+	ENTER .25-
 	+00
-	ENTER -7
+	ENTER 7-
 	ALPHA SIN
 		SEARCH &loop3
 	END

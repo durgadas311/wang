@@ -12,11 +12,13 @@
 MARK $plot_Xaxis
 	ENTER 1
 	$plot_chrsize	; character size 1 for labels
+	RE01
+	ST08
+	ENTER 1.5
+	*08
 	ENTER 3
 	*01
 	ST09
-	RE00
-	ST08
 	$plot_home	; home position
 	T12
 	T13

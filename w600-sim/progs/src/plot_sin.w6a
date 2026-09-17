@@ -2,6 +2,7 @@
 ;
 ; Uses the plot library in ROM.
 ; The library calls back to EX00 for each datapoint.
+
 	.include	libplot.w6h
 
 	CLRALL
@@ -24,8 +25,6 @@
 	STORE 20	; offset for X
 	$plotter	; plot the wave
 
-	ENTER 1
-	$plot_chrsize	; set character size 1
 	ENTER 90
 	STORE 18
 	ENTER 0
@@ -47,9 +46,9 @@
 	ENTER 1-.05
 	ST15
 	$pt_scale	; scale point
-	$plot_move		; move pen to position
+	$plot_move	; move pen to position
 	.out	W612
-	ALPHA "Y = SIN{X}"	; print title of graph
+	ALPHA "Y = SIN(X)" ; print title of graph
 	SEARCH &exit
 
 ; f(x) for the plot library
