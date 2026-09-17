@@ -5,6 +5,23 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
+// Accrding to schematics:
+//
+// X- is left on page (BSP, X-- set REV direction)
+// Y- is down page (INDEX does Y--, Y-- sets REV direction)
+//                 ("forward" down page is REV to hardware)
+//
+// Internally, we keep _y ++ going down the page, but just change
+// the interpretation of Y+/Y- when handling plotting characters.
+//
+// X register (R01) issues 02-02, 03-02, 03-10 for positive values.
+// Y register (R00) issues 02-10, 03-02, 03-03 for positive values.
+// 712/612 Brochure (unk date, "preliminary") states that X is R00,
+// but the 600 microcode proves X is R01.
+//
+// Hardware moves carriage as each movement code arrives.
+//
+
 class Wang_PlottingOutputWriter extends Wang_Paper
 	implements Wang_OutputDevice
 {
@@ -104,7 +121,6 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			}
 			if (m.getMnemonic() == KeyEvent.VK_T) {
 				_x = _y = 0;
-				_dx = _dy = 0;
 				_text.setCursor(_x, _y);
 				//return; fall through and perform base class too...
 			}
@@ -188,7 +204,6 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 	private boolean _plot;
 	private boolean _adjacent;
 	private int _x, _y;
-	private int _dx, _dy;
 
 	private void index() {
 		_y += _wfm.height;
@@ -279,7 +294,6 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				return;
 			case 3:	// plot mode
 				_plot = true;
-				_dx = _dy = 0;
 				return;
 			}
 		} else if ((b & 0x06) == 0x02) {
@@ -318,36 +332,46 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			case 2:	// stepping
 			case 3:	// stepping
 				if (!_plot) return;
+				// make changes to _x/_y, normalize later
 				switch(b & 0x19) {
 				case 0x00:
-					_dx += 1;
+					++_x;
 					break;
 				case 0x01:
-					_dx -= 1;
+					--_x;
 					break;
 				case 0x08:
-					_dy += 1;
+					--_y;	// up page, not ++_y;
 					break;
 				case 0x09:
-					_dy -= 1;
+					++_y;	// down page, not --_y;
 					break;
 				case 0x10:
-					_dx += 1;
-					_dy += 1;
+					++_x;
+					--_y;	// up page, not ++_y;
 					break;
 				case 0x11:
-					_dx -= 1;
-					_dy += 1;
+					--_x;
+					--_y;	// up page, not ++_y;
 					break;
 				case 0x18:
-					_dx += 1;
-					_dy -= 1;
+					++_x;
+					++_y;	// down page, not --_y;
 					break;
 				case 0x19:
-					_dx -= 1;
-					_dy -= 1;
+					--_x;
+					++_y;	// down page, not --_y;
 					break;
 				}
+				if (_x < 0) _x = 0;
+				if (_x >= 1300) _x = 1299; // 13 in. platten
+				// TODO: continuous forms could go backward
+				// (or forward) forever. But, likely cannot
+				// reverse index past 0 since paper may have
+				// been torn off. User should either negate
+				// their Y values or start a graph by slewing
+				// down page/forms enough to make space.
+				if (_y < 0) _y = 0;
 				return;
 			}
 		}
@@ -356,13 +380,6 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 			s = Wang_UI.getCharConv().tiltrotateToAscii(b, _shifted);
 		}
 		if (_plot) {
-			_x += _dx;
-			if (_x < 0) _x = 0;
-			if (_x >= 1300) _x = 1299; // 13 in. platten
-			// NOTE: our coord system is opposite Wang's in Y...
-			// _y += _dy;
-			_y -= _dy;
-			if (_y < 0) _y = 0;
 			_adjacent = false;
 		}
 		if (printable && s != null) {
