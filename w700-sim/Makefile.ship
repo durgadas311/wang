@@ -11,7 +11,7 @@ COMMON_ICONS = $(subst ../common/,,$(wildcard ../common/icons/*.png))
 
 XTRA = 
 ROMS = wang720c.rom wang720b.rom wang720a.rom wang700c.rom wang700b.rom wang700a.rom
-SPCL = plotter_chrgen.dat
+SPCL = plotter_chrgen.rom
 
 COMMON_CLASSES = \
 		Wang_SplashScreen.class \

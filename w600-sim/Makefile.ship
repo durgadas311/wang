@@ -5,7 +5,7 @@ SHELL = /bin/bash
 
 ROM = wang600.rom
 
-SPCL = plotter_chrgen.dat
+SPCL = plotter_chrgen.rom
 
 # Order is significant, until we setup dependencies
 COMMON_CLASSES = \

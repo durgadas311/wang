@@ -317,21 +317,28 @@ class Wang_Plotter extends Wang_Paper
 	Plotter_CharGen[][] cn24_chrgen;
 
 	private void setup_chrgen() {
-		InputStream inp = this.getClass().getResourceAsStream("plotter_chrgen.dat");
+		InputStream inp = this.getClass().getResourceAsStream("plotter_chrgen.rom");
 		cn24_chrgen = new Plotter_CharGen[64][];
 		// there MUST be an easier way...
 		try {
-			int b;
+			int b, mag;
+			boolean sgn;	// true = positive
 			int x, y;
 			for (x = 0; x < 64; ++x) {
 				cn24_chrgen[x] = new Plotter_CharGen[16];
 				for (y = 0; y < 16; ++y) {
 					cn24_chrgen[x][y] = new Plotter_CharGen();
+					// assumes little-endian, and never EOF
 					b = inp.read();
-					cn24_chrgen[x][y].stop = (b & 0x80) != 0;
+					b |= inp.read() << 8;
+					cn24_chrgen[x][y].stop = (b & 0b1000000000) != 0;
 					cn24_chrgen[x][y].pen = (b & 1) != 0;
-					cn24_chrgen[x][y].dx = (byte)inp.read(); // signed
-					cn24_chrgen[x][y].dy = (byte)inp.read(); // signed
+					sgn = (b & 0b0000100000) != 0;
+					mag = (b & 0b0111000000) >> 6;
+					cn24_chrgen[x][y].dy = (byte)(sgn ? mag : -mag);
+					sgn = (b & 0b0000000010) != 0;
+					mag = (b & 0b0000011100) >> 2;
+					cn24_chrgen[x][y].dx = (byte)(sgn ? mag : -mag);
 				}
 			}
 			inp.close();
