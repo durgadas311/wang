@@ -164,6 +164,7 @@ public class TiltRotate {
 		int x;
 		int i;
 		char c;
+		boolean no_shift = A.length == 0; // do not emit shift codes at all
 
 		for (x = 0; x < s.length(); ++x) {
 			if (s.charAt(x) == '\\' && x + 1 < s.length()) {
@@ -199,7 +200,9 @@ public class TiltRotate {
 				// do not shift for these
 				shift = shifted;
 			}
-			if (x == 0 || shift != shifted) {
+			if (no_shift) {
+				shifted = shift;
+			} else if (x == 0 || shift != shifted) {
 				e = mem.putMem(adr++, (shift ? shiftUp() : shiftDown()));
 				err = err || e;
 				shifted = shift;
