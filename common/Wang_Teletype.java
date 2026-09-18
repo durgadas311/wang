@@ -13,6 +13,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 // client would be ASR33telnet.jar. Anything else may
 // not supply paper tape or similar features.
 
+// GROUP-1 15-xx
+// GROUP-2 15-xx
+
 class Wang_Teletype extends ASR33_Teletype
 		implements Wang_GroupIODevice, ActionListener
 {

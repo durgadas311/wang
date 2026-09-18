@@ -11,14 +11,6 @@ import java.awt.image.*;
 
 // Accrding to schematics:
 //
-//	* X- results in UX (increase X voltage)
-//	* Y- results in DY (decrease Y voltage)
-//
-// From HOME position (zero X/Y voltage, lower-left), the only practical
-// direction (right/up) is X-,Y+ (X- is counter-intuitive). Without more
-// understanding or evidence how this affected programming, behavior
-// will remain that X+ moves to the right in spite of the schematics.
-//
 // ChrSpc Xs/Ys causes both to be applied at the end of each char.
 // But, if both were non-zero then the next character would be printed
 // diagonally. Seems that either one of Xs or Ys should be "0" under
@@ -27,18 +19,19 @@ import java.awt.image.*;
 // (signs in L37B/L27B on 6249, magnitudes in L25/L27/L43 on 6248).
 // Executing the 01-10 command saves the current signs in the spare FFs,
 // and performing the LOSP phase of character printing recalls those
-// signs into position to affect UX/DX/UY/DY.
+// signs (as well as saved dx/dy) into position to affect UX/DX/UY/DY.
 //
 // X register (R01) issues 02-02, 03-02, 03-10 for positive values. 
 // Y register (R00) issues 02-10, 03-02, 03-03 for positive values. 
 // 712/612 Brochure (unk date, "preliminary") states that X is R00, 
-// but the 600 microcode proves X is R01. 
+// but the 600 microcode proves X is R01. The Streitmatter doc contradicts
+// itself on the same page.
 //
 // ChrSpc might normally have Y=0 to print left-right. ChrSpc is
 // applied after the STOP word in chargen ROM.
 //
 // ChrSiz is applied to each dx/dy in chargen ROM (but not ChrSpc
-// or draw/move?).
+// or draw/move).
 //
 // Un-plotted (print mode) 01-02, 01-03, 01-08, 01-10, 01-11 do not
 // perform any functions, only when in plot mode (preceded by 03-08).
@@ -52,11 +45,11 @@ import java.awt.image.*;
 // into 999 units. However, this does not compute. The delta X/Y registers,
 // that hold the values sent by the calculator, are 10 bits eachs and so can
 // range from 0 to 1023. But the D/A counters used to position the pen are
-// 12 bit and can range from 0 to 4095. Counter overflow holds the value
+// 12 bit and can range from 0 to 4095. Counter overflow holds the D/A values
 // at 4095. "Check Scale" with PRST asserted (pressed) sets the D/A to 2000.
 // So while the max delta for a give command (draw/move) is 1023, the entire
 // plot area seems to max out at 4095. There appears to be a 4x factor between
-// delta values and D/A clocking, transforming 0-1023 into 0-4095.
+// delta values and D/A clocking, presumably transforming 0-1023 into 0-4095.
 //
 // ChrSiz stores a 4-bit value. When used, the value is loaded into a 4-bit
 // up-counter using essentially "ChrSiz ^ 0x1110", with the cycle ending when
@@ -68,8 +61,19 @@ import java.awt.image.*;
 // into the scale counter. This should result in 2 clocks, but the input to this
 // counter is a FF that toggles from the low bit of the delta FFs. Unclear just
 // what sort of scaling is indicated without understanding the delta circuitry better.
+// But a 4x would explain the 12-bit D/A counters vs. 10-bit delta counters.
 //
-// TODO: reconcile this!!! 
+// The delta circuitry on 6248 seems excessively convoluted, but appears to locate
+// the most-significant (non-zero) bit in "dX | dY" and then counts off that
+// many clocks. These clocks are passed through a FF and the scale counter,
+// multiplying by at least 4x to the D/A counters. This possibly explains why
+// the delta counters range 0-1023 while the D/A counters range 0-4095, representing
+// a logical space of 1024 units mapped into a physical space of 4096 - both
+// representing the full plot range. This would mean that one plot command is
+// capable of spaning the entire plot range. It is not known just what sort of
+// performance such a plot command would have, both in time it takes the calculator
+// to generate the X/Y increments as well as the time it takes for the plotter to
+// increment over the resulting dX/dY (at 4x) to change the D/A counters.
 
 class Wang_Plotter extends Wang_Paper
 	implements Wang_OutputDevice, ActionListener
