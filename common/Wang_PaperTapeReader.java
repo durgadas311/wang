@@ -620,8 +620,8 @@ try {
 		case 8: // JUMP3: JMP3
 			pcd = jmp[JMP3];
 			break;
-		case 7:	// DP
-			sendChr(DP);
+		case 7:	// CHG_SIGN
+			sendChr(CHG_SIGN);
 			++pcd;
 			break;
 		case 9:	// TRANS
