@@ -289,8 +289,10 @@ public class WangSymbolTable {
 	}
 
 	private int getFreeMark() {
-		int x;
-		for (x = 0; x < lset.length && lset[x]; ++x) {
+		// Must detect subr range if at 00-00... (lset is empty)
+		int x = 0;
+		if (x == subrLo) x = subrHi;
+		for (; x < lset.length && lset[x]; ++x) {
 			if (x == subrLo) x = subrHi - 1;
 		}
 		if (x < lset.length) {
