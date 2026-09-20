@@ -153,6 +153,7 @@ class Wang_PaperTapeReader extends JFrame
 	JMenuItem pos_mi;
 	long rdr_idx;
 	long rdr_tot;
+	LED gon;
 
 	int addr;
 	int _iob;
@@ -171,7 +172,7 @@ class Wang_PaperTapeReader extends JFrame
 
 	public void reset() {
 		giCmd.clear(); // still could be one in the chamber...
-		_input = false;
+		setActive(false);
 		_iob = 0;
 	}
 
@@ -233,13 +234,13 @@ class Wang_PaperTapeReader extends JFrame
 	}
 
 	public boolean start_cn36(int iob, int c) {
-		_input = false;
 		if (_file == null) {
 			//unless we allow mounting a tape later...
-			return false;
+			setActive(false);
+			return _input;
 		}
 		// currently, don't care if running program or not...
-		_input = ((iob & 0x05) == 4 && (c & ~7) == addr);
+		setActive((iob & 0x05) == 4 && (c & ~7) == addr);
 		if (!_input) return _input;
 		_iob = iob;
 		giCmd.add(c & 0x07);
@@ -353,6 +354,7 @@ class Wang_PaperTapeReader extends JFrame
 		// Now do the main window
 		rdr_vu = new PaperTapeViewer(13, 60, false);
 		rdr_vu.addMouseListener(this);
+		gon = new RoundLED(LED.Colors.INCAND);
 
 		gb = new GridBagLayout();
 		setLayout(gb);
@@ -360,23 +362,39 @@ class Wang_PaperTapeReader extends JFrame
 		getContentPane().setBackground(Wang_Colors.ivory);
 		gc.gridx = 0;
 		gc.gridy = 0;
+		gc.anchor = GridBagConstraints.NORTHWEST;
 
 		int tw = (rdr_vu.tapeh * 3) / 2;
 		pn = new JPanel();
-		pn.setPreferredSize(new Dimension(tw, rdr_vu.tapeh));
+		pn.setPreferredSize(new Dimension(5, 5));
 		pn.setOpaque(false);
-		JLabel lab = new JLabel(" Wang " + s_getModel());
-		lab.setFont(new Font("Serif", Font.BOLD, 18));
-		lab.setHorizontalAlignment(SwingConstants.LEFT);
-		lab.setPreferredSize(new Dimension(tw, 20));
-		pn.add(lab);
 		gb.setConstraints(pn, gc);
 		add(pn);
 		++gc.gridx;
+		++gc.gridy;
+		JLabel lab = new JLabel(" Wang " + s_getModel());
+		lab.setFont(new Font("Serif", Font.BOLD, 18));
+		lab.setHorizontalAlignment(SwingConstants.LEFT);
+		lab.setPreferredSize(new Dimension(tw / 2, 20));
+		gb.setConstraints(lab, gc);
+		add(lab);
+		++gc.gridx;
+		gb.setConstraints(gon, gc);
+		add(gon);
+		++gc.gridx;
+		++gc.gridy;
+		pn = new JPanel();
+		pn.setPreferredSize(new Dimension(50, rdr_vu.tapeh - 30));
+		pn.setOpaque(false);
+		gb.setConstraints(pn, gc);
+		add(pn);
+		++gc.gridx;
+		gc.gridy = 0;
+		gc.gridheight = 3;
 		gb.setConstraints(rdr_vu, gc);
 		add(rdr_vu);
 
-		_input = false;
+		setActive(false);
 		_mountLabel = "Mount Tape";
 		_pickLabel = new String[]{"Wang Data files","Text Files"};
 		_fileType = new String[]{"wdf","txt"};
@@ -394,6 +412,11 @@ class Wang_PaperTapeReader extends JFrame
 
 		Thread t = new Thread(this);
 		t.start();
+	}
+
+	private void setActive(boolean act) {
+		_input = act;
+		gon.set(act);
 	}
 
 	private void setupAddr() {
@@ -520,8 +543,11 @@ try {
 		while (!gkbd) {
 			try { Thread.sleep(10); } catch (Exception ee) {}
 		}
-		if (c == GO || c == SR0) {
-			_input = false;
+		// it appears SR0 must be followed by a GO
+		// or else the calculator stalls. So, can't
+		// deactivate on SR0 here.
+		if (c == GO) {
+			setActive(false);
 		}
 		Wang_UI.getCore().replyIO(_iob, c);
 	}
@@ -552,12 +578,15 @@ try {
 				// when data ends. This overrides whatever
 				// "program step" we're on.
 				//
-				// This does not trigger a GO, but does
-				// deactivate this device. If user's SR0-00
-				// executes a GO then the GROUP command
-				// is terminated.
+				// From schematics, this does not trigger a GO, but
+				// does deactivate this device. But then the calculator
+				// stalls, and there appears to be no way to continue
+				// without user intervention (manually pressing GO).
+				// So we send SR0 and then send GO.
 				sendChr(SR0);
-				pcd = -1;
+				// it appears this must be followed by a GO
+				// or else the calculator stalls.
+				pcd = 18;
 			} else {
 				++pcd;
 			}
