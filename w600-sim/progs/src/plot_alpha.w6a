@@ -11,63 +11,63 @@
 	ENTER 10
 	ST01
 	ST00
-	f03	; move abs
+	$mov_abs
 	ENTER 1
-	f01	; char size
+	$chr_size
 	ENTER 6
-	f02	; char spacing
-	f00	; test print
+	$chr_space
+	$print_chrs	; test print
 
 	; Go to (10,20), character size 2 and spacing 12
 	ENTER 10
 	ST01
 	ENTER 20
 	ST00
-	f03	; move abs
+	$mov_abs
 	ENTER 2
-	f01	; char size
+	$chr_size
 	ENTER 12
-	f02	; char spacing
-	f00	; test print
+	$chr_space
+	$print_chrs
 
 	; Go to (10,50), character size 3 and spacing 18
 	ENTER 10
 	ST01
 	ENTER 50
 	ST00
-	f03	; move abs
+	$mov_abs
 	ENTER 3
-	f01	; char size
+	$chr_size
 	ENTER 18
-	f02	; char spacing
-	f00	; test print
+	$chr_space
+	$print_chrs
 
-	SEARCH EX14
+	SEARCH &exit
 
 ; move to absolute coords R00,R01
-MARK f03
+MARK $mov_abs
 	ALPHA "\h"
 	ALPHA "\m"
 	RET
 
 ; test print of characters at current location
-MARK f00
+MARK $print_chrs
 	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+)?=(,:'.*"
 	RET
 
 ; set character size
-MARK f01
+MARK $chr_size
 	ST01
 	T00
 	ALPHA "\z"
 	RET
 
 ; set character spacing
-MARK f02
+MARK $chr_space
 	ST01
 	T00
 	ALPHA "\s"
 	RET
 
-MARK EX14
+MARK &exit
 	END

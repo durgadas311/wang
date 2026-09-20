@@ -1,7 +1,9 @@
 ; Program to compute day-of-week for given month/day/year
-; Enter month, press GO
-; enter dat-of-month, press GO
-; enter year, press GO
+; Uses built-in printer.
+; Enter month, press GO (prints "M")
+; enter dat-of-month, press GO (prints "D")
+; enter year, press GO (prints "Y")
+; print dow "X" (0=sat)
 ; Uses "Zeller's Congruence"
 ; R0 = month
 ; R1 = day-of-month

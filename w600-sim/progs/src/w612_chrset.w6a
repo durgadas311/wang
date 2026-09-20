@@ -33,7 +33,7 @@
 	ST00
 	$move
 	ALPHA "90  652Z 4  873L"
-	SEARCH EX14
+	SEARCH &exit
 
 ; move to absolute coords R00,R01
 MARK $move_abs
@@ -56,5 +56,5 @@ MARK $char_spacing
 	ALPHA "\s"
 	RET
 
-MARK EX14
+MARK &exit
 	END

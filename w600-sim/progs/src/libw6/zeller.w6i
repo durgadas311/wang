@@ -9,8 +9,8 @@
 MARK $zeller
 	ENTER 3
 	ALPHA JIF+	; R0 >= 3
-		SEARCH &janfeb	; correct for Jan/Feb
-MARK &cont	; got correct month/year now
+		SEARCH &zc0	; correct for Jan/Feb
+MARK &zc1	; got correct month/year now
 	ENTER 1
 	+00
 	ENTER 26
@@ -51,9 +51,9 @@ MARK &cont	; got correct month/year now
 	INT
 	RET
 
-MARK &janfeb	; convert Jan/Feb to 13/14 of previous year
+MARK &zc0	; convert Jan/Feb to 13/14 of previous year
 	ENTER 12
 	+00
 	ENTER 1
 	-02
-	SEARCH &cont
+	SEARCH &zc1
