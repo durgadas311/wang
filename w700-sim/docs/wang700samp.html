@@ -8,15 +8,15 @@ and to verify the program loaded correctly.
 
 <H3>countdown.w7t - Count Down timer</H3>
 
-VERIFY PROG: 533
+VERIFY PROG: 180
 
 <P>USE: Enter a number and press GO. This display will count down that number until 0.
 
-<P>This program demonstrates basic use of WRITE ALPHA 1/X (Pause) and program loops.
+<P>This program demonstrates basic use of WRITE-ALPHA 1/X (Pause) and program loops.
 
 <H3>celsius.w7t - Convert Degrees Fahrenheit to Celsius</H3>
 
-VERIFY PROG: 194
+VERIFY PROG: 112
 
 <P>USE: Enter degrees Fahrenheit and press GO. The display will show the
 equivalent degrees Celsius.
@@ -24,21 +24,70 @@ equivalent degrees Celsius.
 <P>This program demonstrates how to do basic math calculations
 using registers.
 
+<H3>factorial.w7t - Compute factorials (N * N-1 * N-2 * ... * 1)</H3>
+
+VERIFY PROG: 317
+
+<P>USE: Enter number and press GO. The display will show the
+factorial of that number. Note that the calculator overflows
+with numbers somewhere above 55.
+
+<H3>hex2dec.w7t - Converting HEX to decimal</H3>
+
+VERIFY PROG: 1020
+
+<P>USE: Enter HEX digits using the subroutine keys, with all switches off (00).
+The equivalent decimal number is maintained in the display.
+
 <H3>hello.w7t - Simple Example of the Model 701 OutputWriter</H3>
 
-VERIFY PROG: 447
+VERIFY PROG: 176
 
-<LI>If not already done, use the Devices -> Output Devices menu to
+<P>
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
 connect one of the OutputWriter models (701, 702, or 711).
 <LI> Press GO
+</UL>
 <P>The OutputWriter window should appear with the
 text "Hello World!" printed on it.
 
 <P>This program demonstrates how to print a text string to the OutputWriter.
 
+<H3>prime_nums.w7t - Find Prime Numbers</H3>
+
+VERIFY PROG: 888
+
+<P>
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect one of the OutputWriter models (701, 702, or 711).
+<LI>Press GO.
+</UL>
+<P>Prime numbers will be printed on the OutputWriter in tabular
+format, 8 primes per line.
+
+<P>The program stops 10,000,000,000, however is probably desirable to stop
+it sooner (press PRIME).
+
+<H3>calendar.w7t - Prints one month calendar on OutputWriter</H3>
+
+VERIFY PROG: 5032
+
+<P>
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect one of the OutputWriter models (701, 702, or 711).
+<LI> Enter month (1-12), press GO
+<LI> Enter year, press GO
+</UL>
+<P>The OutputWriter window should appear with the
+calendar for that month and year printed.
+<P>
+
 <H3>craps.w7t - Game of Craps</H3>
 
-VERIFY PROG: 2470
+VERIFY PROG: (WIP)
 
 <P>USE: Optionally enter a random number (use decimal places), then press GO.
 The number 500 should appear on the Y display. This is your bank.
@@ -56,9 +105,10 @@ flash without aborting the program, and making the display blank.
 
 <H3>zeller.w7t - Compute day-of-week for give date</H3>
 
-VERIFY PROG: 1483
+VERIFY PROG: 2784
 
-<LI>If not already done, use the Devices -> Output Devices menu to
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
 connect one of the OutputWriter models (701, 702, or 711).
 <LI> Enter month (1-12)
 <LI> Press GO (The OutputWriter window should appear, may need to raise calculator window to continue)
@@ -66,29 +116,50 @@ connect one of the OutputWriter models (701, 702, or 711).
 <LI> Press GO
 <LI> Enter year (4 digit)
 <LI> Press GO
+</UL>
 <P>The OutputWriter window should appear with the entered values and result.
+The numeric value computed using Zeller's Congruence is printed, along with
+the name of the day.
+
+<H3>graph_sin.w7t - Example of Plotting Graphs on the 702 Plotting OutputWriter</H3>
+
+VERIFY PROG: 2317
+
+<P>
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect the 702 Plotting OutputWriter.
+<LI>Press GO.
+</UL>
+<P>A graph of a sine-wave will be printed, in landscape orientation (going
+down the page). A title will be printed at about the center of the
+graph (180 degress).
 
 <H3>plot_RC.w7t - Draw a graph on the 712 Flatbed Plotter</H3>
 
-VERIFY PROG: 5131
+VERIFY PROG: (WIP)
 
 <P>
+<UL>
 <LI>If not already done, use the Devices -> Output Devices menu to
 connect the 712 Flatbed Plotter.
 <LI> Press GO
+</UL>
 <P> The graph of a capacitor circuit charge/discharge,
 with axii and labeling, will appear on the plotter window.
 
 <H3>plot_dat.w7t - Plots data samples from a "paper tape" file</H3>
 
-VERIFY PROG: 5185
+VERIFY PROG: 4765
 
 <P>
-<LI>If not already done, use the Devices -> Output Devices menu to
-connect the 712 Flatbed Plotter.
-<LI>If not already done, use the Devices -> 703 Paper Tape Reader menu to
-install (or rewind) the paper tape image "temperature.txt".
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect the 712 Flatbed Plotter and the 703 Papert Tape Reader.
+<LI>If not already done, use the 703 Paper Tape Reader menu to
+install (or rewind) the paper tape image "temperature.wdf".
 <LI> Press GO
+</UL>
 <P>The graph of the temperature data, with axii and labeling, will appear on the
 plotter window.
 
@@ -98,58 +169,83 @@ formated as lines of numeric data.
 
 <H3>list_dat.w7t - Lists datapoints from a paper tape file</H3>
 
-VERIFY PROG: 1679
+VERIFY PROG: 1415
 
 <P>
-<LI>If not already done, use the Devices -> Output Devices menu to
-connect one of the OutputWriter models (701, 702, or 711).
-<LI>If not already done, use the Devices -> 703 Paper Tape Reader menu to
-install (or rewind) the paper tape image "temperature.txt".
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect one of the OutputWriter models (701, 702, or 711)
+and also the 703 Paper Tape Reader.
+<LI>If not already done, use the 703 Paper Tape Reader menu to
+install (or rewind) the paper tape image "temperature.wdf".
 <LI> Press GO
+</UL>
 <P>A tabular list of the datapoints in the tape image will be printed.
 
 <H3>plot_alpha.w7t - Demonstrates the character set of the 712 Plotter</H3>
 
-VERIFY PROG: 1288
+VERIFY PROG: 1129
 
 <P>
-<LI>If not already done, use the Devices -> Output Devices menu to
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
 connect the 712 Flatbed Plotter.
 <LI> Press GO
+</UL>
 <P> The complete character set, in three different sizes, will be drawn on the
 plotter.
 
-<H3>example707.w7t - Demonstrates one way to use the Model 707 Teletype</H3>
+<H3>plot_sin.w7t - Draw a sine-wave graph on the 712 Flatbed Plotter</H3>
 
-VERIFY PROG: 1063
+VERIFY PROG: 1751
 
 <P>
+<UL>
+<LI>If not already done, use the Devices -> Device... menu to
+connect the 712 Flatbed Plotter.
+<LI> Press GO
+</UL>
+<P> The graph of a sine wave, with axii and labeling, will appear on the
+plotter window.
+
+
+<H3>example707.w7t - Demonstrates using the Model 707 Teletype interactively</H3>
+
+VERIFY PROG: 861
+
+<P>
+<UL>
 <LI>If not already done, use the Devices -> Output Devices menu to
 connect the 707 Teletype.
 <LI>Using "telnet", or some other suitable client, connect to the Wang 700 simulation.
+Typically, the ASR33telnet.jar app is used instead of telnet.
 <LI>Press GO.  An introduction and prompt for data should appear on the "telnet" session.
 <LI>From the "telnet" session, type a number and press "Enter" (Return).
 <LI>The equivalent temperature in Celsius, and a new prompt, should be printed.
+</UL>
 <P>The program repeats indefinitely, until PRIME is pressed on the calculator.
 If the client disconnects, the program will still be running and a new client can be connected
 (although in that case the prompt is not re-printed).
 
 <H3>cp_flpy.w7t - Demonstrates copying one floppy data to another</H3>
 
-VERIFY PROG: 264
+VERIFY PROG: (WIP)
 
 <P>
+<UL>
 <LI>If not already done, use the Devices -> Devices... menu to
 connect the 740 Dual Floppy.
 <LI>Click the left drive and mount a file to be copied.
 <LI>Click the right drive and enter a new file name.
 <LI>Press GO.  The drive lights should alternate rapidly.
 <LI>When the program finishes, 315392.0000 should be in the display.
+</UL>
 <P>The file mounted on the right drive should now have the same contents as the
 one mounted on the left drive.
 
 <H2>Source Code</H2>
 
-The above programs (and data) are available in "source" format in the (TBD) package.
+The above programs (and data) are available in "source" format in the github repository.
+A listing file for each is included in the w700progs.tgz tarball.
 
 </HTML>

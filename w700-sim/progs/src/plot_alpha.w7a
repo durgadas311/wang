@@ -35,5 +35,9 @@ MARK $prt_chrs	; print test pattern
 	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+)?=(,:'.*"
 	RET
 
+	.INCLUDE plot_home.w7i
+	.INCLUDE plot_move.w7i
+	.INCLUDE plot_chrsize.w7i
+
 MARK &exit
 	END

@@ -1,0 +1,116 @@
+; Use f(x) keys to enter HEX digits 0-F, display shows running total.
+
+	.DEF	$key0 SR0-00
+	.DEF	$key1 SR0-01
+	.DEF	$key2 SR0-02
+	.DEF	$key3 SR0-03
+	.DEF	$key4 SR0-04
+	.DEF	$key5 SR0-05
+	.DEF	$key6 SR0-06
+	.DEF	$key7 SR0-07
+	.DEF	$key8 SR0-08
+	.DEF	$key9 SR0-09
+	.DEF	$keyA SR0-10
+	.DEF	$keyB SR0-11
+	.DEF	$keyC SR0-12
+	.DEF	$keyD SR0-13
+	.DEF	$keyE SR0-14
+	.DEF	$keyF SR0-15
+
+MARK $key0
+	STD 00
+	ENTER 16
+	*D 00
+	RED 00
+	RET
+MARK $key1
+	$key0
+	ENTER 1
+	+D 00
+	RED 00
+	RET
+MARK $key2
+	$key0
+	ENTER 2
+	+D 00
+	RED 00
+	RET
+MARK $key3
+	$key0
+	ENTER 3
+	+D 00
+	RED 00
+	RET
+MARK $key4
+	$key0
+	ENTER 4
+	+D 00
+	RED 00
+	RET
+MARK $key5
+	$key0
+	ENTER 5
+	+D 00
+	RED 00
+	RET
+MARK $key6
+	$key0
+	ENTER 6
+	+D 00
+	RED 00
+	RET
+MARK $key7
+	$key0
+	ENTER 7
+	+D 00
+	RED 00
+	RET
+MARK $key8
+	$key0
+	ENTER 8
+	+D 00
+	RED 00
+	RET
+MARK $key9
+	$key0
+	ENTER 9
+	+D 00
+	RED 00
+	RET
+MARK $keyA
+	$key0
+	ENTER 10
+	+D 00
+	RED 00
+	RET
+MARK $keyB
+	$key0
+	ENTER 11
+	+D 00
+	RED 00
+	RET
+MARK $keyC
+	$key0
+	ENTER 12
+	+D 00
+	RED 00
+	RET
+MARK $keyD
+	$key0
+	ENTER 13
+	+D 00
+	RED 00
+	RET
+MARK $keyE
+	$key0
+	ENTER 14
+	+D 00
+	RED 00
+	RET
+MARK $keyF
+	$key0
+	ENTER 15
+	+D 00
+	RED 00
+	RET
+	END

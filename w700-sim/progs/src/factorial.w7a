@@ -1,0 +1,24 @@
+; Compute factorial
+; enter N, press GO, stops with N! in display.
+
+	ALPHA LOGX	; skip if X>=0
+		SEARCH &error
+	STD 15
+	ENTER 1
+	STD 14	; result (0!)
+MARK &loop
+	RED 15
+	ALPHA LNX	; skip if X==0
+		SEARCH &more
+	RED 14
+	SEARCH &exit
+MARK &more
+	*D 14
+	ENTER 1
+	-D 15
+	SEARCH &loop
+
+MARK &error
+	CLRX
+MARK &exit
+	END

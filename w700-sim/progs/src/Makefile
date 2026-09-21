@@ -6,7 +6,22 @@ VPATH = libw7:libplot:libtrig
 WFLAGS = path=$(VPATH)
 
 
-SRCS = $(wildcard *.w7a)
+#SRCS = $(wildcard *.w7a)
+SRCS =	calendar.w7a \
+	celsius.w7a \
+	countdown.w7a \
+	example707.w7a \
+	factorial.w7a \
+	graph_sin.w7a \
+	hello.w7a \
+	hex2dec.w7a \
+	list_dat.w7a \
+	plot_alpha.w7a \
+	plot_dat.w7a \
+	plot_sin.w7a \
+	prime_nums.w7a \
+	zeller.w7a
+
 PROGS = $(subst .w7a,.w7t,$(SRCS))
 LISTS = $(subst .w7a,.lst,$(SRCS))
 DATAS = $(wildcard *.txt)
@@ -37,7 +52,7 @@ graph_sin.w7t: graph_sin.w7a grapher.w7i pt_scale.w7i $(SINCOS_DEPS)
 plot_sin.w7t: plot_sin.w7a $(PLOT_DEPS) $(SINCOS_DEPS)
 plot_dat.w7t: plot_dat.w7a $(PLOT_DEPS)
 
-w700progs.tgz: $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS) $(LISTS)
+w700progs.tgz: $(PROGS) $(ROMS) $(FLABS) $(DATAF) $(DATAS) $(LISTS)
 	tar -czf w700progs.tgz --transform="s;^;w700progs/;" $^
 
 install: $(PROGS) $(ROMS) $(DATAS)
