@@ -1,0 +1,22 @@
+; Example program to use the 707 Teletype to do interactive
+; computing.
+; press GO, interact on teletype.
+
+	ALPHA "Converts Fahrenheit to Celsius\r"
+MARK &loop
+	ALPHA "Enter Fahrenheit: "
+	CLRX
+	GROUP1 15-05	; input number from TTY
+	STY
+	ENTER 32	; convert to celsius...
+	-Y
+	ENTER 5
+	*Y
+	ENTER 9
+	/Y
+	ALPHA "Celsius = "
+	REY
+	WRITE 03-01	; print celsius
+	ALPHA "\r\r"
+	SEARCH &loop
+	END

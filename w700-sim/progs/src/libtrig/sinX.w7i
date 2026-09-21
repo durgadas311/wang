@@ -1,0 +1,10 @@
+; sin
+; Contributed by David Stokes
+
+; X is in degrees
+MARK $sinX
+	STY
+	ENTER 90
+	-Y
+	REY
+	SEARCH $cosX

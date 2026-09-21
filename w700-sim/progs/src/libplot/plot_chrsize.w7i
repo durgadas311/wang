@@ -1,0 +1,20 @@
+; set character size/spacing
+	.OUT	W712	; flatbed plotter
+
+; called with size factor (1,2,...)
+; spacing is 1.3x taller than wide.
+MARK $plot_chrsize
+	; size index in X, save temp in Y
+	STD 01	; save for space computation
+	STY
+	ENTER 0
+	EXY	; X=size, Y=0
+	ALPHA "\z"	; set char size
+	; compute space from size index
+	ENTER 6
+	*D 01	; 6 * index
+	CLRX
+	STY	; Y = 0 (left-to-right only)
+	RED 01	; X = 6 * index
+	ALPHA "\s"	; set char space
+	RET

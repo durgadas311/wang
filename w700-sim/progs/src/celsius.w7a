@@ -1,0 +1,14 @@
+; Convert degrees F to C
+; Enter F, press GO
+; Uses register 15
+; C = (F - 32) * 5 / 9
+
+	STD 15
+	ENTER 32
+	-D 15
+	ENTER 5
+	*D 15
+	ENTER 9
+	/D 15
+	RED 15
+	END

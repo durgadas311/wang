@@ -1,0 +1,8 @@
+; move pen to (R1,R0)
+	.OUT	W712	; flatbed plotter
+
+MARK $plot_move
+	REYD 00
+	RED 01
+	ALPHA "\m"	; move command (pen up)
+	RET

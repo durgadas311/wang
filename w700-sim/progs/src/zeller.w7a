@@ -1,0 +1,79 @@
+; Converts month, day, year to day-of-week
+; Requires OutputWriter
+; Enter month; GO; enter day; GO; enter year; GO
+
+	STD 0
+	WRITE 04-00
+	ALPHA " Month\r"
+	CLRX
+	STOP
+	STD 1
+	WRITE 04-00
+	ALPHA " Day\r"
+	CLRX
+	STOP
+	STD 2
+	WRITE 04-00
+	ALPHA " Year\r"
+	$zeller
+	ALPHA CHGSGN	; skip if X!=0
+		SETEXP	; fix WRITE of 0 quirk
+		E1
+	WRITE 04-00
+	WRITE 12-01
+	$dow
+	ALPHA "\r\r"
+	SEARCH &exit
+
+; dow in X (0=sat)
+MARK $dow
+	STY
+	ALPHA RET ; skip if Y!=0
+		SEARCH &sat
+	ENTER 1
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &sun
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &mon
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &tue
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &wed
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &thu
+	-Y
+	ALPHA RET ; skip if Y!=0
+		SEARCH &fri
+	SEARCH &sat
+
+MARK &sun
+	ALPHA "Sunday"
+	RET
+MARK &mon
+	ALPHA "Monday"
+	RET
+MARK &tue
+	ALPHA "Tuesday"
+	RET
+MARK &wed
+	ALPHA "Wednesday"
+	RET
+MARK &thu
+	ALPHA "Thursday"
+	RET
+MARK &fri
+	ALPHA "Friday"
+	RET
+MARK &sat
+	ALPHA "Saturday"
+	RET
+
+	.INCLUDE zeller.w7i
+
+MARK &exit
+	END

@@ -1,0 +1,18 @@
+; Example of coounting down to zero.
+; Uses register 14.
+; Enter starting number, press GO
+; Handles case where X is zero at start.
+; Does not handle negative numbers.
+
+	STD 14
+MARK &loop
+	ALPHA CHGSGN	; skip if X!=0
+		SEARCH &done
+	ENTER 1
+	-D 14
+	RED 14
+	ALPHA 1/X	; pause
+	SEARCH &loop
+MARK &done
+	END
+

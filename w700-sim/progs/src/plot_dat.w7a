@@ -1,0 +1,142 @@
+; Plot a list of data points on the flatbed plotter.
+	.OUT W712
+
+; Data taken from 703 Paper Tape Reader,
+; with "temperature.wdf" mounted as tape.
+; Requires that end-of-tape produce SR0-00,
+; as done by the 703 at end of tape.
+
+	ENTER 5
+	STD 21		; X scale
+	ENTER 10
+	STD 22		; Y scale
+	ENTER 40
+	STD 19		; X base
+	ENTER 200
+	STD 20		; Y base
+	ENTER 0
+	STD 16		; X start
+	$plot_home
+
+	ENTER 0
+	STD 12		; clear prev X
+	STD 13		; clear prev Y
+	RED 16
+	STD 11		; R11 = X start
+	ENTER 0
+	STD 14		; R14 = 0
+	GROUP1 00-00	; read first value
+	SKERR		; end-of-tape?
+		SEARCH &pd2
+	SEARCH &pd1	; done with input
+MARK &pd2	; got first point (move, not draw)
+	STD 15	; R15 = Y value
+	STD 6	; min = value (init)
+	STD 7	; max = value (init)
+	$pt_scale
+	$plot_move
+	ENTER 1
+	+D 11	; R11++
+MARK &pd3
+	RED 11
+	STD 14
+	RED 16
+	-D 14
+	GROUP1 00-00	; get next value
+	SKERR		; end of tape?
+		SEARCH &pd4
+	SEARCH &pd1	; done with input
+MARK &pd4
+	STD 15	; save value
+	REYD 6	; R06 = min
+	SKY<X
+		STD 6	; min
+	REYD 7	; R07 = max
+	SKY>=X
+		STD 7	; max
+	$pt_scale
+	$plot_draw
+	ENTER 1
+	+D 11
+	SEARCH &pd3
+
+MARK &pd1	; done with input
+	; Compute values for drawing X axis
+	REYD 11	; Y = R11: total number of values
+	RED 16	; X = X start
+	-Y
+	ENTER 1
+	+Y
+	STYD 17	; R17 = X_end - X_start + 1 (delta X)
+	ENTER 0
+	STD 16
+	ENTER 8
+	STD 18	; step (tics)
+	ENTER 0
+	STD 10	; base for X
+	$plot_Xaxis	; draw X axis R16..R17
+
+	; Now compute values for drawing Y axis
+	REYD 6		; max Y
+	ENTER 5
+	ALPHA GROUP2	; skip if Y+
+		CHGSGN
+		GO
+	+Y
+	ENTER 5
+	/Y
+	EXY
+	INT
+	EXY
+	*Y
+	STYD 16	; Y start (min Y)
+	REYD 7
+	ENTER 5
+	ALPHA GROUP2	; skip if Y+
+		CHGSGN
+		GO
+	+Y
+	ENTER 5
+	/Y
+	EXY
+	INT
+	EXY
+	*Y
+	ENTER 1
+	ALPHA GROUP2	; skip if Y+
+		CHGSGN
+		GO
+	+Y
+	STYD 17	; Y end (max)
+	ENTER 5
+	STD 18	; step (tics)
+	ENTER 0
+	STD 11
+	$plot_Yaxis
+	ENTER 2
+	$plot_chrsize	; set char size/space
+	ENTER 0
+	STD 14
+	ENTER 17-
+	STD 15
+	$pt_scale	; scale values
+	$plot_move	; move
+	ALPHA "outdoor temp, deg c"
+	SEARCH &exit
+
+; Invoked by 703 on end-of-tape
+MARK SR0-00	; end of tape
+	ENTER 0
+	1/X	; set ERROR flag
+	RET
+
+	.INCLUDE	plot_home.w7i
+	.INCLUDE	plot_move.w7i
+	.INCLUDE	plot_draw.w7i
+	.INCLUDE	plot_chrsize.w7i
+	.INCLUDE	plot_Xaxis.w7i
+	.INCLUDE	plot_Yaxis.w7i
+	.INCLUDE	pt_scale.w7i
+
+MARK &exit
+	END

@@ -1,0 +1,92 @@
+; Wang 712 demo to plot a sine wave
+;
+; The library calls back to SR0-00 for each datapoint.
+
+	$plot_home
+	ENTER 0
+	STD 12	; clear prev X
+	STD 13	; clear prev Y
+	; setup parameters for the ROM
+	; for x=0 to 360 step 5
+	ENTER 0
+	STD 16	; start X
+	ENTER 360
+	STD 17	; ending X
+	ENTER 5
+	STD 18	; step for X
+
+	ENTER 2.5
+	STD 21
+	ENTER 450
+	STD 22
+	ENTER 50
+	STD 19	; offset for Y
+	ENTER 500
+	STD 20	; offset for X
+	$plotter	; plot the wave
+
+	ENTER 90
+	STD 18
+	ENTER 0
+	STD 10
+	$plot_Xaxis
+	ENTER 1-
+	STD 16
+	ENTER 1
+	STD 17
+	ENTER 1
+	STD 18
+	ENTER 0
+	STD 11
+	$plot_Yaxis
+	ENTER 2
+	$plot_chrsize	; set character size 2
+	ENTER 0
+	STD 14
+	ENTER 1.05-
+	STD 15
+	$pt_scale	; scale point
+	$plot_move	; move pen to position
+	.OUT W712
+	ALPHA "Y = SIN(X)" ; print title of graph
+	SEARCH &exit
+
+; f(x) for the plot library
+MARK SR0-00
+	STD 01	; might be redundant
+	$sinX	; correct only for 0-180
+	STD 00	; might be redundant
+	; must change sign if between 180 and 360...
+	; allow for angles above 360...
+	; if ((X % 360) > 180) Y = -Y
+	REYD 01
+	ENTER 360
+	/Y
+	REY
+	INT
+	-Y
+	ENTER 360
+	*Y
+	ENTER 180
+	SKY<X
+		SEARCH &sr0a
+	RED 00
+	RET
+MARK &sr0a
+	RED 00
+	CHGSGN
+	RET
+
+	.INCLUDE sinX.w7i
+	.INCLUDE cosX.w7i
+	.INCLUDE plotter.w7i
+	.INCLUDE plot_chrsize.w7i
+	.INCLUDE plot_draw.w7i
+	.INCLUDE plot_home.w7i
+	.INCLUDE plot_move.w7i
+	.INCLUDE plot_Xaxis.w7i
+	.INCLUDE plot_Yaxis.w7i
+	.INCLUDE pt_scale.w7i
+
+MARK &exit
+	END

@@ -1,0 +1,40 @@
+; plot on Wang 712 using SR0-00 as f(x)
+	.OUT	W712	; flatbed plotter (nothing here cares)
+
+; R16 = starting X
+; R17 = ending X
+; R18 = step for X
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+;
+MARK $plotter
+	$plot_home	; home pen
+	RED 16
+	STD 11
+	STD 14
+	SR0-00		; callback to user's f(x)
+	STD 15		; save new Y
+	$pt_scale	; compute delta
+	$plot_move	; move to start position
+	RED 18
+	+D 11
+MARK &pl1
+	RED 11
+	STD 14
+	SR0-00		; callback to user's f(x)
+	STD 15
+	$pt_scale
+	$plot_draw	; draw to next position
+	RED 17
+	STD 02
+	RED 18
+	+D 11
+	RED 11
+	-D 02
+	RED 02
+	ALPHA LOGX	; skip if X+
+		RET
+		GO
+	SEARCH &pl1	; do another point

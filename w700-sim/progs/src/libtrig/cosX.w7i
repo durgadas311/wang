@@ -1,0 +1,50 @@
+; cos
+; Contributed by David Stokes
+
+MARK $cosX
+	STY
+	ENTER 360
+	/Y
+	REY
+	INT
+	-Y
+	ENTER 4
+	*Y
+	REY
+	INT
+	-Y		; X has "quadrant" (0-3), Y has fraction of 90 degrees
+	ALPHA SQRT	; "cosine test": save sign for result and normalize X,Y
+	PI
+	*Y
+	ENTER 2
+	/Y
+	REY
+	X^2
+	STD 02	; trigtemp3
+	ENTER 16
+	STY
+	ENTER 1
+	STD 03	; ans
+MARK &cos0
+	RED 02	; trigtemp3)
+	*D 03	; ans
+	REY
+	/D 03	; ans
+	ENTER 1
+	-Y
+	REY
+	CHGSGN
+	/D 03	; ans
+	ENTER 1
+	-Y
+	+D 03	; ans
+	ALPHA WRITE	; skip if Y==0
+		SEARCH &cos0
+	REYD 03	; ans
+	ENTER .5e-11
+	-Y
+	-Y
+	REY
+	ALPHA END	; "set sign": retrieve previously saved sign
+	REY 248		; "bad reg"... residual?
+	RET

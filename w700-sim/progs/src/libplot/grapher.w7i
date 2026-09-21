@@ -1,0 +1,51 @@
+; Plot a graph calling SR0-00 for f(x) and SR0-01 for plot(x,y)
+; This is neutral to the actual plotting device,
+; user's SR0-01 covers that.
+;
+; R16 = starting X value
+; R17 = ending X value
+; R18 = step for X
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+;
+; R11 = current X
+; R12 = previous X
+; R13 = previous Y
+; R14 = scaling X
+; R15 = scaling Y
+;
+; Caller ensures plotter is in "home" position,
+; if pertinent.
+MARK $grapher
+	ENTER 0
+	STD 01	; zero X,Y
+	STD 00
+	RED 16	; starting X
+	STD 11
+	STD 14
+	SR0-00	; callback to user's f(x)
+	STD 15
+	$pt_scale	; scale coords (R14,R15)
+	SR0-01	; callback to user's plot
+	RED 18	; step for X
+	+D 11
+MARK &gr1
+	RED 11
+	STD 14
+	SR0-00	; callback to user's f(x)
+	STD 15
+	$pt_scale	; scale coords
+	SR0-01	; callback to user's plot
+	RED 17
+	STD 02
+	RED 18
+	+D 11
+	RED 11
+	-D 02
+	RED 02
+	ALPHA LOGX	; skip if X+
+		RET
+		GO
+	SEARCH &gr1	; loop back for another point

@@ -1,0 +1,93 @@
+; draw X axis with labeled tic marks, at Y=0.
+; label is un-scaled X value.
+; Intended for 712 flatbed plotter.
+
+; R16 = starting X
+; R17 = ending X
+; R18 = step for X (tic interval)
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+; 
+MARK $plot_Xaxis
+	ENTER 1
+	$plot_chrsize	; character size 1 for labels
+	RED 01		; R01 has width
+	STD 08
+	ENTER 1.5
+	*D 08
+	ENTER 3
+	*D 01
+	RED 01
+	STD 09
+	$plot_home	; home position
+	ENTER 0
+	STD 12
+	STD 13
+	RED 16		; starting X
+	STD 11
+	STD 14
+	RED 10
+	STD 15
+	$pt_scale	; scale coord
+	$plot_move	; move to position
+	$X_tic		; draw X axis tic/value
+	RED 18		; step for X
+	+D 11
+MARK &px1
+	RED 11
+	STD 14
+	RED 10
+	STD 15
+	$pt_scale	; scale coord
+	$plot_draw	; draw to position
+	$X_tic		; draw X axis tic/value
+	RED 17
+	STD 02
+	RED 18
+	+D 11
+	RED 11
+	-D 02
+	RED 02
+	ALPHA LOGX	; skip if X+
+		SEARCH &px2
+	SEARCH &px1	; do another segment
+MARK &px2
+	RED 18		; go back to last segment
+	+D 02
+	RED 02
+	ALPHA CHGSGN	; (X!=0) check if whole segment needed
+		RET
+		GO
+	RED 17		; do partial segment
+	STD 14
+	RED 10
+	STD 15
+	$pt_scale	; scale coord
+	$plot_draw	; draw last partial segment
+	RET
+
+; draw a tic mark and label it, along the X axis
+MARK $X_tic
+	ENTER 0
+	STD 01
+	ENTER 5-
+	STD 00
+	$plot_draw	; draw tic mark
+	RED 09
+	CHGSGN
+	STD 01
+	RED 08
+	CHGSGN
+	STD 00
+	$plot_move	; move to label
+	RED 11
+	WRITE 03-00	; print value
+	$plot_home	; home 
+	RED 12
+	STD 01
+	RED 13
+	STD 00
+	$plot_move	; move to axis
+	RET

@@ -1,0 +1,58 @@
+; Program to dump a list of data items.
+; Data from 703 Papter Tape Reader
+
+	ENTER 0e1 ; WRITE xx-00 "bug"
+	STD 15
+	ALPHA "Outdoor Temp, Deg. C\r"
+	ALPHA "Sample  Time  Temp\r"
+	ALPHA "------  ----  -------\r"
+MARK &loop
+	GROUP1 00-00	; Read next number
+	SKERR
+		SEARCH &more
+	SEARCH &done
+MARK &more
+	STD 14
+	RED 15
+	WRITE 03-00	; print integer
+	WRITE 12-03	; print spaces
+	RED 15
+	STD 13
+	ENTER 15
+	*D 13
+	ENTER 60
+	/D 13
+	RED 13
+	INT
+	STD 12
+	-D 13
+	ENTER 60
+	*D 13
+	RED 12
+	ALPHA E2	; X * 100
+	+D 13
+	RED 13
+	ALPHA CHGSGN	; skip if X!=0
+		SETEXP ; WRITE xx-00 "bug"
+		E1
+	WRITE 04-00	; print integer
+	RED 14
+	WRITE 04-03	; print XXXX.YYY
+	ALPHA "\r"
+	ENTER 1
+	+D 15
+	SEARCH &loop
+
+MARK &done
+	ALPHA "END OF DATA\r"
+	SEARCH &exit
+
+; The 703 issues SR0-00 when detecting end-of-tape
+MARK SR0-00	; end of tape - set ERR flag
+	ENTER 0
+	1/X
+	RET
+
+MARK &exit
+	END
+

@@ -1,0 +1,5 @@
+; Simple "Hello World" program
+; Turn on output writer, press GO
+
+	ALPHA "Hello World!\r"
+	END

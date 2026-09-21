@@ -1,0 +1,39 @@
+; Plot character samples on 712 flatbed plotter.
+; turn on 712 plotter, press GO
+
+	.OUT	W712
+
+	$plot_home
+	ENTER 10
+	STD 1
+	STD 0
+	$plot_move
+	ENTER 1
+	$plot_chrsize
+	$prt_chrs
+	$plot_home
+	ENTER 10
+	STD 1
+	ENTER 20
+	STD 0
+	$plot_move
+	ENTER 2
+	$plot_chrsize
+	$prt_chrs
+	$plot_home
+	ENTER 10
+	STD 1
+	ENTER 50
+	STD 0
+	$plot_move
+	ENTER 3
+	$plot_chrsize
+	$prt_chrs
+	SEARCH &exit
+
+MARK $prt_chrs	; print test pattern
+	ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/+)?=(,:'.*"
+	RET
+
+MARK &exit
+	END

@@ -1,0 +1,41 @@
+; plot data points (on 712 flatbed plotter).
+;
+; R16 = starting register number for Y data (>= 23).
+; R17 = number of data points
+; R19 = base X offset
+; R20 = base Y offset
+; R21 = X scale
+; R22 = Y scale
+; X starts at 0 and advances by 1.
+MARK $plot_data
+	$plot_home
+	RED 16
+	STD 11
+	ENTER 0
+	STD 14		; X value
+	REI 11
+	STD 15		; Y data value
+	$pt_scale	; scale point
+	$plot_move	; move to first point
+	ENTER 1
+	+D 11
+MARK &pd1
+	RED 11
+	STD 14
+	RED 16
+	-D 14	; X = reg_num - reg_start
+	REI 11	; next data point
+	STD 15
+	$pt_scale	; scale point
+	$plot_draw	; draw line to next point
+	RED 17
+	STD 02
+	ENTER 1
+	+D 11
+	RED 11
+	-D 02
+	RED 02
+	ALPHA LOGX	; skip if X+
+		RET
+		GO
+	SEARCH &pd1	; get another data point
