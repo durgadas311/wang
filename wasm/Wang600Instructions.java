@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
 import java.util.Vector;
+import java.io.PrintStream;
 
 public class Wang600Instructions implements WangInstructions {
 	private static final int _RAM = 0x100;
@@ -8,6 +9,8 @@ public class Wang600Instructions implements WangInstructions {
 
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
+	private static Vector<Instruction> alpha = new Vector<Instruction>();
+	private static Vector<Instruction> iokey = new Vector<Instruction>();
 	private TiltRotate tr = new TiltRotate();
 	private char error;
 	private boolean rom;
@@ -77,7 +80,7 @@ public class Wang600Instructions implements WangInstructions {
 		instr.add(new Instruction("RET",	0x9f, 0));
 		instr.add(new Instruction("RECALL*",	0xf0, REG));
 		instr.add(new Instruction("PRINT*",	0xf1, FMT));
-		instr.add(new Instruction("I/O",	0xf2, IO));
+		instr.add(new Instruction("I/O",	0xf2, IOKEY));
 		instr.add(new Instruction("SRCHROM",	0xf3, ROMARK));
 		instr.add(new Instruction("SRCHROM*",	0xf4, ROMARK));
 		instr.add(new Instruction("SRCHROM*",	0xf5, ROMARK));
@@ -120,6 +123,35 @@ public class Wang600Instructions implements WangInstructions {
 		instr.add(new Instruction("@SEARCH",	0xf3 | _ROM, ROMARK));
 		instr.add(new Instruction("@CALL",	0xf7 | _RAM, MARK));
 		instr.add(new Instruction("@CALL",	0xfc | _ROM, ROMARK));
+
+		// ALPHA prefix mnemonics
+		alpha.add(new Instruction("KTRC_ON", 0x82, 0));	// PRINT
+		alpha.add(new Instruction("KTRC_OFF", 0x92, 0)); // ALPHA
+		alpha.add(new Instruction("PTRC_ON", 0x8a, 0));	// LNX
+		alpha.add(new Instruction("PTRC_OFF", 0x8b, 0)); // E^X
+		alpha.add(new Instruction("PAUSE", 0x93, 0)); // STOP
+		alpha.add(new Instruction("PI", 0xa0, 0)); // 10-00
+		alpha.add(new Instruction("JIFR0=", 0x84, 0)); // JIF0
+		alpha.add(new Instruction("JIFR0>=", 0x85, 0)); // JIF+
+		alpha.add(new Instruction("JIFR0<", 0x86, 0)); // SIN
+		alpha.add(new Instruction("SKLD", 0x8e, 0)); // LOAD
+		alpha.add(new Instruction("STREG", 0x91, 0)); // STORE
+		alpha.add(new Instruction("LDREG", 0x81, 0)); // RECALL
+		for (int x = 1; x < 16; ++x) {
+			String n = String.format("%02d", x);
+			alpha.add(new Instruction("SHX+" + n, 0xa0 + x, 0)); // 10-XX
+			alpha.add(new Instruction("SHX-" + n, 0xb0 + x, 0)); // 11-XX
+		}
+
+		// I/O prefix mnemonics
+		iokey.add(new Instruction("JIFR0~", 0xa0, 0));	// 10-00
+		iokey.add(new Instruction("JIFR0!~", 0xb0, 0));	// 11-00
+		for (int x = 0; x < 16; ++x) {
+			if ((x & 7) == 7) continue;
+			String n = String.format("IO%c%d", x >= 8 ? 'W' : 'R',
+				(x & 7) == 0 ? 1 : 4 << (x & 7));
+			iokey.add(new Instruction(n, 0xd0 + x, 0)); // 13-xx
+		}
 	}
 
 	public Wang600Instructions(boolean rom) {
@@ -182,6 +214,24 @@ public class Wang600Instructions implements WangInstructions {
 		int cd = (F.indexOf(opr.charAt(0)) << 4);
 		cd |= Integer.valueOf(opr.substring(2));
 		return (byte)cd;
+	}
+
+	Instruction alphaMn(String opcode) {
+		for (Instruction x : alpha) {
+			if (x.equalsMn(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
+	Instruction iokeyMn(String opcode) {
+		for (Instruction x : iokey) {
+			if (x.equalsMn(opcode)) {
+				return x;
+			}
+		}
+		return null;
 	}
 
 	private byte getCode(String opr) {
@@ -446,8 +496,10 @@ public class Wang600Instructions implements WangInstructions {
 				}
 				adr += reg;
 			} else {
-				// TODO: same as INDIR, etc.
-				e = asm(line[x]);
+				e = alphaMn(line[x]);
+				if (e == null) {
+					e = asm(line[x]);
+				}
 				if (e == null) {
 					error = 'P';
 					return -2;
@@ -458,7 +510,25 @@ public class Wang600Instructions implements WangInstructions {
 				}
 			}
 			break;
-		case IO:
+		case IOKEY:	// I/O prefix
+			if (line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
+				if (mem.putMem(adr++, getCode(line[x]))) {
+					error = 'Z';
+					return -2;
+				}
+			} else {
+				e = iokeyMn(line[x]);
+				if (e == null) {
+					error = 'P';
+					return -2;
+				}
+				if (mem.putMem(adr++, (byte)e.opcode)) {
+					error = 'Z';
+					return -2;
+				}
+			}
+			break;
+		case IO:	// GROUP 1/2
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
 				error = 'I';
 				return -2;
@@ -652,6 +722,24 @@ public class Wang600Instructions implements WangInstructions {
 		return null;
 	}
 
+	Instruction disAlpha(int opcode) {
+		for (Instruction x : alpha) {
+			if (x.equalsOp(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
+	Instruction disIOkey(int opcode) {
+		for (Instruction x : iokey) {
+			if (x.equalsOp(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
 	private String getKey(int code) {
 		Instruction e;
 
@@ -660,6 +748,26 @@ public class Wang600Instructions implements WangInstructions {
 			return String.format("%02d-%02d", (code >> 4), (code & 0x0f));
 		}
 		return e.mnemonic;
+	}
+
+	private String getAlphaKey(int code) {
+		Instruction e;
+
+		e = disAlpha(code);
+		if (e != null) {
+			return e.mnemonic;
+		}
+		return getKey(code);
+	}
+
+	private String getIOKey(int code) {
+		Instruction e;
+
+		e = disIOkey(code);
+		if (e != null) {
+			return e.mnemonic;
+		}
+		return String.format("%02d-%02d", (code >> 4), (code & 0x0f));
 	}
 
 	// Used for assembler help
@@ -765,8 +873,11 @@ public class Wang600Instructions implements WangInstructions {
 				if (o >= 0x80) --x;
 				ret += "\"";
 			} else {
-				ret += " " + getKey(o);
+				ret += " " + getAlphaKey(o);
 			}
+			break;
+		case IOKEY:
+			ret += " " + getIOKey(o);
 			break;
 		case IO:
 			ret += String.format(" %02d-%02d", (o >> 4), (o & 0x0f));
@@ -784,5 +895,21 @@ public class Wang600Instructions implements WangInstructions {
 
 	public String regHelp() {
 		return "[label] [\"string\" | number]";
+	}
+
+	// output is on new line below basic ALPHA help
+	public void alphaHelp(PrintStream out) {
+		for (Instruction x : alpha) {
+			out.format("      %02d-%02d %s\n",
+				x.opcode >> 4, x.opcode & 0x0f, x.mnemonic);
+		}
+	}
+
+	// output is on new line below basic I/O help
+	public void iokeyHelp(PrintStream out) {
+		for (Instruction x : iokey) {
+			out.format("      %02d-%02d %s\n",
+				x.opcode >> 4, x.opcode & 0x0f, x.mnemonic);
+		}
 	}
 }

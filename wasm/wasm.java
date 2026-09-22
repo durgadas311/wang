@@ -141,6 +141,12 @@ public class wasm {
 					break;
 				case WangInstructions.ALPHA:
 					System.out.format(" { \"text...\" | <keycode> }\n");
+					mach.alphaHelp(System.out);
+					break;
+				case WangInstructions.IOKEY:
+					// like 700 WRITE formats, but more also.
+					System.out.format(" <padding>-<decimal>\n");
+					mach.iokeyHelp(System.out);
 					break;
 				case WangInstructions.IO:
 					System.out.format(" <iocode>\n");

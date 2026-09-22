@@ -1,10 +1,12 @@
 // Copyright (c) 2023 Douglas Miller <durgadas311@gmail.com>
 
 import java.util.Vector;
+import java.io.PrintStream;
 
 public class Wang700Instructions implements WangInstructions {
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
+	private static Vector<Instruction> alpha = new Vector<Instruction>();
 	private TiltRotate tr;
 	private char error;
 	private boolean pass;
@@ -118,11 +120,37 @@ public class Wang700Instructions implements WangInstructions {
 			instr.add(new Instruction("SR1-" + n, 0x10 + x, FCALL));
 			instr.add(new Instruction("SR2-" + n, 0x20 + x, FCALL));
 			instr.add(new Instruction("SR3-" + n, 0x30 + x, FCALL));
-			instr.add(new Instruction("IO" + n, 0x80 + x, 0));
+			if (x == 7) {
+				instr.add(new Instruction("SKY~X", 0x80 + x, 0));
+			} else if (x == 15) {
+				instr.add(new Instruction("SKY!~X", 0x80 + x, 0));
+			} else {
+				n = String.format("IO%c%d", x >= 8 ? 'W' : 'R',
+					(x & 7) == 0 ? 1 : 4 << (x & 7));
+				instr.add(new Instruction(n, 0x80 + x, 0));
+			}
 		}
 		// Add some assembler aliases, not seen by disassembler
 		instr.add(new Instruction("CHGSGN", 0x7b, 0));
 		instr.add(new Instruction("SETEXP", 0x7a, 0));
+
+		// Add alpha code mnemonics
+		alpha.add(new Instruction("SKX+", 0x6a, 0)); // LOGX
+		alpha.add(new Instruction("SKX0", 0x6b, 0)); // LNX
+		alpha.add(new Instruction("SKX-", 0x7a, 0)); // SETEXP
+		alpha.add(new Instruction("SKXNZ", 0x7b, 0)); // CHGSGN
+		alpha.add(new Instruction("SKY+", 0x4a, IO)); // GROUP2
+		alpha.add(new Instruction("SKY0", 0x4b, FMT)); // WRITE
+		alpha.add(new Instruction("SKY-", 0x5a, 0)); // SKERR
+		alpha.add(new Instruction("SKYNZ", 0x5b, 0)); // RET
+		alpha.add(new Instruction("180/PI", 0x5e, 0)); // GO
+		alpha.add(new Instruction("PI/180", 0x5f, 0)); // STOP
+		alpha.add(new Instruction("PAUSE", 0x6f, 0)); // 1/X
+		for (int x = 0; x < 10; ++x) {
+			String n = String.format("%02d", x == 0 ? 10 : x);
+			alpha.add(new Instruction("SHX+" + n, 0x70 + x, 0)); // ++EXP
+			alpha.add(new Instruction("SHX-" + n, 0x40 + x, 0)); // --EXP
+		}
 	}
 
 	public Wang700Instructions() {
@@ -165,6 +193,15 @@ public class Wang700Instructions implements WangInstructions {
 
 	Instruction asm(String opcode) {
 		for (Instruction x : instr) {
+			if (x.equalsMn(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
+	Instruction alphaMn(String opcode) {
+		for (Instruction x : alpha) {
 			if (x.equalsMn(opcode)) {
 				return x;
 			}
@@ -418,7 +455,10 @@ public class Wang700Instructions implements WangInstructions {
 				}
 				adr += reg;
 			} else {
-				e = asm(line[x]);
+				e = alphaMn(line[x]);
+				if (e == null) {
+					e = asm(line[x]);
+				}
 				if (e == null) {
 					error = 'P';
 					return -2;
@@ -429,7 +469,7 @@ public class Wang700Instructions implements WangInstructions {
 				}
 			}
 			break;
-		case IO:
+		case IO:	// GROUP 1/2
 			if (!line[x].matches("^[0-1][0-9]-[0-1][0-9]$")) {
 				error = 'I';
 				return -2;
@@ -642,6 +682,15 @@ public class Wang700Instructions implements WangInstructions {
 		return null;
 	}
 
+	Instruction disAlpha(int opcode) {
+		for (Instruction x : alpha) {
+			if (x.equalsOp(opcode)) {
+				return x;
+			}
+		}
+		return null;
+	}
+
 	private String getKey(int code) {
 		Instruction e;
 
@@ -650,6 +699,16 @@ public class Wang700Instructions implements WangInstructions {
 			return String.format("%02d-%02d", (code >> 4), (code & 0x0f));
 		}
 		return e.mnemonic;
+	}
+
+	private String getAlphaKey(int code) {
+		Instruction e;
+
+		e = disAlpha(code);
+		if (e != null) {
+			return e.mnemonic;
+		}
+		return getKey(code);
 	}
 
 	// Used for assembler help
@@ -750,7 +809,7 @@ public class Wang700Instructions implements WangInstructions {
 				if (o != tr.term()) --x;
 				ret += "\"";
 			} else {
-				ret += " " + getKey(o);
+				ret += " " + getAlphaKey(o);
 			}
 			break;
 		case IO:
@@ -769,5 +828,16 @@ public class Wang700Instructions implements WangInstructions {
 
 	public String regHelp() {
 		return "[label[,label]] [\"string\" | number][,...]";
+	}
+
+	public void alphaHelp(PrintStream out) {
+		for (Instruction x : alpha) {
+			out.format("      %02d-%02d %s\n",
+				x.opcode >> 4, x.opcode & 0x0f, x.mnemonic);
+		}
+	}
+
+	public void iokeyHelp(PrintStream out) {
+		// no such key on 700s
 	}
 }
