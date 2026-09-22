@@ -199,6 +199,7 @@ td.tag {text-align: center;}
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
+<TD CLASS="key">SKIP if Y&#8801;X</TD>
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
@@ -206,8 +207,7 @@ td.tag {text-align: center;}
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
 <TD CLASS="key">(I/O)</TD>
-<TD CLASS="key">(I/O)</TD>
-<TD CLASS="key">(I/O)</TD></TR>
+<TD CLASS="key">SKIP if Y&#8802;X</TD></TR>
 
 <TR><TH>09</TH>
 <TD CLASS="key">?</TD>
@@ -346,6 +346,9 @@ td.tag {text-align: center;}
 <LI>(?) All unimplemented codes in the range 08-00 to 15-15
 will map directly to their corresponding codes in the
 range 00-00 to 07-15.
+<LI>"Binary comparisons" (&#8801;/&#8802;, model C only)
+do not normalize to decimal numbers, so may be used
+to compare "values" that do not represent decimal numbers.
 </UL>
 
 <P><A NAME="registers">Program Register Codes</A>
@@ -608,7 +611,7 @@ single-digit number (1..9).
 	User must compute equivalent program step number from register number when
 	transferring register data.
 	</TD></TR>
-<TR>	<TD>08&nbsp;00 through 08&nbsp;07</TD>
+<TR>	<TD>08&nbsp;00 through 08&nbsp;06</TD>
 	<TD>page-in blocks of program steps from "device 2".
 	"Source" address is in Y (integer portion, 0 - 16M).
 	In X is the starting program step number
@@ -616,18 +619,17 @@ single-digit number (1..9).
 	Length determined by 'xx':
 	<TABLE BORDER>
 	<TR><TH>00</TH><TH>01</TH><TH>02</TH><TH>03</TH>
-		<TH>04</TH><TH>05</TH><TH>06</TH><TH>07</TH></TR>
+		<TH>04</TH><TH>05</TH><TH>06</TH></TR>
 	<TR><TD>1 step</TD>
 		<TD>8 steps</TD>
 		<TD>16 steps</TD>
 		<TD>32 steps</TD>
 		<TD>64 steps</TD>
 		<TD>128 steps</TD>
-		<TD>256 steps</TD>
-		<TD>(nothing)</TD></TR>
+		<TD>256 steps</TD></TR>
 	</TABLE>
 	</TD></TR>
-<TR>	<TD>08&nbsp;08 through 08&nbsp;15</TD>
+<TR>	<TD>08&nbsp;08 through 08&nbsp;14</TD>
 	<TD>page-out blocks of program steps to "device 2".
 	"Destination" address is in Y (integer portion, 0 - 16M).
 	In X is the starting program step number
@@ -635,15 +637,14 @@ single-digit number (1..9).
 	Length determined 'xx':
 	<TABLE BORDER>
 	<TR><TH>08</TH><TH>09</TH><TH>10</TH><TH>11</TH>
-		<TH>12</TH><TH>13</TH><TH>14</TH><TH>15</TH></TR>
+		<TH>12</TH><TH>13</TH><TH>14</TH></TR>
 	<TR><TD>1 step</TD>
 		<TD>8 steps</TD>
 		<TD>16 steps</TD>
 		<TD>32 steps</TD>
 		<TD>64 steps</TD>
 		<TD>128 steps</TD>
-		<TD>256 steps</TD>
-		<TD>(nothing)</TD></TR>
+		<TD>256 steps</TD></TR>
 	</TABLE>
 	</TD></TR>
 </TABLE>
