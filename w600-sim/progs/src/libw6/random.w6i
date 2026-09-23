@@ -4,7 +4,7 @@
 MARK $rand
 	ENTER 1
 	+07
-	ALPHA f07
+	ALPHA SHX+07
 	LNX
 	*07
 	INT

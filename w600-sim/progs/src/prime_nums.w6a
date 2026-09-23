@@ -17,7 +17,7 @@ MARK &next1
 	+01
 	ST00
 	ENTER 1E10
-	ALPHA SIN	; R0 < X
+	ALPHA JIFR0<	; R0 < X
 		SEARCH &done
 	RE01
 	SQRT
@@ -33,7 +33,7 @@ MARK &next2
 	ST02
 	ENTER 1
 	+08
-	ALPHA JIF0	; R0 == X
+	ALPHA JIFR0=	; R0 == X
 		SEARCH &try_it
 	SEARCH &got_one
 MARK &try_it

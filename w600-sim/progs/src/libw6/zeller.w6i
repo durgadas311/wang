@@ -8,7 +8,7 @@
 
 MARK $zeller
 	ENTER 3
-	ALPHA JIF+	; R0 >= 3
+	ALPHA JIFR0>=	; R0 >= 3
 		SEARCH &zc0	; correct for Jan/Feb
 MARK &zc1	; got correct month/year now
 	ENTER 1

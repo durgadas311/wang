@@ -13,7 +13,7 @@
 MARK &load_tape_data
 	ST01	; &array[0]
 	ENTER 0	; dest register number
-	ALPHA RECALL	; load one number into R0
+	ALPHA LDREG	; load one number into R0
 	RE00
 	ST15		;
 	RE01		; base reg
@@ -21,10 +21,10 @@ MARK &load_tape_data
 	ENTER 1
 	-00		; R0 = &array[N-1]
 	ENTER &_last
-	ALPHA SIN	; jif X <= R0
+	ALPHA JIFR0<
 		SEARCH &ltd_err
 	RE00
-	ALPHA RECALL	; load numbers into (R0)
+	ALPHA LDREG	; load numbers into (R0)
 	RET
 
 MARK &ltd_err

@@ -53,9 +53,9 @@ MARK &loop1
 	ENTER .25
 	+00
 	ENTER 6
-	ALPHA JIF+
+	ALPHA JIFR0>=
 		SEARCH &loop1
-	ALPHA JIF0
+	ALPHA JIFR0=
 		SEARCH &done1
 	SEARCH &loop1
 MARK &done1
@@ -74,7 +74,7 @@ MARK &loop2
 	ENTER .25-
 	+00
 	ENTER 5-
-	ALPHA SIN
+	ALPHA JIFR0<
 		SEARCH &loop2
 	ENTER 7
 	ST00
@@ -90,6 +90,6 @@ MARK &loop3
 	ENTER .25-
 	+00
 	ENTER 7-
-	ALPHA SIN
+	ALPHA JIFR0<
 		SEARCH &loop3
 	END

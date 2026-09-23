@@ -8,8 +8,8 @@ MARK &loop
 		SEARCH &exit
 	ENTER 1
 	-14
-	ALPHA STOP	;
-	ALPHA STOP	; 1 second pause
+	ALPHA PAUSE	;
+	ALPHA PAUSE	; 1 second (total) pause
 	SEARCH &loop
 MARK &exit
 	END

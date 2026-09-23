@@ -20,28 +20,28 @@ MARK &again
 		SEARCH &error	; error: can't bet more than have
 	$roll	; roll dice
 	ST00	; point
-	ALPHA STOP
-	ALPHA STOP
+	ALPHA PAUSE
+	ALPHA PAUSE
 	ENTER 12
-	I/O 11-00	; Jif R0 != 12
+	I/O JIFR0!~	; Jif R0 != 12
 		SEARCH &lose	; 12 loses
 	ENTER 2
-	I/O 11-00	; Jif R0 != 2
+	I/O JIFR0!~	; Jif R0 != 2
 		SEARCH &lose	; 2 loses
 	ENTER 3
-	I/O 11-00	; Jif R0 != 3
+	I/O JIFR0!~	; Jif R0 != 3
 		SEARCH &lose	; 3 loses
 	ENTER 7
-	I/O 11-00	; Jif R0 != 7
+	I/O JIFR0!~	; Jif R0 != 7
 		SEARCH &win	; 7 wins
 	ENTER 11
-	I/O 11-00	; Jif R0 != 11
+	I/O JIFR0!~	; Jif R0 != 11
 		SEARCH &win	; 11 wins
 MARK &point
 	$roll
-	ALPHA STOP
-	ALPHA STOP
-	I/O 11-00	; Jif R0 != roll
+	ALPHA PAUSE
+	ALPHA PAUSE
+	I/O JIFR0!~	; Jif R0 != roll (best R0 != X?)
 		SEARCH &win	; roll == point, winner
 	ST14
 	ENTER 7
@@ -51,8 +51,8 @@ MARK &point
 ; lose
 MARK &lose
 	RECALL &BLANK
-	ALPHA STOP	; lose...
-	ALPHA STOP
+	ALPHA PAUSE	; lose...
+	ALPHA PAUSE
 	RE02
 	-01		; deduct loss
 	SEARCH &again
@@ -61,8 +61,8 @@ MARK &win
 	ENTER 0
 	1/X	; force "error" - display flashing
 	RE00
-	ALPHA STOP	; win!
-	ALPHA STOP
+	ALPHA PAUSE	; win!
+	ALPHA PAUSE
 	JIFERR		; clear error condition
 		GO
 		GO
@@ -75,8 +75,8 @@ MARK &error
 	ENTER 0
 	1/X
 	RE01
-	ALPHA STOP	; display flashing amount available
-	ALPHA STOP
+	ALPHA PAUSE	; display flashing amount available
+	ALPHA PAUSE
 	JIFERR	; clear error condition
 		GO
 		GO
