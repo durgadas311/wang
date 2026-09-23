@@ -6,12 +6,12 @@
 
 	STD 14
 MARK &loop
-	ALPHA CHGSGN	; skip if X!=0
+	ALPHA SKXNZ
 		SEARCH &done
 	ENTER 1
 	-D 14
 	RED 14
-	ALPHA 1/X	; pause
+	ALPHA PAUSE
 	SEARCH &loop
 MARK &done
 	END

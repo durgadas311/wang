@@ -25,11 +25,13 @@
 	STD 20	; offset for X
 	$plotter	; plot the wave
 
+	; draw X axis
 	ENTER 90
 	STD 18
 	ENTER 0
 	STD 10
 	$plot_Xaxis
+	; draw Y axis
 	ENTER 1-
 	STD 16
 	ENTER 1
@@ -39,6 +41,7 @@
 	ENTER 0
 	STD 11
 	$plot_Yaxis
+	; print a title
 	ENTER 2
 	$plot_chrsize	; set character size 2
 	ENTER 0

@@ -10,6 +10,7 @@ WFLAGS = path=$(VPATH)
 SRCS =	calendar.w7a \
 	celsius.w7a \
 	countdown.w7a \
+	craps.w7a \
 	example707.w7a \
 	factorial.w7a \
 	graph_sin.w7a \

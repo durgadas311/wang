@@ -51,14 +51,14 @@ MARK &py1
 	RED 10
 	-D 02
 	RED 02
-	ALPHA LOGX	; skip if X+
+	ALPHA SKX+	; skip if X+
 		SEARCH &py2
 	SEARCH &py1	; do more segments
 MARK &py2
 	RED 18
 	+D 02
 	RED 02
-	ALPHA CHGSGN	; skip if X!=0
+	ALPHA SKXNZ	; skip if X!=0
 		RET
 		GO
 	RED 17	; do partial segment
@@ -77,7 +77,7 @@ MARK $Y_tic
 	STD 01
 	$plot_draw		; draw tic mark
 	RED 10
-	ALPHA CHGSGN	; skip if X!=0
+	ALPHA SKXNZ	; skip if X!=0
 		SEARCH &yt1
 	RED 09	; R10 != 0
 	CHGSGN

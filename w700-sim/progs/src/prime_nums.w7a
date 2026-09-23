@@ -5,7 +5,7 @@
 ; R0 = temp for comparisons
 ; R1 = current number to test
 ; R2 = temp for quotient
-; R3 = column count
+; R3 = column count (8..0)
 ; R8 = current divisor to use
 ; R10 = temp for testing quotient
 
@@ -55,7 +55,7 @@ MARK &try_it
 	INT
 	-D 10
 	RED 10
-	ALPHA LNX	; skip if X==0; zero if it divides evenly
+	ALPHA SKX0	; skip if X==0; zero if it divides evenly
 		SEARCH &next2
 	SEARCH &next1
 
@@ -65,7 +65,7 @@ MARK &got_one
 	ENTER 1
 	-D 03
 	RED 03
-	ALPHA LNX	; skip if X==0
+	ALPHA SKX0	; skip if X==0
 		SEARCH &next1
 	ENTER 8
 	STD 03
@@ -75,4 +75,3 @@ MARK &got_one
 MARK &done
 	CLRX
 	END
-

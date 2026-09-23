@@ -45,7 +45,7 @@ MARK &gr1
 	RED 11
 	-D 02
 	RED 02
-	ALPHA LOGX	; skip if X+
+	ALPHA SKX+	; skip if X+
 		RET
 		GO
 	SEARCH &gr1	; loop back for another point

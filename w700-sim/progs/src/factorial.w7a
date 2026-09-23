@@ -1,14 +1,14 @@
 ; Compute factorial
 ; enter N, press GO, stops with N! in display.
 
-	ALPHA LOGX	; skip if X>=0
+	ALPHA SKX+	; skip if X>=0
 		SEARCH &error
 	STD 15
 	ENTER 1
 	STD 14	; result (0!)
 MARK &loop
 	RED 15
-	ALPHA LNX	; skip if X==0
+	ALPHA SKX0	; skip if X==0
 		SEARCH &more
 	RED 14
 	SEARCH &exit

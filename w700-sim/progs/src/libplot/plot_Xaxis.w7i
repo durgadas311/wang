@@ -50,14 +50,14 @@ MARK &px1
 	RED 11
 	-D 02
 	RED 02
-	ALPHA LOGX	; skip if X+
+	ALPHA SKX+	; skip if X+
 		SEARCH &px2
 	SEARCH &px1	; do another segment
 MARK &px2
 	RED 18		; go back to last segment
 	+D 02
 	RED 02
-	ALPHA CHGSGN	; (X!=0) check if whole segment needed
+	ALPHA SKXNZ	; (X!=0) check if whole segment needed
 		RET
 		GO
 	RED 17		; do partial segment

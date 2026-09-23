@@ -16,38 +16,38 @@
 	WRITE 04-00
 	ALPHA " Year\r"
 	$zeller
-	ALPHA CHGSGN	; skip if X!=0
+	ALPHA SKXNZ	; skip if X!=0
 		SETEXP	; fix WRITE of 0 quirk
 		E1
-	WRITE 04-00
-	WRITE 12-01
-	$dow
+	WRITE 04-00	; print return from $zeller
+	WRITE 12-01	; space separator
+	$dow		; print day name
 	ALPHA "\r\r"
 	SEARCH &exit
 
 ; dow in X (0=sat)
 MARK $dow
 	STY
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &sat
 	ENTER 1
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &sun
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &mon
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &tue
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &wed
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &thu
 	-Y
-	ALPHA RET ; skip if Y!=0
+	ALPHA SKYNZ ; skip if Y!=0
 		SEARCH &fri
 	SEARCH &sat
 

@@ -1,0 +1,124 @@
+; Craps game.
+; Enter random seed (0.xxxxx), press GO,
+; see bank (500) and enter bet, press GO, repeat...
+; Registers:
+;	0 current point
+;	1 bank balance
+;	2 bet
+;	3 (internal) dice roll
+;	7 random seed
+
+	STD 7
+	ENTER 500
+	STD 1
+MARK &again
+	REYD 1
+	CLRX
+	STOP
+	STD 2
+	-Y
+	ALPHA SKY+	; skip if Y+
+		SEARCH &error	; bet too large
+	$roll	; roll the dice
+	STD 0	; possible "point"
+	STY	; Y=X, keep point in Y
+	ALPHA PAUSE
+	ALPHA PAUSE
+	ENTER 12	; box-cars - lose
+	SKY=X
+		SEARCH &not12
+	SEARCH &lose	; lose
+MARK &not12
+	ENTER 2		; snake eyes - lose
+	SKY=X
+		SEARCH &not2
+	SEARCH &lose	; lose
+MARK &not2
+	ENTER 3		; three - lose
+	SKY=X
+		SEARCH &not3
+	SEARCH &lose	; lose
+MARK &not3
+	ENTER 7		; seven - win
+	SKY=X
+		SEARCH &not7
+	SEARCH &win	; win
+MARK &not7
+	ENTER 11	; eleven - win
+	SKY=X
+		SEARCH &point
+	SEARCH &win	; win
+MARK &point		; try for point
+	$roll		; roll the dice
+	REYD 0
+	ALPHA PAUSE
+	ALPHA PAUSE
+	SKY=X
+		SEARCH &notPT
+	SEARCH &win	; point - win
+MARK &notPT
+	STY
+	ENTER 7		; seven - lose
+	SKY=X
+		SEARCH &point	; keep going
+MARK &lose	; lose: blank display
+	RED &blank
+	REYD &blank
+	ALPHA PAUSE
+	ALPHA PAUSE
+	RED 2
+	-D 1
+	SEARCH &again
+
+MARK &win	; win: flash display
+	ENTER 0
+	1/X
+	RED 0
+	ALPHA PAUSE
+	ALPHA PAUSE
+	SKERR
+		GO
+		GO
+	RED 2
+	+D 1
+	SEARCH &again
+
+MARK &error	; bet too high
+	ENTER 0
+	1/X
+	RED 1
+	ALPHA PAUSE
+	ALPHA PAUSE
+	SKERR
+		GO
+		GO
+	SEARCH &again
+
+MARK $roll	; roll two dice
+	$rand
+	STY
+	ENTER 6
+	*Y
+	ENTER 1
+	+Y
+	REY
+	INT
+	STD 3
+	$rand
+	STY
+	ENTER 6
+	*Y
+	ENTER 1
+	+Y
+	REY
+	INT
+	+D 3
+	RED 3
+	RET
+
+	.INCLUDE random.w7i
+
+	; TODO: what is the "blankest" pattern
+	.REG blank "FFFFFFFFFFFFF00F"
+
+	END

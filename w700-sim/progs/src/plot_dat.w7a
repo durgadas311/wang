@@ -79,7 +79,7 @@ MARK &pd1	; done with input
 	; Now compute values for drawing Y axis
 	REYD 6		; max Y
 	ENTER 5
-	ALPHA GROUP2	; skip if Y+
+	ALPHA SKY+	; skip if Y+
 		CHGSGN
 		GO
 	+Y
@@ -92,7 +92,7 @@ MARK &pd1	; done with input
 	STYD 16	; Y start (min Y)
 	REYD 7
 	ENTER 5
-	ALPHA GROUP2	; skip if Y+
+	ALPHA SKY+	; skip if Y+
 		CHGSGN
 		GO
 	+Y
@@ -103,7 +103,7 @@ MARK &pd1	; done with input
 	EXY
 	*Y
 	ENTER 1
-	ALPHA GROUP2	; skip if Y+
+	ALPHA SKY+	; skip if Y+
 		CHGSGN
 		GO
 	+Y
@@ -113,6 +113,8 @@ MARK &pd1	; done with input
 	ENTER 0
 	STD 11
 	$plot_Yaxis
+
+	; Print a title in some likely spot
 	ENTER 2
 	$plot_chrsize	; set char size/space
 	ENTER 0
@@ -121,7 +123,7 @@ MARK &pd1	; done with input
 	STD 15
 	$pt_scale	; scale values
 	$plot_move	; move
-	ALPHA "outdoor temp, deg c"
+	ALPHA "OUTDOOR TEMP, DEG C"
 	SEARCH &exit
 
 ; Invoked by 703 on end-of-tape

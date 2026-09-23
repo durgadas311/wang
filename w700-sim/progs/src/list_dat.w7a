@@ -1,7 +1,16 @@
 ; Program to dump a list of data items.
-; Data from 703 Papter Tape Reader
+; Data from 703 Papter Tape Reader. Tape is assumed to
+; contain a list of outdoor temperatures recorded in
+; degrees celsius at 15 minute intervals.
+; See "temperature.wdf".
+;
+; R12 = temp, computing time index
+; R13 = temp, time index (HHMM)
+; R14 = sample (temp, deg C)
+; R15 = sample number, 0..N-1
 
-	ENTER 0e1 ; WRITE xx-00 "bug"
+
+	ENTER 0e1 ; WRITE xx-00 "bug" if "0"
 	STD 15
 	ALPHA "Outdoor Temp, Deg. C\r"
 	ALPHA "Sample  Time  Temp\r"
@@ -12,35 +21,35 @@ MARK &loop
 		SEARCH &more
 	SEARCH &done
 MARK &more
-	STD 14
+	STD 14		; save sample
 	RED 15
-	WRITE 03-00	; print integer
+	WRITE 03-00	; print sample num, integer
 	WRITE 12-03	; print spaces
 	RED 15
 	STD 13
-	ENTER 15
+	ENTER 15	; 15-min sample interval
 	*D 13
-	ENTER 60
+	ENTER 60	; convert to hours
 	/D 13
 	RED 13
 	INT
-	STD 12
+	STD 12		; whole hour
 	-D 13
 	ENTER 60
-	*D 13
+	*D 13		; minutes within hour
 	RED 12
-	ALPHA E2	; X * 100
+	ALPHA SHX+02	; X * 100
 	+D 13
-	RED 13
-	ALPHA CHGSGN	; skip if X!=0
-		SETEXP ; WRITE xx-00 "bug"
+	RED 13		; HHMM as integer
+	ALPHA SKXNZ	; skip if X!=0
+		SETEXP ; WRITE xx-00 "bug" if "0"
 		E1
-	WRITE 04-00	; print integer
+	WRITE 04-00	; print time index, integer, HHMM
 	RED 14
-	WRITE 04-03	; print XXXX.YYY
+	WRITE 04-03	; print temp, XXXX.YYY
 	ALPHA "\r"
 	ENTER 1
-	+D 15
+	+D 15		; ++sample number
 	SEARCH &loop
 
 MARK &done

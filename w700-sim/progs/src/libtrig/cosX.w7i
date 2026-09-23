@@ -38,7 +38,7 @@ MARK &cos0
 	ENTER 1
 	-Y
 	+D 03	; ans
-	ALPHA WRITE	; skip if Y==0
+	ALPHA SKY0	; skip if Y==0
 		SEARCH &cos0
 	REYD 03	; ans
 	ENTER .5e-11
