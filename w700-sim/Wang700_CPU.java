@@ -525,10 +525,10 @@ class Wang700_CPU
 			return ti_bit;
 		} else {
 			if ((ti & 0x00ff00) != 0) {
-				byte b1 = (byte)((ti >> 8) & 0x0ff);
-				byte b2 = (byte)(ti & 0x0ff);
-				ti_data = ((b1 << 1) | even_parity8(b1)) << 9;
-				ti_data |= (b2 << 1) | even_parity8(b2);
+				int b1 = ((ti >> 8) & 0x0ff);
+				int b2 = (ti & 0x0ff);
+				ti_data = ((b1 << 1) | even_parity8((byte)b1)) << 9;
+				ti_data |= (b2 << 1) | even_parity8((byte)b2);
 				ti_bitc = 18;
 			} else {
 				ti_data = (ti << 1) | even_parity8((byte)ti);
