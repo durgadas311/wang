@@ -46,5 +46,5 @@ MARK &cos0
 	-Y
 	REY
 	ALPHA END	; "set sign": retrieve previously saved sign
-	REY 248		; "bad reg"... residual?
+	REYD 248	; "bad reg"... residual?
 	RET

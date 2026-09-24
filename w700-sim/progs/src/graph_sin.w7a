@@ -34,27 +34,7 @@
 ; On entry, display has X.
 ; On return, display has the corresponding Y.
 MARK SR0-00
-	STD 01	; might be redundant
-	$sinX	; correct only for 0-180
-	STD 00	; might be redundant
-	; must change sign if between 180 and 360...
-	; allow for angles above 360...
-	REYD 01
-	ENTER 360
-	/Y
-	REY
-	INT
-	-Y
-	ENTER 360
-	*Y
-	ENTER 180
-	SKY<X
-		SEARCH &sr0a
-	RED 00
-	RET
-MARK &sr0a
-	RED 00
-	CHGSGN
+	$sinX
 	RET
 
 ; Plot a point (R1,R0).
