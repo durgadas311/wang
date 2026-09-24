@@ -441,8 +441,8 @@ class Wang600_CPU
 			return do_repc();
 		}
 		if ((ti & 0x00ff00) != 0) {
-			byte b1 = (byte)((ti >> 8) & 0x0ff);
-			byte b2 = (byte)(ti & 0x0ff);
+			int b1 = ((ti >> 8) & 0x0ff);
+			int b2 = (ti & 0x0ff);
 			int x = ((b1 >> 4) & 0x0f);
 			ti_data = (x << 1) | odd_parity[x];
 			x = (b1 & 0x0f);
