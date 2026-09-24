@@ -181,7 +181,7 @@ public class Wang700Instructions implements WangInstructions {
 		int vp = 0;
 		for (int x = 0; x < end; ++x) {
 			int b = mem[x] & 0xff;
-			if (b == endProg()) {
+			if (x + 1 == end && b == endProg()) {
 				return vp;
 			}
 			vp += (b & 0x0f) + (b >> 4);

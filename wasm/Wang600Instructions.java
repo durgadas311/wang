@@ -190,7 +190,7 @@ public class Wang600Instructions implements WangInstructions {
 		for (int x = 0; x < end; ++x) {
 			int b = mem[x] & 0xff;
 			vp += (b & 0x0f) + (b >> 4);
-			if (b == endProg()) {
+			if (x + 1 == end && b == endProg()) {
 				return vp;
 			}
 		}
