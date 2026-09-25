@@ -7,6 +7,7 @@ import java.io.*;
 
 public class WangAssembler implements WangMemory {
 	Vector<File> paths;
+	Vector<File> included;
 	WangInstructions wi;
 	boolean tape;
 	boolean rom;
@@ -27,6 +28,7 @@ public class WangAssembler implements WangMemory {
 		this.tape = tape;
 		this.rom = rom;
 		this.raw = raw;
+		included = new Vector<File>();
 		startPC = 0;
 		regPC = -1;
 		if (rom) {
@@ -183,7 +185,7 @@ public class WangAssembler implements WangMemory {
 		return 0;
 	}
 
-	private File search(String fn) {
+	private File searchPaths(String fn) {
 		File f = new File(fn);
 		File ff;
 
@@ -192,6 +194,16 @@ public class WangAssembler implements WangMemory {
 			ff = new File(d, fn);
 			if (ff.isFile()) return ff;
 		}
+		return f;
+	}
+
+	private File search(String fn) {
+		File f = searchPaths(fn);
+		if (!f.isFile()) return f; // let caller deal with error
+		for (File i : included) {
+			if (i.equals(f)) return null;
+		}
+		included.add(f);
 		return f;
 	}
 
@@ -296,7 +308,11 @@ public class WangAssembler implements WangMemory {
 				errorList(String.format(">               %s", line),
 					0, ls);
 				File f = search(toks[n]);
-				n = asm(f, ls); // errs counted
+				if (f == null) { // duplicate
+					errorList("; already included", 0, ls);
+				} else {
+					n = asm(f, ls); // errs counted
+				}
 				errorList(String.format("<               %s", line),
 					0, ls);
 				continue;
@@ -377,6 +393,7 @@ public class WangAssembler implements WangMemory {
 		errs = 0;
 		adr = startPC;
 		wi.getSymTab().reset();
+		included.clear();
 		// start second pass
 		wi.finalPass(true);
 		n = asm(file, ls);

@@ -51,7 +51,6 @@ MARK SR0-01
 	.INCLUDE	grapher.w7i
 	.INCLUDE	pt_scale.w7i
 	.INCLUDE	sinX.w7i
-	.INCLUDE	cosX.w7i ; for both sin and cos
 
 MARK &exit
 	END

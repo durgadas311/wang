@@ -60,7 +60,6 @@ MARK SR0-00
 	RET
 
 	.INCLUDE sinX.w7i
-	.INCLUDE cosX.w7i
 	.INCLUDE plotter.w7i
 	.INCLUDE plot_chrsize.w7i
 	.INCLUDE plot_draw.w7i

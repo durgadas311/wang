@@ -8,3 +8,5 @@ MARK $sinX
 	-Y
 	REY
 	SEARCH $cosX
+
+	.INCLUDE cosX.w7i
