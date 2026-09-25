@@ -107,6 +107,13 @@ public class WangAssembler implements WangMemory {
 		}
 	}
 
+	private void goPad(int adr, int code, PrintStream ls) {
+		putMem(adr, code);
+		errorList(String.format(" %04d  %02d-%02d ; safety padding",
+			adr, code >> 4, code & 0x0f),
+			0, ls);
+	}
+
 	private void verifyProg(int adr, PrintStream ls) {
 		if (ls == null) return;
 		int vp = wi.verifyProg(mem, adr);
@@ -309,7 +316,18 @@ public class WangAssembler implements WangMemory {
 					n, ls);
 				continue;
 			} else {
-				n = wi.encode(toks, n, this, adr);
+				if (wi.needRegFix()) {
+					goPad(adr++, wi.go(), ls);
+				}
+				// should never normally return 0, so if it
+				// does assume we need to insert a GO and
+				// try again.
+				int nn = wi.encode(toks, n, this, adr);
+				if (nn == 0) {
+					goPad(adr++, wi.go(), ls);
+					nn = wi.encode(toks, n, this, adr);
+				}
+				n = nn;
 			}
 			errorList(String.format("%c%04d  %02d-%02d    %s",
 						wi.lastError(),

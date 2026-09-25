@@ -8,8 +8,6 @@
 ;	R1 = first register (&array[0])
 ;	R15 = number of registers used (N)
 
-	.SREG	&_last	; TODO: wasm needs to generate a "last_reg" symbol
-
 MARK &load_tape_data
 	ST01	; &array[0]
 	ENTER 0	; dest register number
@@ -20,7 +18,7 @@ MARK &load_tape_data
 	+00		;
 	ENTER 1
 	-00		; R0 = &array[N-1]
-	ENTER &_last
+	ENTER REGEND	; last usable register, first after program end.
 	ALPHA JIFR0<
 		SEARCH &ltd_err
 	RE00

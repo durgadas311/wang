@@ -10,7 +10,7 @@
 	ENTER 315392
 	ST02
 	T00		; device address starts at 0
-	ENTER END	; register space after program end
+	ENTER PRGEND	; space after program end
 	ST01
 	GROUP2 00-00	; address may need customization
 MARK &loop

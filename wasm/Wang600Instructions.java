@@ -15,6 +15,7 @@ public class Wang600Instructions implements WangInstructions {
 	private char error;
 	private boolean rom;
 	private boolean pass;
+	private boolean regFix;
 	private int lastStep;
 
 	static final String E = "0123456789.E-";
@@ -176,6 +177,7 @@ public class Wang600Instructions implements WangInstructions {
 	public int endProg() { return 0x9e; }
 	public int endData() { return 0xff; }
 	public int stop() { return 0x93; }
+	public int go() { return 0x83; }
 	public char lastError() { return error; }
 	public boolean finalPass() { return pass; }
 	public void finalPass(boolean p) { pass = p; }
@@ -195,6 +197,20 @@ public class Wang600Instructions implements WangInstructions {
 			}
 		}
 		return -1;	// error
+	}
+	public boolean twoStep(int code) {
+		Instruction e;
+
+		if (code < 0) return false;
+		e = disas(code);
+		if (e == null) return false; // assumption
+		return (e.flags != 0 && e.flags != FCALL && e.flags != FROM);
+	}
+
+	public boolean needRegFix() {
+		boolean b = regFix;
+		regFix = false;
+		return b;
 	}
 
 	// Assembly methods //
@@ -336,8 +352,10 @@ public class Wang600Instructions implements WangInstructions {
 		x = first;
 		if (line[x].equalsIgnoreCase("ENTER")) {
 			String val = line[++x];
-			if (val.equalsIgnoreCase("END")) {
+			if (val.equalsIgnoreCase("PRGEND")) {
 				val = String.format("%04d", lastStep);
+			} else if (val.equalsIgnoreCase("REGEND")) {
+				val = String.format("%03d", adrReg(regPad(lastStep)));
 			} else if (val.charAt(0) == '&') {
 				reg = tbl.getLabel(val, adr);
 				if (reg < 0) {
@@ -677,6 +695,10 @@ public class Wang600Instructions implements WangInstructions {
 				}
 			}
 		}
+		// If the last byte of data is a two-step command,
+		// it might cause problems with a subsequent MARK
+		// or END PROG.
+		regFix = twoStep(c & 0xff);
 		return adr - start;
 	}
 

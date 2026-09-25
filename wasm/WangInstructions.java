@@ -18,6 +18,8 @@ public interface WangInstructions {
 
 	int encode(String[] line, int first, WangMemory mem, int start);
 	void endPC(int pc);
+	boolean twoStep(int code);
+	boolean needRegFix();
 	int verifyProg(byte[] mem, int end);
 	int regSteps(int nreg);
 	int regPad(WangMemory mem, int start);
@@ -43,6 +45,7 @@ public interface WangInstructions {
 	int regsPerBlk();
 	int regBlkLen();
 	int stop();
+	int go();
 	boolean finalPass();
 	void finalPass(boolean p);
 	String printHelp(); // help string for PRINT/WRITE command (FMT)

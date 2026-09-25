@@ -3,6 +3,38 @@
 import java.util.Vector;
 import java.io.PrintStream;
 
+// There is a bug in 720C microcode where LIST PROG and RECORD PROG fail to
+// properly recognize the END PROG if it is in the shadow of a step that resembles
+// a two-step command even though it itself is the operand of another two-step
+// command. For example:
+//
+//	0000  04 05  RECALL DIRECT
+//	0001  04 00  register 40, also confused with +DIRECT
+//	0002  05 12  END PROG
+//
+// Essentially, an END PROG that is preceded by any 04-xx or 12-xx, except
+// 04-13 or 12-13, will not be recognized as the end. Even if the offending
+// code is only the operand of a two-step command and thus the END PROG is not
+// itself an operand.
+//
+// LIST PROG and RECORD PROG, upon detecting END PROG, back up and look at
+// previous step, checking for a two-step command. This is taken out of context
+// and thus misses the case where that previous step is actually the operand
+// of a two-step command and should be ignored.
+//
+// It may be possible to avoid this by inserting a GO command before END PROG,
+// at least in the case that the preceding step is 04-xx or 12-xx (xx != 13).
+// However, the case of ALPHA END-PROG (apply saved sign, for trig funcs) needs
+// to avoid inserting a GO. END-PROG should never be a label, and is not a
+// valid DIRECT register, but it appears those cases would otherwise work so
+// should not be prevented.
+//
+// Oddly, VERIFY PROG does not suffer this problem as it tracks two-step
+// commands and does not compare their operand step to END PROG.
+//
+// It is not known if there is a later version of ROM that fixes this.
+// Waiting on a pristine copy of 720-D3 (or 700-D4) to confirm.
+
 public class Wang700Instructions implements WangInstructions {
 	private WangSymbolTable tbl;
 	private static Vector<Instruction> instr = new Vector<Instruction>();
@@ -10,6 +42,7 @@ public class Wang700Instructions implements WangInstructions {
 	private TiltRotate tr;
 	private char error;
 	private boolean pass;
+	private boolean regFix;
 	private int lastStep;
 
 	static final String E = "0123456789E-.";
@@ -168,6 +201,7 @@ public class Wang700Instructions implements WangInstructions {
 	public int endProg() { return 0x5c; }
 	public int endData() { return 0x5c; }
 	public int stop() { return 0x5f; }
+	public int go() { return 0x5e; }
 	public char lastError() { return error; }
 	public boolean finalPass() { return pass; }
 	public void finalPass(boolean p) { pass = p; }
@@ -187,6 +221,20 @@ public class Wang700Instructions implements WangInstructions {
 			vp += (b & 0x0f) + (b >> 4);
 		}
 		return -1;	// error
+	}
+	public boolean twoStep(int code) {
+		Instruction e;
+
+		if (code < 0) return false;
+		e = disas(code);
+		if (e == null) return false; // assumption
+		return (e.flags != 0 && e.flags != FCALL);
+	}
+
+	public boolean needRegFix() {
+		boolean b = regFix;
+		regFix = false;
+		return b;
 	}
 
 	// Assembly methods //
@@ -320,8 +368,10 @@ public class Wang700Instructions implements WangInstructions {
 		x = first;
 		if (line[x].equalsIgnoreCase("ENTER")) {
 			String val = line[++x];
-			if (val.equalsIgnoreCase("END")) {
+			if (val.equalsIgnoreCase("PRGEND")) {
 				val = String.format("%04d", lastStep);
+			} else if (val.equalsIgnoreCase("REGEND")) {
+				val = String.format("%03d", adrReg(regPad(lastStep)));
 			} else if (val.charAt(0) == '&') {
 				reg = tbl.getLabel(val, adr);
 				if (reg < 0) {
@@ -364,6 +414,14 @@ public class Wang700Instructions implements WangInstructions {
 			if (e == null) {
 				error = 'O';
 				return -1;
+			}
+			// If an END PROG follows a step that resembles a
+			// two-step command, it exposes bugs in LIST PROG
+			// and RECORD PROG. Return 0 to signal that a fixup
+			// is required. After the fixup, this will no longer
+			// be true.
+			if (e.opcode == endProg() && twoStep(mem.getMem(adr - 1))) {
+				return 0; // try again after inserting GO...
 			}
 			if (mem.putMem(adr++, e.opcode)) {
 				error = 'Z';
@@ -486,7 +544,7 @@ public class Wang700Instructions implements WangInstructions {
 
 	// get number of steps needed for num registers
 	public int regSteps(int nreg) {
-		return ((nreg + 1) >> 2) * 16;
+		return ((nreg + 1) >> 1) * 16;
 	}
 
 	public int regPad(int start) {
@@ -605,7 +663,7 @@ public class Wang700Instructions implements WangInstructions {
 		boolean odd = ((reg & 1) != 0);
 		int x;
 		int c = 0;
-		int b;
+		int b = 0; // should not matter, loop always changes
 		double d;
 		String v;
 
@@ -628,6 +686,10 @@ public class Wang700Instructions implements WangInstructions {
 				return -16;
 			}
 		}
+		// If the last byte of data is a two-step command,
+		// it might cause problems with a subsequent MARK
+		// or END PROG.
+		regFix = twoStep(b & 0xff);
 		return adr - start;
 	}
 
