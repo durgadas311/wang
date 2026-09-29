@@ -8,7 +8,7 @@
 ;	3 (internal) dice roll
 ;	7 random seed
 
-	STD 7
+	$seed
 	ENTER 500
 	STD 1
 MARK &again
@@ -96,6 +96,7 @@ MARK &error	; bet too high
 
 MARK $roll	; roll two dice
 	$rand
+	ABS
 	STY
 	ENTER 6
 	*Y
@@ -105,6 +106,7 @@ MARK $roll	; roll two dice
 	INT
 	STD 3
 	$rand
+	ABS
 	STY
 	ENTER 6
 	*Y

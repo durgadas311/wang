@@ -1,0 +1,60 @@
+; Random Number Generator from "520-600 Series General Program Library Vol 1"
+;
+; Enter seed, press f00, displays first random number and stops.
+; Press f15 to get another random number (display and stop).
+
+MARK f00	; init seed and generate random number
+	ABS
+	ST15
+	ENTER 1
+	-15
+	JIF+
+		SEARCH &E2
+	1/X
+	ST15
+	ENTER 1
+	-15
+MARK E2
+	ENTER 1
+	+15
+MARK E3	; generate one (X = R14 or R15)
+	f01
+	ST14	; current random number
+	SEARCH E5
+
+MARK f01
+	ABS
+	ST15
+	LNX
+	*15
+	E^X
+	ALPHA SHX+02
+	ST15
+	INT
+	-15
+	ENTER 2
+	*15
+	ENTER 1
+	-15
+	RET
+
+MARK E4
+	f14
+	SEARCH E3
+
+MARK f14
+	RE14
+	GO
+	GO
+	RET
+
+MARK f15	; generate new random number
+	f14
+	SEARCH E3
+
+MARK E5
+	RE14
+	STOP
+	SEARCH E3
+
+	END

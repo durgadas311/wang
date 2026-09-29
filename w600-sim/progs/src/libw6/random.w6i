@@ -1,12 +1,35 @@
 ; $RAND: random number 0.0 <= x < 1.0
 ; uses R07 (seed: 0..0.9999)
 
-MARK $rand
+MARK $seed
+	ABS
+	ST07
+	ENTER 1
+	-07
+	JIF+
+		SEARCH &rnd0
+	1/X
+	ST07
+	ENTER 1
+	-07
+MARK &rnd0
 	ENTER 1
 	+07
-	ALPHA SHX+07
+	RET
+
+MARK $rand
+	RE07
+	ABS
+	ST07
 	LNX
 	*07
+	E^X
+	ALPHA SHX+02
+	ST07
 	INT
+	-07
+	ENTER 2
+	*07
+	ENTER 1
 	-07
 	RET
