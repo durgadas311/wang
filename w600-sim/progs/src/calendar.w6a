@@ -116,6 +116,8 @@ MARK $month
 	-03
 	ENTER 2
 	*03		; R3 = (month - 1) * 2
+	ENTER 1
+	+03		; +1 for starting with R03, not R03+1
 	INDIR R03	; "switch" on R03
 	SEARCH &jan	; R03 = 0
 	SEARCH &feb	; R03 = 2
