@@ -1,4 +1,4 @@
-4\v 8\v # left header c0
+4\v 8\v # left header upper
 <HTML><CENTER>plot 602</CENTER></HTML> # c0
 <HTML><CENTER>plot 612</CENTER></HTML> # c1
 <HTML><CENTER>data 612</CENTER></HTML> # c2
@@ -9,10 +9,10 @@
 <HTML><CENTER>Xaxis 612</CENTER></HTML> # c7
 <HTML><CENTER>Yaxis 612</CENTER></HTML> # c8
  # c9
- # ca
- # cb
- # cc
- # cd
- # ce
- # cf
-libplot # right header cf
+ # c10
+ # c11
+ # c12
+ # c13
+ # c14
+ # c15
+libplot # right header upper

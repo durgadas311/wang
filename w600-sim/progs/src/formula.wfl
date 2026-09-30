@@ -1,0 +1,18 @@
+f(x)\v # left header upper
+<HTML><CENTER>CLEAR</CENTER></HTML> # f0
+<HTML><FONT SIZE=+2><CENTER>+</CENTER></HTML> # f1
+<HTML><FONT SIZE=+2><CENTER>&minus;</CENTER></HTML> # f2
+<HTML><FONT SIZE=+2><CENTER>&times;</CENTER></HTML> # f3
+<HTML><FONT SIZE=+2><CENTER>&divide;</CENTER></HTML> # f4
+<HTML><FONT SIZE=+2><CENTER>^</CENTER></HTML> # f5
+<HTML><FONT SIZE=+1><CENTER>(</CENTER></HTML> # f6
+<HTML><FONT SIZE=+1><CENTER>)</CENTER></HTML> # f7
+<HTML><FONT SIZE=+2><CENTER>=</CENTER></HTML> # f8
+ # f9
+ # f10
+ # f11
+ # f12
+ # f13
+ # f14
+ # f15
+formula # right header upper

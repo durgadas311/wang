@@ -1,0 +1,212 @@
+; "Formulae Evaluation" 1023-6-MA6 from
+; 520-600 Series Program Library Vol1
+;
+; f00 = CLEAR
+; f01 = [+]
+; f02 = [-]
+; f03 = [*]
+; f04 = [/]
+; f05 = [^]
+; f06 = [(]
+; f07 = [)]
+; f08 = [=]
+
+MARK f00	; the CLEAR key
+	ENTER 4
+	ST00
+MARK E0
+	ENTER 1
+	+00
+	F05
+	ENTER 31
+	ALPHA JIF0
+		SEARCH E0
+	CLEAR
+	RET
+
+MARK f01	; the [+] key
+	F01
+	F00
+	ENTER 7
+	F02
+	ENTER 1
+	F06
+	RET
+
+MARK f02	; the [-] key
+	F01
+	F00
+	ENTER 7
+	F02
+	ENTER 2
+	F06
+	RET
+
+MARK f03	; the [*] key
+	F01
+	ENTER 12
+	F02
+	ENTER 1
+	F06
+	RET
+
+MARK f04	; the [/] key
+	F01
+	ENTER 12
+	F02
+	ENTER 2
+	F06
+	RET
+
+MARK f05	; the [^] key
+	ST04
+	ENTER 27
+	F02
+	RE04
+	F06
+	RET
+
+MARK f06	; the [(] key
+	ENTER 1
+	+05
+	RET
+
+MARK f07	; the [)] key
+	F01
+	F00
+	ENTER 17
+	F02
+	INDIR RE00
+	ST04
+	ENTER 7
+	F02
+	F05
+	ENTER 5
+	+00
+	F05
+	ENTER 5
+	+00
+	F05
+	ENTER 5
+	+00
+	F05
+	ENTER 1
+	-05
+	RE04
+	RET
+
+MARK f08	; the [=] key
+	ST04
+	RE05
+	JIF0
+		ENTER 0
+		/00
+	RE04
+	F01
+	F00
+	RECALL 17
+	RET
+
+; Internal functions
+MARK F00
+	ENTER 7
+	F02
+	INDIR RE00
+	JIFNZ
+		SEARCH E1
+	ST00
+	ENTER 1
+	ALPHA JIF0
+		SEARCH E2
+MARK E3
+	F04
+	INDIR +00
+	SEARCH E4
+MARK E2
+	F04
+	INDIR -00
+	SEARCH E4
+MARK E1
+	ENTER 12
+	F02
+	INDIR RE00
+	JIF0
+		SEARCH E3
+	ENTER 5
+	+00
+	RE04
+	INDIR +00
+MARK E4
+	ENTER 12
+	F02
+	F05
+	ENTER 10
+	+00
+	F05
+	RET
+
+MARK F01
+	ST04
+	ENTER 27
+	F02
+	INDIR RE00
+	JIFNZ
+		SEARCH E5
+	LOGX
+	*04
+	10^X
+	ST04
+	F05
+MARK E5
+	ENTER 12
+	F02
+	INDIR RE00
+	JIF0
+		SEARCH E6
+	F03
+	RE04
+	F06
+	RET
+MARK E6
+	ST00
+	ENTER 1
+	ALPHA JIF0
+		SEARCH E7
+	F03
+	RE04
+	INDIR *00
+	RET
+MARK E7
+	F03
+	RE04
+	INDIR /00
+	RET
+
+MARK F02
+	ST00
+	RE05
+	+00
+	RET
+
+MARK F03
+	ENTER 22
+	F02
+	RET
+
+MARK F04
+	F03
+	INDIR RE00
+	ST06
+	ENTER 5
+	-00
+	RE06
+	RET
+
+MARK F05
+	ENTER 0
+MARK F06
+	INDIR ST00
+	CLEAR
+	RET
+
+	END

@@ -1,0 +1,105 @@
+; "Base A <-> Base B" 1024-2-MA6
+; from 520-600 Series Program Library Vol1
+;
+; Enter Base A, ST left
+; Enter Base B, ST right
+; Bases 2..10
+;
+; f00 = convert A -> B
+; f01 = convert A <- B
+; Added:
+; f14 = set A
+; f15 = set B
+
+; internal functions
+MARK F00
+	ST01
+	ENTER 0
+	ST00
+	ST02
+	ENTER 11
+	ST05
+	RET
+
+MARK F01
+	ENTER .5
+	+02
+	INT
+	ST02
+	RET
+
+; The user interface functions
+MARK f00	; convert A -> B
+	F00
+	ST00
+MARK E0
+	RE00
+	10^X
+	/01
+	INT
+	ST04
+	-01
+	RE15
+	LOGX
+	ST03
+	RE00
+	10^X
+	*01
+	RE00
+	*03
+	10^X
+	*04
+	+02
+	ENTER 1
+	-00
+	JIF+
+		SEARCH E1
+	SEARCH E0
+MARK E1
+	F01
+	F00
+MARK E2
+	RE14
+	/01
+	INT
+	EX01
+	ST03
+	RE01
+	-03
+	RE14
+	*03
+	RE00
+	10^X
+	*03
+	+02
+	RE05
+	ST04
+	ENTER 1
+	+00
+	-04
+	JIF0
+		SEARCH E2
+	SEARCH F01
+
+MARK f01	; convert A <- B
+	ST01
+	RE15
+	EX14
+	ST15
+	RE01
+	f00
+	RE15
+	EX14
+	ST15
+	RE02
+	RET
+
+MARK f14	; set A
+	ST15
+	RET
+
+MARK f15	; set B
+	ST14
+	RET
+
+	END

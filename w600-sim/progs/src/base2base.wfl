@@ -1,0 +1,18 @@
+f(x)\v # left header upper
+<HTML><CENTER>A&rarr;B</CENTER></HTML> # f0
+<HTML><CENTER>A&larr;B</CENTER></HTML> # f1
+ # f2
+ # f3
+ # f4
+ # f5
+ # f6
+ # f7
+ # f8
+ # f9
+ # f10
+ # f11
+ # f12
+ # f13
+set A # f14
+set B # f15
+base cnv # right header upper

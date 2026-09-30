@@ -1,0 +1,18 @@
+4\v 8\v # left header upper
+<HTML><CENTER>plot 602</CENTER></HTML> # c0
+<HTML><CENTER>plot 612</CENTER></HTML> # c1
+<HTML><CENTER>data 612</CENTER></HTML> # c2
+<HTML><CENTER>chrsize 612</CENTER></HTML> # c3
+<HTML><CENTER>home 612</CENTER></HTML> # c4
+<HTML><CENTER>move 612</CENTER></HTML> # c5
+<HTML><CENTER>draw 612</CENTER></HTML> # c6
+<HTML><CENTER>Xaxis 612</CENTER></HTML> # c7
+<HTML><CENTER>Yaxis 612</CENTER></HTML> # c8
+ # c9
+ # c10
+ # c11
+ # c12
+ # c13
+ # c14
+ # c15
+libplot # right header upper

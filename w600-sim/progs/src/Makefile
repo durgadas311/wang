@@ -14,7 +14,7 @@ SUBDIRS = libw6 libplot tests
 ROMS = libplot.w6x
 # might need to separate FLABS for ROM (implicit build) from RAM (explicit build)
 # TODO: need a way to generate the labels
-#FLABS = libplot.wfl
+FLABS = libplot.wfl base2base.wfl formula.wfl
 # The modules that comprise libplot ROM:
 LPLOT = grapher.w6i \
 	plot_chrsize.w6i \
@@ -70,8 +70,8 @@ list_dat.w6t: list_dat.w6a load_tape_data.w6i
 w600progs.tgz: $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS) $(LISTS)
 	tar -czf w600progs.tgz --transform="s;^;w600progs/;" $^
 
-install: $(PROGS) $(ROMS) $(DATAT)
-	cp $(PROGS) $(ROMS) $(DATAT) ~/Wang600Files/
+install: $(PROGS) $(FLABS) $(ROMS) $(DATAT)
+	cp $(PROGS) $(FLABS) $(ROMS) $(DATAT) ~/Wang600Files/
 
 ship: $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS)
 	cp $(PROGS) $(ROMS) $(FLABS) $(DATAT) $(DATAS) ..
