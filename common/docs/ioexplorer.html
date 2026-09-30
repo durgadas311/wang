@@ -58,16 +58,18 @@ from the calculator.
 	<DT>Grp1/Grp2
 	<DD>This radio button selects whether the device matches GROUP 1 or
 	GROUP 2 commands.</DD>
-	<DT>(Input) num
-	<DD>If selected, the following input text will be interpreted as
-	numeric entry, else it is considered text and converted to
-	OutputWriter tile-rotate codes.</DD>
+	<DT>(Input) txt/num/pgm
+	<DD>This radio button selects how to interpret the "Input" field.
+	"txt" expects text which is converted to OutputWriter tilt-rotate codes.
+	"num" expects a numerical representation which is converted to number entry keys.
+	"pgm" expects program codes expressed as hexadecimal numbers separated by spaces.
+	</DD>
 	<DT>Input
 	<DD>This field specifies what will be sent as input for a GROUP 1
-	or GROUP 2 command. After sending the last character, then next
+	or GROUP 2 command. After sending the last character with "auto" enabled, then next
 	thing sent is a GO code - which terminates the GROUP command.
-	If left blank, then no input is sent - only the GO.
-	Input is interpreted according to the "num" selection.</DD>
+	If left blank, then no input is sent - only the GO (regardless of "auto").
+	Input is interpreted according to the txt/num/pgm selection.</DD>
 	<DT>auto
 	<DD>When selected, the device will operate independently of the
 	user. Otherwise, it is necessary to press GISN or GO buttons
@@ -77,7 +79,7 @@ from the calculator.
 	"GKBD" signal, inverted. If selected, the calculator GKBD signal is off,
 	indicating that the calculator is ready for an input character.</DD>
 	<DT>GISN
-	<DD>This button is used to manually send the next character (or GO).</DD>
+	<DD>This button is used to manually send the next character.</DD>
 	<DT>GLRN
 	<DD>This selects the state of the GLRN signal during the time that the
 	device is active. It is reset by PRIME or by sending the GO code,
@@ -88,6 +90,10 @@ from the calculator.
 	<DD>This sends the GO code which terminates the GROUP command.
 	It may be used to terminate the input before reaching then end
 	of the data.</DD>
+	<DT>S&amp;R
+	<DD>This sends the subroutine 00 code, which does not terminate the GROUP command.
+	If the calculator is in RUN mode, then this will attempt to execute subroutine 00.
+	</DD>
 	</DL>
 </DD>
 

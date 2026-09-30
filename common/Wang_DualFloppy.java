@@ -394,6 +394,13 @@ public class Wang_DualFloppy extends JFrame
 		return pan;
 	}
 
+	private void _onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
+
 	private void doGO() {
 		bi_hdr = 0;
 		giChr.add(GO);
@@ -836,10 +843,7 @@ System.err.format("do_ack\n");
 	public JFrame getFrame() { return null; }
 	public Component getComponent() { return null; }
 	public void onOff(boolean vis) {
-		if (visib != vis) {
-			visib = vis;
-			setVisible(vis);
-		}
+		_onOff(vis);
 		if (vis) toFront();
 	}
 	public boolean onOff() { return visib; }

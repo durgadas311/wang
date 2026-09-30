@@ -238,6 +238,13 @@ class Wang_Paper
 		_frame.addWindowListener(this);
 	}
 
+	protected void _onOff(boolean on) {
+		if (_onoff != on) {
+			_onoff = on;
+			_frame.setVisible(_onoff);
+		}
+	}
+
 	private void save(File file) {
 		String ext = SuffFileFilter.getExtension(file);
 		if (!ext.equals("txt") && !ext.equals("png")) {
@@ -1029,10 +1036,7 @@ class Wang_Paper
 	}
 
 	public void onOff(boolean on) {
-		if (_onoff != on) {
-			_onoff = on;
-			_frame.setVisible(_onoff);
-		}
+		_onOff(on);
 		if (on) _frame.toFront();
 	}
 

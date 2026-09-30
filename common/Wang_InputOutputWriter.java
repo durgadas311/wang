@@ -104,13 +104,13 @@ class Wang_InputOutputWriter extends IBM_Selectric
 			_indOUTPUT.setOn(false);
 			_indINPUT.setOn(true);
 			super.getPaper().addKeyListener(this);
-			onOff(true);
+			onOff(true); // fully raise, since input expected
 		} else if (c == 0x4d) { // "TYPE" - local echo but no send
 			_glrn = 0;
 			_indOUTPUT.setOn(false);
 			_indTYPE.setOn(true);
 			super.getPaper().addKeyListener(this);
-			onOff(true);
+			onOff(true); // fully raise, since input expected
 		}
 		return _input;
 	}

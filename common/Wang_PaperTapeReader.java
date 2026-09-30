@@ -165,6 +165,13 @@ class Wang_PaperTapeReader extends JFrame
 	LinkedBlockingDeque<Integer> giCmd;
 	boolean gkbd; // actually, !GKBD
 
+	private void _onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
+
 	private boolean isNumeric() {
 		int x = numerics.indexOf((char)_currByte);
 		return (x >= 0);
@@ -257,10 +264,7 @@ class Wang_PaperTapeReader extends JFrame
 	public void setProperties(Wang_Properties p) {}
 	public boolean onOff() { return visib; }
 	public void onOff(boolean vis) {
-		if (visib != vis) {
-			visib = vis;
-			setVisible(vis);
-		}
+		_onOff(vis);
 		if (vis) toFront();
 	}
 	public JFrame getFrame() { return null; }

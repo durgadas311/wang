@@ -209,8 +209,8 @@ try {
 		}
 		_text.repaint();
 
-		// "auto raise"...
-		onOff(true);
+		// "auto visible"... but not raise
+		_onOff(true);
 	}
 
 	public int getRBS() { return 1; } // always ready, for now

@@ -162,6 +162,13 @@ public class Wang_ExtendedMemory extends JFrame
 		t.start();
 	}
 
+	private void _onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
+
 	private void setupDialog() {
 		_dia_pn = new JPanel();
 		GridBagLayout gb = new GridBagLayout();
@@ -540,10 +547,7 @@ System.err.format("do_ack\n");
 	public JFrame getFrame() { return null; }
 	public Component getComponent() { return null; }
 	public void onOff(boolean vis) {
-		if (visib != vis) {
-			visib = vis;
-			setVisible(vis);
-		}
+		_onOff(vis);
 		if (vis) toFront();
 	}
 	public boolean onOff() { return visib; }

@@ -858,8 +858,8 @@ if (_draw_bar) {
 			setCursor(_x, _y);
 			_text.repaint();
 		}
-		// "auto raise"...
-		onOff(true);
+		// "auto visible"... but not raise
+		_onOff(true);
 	}
 
 	public int getRBS() { return 1; } // always ready, for now

@@ -7,8 +7,24 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
-// GROUP-1 04-01 in RUN mode
-// GROUP-2 04-01 in LEARN mode
+// GROUP-1 04-08 in RUN mode
+// GROUP-2 04-08 in LEARN mode
+//
+// The documentation states:
+//	"Once the GROUP-1 04-08 instruction or the
+//	GROUP-2 04-08 instruction is given, the key-
+//	board is non-operational until the PRIME key is
+//	depressed."
+// However, the schematic clearly shows that GO is decoded
+// and appears to clear the activate state of the device.
+// Or at least it clears the GLRN signal and deactivates
+// after sending GO.
+//
+// Interpretation of the schematic suggests that no program can contain
+// GO instructions (used a no-ops) or else reading of cards will terminate.
+// For the 600 series, there do not appear to be any single-step codes that
+// are truly no-op (E13 has some odd "restore sign" function). For the 700,
+// possibly the 13-14 "shadow code" for GO will suffice.
 //
 
 class Wang_CardReader extends JFrame
@@ -94,7 +110,7 @@ class Wang_CardReader extends JFrame
 	CardDeck out;
 	LED gon;
 
-	int addr = 0x41;
+	int addr = 0x48;
 	int _iob;
 	boolean _input;
 	int _glrn;
@@ -144,6 +160,13 @@ class Wang_CardReader extends JFrame
 		_currByte = b;
 	}
 
+	private void _onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
+
 	public boolean start_cn36(int iob, int c) {
 		// currently, don't care if running program or not...
 		setActive(((iob & 0x04) == 4 && c == addr));
@@ -166,10 +189,7 @@ class Wang_CardReader extends JFrame
 	public void setProperties(Wang_Properties p) {}
 	public boolean onOff() { return visib; }
 	public void onOff(boolean vis) {
-		if (visib != vis) {
-			visib = vis;
-			setVisible(vis);
-		}
+		_onOff(vis);
 		if (vis) toFront();
 	}
 	public JFrame getFrame() { return null; }

@@ -64,7 +64,9 @@ public class WangIOExplorer extends JFrame
 	JTextField adr;
 	JRadioButton grp1;
 	JRadioButton grp2;
-	JCheckBox gi_num;
+	JRadioButton gi_txt;
+	JRadioButton gi_num;
+	JRadioButton gi_pgm;
 	JTextField gin;
 	JButton gisn;
 	JCheckBox gkbd;
@@ -188,8 +190,13 @@ public class WangIOExplorer extends JFrame
 		gin = new JTextField();
 		gin.setPreferredSize(new Dimension(500, 20));
 		gin.setHorizontalAlignment(SwingConstants.LEFT);
-		gi_num = new JCheckBox("num");
-		gi_num.addActionListener(this);
+		grp = new ButtonGroup();
+		gi_txt = new JRadioButton("txt", true);
+		gi_num = new JRadioButton("num", false);
+		gi_pgm = new JRadioButton("pgm", false);
+		grp.add(gi_txt);
+		grp.add(gi_num);
+		grp.add(gi_pgm);
 		gisn = new JButton("GISN");
 		gisn.setPreferredSize(new Dimension(50, 20));
 		gisn.setMargin(new Insets(2,2,2,2));
@@ -374,8 +381,18 @@ public class WangIOExplorer extends JFrame
 		++gc.gridx;
 		setGap(5);
 		++gc.gridx;
+		gb.setConstraints(gi_txt, gc);
+		add(gi_txt);
+		++gc.gridx;
+		setGap(5);
+		++gc.gridx;
 		gb.setConstraints(gi_num, gc);
 		add(gi_num);
+		++gc.gridx;
+		setGap(5);
+		++gc.gridx;
+		gb.setConstraints(gi_pgm, gc);
+		add(gi_pgm);
 		++gc.gridy;
 		gc.gridx = 1;
 		int gin_y = gc.gridy;
@@ -590,6 +607,13 @@ public class WangIOExplorer extends JFrame
 		return s;
 	}
 
+	private void _onOff(boolean vis) {
+		if (visib != vis) {
+			visib = vis;
+			setVisible(vis);
+		}
+	}
+
 	private void clear() { // soft reset, IOB=0
 		tws.setEnabled(false);
 		tws.setSelected(false);
@@ -736,6 +760,17 @@ public class WangIOExplorer extends JFrame
 		tyo.setText("");
 	}
 
+	private void parsePgm(Vector<Integer> inp) {
+		String[] ss = gin.getText().trim().split("\\s");
+		for (String s : ss) {
+			int b = 0;
+			try {
+				b = Integer.valueOf(s, 16);
+				inp.add(b);
+			} catch (Exception ee) {} // silently drop invalid expr
+		}
+	}
+
 	private void parseNum(Vector<Integer> inp) {
 		for (byte c : gin.getText().getBytes()) {
 			if (c >= '0' && c <= '9') {
@@ -772,7 +807,9 @@ public class WangIOExplorer extends JFrame
 	// setup "input" from 'gin'
 	private void startInput() {
 		Vector<Integer> inp = new Vector<Integer>();
-		if (gi_num.isSelected()) {
+		if (gi_pgm.isSelected()) {
+			parsePgm(inp);
+		} else if (gi_num.isSelected()) {
 			parseNum(inp);
 		} else {
 			parseTR(inp);
@@ -788,11 +825,12 @@ public class WangIOExplorer extends JFrame
 
 	// -1 on end of string
 	private int giNxtChr() {
-		if (gin_idx < gin_dat.length) {
-			return gin_dat[gin_idx++];
-		} else {
-			return -1;
+		if (gin_dat.length == 0) return -1;
+		if (gin_idx >= gin_dat.length) {
+			if (gi_auto.isSelected()) return -1; // signal GO
+			gin_idx = 0; // else just start over
 		}
+		return gin_dat[gin_idx++];
 	}
 
 	private void gi_next() {
@@ -948,6 +986,9 @@ public class WangIOExplorer extends JFrame
 			}
 		} else if (cb == bi_supp) {
 			setBioSupp(bi_supp.isSelected());
+		} else if (cb == glrn) {
+			// Wake up calculator
+			Wang_UI.getCore().chgMode0();
 		}
 	}
 
@@ -1150,6 +1191,7 @@ System.err.format("do_ack\n");
 		iob.setText("");
 		tyo_clear(); // or not?
 		//ty_auto.setSelected(false);
+		// don't need wakup, calculator already awake
 		glrn.setSelected(false);
 		devEna = false;
 		don.set(devEna);
@@ -1170,10 +1212,7 @@ System.err.format("do_ack\n");
 	public JFrame getFrame() { return this; }
 	public Component getComponent() { return this; }
 	public void onOff(boolean vis) {
-		if (visib != vis) {
-			visib = vis;
-			setVisible(vis);
-		}
+		_onOff(vis);
 		if (vis) toFront();
 	}
 	public boolean onOff() { return visib; }
@@ -1194,6 +1233,7 @@ System.err.format("do_ack\n");
 			if (c < 0) continue; // or break?
 			// TODO: verify IOB = 4,5,6,7 ?
 			if (c == GO) { // TODO: others as well
+				// don't need wakup, replyIO() does that.
 				glrn.setSelected(false);
 			}
 			trigGISN(curIob);

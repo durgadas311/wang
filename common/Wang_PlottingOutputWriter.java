@@ -395,8 +395,8 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		_text.setCursor(_x, _y);
 		_text.repaint();
 
-		// "auto raise"...
-		onOff(true);
+		// "auto visible"... but not raise
+		_onOff(true);
 	}
 
 	public int getRBS() { return 1; } // always ready, for now
