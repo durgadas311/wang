@@ -20,6 +20,7 @@ import java.awt.datatransfer.StringSelection;
 public class w600_fe
 {
 	private static JFrame front_end;
+	private static Wang_Devices _devs;
 
 	public static void main(String[] args) {
 		Wang_SplashScreen.starting();
@@ -183,12 +184,10 @@ public class w600_fe
 		mu.add(mi);
 
 		JMenu _mu = new JMenu("Device...");
-		Wang_Devices _devs = new Wang_Devices(mu, front_end);
+		_devs = new Wang_Devices(mu, front_end);
 		_devs.setPluginMenu(_mu);
 		mu.add(_mu); // device connections sub-menu
-		String cn24 = Wang_UI.getProperties().getProperty("wang600_cn24_device");
-		Wang_CN24_dev.connect(null); // not needed?
-		_devs.setActDev(cn24);
+		_devs.initDevs(); // initialize connected devices from property
 
 		mu = new JMenu("Edit");
 		mb.add(mu);

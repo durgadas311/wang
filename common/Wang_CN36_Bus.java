@@ -38,6 +38,22 @@ public class Wang_CN36_Bus
 		}
 		_cn36.clear(); // all should have been removed, already
 	}
+	// return list of all connected models, w/o duplicate of 'cn24'
+	// 'cn24' may be null, return might be null.
+	static String listAll(String cn24) {
+		String ret = cn24; // might be null
+		if (_cn36 == null) return ret;
+		for (Wang_GroupIODevice dev : _cn36) {
+			String model = dev.getModel();
+			if (model.equals(cn24)) continue;
+			if (ret == null) {
+				ret = model;
+			} else {
+				ret += ' ' + model;
+			}
+		}
+		return ret;
+	}
 	static public void resetCN36() {
 		if (_cn36 == null) return;
 		for (Wang_GroupIODevice dev : _cn36) {

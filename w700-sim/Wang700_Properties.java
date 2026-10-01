@@ -25,6 +25,10 @@ class Wang700_Properties extends Wang_Properties
 	String[] _mdl_val = new String[] { "700A", "700B", "700C", "720A", "720B", "720C" };
 	JPanel _mdl_pn;
 
+	public Wang_Properties getNew() {
+		return new Wang700_Properties();
+	}
+
 	public Wang700_Properties() {
 		try {
 			initProperties("Wang700", "~/.wang700.rc");

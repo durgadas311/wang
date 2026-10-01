@@ -122,15 +122,11 @@ class Wang_Plotter extends Wang_Paper
 		if (mu != null) {
 			mu.add(getMenu());
 		}
-		Wang_CN24_dev.connect(this);
 		onOff(true);
 	}
 	public void unPlug(JMenu mu) {
 		if (!plugged) return;
 		reset();
-		if (Wang_CN24_dev.get() == this) {
-			Wang_CN24_dev.connect(null);
-		}
 		if (pmi != null) {
 			pmi.setText(s_getName() + " (not installed)");
 		}

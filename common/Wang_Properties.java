@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.io.*;
 import java.awt.*;
 
-class Wang_Properties extends Properties
+abstract class Wang_Properties extends Properties
 {
 	static final long serialVersionUID = 311000000014L;
 	static final int OPTION_APPLY = 0;
@@ -23,6 +23,8 @@ class Wang_Properties extends Properties
 
 	public boolean isNew() { return !_exists; }
 	public boolean isDirty() { return _changed; }
+
+	abstract Wang_Properties getNew();
 
 	int doDialog() {
 		Dialog dlg = _prefs.createDialog(null, "Set " + _name + " Options");

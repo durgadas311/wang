@@ -27,6 +27,10 @@ class Wang600_Properties extends Wang_Properties
 	String[] _mdl_val = new String[] { "600-2TP", "600-6TP", "600-14TP" };
 	JPanel _mdl_pn;
 
+	public Wang_Properties getNew() {
+		return new Wang600_Properties();
+	}
+
 	public Wang600_Properties() {
 		try {
 			initProperties("Wang600", "~/.wang600.rc");

@@ -50,17 +50,11 @@ class Wang_InputOutputWriter extends IBM_Selectric
 		if (mu != null) {
 			mu.add(getMenu());
 		}
-		Wang_CN24_dev.connect(this);
-		Wang_CN36_Bus.registerCN36(this);
 		onOff(true);
 	}
 	public void unPlug(JMenu mu) {
 		if (!plugged) return;
 		reset();
-		if (Wang_CN24_dev.get() == this) {
-			Wang_CN24_dev.connect(null);
-		}
-		Wang_CN36_Bus.deregisterCN36(this);
 		if (pmi != null) {
 			pmi.setText(s_getName() + " (not installed)");
 		}

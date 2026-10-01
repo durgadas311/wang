@@ -12,18 +12,29 @@ import javax.swing.*;
 // x03     Wang_PaperTapeReader
 // x05     Wang_MicroFace
 // x07     Wang_Teletype
+// x08     Wang_ExtendedMemory
 // x11     Wang_InputOutputWriter
 // x12     Wang_Plotter
+// x14     Wang_CardReader
+// x40     Wang_DualFloppy
 // x99     WangIOExplorer
+//
+// Future/Other:
+// x09     Dual Cassette
+// x10     Fixed/Removable Harddisc
+// x30     Fixed/Removable Harddisc
 
 class Wang_Devices implements ActionListener {
 	private JMenu _mu; // active Devices menu
 	private Component _comp;
+	private String prop;
 
 	// "Devices" main menu as 'amu'.
 	public Wang_Devices(JMenu amu, Component comp) {
 		_mu = amu;
 		_comp = comp;
+		String series = Wang_UI.getSeries();
+		prop = "wang" + series + "00_conn_devs";
 	}
 
 	// Caller passes in their "Device Connection" sub-menu 'mu'
@@ -136,9 +147,77 @@ class Wang_Devices implements ActionListener {
 		}
 	}
 
+	private void updateProperty() {
+		String list = null;
+		Wang_Peripheral p = Wang_CN24_dev.get();
+		if (p != null) list = p.getModel();
+		list = Wang_CN36_Bus.listAll(list);
+
+		// TODO: try to remove if empty?
+		// Doesn't really matter, empty list means nothing connected.
+		// if (list.length() == 0) {
+
+		// This property is only used at startup, so no need
+		// to re-evaluate anything now. Just save it to properties file.
+		try {
+			Wang_Properties temp = Wang_UI.getProperties().getNew();
+			Wang_UI.getProperties().setAndSaveProperty(
+				temp, prop, list);
+		} catch(Exception ee) {}
+	}
+
+	// unplug whatever is on CN24
 	private void unPlugCN24() {
-		if (Wang_CN24_dev.get() != null) {
-			Wang_CN24_dev.get().unPlug(_mu);
+		Wang_Peripheral p = Wang_CN24_dev.get();
+		if (p == null) return;
+		p.unPlug(_mu);
+		Wang_CN24_dev.connect(null);
+	}
+
+	// connect device to CN24 and/or CN36 as appropriate
+	private void connectDev(Wang_Peripheral p) {
+		if (p instanceof Wang_OutputDevice) { // CN24 needed
+			// if something already on CN24, must unplug it
+			unPlugCN24(); // nulls Wang_CN24_dev
+		}
+		p.plugIn(_mu);
+		if (p instanceof Wang_OutputDevice) {
+			Wang_CN24_dev.connect((Wang_OutputDevice)p);
+		}
+		if (p instanceof Wang_GroupIODevice) {
+			Wang_CN36_Bus.registerCN36((Wang_GroupIODevice)p);
+		}
+	}
+
+	// disconnect device from CN24 and/or CN36 as appropriate
+	private void disconnectDev(Wang_Peripheral p) {
+		if (p instanceof Wang_OutputDevice && Wang_CN24_dev.get() == p) {
+			Wang_CN24_dev.connect(null);
+		}
+		if (p instanceof Wang_GroupIODevice) {
+			Wang_CN36_Bus.deregisterCN36((Wang_GroupIODevice)p);
+		}
+		p.unPlug(_mu);
+	}
+
+	// This is called at startup, before anything connected
+	// TODO: assert that? disconnect any?
+	public void initDevs() {
+		String p = Wang_UI.getProperties().getProperty(prop);
+		if (p == null || p.length() == 0) return;
+		// a list of device models
+		for (String m : p.split("\\s")) {
+			try {
+				int n = Integer.valueOf(m);
+				// we only use 700 series model numbers
+				n = 700 + (n % 100);
+				Wang_Peripheral wp = getDevice(n);
+				if (wp == null) continue;
+				connectDev(wp);
+			} catch (Exception ee) {
+				// silently ignore invalid terms
+				continue;
+			}
 		}
 	}
 
@@ -155,13 +234,10 @@ class Wang_Devices implements ActionListener {
 		Wang_Peripheral p = getDevice(mn);
 		if (p == null) return; // should never happen
 		if (p.isPlugged()) {
-			p.unPlug(_mu);
-			return;
+			disconnectDev(p);
+		} else {
+			connectDev(p);
 		}
-		if (p instanceof Wang_OutputDevice) { // CN24 needed
-			// if something already on CN24, must unplug it
-			unPlugCN24();
-		}
-		p.plugIn(_mu);
+		updateProperty();
 	}
 }
