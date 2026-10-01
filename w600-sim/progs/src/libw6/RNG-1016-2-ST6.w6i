@@ -1,4 +1,5 @@
-; Random Number Generator from "520-600 Series General Program Library Vol 1"
+; Random Number Generator 1016-2-ST6
+; from "520-600 Series General Program Library Vol 1"
 ;
 ; Enter seed, press f00, displays first random number and stops.
 ; Press f15 to get another random number (display and stop).

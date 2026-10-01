@@ -40,7 +40,7 @@ MARK &leap	; leap year
 	ENTER 1
 	+05	; 29 days in FEB
 MARK &noleap	; not leap year
-	f00	; print header
+	$header	; print header
 	ENTER 1
 	ST01	; first of month
 	$zeller	; zeller - compute day of week
@@ -100,7 +100,7 @@ MARK &nocent
 	SEARCH &leap	; leap year
 
 ; print header
-MARK f00
+MARK $header
 	RE00
 	$month		; print month name
 	I/O 12-07	; print "       "
