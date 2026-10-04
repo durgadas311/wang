@@ -1,200 +1,232 @@
 ; "Formulae Evaluation" 1023-6-MA6 from
-; 520-600 Series Program Library Vol1
+; 520-600 Series General Program Library Vol1
 ;
 ; f00 = CLEAR
-; f01 = [+]
-; f02 = [-]
-; f03 = [*]
-; f04 = [/]
-; f05 = [^]
-; f06 = [(]
-; f07 = [)]
-; f08 = [=]
+; f01 = [+]	level 7 op 1
+; f02 = [-]	level 7 op 2
+; f03 = [*]	level 12 op 1
+; f04 = [/]	level 12 op 2
+; f05 = [^]	level 27
+; f06 = [(]	++level
+; f07 = [)]	compute...
+; f08 = [=]	final total
+;
+; Register usage:
+;	R0	index to current working value (INDIR <op>00)
+;		temp: for ALPHA compares
+;	R4	temp, current value
+;	R5	parenthesis nesting (0..4)
+;	R6	temp, current value
+;	R7..11	add/sub by paren level
+;	R12..16	mult/div by paren level
+;	R17..21	current total by paren level
+;	R22..26	power by paren level
+	.DEF	$kclr	f00
+	.DEF	$kplus	f01
+	.DEF	$kminus	f02
+	.DEF	$ktimes	f03
+	.DEF	$kdivide	f04
+	.DEF	$kpower	f05
+	.DEF	$klparen	f06
+	.DEF	$krparen	f07
+	.DEF	$kequal	f08
+	.DEF	$none1	f09	; reserve unused labels
+	.DEF	$none2	f10
+	.DEF	$none3	f11
+	.DEF	$none4	f12
+	.DEF	$none5	f13
+	.DEF	$none6	f14
+	.DEF	$none7	f15
 
-MARK f00	; the CLEAR key
+	; fudge to match orig program
+	.DEF	&no_add	E1
+	.DEF	&do_sub	E2
+	.DEF	&do_add	E3
+
+MARK $kclr	; the CLEAR key
 	ENTER 4
 	ST00
-MARK E0
+MARK &clr0
 	ENTER 1
 	+00
-	F05
-	ENTER 31
+	$zero_cur
+	ENTER 31	; 27+5 (-1)
 	ALPHA JIF0
-		SEARCH E0
+		SEARCH &clr0
 	CLEAR
 	RET
 
-MARK f01	; the [+] key
-	F01
-	F00
+MARK $kplus	; the [+] key
+	$comp_pwr_mlt
+	$comp_add
 	ENTER 7
-	F02
+	$set_idx
 	ENTER 1
-	F06
+	$set_cur
 	RET
 
-MARK f02	; the [-] key
-	F01
-	F00
+MARK $kminus	; the [-] key
+	$comp_pwr_mlt
+	$comp_add
 	ENTER 7
-	F02
+	$set_idx
 	ENTER 2
-	F06
+	$set_cur
 	RET
 
-MARK f03	; the [*] key
-	F01
+MARK $ktimes	; the [*] key
+	$comp_pwr_mlt
 	ENTER 12
-	F02
+	$set_idx
 	ENTER 1
-	F06
+	$set_cur
 	RET
 
-MARK f04	; the [/] key
-	F01
+MARK $kdivide	; the [/] key
+	$comp_pwr_mlt
 	ENTER 12
-	F02
+	$set_idx
 	ENTER 2
-	F06
+	$set_cur
 	RET
 
-MARK f05	; the [^] key
+MARK $kpower	; the [^] key
 	ST04
 	ENTER 27
-	F02
+	$set_idx
 	RE04
-	F06
+	$set_cur
 	RET
 
-MARK f06	; the [(] key
+MARK $klparen	; the [(] key
 	ENTER 1
 	+05
 	RET
 
-MARK f07	; the [)] key
-	F01
-	F00
+MARK $krparen	; the [)] key
+	$comp_pwr_mlt
+	$comp_add
 	ENTER 17
-	F02
+	$set_idx	; set level 17
 	INDIR RE00
-	ST04
+	ST04	; current sum
 	ENTER 7
-	F02
-	F05
+	$set_idx
+	$zero_cur	; zero val (7)
 	ENTER 5
 	+00
-	F05
+	$zero_cur	; zero val (12)
 	ENTER 5
 	+00
-	F05
+	$zero_cur	; zero val (17)
 	ENTER 5
 	+00
-	F05
+	$zero_cur	; zero val (22)
 	ENTER 1
 	-05
-	RE04
+	RE04	; current sum
 	RET
 
-MARK f08	; the [=] key
+MARK $kequal	; the [=] key
 	ST04
-	RE05
+	RE05	; paren nesting
 	JIF0
-		ENTER 0
+		ENTER 0	; unbalanced parens
 		/00
 	RE04
-	F01
-	F00
+	$comp_pwr_mlt
+	$comp_add
 	RECALL 17
 	RET
 
 ; Internal functions
-MARK F00
+MARK $comp_add	; compute add/sub
 	ENTER 7
-	F02
+	$set_idx
 	INDIR RE00
 	JIFNZ
-		SEARCH E1
+		SEARCH &no_add
 	ST00
 	ENTER 1
 	ALPHA JIF0
-		SEARCH E2
-MARK E3
-	F04
+		SEARCH &do_sub
+MARK &do_add
+	$pop_idx22
 	INDIR +00
-	SEARCH E4
-MARK E2
-	F04
+	SEARCH &add_done
+MARK &do_sub
+	$pop_idx22
 	INDIR -00
-	SEARCH E4
-MARK E1
+	SEARCH &add_done
+MARK &no_add
 	ENTER 12
-	F02
+	$set_idx
 	INDIR RE00
 	JIF0
-		SEARCH E3
+		SEARCH &do_add
 	ENTER 5
 	+00
 	RE04
 	INDIR +00
-MARK E4
+MARK &add_done
 	ENTER 12
-	F02
-	F05
+	$set_idx
+	$zero_cur
 	ENTER 10
 	+00
-	F05
+	$zero_cur
 	RET
 
-MARK F01
+MARK $comp_pwr_mlt	; compute power/mult
 	ST04
 	ENTER 27
-	F02
+	$set_idx	; set level 27
 	INDIR RE00
 	JIFNZ
-		SEARCH E5
+		SEARCH &no_pwr
 	LOGX
 	*04
 	10^X
-	ST04
-	F05
-MARK E5
+	ST04	; save X^Y
+	$zero_cur	; zero val (27)
+MARK &no_pwr
 	ENTER 12
-	F02
-	INDIR RE00
+	$set_idx	; set level 12
+	INDIR RE00	; get current mult op
 	JIF0
-		SEARCH E6
-	F03
+		SEARCH &do_mlt
+	$set_idx22	; set level 22
 	RE04
-	F06
+	$set_cur	; store in (level)
 	RET
-MARK E6
+MARK &do_mlt
 	ST00
 	ENTER 1
 	ALPHA JIF0
-		SEARCH E7
-	F03
+		SEARCH &do_div
+	$set_idx22	; set level 22
 	RE04
-	INDIR *00
+	INDIR *00	// multiplication
 	RET
-MARK E7
-	F03
+MARK &do_div
+	$set_idx22
 	RE04
-	INDIR /00
+	INDIR /00	// division
 	RET
 
-MARK F02
+MARK $set_idx	; ser curr idx and incr by R5
 	ST00
 	RE05
 	+00
 	RET
 
-MARK F03
+MARK $set_idx22	; set idx 22+R5
 	ENTER 22
-	F02
+	$set_idx
 	RET
 
-MARK F04
-	F03
+MARK $pop_idx22
+	$set_idx22
 	INDIR RE00
 	ST06
 	ENTER 5
@@ -202,9 +234,9 @@ MARK F04
 	RE06
 	RET
 
-MARK F05
+MARK $zero_cur	; zero curr val
 	ENTER 0
-MARK F06
+MARK $set_cur	; store X in curr val
 	INDIR ST00
 	CLEAR
 	RET
