@@ -50,8 +50,9 @@ class Wang600_Simulator
 	}
 
 	private void loadXRom(File img) {
+		// CPU has a copy of '_xrom', so must re-use it.
+		int len = _xrom.length;
 		// must reverse order of bytes....
-		_xrom = null;
 		if (img != null) {
 			FileInputStream f;
 			try {
@@ -61,7 +62,6 @@ class Wang600_Simulator
 				return;
 			}
 			int n = 0;
-			int len = 2048;
 			byte[] buf = new byte[len];
 			try {
 				n = f.read(buf);
@@ -74,7 +74,6 @@ class Wang600_Simulator
 			} catch (IOException ee) {
 			}
 			if (n > 0) {
-				_xrom = new byte[len];
 				for (int x = 0; x < n; ++x) {
 					_xrom[len - x - 1] = buf[x];
 				}
@@ -676,6 +675,7 @@ class Wang600_Simulator
 		}
 		_rom = new Wang600_UcodeRom(rom, memsize);
 		_ram = new byte[memsize];
+		_xrom = new byte[2048];
 
 		_xromFile = Wang_UI.getProperties().getFile("wang600_rom_image", true, Wang_UI.getDir());
 		loadXRom(_xromFile);
