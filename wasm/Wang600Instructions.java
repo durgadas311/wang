@@ -268,6 +268,14 @@ public class Wang600Instructions implements WangInstructions {
 				// may check (e.mnemonic == null).
 				e = new Instruction(null, op, 0);
 			}
+		} else if (opr.startsWith("@")) {
+			e = asm(opr.substring(1));
+			if (e == null) return e;
+			if (rom && e.flags == FCALL) {
+				e = disas(e.opcode + 0x20);
+			} else if (!rom && e.flags == FROM) {
+				e = disas(e.opcode - 0x20);
+			}
 		} else {
 			e = asm(opr);
 		}
