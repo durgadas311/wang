@@ -33,6 +33,8 @@ public interface WangInstructions {
 	int def(String[] line, int first);
 	int setOutput(String dev);
 	int setOutput(String[] line, int first);
+	int setModel(String mod);
+	int setModel(String[] line, int first);
 	char lastError();
 	WangSymbolTable getSymTab();
 	WangInstruction decode(byte[] mem, int start);

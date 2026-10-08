@@ -17,6 +17,8 @@ public class Wang600Instructions implements WangInstructions {
 	private boolean pass;
 	private boolean regFix;
 	private int lastStep;
+	private int maxpc = 1847;
+	private int maxreg = 246;
 
 	static final String E = "0123456789.E-";
 	static final String F = "XYZABCDEFGHIJKLM";
@@ -169,9 +171,9 @@ public class Wang600Instructions implements WangInstructions {
 	}
 
 	// TODO: support different memory configs?
-	public int maxPC() { return 1847; }
+	public int maxPC() { return maxpc; }
 	public int maxRomPC() { return 2047; }
-	public int maxReg() { return 246; }
+	public int maxReg() { return maxreg; }
 	public int regsPerBlk() { return 1; }
 	public int regBlkLen() { return 8; }
 	public int endProg() { return 0x9e; }
@@ -282,9 +284,37 @@ public class Wang600Instructions implements WangInstructions {
 		return e;
 	}
 
+	public int setModel(String mod) {
+		int mem = 2048; // bytes, tho calc uses nibbles
+		String[] ss = mod.split("-");
+		if (ss.length > 1) {
+			if (ss[1].matches("2[TtPp]*")) mem = 512;
+			else if (ss[1].matches("6[TtPp]*")) mem = 1024;
+			else if (ss[1].matches("14[TtPp]*")) mem = 2048;
+			else {
+				error = 'S';
+				return -1;
+			}
+		}
+		mem -= 9 * 8;	// system space, 9 regs
+		maxreg = (mem / 8) - 1;
+		mem -= 16 * 8;	// fixed registers
+		maxpc = mem - 1;
+		return 0;
+	}
+
+	public int setModel(String[] line, int first) {
+		int x = first + 1; // skip ".MODEL"
+		if (x >= line.length) {
+			error = 'S';
+			return -1;
+		}
+		return setModel(line[x]);
+	}
+
 	public int setOutput(String dev) {
 		error = ' ';
-		if (!dev.matches("[wW]6[01][012]") && !dev.matches("[Ww]60[67]")) {
+		if (!dev.matches("[wW]6[01][12]") && !dev.matches("[Ww]60[67]")) {
 			error = 'S';
 			return -1;
 		}

@@ -44,6 +44,8 @@ public class Wang700Instructions implements WangInstructions {
 	private boolean pass;
 	private boolean regFix;
 	private int lastStep;
+	private int maxpc = 1983;
+	private int maxreg = 248;
 
 	static final String E = "0123456789E-.";
 
@@ -193,9 +195,9 @@ public class Wang700Instructions implements WangInstructions {
 		tr = new TiltRotate(0x4d, 0x80);
 	}
 
-	public int maxPC() { return 1983; }
+	public int maxPC() { return maxpc; }
 	public int maxRomPC() { return 0; }
-	public int maxReg() { return 248; }
+	public int maxReg() { return maxreg; }
 	public int regsPerBlk() { return 2; }
 	public int regBlkLen() { return 16; }
 	public int endProg() { return 0x5c; }
@@ -290,9 +292,39 @@ public class Wang700Instructions implements WangInstructions {
 		return mem.putMem(adr, reg);
 	}
 
+	public int setModel(String mod) {
+		// TODO: check for A/B/C suffix and adjust capabilities?
+		// ... could error on use of features not available.
+		int mem = 2048;
+		// NOTE: "700" means default, which is 720.
+		// Must append "A", "B", or "C" for actual 700 memory size.
+		if (mod.charAt(1) == '2') mem = 2048;
+		else if (mod.charAt(1) == '0') {
+			if (mod.length() < 4) mem = 2048; // default
+			else mem = 1024; // model specified, use mem size
+		}
+		else {	// never happens due to ".matches()" test before this
+			error = 'S';
+			return -1;
+		}
+		mem -= 4 * 16;	// system space, 4 dbl regs
+		maxreg = (mem / 8) - 1;
+		maxpc = mem - 1;
+		return 0;
+	}
+
+	public int setModel(String[] line, int first) {
+		int x = first + 1; // skip ".MODEL"
+		if (x >= line.length) {
+			error = 'S';
+			return -1;
+		}
+		return setModel(line[x]);
+	}
+
 	public int setOutput(String dev) {
 		error = ' ';
-		if (!dev.matches("[wW]7[01][012]") && !dev.matches("[Ww]70[67]")) {
+		if (!dev.matches("[wW]7[01][12]") && !dev.matches("[Ww]70[67]")) {
 			error = 'S';
 			return -1;
 		}

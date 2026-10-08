@@ -19,6 +19,7 @@ public class wasm {
 	File aout = null;
 	PrintStream list = System.out;
 	String dev = null;
+	String mod = null;
 	Vector<File> paths;
 
 	private void help() {
@@ -55,10 +56,16 @@ public class wasm {
 			} else if (arg.startsWith("dat=")) {
 				data = true;
 				file = new File(arg.substring(4));
-			} else if (arg.matches("6[01][012]")) {
+			} else if (arg.startsWith("600")) {
+				w600 = true;
+				mod = arg;
+			} else if (arg.matches("6[01][1267]")) {
 				w600 = true;
 				dev = "W" + arg;
-			} else if (arg.matches("7[01][012]")) {
+			} else if (arg.matches("7[02]0[ABC]*")) {
+				w700 = true;
+				mod = arg;
+			} else if (arg.matches("7[01][1267]")) {
 				w700 = true;
 				dev = "W" + arg;
 			} else if (arg.equals("raw")) {
@@ -165,12 +172,19 @@ public class wasm {
 			System.out.format("      .SREG symbol[,symbol] [count]\n");
 			System.out.format("      .DEF symbol code\n");
 			System.out.format("      .OUT <device>\n");
+			System.out.format("      .MODEL <model>\n");
 			System.out.format("      .INCLUDE <file>\n");
 			System.out.format("      .EXT <label>...\n");
 			if (mach.maxRomPC() > 0) {
 				System.out.format("      .EXTROM <label>...\n");
 			}
 			System.exit(0);
+		}
+		if (mod != null) {
+			if (mach.setModel(mod) < 0) {
+				System.err.format("Invalid model \"%s\"\n", mod);
+				System.exit(1);
+			}
 		}
 		if (dev != null) {
 			if (mach.setOutput(dev) < 0) {

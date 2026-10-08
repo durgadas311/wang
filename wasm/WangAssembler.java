@@ -299,6 +299,12 @@ public class WangAssembler implements WangMemory {
 							wi.lastError(), line),
 					n, ls);
 				continue;
+			} else if (toks[n].equalsIgnoreCase(".MODEL")) {
+				n = wi.setModel(toks, n);
+				errorList(String.format("%c               %s",
+							wi.lastError(), line),
+					n, ls);
+				continue;
 			} else if (toks[n].equalsIgnoreCase(".INCLUDE")) {
 				++n;
 				if (n >= toks.length) {
