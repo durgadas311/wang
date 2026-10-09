@@ -399,7 +399,7 @@ class Wang600_Simulator
 				str += " Warp";
 			} else if (nxt >= 0) {
 				str += String.format(" PC %03x", nxt);
-			} else {
+			} else if (cyc < 0) {
 				str += " Sleep";
 			}
 			str += String.format("... %d\n", cpu.cycles);
@@ -628,6 +628,9 @@ class Wang600_Simulator
 		if (key < 0) {
 			keyCodes.add(key);
 			return;
+		}
+		if (trace) { // can only be if _dbg != null
+			_dbg.warp(String.format("Key Press %02x", key), -1, 0);
 		}
 //fprintf(stderr,"%03x: key down %02x (%s)\n", pc, key, z2);
 //if (__keytrc) fprintf(stderr,"key %02d %02d\n", (key >> 4) & 0x0f, key & 0x0f);
