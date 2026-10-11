@@ -361,18 +361,66 @@ td.tag {text-align: center;}
 <P><A NAME="indirect">Indirect Codes</A>
 
 <P><TABLE BORDER>
-<TR><TH>INDIR prefix</TH></TR>
-<TR><TD>The second step is a register command. The operation is performed
-	on the register number that is stored in that register.
+<TR><TH COLSPAN=2>INDIR prefix</TH></TR>
+<TR><TD>00&nbsp;rr</TD>
+	<TD>The integer, absolute value, contents of register
+	'rr' is added to the Program Counter (current program step).
+	This effectively is a relative jump or "switch" statement.
+	The practical values are 1 through 255 (0 causes the 00&nbsp;rr to be executed),
+	The step of the 00&nbsp;rr is the base for adding (not the next step),
+	meaning values generally need to start at "1".
+	For implementing a "switch" statement,
+	this command is typically followed by a series
+	of SEARCH commands and thus the value in 'rr' would be 1,3,5,...
+	Beware that it is possible to jump into the middle of a two-step command,
+	which rarely has desirable outcomes.
+	</TD></TR>
+<TR><TD>01&nbsp;rr through 07&nbsp;rr and 14&nbsp;rr</TD>
+	<TD>The second step is a register command. The operation is performed
+	on the register number that is stored in that register,
+	rather than the register itself.
 	If register 05 contains 158.00000000, then INDIR&nbsp;+05 will add
 	the display to register 158 (which is also known as 09&nbsp;14).
 	Note, this method of accessing register 09&nbsp;14 (END&nbsp;PROG) will not
 	interfere with program control functions.
 	</TD></TR>
-<TR><TD>A special case is for codes 00&nbsp;rr where 'rr' specifies a register
-	to be used indirectly. The integer, absolute value, contents of register
-	'rr' is added to the Program Counter (current program step). This effectively
-	is a variable-length jump. The value is limited to 000 through 999.
+<TR><TD>08&nbsp;rr</TD>
+	<TD>Execute the 08&nbsp;xx instruction where 'xx' is the value (0..15) in
+	register 'rr'. Note that two-step instructions require a third step
+	following the INDIR 08&nbsp;rr.
+	</TD></TR>
+<TR><TD>09&nbsp;rr</TD>
+	<TD>Execute the 09&nbsp;xx instruction where 'xx' is the value (0..15) in
+	register 'rr'. Note that two-step instructions require a third step
+	following the INDIR 09&nbsp;rr.
+	</TD></TR>
+<TR><TD>10&nbsp;xx through 13&nbsp;xx</TD>
+	<TD>The (RAM or ROM) subroutine is called.
+	This appears to be identical to the normal subroutine calls
+	(same as if no INDIR prefix).
+	</TD></TR>
+<TR><TD>15&nbsp;rr</TD>
+	<TD>Mimic executing the prefix designated by the contents of
+	register 'rr'. This instruction sets the value from 'rr' (plus 1) in the
+	system "prefix state" register, which effectively makes the calculator
+	behave as if the prefix code was executed. All of these represent two-step
+	instructions, so a third step is required and must be valid for the selected
+	prefix state.
+	<TABLE BORDER>
+	<TR><TH>0</TH><TD>RECALL</TD></TR>
+	<TR><TH>1</TH><TD>PRINT</TD></TR>
+	<TR><TH>2</TH><TD>I/O</TD></TR>
+	<TR><TH>3</TH><TD>SEARCH ROM</TD></TR>
+	<TR><TH>7</TH><TD>CALL</TD></TR>
+	<TR><TH>8</TH><TD>MARK (no op)</TD></TR>
+	<TR><TH>9</TH><TD>STORE</TD></TR>
+	<TR><TH>10</TH><TD>ALPHA</TD></TR>
+	<TR><TH>11</TH><TD>INDIR</TD></TR>
+	<TR><TH>12</TH><TD>CALL ROM</TD></TR>
+	<TR><TH>13</TH><TD>GROUP&nbsp;1</TD></TR>
+	<TR><TH>14</TH><TD>GROUP&nbsp;2</TD></TR>
+	<TR><TH>15</TH><TD>SEARCH</TD></TR>
+	</TABLE>
 	</TD></TR>
 </TABLE>
 
