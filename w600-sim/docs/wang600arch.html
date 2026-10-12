@@ -631,11 +631,11 @@ For example, plotting commands expect<BR>
 <TR><TH>RAM<BR>Address</TH><TH>T,U,V</TH><TH>3</TH><TH>2</TH><TH>1</TH><TH>0</TH></TR>
 <TR><TD>0xfff</TD><TD>15,15,15</TD><TD>-</TD><TD>-</TD><TD>-</TD><TD>Keyboard<BR>Trace</TD></TR>
 <TR><TD>0xffe</TD><TD>15,15,14</TD><TD COLSPAN=4>scratch</TD></TR>
-<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>-</TD><TD>-</TD><TD>Group<BR>I/O</TD><TD>Program<BR>Trace</TD></TR>
+<TR><TD>0xffd</TD><TD>15,15,13</TD><TD>ALPHA<BR>RETURN</TD><TD>Skip<BR>Tape</TD><TD>Group<BR>I/O</TD><TD>Program<BR>Trace</TD></TR>
 <TR><TD>0xffc</TD><TD>15,15,12</TD><TD COLSPAN=4>unused?</TD></TR>
 <TR><TD>0xffb</TD><TD>15,15,11</TD><TD COLSPAN=4>Prog Subr Stack Level</TD></TR>
-<TR><TD>0xffa</TD><TD>15,15,10</TD><TD COLSPAN=4>Prefix State</TD></TR>
-<TR><TD>0xff9</TD><TD>15,15,9</TD><TD COLSPAN=4>unknown</TD></TR>
+<TR><TD>0xffa</TD><TD>15,15,10</TD><TD COLSPAN=4>Prefix State, temp</TD></TR>
+<TR><TD>0xff9</TD><TD>15,15,9</TD><TD COLSPAN=4>temp</TD></TR>
 <TR><TD>0xff8</TD><TD>15,15,8</TD><TD COLSPAN=4>KB Keyboard code</TD></TR>
 <TR><TD>0xff7</TD><TD>15,15,7</TD><TD COLSPAN=4>KA Keyboard code</TD></TR>
 <TR><TD>0xff6</TD><TD>15,15,6</TD><TD COLSPAN=4>Tape Bit</TD></TR>
@@ -650,11 +650,15 @@ For example, plotting commands expect<BR>
 
 <P><DL>
 	<DT><B>Keyboard Trace (15,15,15)<0>:</B>
-	<DD>	Tracing of keyboard commands is enabled
+	<DD>	Tracing of keyboard commands is enabled</DD>
+	<DT><B>Group I/O (15,15,13)<3>:</B>
+	<DD>	An ALPHA RETURN is printing</DD>
+	<DT><B>Group I/O (15,15,13)<2>:</B>
+	<DD>	An ALPHA LOAD-PROG is skipping blocks</DD>
 	<DT><B>Group I/O (15,15,13)<1>:</B>
-	<DD>	A Group I/O sequence is running
+	<DD>	A Group I/O sequence is running</DD>
 	<DT><B>Program Trace (15,15,13)<0>:</B>
-	<DD>	Tracing of program commands is enabled
+	<DD>	Tracing of program commands is enabled</DD>
 	<DT><B>Prefix State (15,15,10):</B>
 	<DD>	<TABLE BORDER>
 		<TR><TD>00 = SEARCH</TD>		<TD>08 = CALL</TD></TR>

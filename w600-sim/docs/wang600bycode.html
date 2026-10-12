@@ -210,7 +210,7 @@ td.tag {text-align: center;}
 <TD CLASS="key">&#945; *</TD>
 <TD CLASS="key">STOP</TD>
 <TD CLASS="key">J<SUP>IF</SUP>&#8800;0</TD>
-<TD CLASS="key">J<SUP>IF</SUP> ERROR</TD>
+<TD CLASS="key">J<SUP>IF</SUP>ERROR</TD>
 <TD CLASS="key">SIN<SUP>-1</SUP></TD>
 <TD CLASS="key">COS<SUP>-1</SUP></TD>
 <TD CLASS="key">TAN<SUP>-1</SUP></TD>
@@ -447,32 +447,43 @@ td.tag {text-align: center;}
 	Code 02&nbsp;02 terminates command.
 	</TD></TR>
 
-<TR>	<TD>PRINT</TD><TD> Turn on keyboard trace, a.k.a. "Auto Print" (Printer must be ON)
+<TR>	<TD>PRINT</TD><TD> Turn on keyboard trace, a.k.a. "Auto Print" (Printer must be ON).
 	</TD></TR>
-<TR>	<TD>&#945;</TD><TD> Turn off keyboard trace
+<TR>	<TD>&#945;</TD><TD> Turn off keyboard trace.
 	</TD></TR>
-<TR>	<TD>LOG<SUB>e</SUB>X</TD><TD> Turn on program trace (Printer must be ON)
+<TR>	<TD>LOG<SUB>e</SUB>X</TD><TD> Turn on program trace (Printer must be ON).
 	</TD></TR>
-<TR>	<TD>e<SUP>X</SUP></TD><TD> Turn off program trace
+<TR>	<TD>
+LOG<SUB>10</SUB>X<BR>
+TAN<BR>
+TAN<SUP>-1</SUP></TD><TD BGCOLOR="lightgray">Same as LOG<SUB>e</SUB>X</TD></TR>
+<TR>	<TD>e<SUP>X</SUP></TD><TD> Turn off program trace.
 	</TD></TR>
+<TR>	<TD>
+10<SUP>x</SUP><BR>
+RAD-DEG<BR>
+DEG-RAD</TD><TD BGCOLOR="lightgray">Same as e<SUP>X</SUP></TD></TR>
 <TR>	<TD>RETURN</TD><TD> Return from subroutine. Print display if Auto Print is ON.
 	</TD></TR>
+<TR>	<TD>
+INT&nbsp;X<BR>
+|X|<BR>
+END&nbsp;PROG</TD><TD BGCOLOR="lightgray">Same as RETURN</TD></TR>
 <TR>	<TD>STOP</TD><TD> 0.5 second pause
 	</TD></TR>
-<TR>	<TD>10 00</TD><TD> Value of &#960; to display
+<TR>	<TD>J<SUP>IF</SUP>0</TD><TD> Jump if 00&nbsp;00 = display.
 	</TD></TR>
-<TR>	<TD>10 xx</TD><TD> Multiply display by 10<SUP>xx</SUP>
+<TR>	<TD>COS</TD><TD BGCOLOR="lightgray">Same as J<SUP>IF</SUP>0</TD></TR>
+<TR>	<TD>J<SUP>IF</SUP>+</TD><TD> Jump if 00&nbsp;00 >= display.
 	</TD></TR>
-<TR>	<TD>11 xx</TD><TD> Multiply display by 10<SUP>-xx</SUP>
+<TR>	<TD>SIN</TD><TD> Jump if 00&nbsp;00 < display.
 	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>0</TD><TD> Jump if 00&nbsp;00 = display
-	</TD></TR>
-<TR>	<TD>J<SUP>IF</SUP>+</TD><TD> Jump if 00&nbsp;00 >= display
-	</TD></TR>
-<TR>	<TD>SIN</TD><TD> Jump if 00&nbsp;00 < display
-	</TD></TR>
-<TR>	<TD>LOAD PROG</TD><TD> Skip N records and load program from tape.
+<TR>	<TD>LOAD&nbsp;PROG</TD><TD> Skip N records and load program from tape.
 	N is integer portion of current display value.
+<TR>	<TD>
+X<SUP>2</SUP><BR>
+&#8730;X<BR>
+1/X</TD><TD BGCOLOR="lightgray">Same as LOAD&nbsp;PROG</TD></TR>
 <TR>	<TD>STORE</TD><TD> Record N+1 registers to tape.
 	N is integer portion of current display value.
 	Registers are recorded in reverse order, N through 00&nbsp;00.
@@ -480,6 +491,32 @@ td.tag {text-align: center;}
 	N is integer portion of current display value.
 	Registers are loaded in reverse order, N through 00&nbsp;00.
 	</TD></TR>
+<TR>	<TD>GO</TD><TD BGCOLOR="lightgray">Same as RECALL</TD></TR>
+<TR>	<TD>
+J<SUP>IF</SUP>&#8800;0<BR>
+J<SUP>IF</SUP>ERROR<BR>
+SIN<SUP>-1</SUP><BR>
+COS<SUP>-1</SUP>
+	</TD><TD> No implementation - no operation.
+	</TD></TR>
+<TR>	<TD>12&nbsp;xx</TD><TD BGCOLOR="lightgray">(xx > 0) Same as 08&nbsp;xx</TD></TR>
+<TR>	<TD>13&nbsp;xx</TD><TD BGCOLOR="lightgray">(xx > 0) Same as 09&nbsp;xx</TD></TR>
+<TR>	<TD>10&nbsp;00</TD><TD> Value of &#960; to display.
+	</TD></TR>
+<TR>	<TD>
+SEARCH<BR>
+MARK<BR>
+11&nbsp;00<BR>
+12&nbsp;00<BR>
+13&nbsp;00<BR>
+14&nbsp;00<BR>
+15&nbsp;00</TD><TD BGCOLOR="lightgray">Same as 10&nbsp;00</TD></TR>
+<TR>	<TD>10&nbsp;xx</TD><TD>(xx > 0) Multiply display by 10<SUP>xx</SUP>.
+	</TD></TR>
+<TR>	<TD>14&nbsp;xx</TD><TD BGCOLOR="lightgray">Same as 10&nbsp;xx</TD></TR>
+<TR>	<TD>11&nbsp;xx</TD><TD>(xx > 0) Multiply display by 10<SUP>-xx</SUP>.
+	</TD></TR>
+<TR>	<TD>15&nbsp;xx</TD><TD BGCOLOR="lightgray">Same as 11&nbsp;xx</TD></TR>
 
 </TABLE>
 
