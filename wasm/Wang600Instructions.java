@@ -543,9 +543,9 @@ public class Wang600Instructions implements WangInstructions {
 			break;
 		case ALPHA:
 			// line[x] must have quotes, or else be a key.
-			if (line[x].matches("^\".*\"$")) {
+			if (line[x].matches("^\".*\"$") || line[x].matches("^'.*'$")) {
 				reg = tr.a2tr(line[x].substring(1, line[x].length() - 1),
-					false, mem, adr);
+					line[x].charAt(0) == '"', false, mem, adr);
 				if (reg < 0) {
 					error = 'Z';
 					return reg;

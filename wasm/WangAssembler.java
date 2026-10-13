@@ -240,7 +240,7 @@ public class WangAssembler implements WangMemory {
 			}
 			// TODO: fix this for e.g. ALPHA "...;..."
 			s = line.replaceFirst(";.*$", "");
-			toks = s.split("\\s(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+			toks = s.split("\\s(?=([^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)");
 			n = 0;
 			while (n < toks.length && toks[n].length() == 0) ++n;
 			if (n >= toks.length) {

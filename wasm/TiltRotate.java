@@ -155,7 +155,7 @@ public class TiltRotate {
 	// all at once, caller supplies initial SHIFT
 	// TODO: how to return new SHIFT state?
 	// Returns length of string in memory.
-	public int a2tr(String s, boolean shifted, WangMemory mem, int start) {
+	public int a2tr(String s, boolean dblq, boolean shifted, WangMemory mem, int start) {
 		int adr = start;
 		boolean shift;
 		boolean plot;
@@ -202,7 +202,7 @@ public class TiltRotate {
 			}
 			if (no_shift) {
 				shifted = shift;
-			} else if (x == 0 || shift != shifted) {
+			} else if ((dblq && x == 0) || shift != shifted) {
 				e = mem.putMem(adr++, (shift ? shiftUp() : shiftDown()));
 				err = err || e;
 				shifted = shift;
