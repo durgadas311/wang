@@ -1,0 +1,617 @@
+; Approximation of "Formula Programming" ROM
+	.OUT	W601
+;
+; Errors:
+;	+01	stack overflow
+;	+02	implied multiplication (e.g. [3] [I])
+;	+03	unbalanced parens
+;	+04	invalid operator (e.g. [6] [(])
+;
+; Operator precedence
+;	=
+; ??	R( S( U( V( W( [DEF x?]
+; ??	, [IN?]
+;	(
+;	+ -
+;	* /
+;	^
+;
+; Register usage:
+;	R0	temp, for ALPHA compares
+;	R1	temp
+;	R2	reserved - PRINT flag/column
+;	R3	reserved - (context) variable set/get/iter
+;	R4	reserved: max reg used (0 == 25)
+;	R5	temp - eval next op precedence
+;	R6	temp - eval next op
+;	R7	temp - eval RHS/result
+;	R8	reserved - stack pointer
+;	R9..15	constants (vars) I, J, K, L, X, Y ,Z
+;	R16..25	expression stack... TBD (10 levels)
+;	R16..[R4]
+
+; Documentation claims that DEF R( 3 , 3 ) consumes only 9
+; registers, but the dimensions must be stored someplace
+; which would imply 9+1 registers at a minimum.
+; Documentation also suggests that one cannot locate the start
+; of S( ) without knowing the dimensions of R( ) first, implying
+; that these dimensions must be persistent and in a known location.
+; It only declares that certain temp registers are used during IN
+; and OUT operations, not the entire lifetime of a matrix, so it
+; seems these dimensions must be stored in the matrix registers
+; (starting after R25 a.k.a. [R4]).
+;
+; Need to suppport:
+;	BEG DEF R( 3 , 3 )	define matrix dimensions
+;	BEG DEF R( 3 )		define vector dimensions
+;	BEG R( n IN n IN ...	enter elements (no closing paren)
+;	BEG R( 1 , 2 ) ...	reference matrix element(s)
+;	BEG R( 1 ) ...		reference vectors, too
+;	... = R( 3 , 2 )	assign matrix element
+;	... = R( 3 )		assign vectors, too
+;	BEG R( PAUSE		list/output all elements
+;	BEG R( OUT OUT ...	display elements manually
+;
+; Is R( or S( just a token like [(], with fraction as index?
+; 1.0 for [(], 1.1 for [R(], 1.2 for [S(] ?
+; DEF sets a flag like BEG/[=] or applied to [R(]?
+;
+; Matrix is stored in registers as follows, using a base register
+; number (R04 + 1):
+;	reg = R04	// last of "core reserved space"
+;	reg+1	Dimensions of R( // XX.YY format, N = XX * YY
+;	reg+2	Dimensions of S(
+;	reg+3	Scratch for U(, V(, W( (I/O with 618)
+;	// TODO: need to know last step number (memory size),
+;	// or step number of "reg+3", to do I/O w/618.
+;	-----	----------------
+;	reg+4	R(1,1) // or R(1)
+;	reg+5	R(...)
+;	...	R(X,Y)
+;	reg+4+N	S(1,1) // or S(1)
+;	...
+
+	.DEF	$begin	@g00	; init all (get var)
+	.DEF	$lparen	@g01	; [(]
+	.DEF	$rparen	@g02	; [)]
+	.DEF	$add	@g03	; [+]
+	.DEF	$sub	@g04	; [-]
+	.DEF	$mlt	@g05	; [*]
+	.DEF	$div	@g06	; [/]
+	.DEF	$pwr	@g07	; [^]
+	.DEF	$equal	@g08	; [=] (set var)
+	.DEF	$var_i	@g09	; set/get/iter vars (get var)
+	.DEF	$var_j	@g10	; ...
+	.DEF	$var_k	@g11	; ...
+	.DEF	$var_l	@g12	; ...
+	.DEF	$var_x	@g13	; ...
+	.DEF	$var_y	@g14	; ...
+	.DEF	$var_z	@g15	; ...
+	.DEF	$print	@G00	; BEGIN w/printing
+	.DEF	$comma	@G02	; TODO matrix op
+	.DEF	$pause	@G04	; TODO matrix op
+	.DEF	$in	@G07	; TODO matrix op
+	.DEF	$out	@G08	; TODO matrix op
+	.DEF	$next	@G09	; iterate var
+	.DEF	$def	@G10	; TODO matrix op
+	.DEF	$mat_r	@G11	; TODO matrix op
+	.DEF	$mat_s	@G12	; TODO matrix op
+	.DEF	$mat_u	@G13	; TODO matrix op
+	.DEF	$mat_v	@G14	; TODO matrix op
+	.DEF	$mat_w	@G15	; TODO matrix op
+
+MARK $print
+	ENTER 1
+	ST02	; PRINT
+	@SEARCH &init
+
+MARK $begin	; the CLEAR key
+	T02	; no PRINT
+MARK &init
+	JIFERR	; turn off prog err, if any
+		GO
+		GO
+	ENTER 1
+	ST03	; set flag for variable references
+MARK &init0
+	RE04	; default to 25
+	JIF0
+		@SEARCH &init1
+	ENTER 25
+	ST04
+MARK &init1
+	ENTER 15	; i.e. -1
+	ST08
+	CLEAR
+	RET
+
+MARK $add	; the [+] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &ad0
+	; Docs suggest +2 subr levels when printing
+	@CALL &print_r7
+	ALPHA " +"
+	ENTER 2
+	+02
+MARK &ad0
+	ENTER 2
+	@SEARCH &eval
+
+MARK $sub	; the [-] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &su0
+	; Docs suggest +2 subr levels when printing
+	@CALL &print_r7
+	ALPHA " -"
+	ENTER 2
+	+02
+MARK &su0
+	ENTER 3
+	@SEARCH &eval
+
+MARK $mlt	; the [*] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &ml0
+	; Docs suggest +2 subr levels when printing
+	@CALL &print_r7
+	ALPHA " *"
+	ENTER 2
+	+02
+MARK &ml0
+	ENTER 4
+	@SEARCH &eval
+
+MARK $div	; the [/] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &dv0
+	; Docs suggest +2 subr levels when printing
+	@CALL &print_r7
+	ALPHA " /"
+	ENTER 2
+	+02
+MARK &dv0
+	ENTER 5
+	@SEARCH &eval
+
+MARK $pwr	; the [^] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &pw0
+	; Docs suggest +2 subr levels when printing
+	@CALL &print_r7
+	ALPHA " **"
+	ENTER 3
+	+02
+MARK &pw0
+	ENTER 6
+	@SEARCH &eval
+
+MARK $lparen	; the [(] key
+	; TODO: check for "6 (" case, error +04
+	RE02
+	JIFNZ
+		@SEARCH &lp0
+	ALPHA " ("
+	ENTER 2
+	+02
+MARK &lp0
+	ENTER 1	; '(' marker
+	@SEARCH &push
+
+MARK $rparen	; the [)] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &rp0
+	; Docs suggest +1 subr levels when printing
+	@CALL &print_r7
+	ALPHA " )"
+	ENTER 2
+	+02
+MARK &rp0
+	ENTER 1	; '(' marker
+	@CALL &eval_op
+	@CALL &pop	; discard '(' marker
+	JIFNZ
+		@SEARCH &err_03	; excess ')'
+	; check if MAT op
+	ST00
+	INT
+	-00
+	JIF0
+		@SEARCH &mat_op
+	RET
+
+MARK $equal	; the [=] key
+	ST07
+	RE02
+	JIFNZ
+		@SEARCH &eq0
+	@CALL &print_r7
+	ALPHA " ="
+	ENTER 2
+	+02
+MARK &eq0
+	ENTER 3
+	ST03	; set flag for variable assignments
+	ENTER 0	; evaluate entire stack. however, unbalanced parens stop early
+	@CALL &eval_op
+	@CALL &peek
+	JIF0
+		@SEARCH &err_03	; excess '('
+	@CALL &init0
+	RE02
+	JIFNZ
+		@SEARCH &eq1
+	@CALL &print_r7
+	ALPHA "\r"
+	ENTER 1
+	ST02
+MARK &eq1
+	RE07
+	RET
+
+; Variable set/get print nothing
+MARK $var_i
+	ST07
+	ENTER 9
+	@SEARCH &do_var
+
+MARK $var_j
+	ST07
+	ENTER 10
+	@SEARCH &do_var
+
+MARK $var_k
+	ST07
+	ENTER 11
+	@SEARCH &do_var
+
+MARK $var_l
+	ST07
+	ENTER 12
+	@SEARCH &do_var
+
+MARK $var_x
+	ST07
+	ENTER 13
+	@SEARCH &do_var
+
+MARK $var_y
+	ST07
+	ENTER 14
+	@SEARCH &do_var
+
+MARK $var_z
+	ST07
+	ENTER 15
+MARK &do_var	; R7 is (possible) value to set
+	; TODO: check for "3 I" case - error +02
+	ST06	; R6 is reg to use
+	; This must support:
+	;	"BEGIN I + 6 ..." (reference) must work.
+	;	"BEGIN 5 = I 7 = J" (assignment) must work.
+	;	"BEGIN 5 = I = J" (assignment) must work.
+	; basically, pressing I, J, K, ... after [=] resets the flag as for BEGIN.
+	; only [=] sets the flag for assignments, reset by var or BEGIN.
+	INDIR R03	; 1=get, 3=set, 5=next
+	@SEARCH &get_var
+	@SEARCH &set_var
+	@SEARCH &do_next
+MARK &get_var
+	INDIR RE06
+	RET
+MARK &set_var
+	ENTER 1		; reset, like BEGIN
+	ST03
+	RE07
+	INDIR ST06
+	RET
+MARK &do_next
+	ENTER 1		; reset, like BEGIN
+	ST03
+	INDIR +06	; 1.MAX -> 2.MAX ...
+	ST01
+	INT
+	ST00		; 1, 2, ... (current count)
+	-01		; 0.MAX
+	ALPHA SHX+03	; 0.MAX -> MAX.0
+	ST01
+	ENTER 1
+	+01		; MAX+1
+	ALPHA JIFR0<	; skip if R0 < MAX+1
+		INDIR T06	; 0.0 on terminal count (?)
+	INDIR RE06
+	INT
+	RET
+
+MARK $next	; loop interator
+	ST07	; TODO: preserve display or not?
+	ENTER 5
+	ST03	; set flag for variable iterator
+	RE07
+	RET
+
+; Internal functions
+
+; uses R0
+MARK &print_r7
+	; if printing beyond column 80,
+	; start a new line
+	RE02
+	ST00
+	ENTER 80
+	ALPHA JIFR0>=
+		@SEARCH &pr0
+	ALPHA "\r"
+	I/O 12-04	; indent continuation lines
+	ENTER 4
+	ST02
+MARK &pr0
+	RE07
+	@CALL &printf
+	RET
+
+; Uses R0
+MARK &precedence
+	ST00
+	ENTER 2
+	/00
+	INT
+	RET
+
+; Uses: R0
+MARK &peek
+	; yuk...
+	RE08
+	ST00
+	ENTER 16
+	ALPHA JIFR0>=
+		@SEARCH &pop0
+	INDIR RE08
+	RET
+
+; Uses: R0
+MARK &pop
+	; yuk... also, should re-use peek
+	RE08
+	ST00
+	ENTER 16
+	ALPHA JIFR0>=
+		@SEARCH &pop0
+	INDIR RE08
+	ST00
+	ENTER 1
+	-08
+	RE00
+	RET
+MARK &pop0
+	ENTER 0
+	RET
+
+; Uses R0, R1
+MARK &push
+	ST01	; value to push
+	RE08	; check overflow, error +01
+	ST00
+	RE04
+	ALPHA JIFR0<
+		@SEARCH &err_01
+	ENTER 1
+	+08
+	RE01
+	INDIR ST08
+	RET
+
+; Entry:
+;	display is operator
+;	R7 is "rhs"
+MARK &eval
+	ST06	; op
+	@CALL &eval_op
+	@CALL &push	; new "lhs" is current "rhs"
+	RE06		; op
+	@CALL &push	; new op
+	RE07
+	RET
+
+; while (PREC(peek()) > 0 && PREC(peek()) >= PREC(op)) {
+;	lop = pop();
+;	lhs = pop();
+;	rhs = do_op(lop, lhs, rhs);
+; }
+; Entry:
+;	display is "op"
+;	R7 contains "rhs"
+; Uses: R0, R1, R5, R7, must preserve R6 for "eval"
+; Return:
+;	display = R7 = current total ("lhs")
+MARK &eval_op
+	@CALL &precedence
+	ST05	; PREC(op) - target operator precedence
+MARK &ev0
+	@CALL &peek
+	@CALL &precedence
+	ST00	; PREC(peek())
+	JIFNZ
+		@SEARCH &ev1	; TODO: handle this: empty or '('
+				; (these don't have a "lhs", must not pop)
+	RE05
+	ALPHA JIFR0>=	; PREC(peek()) >= PREC(op)
+		@SEARCH &ev1
+	@CALL &pop	; operator, R8 -> lhs
+	ST01		; 2,3,4,5,6
+	ENTER 2
+	*01		; 4,6,8,10,12
+	ENTER 3
+	-01		; 1,3,5,7,9
+	@CALL &pop	; "lhs" -> R00, display
+	EX01		; "lhs" -> R1, display=indir jump
+	ST00
+	RE07	; "rhs"
+	INDIR R00
+	@SEARCH &do_add
+	@SEARCH &do_sub
+	@SEARCH &do_mlt
+	@SEARCH &do_div
+	@SEARCH &do_pwr
+MARK &do_comma
+	ALPHA SHX-02
+	+01		; could be DIM or subscript
+	@SEARCH &ev2	; caller detects MAT op
+MARK &do_add
+	+01
+	@SEARCH &ev2
+MARK &do_sub
+	-01
+	@SEARCH &ev2
+MARK &do_mlt
+	*01
+	@SEARCH &ev2
+MARK &do_div
+	/01
+	@SEARCH &ev2
+MARK &do_pwr
+	RE01
+	LOGX
+	*07
+	10^X
+MARK &ev2	; display has new "rhs"
+	ST07	; set new "rhs"
+	@SEARCH &ev0
+MARK &ev1	; done
+	RE07
+	RET
+
+; compute length of MAT in registers, excl. DIM
+; Entry: R6 is DIM register
+; Return R5/display is num registers for elements
+MARK &mat_len
+	INDIR RE06	; dimensions of MAT, XX.YY
+MARK &mat_len0
+	ST00
+	INT	; XX
+	ST05
+	-00	; .YY
+	ALPHA SHX+02
+	*05	; num regs in R(
+	RET
+
+; point to R(
+; Return: R6 is the register number of the R() dimensions
+MARK &ptr_r
+	RE04
+	ST06
+	ENTER 1
+	+06
+	RET
+
+; point to S(
+; Return: R6 is the register number of the S() dimensions
+MARK &ptr_s
+	@CALL &ptr_r	; R6 = DIM reg for R(
+MARK &ptr0
+	@CALL &mat_len	; R5/display = num registers for elements
+	+06
+	ENTER 1
+	+06	; DIM of S( [or V( or W(]
+	RET
+
+; U(, V(, and W( exist only in the 618 memory.
+; All accesses must be through this interface.
+
+; point to U(
+; Return: R6 is the register number of the U() dimensions
+MARK &ptr_u
+	; TODO: read from 618
+	RET
+
+; point to V(
+; Return: R6 is the register number of the V() dimensions
+MARK &ptr_v
+	@CALL &ptr_u	; R6 = DIM reg for U(
+	@SEARCH &ptr0
+
+; point to W(
+; Return: R6 is the register number of the W() dimensions
+MARK &ptr_w
+	@CALL &ptr_v	; R6 = DIM reg for V(
+	@SEARCH &ptr0
+
+; R( S( U( V( W( completed by )
+; Entry: display/R0 is 0.mat
+;        R7 = matrix DIM or subscript
+MARK &mat_op
+	ALPHA SHX+01
+	ST00	; 1,2,3,4,5
+	ENTER 2
+	*00	; 2,4,6,8,10
+	ENTER 1
+	-00	; 1,3,5,7,9
+	INDIR R00
+	@SEARCH &do_mat_r
+	@SEARCH &do_mat_s
+	@SEARCH &do_mat_u
+	@SEARCH &do_mat_v
+	@SEARCH &do_mat_w
+MARK &do_mat_r
+	@CALL &ptr_r
+	@SEARCH &mo0
+MARK &do_mat_s
+	@CALL &ptr_s
+	@SEARCH &mo0
+MARK &do_mat_u
+	@CALL &ptr_u
+	@SEARCH &mo0
+MARK &do_mat_v
+	@CALL &ptr_v
+	@SEARCH &mo0
+MARK &do_mat_w
+	@CALL &ptr_w
+	; @SEARCH &mo0
+
+MARK &mo0	; R6 is matrix DIM reg
+	RE07	; DEF
+	ST06
+	RET
+
+MARK &err_01
+	ENTER 0
+	1/X	; set prog err
+	ENTER 01
+	STOP	; what happens if user doesn't reset?
+	@SEARCH &err_01
+
+MARK &err_02
+	ENTER 0
+	1/X	; set prog err
+	ENTER 02
+	STOP	; what happens if user doesn't reset?
+	@SEARCH &err_02
+
+MARK &err_03
+	ENTER 0
+	1/X	; set prog err
+	ENTER 03
+	STOP	; what happens if user doesn't reset?
+	@SEARCH &err_03
+
+MARK &err_04
+	ENTER 0
+	1/X	; set prog err
+	ENTER 04
+	STOP	; what happens if user doesn't reset?
+	@SEARCH &err_04
+
+	.INCLUDE printf.w6i
+
+	END

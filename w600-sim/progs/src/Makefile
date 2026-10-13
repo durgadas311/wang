@@ -3,6 +3,8 @@
 WASM = wasm
 VPATH = libw6:libplot:lib612
 WFLAGS = path=$(VPATH)
+# e.g. MODEL=600-2, MODEL=600-6, MODEL=600-14
+MODEL =
 
 
 SRCS = $(wildcard *.w6a)
@@ -11,10 +13,10 @@ LISTS = $(subst .w6a,.lst,$(SRCS))
 DATAS = $(wildcard *.txt)
 DATAT = $(subst .txt,.w6t,$(DATAS))
 SUBDIRS = libw6 libplot tests
-ROMS = libplot.w6x
+ROMS = libplot.w6x form_prog.w6x
 # might need to separate FLABS for ROM (implicit build) from RAM (explicit build)
 # TODO: need a way to generate the labels
-FLABS = libplot.wfl base2base.wfl formula.wfl
+FLABS = libplot.wfl base2base.wfl formula.wfl form_prog.wfl
 # The modules that comprise libplot ROM:
 LPLOT = grapher.w6i \
 	plot_chrsize.w6i \
@@ -51,18 +53,19 @@ all: $(ROMS) $(PROGS) # $(DATAT)
 #	@rm -f $(basename $@).w6$$
 
 %.w6x: %.w6a
-	$(WASM) $(WFLAGS) asm=$< lst=$*.lst out=$@ rom
+	$(WASM) $(MODEL) $(WFLAGS) asm=$< lst=$*.lst out=$@ rom
 
 %.w6t: %.w6a
-	$(WASM) $(WFLAGS) asm=$< lst=$*.lst out=$@ tape
+	$(WASM) $(MODEL) $(WFLAGS) asm=$< lst=$*.lst out=$@ tape
 
 %.w6t: %.txt
-	$(WASM) dat=$< out=$@
+	$(WASM) $(MODEL) dat=$< out=$@
 
 craps.w6t: craps.w6a random.w6i
 calendar.w6t: calendar.w6a zeller.w6i
 zeller.w6t: zeller.w6a zeller.w6i
 libplot.w6x: libplot.w6a libplot.w6i $(LPLOT)
+form_prog.w6x: form_prog.w6a printf.w6i
 plot_sin.w6t: plot_sin.w6a libplot.w6h
 plot_dat.w6t: plot_dat.w6a load_tape_data.w6i
 list_dat.w6t: list_dat.w6a load_tape_data.w6i

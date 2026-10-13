@@ -1,0 +1,176 @@
+; print a number in a minimal format (similar to printf " %g").
+; A leading blank is always printed.
+
+	.OUT W601
+
+; Uses R0, R1, R2 (in/out)
+; Accumulates width of output to R2
+
+; display (X) is number to print
+MARK &printf
+	JIFNZ
+		@SEARCH &_pf_zr	; trivial case of zero
+	ST01
+	JIF+
+		@CALL &_pf_spc
+	ENTER 8	; max "reasonable" digits (-1)
+	ST00
+	RE01
+	INT
+	ABS
+	JIFNZ
+		@SEARCH &_pf_log0 ; no int digits (0.xxxxx)
+	LOGX
+	ALPHA JIFR0>=
+		@SEARCH &_pf_sci
+MARK &_pf2
+	@CALL &_pf_int
+	RE01
+	ABS
+	ST01
+	INT
+	-01
+	JIFNZ
+		RET
+		GO
+	ALPHA '.'
+	ENTER 1
+	+02
+	RE01
+MARK &_pf1
+	ALPHA SHX+01
+	ST01
+	INT
+	@CALL &_pf_dig
+	RE01
+	INT
+	-01
+	JIF0
+		@SEARCH &_pf1
+	RET
+
+MARK &_pf_zr
+	ALPHA ' 0'
+	ENTER 2
+	+02
+	RET
+
+; print extra space to pad against '-' or '.'
+MARK &_pf_spc
+	ALPHA ' '
+	ENTER 1
+	+02
+	RET
+
+; no integer places, but not 0 (|X| < 1.0)
+; R0 still has 8 in it.
+MARK &_pf_log0
+	RE01
+	ABS
+	LOGX	; check zeroes after decimal point
+	ABS
+	ALPHA JIFR0>=	; reasonable number of decimal places?
+		@SEARCH &_pf_sci
+	RE01
+	CHGSGN
+	JIF+
+		@CALL &_pf_spc	; need space if +0.xxxxx
+	RE01
+	JIF+
+		@CALL &_pi_neg	; need minus sign
+	ENTER 1-	; handle as if LOGX = -1
+	@SEARCH &_pf2
+
+MARK &_pf_sci
+	ENTER 16
+	+02
+	RE01
+	I/O 00-15
+	RET
+
+; Print integer portion of value.
+; R01 = number to print, X = num integer digits
+MARK &_pf_int
+	ST00
+	ENTER 1
+	+00
+	INT
+	JIF+
+		@SEARCH &_pi_no_int
+	ST00
+	+02
+	ENTER 1
+	+02
+	ENTER 3
+	*00
+MARK &_pi0
+	ENTER 1
+	+00
+	RE01
+	INT
+	INDIR R00
+;	@SEARCH &_pi_no_int
+	ENTER 1		; should not get here?
+	-02		;
+	RET		;
+	I/O 01-00
+	RET
+	I/O 02-00
+	RET
+	I/O 03-00
+	RET
+	I/O 04-00
+	RET
+	I/O 05-00
+	RET
+	I/O 06-00
+	RET
+	I/O 07-00
+	RET
+	I/O 08-00
+	RET
+	I/O 09-00
+	RET
+
+MARK &_pi_no_int	; must still print sign...
+	RE01
+	JIF+
+		@SEARCH &_pi_neg
+	RET
+
+MARK &_pi_neg
+	ALPHA '-'
+	ENTER 1
+	+02
+	RET
+
+; X = digit to print
+MARK &_pf_dig
+	ST00
+	ENTER 1
+	+02
+	ENTER 4
+	*00
+	ENTER 1
+	+00
+	INDIR R00
+	ALPHA '0'
+	RET
+	ALPHA 'l'
+	RET
+	ALPHA '2'
+	RET
+	ALPHA '3'
+	RET
+	ALPHA '4'
+	RET
+	ALPHA '5'
+	RET
+	ALPHA '6'
+	RET
+	ALPHA '7'
+	RET
+	ALPHA '8'
+	RET
+	ALPHA '9'
+	RET
