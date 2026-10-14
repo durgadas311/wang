@@ -240,7 +240,7 @@ public class WangAssembler implements WangMemory {
 			}
 			// TODO: fix this for e.g. ALPHA "...;..."
 			s = line.replaceFirst(";.*$", "");
-			toks = s.split("\\s(?=([^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)");
+			toks = s.split("\\s+(?=([^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)");
 			n = 0;
 			while (n < toks.length && toks[n].length() == 0) ++n;
 			if (n >= toks.length) {
@@ -333,6 +333,13 @@ public class WangAssembler implements WangMemory {
 			} else if (toks[n].equalsIgnoreCase(".DEF")) {
 				// pre-defined symbols
 				n = wi.def(toks, n);
+				errorList(String.format("%c               %s",
+							wi.lastError(), line),
+					n, ls);
+				continue;
+			} else if (toks[n].equalsIgnoreCase(".EQU")) {
+				// constants
+				n = wi.equ(toks, n);
 				errorList(String.format("%c               %s",
 							wi.lastError(), line),
 					n, ls);

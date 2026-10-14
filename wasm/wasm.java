@@ -171,6 +171,7 @@ public class wasm {
 			System.out.format("      .REG %s\n", mach.regHelp());
 			System.out.format("      .SREG symbol[,symbol] [count]\n");
 			System.out.format("      .DEF symbol code\n");
+			System.out.format("      .EQU symbol number\n");
 			System.out.format("      .OUT <device>\n");
 			System.out.format("      .MODEL <model>\n");
 			System.out.format("      .INCLUDE <file>\n");

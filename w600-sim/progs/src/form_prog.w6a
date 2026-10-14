@@ -100,9 +100,35 @@
 	.DEF	$mat_v	@G14	; TODO matrix op
 	.DEF	$mat_w	@G15	; TODO matrix op
 
+	; operators as stored on stack
+	.EQU	%op_none	0	; prec 0
+	.EQU	%op_paren	1	; prec 0
+	.EQU	%op_add		2	; prec 1
+	.EQU	%op_sub		3	; prec 1
+	.EQU	%op_mlt		4	; prec 2
+	.EQU	%op_div		5	; prec 2
+	.EQU	%op_pwr		6	; prec 3
+	; how to convert operator to precedence
+	.EQU	%op_prec	2	; prec = INT(op / op_prec)
+
+	; states for R3 - context for variables.
+	; used directly in INDIR R03 instruction.
+	.EQU	%var_ref	1	; reference variable
+	.EQU	%var_set	3	; set variable
+	.EQU	%var_iter	5	; iterate variable
+
+	; register/ID for variables
+	.EQU	%varid_i	9
+	.EQU	%varid_j	10
+	.EQU	%varid_k	11
+	.EQU	%varid_l	12
+	.EQU	%varid_x	13
+	.EQU	%varid_y	14
+	.EQU	%varid_z	15
+
 MARK $print
 	ENTER 1
-	ST02	; PRINT
+	ST02	; PRINT (output column number)
 	@SEARCH &init
 
 MARK $begin	; the CLEAR key
@@ -111,7 +137,7 @@ MARK &init
 	JIFERR	; turn off prog err, if any
 		GO
 		GO
-	ENTER 1
+	ENTER %var_ref
 	ST03	; set flag for variable references
 MARK &init0
 	RE04	; default to 25
@@ -136,7 +162,7 @@ MARK $add	; the [+] key
 	ENTER 2
 	+02
 MARK &ad0
-	ENTER 2
+	ENTER %op_add
 	@SEARCH &eval
 
 MARK $sub	; the [-] key
@@ -150,7 +176,7 @@ MARK $sub	; the [-] key
 	ENTER 2
 	+02
 MARK &su0
-	ENTER 3
+	ENTER %op_sub
 	@SEARCH &eval
 
 MARK $mlt	; the [*] key
@@ -164,7 +190,7 @@ MARK $mlt	; the [*] key
 	ENTER 2
 	+02
 MARK &ml0
-	ENTER 4
+	ENTER %op_mlt
 	@SEARCH &eval
 
 MARK $div	; the [/] key
@@ -178,7 +204,7 @@ MARK $div	; the [/] key
 	ENTER 2
 	+02
 MARK &dv0
-	ENTER 5
+	ENTER %op_div
 	@SEARCH &eval
 
 MARK $pwr	; the [^] key
@@ -192,7 +218,7 @@ MARK $pwr	; the [^] key
 	ENTER 3
 	+02
 MARK &pw0
-	ENTER 6
+	ENTER %op_pwr
 	@SEARCH &eval
 
 MARK $lparen	; the [(] key
@@ -204,7 +230,7 @@ MARK $lparen	; the [(] key
 	ENTER 2
 	+02
 MARK &lp0
-	ENTER 1	; '(' marker
+	ENTER %op_paren	; '(' marker
 	@SEARCH &push
 
 MARK $rparen	; the [)] key
@@ -218,9 +244,15 @@ MARK $rparen	; the [)] key
 	ENTER 2
 	+02
 MARK &rp0
-	ENTER 1	; '(' marker
+	ENTER %op_paren	; '(' marker
 	@CALL &eval_op
 	@CALL &pop	; discard '(' marker
+	; TODO: check for R( S( U( V( W(, also DEF prefix.
+	; Need to handle assignment, reference, or DEF here.
+	; IN/OUT/PAUSE do not use [)] - need error check?
+	; PRINT mode only prints results/values, not matrix ops.
+	; There appears to be no way to print a matrix (without
+	; writing a program to do that).
 	JIFNZ
 		@SEARCH &err_03	; excess ')'
 	; check if MAT op
@@ -241,9 +273,9 @@ MARK $equal	; the [=] key
 	ENTER 2
 	+02
 MARK &eq0
-	ENTER 3
+	ENTER %var_set
 	ST03	; set flag for variable assignments
-	ENTER 0	; evaluate entire stack. however, unbalanced parens stop early
+	ENTER %op_none	; evaluate entire stack. however, unbalanced parens stop early
 	@CALL &eval_op
 	@CALL &peek
 	JIF0
@@ -263,37 +295,37 @@ MARK &eq1
 ; Variable set/get print nothing
 MARK $var_i
 	ST07
-	ENTER 9
+	ENTER %varid_i
 	@SEARCH &do_var
 
 MARK $var_j
 	ST07
-	ENTER 10
+	ENTER %varid_j
 	@SEARCH &do_var
 
 MARK $var_k
 	ST07
-	ENTER 11
+	ENTER %varid_k
 	@SEARCH &do_var
 
 MARK $var_l
 	ST07
-	ENTER 12
+	ENTER %varid_l
 	@SEARCH &do_var
 
 MARK $var_x
 	ST07
-	ENTER 13
+	ENTER %varid_x
 	@SEARCH &do_var
 
 MARK $var_y
 	ST07
-	ENTER 14
+	ENTER %varid_y
 	@SEARCH &do_var
 
 MARK $var_z
 	ST07
-	ENTER 15
+	ENTER %varid_z
 MARK &do_var	; R7 is (possible) value to set
 	; TODO: check for "3 I" case - error +02
 	ST06	; R6 is reg to use
@@ -304,20 +336,20 @@ MARK &do_var	; R7 is (possible) value to set
 	; basically, pressing I, J, K, ... after [=] resets the flag as for BEGIN.
 	; only [=] sets the flag for assignments, reset by var or BEGIN.
 	INDIR R03	; 1=get, 3=set, 5=next
-	@SEARCH &get_var
-	@SEARCH &set_var
-	@SEARCH &do_next
+	@SEARCH &get_var	; %var_ref
+	@SEARCH &set_var	; %var_set
+	@SEARCH &do_next	; %var_iter
 MARK &get_var
 	INDIR RE06
 	RET
 MARK &set_var
-	ENTER 1		; reset, like BEGIN
+	ENTER %var_ref	; reset, like BEGIN
 	ST03
 	RE07
 	INDIR ST06
 	RET
 MARK &do_next
-	ENTER 1		; reset, like BEGIN
+	ENTER %var_ref	; reset, like BEGIN
 	ST03
 	INDIR +06	; 1.MAX -> 2.MAX ...
 	ST01
@@ -336,7 +368,7 @@ MARK &do_next
 
 MARK $next	; loop interator
 	ST07	; TODO: preserve display or not?
-	ENTER 5
+	ENTER %var_iter
 	ST03	; set flag for variable iterator
 	RE07
 	RET
@@ -364,7 +396,7 @@ MARK &pr0
 ; Uses R0
 MARK &precedence
 	ST00
-	ENTER 2
+	ENTER %op_prec
 	/00
 	INT
 	RET

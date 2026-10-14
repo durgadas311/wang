@@ -31,6 +31,7 @@ public interface WangInstructions {
 	int dreg(String[] line, int first, WangMemory mem, int start);
 	int xlab(String[] line, int first);
 	int def(String[] line, int first);
+	int equ(String[] line, int first);
 	int setOutput(String dev);
 	int setOutput(String[] line, int first);
 	int setModel(String mod);

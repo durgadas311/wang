@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class WangSymbolTable {
+	private Vector<WangSymbol> cons;
 	private Vector<WangSymbol> regs;
 	private Vector<WangSymbol> syms;
 	private Vector<WangSymbol> subs;
@@ -15,6 +16,7 @@ public class WangSymbolTable {
 	private int subrLo, subrHi;
 
 	public WangSymbolTable(int lo, int hi) {
+		cons = new Vector<WangSymbol>();
 		regs = new Vector<WangSymbol>();
 		syms = new Vector<WangSymbol>();
 		subs = new Vector<WangSymbol>();
@@ -53,6 +55,15 @@ public class WangSymbolTable {
 	private WangSymbol lookup(String lab) {
 		for (WangSymbol sym : regs) {
 			if (sym.nam.equalsIgnoreCase(lab)) {
+				return sym;
+			}
+		}
+		return null;
+	}
+
+	private WangSymbol clookup(String key) {
+		for (WangSymbol sym : cons) {
+			if (sym.nam.equalsIgnoreCase(key)) {
 				return sym;
 			}
 		}
@@ -99,6 +110,32 @@ public class WangSymbolTable {
 
 	public Vector<WangSymbol> getSyms() {
 		return regs;
+	}
+
+	public int defConst(String key, int val) {
+		WangSymbol sym = clookup(key);
+		if (sym != null) {
+			if (sym.val != val) {
+				// multiple definitions... error...
+				return -1;
+			}
+			return 0;
+		}
+		sym = new WangSymbol(key, val);
+		cons.add(sym);
+		return 0;
+	}
+
+	// TODO: make this work for negative values...
+	// These must be defined before use - enforce that somehow.
+	public int getConst(String key, int ref) {
+		if (key.charAt(0) == '%') key = key.substring(1);
+		WangSymbol sym = clookup(key);
+		if (sym == null) {
+			// undefined... error...
+			return -1;
+		}
+		return sym.val;
 	}
 
 	// define register label
