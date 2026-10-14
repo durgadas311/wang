@@ -112,10 +112,10 @@ public class WangSymbolTable {
 		return regs;
 	}
 
-	public int defConst(String key, int val) {
+	public int defConst(String key, String val) {
 		WangSymbol sym = clookup(key);
 		if (sym != null) {
-			if (sym.val != val) {
+			if (!val.equals(sym.str)) {
 				// multiple definitions... error...
 				return -1;
 			}
@@ -128,14 +128,14 @@ public class WangSymbolTable {
 
 	// TODO: make this work for negative values...
 	// These must be defined before use - enforce that somehow.
-	public int getConst(String key, int ref) {
+	public String getConst(String key, int ref) {
 		if (key.charAt(0) == '%') key = key.substring(1);
 		WangSymbol sym = clookup(key);
 		if (sym == null) {
 			// undefined... error...
-			return -1;
+			return null;
 		}
-		return sym.val;
+		return sym.str;
 	}
 
 	// define register label

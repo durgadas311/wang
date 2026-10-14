@@ -405,12 +405,11 @@ public class Wang600Instructions implements WangInstructions {
 				}
 				val = String.format("%03d", reg);
 			} else if (val.charAt(0) == '%') {
-				reg = tbl.getConst(val, adr);
-				if (reg < 0) {
+				val = tbl.getConst(val, adr);
+				if (val == null) {
 					error = 'U';
 					return -3;
 				}
-				val = String.format("%d", reg);
 			}
 			for (int i = 0; i < val.length(); ++i) {
 				int q = E.indexOf(Character.toUpperCase(val.charAt(i)));
@@ -678,14 +677,8 @@ public class Wang600Instructions implements WangInstructions {
 		}
 		// TODO: possibly also allow keyOrCode()...
 		key = line[x].substring(1);
-		try {
-			val = Integer.decode(line[x + 1]);
-		} catch (Exception ee) {
-System.err.format("%s: %s\n", key, ee.getMessage());
-			error = 'O';
-			return -1;
-		}
-		x = tbl.defConst(key, val);
+		// TODO: sanity-check value string?
+		x = tbl.defConst(key, line[x + 1]);
 		if (x < 0) {
 			if (x == -1) error = 'M';
 			else error = 'P';

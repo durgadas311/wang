@@ -3,6 +3,7 @@
 public class WangSymbol {
 	public String nam;
 	public int val;
+	public String str;
 	public int ref;
 
 	public WangSymbol(int ref) {
@@ -20,5 +21,12 @@ public class WangSymbol {
 		val = -1;	// also 15-15
 		nam = lab;
 		this.ref = ref;
+	}
+
+	public WangSymbol(String lab, String val) {
+		str = val;
+		nam = lab;
+		this.val = -1;
+		ref = -1;
 	}
 }

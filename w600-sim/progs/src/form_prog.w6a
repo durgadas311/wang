@@ -103,11 +103,18 @@
 	; operators as stored on stack
 	.EQU	%op_none	0	; prec 0
 	.EQU	%op_paren	1	; prec 0
-	.EQU	%op_add		2	; prec 1
-	.EQU	%op_sub		3	; prec 1
-	.EQU	%op_mlt		4	; prec 2
-	.EQU	%op_div		5	; prec 2
-	.EQU	%op_pwr		6	; prec 3
+	.EQU	%sop_def	1.1	; spcl handling
+	.EQU	%sop_matr	1.2
+	.EQU	%sop_mats	1.3
+	.EQU	%sop_matu	1.4
+	.EQU	%sop_matv	1.5
+	.EQU	%sop_matw	1.6
+	.EQU	%op_comma	2	; prec 1
+	.EQU	%op_add		4	; prec 2
+	.EQU	%op_sub		5	; prec 2
+	.EQU	%op_mlt		6	; prec 3
+	.EQU	%op_div		7	; prec 3
+	.EQU	%op_pwr		8	; prec 4
 	; how to convert operator to precedence
 	.EQU	%op_prec	2	; prec = INT(op / op_prec)
 
@@ -366,12 +373,51 @@ MARK &do_next
 	INT
 	RET
 
+; This can only be used once, and in context of [R(] et al.
+MARK $comma
+	ST07
+	ENTER %op_comma
+	@SEARCH &eval
+
+MARK $pause
+	RET
+
+MARK $in
+	RET
+
+MARK $out
+	RET
+
 MARK $next	; loop interator
 	ST07	; TODO: preserve display or not?
 	ENTER %var_iter
 	ST03	; set flag for variable iterator
 	RE07
 	RET
+
+MARK $def
+	ENTER %sop_def
+	@SEARCH &push
+
+MARK $mat_r
+	ENTER %sop_matr
+	@SEARCH &push
+
+MARK $mat_s
+	ENTER %sop_mats
+	@SEARCH &push
+
+MARK $mat_u
+	ENTER %sop_matu
+	@SEARCH &push
+
+MARK $mat_v
+	ENTER %sop_matv
+	@SEARCH &push
+
+MARK $mat_w
+	ENTER %sop_matw
+	@SEARCH &push
 
 ; Internal functions
 
@@ -491,6 +537,8 @@ MARK &ev0
 	ST00
 	RE07	; "rhs"
 	INDIR R00
+	@SEARCH &do_comma
+	@SEARCH &do_comma	; never reached
 	@SEARCH &do_add
 	@SEARCH &do_sub
 	@SEARCH &do_mlt
@@ -584,37 +632,58 @@ MARK &ptr_w
 ;        R7 = matrix DIM or subscript
 MARK &mat_op
 	ALPHA SHX+01
-	ST00	; 1,2,3,4,5
+	ST00	; 1,2,3,4,5,6
 	ENTER 2
-	*00	; 2,4,6,8,10
+	*00	; 2,4,6,8,10,12
 	ENTER 1
-	-00	; 1,3,5,7,9
+	-00	; 1,3,5,7,9,11
 	INDIR R00
+	@SEARCH &err_03	; not entered via here
 	@SEARCH &do_mat_r
 	@SEARCH &do_mat_s
 	@SEARCH &do_mat_u
 	@SEARCH &do_mat_v
 	@SEARCH &do_mat_w
+
 MARK &do_mat_r
-	@CALL &ptr_r
+	@CALL &ptr_r	; R6 -> R( dim reg
 	@SEARCH &mo0
 MARK &do_mat_s
-	@CALL &ptr_s
+	@CALL &ptr_s	; R6 -> S( dim reg
 	@SEARCH &mo0
 MARK &do_mat_u
-	@CALL &ptr_u
+	@CALL &ptr_u	; U( dim to scratch, R6->scratch
 	@SEARCH &mo0
 MARK &do_mat_v
-	@CALL &ptr_v
+	@CALL &ptr_v	; V( dim to scratch, R6->scratch
 	@SEARCH &mo0
 MARK &do_mat_w
-	@CALL &ptr_w
+	@CALL &ptr_w	; W( dim to scratch, R6->scratch
 	; @SEARCH &mo0
 
 MARK &mo0	; R6 is matrix DIM reg
-	RE07	; DEF
-	ST06
+	; peek for DEF...
+	@CALL &peek
+	ST00
+	ENTER %sop_def
+	-00
+	JIF0
+		@SEARCH &mo1
+	; DEFINE MAT dimensions
+	@CALL &pop
+	RE07	; dimensions
+	INDIR ST06
 	RET
+MARK &mo1
+	; R6 -> matrix DIM.
+	; TODO: validate subscripts against DIM?
+
+	; TODO: subscript to register number in R6, after which
+	; same as VAR except no NEXT.
+	INDIR R03	; 1=get, 3=set, 5=next (invalid)
+	@SEARCH &get_var	; %var_ref
+	@SEARCH &set_var	; %var_set
+	@SEARCH &err_04		; %var_iter
 
 MARK &err_01
 	ENTER 0
