@@ -525,6 +525,20 @@ public class Wang600Instructions implements WangInstructions {
 					error = 'U';
 					return -2;
 				}
+			} else if (line[x].charAt(0) == '%') {
+				String val = tbl.getConst(line[x], adr); // must be integer <= 255
+				if (val == null) {
+					error = 'U';
+					return -2;
+				}
+				reg = -1;
+				try {
+					reg = Integer.decode(val);
+				} catch (Exception ee) {}
+				if (reg < 0 || reg > maxReg()) {
+					error = 'R';
+					return -2;
+				}
 			} else {
 				reg = Integer.valueOf(line[x]);
 				if (reg < 0 || reg > maxReg()) {
