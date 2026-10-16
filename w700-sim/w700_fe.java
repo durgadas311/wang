@@ -215,10 +215,7 @@ public class w700_fe
 		front_end.add(pan);
 
 
-		Wang_FunctionLabelBar fbar = null;
-		if (Wang_UI.getProperties().getProperty("wang_function_labels") != null) {
-			fbar = new Wang_FunctionLabelBar();
-		}
+		Wang_FunctionLabelBar fbar = new Wang_FunctionLabelBar();
 
 		Wang700.Kbd = new Wang700_Keyboard(fbar);
 		s.gridx = 0;

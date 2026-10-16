@@ -143,10 +143,7 @@ public class w600_fe
 
 		Wang600.Prt = new Wang600_Printer();
 
-		Wang_FunctionLabelBar fbar = null;
-		if (Wang_UI.getProperties().getProperty("wang_function_labels") != null) {
-			fbar = new Wang_FunctionLabelBar();
-		}
+		Wang_FunctionLabelBar fbar = new Wang_FunctionLabelBar();
 
 		// Must be after Display, Tape, and Printer are created.
 		Wang600.Kbd = new Wang600_Keyboard(fbar);
