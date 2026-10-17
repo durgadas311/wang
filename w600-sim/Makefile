@@ -131,6 +131,7 @@ wpcc.tgz: _FRC_
 
 www: _FRC_
 	rsync -Wuv docs/*.html docs/*.gif durgadas.com:/var/www/html/wang600/wang600docs
+	rsync -Wuv docs/src/Wang600QuickRef.pdf durgadas.com:/var/www/html/wang600/wang600docs
 	rsync -Wuv www/wang6* durgadas.com:/var/www/html/wang600
 	rsync -Wuv www/downloads/*.html www/downloads/.htaccess durgadas.com:/var/www/html/sebhc/w600-sim
 
