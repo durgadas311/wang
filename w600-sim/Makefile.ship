@@ -121,7 +121,8 @@ wang600.jar: Release.java Release.class w600_fe.class w600_edit.class w600initPr
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS)) \
-		$(addprefix -C ../common docs/,$(COMN_DOCS))
+		$(addprefix -C ../common docs/,$(COMN_DOCS)) \
+		-C docs/src Wang600QuickRef.pdf
 
 wang600setup.jar: w600initProps.class
 	echo "Main-Class: w600initProps" >Manifest.txt
