@@ -107,6 +107,11 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 				onOff(true);
 				return;
 			}
+			if (m.getMnemonic() == KeyEvent.VK_I) {
+				// manual return-index
+				do_crlf();
+				return;
+			}
 			if (m.getMnemonic() == KeyEvent.VK_U) {
 				//setup();
 				return;
@@ -156,6 +161,9 @@ class Wang_PlottingOutputWriter extends Wang_Paper
 		JMenu mu;
 		mu = new JMenu("Typewriter");
 		JMenuItem mi;
+		mi = new JMenuItem("Return/Index", KeyEvent.VK_I);
+		mi.addActionListener(this);
+		mu.add(mi);
 		mi = new JMenuItem("Setup", KeyEvent.VK_U);
 		mi.addActionListener(this);
 		mu.add(mi);

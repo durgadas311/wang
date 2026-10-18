@@ -96,6 +96,11 @@ class Wang_OutputWriter extends IBM_Selectric implements ActionListener
 				onOff(true);
 				return;
 			}
+			if (m.getMnemonic() == KeyEvent.VK_I) {
+				// manual return-index
+				do_crlf();
+				return;
+			}
 		}
 		super.actionPerformed(e);
 	}
@@ -106,6 +111,9 @@ class Wang_OutputWriter extends IBM_Selectric implements ActionListener
 		JMenu mu;
 		mu = new JMenu("Typewriter");
 		JMenuItem mi;
+		mi = new JMenuItem("Return/Index", KeyEvent.VK_I);
+		mi.addActionListener(this);
+		mu.add(mi);
 		mi = new JMenuItem("Setup", KeyEvent.VK_U);
 		mi.addActionListener(this);
 		mu.add(mi);
