@@ -610,6 +610,8 @@ class Wang700_Help extends JComponent
 		return _help;
 	}
 
+	public JMenuItem getMenuItemQRef() { return null; }
+
 	public JMenuItem getMenuItemAbout() {
 		return _about;
 	}
