@@ -1089,6 +1089,17 @@ class Wang600_Keyboard extends Wang_Keyboard
 		Wang600.Core.pressKey(code);
 	}
 
+	// This makes sense for the XROM, but is problematic for tape files,
+	// not only because a tape file may contain several images but also since
+	// the label only makes sense if a specific image has been loaded and
+	// is ready to run.
+	public void checkLabelFile(File other) {
+		if (_fbar != null) {
+			_fbar.checkLabelFile(other);
+		}
+	}
+
+	Wang_FunctionLabelBar _fbar;
 	JFrame _frame;
 	JScrollPane _scroll;
 	int _xoff, _yoff;
@@ -1096,6 +1107,7 @@ class Wang600_Keyboard extends Wang_Keyboard
 	LinkedBlockingDeque<Integer> kbIn;
 
 	public Wang600_Keyboard(Wang_FunctionLabelBar fbar) {
+		_fbar = fbar;
 		kbIn = new LinkedBlockingDeque<Integer>();
 		int x;
 		_kbds = new Wang_Keyboards[num_kbds];

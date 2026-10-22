@@ -414,6 +414,12 @@ class Wang1200_Model611 extends JComponent
 	public void onOff(boolean on) {
 	}
 
+        public String getModel() { return "1200"; }
+        public String getName() { return "1200"; }
+        public void plugIn(JMenu mu) {}
+        public void unPlug(JMenu mu) {}
+        public boolean isPlugged() { return true; }
+
 	public JFrame getFrame() { return null; }
 	public Component getComponent() { return this; }
 
@@ -1223,6 +1229,8 @@ class Wang1200_Help extends JComponent
 		return _help;
 	}
 
+	public JMenuItem getMenuItemQRef() { return null; }
+
 	public JMenuItem getMenuItemAbout() {
 		return _about;
 	}
@@ -1436,6 +1444,8 @@ class Wang1200_KeyboardInst extends Wang1200_Keyboard
 	Wang_Keys _skl;
 	Wang_Keys _shl;
 	Wang_Keys _csl;
+
+	public void checkLabelFile(File other) {}
 
 	public int getMode0(boolean clear) { return _mode0; }
 	public int getMode1(boolean clear) {
@@ -1746,14 +1756,14 @@ System.err.println("action");
 }
 		// on some platforms, ALT causes extended character codes...
 		// so we have to handle ALT (as CODE) in the keyPressed event.
-		int m = e.getModifiers();
+		int m = e.getModifiersEx();
 		char c = e.getKeyChar();
 		if (c == 0x04) {
 			e.consume();
 			Wang1200.Core.debugIntr();
 			return;
 		}
-		if ((m & InputEvent.ALT_MASK) != 0) return;
+		if ((m & InputEvent.ALT_DOWN_MASK) != 0) return;
 		e.consume();
 		process_keychar(c, false);
 	}
@@ -1764,8 +1774,8 @@ System.err.println("action");
 			setCode(true);
 			return;
 		}
-		int m = e.getModifiers();
-		if ((m & InputEvent.ALT_MASK) == 0) return;
+		int m = e.getModifiersEx();
+		if ((m & InputEvent.ALT_DOWN_MASK) == 0) return;
 		int k = e.getKeyCode();
 		if (k != KeyEvent.VK_BACK_SPACE &&
 			k != KeyEvent.VK_ENTER &&
@@ -1783,8 +1793,8 @@ System.err.println("action");
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		boolean alt = ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0);
-		boolean coded = ((e.getModifiers() & InputEvent.ALT_MASK) != 0);
+		boolean alt = ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+		boolean coded = ((e.getModifiers() & ActionEvent.ALT_MASK) != 0);
 		// must be a button, find out which
 		int x, y;
 		for (y = 0; y < _nkbds; ++y) {

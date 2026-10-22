@@ -78,6 +78,7 @@ class Wang600_Simulator
 					_xrom[len - x - 1] = buf[x];
 				}
 			}
+			Wang600.Kbd.checkLabelFile(img);
 		}
 	}
 

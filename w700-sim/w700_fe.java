@@ -844,6 +844,7 @@ class Wang700_Keyboard extends Wang_Keyboard
 	int _defreg;
 	boolean _run; // _mode0 doesn't show RUN down, only NOT learn/list/etc
 	boolean modelC;
+	Wang_FunctionLabelBar _fbar;
 
 	public int getMode0(boolean clear) {
 		int code = _mode0;
@@ -995,7 +996,18 @@ class Wang700_Keyboard extends Wang_Keyboard
 		Wang700.Core.pressKey(code);
 	}
 
+	// This is problematic for tape files, not only because
+	// a tape file may contain several images but also since
+	// the label only makes sense if a specific image has been
+	// loaded and is ready to run.
+	public void checkLabelFile(File other) {
+		if (_fbar != null) {
+			_fbar.checkLabelFile(other);
+		}
+	}
+
 	public Wang700_Keyboard(Wang_FunctionLabelBar fbar) {
+		_fbar = fbar;
 		kbIn = new LinkedBlockingDeque<Integer>();
 		int x;
 		_kbds = new Wang_Keyboards[num_kbds];

@@ -3,6 +3,7 @@
 
 import java.awt.event.*;
 import javax.swing.*;
+import java.io.*;
 
 abstract class Wang_Keyboard extends JComponent
 			implements KeyListener
@@ -10,4 +11,5 @@ abstract class Wang_Keyboard extends JComponent
 	static final long serialVersionUID = 31100000004L;
 	public abstract int getMode0(boolean clear); // mode bits, 0-3, a.k.a D1
 	public abstract int getMode1(boolean clear); // mode bits, 0-3, a.k.a D2
+	public abstract void checkLabelFile(File other);
 }

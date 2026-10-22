@@ -173,6 +173,34 @@ class Wang_FunctionLabelBar extends JPanel
 		}
 	}
 
+	private void setLabelFile(File file) {
+		// TODO: allow for directories other than "wang home"?
+		try { // if this fails, oh well.
+			Wang_UI.getProperties().setAndSaveProperty(
+				Wang_UI.getProperties().getClass().newInstance(),
+				"wang_function_labels",
+				file == null ? "" : file.getName());
+		} catch(Exception ee) {}
+		loadLabels(file);
+	}
+
+	public void checkLabelFile(File other) {
+		String fn = other.getName();
+		int x = fn.lastIndexOf('.');
+		if (x == 0) {
+			fn = "";
+		} else if (x > 0) {
+			fn = fn.substring(0, x);
+		}
+		fn += ".wfl";
+		File lbl = new File(other.getParentFile(), fn);
+		if (lbl.exists()) {
+			setLabelFile(lbl);
+		} else {
+			setLabelFile(null);
+		}
+	}
+
 	private void pickLabelFile() {
 		SuffFileChooser ch = new SuffFileChooser("Load Key Labels",
 			"wfl", "Function Label Files", Wang_UI.getDir());
@@ -186,13 +214,7 @@ class Wang_FunctionLabelBar extends JPanel
 		} else {
 			file = null;
 		}
-		try { // if this fails, oh well.
-			Wang_UI.getProperties().setAndSaveProperty(
-				Wang_UI.getProperties().getClass().newInstance(),
-				"wang_function_labels",
-				file == null ? "" : file.getName());
-		} catch(Exception ee) {}
-		loadLabels(file);
+		setLabelFile(file);
 	}
 
 	public Wang_FunctionLabelBar() {
