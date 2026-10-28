@@ -9,26 +9,55 @@
 ;
 ; Operator precedence
 ;	=
-; ??	R( S( U( V( W( [DEF x?]
-; ??	, [IN?]
-;	(
+;	(	R( S( U( V( W(
+;		,
 ;	+ -
 ;	* /
 ;	^
+;
+; NEXT, DEFINE, [=] set a context flag (R3) to alter how [I] and [R(]
+; (et al.) behave. Default is to reference the variable or matrix
+; element providing a value for the next operator.
+;
+; NEXT and DEF use the same code, as their contexts are mutually
+; exclusive. IN, OUT, and OUT-PAUSE alter interpretation of [R(] et al.
+; and eliminate the need for closing paren (or comma). Failure to follow
+; these conventions will have unpredictable results.
+;
+; Stack entries normally are value-operator pairs, with the operator
+; on the top of stack. The exception is the left-paren variants (incl.
+; matrix variables) where there is no value associated.
+;
+; The eval routine is execuated for each operator keyed, which also
+; includes an implied value (the display). As long as the operator on the
+; stack is higher or equal precedence to the current keyed operator, the
+; stack entry is combined with the display value (accumulated in R7). Then
+; the value in R7 and current keyed operator are pushed on the stack. In
+; these cases, right-paren is considered an operator and all operations
+; on the stack are processed up to the matching left-paren but nothing
+; is pushed.
+;
+; R8 points to the top of the stack, and must be incremented before
+; storing the value when pushing. The means that a "peek" operation can
+; be performed without altering R8. Peek and pop operations return
+; the value 0 if underflow occurs (R8 unchanged). An overflow during
+; push causes the +01 error and essentially aborts the current calculation.
+; R4 determines when overflow occurs. If R8 == R4 on entry to push,
+; an overflow is indicated. When R8 == 15 then the stack is empty.
 ;
 ; Register usage:
 ;	R0	temp, for ALPHA compares
 ;	R1	temp
 ;	R2	reserved - PRINT flag/column
-;	R3	reserved - (context) variable set/get/iter
-;	R4	reserved: max reg used (0 == 25)
-;	R5	temp - eval next op precedence
-;	R6	temp - eval next op
-;	R7	temp - eval RHS/result
+;	R3	reserved - (context) variable set/get/iter/def
+;	R4	reserved: max reg used (0 == 25, default)
+;	R5	temp - eval: next op precedence, MAT: base reg
+;	R6	temp - eval: next op, MAT: current subscript
+;	R7	temp - eval: RHS/result
 ;	R8	reserved - stack pointer
 ;	R9..15	constants (vars) I, J, K, L, X, Y ,Z
-;	R16..25	expression stack... TBD (10 levels)
-;	R16..[R4]
+;	R16..[R4] expression stack... (default 10 levels)
+;	[R4+1]	start of matrix storage space
 
 ; Documentation claims that DEF R( 3 , 3 ) consumes only 9
 ; registers, but the dimensions must be stored someplace
@@ -52,54 +81,58 @@
 ;	BEG R( PAUSE		list/output all elements
 ;	BEG R( OUT OUT ...	display elements manually
 ;
-; Is R( or S( just a token like [(], with fraction as index?
-; 1.0 for [(], 1.1 for [R(], 1.2 for [S(] ?
-; DEF sets a flag like BEG/[=] or applied to [R(]?
+; R( et al. are "sub-ops" peers of left paren, altering the way
+; right paren is handled. DEF uses the same context code as NEXT
+; since the two are mutually exclusive. IN, OUT, and OUT-PAUSE
+; replace right paren and terminate the matrix iteration when
+; reaching the last element.
 ;
 ; Matrix is stored in registers as follows, using a base register
-; number (R04 + 1):
+; number (R04 + 2):
 ;
-;	      +------------------------+
-;	[R04] |  last stack register   |
-;	      +------------------------+
-;	+1    |  618 buffer register   |
-;	      +------------------------+
-;	+2    |  R( dimensions reg     | -> MAT len "Nr"
-;	      +------------------------+
-;	+3    |  R(1,1) register       |
-;	      +------------------------+
-;	      |        ...             |
-;	      +------------------------+
-;	+2+Nr |  S( dimensions reg     | -> MAT len "Ns"
-;	      +------------------------+
-;	+3+Nr |  S(1,1) register       |
-;	      +------------------------+
-;	      |        ...             |
-;	      +------------------------+
+;	      |                       |
+;	      +- - - - - - - - - - - -+
+;	[R04] |  last stack register  |
+;	      +-----------------------+
+;	+1    |  618 buffer register  |
+;	      +-----------------------+
+;	+2    |  R( dimensions reg    | -> MAT len "Nr"
+;	      +- - - - - - - - - - - -+
+;	+3    |  R(1,1) register      |
+;	      +- - - - - - - - - - - -+
+;	      |        ...            |
+;	      +-----------------------+
+;	+2+Nr |  S( dimensions reg    | -> MAT len "Ns"
+;	      +- - - - - - - - - - - -+
+;	+3+Nr |  S(1,1) register      |
+;	      +- - - - - - - - - - - -+
+;	      |        ...            |
+;	      +-----------------------+
 ;
 ; Registers used in 618 memory:
-;	         +------------------------+
-;	0        |  reserved              |
-;	         +------------------------+
-;	1        |  U( dimensions reg     | -> MAT len "Nu"
-;	         +------------------------+
-;	2        |  U(1,1) register       |
-;	         +------------------------+
-;	         |        ...             |
-;	         +------------------------+
-;	2+Nu     |  V( dimensions reg     | -> MAT len "Nv"
-;	         +------------------------+
-;	3+Nu     |  V(1,1) register       |
-;	         +------------------------+
-;	         |        ...             |
-;	         +------------------------+
-;	3+Nu+Nv  |  W( dimensions reg     | -> MAT len "Nw"
-;	         +------------------------+
-;	4+Nu+Nv  |  W(1,1) register       |
-;	         +------------------------+
-;	         |        ...             |
-;	         +------------------------+
+;	         +-----------------------+
+;	0        |  reserved             |
+;	         +-----------------------+
+;	1        |  U( dimensions reg    | -> MAT len "Nu"
+;		 +- - - - - - - - - - - -+
+;	2        |  U(1,1) register      |
+;		 +- - - - - - - - - - - -+
+;	         |        ...            |
+;	         +-----------------------+
+;	2+Nu     |  V( dimensions reg    | -> MAT len "Nv"
+;		 +- - - - - - - - - - - -+
+;	3+Nu     |  V(1,1) register      |
+;		 +- - - - - - - - - - - -+
+;	         |        ...            |
+;	         +-----------------------+
+;	3+Nu+Nv  |  W( dimensions reg    | -> MAT len "Nw"
+;		 +- - - - - - - - - - - -+
+;	4+Nu+Nv  |  W(1,1) register      |
+;		 +- - - - - - - - - - - -+
+;	         |        ...            |
+;	         +-----------------------+
 
+; User interface (function key assignments):
 	.DEF	$begin	@g00	; init all (get var)
 	.DEF	$lparen	@g01	; [(]
 	.DEF	$rparen	@g02	; [)]
@@ -162,7 +195,18 @@
 	.EQU	%varid_y	14
 	.EQU	%varid_z	15
 
-	; constant for calculating step number from register number
+	; Constant for calculating step number from register number.
+	; For now, must recompile for target memory size.
+	; If there is no way to determine memory size in a program,
+	; the user would have to enter one of these values (or codes)
+	; into another register (there are no spares).
+	; Perhaps BEGIN could be defined to have the display contain
+	; an indicator of memory size.
+	;
+	; Attempting to do RECALL xxx and checking for error does not
+	; work for ROM code - the error behavior is different and causes
+	; STOP without possibility of resuming.
+	;
 	;.EQU	%reg_step	432	// bias to calc step from reg, 600-2
 	;.EQU	%reg_step	944	// bias to calc step from reg, 600-6
 	.EQU	%reg_step	1968	// bias to calc step from reg, 600-14
@@ -276,6 +320,25 @@ MARK &lp0
 
 MARK $rparen	; the [)] key
 	ST07
+	ENTER %op_paren	; '(' marker
+	@CALL &eval_op
+	@CALL &pop	; discard '(' marker
+	; Need to handle MAT assignment, reference, or DEF here.
+	; IN/OUT/PAUSE do not use [)] - need error check?
+	; There appears to be no way to print a whole matrix (without
+	; writing a program to do that).
+	JIFNZ
+		@SEARCH &err_03	; excess ')'
+	; check for R( S( U( V( W( (incl. GET/SET/DEF prefix).
+	; 1.00 for [(], 1.XX for MAT ops
+	ST00
+	INT
+	-00
+	JIF0
+		@SEARCH &mat_op
+	; PRINT mode only prints results/values, not matrix ops.
+	; A matrix element reference value will be printed on the
+	; subsequent operation key (just like keyed values).
 	RE02
 	JIFNZ
 		@SEARCH &rp0
@@ -285,23 +348,6 @@ MARK $rparen	; the [)] key
 	ENTER 2
 	+02
 MARK &rp0
-	ENTER %op_paren	; '(' marker
-	@CALL &eval_op
-	@CALL &pop	; discard '(' marker
-	; TODO: check for R( S( U( V( W(, also DEF prefix.
-	; Need to handle assignment, reference, or DEF here.
-	; IN/OUT/PAUSE do not use [)] - need error check?
-	; PRINT mode only prints results/values, not matrix ops.
-	; There appears to be no way to print a matrix (without
-	; writing a program to do that).
-	JIFNZ
-		@SEARCH &err_03	; excess ')'
-	; check if MAT op
-	ST00
-	INT
-	-00
-	JIF0
-		@SEARCH &mat_op
 	RET
 
 MARK $equal	; the [=] key
@@ -915,15 +961,16 @@ MARK &mo0	; R5 is matrix DIM reg
 
 	; TODO: subscript to register number in R6, after which
 	; same as VAR except no NEXT.
-	INDIR R03	; 1=get, 3=set, 5=next (invalid)
+	INDIR R03	; 1=get, 3=set, 5=define
 	@SEARCH &get_mat
 	@SEARCH &set_mat
+;	@SEARCH &def_mat
 	; DEFINE MAT dimensions
 	; dimensions in R7
 	RE05	; MAT DIM reg
 	ABS
 	ST00
-	@SEARCH &ind_st0
+	@SEARCH &ind_st0 ; store R7 in [R0]
 
 MARK &get_mat	; R7 is subscript, R5 is MAT DIM
 	RE07
