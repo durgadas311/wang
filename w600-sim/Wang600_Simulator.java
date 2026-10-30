@@ -37,15 +37,15 @@ class Wang600_Simulator
 		return new JMenuItem("Expansion ROM - " + status, key);
 	}
 
+	// 'img' is from RAM so is already "reversed"
 	public void setXRom(byte[] img) {
 		int l = img.length;
 		if (l > _xrom.length) {
 			// just in case...
 			l = _xrom.length;
 		}
-		int z = _xrom.length - l;
 		for (int x = 0; x < l; ++x) {
-			_xrom[z] = img[x];
+			_xrom[x] = img[x];
 		}
 	}
 
@@ -74,6 +74,9 @@ class Wang600_Simulator
 			} catch (IOException ee) {
 			}
 			if (n > 0) {
+				// file is in "natural" order, must reverse
+				// since microcode looks at ROM top-down
+				// (step 0000 is address 0xfff).
 				for (int x = 0; x < n; ++x) {
 					_xrom[len - x - 1] = buf[x];
 				}
@@ -387,8 +390,8 @@ class Wang600_Simulator
 		}
 
 		public void dup() {
-			int xx = 0x100;
-			int yy = _ram.length - 0x0a0;
+			int xx = 0x100;		// skip fixed register space
+			int yy = _ram.length - 0x090; // ...and sys mem
 			setXRom(Arrays.copyOfRange(_ram, xx, yy));
 		}
 
@@ -436,7 +439,9 @@ class Wang600_Simulator
 
 		public String ramDump(int adr, int len) {
 			String str = new String();
-			int aa = adr >> 1; 
+			// Fold starting adr into range, as h/w does.
+			// But printed adr tells all.
+			int aa = (adr & memmask) >> 1;
 			int ln = (len + 1) & ~1;
 			int xx, yy;
 			for (xx = 0; xx < ln;) {
@@ -462,7 +467,7 @@ class Wang600_Simulator
 				str = "No ROM installed";
 				return str;
 			}
-			int aa = adr >> 1; 
+			int aa = (adr & 0xfff) >> 1;
 			int ln = (len + 1) & ~1;
 			int xx, yy;
 			for (xx = 0; xx < ln;) {

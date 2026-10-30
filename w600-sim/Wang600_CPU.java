@@ -65,7 +65,7 @@ class Wang600_CPU
 	static final int D21_PRT_ON = 0x02;
 
 	public int memsize;
-	public int memmask;
+	public int memmskb;
 	public byte[] _rom; // microcode
 	public byte[] _ram; // program memory
 	public byte[] _xrom;// extension/add-on program ROM
@@ -77,7 +77,7 @@ class Wang600_CPU
 		_xrom = xrom;
 		if (fp != null) {
 			memsize = fp.getMemSize();
-			memmask = fp.getMemMask();
+			memmskb = fp.getMemMask() >> 1; // convert nibble mask to bytes
 		}
 		this.fp = fp;
 		odd_parity = new byte[] { 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1 };
@@ -585,10 +585,9 @@ class Wang600_CPU
 
 	private void rd_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		adr &= memmask;
 		boolean odd = ((adr & 1) != 0);
 		adr >>= 1;
-		byte b = _ram[adr];
+		byte b = _ram[adr & memmskb];
 		if (odd) {
 			b >>= 4;
 		}
@@ -608,16 +607,18 @@ class Wang600_CPU
 
 	private void wr_ram_i(byte ah, byte am, byte al) {
 		int adr = ((ah & 0x0f) << 8) | ((am & 0x0f) << 4) | (al & 0x0f);
-		adr &= memmask;
+		boolean odd = ((adr & 1) != 0);
+		adr >>= 1;
+		adr &= memmskb;
 		byte a = ca;
-		byte b = _ram[adr >> 1];
-		if ((adr & 1) != 0) {
+		byte b = _ram[adr];
+		if (odd) {
 			a <<= 4;
 			b &= 0x0f;
 		} else {
 			b &= 0xf0;
 		}
-		_ram[adr >> 1] = (byte)(b | a);
+		_ram[adr] = (byte)(b | a);
 	}
 
 	public void new_iob(int io) {
