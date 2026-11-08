@@ -6,6 +6,13 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.io.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import java.awt.Desktop;
 import java.awt.datatransfer.Transferable;
@@ -275,6 +282,9 @@ public class w700_fe
 		mi = Wang700.Help.getMenuItemHelp();
 		mi.addActionListener(inp);
 		mu.add(mi);
+		mi = Wang700.Help.getMenuItemQRef();
+		mi.addActionListener(inp);
+		mu.add(mi);
 		mi = Wang700.Help.getMenuItemAbout();
 		mi.addActionListener(inp);
 		mu.add(mi);
@@ -317,6 +327,10 @@ class Wang700_SimInput
 			Wang700.Help.toggle();
 			return;
 		}
+		if (m.getMnemonic() == KeyEvent.VK_Q) {
+			spawnQuickRef();
+			return;
+		}
 		if (m.getMnemonic() == KeyEvent.VK_A) {
 			Wang700.Help.showAbout();
  			return;
@@ -331,6 +345,55 @@ class Wang700_SimInput
 				Wang700.DispY.setProperties(props);
 				// <others>.setProperties(props);
 			}
+			return;
+		}
+	}
+
+	private boolean jarNewer(File res) {
+		if (!res.exists()) return true;
+		String jp = new File(this.getClass().getProtectionDomain().
+			getCodeSource().getLocation().getPath()).toURI().getPath();
+		// unknown hack for Winderz
+		if (jp.startsWith("/") &&
+			System.getProperty("os.name").toLowerCase().contains("win")) {
+			jp = jp.substring(1);
+		}
+		try (JarFile jf = new JarFile(jp)) {
+			JarEntry je = jf.getJarEntry(res.getName());
+			if (je == null) { // no such file in JAR
+				return false; // should skip attempted open()...
+			}
+			FileTime jt = je.getLastModifiedTime();
+			FileTime st = Files.readAttributes(res.toPath(),
+				BasicFileAttributes.class).lastModifiedTime();
+			return jt.compareTo(st) > 0;
+		} catch (Exception ee) {
+		}
+		return false; // do nothing on failure? (no JAR file at all???)
+	}
+
+	private void spawnQuickRef() {
+		if (!Desktop.isDesktopSupported()) {
+			// pop-up message...
+			return;
+		}
+		File qr = new File(Wang_UI.getDir(), "Wang700QuickRef.pdf");
+		if (jarNewer(qr)) {
+			try {
+				java.io.InputStream qri = this.getClass().
+					getResourceAsStream(qr.getName());
+				Files.copy(qri, qr.toPath(),
+					StandardCopyOption.REPLACE_EXISTING);
+			} catch (Exception ee) {
+				// pop-up message...
+				return;
+			}
+		}
+		Desktop desktop = Desktop.getDesktop();
+		try {
+			desktop.open(qr);
+		} catch (Exception ee) {
+			// pop-up message
 			return;
 		}
 	}
@@ -602,6 +665,7 @@ class Wang700_Help extends JComponent
 	private JScrollPane _scroll;
 	private int _xoff, _yoff;
 	private JMenuItem _help;
+	private JMenuItem _qref;
 	private JMenuItem _about;
 	private boolean _help_on;
 	private JFrame _main;
@@ -610,7 +674,7 @@ class Wang700_Help extends JComponent
 		return _help;
 	}
 
-	public JMenuItem getMenuItemQRef() { return null; }
+	public JMenuItem getMenuItemQRef() { return _qref; }
 
 	public JMenuItem getMenuItemAbout() {
 		return _about;
@@ -618,7 +682,8 @@ class Wang700_Help extends JComponent
 
 	public Wang700_Help(JFrame frame) {
 		_main = frame;
-		_help = new JMenuItem("Show Help", KeyEvent.VK_H);;
+		_help = new JMenuItem("Show Help", KeyEvent.VK_H);
+		_qref = new JMenuItem("Quick Ref", KeyEvent.VK_Q);
 		_about = new JMenuItem("About", KeyEvent.VK_A);
 		_help_on = false;
 

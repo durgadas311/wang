@@ -134,7 +134,8 @@ wang700.jar: Release.java Release.class w700_fe.class w700_edit.class w700initPr
 		$(addprefix -C ../common ,$(SPCL)) \
 		$(addprefix -C ../common/fonts ,$(FONTS)) \
 		$(addprefix -C ../common ,$(COMMON_ICONS)) \
-		$(addprefix -C ../common docs/,$(COMN_DOCS))
+		$(addprefix -C ../common docs/,$(COMN_DOCS)) \
+		-C docs/src Wang700QuickRef.pdf
 
 wang700setup.jar: w700initProps.class
 	echo "Main-Class: w700initProps" >Manifest.txt

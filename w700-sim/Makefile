@@ -153,6 +153,7 @@ install: temp_dest
 
 www: _FRC_
 	rsync -Wuv docs/*.html docs/*.gif durgadas.com:/var/www/html/wang700/wang700docs
+	rsync -Wuv docs/src/Wang700QuickRef.pdf durgadas.com:/var/www/html/wang700/wang700docs
 	rsync -Wuv www/wang700* durgadas.com:/var/www/html/wang700
 	rsync -Wuv www/downloads/*.html www/downloads/.htaccess durgadas.com:/var/www/html/sebhc/w700-sim
 
