@@ -743,7 +743,7 @@ public class Wang600Instructions implements WangInstructions {
 			else error = 'P';
 			return -1;
 		}
-		return 0;
+		return e.opcode & 0xff;
 	}
 
 	public int setReg(int reg, String val, WangMemory mem, int start) {

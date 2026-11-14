@@ -333,14 +333,16 @@ public class WangAssembler implements WangMemory {
 			} else if (toks[n].equalsIgnoreCase(".DEF")) {
 				// pre-defined symbols
 				n = wi.def(toks, n);
-				errorList(String.format("%c               %s",
-							wi.lastError(), line),
+				errorList(String.format("%c     =%02d-%02d    %s",
+							wi.lastError(),
+							(n >> 4) & 0x0f, n & 0x0f,
+							line),
 					n, ls);
 				continue;
 			} else if (toks[n].equalsIgnoreCase(".EQU")) {
 				// constants
 				n = wi.equ(toks, n);
-				errorList(String.format("%c               %s",
+				errorList(String.format("%c     =         %s",
 							wi.lastError(), line),
 					n, ls);
 				continue;

@@ -732,7 +732,7 @@ public class Wang700Instructions implements WangInstructions {
 			else error = 'P';
 			return -1;
 		}
-		return 0;
+		return e.opcode & 0xff;
 	}
 
 	// odd registers in low nibble, even in high.
